@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:browser_launcher/browser_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -44,45 +43,42 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
+  // TODO(kenz): remove the openInBrowser parameter, as it is unnecessary after
+  // removing the 'v' terminal hotkey.
   @override
   Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false}) async {
-    if (devToolsUri != null) {
-      // DevTools is already running.
-      if (openInBrowser) {
-        await Chrome.start(<String>[devToolsUri.toString()]);
-      }
-      return;
-    }
-
-    bool offline = false;
+    // Place this entire method in a try/catch that swallows exceptions because
+    // we do not want to block Flutter run/attach operations on a DevTools
+    // failure.
     try {
-      const String pubHostedUrlKey = 'PUB_HOSTED_URL';
-      if (_platform.environment.containsKey(pubHostedUrlKey)) {
-        await http.head(_platform.environment[pubHostedUrlKey]);
-      } else {
-        await http.head('https://pub.dev');
+      bool offline = false;
+      try {
+        const String pubHostedUrlKey = 'PUB_HOSTED_URL';
+        if (_platform.environment.containsKey(pubHostedUrlKey)) {
+          await http.head(_platform.environment[pubHostedUrlKey]);
+        } else {
+          await http.head('https://pub.dev');
+        }
+      } on Exception catch (_, __) {
+        offline = true;
       }
-    } on Exception catch (_, __) {
-      offline = true;
-    }
 
-    if (offline) {
-      // TODO(kenz): we should launch an already activated version of DevTools
-      // here, if available, once DevTools has offline support. DevTools does
-      // not work without internet currently due to the failed request of a
-      // couple scripts. See https://github.com/flutter/devtools/issues/2420.
-      return;
-    } else {
-      final bool didActivateDevTools = await _activateDevTools();
-      final bool devToolsActive = await _checkForActiveDevTools();
-      if (!didActivateDevTools && !devToolsActive) {
-        // At this point, we failed to activate the DevTools package and the
-        // package is not already active.
+      if (offline) {
+        // TODO(kenz): we should launch an already activated version of DevTools
+        // here, if available, once DevTools has offline support. DevTools does
+        // not work without internet currently due to the failed request of a
+        // couple scripts. See https://github.com/flutter/devtools/issues/2420.
         return;
+      } else {
+        final bool didActivateDevTools = await _activateDevTools();
+        final bool devToolsActive = await _checkForActiveDevTools();
+        if (!didActivateDevTools && !devToolsActive) {
+          // At this point, we failed to activate the DevTools package and the
+          // package is not already active.
+          return;
+        }
       }
-    }
 
-    try {
       _devToolsProcess = await _processManager.start(<String>[
         _pubExecutable,
         'global',
