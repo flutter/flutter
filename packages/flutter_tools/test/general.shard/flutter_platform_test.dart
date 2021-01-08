@@ -227,7 +227,7 @@ void main() {
   FakeProcessManager fakeProcessManager;
 
   testUsingContext('Can pass additional arguments to tester binary', () async {
-    final TestFlutterPlatform platform =TestFlutterPlatform(<String>['--foo', '--bar']);
+    final TestFlutterPlatform platform = TestFlutterPlatform(<String>['--foo', '--bar']);
     platform.loadChannel('test1.dart', MockSuitePlatform());
     await null;
 
