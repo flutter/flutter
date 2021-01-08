@@ -20,7 +20,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
-import io.flutter.embedding.engine.dynamicfeatures.DynamicFeatureManager;
+import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
@@ -226,7 +226,7 @@ public class FlutterJNI {
   @Nullable private LocalizationPlugin localizationPlugin;
   @Nullable private PlatformViewsController platformViewsController;
 
-  @Nullable private DynamicFeatureManager dynamicFeatureManager;
+  @Nullable private DeferredComponentManager deferredComponentManager;
 
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
@@ -984,15 +984,16 @@ public class FlutterJNI {
 
   // ----- End Localization Support ----
 
-  // ----- Start Dynamic Features Support ----
+  // ----- Start Deferred Components Support ----
 
-  /** Sets the dynamic feature manager that is used to download and install split features. */
+  /** Sets the deferred component manager that is used to download and install split features. */
   @UiThread
-  public void setDynamicFeatureManager(@Nullable DynamicFeatureManager dynamicFeatureManager) {
+  public void setDeferredComponentManager(
+      @Nullable DeferredComponentManager deferredComponentManager) {
     ensureRunningOnMainThread();
-    this.dynamicFeatureManager = dynamicFeatureManager;
-    if (dynamicFeatureManager != null) {
-      dynamicFeatureManager.setJNI(this);
+    this.deferredComponentManager = deferredComponentManager;
+    if (deferredComponentManager != null) {
+      deferredComponentManager.setJNI(this);
     }
   }
 
@@ -1000,7 +1001,7 @@ public class FlutterJNI {
    * Called by dart to request that a Dart deferred library corresponding to loadingUnitId be
    * downloaded (if necessary) and loaded into the dart vm.
    *
-   * <p>This method delegates the task to DynamicFeatureManager, which handles the download and
+   * <p>This method delegates the task to DeferredComponentManager, which handles the download and
    * loading of the dart library and any assets.
    *
    * @param loadingUnitId The loadingUnitId is assigned during compile time by gen_snapshot and is
@@ -1009,13 +1010,13 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void requestDartDeferredLibrary(int loadingUnitId) {
-    if (dynamicFeatureManager != null) {
-      dynamicFeatureManager.installDynamicFeature(loadingUnitId, null);
+    if (deferredComponentManager != null) {
+      deferredComponentManager.installDeferredComponent(loadingUnitId, null);
     } else {
       // TODO(garyq): Add link to setup/instructions guide wiki.
       Log.e(
           TAG,
-          "No DynamicFeatureManager found. Android setup must be completed before using split AOT dynamic features.");
+          "No DeferredComponentManager found. Android setup must be completed before using split AOT deferred components.");
     }
   }
 
@@ -1048,8 +1049,8 @@ public class FlutterJNI {
   /**
    * Adds the specified AssetManager as an APKAssetResolver in the Flutter Engine's AssetManager.
    *
-   * <p>This may be used to update the engine AssetManager when a new dynamic feature is installed
-   * and a new Android AssetManager is created with access to new assets.
+   * <p>This may be used to update the engine AssetManager when a new deferred component is
+   * installed and a new Android AssetManager is created with access to new assets.
    *
    * @param assetManager An android AssetManager that is able to access the newly downloaded assets.
    * @param assetBundlePath The subdirectory that the flutter assets are stored in. The typical
@@ -1071,7 +1072,7 @@ public class FlutterJNI {
   /**
    * Indicates that a failure was encountered during the Android portion of downloading a dynamic
    * feature module and loading a dart deferred library, which is typically done by
-   * DynamicFeatureManager.
+   * DeferredComponentManager.
    *
    * <p>This will inform dart that the future returned by loadLibrary() should complete with an
    * error.
@@ -1084,16 +1085,16 @@ public class FlutterJNI {
    */
   @SuppressWarnings("unused")
   @UiThread
-  public void dynamicFeatureInstallFailure(
+  public void deferredComponentInstallFailure(
       int loadingUnitId, @NonNull String error, boolean isTransient) {
     ensureRunningOnMainThread();
-    nativeDynamicFeatureInstallFailure(loadingUnitId, error, isTransient);
+    nativeDeferredComponentInstallFailure(loadingUnitId, error, isTransient);
   }
 
-  private native void nativeDynamicFeatureInstallFailure(
+  private native void nativeDeferredComponentInstallFailure(
       int loadingUnitId, @NonNull String error, boolean isTransient);
 
-  // ----- End Dynamic Features Support ----
+  // ----- End Deferred Components Support ----
 
   // @SuppressWarnings("unused")
   @UiThread
