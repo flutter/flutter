@@ -227,11 +227,6 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   );
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
   void performLayout() {
     if (child == null) {
       return;
