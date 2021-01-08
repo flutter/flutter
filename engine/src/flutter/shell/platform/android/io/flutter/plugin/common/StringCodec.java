@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
  * A {@link MessageCodec} using UTF-8 encoded String messages.
  *
  * <p>This codec is guaranteed to be compatible with the corresponding <a
- * href="https://docs.flutter.io/flutter/services/StringCodec-class.html">StringCodec</a> on the
+ * href="https://api.flutter.dev/flutter/services/StringCodec-class.html">StringCodec</a> on the
  * Dart side. These parts of the Flutter SDK are evolved synchronously.
  */
 public final class StringCodec implements MessageCodec<String> {

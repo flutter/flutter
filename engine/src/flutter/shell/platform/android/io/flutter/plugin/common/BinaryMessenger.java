@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 /**
  * Facility for communicating with Flutter using asynchronous message passing with binary messages.
  * The Flutter Dart code should use <a
- * href="https://docs.flutter.io/flutter/services/BinaryMessages-class.html">BinaryMessages</a> to
+ * href="https://api.flutter.dev/flutter/services/BinaryMessages-class.html">BinaryMessages</a> to
  * participate.
  *
  * <p>{@code BinaryMessenger} is expected to be utilized from a single thread throughout the

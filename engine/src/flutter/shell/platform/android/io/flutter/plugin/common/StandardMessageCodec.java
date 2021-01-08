@@ -21,7 +21,7 @@ import java.util.Map.Entry;
  * MessageCodec using the Flutter standard binary encoding.
  *
  * <p>This codec is guaranteed to be compatible with the corresponding <a
- * href="https://docs.flutter.io/flutter/services/StandardMessageCodec-class.html">StandardMessageCodec</a>
+ * href="https://api.flutter.dev/flutter/services/StandardMessageCodec-class.html">StandardMessageCodec</a>
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * <p>Supported messages are acyclic values of these forms:

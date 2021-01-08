@@ -12,7 +12,7 @@
 
 static NSString* const kTextInputChannel = @"flutter/textinput";
 
-// See https://docs.flutter.io/flutter/services/SystemChannels/textInput-constant.html
+// See https://api.flutter.dev/flutter/services/SystemChannels/textInput-constant.html
 static NSString* const kSetClientMethod = @"TextInput.setClient";
 static NSString* const kShowMethod = @"TextInput.show";
 static NSString* const kHideMethod = @"TextInput.hide";

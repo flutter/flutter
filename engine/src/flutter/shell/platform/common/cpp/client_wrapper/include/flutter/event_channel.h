@@ -24,7 +24,7 @@ class EncodableValue;
 // binary before being transmitted back to Flutter. The MethodCodec used must be
 // compatible with the one used by the Flutter application. This can be achieved
 // by creating an EventChannel
-// ("https://docs.flutter.io/flutter/services/EventChannel-class.html")
+// ("https://api.flutter.dev/flutter/services/EventChannel-class.html")
 // counterpart of this channel on the Dart side.
 // The C++ type of stream configuration arguments, events, and error details are
 // templated, but only values supported by the specified MethodCodec can be

@@ -43,7 +43,7 @@ FLUTTER_EXPORT
  * `NSData` instances.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [BinaryCodec](https://docs.flutter.io/flutter/services/BinaryCodec-class.html)
+ * [BinaryCodec](https://api.flutter.dev/flutter/services/BinaryCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * On the Dart side, messages are represented using `ByteData`.
@@ -56,7 +56,7 @@ FLUTTER_EXPORT
  * A `FlutterMessageCodec` using UTF-8 encoded `NSString` messages.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [StringCodec](https://docs.flutter.io/flutter/services/StringCodec-class.html)
+ * [StringCodec](https://api.flutter.dev/flutter/services/StringCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  */
 FLUTTER_EXPORT
@@ -67,7 +67,7 @@ FLUTTER_EXPORT
  * A `FlutterMessageCodec` using UTF-8 encoded JSON messages.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [JSONMessageCodec](https://docs.flutter.io/flutter/services/JSONMessageCodec-class.html)
+ * [JSONMessageCodec](https://api.flutter.dev/flutter/services/JSONMessageCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * Supports values accepted by `NSJSONSerialization` plus top-level
@@ -184,7 +184,7 @@ FLUTTER_EXPORT
  * A `FlutterMessageCodec` using the Flutter standard binary encoding.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [StandardMessageCodec](https://docs.flutter.io/flutter/services/StandardMessageCodec-class.html)
+ * [StandardMessageCodec](https://api.flutter.dev/flutter/services/StandardMessageCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * Supported messages are acyclic values of these forms:
@@ -434,7 +434,7 @@ FLUTTER_EXPORT
  * envelopes.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [JSONMethodCodec](https://docs.flutter.io/flutter/services/JSONMethodCodec-class.html)
+ * [JSONMethodCodec](https://api.flutter.dev/flutter/services/JSONMethodCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * Values supported as methods arguments and result payloads are
@@ -448,7 +448,7 @@ FLUTTER_EXPORT
  * A `FlutterMethodCodec` using the Flutter standard binary encoding.
  *
  * This codec is guaranteed to be compatible with the corresponding
- * [StandardMethodCodec](https://docs.flutter.io/flutter/services/StandardMethodCodec-class.html)
+ * [StandardMethodCodec](https://api.flutter.dev/flutter/services/StandardMethodCodec-class.html)
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * Values supported as method arguments and result payloads are those supported by

@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * responses and events are encoded into binary before being transmitted back to Flutter. The {@link
  * MethodCodec} used must be compatible with the one used by the Flutter application. This can be
  * achieved by creating an <a
- * href="https://docs.flutter.io/flutter/services/EventChannel-class.html">EventChannel</a>
+ * href="https://api.flutter.dev/flutter/services/EventChannel-class.html">EventChannel</a>
  * counterpart of this channel on the Dart side. The Java type of stream configuration arguments,
  * events, and error details is {@code Object}, but only values supported by the specified {@link
  * MethodCodec} can be used.

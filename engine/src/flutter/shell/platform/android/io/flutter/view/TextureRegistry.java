@@ -10,7 +10,7 @@ import android.graphics.SurfaceTexture;
 /**
  * Registry of backend textures used with a single {@link FlutterView} instance. Entries may be
  * embedded into the Flutter view using the <a
- * href="https://docs.flutter.io/flutter/widgets/Texture-class.html">Texture</a> widget.
+ * href="https://api.flutter.dev/flutter/widgets/Texture-class.html">Texture</a> widget.
  */
 public interface TextureRegistry {
   /**

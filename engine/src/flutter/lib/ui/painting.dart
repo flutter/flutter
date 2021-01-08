@@ -98,7 +98,7 @@ Color _scaleAlpha(Color a, double factor) {
 ///
 /// See also:
 ///
-///  * [Colors](https://docs.flutter.io/flutter/material/Colors-class.html), which
+///  * [Colors](https://api.flutter.dev/flutter/material/Colors-class.html), which
 ///    defines the colors found in the Material Design specification.
 class Color {
   /// Construct a color from the lower 32 bits of an [int].

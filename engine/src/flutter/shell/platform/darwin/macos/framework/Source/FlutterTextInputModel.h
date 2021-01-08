@@ -51,13 +51,13 @@ typedef NS_ENUM(NSUInteger, FlutterTextAffinity) {
 
 /**
  * Keyboard type of the client. See available options:
- * https://docs.flutter.io/flutter/services/TextInputType-class.html
+ * https://api.flutter.dev/flutter/services/TextInputType-class.html
  */
 @property(nonatomic, readonly, nonnull) NSString* inputType;
 
 /**
  * An action requested by the user on the input client. See available options:
- * https://docs.flutter.io/flutter/services/TextInputAction-class.html
+ * https://api.flutter.dev/flutter/services/TextInputAction-class.html
  */
 @property(nonatomic, readonly, nonnull) NSString* inputAction;
 

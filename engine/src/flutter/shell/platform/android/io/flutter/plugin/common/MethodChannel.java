@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
  * <p>Incoming method calls are decoded from binary on receipt, and Java results are encoded into
  * binary before being transmitted back to Flutter. The {@link MethodCodec} used must be compatible
  * with the one used by the Flutter application. This can be achieved by creating a <a
- * href="https://docs.flutter.io/flutter/services/MethodChannel-class.html">MethodChannel</a>
+ * href="https://api.flutter.dev/flutter/services/MethodChannel-class.html">MethodChannel</a>
  * counterpart of this channel on the Dart side. The Java type of method call arguments and results
  * is {@code Object}, but only values supported by the specified {@link MethodCodec} can be used.
  *
@@ -107,9 +107,9 @@ public class MethodChannel {
    *
    * <p>If no handler has been registered, any incoming method call on this channel will be handled
    * silently by sending a null reply. This results in a <a
-   * href="https://docs.flutter.io/flutter/services/MissingPluginException-class.html">MissingPluginException</a>
+   * href="https://api.flutter.dev/flutter/services/MissingPluginException-class.html">MissingPluginException</a>
    * on the Dart side, unless an <a
-   * href="https://docs.flutter.io/flutter/services/OptionalMethodChannel-class.html">OptionalMethodChannel</a>
+   * href="https://api.flutter.dev/flutter/services/OptionalMethodChannel-class.html">OptionalMethodChannel</a>
    * is used.
    *
    * @param handler a {@link MethodCallHandler}, or null to deregister.

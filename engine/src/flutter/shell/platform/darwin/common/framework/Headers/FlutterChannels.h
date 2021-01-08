@@ -218,7 +218,7 @@ FLUTTER_EXPORT
  * Invokes the specified Flutter method with the specified arguments, expecting
  * no results.
  *
- * @see [MethodChannel.setMethodCallHandler](https://docs.flutter.io/flutter/services/MethodChannel/setMethodCallHandler.html)
+ * @see [MethodChannel.setMethodCallHandler](https://api.flutter.dev/flutter/services/MethodChannel/setMethodCallHandler.html)
  *
  * @param method The name of the method to invoke.
  * @param arguments The arguments. Must be a value supported by the codec of this
