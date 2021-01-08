@@ -160,6 +160,27 @@ class _FlutterProject {
         if (buildOutput.contains('the range of supported deployment target versions')) {
           throw TaskResult.failure('Minimum plugin version warning present');
         }
+
+        final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
+        if (!podsProject.existsSync()) {
+          throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
+        }
+
+        final String podsProjectContent = podsProject.readAsStringSync();
+        // This may be a bit brittle, IPHONEOS_DEPLOYMENT_TARGET appears in the
+        // Pods Xcode project file 6 times. If this number changes, make sure
+        // it's not a regression in the IPHONEOS_DEPLOYMENT_TARGET override logic.
+        // The plugintest target should not have IPHONEOS_DEPLOYMENT_TARGET set.
+        // See _reduceDarwinPluginMinimumVersion for details.
+        if (target == 'ios' && 'IPHONEOS_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 6) {
+          throw TaskResult.failure('plugintest may contain IPHONEOS_DEPLOYMENT_TARGET');
+        }
+
+        // Same for macOS, but 12.
+        // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
+        if (target == 'macos' && 'MACOSX_DEPLOYMENT_TARGET'.allMatches(podsProjectContent).length != 12) {
+          throw TaskResult.failure('plugintest may contain MACOSX_DEPLOYMENT_TARGET');
+        }
       }
     });
   }
