@@ -1952,11 +1952,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
     // On Android try to select the previous word instead only if the text is read only.
-    } else if ((text?.text != null
-        && _isWhitespace(text!.text!.codeUnitAt(position.offset))
-        && position.offset > 0) || (readOnly && originalText != null
-        && _isWhitespace(originalText.codeUnitAt(position.offset))
-        && position.offset > 0)) {
+    } else if (position.offset > 0 && ((text?.text != null
+        && _isWhitespace(text!.text!.codeUnitAt(position.offset)))
+        || (readOnly && originalText != null
+        && _isWhitespace(originalText.codeUnitAt(position.offset))))) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
