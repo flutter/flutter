@@ -268,8 +268,8 @@ FLUTTER_EXPORT
  * Can be nil after `destroyContext` is called.
  *
  * @see [Navigation
- * Channel](https://docs.flutter.io/flutter/services/SystemChannels/navigation-constant.html)
- * @see [Navigator Widget](https://docs.flutter.io/flutter/widgets/Navigator-class.html)
+ * Channel](https://api.flutter.dev/flutter/services/SystemChannels/navigation-constant.html)
+ * @see [Navigator Widget](https://api.flutter.dev/flutter/widgets/Navigator-class.html)
  */
 @property(nonatomic, readonly) FlutterMethodChannel* navigationChannel;
 
@@ -288,7 +288,7 @@ FLUTTER_EXPORT
  * Can be nil after `destroyContext` is called.
  *
  * @see [Text Input
- * Channel](https://docs.flutter.io/flutter/services/SystemChannels/textInput-constant.html)
+ * Channel](https://api.flutter.dev/flutter/services/SystemChannels/textInput-constant.html)
  */
 @property(nonatomic, readonly) FlutterMethodChannel* textInputChannel;
 
@@ -299,7 +299,7 @@ FLUTTER_EXPORT
  * Can be nil after `destroyContext` is called.
  *
  * @see [Lifecycle
- * Channel](https://docs.flutter.io/flutter/services/SystemChannels/lifecycle-constant.html)
+ * Channel](https://api.flutter.dev/flutter/services/SystemChannels/lifecycle-constant.html)
  */
 @property(nonatomic, readonly) FlutterBasicMessageChannel* lifecycleChannel;
 
@@ -310,7 +310,7 @@ FLUTTER_EXPORT
  * Can be nil after `destroyContext` is called.
  *
  * @see [System
- * Channel](https://docs.flutter.io/flutter/services/SystemChannels/system-constant.html)
+ * Channel](https://api.flutter.dev/flutter/services/SystemChannels/system-constant.html)
  */
 @property(nonatomic, readonly) FlutterBasicMessageChannel* systemChannel;
 
