@@ -169,7 +169,6 @@ TEST(FlEngineTest, SettingsPlugin) {
             FL_MESSAGE_CODEC(codec), data, &error);
         EXPECT_NE(settings, nullptr);
         EXPECT_EQ(error, nullptr);
-        g_printerr("%s\n", fl_value_to_string(settings));
 
         g_autoptr(FlValue) text_scale_factor =
             fl_value_lookup_string(settings, "textScaleFactor");
