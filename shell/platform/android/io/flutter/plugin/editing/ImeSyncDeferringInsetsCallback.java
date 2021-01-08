@@ -101,6 +101,7 @@ class ImeSyncDeferringInsetsCallback {
   // WindowInsetsAnimation.Callback was introduced in API level 30.  The callback
   // subclass is separated into an inner class in order to avoid warnings from
   // the Android class loader on older platforms.
+  @Keep
   private class AnimationCallback extends WindowInsetsAnimation.Callback {
     AnimationCallback() {
       super(WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE);
