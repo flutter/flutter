@@ -456,6 +456,7 @@ enum ButtonIconAlignment {
   end,
 }
 
+/// decides the arrangment of the buttons by providing `iconAlignment`
 List<Widget> decideArrangementFromButtonIconAlignment({
   required ButtonIconAlignment iconAlignment,
   required Widget label,
