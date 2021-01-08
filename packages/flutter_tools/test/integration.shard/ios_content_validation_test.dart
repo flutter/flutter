@@ -110,7 +110,7 @@ void main() {
         // This mimics Xcode behavior and prevents a developer from having to install a
         // 300+MB app.
         expect(containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
-      }, skip: !platform.isMacOS);
+      });
 
       testWithoutContext('Info.plist dart observatory Bonjour service', () {
         final String infoPlistPath = fileSystem.path.join(
@@ -144,7 +144,7 @@ void main() {
         );
         final bool localNetworkUsageFound = localNetworkUsage.exitCode == 0;
         expect(localNetworkUsageFound, buildMode == BuildMode.debug);
-      }, skip: !platform.isMacOS);
+      });
 
       testWithoutContext('check symbols', () {
         final ProcessResult symbols = processManager.runSync(
@@ -158,7 +158,7 @@ void main() {
         );
         final bool aotSymbolsFound = (symbols.stdout as String).contains('_kDartVmSnapshot');
         expect(aotSymbolsFound, buildMode != BuildMode.debug);
-      }, skip: !platform.isMacOS);
+      });
 
       testWithoutContext('xcode_backend embed_and_thin', () {
         outputFlutterFramework.deleteSync(recursive: true);
@@ -211,8 +211,9 @@ void main() {
           outputAppFrameworkBinary.path,
         ]);
         expect(grepResult.stdout, isNot(contains('matches')));
-      }, skip: !platform.isMacOS);
+      });
     },
+      skip: !platform.isMacOS,
       timeout: const Timeout(Duration(minutes: 5)),
     );
   }
