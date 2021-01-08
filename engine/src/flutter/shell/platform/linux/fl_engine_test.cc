@@ -147,9 +147,6 @@ TEST(FlEngineTest, PlatformMessageResponse) {
 
 // Checks settings plugin sends settings on startup.
 TEST(FlEngineTest, SettingsPlugin) {
-  GTEST_SKIP()
-      << "disabled: see https://github.com/flutter/flutter/issues/73517";
-
   g_autoptr(FlEngine) engine = make_mock_engine();
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
