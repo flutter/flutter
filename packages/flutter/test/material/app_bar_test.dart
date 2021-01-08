@@ -933,6 +933,37 @@ void main() {
     expect(getAppBarWidget(appBarFinder).elevation, 4.0);
   });
 
+  testWidgets('SliverAppBar uses elevation of AppBarTheme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/73525.
+    const double themeElevation = 12.0;
+
+    Widget buildSliverAppBar(bool forceElevated, double elevation) {
+      return MaterialApp(
+        theme: ThemeData(
+          appBarTheme: AppBarTheme(elevation: elevation)
+        ),
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              backwardsCompatibility: false,
+              title: const Text('Title'),
+              forceElevated: forceElevated,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+
+    await tester.pumpWidget(buildSliverAppBar(false, themeElevation));
+    expect(getMaterialWidget(materialFinder).elevation, 0.0);
+
+    await tester.pumpWidget(buildSliverAppBar(true, themeElevation));
+    expect(getMaterialWidget(materialFinder).elevation, themeElevation);
+  });
+
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
