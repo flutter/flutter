@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -49,10 +50,18 @@ typedef CupertinoToolbarBuilder = Widget Function(
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
+/// Tries to position itself above [anchorAbove], but if it doesn't fit, then
+/// it positions itself below [anchorBelow].
+///
+/// If any children don't fit in the menu, an overflow menu will automatically
+/// be created.
+///
 /// See also:
 ///
 ///  * [TextSelectionControls.buildToolbar], where this is used by default to
 ///    build an iOS-style toolbar.
+///  * [TextSelectionToolbar], which is similar, but builds an Android-style
+///    toolbar.
 class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoTextSelectionToolbar({
@@ -61,7 +70,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     required this.anchorBelow,
     required this.children,
     this.toolbarBuilder = _defaultToolbarBuilder,
-    // TODO(justinmc): Add toolbarBuilder.
   }) : assert(children.length > 0),
        super(key: key);
 
@@ -78,11 +86,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   ///     Cupertino-style text selection toolbar text button.
   final List<Widget> children;
 
-  /// Builds the toolbar container.
-  ///
-  /// Useful for customizing the high-level background of the toolbar. The given
-  /// child Widget will contain all of the [children] and will continue to
-  /// handle overflow as usual.
+  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
   ///
   /// The given anchor and isAbove can be used to position an arrow, as in the
   /// default Cupertino toolbar.
@@ -106,136 +110,31 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    final double toolbarHeightNeeded = mediaQuery.padding.top
+    final double paddingAbove = mediaQuery.padding.top
       + _kToolbarScreenPadding
-      + _kToolbarHeight
       + _kToolbarContentDistance;
-    final bool isAbove = anchorAbove.dy >= toolbarHeightNeeded;
-    final Offset anchor = isAbove ? anchorAbove : anchorBelow;
+    final double toolbarHeightNeeded = paddingAbove + _kToolbarHeight;
+    final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
+    // The arrow points slightly off of the anchor, so adjust the anchor to
+    // include this padding.
+    const Offset adjustment = Offset(0.0, _kToolbarContentDistance);
+    final Offset anchorAboveAdjusted = anchorAbove - adjustment;
+    final Offset anchorBelowAdjusted = anchorBelow + adjustment;
+    final Offset anchor = fitsAbove ? anchorAboveAdjusted : anchorBelowAdjusted;
 
-    return _CupertinoTextSelectionToolbarPosition(
-      anchor: anchor,
-      isAbove: isAbove,
+    return CustomSingleChildLayout(
+      delegate: TextSelectionToolbarLayoutDelegate(
+        anchorAbove: anchorAboveAdjusted,
+        anchorBelow: anchorBelowAdjusted,
+        paddingAbove: paddingAbove,
+      ),
       child: _CupertinoTextSelectionToolbarContent(
         anchor: anchor,
-        isAbove: isAbove,
+        isAbove: fitsAbove,
         toolbarBuilder: toolbarBuilder,
         children: children,
       ),
     );
-  }
-}
-
-// Positions the toolbar at the correct location with respect to the anchor.
-class _CupertinoTextSelectionToolbarPosition extends SingleChildRenderObjectWidget {
-  /// Create an instance of CupertinoTextSelectionToolbar.
-  const _CupertinoTextSelectionToolbarPosition({
-    Key? key,
-    required Offset anchor,
-    required bool isAbove,
-    Widget? child,
-  }) : _anchor = anchor,
-       _isAbove = isAbove,
-       super(key: key, child: child);
-
-  final Offset _anchor;
-
-  // Whether the arrow should point down and be attached to the bottom
-  // of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool _isAbove;
-
-  @override
-  _RenderCupertinoTextSelectionToolbarPosition createRenderObject(BuildContext context) => _RenderCupertinoTextSelectionToolbarPosition(
-    _anchor,
-    _isAbove,
-    null,
-  );
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarPosition renderObject) {
-    renderObject
-      ..anchor = _anchor
-      ..isAbove = _isAbove;
-  }
-}
-
-// Positions and clips the toolbar.
-//
-// The toolbar is positioned at the correct anchor facing up or down.
-//
-// It is clipped down to a rounded rectangle with a protruding arrow.
-class _RenderCupertinoTextSelectionToolbarPosition extends RenderShiftedBox {
-  _RenderCupertinoTextSelectionToolbarPosition(
-    this._anchor,
-    this._isAbove,
-    RenderBox? child,
-  ) : super(child);
-
-  @override
-  bool get isRepaintBoundary => true;
-
-  Offset _anchor;
-  set anchor(Offset value) {
-    if (value == _anchor) {
-      return;
-    }
-    _anchor = value;
-    markNeedsLayout();
-    markNeedsSemanticsUpdate();
-  }
-
-  bool _isAbove;
-  set isAbove(bool value) {
-    if (_isAbove == value) {
-      return;
-    }
-    _isAbove = value;
-    markNeedsLayout();
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    size = constraints.biggest;
-
-    if (child == null) {
-      return;
-    }
-    final BoxConstraints enforcedConstraint = constraints
-      .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
-      .loosen();
-
-    child!.layout(enforcedConstraint, parentUsesSize: true);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-
-    // The local x-coordinate of the center of the toolbar. The toolbar would
-    // like to horizontally center itself on the anchor if possible.
-    final double leftBound = child!.size.width/2 + _kToolbarScreenPadding;
-    final double rightBound = constraints.maxWidth - child!.size.width/2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = _anchor.dx.clamp(leftBound, rightBound);
-
-    childParentData.offset = Offset(
-      adjustedCenterX - child!.size.width/2,
-      _isAbove
-          ? _anchor.dy - child!.size.height - _kToolbarContentDistance
-          : _anchor.dy + _kToolbarContentDistance,
-    );
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      return;
-    }
-
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    context.paintChild(child!, offset + childParentData.offset);
   }
 }
 
