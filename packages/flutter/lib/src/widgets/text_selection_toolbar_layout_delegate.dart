@@ -17,13 +17,16 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
     required this.anchorAbove,
     required this.anchorBelow,
     this.fitsAbove,
-    this.paddingAbove = 0.0,
   });
 
   /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
+  ///
+  /// Should be provided in local coordinates.
   final Offset anchorAbove;
 
   /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
+  ///
+  /// Should be provided in local coordinates.
   final Offset anchorBelow;
 
   /// Whether or not the child should be considered to fit above anchorAbove.
@@ -34,10 +37,6 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   ///
   /// If not provided, it will be calculated.
   final bool? fitsAbove;
-
-  /// Any space above anchorAbove that isn't able to be occupied by the child,
-  /// such as screen padding.
-  final double paddingAbove;
 
   // Return the value that centers width as closely as possible to position
   // while fitting inside of min and max.
@@ -63,8 +62,7 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final bool fitsAbove = this.fitsAbove
-        ?? anchorAbove.dy >= childSize.height + paddingAbove;
+    final bool fitsAbove = this.fitsAbove ?? anchorAbove.dy >= childSize.height;
     final Offset anchor = fitsAbove ? anchorAbove : anchorBelow;
 
     return Offset(
@@ -83,7 +81,6 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(TextSelectionToolbarLayoutDelegate oldDelegate) {
     return anchorAbove != oldDelegate.anchorAbove
         || anchorBelow != oldDelegate.anchorBelow
-        || paddingAbove != oldDelegate.paddingAbove
         || fitsAbove != oldDelegate.fitsAbove;
   }
 }

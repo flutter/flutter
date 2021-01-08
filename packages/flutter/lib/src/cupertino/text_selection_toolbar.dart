@@ -32,6 +32,8 @@ const Color _kToolbarDividerColor = Color(0xFF808080);
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
 ///
+/// The anchor is provided in global coordinates.
+///
 /// See also:
 ///
 ///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is of this type.
@@ -43,7 +45,6 @@ typedef CupertinoToolbarBuilder = Widget Function(
   bool isAbove,
   Widget child,
 );
-
 
 /// An iOS-style text selection toolbar.
 ///
@@ -110,29 +111,33 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    final double paddingAbove = mediaQuery.padding.top
-      + _kToolbarScreenPadding
-      + _kToolbarContentDistance;
-    final double toolbarHeightNeeded = paddingAbove + _kToolbarHeight;
+    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final double toolbarHeightNeeded = paddingAbove
+        + _kToolbarContentDistance
+        + _kToolbarHeight;
     final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
-    // The arrow points slightly off of the anchor, so adjust the anchor to
-    // include this padding.
-    const Offset adjustment = Offset(0.0, _kToolbarContentDistance);
-    final Offset anchorAboveAdjusted = anchorAbove - adjustment;
-    final Offset anchorBelowAdjusted = anchorBelow + adjustment;
-    final Offset anchor = fitsAbove ? anchorAboveAdjusted : anchorBelowAdjusted;
 
-    return CustomSingleChildLayout(
-      delegate: TextSelectionToolbarLayoutDelegate(
-        anchorAbove: anchorAboveAdjusted,
-        anchorBelow: anchorBelowAdjusted,
-        paddingAbove: paddingAbove,
+    const Offset contentPaddingAdjustment = Offset(0.0, _kToolbarContentDistance);
+    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        _kToolbarScreenPadding,
+        paddingAbove,
+        _kToolbarScreenPadding,
+        _kToolbarScreenPadding,
       ),
-      child: _CupertinoTextSelectionToolbarContent(
-        anchor: anchor,
-        isAbove: fitsAbove,
-        toolbarBuilder: toolbarBuilder,
-        children: children,
+      child: CustomSingleChildLayout(
+        delegate: TextSelectionToolbarLayoutDelegate(
+          anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
+          anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+        ),
+        child: _CupertinoTextSelectionToolbarContent(
+          anchor: fitsAbove ? anchorAbove : anchorBelow,
+          isAbove: fitsAbove,
+          toolbarBuilder: toolbarBuilder,
+          children: children,
+        ),
       ),
     );
   }
@@ -140,6 +145,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
 // Clips the child so that it has the shape of the default iOS text selection
 // toolbar, with rounded corners and an arrow pointing at the anchor.
+//
+// The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
     Key? key,
@@ -349,6 +356,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 }
 
 // Renders the content of the selection menu and maintains the page state.
+//
+// The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
     Key? key,
