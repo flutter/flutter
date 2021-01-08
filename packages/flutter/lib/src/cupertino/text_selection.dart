@@ -170,6 +170,11 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
       addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
     }
 
+    // If there is no option available, build an empty widget.
+    if (items.isEmpty) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
