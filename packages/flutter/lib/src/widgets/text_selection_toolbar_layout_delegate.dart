@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 /// Positions the toolbar above [anchorAbove] if it fits, or otherwise below
 /// [anchorBelow].
