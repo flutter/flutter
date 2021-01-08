@@ -38,7 +38,7 @@ jazzy \
   --module-version 1.0.0\
   --xcodebuild-arguments --objc,"$FLUTTER_UMBRELLA_HEADER",--,-x,objective-c,-isysroot,"$(xcrun --show-sdk-path --sdk iphonesimulator)",-I,"$(pwd)"\
   --module Flutter\
-  --root-url https://docs.flutter.io/objc/\
+  --root-url https://api.flutter.dev/objc/\
   --output "$1"
 
 EXPECTED_CLASSES="FlutterAppDelegate.html

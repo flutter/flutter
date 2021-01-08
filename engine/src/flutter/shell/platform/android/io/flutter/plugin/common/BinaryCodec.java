@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
  * A {@link MessageCodec} using unencoded binary messages, represented as {@link ByteBuffer}s.
  *
  * <p>This codec is guaranteed to be compatible with the corresponding <a
- * href="https://docs.flutter.io/flutter/services/BinaryCodec-class.html">BinaryCodec</a> on the
+ * href="https://api.flutter.dev/flutter/services/BinaryCodec-class.html">BinaryCodec</a> on the
  * Dart side. These parts of the Flutter SDK are evolved synchronously.
  *
  * <p>On the Dart side, messages are represented using {@code ByteData}.
