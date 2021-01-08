@@ -58,6 +58,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildLinux(
       flutterProject.linux,
       buildInfo,

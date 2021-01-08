@@ -661,7 +661,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cached-ness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.',
+      hide: hide,
     );
   }
 
@@ -674,6 +675,7 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+      hide: hide,
     );
   }
 
