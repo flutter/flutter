@@ -60,7 +60,10 @@ class ScaleStartDetails {
   ///    coordinates.
   final Offset localFocalPoint;
 
-  /// The number of the pointers in contact with the screen.
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
  final int pointerCount;
 
   @override
@@ -149,7 +152,10 @@ class ScaleUpdateDetails {
   /// Expressed in radians.
   final double rotation;
 
-  /// The number of the pointers in contact with the screen.
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
   final int pointerCount;
 
   @override
@@ -174,7 +180,10 @@ class ScaleEndDetails {
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
 
-  /// The number of the pointers in contact with the screen.
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
   final int pointerCount;
 
   @override
