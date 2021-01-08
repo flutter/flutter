@@ -5463,8 +5463,8 @@ abstract class RenderObjectElement extends Element {
 
   /// The underlying [RenderObject] for this element.
   @override
-  RenderObject get renderObject => _renderObject;
-  late RenderObject _renderObject;
+  RenderObject get renderObject => _renderObject!;
+  RenderObject? _renderObject;
 
   bool _debugDoingBuild = false;
   @override
@@ -5566,7 +5566,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject.debugCreator = DebugCreator(this);
+      renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -6058,7 +6058,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
+    properties.add(DiagnosticsProperty<RenderObject>('renderObject', _renderObject, defaultValue: null));
   }
 }
 
