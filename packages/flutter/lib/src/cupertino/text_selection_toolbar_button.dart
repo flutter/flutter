@@ -56,13 +56,13 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
-      child: child,
       borderRadius: null,
       color: _kToolbarBackgroundColor,
       disabledColor: _kToolbarBackgroundColor,
       onPressed: onPressed,
       padding: _kToolbarButtonPadding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,
+      child: child,
     );
   }
 }
