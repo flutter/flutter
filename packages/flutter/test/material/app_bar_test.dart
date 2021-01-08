@@ -905,7 +905,7 @@ void main() {
 
   testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
-    Widget buildSliverAppBar(bool forceElevated) {
+    Widget buildSliverAppBar(bool forceElevated, [double? elevation]) {
       return MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -913,6 +913,7 @@ void main() {
               backwardsCompatibility: false,
               title: const Text('Title'),
               forceElevated: forceElevated,
+              elevation: elevation,
             ),
           ],
         ),
@@ -926,6 +927,9 @@ void main() {
     expect(getAppBarWidget(appBarFinder).elevation, 0.0);
 
     await tester.pumpWidget(buildSliverAppBar(true));
+    expect(getAppBarWidget(appBarFinder).elevation, null);
+
+    await tester.pumpWidget(buildSliverAppBar(true, 4.0));
     expect(getAppBarWidget(appBarFinder).elevation, 4.0);
   });
 
