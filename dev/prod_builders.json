@@ -148,19 +148,19 @@
          "name": "Linux firebase_abstract_method_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_abstract_method_smoke_test",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux firebase_android_embedding_v2_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_android_embedding_v2_smoke_test",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux firebase_release_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_release_smoke_test",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux flutter_gallery__back_button_memory",
