@@ -296,7 +296,11 @@ class CreateCommand extends CreateBase {
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         _printNoPluginMessage();
       }
-      _printWarningToEnablePlatforms(requestedPlatforms);
+
+      final List<String> _warningList = _getPlatformWarningList(requestedPlatforms);
+      if (_warningList.isNotEmpty) {
+        _printWarningDisabledPlatform(_warningList, relativePluginPath);
+      }
       _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
@@ -315,8 +319,11 @@ In order to run your $application, type:
 
 Your $application code is in $relativeAppMain.
 ''');
-    // Show warning if any selected platform is not enabled
-    _printWarningToEnablePlatforms(requestedPlatforms, true);
+      // Show warning if any selected platform is not enabled
+      final List<String> _warningList = _getPlatformWarningList(requestedPlatforms);
+      if (_warningList.isNotEmpty) {
+        _printWarningDisabledPlatform(_warningList, relativeAppPath);
+      }
     }
 
     return FlutterCommandResult.success();
@@ -496,14 +503,12 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
   globals.printStatus('''
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-
 ''', emphasis: true, color: TerminalColor.red);
 }
 
 void _printNoPluginMessage() {
     globals.printError('''
 You've created a plugin project that doesn't yet support any platforms.
-
 ''');
 }
 
@@ -515,12 +520,9 @@ For more information, see https://flutter.dev/go/plugin-platforms.
 ''');
 }
 
-// shows warning if user requested a platform and if it's not enabled
-void _printWarningToEnablePlatforms(
-  List<String> requestedPlatforms,
-  [bool isApp = false]
-) {
-  final List<String> _showWarning = <String>[
+/// returns a list of platforms which user has requested a platform and if it's not enabled
+List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+  final List<String> _disabledPlatform = <String>[
   if (requestedPlatforms.contains('android') && !featureFlags.isAndroidEnabled)
     'android',
   if (requestedPlatforms.contains('ios') && !featureFlags.isIOSEnabled)
@@ -535,18 +537,40 @@ void _printWarningToEnablePlatforms(
     'linux',
   ];
 
-  if (_showWarning.isEmpty){
-    return;
+  return _disabledPlatform;
+}
+
+void _printWarningDisabledPlatform(List<String> platforms, String relativePath) {
+  final  List<String> _mobile = <String>[], _desktop = <String>[], _web = <String>[];
+  for (final String platform in platforms) {
+    if (platform == 'android' || platform == 'ios') {
+      _mobile.add(platform);
+    } else if (platform == 'web') {
+      _web.add(platform);
+    } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
+      _desktop.add(platform);
+    }
   }
 
-  final String _disabledPlatforms = _showWarning.join(', ');
+  if (_mobile.isNotEmpty) {
+    globals.printStatus('''
+The mobile ${_mobile.length > 1 ? 'platforms' : 'platform'}: ${_mobile.join(', ')} ${_mobile.length > 1 ? 'are' : 'is'} not enabled.
+Enable them and then
 
-  globals.printStatus('! $_disabledPlatforms are not enabled; enable the platforms and then add them.',
-    emphasis: true,
-    color: TerminalColor.yellow
-  );
-
-  if (isApp){
-      globals.printStatus('After enabling the platforms run `flutter create .`\n');
+  \$ cd $relativePath
+  \$ flutter create .
+''');
+  }
+  if (_desktop.isNotEmpty) {
+    globals.printStatus('''
+The desktop ${_desktop.length > 1 ? 'platforms' : 'platform'}: ${_desktop.join(', ')} ${_desktop.length > 1 ? 'are' : 'is'} not supported on your local environment.
+For more details, see: https://flutter.dev/desktop
+''');
+  }
+  if (_web.isNotEmpty) {
+    globals.printStatus('''
+Web is not currently supported on your local environment. 
+For more details: see https://flutter.dev/docs/get-started/web
+''');
   }
 }

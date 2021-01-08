@@ -35,7 +35,7 @@ import '../../src/testbed.dart';
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
-const String _kDisabledPlatformRequestedMessage = 'are not enabled; enable the platforms and then add them.';
+const String _kDisabledPlatformRequestedMessage = 'not currently supported on your local environment.';
 // TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -2375,7 +2375,7 @@ void main() {
     Logger: () => logger,
   });
 
-    testUsingContext('should show warning when disabled platforms are selected while creating a app', () async {
+  testUsingContext('should show warning when disabled platforms are selected while creating a app', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
