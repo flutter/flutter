@@ -1943,7 +1943,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     final TextRange word = _textPainter.getWordBoundary(position);
-    final String originalText = textSelectionDelegate.textEditingValue.text;
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
       return TextSelection.fromPosition(position);
@@ -1952,10 +1951,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
     // On Android try to select the previous word instead only if the text is read only.
-    } else if (position.offset > 0 && ((text?.text != null
-        && _isWhitespace(text!.text!.codeUnitAt(position.offset)))
-        || (readOnly && originalText != null
-        && _isWhitespace(originalText.codeUnitAt(position.offset))))) {
+    } else if (text?.toPlainText() != null
+        && _isWhitespace(text!.toPlainText().codeUnitAt(position.offset))
+        && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
