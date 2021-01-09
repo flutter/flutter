@@ -344,7 +344,7 @@ class DataCell {
 ///       rows: List<DataRow>.generate(
 ///         numItems,
 ///         (index) => DataRow(
-///           color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
 ///             if (states.contains(MaterialState.selected))
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
@@ -355,9 +355,9 @@ class DataCell {
 ///           }),
 ///           cells: [DataCell(Text('Row $index'))],
 ///           selected: selected[index],
-///           onSelectChanged: (bool value) {
+///           onSelectChanged: (bool? value) {
 ///             setState(() {
-///               selected[index] = value;
+///               selected[index] = value!;
 ///             });
 ///           },
 ///         ),

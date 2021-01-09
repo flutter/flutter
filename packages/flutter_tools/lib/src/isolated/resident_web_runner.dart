@@ -184,12 +184,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
       fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    globals.printStatus(
-        "Warning: Flutter's support for web development is not stable yet and hasn't");
-    globals.printStatus('been thoroughly tested in production environments.');
-    globals.printStatus('For more information see https://flutter.dev/web');
-    globals.printStatus('');
-    globals.printStatus(message);
+    if (!flutterNext) {
+      globals.printStatus(
+          "Warning: Flutter's support for web development is not stable yet and hasn't");
+      globals.printStatus('been thoroughly tested in production environments.');
+      globals.printStatus('For more information see https://flutter.dev/web');
+      globals.printStatus('');
+      globals.printStatus(message);
+    }
     const String quitMessage = 'To quit, press "q".';
     if (device.device is! WebServerDevice) {
       globals.printStatus('For a more detailed help message, press "h". $quitMessage');
@@ -499,6 +501,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           chromiumLauncher: _chromiumLauncher,
           nullAssertions: debuggingOptions.nullAssertions,
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
+          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -518,6 +521,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             false,
             kNoneWorker,
             true,
+            debuggingOptions.nativeNullAssertions,
           );
         }
         await device.device.startApp(
@@ -585,6 +589,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           false,
           kNoneWorker,
           true,
+          debuggingOptions.nativeNullAssertions,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -681,7 +686,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         'typedef _NullaryFunction = dynamic Function();',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);',
+          '  registerPlugins(webPluginRegistrar);',
         '  await ui.webOnlyInitializePlatform();',
         '  if (entrypoint.main is _UnaryFunction) {',
         '    return (entrypoint.main as _UnaryFunction)(<String>[]);',
@@ -743,6 +748,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher.connectedInstance;
@@ -802,6 +808,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       });
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+      device.vmService = _vmService;
+      // Update caches to enable the FlutterVmService extensions.
+      setHttpAddress(_httpUriFromWebsocketUri(websocketUri), device.vmService);
+      setWsAddress(websocketUri, device.vmService);
+
       // Always run main after connecting because start paused doesn't work yet.
       if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
         _connectionResult.appConnection.runMain();
@@ -852,5 +863,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
   Future<void> exitApp() async {
     await device.exitApps();
     appFinished();
+  }
+
+  Uri _httpUriFromWebsocketUri(Uri websocketUri) {
+    const String wsPath = '/ws';
+    final String path = websocketUri.path;
+    return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
   }
 }

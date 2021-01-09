@@ -124,7 +124,6 @@ void main() {
 
     setUp(() {
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
 
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
@@ -237,7 +236,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Pshrink=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -266,7 +264,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Pshrink=true',
           '-Psplit-debug-info=${tempDir.path}',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -300,7 +297,6 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pextra-front-end-options=foo,bar',
-          '-Pshrink=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -356,7 +352,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Pshrink=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -424,7 +419,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Pshrink=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -481,7 +475,6 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Pshrink=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],

@@ -8,6 +8,7 @@ import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
@@ -208,6 +209,35 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        section('gradlew assembleLocal with plugin (custom debug build)');
+
+        final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin.');
+        final Directory pluginDir = Directory(path.join(tempDir.path, 'plugin_under_test'));
+
+        section('Create plugin');
+        await inDirectory(tempDir, () async {
+          await flutter(
+            'create',
+            options: <String>[
+              '--org',
+              'io.flutter.devicelab.plugin',
+              '--template=plugin',
+              '--platforms=android,ios',
+              pluginDir.path,
+            ],
+          );
+        });
+
+        section('Configure');
+        project.addPlugin('plugin_under_test', value: '$platformLineSep    path: ${pluginDir.path}');
+        await project.addCustomBuildType('local', initWith: 'debug');
+        await project.getPackages();
+
+        section('Build APK');
+        await project.runGradleTask('assembleLocal');
+      });
+
+      await runProjectTest((FlutterProject project) async {
         section('gradlew assembleBeta (custom release build)');
         await project.addCustomBuildType('beta', initWith: 'release');
         await project.runGradleTask('assembleBeta');
@@ -249,7 +279,7 @@ Future<void> main() async {
             output.contains('at org.gradle'))
           throw failure(
               'Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
+        if (!output.contains('Build failed'))
           throw failure(
               'Gradle output should contain a readable error message',
               result);
@@ -285,11 +315,11 @@ Future<void> main() async {
           throw failure(
               'flutter build apk should fail when Gradle does', result);
         final String output = '${result.stdout}\n${result.stderr}';
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
+        if (!output.contains('Build failed'))
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',
               result);
-        if (hasMultipleOccurrences(output, 'builTypes'))
+        if (hasMultipleOccurrences(output, 'Build failed'))
           throw failure(
               'flutter build apk should not invoke Gradle repeatedly on error',
               result);

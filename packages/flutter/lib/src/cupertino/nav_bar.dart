@@ -197,6 +197,33 @@ bool _isTransitionable(BuildContext context) {
 /// value from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
+/// Since [backgroundColor]'s opacity is not 1.0, there is a blur effect and
+/// content slides underneath.
+///
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       // Try removing opacity to observe the lack of a blur effect and of sliding content.
+///       backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: Column(
+///       children: [
+///         Container(height: 50, color: CupertinoColors.systemRed),
+///         Container(height: 50, color: CupertinoColors.systemGreen),
+///         Container(height: 50, color: CupertinoColors.systemBlue),
+///         Container(height: 50, color: CupertinoColors.systemYellow),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the
@@ -551,6 +578,11 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
+/// The [stretch] parameter determines whether the nav bar should stretch to
+/// fill the over-scroll area. The nav bar can still expand and contract as the
+/// user scrolls, but it will also stretch when the user over-scrolls if the
+/// [stretch] value is `true`. Defaults to `true`.
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -575,6 +607,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.stretch = true,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
        assert(
@@ -672,6 +705,13 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
 
+  /// Whether the nav bar should stretch to fill the over-scroll area.
+  ///
+  /// The nav bar can still expand and contract as the user scrolls, but it will
+  /// also stretch when the user over-scrolls if the [stretch] value is `true`.
+  /// Defaults to `true`.
+  final bool stretch;
+
   @override
   _CupertinoSliverNavigationBarState createState() => _CupertinoSliverNavigationBarState();
 }
@@ -729,6 +769,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             heroTag: widget.heroTag,
             persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
             alwaysShowMiddle: widget.middle != null,
+            stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           ),
         ),
       ),
@@ -751,6 +792,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.heroTag,
     required this.persistentHeight,
     required this.alwaysShowMiddle,
+    required this.stretchConfiguration,
   }) : assert(persistentHeight != null),
        assert(alwaysShowMiddle != null),
        assert(transitionBetweenRoutes != null);
@@ -773,6 +815,9 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+
+  @override
+  OverScrollHeaderStretchConfiguration? stretchConfiguration;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {

@@ -15,7 +15,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -50,6 +49,9 @@ enum BottomNavigationBarType {
 /// If not specified, then it's automatically set to
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
+///
+/// The length of [items] must be at least two and each item's icon and title/label
+/// must not be null.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
@@ -267,7 +269,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the unselected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.title]s.
   ///
-  /// If null then the [TextTheme.caption]'s color is used.
+  /// If null then the [ThemeData.unselectedWidgetColor]'s color is used.
   final Color? unselectedItemColor;
 
   /// The size, opacity, and color of the icon in the currently selected
@@ -398,6 +400,9 @@ class _BottomNavigationTile extends StatelessWidget {
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
 
+    // The effective tool tip message to be shown on the BottomNavigationBarItem.
+    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+
     // Defines the padding for the animating icons + labels.
     //
     // The animations go from "Unselected":
@@ -488,11 +493,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (item.label != null) {
+    if (effectiveTooltip != null) {
       result = Tooltip(
-        message: item.label!,
+        message: effectiveTooltip,
         preferBelow: false,
         verticalOffset: selectedIconSize + selectedFontSize,
+        excludeFromSemantics: true,
         child: result,
       );
     }
@@ -853,7 +859,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         colorTween = ColorTween(
           begin: widget.unselectedItemColor
             ?? bottomTheme.unselectedItemColor
-            ?? themeData.textTheme.caption!.color,
+            ?? themeData.unselectedWidgetColor,
           end: widget.selectedItemColor
             ?? bottomTheme.selectedItemColor
             ?? widget.fixedColor

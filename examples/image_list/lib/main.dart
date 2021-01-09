@@ -178,14 +178,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = List<AnimationController>(IMAGES);
+    final List<AnimationController> controllers = List<AnimationController>.filled(IMAGES, null);
     for (int i = 0; i < IMAGES; i++) {
       controllers[i] = AnimationController(
         duration: const Duration(milliseconds: 3600),
         vsync: this,
       )..repeat();
     }
-    final List<Completer<bool>> completers = List<Completer<bool>>(IMAGES);
+    final List<Completer<bool>> completers = List<Completer<bool>>.filled(IMAGES, null);
     for (int i = 0; i < IMAGES; i++) {
       completers[i] = Completer<bool>();
     }

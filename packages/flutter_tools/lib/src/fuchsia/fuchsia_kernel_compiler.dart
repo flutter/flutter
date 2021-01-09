@@ -115,7 +115,6 @@ class FuchsiaKernelCompiler {
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
       ],
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
 
       for (final String dartDefine in buildInfo.dartDefines)
         '-D$dartDefine',

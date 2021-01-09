@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:dds/dds.dart' as dds;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -538,6 +539,37 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
+  }));
+
+  testUsingContext('ResidentRunner fails its operation if the device initialization is not complete', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      setAssetBundlePath,
+    ]);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+    await onAppStart.future;
+    when(mockFlutterDevice.devFS).thenReturn(null);
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, false);
+    expect(result.code, 1);
+    expect(result.message, contains('Device initialization has not completed.'));
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner can handle an reload-barred exception from hot reload', () => testbed.run(() async {
@@ -2615,6 +2647,33 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true)
   });
 
+   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag when feature is enabled', () async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+
+    final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
+      mockDevice,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        extraFrontEndOptions: <String>[],
+      ),
+      target: null, platform: null,
+    )).generator as DefaultResidentCompiler;
+
+    expect(residentCompiler.extraFrontEndOptions,
+      contains('--enable-experiment=alternative-invalidation-strategy'));
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isExperimentalInvalidationStrategyEnabled: true)
+  });
+
   testUsingContext('connect sets up log reader', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final MockDevice mockDevice = MockDevice();
@@ -2646,6 +2705,67 @@ void main() {
     }) async => mockVMService,
   }));
 
+  testUsingContext('FlutterDevice handles existing DDS instance', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
+    final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+    final Completer<void> noopCompleter = Completer<void>();
+    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+    when(mockDevice.dds).thenReturn(mockDds);
+    when(mockDds.startDartDevelopmentService(any, any, any, any)).thenThrow(FakeDartDevelopmentServiceException());
+    when(mockDds.uri).thenReturn(Uri.parse('http://localhost:1234'));
+    when(mockDds.done).thenAnswer((_) => noopCompleter.future);
+
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    await flutterDevice.connect(allowExistingDdsInstance: true);
+    verify(mockLogReader.connectedVMService = mockVMService);
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
+  }));
+
+  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
+    // See https://github.com/flutter/flutter/issues/72385 for context.
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.dds).thenReturn(DartDevelopmentService(logger: testLogger));
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+      throw FakeDartDevelopmentServiceException(message: 'No URI');
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    bool caught = false;
+    final Completer<void>done = Completer<void>();
+    runZonedGuarded(() {
+      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
+    }, (Object e, StackTrace st) {
+      expect(e is StateError, true);
+      expect((e as StateError).message, contains('No URI'));
+      expect(testLogger.errorText, contains(
+        'DDS has failed to start and there is not an existing DDS instance',
+      ));
+      done.complete();
+      caught = true;
+    });
+    await done.future;
+    if (!caught) {
+      fail('Expected a StateError to be thrown.');
+    }
+  }));
+
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android', TestFeatureFlags()), 'iOS');
     expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
@@ -2666,6 +2786,17 @@ class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
+
+class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {
+  FakeDartDevelopmentServiceException({this.message = defaultMessage});
+
+  @override
+  final int errorCode = dds.DartDevelopmentServiceException.existingDdsInstanceError;
+
+  @override
+  final String message;
+  static const String defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
+}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })
@@ -2710,6 +2841,7 @@ class FakeFlutterDevice extends FlutterDevice {
     int hostVmServicePort,
     int ddsPort,
     PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+    bool allowExistingDdsInstance = false,
   }) async { }
 
 

@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Locale;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'binding.dart';
 import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 
 // Examples can assume:
-// class Intl { static String message(String s, { String name, String locale }) => ''; }
-// Future<void> initializeMessages(String locale) => null;
+// class Intl { static String message(String s, { String? name, String? locale }) => ''; }
+// Future<void> initializeMessages(String locale) => Future.value();
 
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
@@ -323,7 +320,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   }
 ///
 ///   static MyLocalizations of(BuildContext context) {
-///     return Localizations.of<MyLocalizations>(context, MyLocalizations);
+///     return Localizations.of<MyLocalizations>(context, MyLocalizations)!;
 ///   }
 ///
 ///   String title() => Intl.message('<title>', name: 'title', locale: locale.toString());

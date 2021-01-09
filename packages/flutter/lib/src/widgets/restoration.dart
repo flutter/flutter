@@ -625,9 +625,9 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///
 /// ```dart
 /// class RestorableCounter extends StatefulWidget {
-///   RestorableCounter({Key key, this.restorationId}) : super(key: key);
+///   RestorableCounter({Key? key, this.restorationId}) : super(key: key);
 ///
-///   final String restorationId;
+///   final String? restorationId;
 ///
 ///   @override
 ///   _RestorableCounterState createState() => _RestorableCounterState();
@@ -645,10 +645,10 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   // In this example, the restoration ID for the mixin is passed in through
 ///   // the [StatefulWidget]'s constructor.
 ///   @override
-///   String get restorationId => widget.restorationId;
+///   String? get restorationId => widget.restorationId;
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the counter either has its old value restored or is
 ///     // initialized to its default value.

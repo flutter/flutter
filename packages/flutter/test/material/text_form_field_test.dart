@@ -406,6 +406,56 @@ void main() {
     expect(find.text('initialValue'), findsOneWidget);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/34847.
+  testWidgets('didChange resets the text field\'s value to empty when passed null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(
+                initialValue: null,
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+    await tester.pump();
+    expect(find.text('changedValue'), findsOneWidget);
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.didChange(null);
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text(''), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/34847.
+  testWidgets('reset resets the text field\'s value to empty when intialValue is null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(
+                initialValue: null,
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+    await tester.pump();
+    expect(find.text('changedValue'), findsOneWidget);
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text(''), findsOneWidget);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -530,5 +580,47 @@ void main() {
 
     final TextField widget = tester.widget(find.byType(TextField));
     expect(widget.selectionControls, equals(materialTextSelectionControls));
+  });
+
+  testWidgets('TextFormField respects hintTextDirection', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
+              hintTextDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Finder hintTextFinder = find.text('Some Hint');
+
+    final Text hintText = tester.firstWidget(hintTextFinder);
+    expect(hintText.textDirection, TextDirection.ltr);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Some Label',
+              hintText: 'Some Hint',
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final BuildContext context = tester.element(hintTextFinder);
+    final TextDirection textDirection = Directionality.of(context);
+    expect(textDirection, TextDirection.rtl);
   });
 }

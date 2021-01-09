@@ -191,8 +191,6 @@ void main() {
       '--snapshot_kind=app-aot-elf',
       '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
       '--strip',
-      '--no-causal-async-stacks',
-      '--lazy-async-stacks',
       environment.buildDir.childFile('app.dill').path,
       ],
     ));
@@ -235,8 +233,6 @@ void main() {
       '--snapshot_kind=app-aot-elf',
       '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
       '--strip',
-      '--no-causal-async-stacks',
-      '--lazy-async-stacks',
       environment.buildDir.childFile('app.dill').path,
       ],
     ));
@@ -282,8 +278,6 @@ void main() {
         '--snapshot_kind=app-aot-elf',
         '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         environment.buildDir.childFile('app.dill').path
       ],
     ));

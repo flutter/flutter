@@ -146,3 +146,8 @@ footer {
   font-style: italic;
   font-weight: bold;
 }
+
+/* Constrain image width to container */
+img {
+  max-width: 100%
+}

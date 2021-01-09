@@ -146,6 +146,18 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Uri of the test package.
   Uri get testUri => _flutterToolPackageConfig['test'].packageUriRoot;
 
+  WebRendererMode get _rendererMode  {
+    return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
+      ? WebRendererMode.canvaskit
+      : WebRendererMode.html;
+  }
+
+  NullSafetyMode get _nullSafetyMode {
+    return buildInfo.nullSafetyMode == NullSafetyMode.sound
+      ? NullSafetyMode.sound
+      : NullSafetyMode.unsound;
+  }
+
   final Configuration _config;
   final shelf.Server _server;
   Uri get url => _server.url;
@@ -178,13 +190,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     'dart_stack_trace_mapper.js',
   ));
 
-  File get _dartSdk => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdk => _fileSystem.file(
+    _artifacts.getArtifactPath(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
 
-  File get _dartSdkSourcemaps => _fileSystem.file(_artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[WebRendererMode.html][
-    buildInfo.nullSafetyMode == NullSafetyMode.sound ? NullSafetyMode.sound : NullSafetyMode.unsound
-  ]));
+  File get _dartSdkSourcemaps => _fileSystem.file(
+    _artifacts.getArtifactPath(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -214,6 +224,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions,
+        nativeNullAssertions: true,
         bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
         entrypoint: '/' + generatedFile
        ), headers: <String, String>{
@@ -607,7 +618,7 @@ class BrowserManager {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((dynamic error, StackTrace stackTrace) {
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
@@ -619,7 +630,7 @@ class BrowserManager {
     }).catchError((dynamic error, StackTrace stackTrace) {
       chrome.close();
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));

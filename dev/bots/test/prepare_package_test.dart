@@ -234,6 +234,13 @@ void main() {
     group('ArchivePublisher for $platformName', () {
       FakeProcessManager processManager;
       Directory tempDir;
+      final String gsutilCall = platform.isWindows
+          ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+          : 'gsutil.py';
+      final String releasesName = 'releases_$platformName.json';
+      final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+      final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
+      final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         processManager = FakeProcessManager();
@@ -245,11 +252,7 @@ void main() {
       });
 
       test('calls the right processes', () async {
-        final String releasesName = 'releases_$platformName.json';
-        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-        final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
-        final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''
@@ -289,10 +292,9 @@ void main() {
 ''';
         File(jsonPath).writeAsStringSync(releasesJson);
         File(archivePath).writeAsStringSync('archive contents');
-        final String gsutilCall = platform.isWindows
-            ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
-            : 'gsutil.py';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          // This process fails because the file does NOT already exist
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -341,6 +343,94 @@ void main() {
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
+      });
+
+      test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          'v1.2.3',
+          outputFile,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          // This process returns 0 because file already exists
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
+        };
+        processManager.fakeResults = calls;
+        expect(() async => await publisher.publishArchive(false), throwsException);
+        processManager.verifyCalls(calls.keys.toList());
+      });
+
+      test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final ArchivePublisher publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          'v1.2.3',
+          outputFile,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
+        final String releasesJson = '''
+{
+  "base_url": "https://storage.googleapis.com/flutter_infra/releases",
+  "current_release": {
+    "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
+    "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
+  },
+  "releases": [
+    {
+      "hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0",
+      "channel": "dev",
+      "version": "v0.2.3",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
+    },
+    {
+      "hash": "b9bd51cc36b706215915711e580851901faebb40",
+      "channel": "beta",
+      "version": "v0.2.2",
+      "release_date": "2018-03-16T18:48:13.375013Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
+    },
+    {
+      "hash": "$testRef",
+      "channel": "stable",
+      "version": "v0.0.0",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
+    }
+  ]
+}
+''';
+        File(jsonPath).writeAsStringSync(releasesJson);
+        File(archivePath).writeAsStringSync('archive contents');
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+        };
+        processManager.fakeResults = calls;
+        assert(tempDir.existsSync());
+        await publisher.publishArchive(true);
+        processManager.verifyCalls(calls.keys.toList());
       });
     });
   }

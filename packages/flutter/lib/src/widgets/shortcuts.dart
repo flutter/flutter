@@ -424,10 +424,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///       child: Focus(
 ///         autofocus:true,
 ///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('Add to the counter by pressing keyboard Shift and keyboard "K"'),
-///             Text('Subtract from the counter by pressing keyboard Shift and keyboard "L"'),
-///             Text('count: $count'),
+///             Text('Add: keyboard Shift + "k"'),
+///             Text('Subtract: keyboard Shift + "l"'),
+///             SizedBox(height: 10.0),
+///             ColoredBox(
+///               color: Colors.yellow,
+///               child: Padding(
+///                 padding: EdgeInsets.all(4.0),
+///                 child: Text('count: $count'),
+///               ),
+///             ),
 ///           ],
 ///         ),
 ///       ),

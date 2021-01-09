@@ -4,6 +4,7 @@
 
 import 'dart:ui' show window, SemanticsFlag;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -368,8 +369,8 @@ void main() {
 
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
+      debugDefaultTargetPlatformOverride = platform;
       return MaterialApp(
-        theme: ThemeData(platform: platform),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
@@ -405,6 +406,8 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   group('PopupMenuButton with Icon', () {

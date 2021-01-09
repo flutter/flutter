@@ -30,6 +30,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    addNativeNullAssertions(hide: !verboseHelp);
     argParser
       ..addFlag('trace-startup',
         negatable: false,
@@ -144,6 +145,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
 
+  @override
+  bool get reportNullSafety => true;
+
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
@@ -205,6 +209,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
         nullAssertions: boolArg('null-assertions'),
+        nativeNullAssertions: boolArg('native-null-assertions'),
       );
     }
   }
