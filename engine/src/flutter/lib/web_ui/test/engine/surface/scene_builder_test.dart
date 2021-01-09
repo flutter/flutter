@@ -412,7 +412,7 @@ void testMain() {
       final bool useOffset = int.tryParse(char) == null;
       final EnginePictureRecorder recorder = PictureRecorder();
       final RecordingCanvas canvas = recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
-      final Paragraph paragraph = (ParagraphBuilder(ParagraphStyle())..addText(char)).build();
+      final DomParagraph paragraph = (DomParagraphBuilder(ParagraphStyle())..addText(char)).build();
       paragraph.layout(ParagraphConstraints(width: 1000));
       canvas.drawParagraph(paragraph, Offset.zero);
       final EngineLayer newLayer = useOffset
