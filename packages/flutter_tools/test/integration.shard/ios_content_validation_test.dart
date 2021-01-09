@@ -45,7 +45,7 @@ void main() {
 
         projectRoot = tempDir.childDirectory('hello').path;
 
-        final ProcessResult result = processManager.runSync(<String>[
+        processManager.runSync(<String>[
           flutterBin,
           ...getLocalEngineArguments(),
           'build',
