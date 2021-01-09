@@ -92,7 +92,6 @@ TestMetalContext::TextureInfo TestMetalContext::CreateMetalTexture(const SkISize
 
   const int64_t texture_id = texture_id_ctr_++;
   textures_[texture_id] = texture;
-  std::cout << "inserting texture with id: " << texture_id << std::endl;
 
   return {
       .texture_id = texture_id,
