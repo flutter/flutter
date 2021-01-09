@@ -330,6 +330,14 @@ flt-glass-pane * {
     }
 
     final html.BodyElement bodyElement = html.document.body!;
+
+    setElementAttribute(
+      bodyElement,
+      'flt-renderer',
+      '${useCanvasKit ? 'canvaskit' : 'html'} (${_autoDetect ? 'auto-selected' : 'requested explicitly'})',
+    );
+    setElementAttribute(bodyElement, 'flt-build-mode', buildMode);
+
     setElementStyle(bodyElement, 'position', 'fixed');
     setElementStyle(bodyElement, 'top', '0');
     setElementStyle(bodyElement, 'right', '0');
