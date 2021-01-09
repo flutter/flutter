@@ -232,9 +232,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return;
     }
 
-    final BoxConstraints enforcedConstraint = constraints
-      .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
-      .loosen();
+    final BoxConstraints enforcedConstraint = constraints.loosen();
 
     child!.layout(_heightConstraint.enforce(enforcedConstraint), parentUsesSize: true);
 
