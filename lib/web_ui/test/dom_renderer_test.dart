@@ -14,6 +14,11 @@ void main() {
 }
 
 void testMain() {
+  test('populates flt-renderer and flt-build-mode', () {
+    DomRenderer();
+    expect(html.document.body.attributes['flt-renderer'], 'html (requested explicitly)');
+    expect(html.document.body.attributes['flt-build-mode'], 'debug');
+  });
   test('creating elements works', () {
     final DomRenderer renderer = DomRenderer();
     final html.Element element = renderer.createElement('div');
