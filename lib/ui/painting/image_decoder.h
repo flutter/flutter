@@ -61,7 +61,7 @@ class ImageDecoder {
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoder);
 };
 
-sk_sp<SkImage> ImageFromCompressedData(fml::RefPtr<ImageDescriptor> descriptor,
+sk_sp<SkImage> ImageFromCompressedData(ImageDescriptor* descriptor,
                                        uint32_t target_width,
                                        uint32_t target_height,
                                        const fml::tracing::TraceFlow& flow);
