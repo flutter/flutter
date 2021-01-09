@@ -518,8 +518,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // shown - subsequently we leave the scroll offset where the user left
     // it. This scroll offset is only accurate for fixed height menu items
     // (the default).
+    final double maxScrollOffset = preferredMenuHeight - menuHeight;
     final double scrollOffset = preferredMenuHeight <= maxMenuHeight ? 0 :
-      math.max(0.0, selectedItemOffset - (buttonTop - menuTop));
+      math.min(math.max(0.0, selectedItemOffset - (buttonTop - menuTop)), maxScrollOffset);
 
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
