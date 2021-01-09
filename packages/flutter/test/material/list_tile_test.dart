@@ -1566,6 +1566,40 @@ void main() {
     expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 
+  testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/73616.
+    const Color tileColor = Color(0xffff0000);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTile(
+              tileColor: tileColor,
+              onTap: () {},
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Before ListTile is tapped, it should be tileColor
+    expect(find.byType(Material), paints..path(color: tileColor));
+
+    // Tap on tile to trigger ink effect and wait for it to be underway.
+    await tester.tap(find.byType(ListTile));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
+    expect(
+      find.byType(Material),
+      paints
+        ..path(color: tileColor)
+        ..circle(),
+    );
+  });
+
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
     bool isSelected = false;
     const Color defaultColor = Colors.transparent;
