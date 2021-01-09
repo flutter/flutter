@@ -125,6 +125,7 @@ void main() {
               key: targetKey,
               builder: (BuildContext context) {
                 return PopupMenuButton<int>(
+                  placement: PopupMenuPlacement.belowButton,
                   onSelected: (int value) {
                     Navigator.pushNamed(context, '/next');
                   },
