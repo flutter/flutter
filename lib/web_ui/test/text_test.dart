@@ -89,7 +89,7 @@ void testMain() async {
   });
 
   test('lay out unattached paragraph', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -155,7 +155,7 @@ void testMain() async {
   });
 
   test('$ParagraphBuilder detects plain text', () {
-    ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -166,7 +166,7 @@ void testMain() async {
     expect(paragraph.plainText, isNotNull);
     expect(paragraph.geometricStyle.fontWeight, FontWeight.normal);
 
-    builder = ParagraphBuilder(ParagraphStyle(
+    builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -180,7 +180,7 @@ void testMain() async {
   });
 
   test('$ParagraphBuilder detects rich text', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -195,7 +195,7 @@ void testMain() async {
   });
 
   test('$ParagraphBuilder treats empty text as plain', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -209,7 +209,7 @@ void testMain() async {
 
   // Regression test for https://github.com/flutter/flutter/issues/34931.
   test('hit test on styled text returns correct span offset', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -239,7 +239,7 @@ void testMain() async {
     const fontFamily = 'sans-serif';
     const fontSize = 20.0;
     final style = TextStyle(fontFamily: fontFamily, fontSize: fontSize);
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: fontFamily,
       fontSize: fontSize,
     ));
@@ -326,7 +326,7 @@ void testMain() async {
     'test te04 test050 '
     */
 
-    final Paragraph paragraph = builder.build();
+    final DomParagraph paragraph = builder.build();
     paragraph.layout(ParagraphConstraints(width: 800));
 
     // Reference the offsets with the output of `Display arrangement`.
@@ -358,7 +358,7 @@ void testMain() async {
   test(
       'should not set fontFamily to effectiveFontFamily for spans in rich text',
       () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'Roboto',
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
@@ -389,7 +389,7 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'SomeFont',
       fontSize: 12.0,
     ));
@@ -411,7 +411,7 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'serif',
       fontSize: 12.0,
     ));
@@ -428,7 +428,7 @@ void testMain() async {
     // Set this to false so it doesn't default to 'Ahem' font.
     debugEmulateFlutterTesterEnvironment = false;
 
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final DomParagraphBuilder builder = DomParagraphBuilder(ParagraphStyle(
       fontFamily: 'MyFont 2000',
       fontSize: 12.0,
     ));

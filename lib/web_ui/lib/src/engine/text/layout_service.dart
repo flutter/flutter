@@ -181,6 +181,7 @@ class TextLayoutService {
       height += line.height;
       if (alphabeticBaseline == -1.0) {
         alphabeticBaseline = line.baseline;
+        ideographicBaseline = alphabeticBaseline * _baselineRatioHack;
       }
       if (longestLine < line.width) {
         longestLine = line.width;

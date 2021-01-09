@@ -54,11 +54,11 @@ void testMain() async {
 
     test('loading font should clear measurement caches', () async {
       final ui.ParagraphStyle style = ui.ParagraphStyle();
-      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(style);
+      final DomParagraphBuilder builder = DomParagraphBuilder(style);
       final ui.ParagraphConstraints constraints =
           ui.ParagraphConstraints(width: 30.0);
       builder.addText('test');
-      final ui.Paragraph paragraph = builder.build();
+      final DomParagraph paragraph = builder.build();
       // Triggers the measuring and verifies the result has been cached.
       paragraph.layout(constraints);
       expect(TextMeasurementService.rulerManager.rulers.length, 1);
