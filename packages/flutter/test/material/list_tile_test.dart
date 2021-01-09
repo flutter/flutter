@@ -1449,6 +1449,75 @@ void main() {
     expect(box.size, equals(const Size(800, 44)));
   });
 
+  testWidgets('ListTile shape is painted correctly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63877.
+    const Color tileColor = Color(0xffff0000);
+    const ShapeBorder rectShape = RoundedRectangleBorder();
+    const ShapeBorder stadiumShape = StadiumBorder();
+
+    Widget buildListTile(ShapeBorder shape) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTile(shape: shape, tileColor: tileColor),
+          ),
+        ),
+      );
+    }
+
+    // Test rectangle shape
+    await tester.pumpWidget(buildListTile(rectShape));
+    Rect rect = tester.getRect(find.byType(ListTile));
+
+    // Check if a path was painted with the correct color and shape
+    expect(
+      find.byType(Material),
+      paints..path(
+        color: tileColor,
+        // Corners should be included
+        includes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+        // Points outside rect should be excluded
+        excludes: <Offset>[
+          Offset(rect.left - 1, rect.top - 1),
+          Offset(rect.right + 1, rect.top - 1),
+          Offset(rect.left - 1, rect.bottom + 1),
+          Offset(rect.right + 1, rect.bottom + 1),
+        ],
+      ),
+    );
+
+    // Test stadium shape
+    await tester.pumpWidget(buildListTile(stadiumShape));
+    rect = tester.getRect(find.byType(ListTile));
+
+    // Check if a path was painted with the correct color and shape
+    expect(
+      find.byType(Material),
+      paints..path(
+        color: tileColor,
+        // Center points of sides should be included
+        includes: <Offset>[
+          Offset(rect.left + rect.width / 2, rect.top),
+          Offset(rect.left, rect.top + rect.height / 2),
+          Offset(rect.right, rect.top + rect.height / 2),
+          Offset(rect.left + rect.width / 2, rect.bottom),
+        ],
+        // Corners should be excluded
+        excludes: <Offset>[
+          Offset(rect.left, rect.top),
+          Offset(rect.right, rect.top),
+          Offset(rect.left, rect.bottom),
+          Offset(rect.right, rect.bottom),
+        ],
+      ),
+    );
+  });
+
   testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test ListTile() constructor
     await tester.pumpWidget(
