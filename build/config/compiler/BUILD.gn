@@ -421,13 +421,6 @@ config("compiler") {
       # Clang doesn't support these flags.
       cflags += [ "-finline-limit=64" ]
     }
-    if (is_asan) {
-      # Android build relies on -Wl,--gc-sections removing unreachable code.
-      # ASan instrumentation for globals inhibits this and results in a library
-      # with unresolvable relocations.
-      # TODO(eugenis): find a way to reenable this.
-      cflags += [ "-mllvm -asan-globals=0" ]
-    }
 
     defines += [ "ANDROID" ]
 
