@@ -991,6 +991,36 @@ void main() {
     );
   });
 
+  testWidgets('Dropdown menu scrolls to last item in long lists', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '99',
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+
+    final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
+    final ScrollController scrollController = listView.controller!;
+    // Make sure there is no overscroll
+    expect(scrollController.offset, scrollController.position.maxScrollExtent);
+
+    // Find the selected item in the scrollable dropdown list
+    final Finder menuItemFinder = find.byType(Scrollable);
+    final RenderBox menuItemContainer = tester.renderObject<RenderBox>(menuItemFinder);
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(
+        find.descendant(of: menuItemFinder, matching: find.byKey(const ValueKey<String>('99'))));
+
+    // kMaterialListPadding.vertical is 8.
+    const Offset selectedItemOffset = Offset(0.0, -8.0);
+    expect(
+      selectedItem.size.bottomCenter(selectedItem.localToGlobal(Offset.zero)).dy,
+      equals(menuItemContainer.size.bottomCenter(menuItemContainer.localToGlobal(selectedItemOffset)).dy),
+    );
+  });
+
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String? value;
