@@ -40,6 +40,8 @@ void main() {
           ...getLocalEngineArguments(),
           'create',
           '--platforms=ios',
+          '-i',
+          'objc',
           'hello',
         ], workingDirectory: tempDir.path);
 
