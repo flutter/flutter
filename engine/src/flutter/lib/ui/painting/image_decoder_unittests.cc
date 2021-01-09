@@ -556,10 +556,10 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto descriptor =
       fml::MakeRefCounted<ImageDescriptor>(std::move(data), std::move(codec));
 
-  ASSERT_EQ(
-      ImageFromCompressedData(descriptor, 6, 2, fml::tracing::TraceFlow(""))
-          ->dimensions(),
-      SkISize::Make(6, 2));
+  ASSERT_EQ(ImageFromCompressedData(descriptor.get(), 6, 2,
+                                    fml::tracing::TraceFlow(""))
+                ->dimensions(),
+            SkISize::Make(6, 2));
 }
 
 TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
@@ -574,8 +574,8 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
   auto decode = [descriptor](uint32_t target_width, uint32_t target_height) {
-    return ImageFromCompressedData(descriptor, target_width, target_height,
-                                   fml::tracing::TraceFlow(""));
+    return ImageFromCompressedData(descriptor.get(), target_width,
+                                   target_height, fml::tracing::TraceFlow(""));
   };
 
   auto expected_data = OpenFixtureAsSkData("Horizontal.png");
