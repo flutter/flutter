@@ -308,10 +308,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Navigator.pop(context);
   }
 
-  void _handleResetDate() {
-    setState(() => _selectedDate = _resetDate);
-  }
-
   void _handleEntryModeToggle() {
     setState(() {
       switch (_entryMode) {
@@ -329,6 +325,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   void _handleDateChanged(DateTime date) {
     setState(() => _selectedDate = date);
+  }
+
+  void _handleResetDate() {
+    setState(() => _selectedDate = _resetDate);
   }
 
   Size _dialogSize(BuildContext context) {
@@ -414,6 +414,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialCalendarMode: widget.initialCalendarMode,
         );
         entryModeIcon = Icons.edit;
+
         entryModeTooltip = localizations.inputDateModeButtonLabel;
         break;
 
