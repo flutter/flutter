@@ -147,6 +147,17 @@ part 'engine/vector_math.dart';
 part 'engine/web_experiments.dart';
 part 'engine/window.dart';
 
+// The mode the app is running in.
+// Keep these in sync with the same constants on the framework-side under foundation/constants.dart.
+const bool kReleaseMode = bool.fromEnvironment('dart.vm.product', defaultValue: false);
+const bool kProfileMode = bool.fromEnvironment('dart.vm.profile', defaultValue: false);
+const bool kDebugMode = !kReleaseMode && !kProfileMode;
+String get buildMode => kReleaseMode
+  ? 'release'
+  : kProfileMode
+    ? 'profile'
+    : 'debug';
+
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
 /// HTML and CanvasKit. During this phase we compute transforms, clips, and

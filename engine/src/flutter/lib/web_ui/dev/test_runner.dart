@@ -618,9 +618,13 @@ class TestCommand extends Command<bool> with ArgUtils {
       '--enable-asserts',
       '--enable-experiment=non-nullable',
       '--no-sound-null-safety',
-      if (input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=true',
-      if (!input.forCanvasKit) '-DFLUTTER_WEB_AUTO_DETECT=false',
-      if (!input.forCanvasKit) '-DFLUTTER_WEB_USE_SKIA=false',
+
+      // We do not want to auto-select a renderer in tests. As of today, tests
+      // are designed to run in one specific mode. So instead, we specify the
+      // renderer explicitly.
+      '-DFLUTTER_WEB_AUTO_DETECT=false',
+      '-DFLUTTER_WEB_USE_SKIA=${input.forCanvasKit}',
+
       '-O2',
       '-o',
       targetFileName, // target path.
