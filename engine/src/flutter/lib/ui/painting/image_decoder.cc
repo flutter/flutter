@@ -75,7 +75,7 @@ static sk_sp<SkImage> ResizeRasterImage(sk_sp<SkImage> image,
 }
 
 static sk_sp<SkImage> ImageFromDecompressedData(
-    fml::RefPtr<ImageDescriptor> descriptor,
+    ImageDescriptor* descriptor,
     uint32_t target_width,
     uint32_t target_height,
     const fml::tracing::TraceFlow& flow) {
@@ -98,7 +98,7 @@ static sk_sp<SkImage> ImageFromDecompressedData(
                            SkISize::Make(target_width, target_height), flow);
 }
 
-sk_sp<SkImage> ImageFromCompressedData(fml::RefPtr<ImageDescriptor> descriptor,
+sk_sp<SkImage> ImageFromCompressedData(ImageDescriptor* descriptor,
                                        uint32_t target_width,
                                        uint32_t target_height,
                                        const fml::tracing::TraceFlow& flow) {
@@ -216,38 +216,55 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
   return result;
 }
 
-void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor,
+void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                           uint32_t target_width,
                           uint32_t target_height,
                           const ImageResult& callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   fml::tracing::TraceFlow flow(__FUNCTION__);
 
+  // ImageDescriptors have Dart peers that must be collected on the UI thread.
+  // However, closures in MakeCopyable below capture the descriptor. The
+  // captures of copyable closures may be collected on any of the thread
+  // participating in task execution.
+  //
+  // To avoid this issue, we resort to manually reference counting the
+  // descriptor. Since all task flows invoke the `result` callback, the raw
+  // descriptor is retained in the beginning and released in the `result`
+  // callback.
+  //
+  // `ImageDecoder::Decode` itself is invoked on the UI thread, so the
+  // collection of the smart pointer from which we obtained the raw descriptor
+  // is fine in this scope.
+  auto raw_descriptor = descriptor_ref_ptr.get();
+  raw_descriptor->AddRef();
+
   FML_DCHECK(callback);
   FML_DCHECK(runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   // Always service the callback (and cleanup the descriptor) on the UI thread.
-  auto result = [callback, descriptor, ui_runner = runners_.GetUITaskRunner()](
-                    SkiaGPUObject<SkImage> image,
-                    fml::tracing::TraceFlow flow) {
-    ui_runner->PostTask(
-        fml::MakeCopyable([callback, descriptor, image = std::move(image),
-                           flow = std::move(flow)]() mutable {
-          // We are going to terminate the trace flow here. Flows cannot
-          // terminate without a base trace. Add one explicitly.
-          TRACE_EVENT0("flutter", "ImageDecodeCallback");
-          flow.End();
-          callback(std::move(image));
-        }));
-  };
+  auto result =
+      [callback, raw_descriptor, ui_runner = runners_.GetUITaskRunner()](
+          SkiaGPUObject<SkImage> image, fml::tracing::TraceFlow flow) {
+        ui_runner->PostTask(fml::MakeCopyable(
+            [callback, raw_descriptor, image = std::move(image),
+             flow = std::move(flow)]() mutable {
+              // We are going to terminate the trace flow here. Flows cannot
+              // terminate without a base trace. Add one explicitly.
+              TRACE_EVENT0("flutter", "ImageDecodeCallback");
+              flow.End();
+              callback(std::move(image));
+              raw_descriptor->Release();
+            }));
+      };
 
-  if (!descriptor->data() || descriptor->data()->size() == 0) {
+  if (!raw_descriptor->data() || raw_descriptor->data()->size() == 0) {
     result({}, std::move(flow));
     return;
   }
 
   concurrent_task_runner_->PostTask(
-      fml::MakeCopyable([descriptor,                              //
+      fml::MakeCopyable([raw_descriptor,                          //
                          io_manager = io_manager_,                //
                          io_runner = runners_.GetIOTaskRunner(),  //
                          result,                                  //
@@ -258,16 +275,15 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         // Step 1: Decompress the image.
         // On Worker.
 
-        auto decompressed =
-            descriptor->is_compressed()
-                ? ImageFromCompressedData(std::move(descriptor),  //
-                                          target_width,           //
-                                          target_height,          //
-                                          flow)
-                : ImageFromDecompressedData(std::move(descriptor),  //
-                                            target_width,           //
-                                            target_height,          //
-                                            flow);
+        auto decompressed = raw_descriptor->is_compressed()
+                                ? ImageFromCompressedData(raw_descriptor,  //
+                                                          target_width,    //
+                                                          target_height,   //
+                                                          flow)
+                                : ImageFromDecompressedData(raw_descriptor,  //
+                                                            target_width,    //
+                                                            target_height,   //
+                                                            flow);
 
         if (!decompressed) {
           FML_LOG(ERROR) << "Could not decompress image.";
@@ -283,7 +299,8 @@ void ImageDecoder::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                                    std::move(flow)]() mutable {
           if (!io_manager) {
             FML_LOG(ERROR) << "Could not acquire IO manager.";
-            return result({}, std::move(flow));
+            result({}, std::move(flow));
+            return;
           }
 
           // If the IO manager does not have a resource context, the caller
