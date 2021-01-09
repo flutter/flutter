@@ -57,9 +57,6 @@ void main() {
           '--split-debug-info=foo/',
         ], workingDirectory: projectRoot);
 
-        print(result.stdout);
-        print(result.stderr);
-
         buildPath = fileSystem.directory(fileSystem.path.join(
           projectRoot,
           'build',
