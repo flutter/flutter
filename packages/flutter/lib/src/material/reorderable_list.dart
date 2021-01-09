@@ -12,7 +12,6 @@ import 'material.dart';
 import 'material_localizations.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // class MyDataObject { }
 
 /// The callback used by [ReorderableListView] to move an item to a new
@@ -60,7 +59,7 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ```dart
 /// List<String> _list = List.generate(5, (i) => "${i}");

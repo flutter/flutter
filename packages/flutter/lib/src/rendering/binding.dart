@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,7 +19,6 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
-// // @dart = 2.9
 // dynamic context;
 
 /// The glue between the render tree and the Flutter engine.
@@ -221,7 +219,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Querying [PlatformDispatcher.platformBrightness].
   ///
   /// ```dart
-  /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  /// final Brightness brightness = WidgetsBinding.instance!.platformDispatcher.platformBrightness;
   /// ```
   /// {@end-tool}
   ///

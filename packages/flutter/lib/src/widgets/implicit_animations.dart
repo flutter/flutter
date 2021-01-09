@@ -4,9 +4,7 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -19,7 +17,6 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // class MyWidget extends ImplicitlyAnimatedWidget {
 //   MyWidget() : super(duration: const Duration(seconds: 1));
 //   final Color targetColor = Colors.black;
@@ -352,22 +349,21 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController? get controller => _controller;
-  AnimationController? _controller;
+  AnimationController get controller => _controller;
+  late final AnimationController _controller = AnimationController(
+    duration: widget.duration,
+    debugLabel: kDebugMode ? widget.toStringShort() : null,
+    vsync: this,
+  );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double>? get animation => _animation;
-  Animation<double>? _animation;
+  Animation<double> get animation => _animation;
+  late Animation<double> _animation = _createCurve();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      debugLabel: kDebugMode ? widget.toStringShort() : null,
-      vsync: this,
-    );
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
           if (widget.onEnd != null)
@@ -378,7 +374,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         case AnimationStatus.reverse:
       }
     });
-    _updateCurve();
     _constructTweens();
     didUpdateTweens();
   }
@@ -387,27 +382,27 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve)
-      _updateCurve();
-    _controller!.duration = widget.duration;
+      _animation = _createCurve();
+    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
-      _controller!
+      _controller
         ..value = 0.0
         ..forward();
       didUpdateTweens();
     }
   }
 
-  void _updateCurve() {
-    _animation = CurvedAnimation(parent: _controller!, curve: widget.curve);
+  CurvedAnimation _createCurve() {
+    return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -419,7 +414,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (tween == null)
       return;
     tween
-      ..begin = tween.evaluate(_animation!)
+      ..begin = tween.evaluate(_animation)
       ..end = targetValue;
   }
 
@@ -482,14 +477,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
-  ///   ColorTween _colorTween;
+  ///   ColorTween? _colorTween;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Text(
   ///       'Hello World',
   ///       // Computes the value of the text color at any given time.
-  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///       style: TextStyle(color: _colorTween?.evaluate(animation)),
   ///     );
   ///   }
   ///
@@ -504,7 +499,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///       // A function that takes a color value and returns a tween
   ///       // beginning at that value.
   ///       (value) => ColorTween(begin: value),
-  ///     );
+  ///     ) as ColorTween?;
   ///
   ///     // We could have more tweens than one by using the visitor
   ///     // multiple times.
@@ -552,7 +547,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   @override
   void initState() {
     super.initState();
-    controller!.addListener(_handleAnimationChanged);
+    controller.addListener(_handleAnimationChanged);
   }
 
   void _handleAnimationChanged() {
@@ -575,7 +570,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the `height`, `width`, `color`, and
@@ -776,7 +771,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation!;
+    final Animation<double> animation = this.animation;
     return Container(
       child: widget.child,
       alignment: _alignment?.evaluate(animation),
@@ -814,7 +809,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following code implements the [AnimatedPadding] widget, using a [curve] of
 /// [Curves.easeInOut].
@@ -907,7 +902,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   Widget build(BuildContext context) {
     return Padding(
       padding: _padding!
-        .evaluate(animation!)
+        .evaluate(animation)
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
@@ -935,7 +930,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following code implements the [AnimatedAlign] widget, using a [curve] of
 /// [Curves.fastOutSlowIn].
@@ -1058,9 +1053,9 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: _alignment!.evaluate(animation!)!,
-      heightFactor: _heightFactorTween?.evaluate(animation!),
-      widthFactor: _widthFactorTween?.evaluate(animation!),
+      alignment: _alignment!.evaluate(animation)!,
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
     );
   }
@@ -1100,7 +1095,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// The following example transitions an AnimatedPositioned
 /// between two states. It adjusts the `height`, `width`, and
@@ -1255,12 +1250,12 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   Widget build(BuildContext context) {
     return Positioned(
       child: widget.child,
-      left: _left?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      right: _right?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      left: _left?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      right: _right?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1392,12 +1387,12 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
     return Positioned.directional(
       textDirection: Directionality.of(context),
       child: widget.child,
-      start: _start?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      end: _end?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      start: _start?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      end: _end?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1529,7 +1524,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1552,7 +1547,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///
@@ -1662,7 +1657,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1792,7 +1787,7 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: _style!.evaluate(animation!),
+      style: _style!.evaluate(animation),
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
@@ -1925,11 +1920,11 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
-      borderRadius: _borderRadius!.evaluate(animation!),
-      elevation: _elevation!.evaluate(animation!),
-      color: widget.animateColor ? _color!.evaluate(animation!)! : widget.color,
+      borderRadius: _borderRadius!.evaluate(animation),
+      elevation: _elevation!.evaluate(animation),
+      color: widget.animateColor ? _color!.evaluate(animation)! : widget.color,
       shadowColor: widget.animateShadowColor
-          ? _shadowColor!.evaluate(animation!)!
+          ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
     );
   }

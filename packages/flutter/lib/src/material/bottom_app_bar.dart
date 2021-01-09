@@ -13,8 +13,7 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// Widget bottomAppBarContents;
+// late Widget bottomAppBarContents;
 
 /// A container that is typically used with [Scaffold.bottomNavigationBar], and
 /// can have a notch along the top that makes room for an overlapping
@@ -31,6 +30,176 @@ import 'theme.dart';
 ///   ),
 ///   floatingActionButton: FloatingActionButton(onPressed: null),
 /// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows the [BottomAppBar], which can be configured to have a notch using the
+/// [BottomAppBar.shape] property. This also includes an optional [FloatingActionButton], which illustrates
+/// the [FloatingActionButtonLocation]s in relation to the [BottomAppBar].
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(BottomAppBarDemo());
+/// }
+///
+/// class BottomAppBarDemo extends StatefulWidget {
+///   const BottomAppBarDemo();
+///
+///   @override
+///   State createState() => _BottomAppBarDemoState();
+/// }
+///
+/// class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
+///   var _showFab = true;
+///   var _showNotch = true;
+///   var _fabLocation = FloatingActionButtonLocation.endDocked;
+///
+///   void _onShowNotchChanged(bool value) {
+///     setState(() {
+///       _showNotch = value;
+///     });
+///   }
+///
+///   void _onShowFabChanged(bool value) {
+///     setState(() {
+///       _showFab = value;
+///     });
+///   }
+///
+///   void _onFabLocationChanged(dynamic value) {
+///     setState(() {
+///       _fabLocation = value;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           automaticallyImplyLeading: false,
+///           title: Text("Bottom App Bar Demo"),
+///         ),
+///         body: ListView(
+///           padding: const EdgeInsets.only(bottom: 88),
+///           children: [
+///             SwitchListTile(
+///               title: Text(
+///                 "Floating Action Button",
+///               ),
+///               value: _showFab,
+///               onChanged: _onShowFabChanged,
+///             ),
+///             SwitchListTile(
+///               title: Text("Notch"),
+///               value: _showNotch,
+///               onChanged: _onShowNotchChanged,
+///             ),
+///             Padding(
+///               padding: const EdgeInsets.all(16),
+///               child: Text("Floating action button position"),
+///             ),
+///             RadioListTile<FloatingActionButtonLocation>(
+///               title: Text(
+///                 "Docked - End",
+///               ),
+///               value: FloatingActionButtonLocation.endDocked,
+///               groupValue: _fabLocation,
+///               onChanged: _onFabLocationChanged,
+///             ),
+///             RadioListTile<FloatingActionButtonLocation>(
+///               title: Text(
+///                 "Docked - Center",
+///               ),
+///               value: FloatingActionButtonLocation.centerDocked,
+///               groupValue: _fabLocation,
+///               onChanged: _onFabLocationChanged,
+///             ),
+///             RadioListTile<FloatingActionButtonLocation>(
+///               title: Text(
+///                 "Floating - End",
+///               ),
+///               value: FloatingActionButtonLocation.endFloat,
+///               groupValue: _fabLocation,
+///               onChanged: _onFabLocationChanged,
+///             ),
+///             RadioListTile<FloatingActionButtonLocation>(
+///               title: Text(
+///                 "Floating - Center",
+///               ),
+///               value: FloatingActionButtonLocation.centerFloat,
+///               groupValue: _fabLocation,
+///               onChanged: _onFabLocationChanged,
+///             ),
+///           ],
+///         ),
+///         floatingActionButton: _showFab
+///             ? FloatingActionButton(
+///                 onPressed: () {},
+///                 child: const Icon(Icons.add),
+///                 tooltip: "Create",
+///               )
+///             : null,
+///         floatingActionButtonLocation: _fabLocation,
+///         bottomNavigationBar: _DemoBottomAppBar(
+///           fabLocation: _fabLocation,
+///           shape: _showNotch ? const CircularNotchedRectangle() : null,
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// class _DemoBottomAppBar extends StatelessWidget {
+///   const _DemoBottomAppBar({
+///     this.fabLocation = FloatingActionButtonLocation.endDocked,
+///     this.shape = const CircularNotchedRectangle(),
+///   });
+///
+///   final FloatingActionButtonLocation fabLocation;
+///   final dynamic shape;
+///
+///   static final centerLocations = <FloatingActionButtonLocation>[
+///     FloatingActionButtonLocation.centerDocked,
+///     FloatingActionButtonLocation.centerFloat,
+///   ];
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return BottomAppBar(
+///       shape: shape,
+///       color: Colors.blue,
+///       child: IconTheme(
+///         data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
+///         child: Row(
+///           children: [
+///             IconButton(
+///               tooltip: 'Open navigation menu',
+///               icon: const Icon(Icons.menu),
+///               onPressed: () {},
+///             ),
+///             if (centerLocations.contains(fabLocation)) const Spacer(),
+///             IconButton(
+///               tooltip: "Search",
+///               icon: const Icon(Icons.search),
+///               onPressed: () {},
+///             ),
+///             IconButton(
+///               tooltip: "Favorite",
+///               icon: const Icon(Icons.favorite),
+///               onPressed: () {},
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
 /// ```
 /// {@end-tool}
 ///

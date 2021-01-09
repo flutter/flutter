@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // Examples can assume:
-// // @dart = 2.9
 // class Cat { }
 
 /// A category with which to annotate a class, for documentation

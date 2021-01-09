@@ -15,6 +15,8 @@ import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zrn7V3bMJvg}
+///
 /// The user can transform the child by dragging to pan or pinching to zoom.
 ///
 /// By default, InteractiveViewer may draw outside of its original area of the
@@ -34,7 +36,7 @@ import 'ticker_provider.dart';
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 /// This example shows a simple Container that can be panned and zoomed.
 ///
 /// ```dart
@@ -151,7 +153,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to true.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// This example shows how to create a pannable table. Because the table is
   /// larger than the entire screen, setting `constrained` to false is necessary
   /// to allow it to be drawn to its full size. The parts of the table that
@@ -305,19 +307,19 @@ class InteractiveViewer extends StatefulWidget {
   /// listeners are notified. If the value is set, InteractiveViewer will update
   /// to respect the new value.
   ///
-  /// {@tool dartpad --template=stateful_widget_material_ticker_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material_ticker}
   /// This example shows how transformationController can be used to animate the
   /// transformation back to its starting position.
   ///
   /// ```dart
   /// final TransformationController _transformationController = TransformationController();
-  /// Animation<Matrix4> _animationReset;
-  /// AnimationController _controllerReset;
+  /// Animation<Matrix4>? _animationReset;
+  /// late final AnimationController _controllerReset;
   ///
   /// void _onAnimateReset() {
-  ///   _transformationController.value = _animationReset.value;
+  ///   _transformationController.value = _animationReset!.value;
   ///   if (!_controllerReset.isAnimating) {
-  ///     _animationReset?.removeListener(_onAnimateReset);
+  ///     _animationReset!.removeListener(_onAnimateReset);
   ///     _animationReset = null;
   ///     _controllerReset.reset();
   ///   }
@@ -329,7 +331,7 @@ class InteractiveViewer extends StatefulWidget {
   ///     begin: _transformationController.value,
   ///     end: Matrix4.identity(),
   ///   ).animate(_controllerReset);
-  ///   _animationReset.addListener(_onAnimateReset);
+  ///   _animationReset!.addListener(_onAnimateReset);
   ///   _controllerReset.forward();
   /// }
   ///
@@ -930,12 +932,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
-      final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
-      final Size childSize = childRenderBox.size;
-      final double scaleChange = 1.0 - event.scrollDelta.dy / childSize.height;
-      if (scaleChange == 0.0) {
+
+      // Ignore left and right scroll.
+      if (event.scrollDelta.dy == 0.0) {
         return;
       }
+
+      // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20 per scroll, while a trackpad scroll can be any amount.
+      // The calculation for scaleChange here was arbitrarily chosen to feel natural for both trackpads and mousewheels on all platforms.
+      final double scaleChange = math.exp(-event.scrollDelta.dy / 200);
       final Offset focalPointScene = _transformationController!.toScene(
         event.localPosition,
       );
@@ -1075,6 +1080,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        dragStartBehavior: DragStartBehavior.start,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,

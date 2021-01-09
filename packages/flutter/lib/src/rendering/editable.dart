@@ -678,6 +678,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
         }
       } else {
+        // The directional arrows move the TextSelection.extentOffset, while the
+        // base remains fixed.
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
@@ -741,8 +743,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Just place the collapsed selection at the end or beginning of the region
-    // if shift isn't down.
-    if (!shift) {
+    // if shift isn't down or selection isn't enabled.
+    if (!shift || !selectionEnabled) {
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
       int newOffset = newSelection.extentOffset;
@@ -823,7 +825,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection selection = textSelectionDelegate.textEditingValue.selection;
     final String text = textSelectionDelegate.textEditingValue.text;
     assert(_selection != null);
-    if (_readOnly) {
+    if (_readOnly || !selection.isValid) {
       return;
     }
     String textBefore = selection.textBefore(text);
@@ -1849,6 +1851,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// Select text between the global positions [from] and [to].
+  ///
+  /// [from] corresponds to the [TextSelection.baseOffset], and [to] corresponds
+  /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     assert(cause != null);
     assert(from != null);
@@ -1861,12 +1866,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ? null
       : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
 
-    int baseOffset = fromPosition.offset;
-    int extentOffset = fromPosition.offset;
-    if (toPosition != null) {
-      baseOffset = math.min(fromPosition.offset, toPosition.offset);
-      extentOffset = math.max(fromPosition.offset, toPosition.offset);
-    }
+    final int baseOffset = fromPosition.offset;
+    final int extentOffset = toPosition?.offset ?? fromPosition.offset;
 
     final TextSelection newSelection = TextSelection(
       baseOffset: baseOffset,
