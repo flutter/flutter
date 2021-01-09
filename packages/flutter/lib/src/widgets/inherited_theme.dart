@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// An [InheritedWidget] that defines visual properties like colors
@@ -17,7 +15,7 @@ import 'framework.dart';
 /// like the contents of a new route or an overlay, will be able to see the
 /// ancestor inherited themes of the context it was built in.
 ///
-/// {@tool dartpad --template=freeform_no_null_safety}
+/// {@tool dartpad --template=freeform}
 /// This example demonstrates how `InheritedTheme.capture()` can be used
 /// to wrap the contents of a new route with the inherited themes that
 /// are present when the route was built - but are not present when route

@@ -692,6 +692,8 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   const int kDeviceFull = 112;
   const int kUserMappedSectionOpened = 1224;
   const int kAccessDenied = 5;
+  const int kFatalDeviceHardwareError = 483;
+
   // Catch errors and bail when:
   String errorMessage;
   switch (errorCode) {
@@ -713,6 +715,11 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
         '\n$e\n'
         'Do you have an antivirus program running? '
         'Try disabling your antivirus program and try again.';
+      break;
+    case kFatalDeviceHardwareError:
+      errorMessage =
+        '$message. There is a problem with the device driver '
+        'that this file or directory is stored on.';
       break;
     default:
       // Caller must rethrow the exception.

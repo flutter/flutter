@@ -30,12 +30,11 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// TabController tabController;
+// late TabController tabController;
 // void setState(VoidCallback fn) { }
-// String appBarTitle;
-// int tabCount;
-// TickerProvider tickerProvider;
+// late String appBarTitle;
+// late int tabCount;
+// late TickerProvider tickerProvider;
 
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
@@ -69,7 +68,7 @@ enum _ScaffoldSlot {
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// Here is an example of showing a [SnackBar] when the user presses a button.
 ///
@@ -112,7 +111,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
   /// Typical usage of the [ScaffoldMessenger.of] function is to call it in
   /// response to a user gesture or an application state change.
   ///
@@ -138,7 +137,7 @@ class ScaffoldMessenger extends StatefulWidget {
   /// function. The [MaterialApp.scaffoldMessengerKey] refers to the root
   /// ScaffoldMessenger that is provided by default.
   ///
-  /// {@tool dartpad --template=freeform_no_null_safety}
+  /// {@tool dartpad --template=freeform}
   /// Sometimes [SnackBar]s are produced by code that doesn't have ready access
   /// to a valid [BuildContext]. One such example of this is when you show a
   /// SnackBar from a method outside of the `build` function. In these
@@ -166,7 +165,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///       _counter++;
   ///     });
   ///     if (_counter % 10 == 0) {
-  ///       _scaffoldMessengerKey.currentState.showSnackBar(const SnackBar(
+  ///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
   ///         content: Text('A multiple of ten!'),
   ///       ));
   ///     }
@@ -304,7 +303,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
   ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
@@ -1259,7 +1258,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showBottomSheet] function.
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -1288,7 +1287,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -1318,7 +1317,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -1460,6 +1459,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
+    this.restorationId,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1560,7 +1560,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
@@ -1570,7 +1570,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openDrawer() {
-  ///   _scaffoldKey.currentState.openDrawer();
+  ///   _scaffoldKey.currentState!.openDrawer();
   /// }
   ///
   /// void _closeDrawer() {
@@ -1623,7 +1623,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// To close the drawer, use [Navigator.pop].
   ///
-  /// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the
   /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
   /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
@@ -1633,7 +1633,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
-  ///   _scaffoldKey.currentState.openEndDrawer();
+  ///   _scaffoldKey.currentState!.openEndDrawer();
   /// }
   ///
   /// void _closeEndDrawer() {
@@ -1784,13 +1784,27 @@ class Scaffold extends StatefulWidget {
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
 
+  /// Restoration ID to save and restore the state of the [Scaffold].
+  ///
+  /// If it is non-null, the scaffold will persist and restore whether the
+  /// [drawer] and [endDrawer] was open or closed.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
+
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
   ///
   /// If no instance of this class encloses the given context, will cause an
   /// assert in debug mode, and throw an exception in release mode.
   ///
-  /// {@tool dartpad --template=freeform_no_null_safety}
+  /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1861,7 +1875,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -2056,7 +2070,15 @@ class Scaffold extends StatefulWidget {
 ///
 /// Can display [BottomSheet]s. Retrieve a [ScaffoldState] from the current
 /// [BuildContext] using [Scaffold.of].
-class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
+class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_drawerOpened, 'drawer_open');
+    registerForRestoration(_endDrawerOpened, 'end_drawer_open');
+  }
 
   // DRAWER API
 
@@ -2077,8 +2099,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// This is based on the appBar preferred height plus the top padding.
   double? get appBarMaxHeight => _appBarMaxHeight;
-  bool _drawerOpened = false;
-  bool _endDrawerOpened = false;
+  final RestorableBool _drawerOpened = RestorableBool(false);
+  final RestorableBool _endDrawerOpened = RestorableBool(false);
 
   /// Whether the [Scaffold.drawer] is opened.
   ///
@@ -2086,7 +2108,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
   ///    [Scaffold].
-  bool get isDrawerOpen => _drawerOpened;
+  bool get isDrawerOpen => _drawerOpened.value;
 
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
@@ -2094,18 +2116,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
   ///    a [Scaffold].
-  bool get isEndDrawerOpen => _endDrawerOpened;
+  bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
-      _drawerOpened = isOpened;
+      _drawerOpened.value = isOpened;
     });
     widget.onDrawerChanged?.call(isOpened);
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
     setState(() {
-      _endDrawerOpened = isOpened;
+      _endDrawerOpened.value = isOpened;
     });
     widget.onEndDrawerChanged?.call(isOpened);
   }
@@ -2123,7 +2145,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
-    if (_endDrawerKey.currentState != null && _endDrawerOpened)
+    if (_endDrawerKey.currentState != null && _endDrawerOpened.value)
       _endDrawerKey.currentState!.close();
     _drawerKey.currentState?.open();
   }
@@ -2141,7 +2163,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
-    if (_drawerKey.currentState != null && _drawerOpened)
+    if (_drawerKey.currentState != null && _drawerOpened.value)
       _drawerKey.currentState!.close();
     _endDrawerKey.currentState?.open();
   }
@@ -2173,7 +2195,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See [ScaffoldMessenger.of] for information about how to obtain the
   /// [ScaffoldMessengerState].
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold_center}
   ///
   /// Here is an example of showing a [SnackBar] when the user presses a button.
   ///
@@ -2547,7 +2569,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
@@ -2860,6 +2882,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
+          isDrawerOpen: _endDrawerOpened.value,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2885,6 +2908,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+          isDrawerOpen: _drawerOpened.value,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -3146,7 +3170,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         break;
     }
 
-    if (_endDrawerOpened) {
+    if (_endDrawerOpened.value) {
       _buildDrawer(children, textDirection);
       _buildEndDrawer(children, textDirection);
     } else {

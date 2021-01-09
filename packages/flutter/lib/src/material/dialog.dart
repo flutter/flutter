@@ -18,9 +18,8 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // enum Department { treasury, state }
-// BuildContext context;
+// late BuildContext context;
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
@@ -706,6 +705,9 @@ class SimpleDialogOption extends StatelessWidget {
 ///     case Department.state:
 ///       // ...
 ///     break;
+///     case null:
+///       // dialog dismissed
+///     break;
 ///   }
 /// }
 /// ```
@@ -965,16 +967,8 @@ Future<T?> showDialog<T>({
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-  @Deprecated(
-    'Instead of using the "child" argument, return the child from a closure '
-    'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog. '
-    'This feature was deprecated after v0.2.3.'
-  )
-  Widget? child,
 }) {
-  assert(child == null || builder == null);
-  assert(child != null || builder != null);
+  assert(builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
@@ -984,7 +978,7 @@ Future<T?> showDialog<T>({
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-      final Widget pageChild = child ?? Builder(builder: builder!);
+      final Widget pageChild = Builder(builder: builder!);
       Widget dialog = themes.wrap(pageChild);
       if (useSafeArea) {
         dialog = SafeArea(child: dialog);

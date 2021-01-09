@@ -21,9 +21,6 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// When used as a mixin, provides no-op method implementations.
@@ -43,7 +40,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 /// ```dart
 /// class AppLifecycleReactor extends StatefulWidget {
-///   const AppLifecycleReactor({ Key key }) : super(key: key);
+///   const AppLifecycleReactor({ Key? key }) : super(key: key);
 ///
 ///   @override
 ///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
@@ -53,16 +50,16 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     WidgetsBinding.instance.addObserver(this);
+///     WidgetsBinding.instance!.addObserver(this);
 ///   }
 ///
 ///   @override
 ///   void dispose() {
-///     WidgetsBinding.instance.removeObserver(this);
+///     WidgetsBinding.instance!.removeObserver(this);
 ///     super.dispose();
 ///   }
 ///
-///   AppLifecycleState _notification;
+///   late AppLifecycleState _notification;
 ///
 ///   @override
 ///   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -138,31 +135,31 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class MetricsReactor extends StatefulWidget {
-  ///   const MetricsReactor({ Key key }) : super(key: key);
+  ///   const MetricsReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
   ///   _MetricsReactorState createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
-  ///   Size _lastSize;
+  ///   late Size _lastSize;
   ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
-  ///     WidgetsBinding.instance.addObserver(this);
+  ///     _lastSize = WidgetsBinding.instance!.window.physicalSize;
+  ///     WidgetsBinding.instance!.addObserver(this);
   ///   }
   ///
   ///   @override
   ///   void dispose() {
-  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     WidgetsBinding.instance!.removeObserver(this);
   ///     super.dispose();
   ///   }
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
+  ///     setState(() { _lastSize = WidgetsBinding.instance!.window.physicalSize; });
   ///   }
   ///
   ///   @override
@@ -196,7 +193,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
+  ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
   ///
   ///   @override
   ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
@@ -206,20 +203,20 @@ abstract class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     WidgetsBinding.instance.addObserver(this);
+  ///     WidgetsBinding.instance!.addObserver(this);
   ///   }
   ///
   ///   @override
   ///   void dispose() {
-  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     WidgetsBinding.instance!.removeObserver(this);
   ///     super.dispose();
   ///   }
   ///
-  ///   double _lastTextScaleFactor;
+  ///   late double _lastTextScaleFactor;
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance!.window.textScaleFactor; });
   ///   }
   ///
   ///   @override
@@ -666,7 +663,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         await observer.didPushRouteInformation(
           RouteInformation(
             location: routeArguments['location'] as String,
-            state: routeArguments['state'] as Object,
+            state: routeArguments['state'] as Object?,
           )
         )
       )
@@ -733,36 +730,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [firstFrameRasterized], whether the first frame has finished rendering.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
-
-  /// Tell the framework not to report the frame it is building as a "useful"
-  /// first frame until there is a corresponding call to [allowFirstFrameReport].
-  ///
-  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
-  /// first frame.
-  @Deprecated(
-    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
-    'This feature was deprecated after v1.12.4.'
-  )
-  void deferFirstFrameReport() {
-    if (!kReleaseMode) {
-      deferFirstFrame();
-    }
-  }
-
-  /// When called after [deferFirstFrameReport]: tell the framework to report
-  /// the frame it is building as a "useful" first frame.
-  ///
-  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
-  /// first frame.
-  @Deprecated(
-    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
-    'This feature was deprecated after v1.12.4.'
-  )
-  void allowFirstFrameReport() {
-    if (!kReleaseMode) {
-      allowFirstFrame();
-    }
-  }
 
   void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes

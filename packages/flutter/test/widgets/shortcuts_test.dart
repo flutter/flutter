@@ -579,5 +579,86 @@ void main() {
       expect(description[0], equalsIgnoringHashCodes('manager: ShortcutManager#00000(shortcuts: {})'));
       expect(description[1], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: ActivateIntent#00000}'));
     });
+
+    testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      bool? value = true;
+      Widget buildApp() {
+        return MaterialApp(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
+              orderedIntents: <Intent>[
+                ActivateIntent(),
+                ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+              ]
+            ),
+            LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+            LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+          },
+          home: Material(
+            child: Center(
+              child: ListView(
+                primary: true,
+                children: <Widget> [
+                  StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (bool? newValue) => setState(() { value = newValue; }),
+                        focusColor: Colors.orange[500],
+                      );
+                    },
+                  ),
+                  Container(
+                    color: Colors.blue,
+                    height: 1000,
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      expect(
+        tester.binding.focusManager.primaryFocus!.toStringShort(),
+        equalsIgnoringHashCodes('FocusScopeNode#00000(_ModalScopeState<dynamic> Focus Scope [PRIMARY FOCUS])'),
+      );
+      final ScrollController controller = PrimaryScrollController.of(
+        tester.element(find.byType(ListView))
+      )!;
+      expect(controller.position.pixels, 0.0);
+      expect(value, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      // ScrollView scrolls
+      expect(controller.position.pixels, 448.0);
+      expect(value, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      // Focus is now on the checkbox.
+      expect(
+        tester.binding.focusManager.primaryFocus!.toStringShort(),
+        equalsIgnoringHashCodes('FocusNode#00000([PRIMARY FOCUS])'),
+      );
+      expect(value, isTrue);
+      expect(controller.position.pixels, 0.0);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      // Checkbox is toggled, scroll view does not scroll.
+      expect(value, isFalse);
+      expect(controller.position.pixels, 0.0);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      expect(value, isTrue);
+      expect(controller.position.pixels, 0.0);
+    });
   });
 }

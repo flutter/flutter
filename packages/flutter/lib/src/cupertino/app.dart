@@ -13,9 +13,6 @@ import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// An application that uses Cupertino design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -48,6 +45,75 @@ import 'theme.dart';
 ///  * Scrolling past extremities will trigger iOS-style spring overscrolls.
 ///  * The San Francisco font family is unavailable on Android and can result
 ///    in undefined font behavior.
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that disables the "debug"
+/// banner with a [home] route that will be displayed when the app is launched.
+///
+/// ![The CupertinoApp displays a CupertinoPageScaffold](https://flutter.github.io/assets-for-api-docs/assets/cupertino/basic_cupertino_app.png)
+///
+/// ```dart
+/// CupertinoApp(
+///   home: CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('Home'),
+///     ),
+///     child: Center(child: Icon(CupertinoIcons.share)),
+///   ),
+///   debugShowCheckedModeBanner: false,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that uses the [routes]
+/// `Map` to define the "home" route and an "about" route.
+///
+/// ```dart
+/// CupertinoApp(
+///   routes: <String, WidgetBuilder>{
+///     '/': (BuildContext context) {
+///       return CupertinoPageScaffold(
+///         navigationBar: CupertinoNavigationBar(
+///           middle: const Text('Home Route'),
+///         ),
+///         child: Center(child: Icon(CupertinoIcons.share)),
+///       );
+///     },
+///     '/about': (BuildContext context) {
+///       return CupertinoPageScaffold(
+///         navigationBar: CupertinoNavigationBar(
+///           middle: const Text('About Route'),
+///         ),
+///         child: Center(child: Icon(CupertinoIcons.share)),
+///       );
+///     }
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that defines a [theme] that
+/// will be used for Cupertino widgets in the app.
+///
+/// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
+///
+/// ```dart
+/// CupertinoApp(
+///   theme: CupertinoThemeData(
+///     brightness: Brightness.dark,
+///     primaryColor: CupertinoColors.systemOrange,
+///   ),
+///   home: CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('CupertinoApp Theme'),
+///     ),
+///     child: Center(child: Icon(CupertinoIcons.share)),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -277,7 +343,7 @@ class CupertinoApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -310,7 +376,7 @@ class CupertinoApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );

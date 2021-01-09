@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -11,8 +10,7 @@ import 'borders.dart';
 import 'edge_insets.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
+// late BuildContext context;
 
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///

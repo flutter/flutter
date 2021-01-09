@@ -24,9 +24,8 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // dynamic routeObserver;
-// NavigatorState navigator;
+// late NavigatorState navigator;
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -541,7 +540,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///     // rectangle. When this local history entry is removed, we hide the red
   ///     // rectangle.
   ///     setState(() => _showRectangle = true);
-  ///     ModalRoute.of(context).addLocalHistoryEntry(
+  ///     ModalRoute.of(context)?.addLocalHistoryEntry(
   ///         LocalHistoryEntry(
   ///             onRemove: () {
   ///               // Hide the red rectangle.
@@ -872,15 +871,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings? settings,
-    ui.ImageFilter? filter,
-  }) : _filter = filter,
-       super(settings: settings);
+    this.filter,
+  }) : super(settings: settings);
 
   /// The filter to add to the barrier.
   ///
   /// If given, this filter will be applied to the modal barrier using
   /// [BackdropFilter]. This allows blur effects, for example.
-  final ui.ImageFilter? _filter;
+  final ui.ImageFilter? filter;
 
   // The API for general users of this class
 
@@ -1131,9 +1129,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
-  /// If this getter would ever start returning a different value, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different value,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// See also:
   ///
@@ -1155,6 +1158,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// If [semanticsDismissible] is false, then modal barrier semantics are
   /// excluded from the semantics tree and tapping on the modal barrier
   /// has no effect.
+  ///
+  /// If this getter would ever start returning a different value,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   bool get semanticsDismissible => true;
 
   /// {@template flutter.widgets.ModalRoute.barrierColor}
@@ -1175,21 +1187,23 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// transparent to the specified color.
   /// {@endtemplate}
   ///
-  /// If this getter would ever start returning a different color, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different color, one
+  /// of the [changedInternalState] or [changedExternalState] methods
+  /// should be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// {@tool snippet}
   ///
-  /// It is safe to use `navigator.context` here. For example, to make
-  /// the barrier color use the theme's background color, one could say:
+  /// For example, to make the barrier color use the theme's
+  /// background color, one could say:
   ///
   /// ```dart
   /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
   /// ```
-  ///
-  /// The [Navigator] causes the [ModalRoute]'s modal barrier overlay entry
-  /// to rebuild any time its dependencies change.
   ///
   /// {@end-tool}
   ///
@@ -1214,9 +1228,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// usually darkened by the modal barrier.
   /// {@endtemplate}
   ///
-  /// If this getter would ever start returning a different label, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different label,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// See also:
   ///
@@ -1237,9 +1256,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified [barrierColor].
   ///
-  /// If this getter would ever start returning a different curve, the
-  /// [changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different curve,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// It defaults to [Curves.ease].
   ///
@@ -1452,6 +1476,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedExternalState() {
     super.changedExternalState();
+    _modalBarrier.markNeedsBuild();
     if (_scopeKey.currentState != null)
       _scopeKey.currentState!._forceRebuildPage();
   }
@@ -1461,7 +1486,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// When this changes, if the route is visible, the route will
   /// rebuild, and any widgets that used [ModalRoute.of] will be
   /// notified.
-  bool get canPop => !isFirst || willHandlePopInternally;
+  bool get canPop => isActive && (!isFirst || willHandlePopInternally);
 
   // Internals
 
@@ -1494,9 +1519,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    if (_filter != null) {
+    if (filter != null) {
       barrier = BackdropFilter(
-        filter: _filter!,
+        filter: filter!,
         child: barrier,
       );
     }

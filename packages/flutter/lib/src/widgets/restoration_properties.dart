@@ -10,9 +10,6 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A [RestorableProperty] that makes the wrapped value accessible to the owning
 /// [State] object via the [value] getter and setter.
 ///
@@ -22,7 +19,7 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_restoration}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
 /// ```dart
@@ -33,7 +30,7 @@ import 'restoration.dart';
 ///   RestorableInt _answer = RestorableInt(42);
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the answer either has its old value restored or is
 ///     // initialized to its default value.
@@ -77,14 +74,17 @@ import 'restoration.dart';
 ///   Duration createDefaultValue() => const Duration();
 ///
 ///   @override
-///   void didUpdateValue(Duration oldValue) {
-///     if (oldValue.inMicroseconds != value.inMicroseconds)
+///   void didUpdateValue(Duration? oldValue) {
+///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds)
 ///       notifyListeners();
 ///   }
 ///
 ///   @override
-///   Duration fromPrimitives(Object data) {
-///     return Duration(microseconds: data as int);
+///   Duration fromPrimitives(Object? data) {
+///     if (data != null) {
+///       return Duration(microseconds: data as int);
+///     }
+///     return const Duration();
 ///   }
 ///
 ///   @override
@@ -143,19 +143,11 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   void didUpdateValue(T? oldValue);
 }
 
-// _RestorablePrimitiveValue and its subclasses do not allow null values in
-// anticipation of NNBD (non-nullability by default).
-//
-// If necessary, we can in the future define a new subclass hierarchy that
-// does allow null values for primitive types. Borrowing from lisp where
-// functions that returned a bool ended in 'p', a suggested naming scheme for
-// these new subclasses could be to add 'N' (for nullable) to the end of a
-// class name (e.g. RestorableIntN, RestorableStringN, etc.) to distinguish them
-// from their non-nullable friends.
-class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
-  _RestorablePrimitiveValue(this._defaultValue)
-    : assert(_defaultValue != null),
-      assert(debugIsSerializableForRestoration(_defaultValue)),
+// _RestorablePrimitiveValueN and its subclasses allows for null values.
+// See [_RestorablePrimitiveValue] for the non-nullable version of this class.
+class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
+  _RestorablePrimitiveValueN(this._defaultValue)
+    : assert(debugIsSerializableForRestoration(_defaultValue)),
       super();
 
   final T _defaultValue;
@@ -164,27 +156,42 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
   T createDefaultValue() => _defaultValue;
 
   @override
-  set value(T value) {
-    assert(value != null);
-    super.value = value;
-  }
-
-  @override
   void didUpdateValue(T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
 
   @override
+  T fromPrimitives(Object? serialized) => serialized as T;
+
+  @override
+  Object? toPrimitives() => value;
+}
+
+// _RestorablePrimitiveValue and its subclasses are non-nullable.
+// See [_RestorablePrimitiveValueN] for the nullable version of this class.
+class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveValueN<T> {
+  _RestorablePrimitiveValue(T _defaultValue)
+    : assert(_defaultValue != null),
+      assert(debugIsSerializableForRestoration(_defaultValue)),
+      super(_defaultValue);
+
+  @override
+  set value(T value) {
+    assert(value != null);
+    super.value = value;
+  }
+
+  @override
   T fromPrimitives(Object? serialized) {
     assert(serialized != null);
-    return serialized! as T;
+    return super.fromPrimitives(serialized);
   }
 
   @override
   Object toPrimitives() {
     assert(value != null);
-    return value;
+    return super.toPrimitives()!;
   }
 }
 
@@ -202,6 +209,10 @@ class _RestorablePrimitiveValue<T extends Object> extends RestorableValue<T> {
 /// Instead of using the more generic [RestorableNum] directly, consider using
 /// one of the more specific subclasses (e.g. [RestorableDouble] to store a
 /// [double] and [RestorableInt] to store an [int]).
+///
+/// See also:
+///
+///  * [RestorableNumN] for the nullable version of this class.
 class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
   /// Creates a [RestorableNum].
   ///
@@ -215,6 +226,10 @@ class RestorableNum<T extends num> extends _RestorablePrimitiveValue<T> {
 /// A [RestorableProperty] that knows how to store and restore a [double].
 ///
 /// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableDoubleN] for the nullable version of this class.
 class RestorableDouble extends RestorableNum<double> {
   /// Creates a [RestorableDouble].
   ///
@@ -225,6 +240,10 @@ class RestorableDouble extends RestorableNum<double> {
 /// A [RestorableProperty] that knows how to store and restore an [int].
 ///
 /// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableIntN] for the nullable version of this class.
 class RestorableInt extends RestorableNum<int> {
   /// Creates a [RestorableInt].
   ///
@@ -235,6 +254,10 @@ class RestorableInt extends RestorableNum<int> {
 /// A [RestorableProperty] that knows how to store and restore a [String].
 ///
 /// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableStringN] for the nullable version of this class.
 class RestorableString extends _RestorablePrimitiveValue<String> {
   /// Creates a [RestorableString].
   ///
@@ -245,11 +268,94 @@ class RestorableString extends _RestorablePrimitiveValue<String> {
 /// A [RestorableProperty] that knows how to store and restore a [bool].
 ///
 /// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableBoolN] for the nullable version of this class.
 class RestorableBool extends _RestorablePrimitiveValue<bool> {
   /// Creates a [RestorableBool].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
   RestorableBool(bool defaultValue) : assert(defaultValue != null), super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [bool] that is
+/// nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableBool] for the non-nullable version of this class.
+class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
+  /// Creates a [RestorableBoolN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableBoolN(bool? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [num]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// Instead of using the more generic [RestorableNumN] directly, consider using
+/// one of the more specific subclasses (e.g. [RestorableDoubleN] to store a
+/// [double] and [RestorableIntN] to store an [int]).
+///
+/// See also:
+///
+///  * [RestorableNum] for the non-nullable version of this class.
+class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<T> {
+  /// Creates a [RestorableNumN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableNumN(T defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [double]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableDouble] for the non-nullable version of this class.
+class RestorableDoubleN extends RestorableNumN<double?> {
+  /// Creates a [RestorableDoubleN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableDoubleN(double? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore an [int]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableInt] for the non-nullable version of this class.
+class RestorableIntN extends RestorableNumN<int?> {
+  /// Creates a [RestorableIntN].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableIntN(int? defaultValue) : super(defaultValue);
+}
+
+/// A [RestorableProperty] that knows how to store and restore a [String]
+/// that is nullable.
+///
+/// {@macro flutter.widgets.RestorableNum}
+///
+/// See also:
+///
+///  * [RestorableString] for the non-nullable version of this class.
+class RestorableStringN extends _RestorablePrimitiveValueN<String?> {
+  /// Creates a [RestorableString].
+  ///
+  /// {@macro flutter.widgets.RestorableNum.constructor}
+  RestorableStringN(String? defaultValue) : super(defaultValue);
 }
 
 /// A base class for creating a [RestorableProperty] that stores and restores a
@@ -313,17 +419,17 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
   void initWithValue(T value) {
-    _diposeOldValue();
+    _disposeOldValue();
     super.initWithValue(value);
   }
 
   @override
   void dispose() {
-    _diposeOldValue();
+    _disposeOldValue();
     super.dispose();
   }
 
-  void _diposeOldValue() {
+  void _disposeOldValue() {
     if (_value != null) {
       // Scheduling a microtask for dispose to give other entities a chance
       // to remove their listeners first.

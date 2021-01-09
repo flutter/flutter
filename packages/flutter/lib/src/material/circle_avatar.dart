@@ -9,8 +9,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
-// String userAvatarUrl;
+// late String userAvatarUrl;
 
 /// A circle that represents a user.
 ///
@@ -18,7 +17,12 @@ import 'theme_data.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
+/// If [foregroundImage] fails then [backgroundImage] is used. If
+/// [backgroundImage] fails too, [backgroundColor] is used.
+///
 /// The [onBackgroundImageError] parameter must be null if the [backgroundImage]
+/// is null.
+/// The [onForegroundImageError] parameter must be null if the [foregroundImage]
 /// is null.
 ///
 /// {@tool snippet}
@@ -61,13 +65,16 @@ class CircleAvatar extends StatelessWidget {
     this.child,
     this.backgroundColor,
     this.backgroundImage,
+    this.foregroundImage,
     this.onBackgroundImageError,
+    this.onForegroundImageError,
     this.foregroundColor,
     this.radius,
     this.minRadius,
     this.maxRadius,
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
        assert(backgroundImage != null || onBackgroundImageError == null),
+       assert(foregroundImage != null || onForegroundImageError== null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -96,12 +103,23 @@ class CircleAvatar extends StatelessWidget {
   /// The background image of the circle. Changing the background
   /// image will cause the avatar to animate to the new image.
   ///
+  /// Typically used as a fallback image for [foregroundImage].
+  ///
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
   final ImageProvider? backgroundImage;
+
+  /// The foreground image of the circle.
+  ///
+  /// Typically used as profile image. For fallback use [backgroundImage].
+  final ImageProvider? foregroundImage;
 
   /// An optional error callback for errors emitted when loading
   /// [backgroundImage].
   final ImageErrorListener? onBackgroundImageError;
+
+  /// An optional error callback for errors emitted when loading
+  /// [foregroundImage].
+  final ImageErrorListener? onForegroundImageError;
 
   /// The size of the avatar, expressed as the radius (half the diameter).
   ///
@@ -218,6 +236,16 @@ class CircleAvatar extends StatelessWidget {
           : null,
         shape: BoxShape.circle,
       ),
+      foregroundDecoration: foregroundImage != null
+          ? BoxDecoration(
+              image: DecorationImage(
+                image: foregroundImage!,
+                onError: onForegroundImageError,
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+            )
+          : null,
       child: child == null
           ? null
           : Center(
