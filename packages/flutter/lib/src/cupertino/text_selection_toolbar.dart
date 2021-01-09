@@ -879,6 +879,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     }
     final ToolbarItemsParentData childParentData =
         child.parentData! as ToolbarItemsParentData;
+    if (!childParentData.shouldPaint) {
+      return false;
+    }
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
