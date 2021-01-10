@@ -13,9 +13,6 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'ticker_provider.dart';
 
-// TODO(justinmc): Cleaner way about this? See _round method.
-const double _kTolerance = 100000000000.0;
-
 /// A widget that enables pan and zoom interactions with its child.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zrn7V3bMJvg}
@@ -796,7 +793,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final Offset focalPointSceneCheck = _transformationController!.toScene(
           details.localFocalPoint,
         );
-        if (_round(_referenceFocalPoint!) != _round(focalPointSceneCheck)) {
+        if (_roundOffset(_referenceFocalPoint!) != _roundOffset(focalPointSceneCheck)) {
           _referenceFocalPoint = focalPointSceneCheck;
         }
         break;
@@ -1138,7 +1135,6 @@ double _getFinalTime(double velocity, double drag) {
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
 }
 
-// TODO(justinmc): Consider caching this.
 // Returns the rotation about the z axis in radians of the given Matrix4.
 double _getMatrixRotation(Matrix4 matrix) {
   final Matrix3 rotationMatrix = matrix.getRotation();
@@ -1175,12 +1171,16 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
   );
 }
 
+
+const double _kTolerance = 100000000000.0;
+
 // Round the output values. This works around a precision problem where
 // values that should have been zero were given as within 10^-10 of zero.
-Offset _round(Offset offset) {
+Offset _roundOffset(Offset offset) {
+  final int digitsOfPrecision = _kTolerance.toString().length;
   return Offset(
-    double.parse(offset.dx.toStringAsFixed(9)),
-    double.parse(offset.dy.toStringAsFixed(9)),
+    double.parse(offset.dx.toStringAsFixed(digitsOfPrecision)),
+    double.parse(offset.dy.toStringAsFixed(digitsOfPrecision)),
   );
 }
 
@@ -1445,8 +1445,6 @@ class LineSegment {
     final LineSegment left = LineSegment(rect.topLeft, rect.bottomLeft);
     final ClosestPoints toLeft = findClosestPointsLineSegment(left);
 
-    // TODO(justinmc): Find distance between two ClosestPoints for each side,
-    // and return the closest.
     return (<ClosestPoints>[toTop, toRight, toBottom, toLeft]
         ..sort((ClosestPoints first, ClosestPoints second) {
           final double firstDistance = _distanceBetweenPoints(first.a, first.b);
