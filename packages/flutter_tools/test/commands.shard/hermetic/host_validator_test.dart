@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/host_validator.dart';
+import 'package:flutter_tools/src/http_host_validator.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
@@ -12,10 +14,11 @@ import '../../src/common.dart';
 
 void main() {
   group('host validator', () {
-    const List<String> osTested = <String>['windows', 'macos', 'linux'];
+    const String macOs = 'macos';
+    const List<String> osTested = <String>['windows', 'macos', macOs];
     final Future<ValidationResult> Function(Client mockClient, String os) runHostTest
       = (Client mockClient, String os) async {
-        final HostValidator hostValidator = HostValidator(
+        final HttpHostValidator hostValidator = HttpHostValidator(
           platform: FakePlatform(operatingSystem: os),
           httpClient: mockClient,
         );
@@ -23,62 +26,43 @@ void main() {
         return await hostValidator.validate();
     };
 
-    final Future<List<ValidationResult>> Function(Client mockClient, List<String> osList) runAllTestCases
-      = (Client mockClient, List<String> osList) async {
-        final Iterable<Future<ValidationResult>> validatorResultsFutures =
-          osList.map((String os) => runHostTest(mockClient, os));
-
-        return (await Future.wait(validatorResultsFutures)).toList();
-    };
-
-    test('all the hosts are available', () async {
-      final Client mockClient = MockClient((_) async {
+    bool firstResponseWithException = true;
+    final Client mockClientOk = MockClient((_) async { return Response('', 200); });
+    final Client mockClientError = MockClient((_) { throw const HttpException('No internet connection'); });
+    final Client mockClientFirstOkRestError = MockClient((_) async {
+      if (firstResponseWithException) {
+        firstResponseWithException = false;
         return Response('', 200);
-      });
-
-      final List<ValidationResult> validatorResults = await runAllTestCases(mockClient, osTested);
-
-      // check that for each platform scenario the tests return expected values
-      for(final ValidationResult result in validatorResults) {
-        expect(result.messages..removeWhere(
-                (ValidationMessage message) => !message.isHint && !message.isError
-        ), hasLength(0));
+      } else {
+        throw const HttpException('No internet connection');
       }
     });
 
-    test('all the hosts are not available', () async {
-      final Client mockClient = MockClient((_) async {
-        throw Exception('No internet connection');
+    for(final String os in osTested) {
+      testWithoutContext('$os platform all hosts are available', () async {
+        final ValidationResult result = await runHostTest(mockClientOk, os);
+        expect(
+          result.messages.where((ValidationMessage message) => message.isHint || message.isError),
+          hasLength(0)
+        );
       });
 
-      final List<ValidationResult> validatorResults = await runAllTestCases(mockClient, osTested);
-
-      // check that for each platform scenario the tests return expected values
-      for(final ValidationResult result in validatorResults) {
-        expect(result.messages..removeWhere(
-                (ValidationMessage message) => !message.isHint && !message.isError
-        ), equals(result.messages));
-      }
-    });
-
-    test('one host is not available', () async {
-      bool firstResponseWithException = false;
-      final Client mockClient = MockClient((_) async {
-        if (firstResponseWithException) {
-          return Response('', 200);
-        } else {
-          firstResponseWithException = true;
-          throw Exception('No internet connection');
-        }
+      testWithoutContext('$os platform all hosts are not available', () async {
+        final ValidationResult result = await runHostTest(mockClientError, os);
+        expect(
+          result.messages.where((ValidationMessage message) => message.isHint || message.isError),
+          equals(result.messages)
+        );
       });
 
-      final List<ValidationResult> validatorResults = await runAllTestCases(mockClient, osTested);
-
-      for(final ValidationResult result in validatorResults) {
-        expect(result.messages..removeWhere(
-                (ValidationMessage message) => !message.isHint && !message.isError
-        ), hasLength(1));
-      }
-    });
+      testWithoutContext('$os platform has only one host available', () async {
+        firstResponseWithException = true;
+        final ValidationResult result = await runHostTest(mockClientFirstOkRestError, os);
+        expect(
+          result.messages.where((ValidationMessage message) => message.isHint || message.isError),
+          hasLength(os == macOs ? 3 : 2)
+        );
+      });
+    }
   });
 }
