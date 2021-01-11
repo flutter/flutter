@@ -554,11 +554,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// not null.
   final FocusNode? focusNode;
 
+  /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
   /// Builds the selectable options widgets from a list of options objects.
   ///
   /// The options are displayed floating below the field using a
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as RawAutocomplete.
+  /// place in the widget tree as [RawAutocomplete].
+  /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}

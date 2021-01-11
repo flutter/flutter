@@ -14,9 +14,10 @@ class Autocomplete<T extends Object> extends StatefulWidget {
   const Autocomplete({
     Key? key,
     required this.optionsBuilder,
-    this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
+    this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
+    this.optionsViewBuilder,
   }) : assert(displayStringForOption != null),
        assert(optionsBuilder != null),
        super(key: key);
@@ -35,6 +36,12 @@ class Autocomplete<T extends Object> extends StatefulWidget {
 
   /// {@macro flutter.widgets.RawAutocomplete.optionsBuilder}
   final AutocompleteOptionsBuilder<T> optionsBuilder;
+
+  /// {@macro flutter.widgets.RawAutocomplete.optionsViewBuilder}
+  ///
+  /// If not provided, will build a standard Material-style list of results by
+  /// default.
+  final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
@@ -55,8 +62,8 @@ class _AutocompleteState<T extends Object> extends State<Autocomplete<T>> {
       displayStringForOption: widget.displayStringForOption,
       fieldViewBuilder: widget.fieldViewBuilder,
       optionsBuilder: widget.optionsBuilder,
-      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
-        return _AutocompleteResults<T>(
+      optionsViewBuilder: widget.optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+        return _AutocompleteOptions<T>(
           displayStringForOption: widget.displayStringForOption,
           onSelected: onSelected,
           options: options,
@@ -95,9 +102,9 @@ class _AutocompleteField extends StatelessWidget {
   }
 }
 
-// The default Material-style Autocomplete results.
-class _AutocompleteResults<T extends Object> extends StatelessWidget {
-  const _AutocompleteResults({
+// The default Material-style Autocomplete options.
+class _AutocompleteOptions<T extends Object> extends StatelessWidget {
+  const _AutocompleteOptions({
     Key? key,
     required this.displayStringForOption,
     required this.onSelected,
