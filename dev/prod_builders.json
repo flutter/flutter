@@ -472,7 +472,7 @@
          "name": "Mac build_gallery",
          "repo": "flutter",
          "task_name": "mac_build_gallery",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac customer_testing",
