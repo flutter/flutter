@@ -344,7 +344,7 @@ class SystemChannels {
   ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
   ///    assets and files) may occur at a later time. However, once uninstallation
   ///    is requested, the deferred component should not be used anymore until
-  ///    `installDeferredComponent` is called again.
+  ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
     StandardMethodCodec(),

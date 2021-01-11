@@ -90,7 +90,8 @@ class DeferredComponent {
   /// installed and any assets are ready to be used. When an error occurs, the
   /// future will complete with an error.
   ///
-  /// This method should be used for asset-only deferred components. Deferred components
+  /// This method should be used for asset-only deferred components or loading just
+  /// the assets from a component with both dart code and assets. Deferred components
   /// containing dart code should call `loadLibrary()` on a deferred imported
   /// library's prefix to ensure that the dart code is properly loaded as
   /// `loadLibrary()` will provide the loading unit id needed for the dart
@@ -107,8 +108,13 @@ class DeferredComponent {
   /// calls to `loadLibrary()` to load will complete faster.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [uninstallDeferredComponent], a method to request the uninstall of a component.
+  ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
+  ///    the dart method to trigger the installation of the corresponding deferred component that
+  ///    contains the dart library.
+  ///  * [getDeferredComponentInstallState], a getter that provides the current state
+  ///    of a deferred component installation.
   static Future<void> installDeferredComponent({required String moduleName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'installDeferredComponent',
@@ -137,6 +143,13 @@ class DeferredComponent {
   /// component. Code and assets may only be used after the Future returned by `loadLibrary()`
   /// or [installDeferredComponent] completes succesfully, regardless of what the
   /// installation state is in.
+  ///
+  /// See also:
+  ///
+  ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
+  ///    the dart method to trigger the installation of the corresponding deferred component that
+  ///    contains the dart library.
+  ///  * [installDeferredComponent], a method to install asset-only components.
   static Future<String?> getDeferredComponentInstallState({required String moduleName}) {
     return SystemChannels.deferredComponent.invokeMethod<String>(
       'getDeferredComponentInstallState',
@@ -148,8 +161,9 @@ class DeferredComponent {
   /// uninstalled.
   ///
   /// Since uninstallation typically requires significant disk i/o, this method only
-  /// signals the intent to uninstall. Actual uninstallation (eg, removal of
-  /// assets and files) may occur at a later time. However, once uninstallation
+  /// signals the intent to uninstall. Completion of the returned future indicates
+  /// that the request to uninstall has been registered. Actual uninstallation (eg,
+  /// removal of assets and files) may occur at a later time. However, once uninstallation
   /// is requested, the deferred component should not be used anymore until
   /// [installDeferredComponent] or `loadLibrary()` is called again.
   ///
@@ -157,10 +171,13 @@ class DeferredComponent {
   /// but assets from the component should not be used once the component uninstall is
   /// requested. The dart code will remain usable in the app's current session but
   /// is not guaranteed to work in future sessions.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [installDeferredComponent], a method to install asset-only components.
+  ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
+  ///    the dart method to trigger the installation of the corresponding deferred component that
+  ///    contains the dart library.
   static Future<void> uninstallDeferredComponent({required String moduleName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'uninstallDeferredComponent',
