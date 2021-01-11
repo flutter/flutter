@@ -200,6 +200,7 @@ class FontManager {
       // loaded. They were measured using fallback font, so we should clear the
       // cache.
       TextMeasurementService.clearCache();
+      Spanometer.clearRulersCache();
     }, onError: (dynamic exception) {
       // Failures here will throw an html.DomException which confusingly
       // does not implement Exception or Error. Rethrow an Exception so it can

@@ -8,7 +8,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-const String paragraphStyle = 'style="position: absolute; white-space: pre-wrap; overflow-wrap: break-word; overflow: hidden;"';
+const String paragraphStyle =
+    'font-family: sans-serif; position: absolute; white-space: pre-wrap; overflow-wrap: break-word;';
 const String defaultColor = 'color: rgb(255, 0, 0);';
 const String defaultFontFamily = 'font-family: sans-serif;';
 const String defaultFontSize = 'font-size: 14px;';
@@ -33,7 +34,11 @@ void testMain() {
     expect(paragraph.toPlainText(), 'Hello');
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p $paragraphStyle><span style="$defaultColor font-size: 13px; $defaultFontFamily">Hello</span></p>',
+      '<p style="font-size: 13px; $paragraphStyle">'
+      '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '</p>',
     );
     expect(paragraph.spans, hasLength(1));
 
@@ -55,12 +60,54 @@ void testMain() {
     expect(paragraph.toPlainText(), 'Hello');
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p $paragraphStyle><span style="$defaultColor $defaultFontSize $defaultFontFamily">Hello</span></p>',
+      '<p style="$paragraphStyle"><span style="$defaultColor $defaultFontSize $defaultFontFamily">Hello</span></p>',
     );
     expect(paragraph.spans, hasLength(1));
 
     final FlatTextSpan textSpan = paragraph.spans.single as FlatTextSpan;
     expect(textSpan.style, styleWithDefaults());
+  });
+
+  test('Sets correct styles for max-lines', () {
+    final EngineParagraphStyle style = EngineParagraphStyle(maxLines: 2);
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+
+    builder.addText('Hello');
+
+    final CanvasParagraph paragraph = builder.build();
+    expect(paragraph.paragraphStyle, style);
+    expect(paragraph.toPlainText(), 'Hello');
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p style="$paragraphStyle overflow-y: hidden;">'
+      '<span style="$defaultColor $defaultFontSize $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '</p>',
+    );
+  });
+
+  test('Sets correct styles for ellipsis', () {
+    final EngineParagraphStyle style = EngineParagraphStyle(ellipsis: '...');
+    final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
+
+    builder.addText('Hello');
+
+    final CanvasParagraph paragraph = builder.build();
+    expect(paragraph.paragraphStyle, style);
+    expect(paragraph.toPlainText(), 'Hello');
+    final String expectedParagraphStyle = paragraphStyle.replaceFirst(
+      'white-space: pre-wrap',
+      'white-space: pre',
+    );
+    expect(
+      paragraph.toDomElement().outerHtml,
+      '<p style="$expectedParagraphStyle overflow: hidden; text-overflow: ellipsis;">'
+      '<span style="$defaultColor $defaultFontSize $defaultFontFamily">'
+      'Hello'
+      '</span>'
+      '</p>',
+    );
   });
 
   test('Builds a single-span paragraph with complex styles', () {
@@ -80,7 +127,7 @@ void testMain() {
     expect(paragraph.toPlainText(), 'Hello');
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p $paragraphStyle>'
+      '<p style="line-height: 1.5; font-size: 13px; $paragraphStyle">'
       '<span style="$defaultColor line-height: 1.5; font-size: 9px; font-weight: bold; font-style: italic; $defaultFontFamily letter-spacing: 2px;">'
       'Hello'
       '</span>'
@@ -116,7 +163,7 @@ void testMain() {
     expect(paragraph.toPlainText(), 'Hello world');
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p $paragraphStyle>'
+      '<p style="font-size: 13px; $paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -165,7 +212,7 @@ void testMain() {
     expect(paragraph.toPlainText(), 'Hello world!');
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p $paragraphStyle>'
+      '<p style="font-size: 13px; $paragraphStyle">'
       '<span style="$defaultColor line-height: 2; font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'

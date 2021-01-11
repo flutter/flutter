@@ -1072,6 +1072,18 @@ class Spanometer {
   static Map<TextHeightStyle, TextHeightRuler> _rulers =
       <TextHeightStyle, TextHeightRuler>{};
 
+  @visibleForTesting
+  static Map<TextHeightStyle, TextHeightRuler> get rulers => _rulers;
+
+  /// Clears the cache of rulers that are used for measuring text height and
+  /// baseline metrics.
+  static void clearRulersCache() {
+    _rulers.forEach((TextHeightStyle style, TextHeightRuler ruler) {
+      ruler.dispose();
+    });
+    _rulers.clear();
+  }
+
   String _cssFontString = '';
 
   double? get letterSpacing => currentSpan.style._letterSpacing;
