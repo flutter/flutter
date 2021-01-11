@@ -8,7 +8,49 @@ import 'list_tile.dart';
 import 'material.dart';
 import 'text_form_field.dart';
 
-// TODO(justinmc): Document.
+/// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
+///
+/// See also:
+///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
+///    contains more detailed examples.
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows how to create a very basic autocomplete widget using the
+/// default UI.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class AutocompleteBasicExample extends StatelessWidget {
+///   AutocompleteBasicExample({Key key}) : super(key: key);
+///
+///   final List<String> _kOptions = <String>[
+///     'aardvark',
+///     'bobcat',
+///     'chameleon',
+///   ];
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Autocomplete<String>(
+///       optionsBuilder: (TextEditingValue textEditingValue) {
+///         if (textEditingValue.text == null || textEditingValue.text == '') {
+///           return const Iterable<String>.empty();
+///         }
+///         return kOptions.where((String option) {
+///           return option.contains(textEditingValue.text.toLowerCase());
+///         });
+///       },
+///       onSelected: (String selection) {
+///         print('You just selected $selection');
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class Autocomplete<T extends Object> extends StatefulWidget {
   /// Creates an instance of [Autocomplete].
   const Autocomplete({

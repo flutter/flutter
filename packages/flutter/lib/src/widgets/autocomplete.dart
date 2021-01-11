@@ -57,16 +57,21 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
-// TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
-// implemented.
+// TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
+/// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
 /// choosing from among a list of options.
-///
-/// This is a core framework widget with very basic UI.
 ///
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
+/// {@endtemplate}
+///
+/// This is a core framework widget with very basic UI.
+///
+/// See also:
+///  * [Autocomplete], which is a Material-styled implementation that is based
+/// on RawAutocomplete.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
