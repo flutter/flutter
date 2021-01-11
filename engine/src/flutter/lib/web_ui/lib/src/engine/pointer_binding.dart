@@ -302,16 +302,15 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     if (_debugLogPointerEvents) {
       print(event.type);
     }
+    _callback(_convertWheelEventToPointerData(event));
     if (event.getModifierState('Control') &&
         operatingSystem != OperatingSystem.macOs &&
         operatingSystem != OperatingSystem.iOs) {
       // Ignore Control+wheel events since the default handler
       // will change browser zoom level instead of scrolling.
-      // The exception is MacOs where Control+wheel will still scroll and zoom
-      // is not implemented.
+      // The exception is MacOs where Control+wheel will still scroll and zoom.
       return;
     }
-    _callback(_convertWheelEventToPointerData(event));
     // Prevent default so mouse wheel event doesn't get converted to
     // a scroll event that semantic nodes would process.
     //
