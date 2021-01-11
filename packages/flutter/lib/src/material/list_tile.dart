@@ -110,7 +110,7 @@ class ListTileTheme extends InheritedTheme {
   final bool dense;
 
   /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  /// If specified, [shape] defines the [ListTile]'s shape.
   /// {@endtemplate}
   final ShapeBorder? shape;
 
@@ -839,13 +839,12 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// The shape of the tile's [InkWell].
+  /// The tile's shape.
   ///
-  /// Defines the tile's [InkWell.customBorder].
+  /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
   ///
-  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
-  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 4.0.
+  /// If this property is null then [ListTileTheme.shape] is used.
+  /// If that's null then a rectangular [Border] will be used.
   final ShapeBorder? shape;
 
   /// The tile's internal padding.
