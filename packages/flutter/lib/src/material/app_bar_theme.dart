@@ -43,7 +43,10 @@ class AppBarTheme with Diagnosticable {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.backwardsCompatibility,
-  }) : backgroundColor = backgroundColor ?? color;
+  }) :  assert(
+          color == null || backgroundColor == null,
+          'The color and backgroundColor parameters mean the same thing. Only specify one.'),
+        backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
@@ -65,7 +68,8 @@ class AppBarTheme with Diagnosticable {
   /// See also:
   ///
   ///  * [backgroundColor], which serves this same purpose
-  ///    as this property, but has a consistent name.
+  ///    as this property, but has a name that's consistent with
+  ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
   Color? get color => backgroundColor;
