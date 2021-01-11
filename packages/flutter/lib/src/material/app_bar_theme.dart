@@ -29,8 +29,8 @@ class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     this.brightness,
-    this.color,
-    this.backgroundColor,
+    Color? color,
+    Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
@@ -43,7 +43,7 @@ class AppBarTheme with Diagnosticable {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.backwardsCompatibility,
-  });
+  }) : backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
@@ -68,7 +68,7 @@ class AppBarTheme with Diagnosticable {
   ///    as this property, but has a consistent name.
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
-  final Color? color;
+  Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
   /// descendant [AppBar] widgets.
@@ -78,7 +78,6 @@ class AppBarTheme with Diagnosticable {
   ///  * [foregroundColor], which overrides the default value for
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final Color? backgroundColor;
-
 
   /// Overrides the default value of [AppBar.foregroundColor] in all
   /// descendant widgets.
@@ -218,7 +217,6 @@ class AppBarTheme with Diagnosticable {
     assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
-      color: Color.lerp(a?.color, b?.color, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -239,7 +237,6 @@ class AppBarTheme with Diagnosticable {
   int get hashCode {
     return hashValues(
       brightness,
-      color,
       backgroundColor,
       foregroundColor,
       elevation,
@@ -264,7 +261,6 @@ class AppBarTheme with Diagnosticable {
       return false;
     return other is AppBarTheme
         && other.brightness == brightness
-        && other.color == color
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
@@ -284,7 +280,6 @@ class AppBarTheme with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
