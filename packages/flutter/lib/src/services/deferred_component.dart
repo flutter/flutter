@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import 'system_channels.dart';
 
 /// Default Google Play Store implementation states that reflect the current
