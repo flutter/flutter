@@ -2,7 +2,6 @@ name: dev_tools
 description: Various repository development tools for flutter.
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.6.0 <3.0.0"
 
 dependencies:

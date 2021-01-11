@@ -21,11 +21,6 @@ import 'theme.dart';
 // CalendarDatePicker (if needed, as showDatePicker has already been migrated
 // and it is what most apps would have used).
 
-
-// Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
