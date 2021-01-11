@@ -946,32 +946,21 @@ void main() {
   testWidgets('extended FAB does not show label when isExtended is false', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
-    const Icon icon = Icon(Icons.add, key: iconKey);
-    const Text label = Text('', key: labelKey);
-
-    bool didPressedTheIcon = false;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: FloatingActionButton.extended(
           isExtended: false,
-          label: label,
-          icon: icon,
-          onPressed: () {
-            didPressedTheIcon = true;
-          },
+          label: const Text('', key: labelKey),
+          icon: const Icon(Icons.add, key: iconKey),
+          onPressed: () {},
         ),
       ),
     );
 
-    // Verify that Icon is present.
-    expect(didPressedTheIcon, false);
-    await tester.tap(find.byKey(iconKey));
-    await tester.pump();
-    expect(didPressedTheIcon, true);
-
-    // Verify that label is not present.
+    // Verify that Icon is present and label is not.
+    expect(find.byKey(iconKey), findsOneWidget);
     expect(find.byKey(labelKey), findsNothing);
   });
 }
