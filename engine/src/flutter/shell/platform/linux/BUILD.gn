@@ -74,6 +74,7 @@ source_set("flutter_linux_sources") {
              "fl_binary_messenger_private.h",
              "fl_dart_project_private.h",
              "fl_engine_private.h",
+             "fl_key_event_plugin_private.h",
              "fl_method_call_private.h",
              "fl_method_channel_private.h",
              "fl_method_codec_private.h",
