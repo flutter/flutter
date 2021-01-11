@@ -38,7 +38,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 ///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
-///  * [ScrollbarTheme], which configures the AppBar's appearance.
+///  * [ScrollbarTheme], which configures the Scrollbar's appearance.
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
@@ -137,16 +137,16 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.dragged))
-        return _scrollbarTheme.thumbColor?.resolve(<MaterialState>{MaterialState.dragged}) ?? dragColor;
+        return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
       if (states.contains(MaterialState.hovered) && _showTrackOnHover)
-        return _scrollbarTheme.thumbColor?.resolve(<MaterialState>{MaterialState.hovered}) ?? hoverColor;
+        return _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor;
 
       return Color.lerp(
-        _scrollbarTheme.thumbColor?.resolve(<MaterialState>{}) ?? idleColor,
-        _scrollbarTheme.thumbColor?.resolve(<MaterialState>{MaterialState.hovered}) ?? hoverColor,
+        _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
+        _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor,
         _hoverAnimationController.value,
       )!;
     });
@@ -157,7 +157,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackColor?.resolve(<MaterialState>{MaterialState.hovered})
+        return _scrollbarTheme.trackColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.03)
             : onSurface.withOpacity(0.05));
@@ -171,7 +171,7 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackBorderColor?.resolve(<MaterialState>{MaterialState.hovered})
+        return _scrollbarTheme.trackBorderColor?.resolve(states)
           ?? (brightness == Brightness.light
             ? onSurface.withOpacity(0.1)
             : onSurface.withOpacity(0.25));
@@ -184,11 +184,11 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover)
         return widget.hoverThickness
-          ?? _scrollbarTheme.thickness?.resolve(<MaterialState>{MaterialState.hovered})
+          ?? _scrollbarTheme.thickness?.resolve(states)
           ?? _kScrollbarThicknessWithTrack;
       // The default scrollbar thickness is smaller on mobile.
       return widget.thickness
-        ?? _scrollbarTheme.thickness?.resolve(<MaterialState>{})
+        ?? _scrollbarTheme.thickness?.resolve(states)
         ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
     });
   }

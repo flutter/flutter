@@ -243,7 +243,7 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 
 /// Applies a scrollbar theme to descendant [Scrollbar] widgets.
 ///
-/// Descendant widgets obtain the current theme's [ScrollbarTheme] object using
+/// Descendant widgets obtain the current theme's [ScrollbarThemeData] using
 /// [ScrollbarTheme.of]. When a widget uses [ScrollbarTheme.of], it is
 /// automatically rebuilt if the theme later changes.
 ///
@@ -252,7 +252,7 @@ class _LerpProperties<T> implements MaterialStateProperty<T> {
 ///
 /// See also:
 ///
-///  * [ScrollbarThemeData], which describes the actual configuration of a
+///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
 class ScrollbarTheme extends InheritedWidget {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
