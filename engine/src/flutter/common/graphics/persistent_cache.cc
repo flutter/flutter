@@ -169,14 +169,26 @@ sk_sp<SkData> ParseBase32(const std::string& input) {
 }
 
 sk_sp<SkData> ParseBase64(const std::string& input) {
-  SkBase64 decoder;
-  auto error = decoder.decode(input.c_str(), input.length());
+  SkBase64::Error error;
+
+  size_t output_len;
+  error = SkBase64::Decode(input.c_str(), input.length(), nullptr, &output_len);
   if (error != SkBase64::Error::kNoError) {
     FML_LOG(ERROR) << "Base64 decode error: " << error;
     FML_LOG(ERROR) << "Base64 can't decode: " << input;
     return nullptr;
   }
-  return SkData::MakeWithCopy(decoder.getData(), decoder.getDataSize());
+
+  sk_sp<SkData> data = SkData::MakeUninitialized(output_len);
+  void* output = data->writable_data();
+  error = SkBase64::Decode(input.c_str(), input.length(), output, &output_len);
+  if (error != SkBase64::Error::kNoError) {
+    FML_LOG(ERROR) << "Base64 decode error: " << error;
+    FML_LOG(ERROR) << "Base64 can't decode: " << input;
+    return nullptr;
+  }
+
+  return data;
 }
 
 std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() {
