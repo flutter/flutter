@@ -39,7 +39,7 @@ G_DECLARE_FINAL_TYPE(FlKeyEventPlugin,
  **/
 typedef void (*FlKeyEventPluginCallback)(GObject* source_object,
                                          FlValue* message,
-                                         bool handled,
+                                         gboolean handled,
                                          gpointer user_data);
 
 /**
