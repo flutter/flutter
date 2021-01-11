@@ -32,7 +32,8 @@ void main() {
     });
 
     final String? result = await DeferredComponent.getDeferredComponentInstallState(moduleName: 'testModuleName');
-    expect(result, 'unknown');
+    // Null because test does not have engine attached to implement the message channel.
+    expect(result, null);
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall(
