@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
+#include "flutter/shell/platform/linux/fl_key_event_plugin_private.h"
 
 #include "gtest/gtest.h"
 
@@ -11,18 +12,31 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_text_input_plugin.h"
 
-const char* expected_value = nullptr;
-gboolean expected_handled = FALSE;
+static const char* expected_value = nullptr;
+static gboolean expected_handled = FALSE;
+static uint64_t expected_id = 0;
+static FlKeyEventPlugin* expected_self = nullptr;
 
 // Called when the message response is received in the send_key_event test.
 static void echo_response_cb(GObject* object,
                              FlValue* message,
-                             bool handled,
+                             gboolean handled,
                              gpointer user_data) {
   EXPECT_NE(message, nullptr);
   EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
   EXPECT_STREQ(fl_value_to_string(message), expected_value);
   EXPECT_EQ(handled, expected_handled);
+  if (expected_self != nullptr) {
+    if (handled) {
+      EXPECT_EQ(
+          fl_key_event_plugin_find_pending_event(expected_self, expected_id),
+          nullptr);
+    } else {
+      EXPECT_NE(
+          fl_key_event_plugin_find_pending_event(expected_self, expected_id),
+          nullptr);
+    }
+  }
 
   g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
@@ -69,6 +83,9 @@ TEST(FlKeyEventPluginTest, SendKeyEvent) {
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_NE(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 
   key_event = GdkEventKey{
       GDK_KEY_RELEASE,                       // event type
@@ -93,6 +110,9 @@ TEST(FlKeyEventPluginTest, SendKeyEvent) {
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_NE(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 }
 
 void test_lock_event(guint key_code,
@@ -128,6 +148,9 @@ void test_lock_event(guint key_code,
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_NE(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 
   key_event.type = GDK_KEY_RELEASE;
   key_event.time++;
@@ -138,6 +161,9 @@ void test_lock_event(guint key_code,
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_NE(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 }
 
 // Test sending a "NumLock" keypress.
@@ -199,6 +225,9 @@ TEST(FlKeyEventPluginTest, TestKeyEventHandledByFramework) {
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 }
 
 TEST(FlKeyEventPluginTest, TestKeyEventHandledByTextInputPlugin) {
@@ -234,6 +263,9 @@ TEST(FlKeyEventPluginTest, TestKeyEventHandledByTextInputPlugin) {
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 }
 
 TEST(FlKeyEventPluginTest, TestKeyEventNotHandledByTextInputPlugin) {
@@ -269,6 +301,9 @@ TEST(FlKeyEventPluginTest, TestKeyEventNotHandledByTextInputPlugin) {
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+  EXPECT_NE(fl_key_event_plugin_find_pending_event(
+                plugin, fl_key_event_plugin_get_event_id(&key_event)),
+            nullptr);
 }
 
 TEST(FlKeyEventPluginTest, TestKeyEventResponseOutOfOrderFromFramework) {
@@ -297,16 +332,33 @@ TEST(FlKeyEventPluginTest, TestKeyEventResponseOutOfOrderFromFramework) {
 
   expected_value = "{handled: true}";
   expected_handled = TRUE;
+  expected_self = plugin;
+  uint64_t event_id_a = fl_key_event_plugin_get_event_id(&key_event);
+  expected_id = event_id_a;
   bool handled = fl_key_event_plugin_send_key_event(plugin, &key_event, loop);
   // Should always be true, because the event was delayed.
   EXPECT_TRUE(handled);
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(plugin, event_id_a)->keyval,
+            static_cast<guint>(GDK_KEY_A));
 
   // Send a second key event that will be out of order.
   key_event.keyval = GDK_KEY_B;
   key_event.hardware_keycode = 0x05;
+  uint64_t event_id_b = fl_key_event_plugin_get_event_id(&key_event);
+  expected_id = event_id_b;
   handled = fl_key_event_plugin_send_key_event(plugin, &key_event, loop);
   EXPECT_TRUE(handled);
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(plugin, event_id_b)->keyval,
+            static_cast<guint>(GDK_KEY_B));
 
   // Blocks here until echo_response_cb is called.
   g_main_loop_run(loop);
+
+  // Make sure they both were removed
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(plugin, event_id_a),
+            nullptr);
+  EXPECT_EQ(fl_key_event_plugin_find_pending_event(plugin, event_id_b),
+            nullptr);
+  expected_self = nullptr;
+  expected_id = 0;
 }
