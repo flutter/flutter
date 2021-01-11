@@ -721,7 +721,7 @@ void printHowToConsumeAar({
             url '${repoDirectory.path}'
         }
         maven {
-            url '\$storageUrl/download.flutter.io'
+            url "\$storageUrl/download.flutter.io"
         }
       }
 

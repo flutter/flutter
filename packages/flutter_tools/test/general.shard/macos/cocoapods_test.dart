@@ -273,11 +273,11 @@ void main() {
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
       expect(debugContents, contains('Existing debug config'));
       final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
       expect(releaseContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -305,11 +305,11 @@ void main() {
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
       expect(debugContents, contains('Existing debug config'));
       final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
       expect(releaseContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

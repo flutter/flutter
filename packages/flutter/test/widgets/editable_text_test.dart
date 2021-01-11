@@ -6898,6 +6898,47 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72400.
+  testWidgets("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
+    final UnsettableController unsettableController = UnsettableController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            controller: unsettableController,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Wait for the autofocus to take effect.
+
+    // Delete
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: 'android',
+    );
+
+    expect(tester.takeException(), null);
+  });
+}
+
+class UnsettableController extends TextEditingController {
+  @override
+  set value(TextEditingValue v) {
+    // Do nothing for set, which causes selection to remain as -1, -1.
+  }
 }
 
 class MockTextFormatter extends TextInputFormatter {

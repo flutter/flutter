@@ -102,6 +102,7 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 String generateTestEntrypoint({
   @required String relativeTestPath,
   @required String absolutePath,
+  @required String testConfigPath,
   @required LanguageVersion languageVersion,
 }) {
   return '''
@@ -110,6 +111,7 @@ String generateTestEntrypoint({
   import 'dart:ui' as ui;
   import 'dart:html';
   import 'dart:js';
+  ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
   import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
@@ -122,7 +124,10 @@ String generateTestEntrypoint({
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
-    internalBootstrapBrowserTest(() => test.main);
+
+    internalBootstrapBrowserTest(() {
+      return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
+    });
   }
 
   void internalBootstrapBrowserTest(Function getMain()) {
