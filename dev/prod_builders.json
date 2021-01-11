@@ -460,7 +460,7 @@
          "name": "Mac build_ios_framework_module_test",
          "repo": "flutter",
          "task_name": "mac_build_ios_framework_module_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac build_tests",
@@ -532,13 +532,13 @@
          "name": "Mac module_test_ios",
          "repo": "flutter",
          "task_name": "mac_module_test_ios",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac plugin_lint_mac",
          "repo": "flutter",
          "task_name": "mac_plugin_lint_mac",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac plugin_test",
