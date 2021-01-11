@@ -1049,7 +1049,9 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
-  /// Change the default icon size.
+  /// If provided, the size of the [Icon].
+  ///
+  /// If this property is null, the default size is 24.0 pixels.
   final double? iconSize;
 
   @override
