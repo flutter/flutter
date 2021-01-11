@@ -5,7 +5,8 @@
 import 'dart:collection' show LinkedList, LinkedListEntry;
 
 import 'package:flutter/foundation.dart';
-import './keyboard_key.dart';
+import 'binding.dart';
+import 'keyboard_key.dart';
 
 /// Defines the interface for keyboard key events.
 ///
@@ -274,13 +275,21 @@ abstract class _ValueDispatcher<T> {
   }
 }
 
-/// An interface for listening to [KeyEvent]s from hardware keyboards.
+/// An interface to listen to hardware [KeyEvent]s and query key states.
 /// 
-/// [HardwareKeyboard] tracks key events from hardware keyboards (in contrast to
-/// on-screen keyboards) and provides basic state querying. Get notified when
-/// keys are pressed and released by adding listener with [addListener]. 
-/// Query whether a key is being held, or a lock key is enabled, with
-/// [physicalKeyPressed], [logicalKeyPressed], or [locked].
+/// [HardwareKeyboard] dispatches key events from hardware keyboards (in contrast
+/// to on-screen keyboards) received from the native platform after
+/// normalization. To stay notified whenever keys are pressed and released, add a
+/// listener with [addListener]. Alternatively, you can listen to key events only
+/// when specific part of the app is focused with [Focus.onKeyEvent].
+/// 
+/// [HardwareKeyboard] also offers basic state querying. Query whether a key is
+/// being held, or a lock key is enabled, with [physicalKeyPressed],
+/// [logicalKeyPressed], or [locked].
+/// 
+/// The singleton [HardwareKeyboard] instance is held by the [ServicesBinding] as
+/// [ServicesBinding.hardwareKeyboard], and can be conveniently accessed using the
+/// [HardwareKeyboard.instance] static accessor.
 /// 
 /// ## Event model
 ///
@@ -291,18 +300,23 @@ abstract class _ValueDispatcher<T> {
 /// [HardwareKeyboard] tries to dispatch events following the model as follows:
 /// 
 ///  * At initialization, all keys are released.
-///  * A key down event is always matched one-to-one with a later key up
-///    event, which has the same physical key and logical key.
-///  * Lock state changes always take place at key down events.
+///  * A key press sequence always consists of one [KeyDownEvent], zero or more 
+///    [KeyRepeatEvent]s, and one [KeyUpEvent].
+///  * All events in the same key press sequence have the same physical key and
+///    logical key.
+///  * Only [KeyDownEvent]s and [KeyRepeatEvent]s may have `character`, which
+///    might vary within the key press sequence.
+///  * Lock state always toggles at a respetive [KeyDownEvent].
 /// 
-/// However, this model might not be met on some platforms during the migration
-/// period, since these platforms are still using the legacy engine logic.
+/// However, this model might not be met on some platforms until the migration
+/// period is over, since the [KeyEvent]s on these platforms are still one-to-one
+/// mapped from [RawKeyEvent]s.
 /// 
 /// The resulting events might not map one-to-one to native key events. A
 /// [KeyEvent] that does not correspond to a native event is marked as
 /// `synthesized`.
 /// 
-/// ## Compared to RawKeyboard
+/// ## Compared to [RawKeyboard]
 /// 
 /// [RawKeyboard] is the legacy API, will be deprecated and removed in the
 /// future.
@@ -323,6 +337,11 @@ abstract class _ValueDispatcher<T> {
 ///    system data.
 ///  * [ServiceBinding.hardwareKeyboard], a typical global singleton of this class.
 abstract class HardwareKeyboard extends _ValueDispatcher<KeyEvent> {
+
+  /// Provides convenient access to the current [HardwareKeyboard] singleton from
+  /// the [ServicesBinding] instance.
+  static HardwareKeyboard get instance => ServicesBinding.instance!.hardwareKeyboard;
+
   /// Whether [HardwareKeyboard] is using data from [ui.KeyData], or
   /// [RawKeyEvent] otherwise.
   ///
