@@ -1,9 +1,7 @@
 Contributing to Flutter
 =======================
 
-[![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
-
-_See also: [Flutter's code of conduct](CODE_OF_CONDUCT.md)_
+_tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be [courteous](CODE_OF_CONDUCT.md), follow the steps below to set up a development environment; if you stick around and contribute, you can [join the team](https://github.com/flutter/flutter/wiki/Contributor-access) and get commit access._
 
 Welcome
 -------
@@ -20,14 +18,16 @@ our trust and demonstrated a commitment to Flutter. For more details
 see the [Contributor access](https://github.com/flutter/flutter/wiki/Contributor-access)
 page on our wiki.
 
-We communicate primarily over GitHub and on [chat channels](https://github.com/flutter/flutter/wiki/Chat).
+We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/wiki/Chat).
+
+_See also: [Flutter's code of conduct](CODE_OF_CONDUCT.md)_
 
 Helping out in the issue database
 ---------------------------------
 
 If you want to help us triage, you are very welcome to do so!
 
-1. Join the #hackers-triage [chat](https://github.com/flutter/flutter/wiki/Chat) channel.
+1. Join the #hackers-triage [Discord channel](https://github.com/flutter/flutter/wiki/Chat).
 
 2. Read [our code of conduct](CODE_OF_CONDUCT.md), which stipulates explicitly
    that everyone must be gracious, respectful, and professional. If you're helping out

@@ -39,7 +39,7 @@ target 'watch Extension' do
   use_frameworks!
   use_modular_headers!
 
-  pod 'EFQRCode/watchOS', '5.1.6'
+  pod 'EFQRCode', '6.0'
 end
 
 post_install do |installer|

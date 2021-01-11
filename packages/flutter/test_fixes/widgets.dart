@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
-  // Change made in https://github.com/flutter/flutter/pull/41859
-  const CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
-  themeData.copyWith(brightness: Brightness.light);
-
   // Changes made in https://github.com/flutter/flutter/pull/45941
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();

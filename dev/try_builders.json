@@ -198,7 +198,7 @@
          "name":"Mac build_ios_framework_module_test",
          "repo":"flutter",
          "task_name":"mac_build_ios_framework_module_test",
-         "enabled":true,
+         "enabled":false,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
@@ -279,7 +279,7 @@
          "name":"Mac module_test_ios",
          "repo":"flutter",
          "task_name":"mac_module_test_ios",
-         "enabled":true,
+         "enabled":false,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
@@ -293,7 +293,7 @@
          "name":"Mac plugin_test",
          "repo":"flutter",
          "task_name":"mac_plugin_lint_mac",
-         "enabled":true,
+         "enabled":false,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
