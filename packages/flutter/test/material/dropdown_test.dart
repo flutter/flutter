@@ -586,6 +586,51 @@ void main() {
     expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
   });
 
+  testWidgets('Dropdown menu can position correctly inside a nested navigator', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66870
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Column(
+            children: <Widget>[
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings s) {
+                    return MaterialPageRoute<void>(builder: (BuildContext context) {
+                      return Center(
+                        child: DropdownButton<int>(
+                          value: 1,
+                          items: const <DropdownMenuItem<int>>[
+                            DropdownMenuItem<int>(
+                              child: Text('First Item'),
+                              value: 1,
+                            ),
+                            DropdownMenuItem<int>(
+                              child: Text('Second Item'),
+                              value: 2,
+                            ),
+                          ],
+                          onChanged: (_) { },
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('First Item'));
+    await tester.pump();
+    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
+    expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
+    expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
+  });
+
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int? value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[

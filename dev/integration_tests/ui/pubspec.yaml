@@ -2,7 +2,6 @@ name: integration_ui
 description: Flutter non-plugin UI integration tests.
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.8.0 <3.0.0"
 
 dependencies:

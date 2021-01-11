@@ -22,7 +22,7 @@ final Platform testPlatform = FakePlatform(environment: const <String, String>{}
 void main() {
   testWithoutContext('flattenNameSubdirs', () {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://api.flutter.dev/foo/bar'), MemoryFileSystem.test()), 'api.flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
   });
 
