@@ -4510,12 +4510,6 @@ void main() {
     expect(selection!.baseOffset, 1);
     expect(selection!.extentOffset, 5);
 
-    // Put the cursor at the end of the field.
-    // await tester.tapAt(textOffsetToPosition(tester, 19));
-    // expect(selection, isNotNull);
-    // expect(selection!.baseOffset, 19);
-    // expect(selection!.extentOffset, 19);
-
     // Double tapping does the same thing for the first space.
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tapAt(textOffsetToPosition(tester, 0));
