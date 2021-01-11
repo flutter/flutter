@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -220,7 +219,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Querying [PlatformDispatcher.platformBrightness].
   ///
   /// ```dart
-  /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  /// final Brightness brightness = WidgetsBinding.instance!.platformDispatcher.platformBrightness;
   /// ```
   /// {@end-tool}
   ///

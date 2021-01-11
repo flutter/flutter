@@ -18,13 +18,10 @@ import 'dart:ui' as ui
         PointMode,
         SceneBuilder,
         Vertices;
-import 'dart:ui' show Canvas, Offset;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'app.dart';
 import 'basic.dart';
@@ -960,7 +957,15 @@ mixin WidgetInspectorService {
   /// Structured errors provide semantic information that can be used by IDEs
   /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
-    return const bool.fromEnvironment('flutter.inspector.structuredErrors');
+    // This is a debug mode only feature and will default to false for
+    // profile mode.
+    bool enabled = false;
+    assert(() {
+      // TODO(kenz): add support for structured errors on the web.
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
+      return true;
+    }());
+    return enabled;
   }
 
   /// Called to register service extensions.

@@ -106,7 +106,8 @@ class Chrome {
       '--disable-default-apps',
       '--disable-translate',
     ];
-    final io.Process chromeProcess = await io.Process.start(
+
+    final io.Process chromeProcess = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
       workingDirectory: workingDirectory,
@@ -244,25 +245,6 @@ String _findSystemChromeExecutable() {
 
 /// Waits for Chrome to print DevTools URI and connects to it.
 Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int port) async {
-  chromeProcess.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .listen((String line) {
-      print('[CHROME]: $line');
-    });
-
-  await chromeProcess.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .map((String line) {
-      print('[CHROME]: $line');
-      return line;
-    })
-    .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-      throw Exception('Expected Chrome to print "DevTools listening" string '
-          'with DevTools URL, but the string was never printed.');
-    });
-
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
   final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
@@ -575,4 +557,73 @@ int _readInt(Map<String, dynamic> json, String key) {
   }
 
   return jsonValue.toInt();
+}
+
+/// Used by [Chrome.launch] to detect a glibc bug and retry launching the
+/// browser.
+///
+/// Once every few thousands of launches we hit this glibc bug:
+///
+/// https://sourceware.org/bugzilla/show_bug.cgi?id=19329.
+///
+/// When this happens Chrome spits out something like the following then exits with code 127:
+///
+///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
+const String _kGlibcError = 'Inconsistency detected by ld.so';
+
+Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, { String workingDirectory }) async {
+  // Keep attempting to launch the browser until one of:
+  // - Chrome launched successfully, in which case we just return from the loop.
+  // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
+  while (true) {
+    final io.Process process = await io.Process.start(executable, args, workingDirectory: workingDirectory);
+
+    process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        print('[CHROME STDOUT]: $line');
+      });
+
+    // Wait until the DevTools are listening before trying to connect. This is
+    // only required for flutter_test --platform=chrome and not flutter run.
+    bool hitGlibcBug = false;
+    await process.stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((String line) {
+        print('[CHROME STDERR]:$line');
+        if (line.contains(_kGlibcError)) {
+          hitGlibcBug = true;
+        }
+        return line;
+      })
+      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+        if (hitGlibcBug) {
+          print(
+            'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
+            'Will try launching browser again.',
+          );
+          return null;
+        }
+        print('Failed to launch browser. Command used to launch it: ${args.join(' ')}');
+        throw Exception(
+          'Failed to launch browser. Make sure you are using an up-to-date '
+          'Chrome or Edge. Otherwise, consider using -d web-server instead '
+          'and filing an issue at https://github.com/flutter/flutter/issues.',
+        );
+      });
+
+    if (!hitGlibcBug) {
+      return process;
+    }
+
+    // A precaution that avoids accumulating browser processes, in case the
+    // glibc bug doesn't cause the browser to quit and we keep looping and
+    // launching more processes.
+    process.exitCode.timeout(const Duration(seconds: 1), onTimeout: () {
+      process.kill();
+      return null;
+    });
+  }
 }

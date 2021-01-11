@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
 
 import '../src/common.dart';
@@ -17,7 +18,6 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
@@ -47,6 +47,16 @@ dev_dependencies:
 # PUBSPEC CHECKSUM: 1437
 ''';
 
+const String kExtraPubspecYaml = r'''
+name: nodeps
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: A dummy pubspec with no dependencies
+homepage: http://flutter.dev
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+''';
+
 const String kInvalidGitPubspec = '''
 name: flutter
 author: Flutter Authors <flutter-dev@googlegroups.com>
@@ -54,7 +64,6 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
@@ -89,6 +98,15 @@ void main() {
       .childFile('pubspec.yaml')
       .writeAsStringSync(kFlutterPubspecYaml);
 
+    // A stray extra package should not cause a crash.
+    final Directory extra = flutterSdk
+      .childDirectory('packages')
+      .childDirectory('extra')
+      ..createSync(recursive: true);
+    extra
+      .childFile('pubspec.yaml')
+      .writeAsStringSync(kExtraPubspecYaml);
+
     // Create already parsed pubspecs.
     final PubspecYaml flutterPubspec = PubspecYaml(flutter);
 
@@ -101,13 +119,21 @@ void main() {
       ref: d00362e6bdd0f9b30bba337c358b9e4a6e4ca950
 ''',
     );
+    final BufferLogger bufferLogger = BufferLogger.test();
     final Directory result = createTemporaryFlutterSdk(
+      bufferLogger,
       fileSystem,
       flutterSdk,
       <PubspecYaml>[flutterPubspec],
     );
 
     expect(result, exists);
+
+    // We get a warning about the unexpected package.
+    expect(
+      bufferLogger.errorText,
+      contains("Unexpected package 'extra' found in packages directory"),
+    );
 
     // The version file exists.
     expect(result.childFile('version'), exists);

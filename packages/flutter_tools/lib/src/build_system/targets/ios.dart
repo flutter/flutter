@@ -12,6 +12,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals hide fs, logger, processManager, artifacts;
+import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -65,10 +66,14 @@ abstract class AotAssemblyBase extends Target {
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
-    if (darwinArchs.contains(DarwinArch.x86_64)) {
+
+    final String sdkRoot = environment.defines[kSdkRoot];
+    final EnvironmentType environmentType =
+        environmentTypeFromSdkroot(environment.fileSystem.directory(sdkRoot));
+    if (environmentType == EnvironmentType.simulator) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
-        'attempted to build for $darwinArchs.'
+        'attempted to build for simulator.'
       );
     }
     final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
@@ -94,7 +99,7 @@ abstract class AotAssemblyBase extends Target {
         mainPath: environment.buildDir.childFile('app.dill').path,
         outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
         darwinArch: darwinArch,
-        sdkRoot: environment.defines[kSdkRoot],
+        sdkRoot: sdkRoot,
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
@@ -248,7 +253,7 @@ abstract class UnpackIOS extends Target {
         const Source.pattern(
             '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
         Source.artifact(
-          Artifact.flutterFramework,
+          Artifact.flutterXcframework,
           platform: TargetPlatform.ios,
           mode: buildMode,
         ),
@@ -267,10 +272,16 @@ abstract class UnpackIOS extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    if (environment.defines[kSdkRoot] == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+    final Directory sdkRoot = environment.fileSystem.directory(environment.defines[kSdkRoot]);
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
       platform: TargetPlatform.ios,
       mode: buildMode,
+      environmentType: environmentType,
     );
 
     final ProcessResult result = environment.processManager.runSync(<String>[

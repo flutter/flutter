@@ -65,6 +65,8 @@ void main() {
       testWithoutContext('eulaSigned is false when clang is not installed', () {
         when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
 
+        when(processManager.runSync(<String>['which', 'sysctl']))
+            .thenReturn(ProcessResult(1, 0, '', ''));
         when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
             .thenReturn(ProcessResult(123, 1, '', ''));
         when(processManager.runSync(<String>['xcrun', 'clang']))
@@ -136,6 +138,53 @@ void main() {
         );
 
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+      });
+
+      testWithoutContext('isSimctlInstalled is true when simctl list succeeds', () {
+        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+            ],
+          ),
+        );
+        final Xcode xcode = Xcode(
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: MemoryFileSystem.test(),
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        );
+
+        expect(xcode.isSimctlInstalled, isTrue);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      });
+
+      testWithoutContext('isSimctlInstalled is true when simctl list fails', () {
+        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+            ],
+            exitCode: 1,
+          ),
+        );
+        final Xcode xcode = Xcode(
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: MemoryFileSystem.test(),
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        );
+
+        expect(xcode.isSimctlInstalled, isFalse);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       });
 
       group('macOS', () {

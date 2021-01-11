@@ -10,10 +10,6 @@ import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
 
-Future<String> dylibSymbols(String pathToDylib) {
-  return eval('nm', <String>['-g', pathToDylib]);
-}
-
 Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
 }
@@ -22,6 +18,8 @@ Future<bool> containsBitcode(String pathToBinary) async {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
   final String loadCommands = await eval('otool', <String>[
     '-l',
+    '-arch',
+    'arm64',
     pathToBinary,
   ]);
   if (!loadCommands.contains('__LLVM')) {

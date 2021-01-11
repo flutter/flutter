@@ -124,7 +124,7 @@ class Xcode {
         final RunResult result = _processUtils.runSync(
           <String>[...xcrunCommand(), 'simctl', 'list'],
         );
-        _isSimctlInstalled = result.stderr == null || result.stderr == '';
+        _isSimctlInstalled = result.exitCode == 0;
       } on ProcessException {
         _isSimctlInstalled = false;
       }

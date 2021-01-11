@@ -84,9 +84,11 @@ class ConfigCommand extends FlutterCommand {
     if (values.isEmpty) {
       values = '  No settings have been configured.';
     }
+    final bool analyticsEnabled = globals.flutterUsage.enabled &&
+                                  !globals.flutterUsage.suppressAnalytics;
     return
       '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${globals.flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+      'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.

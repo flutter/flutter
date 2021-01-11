@@ -71,6 +71,22 @@ class PointerRouter {
     _globalRoutes.remove(route);
   }
 
+  /// The number of global routes that have been registered.
+  ///
+  /// This is valid in debug builds only. In release builds, this will throw an
+  /// [UnsupportedError].
+  int get debugGlobalRouteCount {
+    int? count;
+    assert(() {
+      count = _globalRoutes.length;
+      return true;
+    }());
+    if (count != null) {
+      return count!;
+    }
+    throw UnsupportedError('debugGlobalRouteCount is not supported in release builds');
+  }
+
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
     try {
       event = event.transformed(transform);

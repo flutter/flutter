@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1649,7 +1650,7 @@ void main() {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: Builder(builder: (BuildContext context) {
-          return RaisedButton(
+          return ElevatedButton(
             child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
@@ -1662,7 +1663,7 @@ void main() {
     ));
 
     final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.byType(RaisedButton)));
+    await gesture.down(tester.getCenter(find.byType(ElevatedButton)));
     await gesture.up();
 
     await tester.pumpAndSettle();

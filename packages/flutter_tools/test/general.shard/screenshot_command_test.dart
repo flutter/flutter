@@ -15,8 +15,18 @@ void main() {
     });
 
     testUsingContext('rasterizer and skia screenshots require observatory uri', () async {
-      expect(() => ScreenshotCommand.validateOptions('rasterizer', null, null), throwsToolExit());
-      expect(() => ScreenshotCommand.validateOptions('skia', null, null), throwsToolExit());
+      expect(
+          () => ScreenshotCommand.validateOptions('rasterizer', null, null),
+          throwsToolExit(
+              message:
+                  'Observatory URI must be specified for screenshot type rasterizer'));
+      expect(
+          () => ScreenshotCommand.validateOptions('skia', null, null),
+          throwsToolExit(
+              message:
+                  'Observatory URI must be specified for screenshot type skia'));
+      expect(() => ScreenshotCommand.validateOptions('skia', null, ''),
+          throwsToolExit(message: 'Observatory URI "" is invalid'));
     });
 
     testUsingContext('device screenshots require device', () async {

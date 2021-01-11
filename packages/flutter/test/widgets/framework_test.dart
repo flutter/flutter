@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1483,6 +1485,33 @@ void main() {
       )
     );
   });
+
+  testWidgets('Can create BuildOwner that does not interfere with pointer router or raw key event handler', (WidgetTester tester) async {
+    final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
+    final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
+    expect(rawKeyEventHandler, isNotNull);
+    BuildOwner(focusManager: _FakeFocusManager());
+    expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
+    expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
+  });
+
+  testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    TestRenderObjectElement().debugFillProperties(builder);
+    expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
+  });
+}
+
+class _FakeFocusManager implements FocusManager {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return super.noSuchMethod(invocation);
+  }
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '_FakeFocusManager';
+  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1813,4 +1842,8 @@ class FakeLeafRenderObject extends RenderBox {
   void performLayout() {
     size = constraints.biggest;
   }
+}
+
+class TestRenderObjectElement extends RenderObjectElement {
+  TestRenderObjectElement() : super(Table());
 }

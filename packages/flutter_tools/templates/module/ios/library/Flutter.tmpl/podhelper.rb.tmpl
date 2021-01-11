@@ -30,7 +30,7 @@ end
 def install_flutter_engine_pod
   current_directory = File.expand_path('..', __FILE__)
   engine_dir = File.expand_path('engine', current_directory)
-  framework_name = 'Flutter.framework'
+  framework_name = 'Flutter.xcframework'
   copied_engine = File.expand_path(framework_name, engine_dir)
   if !File.exist?(copied_engine)
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.

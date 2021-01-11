@@ -115,7 +115,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   local flutter_engine_flag=""
   local local_engine_flag=""
-  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_framework="${framework_path}/Flutter.xcframework"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -135,7 +135,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.xcframework"
   fi
 
   local bitcode_flag=""
@@ -275,22 +275,17 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  local project_path="${SOURCE_ROOT}/.."
-  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
-    project_path="${FLUTTER_APPLICATION_PATH}"
-  fi
-
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
 
   # Copy Xcode behavior and don't copy over headers or modules.
-  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
+  RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
   if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
     # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
     RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${BUILT_PRODUCTS_DIR}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"

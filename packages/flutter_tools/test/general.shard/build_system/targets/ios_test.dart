@@ -181,21 +181,21 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('AotAssemblyRelease throws exception if asked to build for x86 target', () async {
+  testUsingContext('AotAssemblyRelease throws exception if asked to build for simulator', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
-        kSdkRoot: 'path/to/sdk',
+        kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        kBuildMode: 'release',
+        kIosArchs: 'x86_64',
       },
       processManager: processManager,
       artifacts: artifacts,
       logger: logger,
       fileSystem: fileSystem,
     );
-    environment.defines[kBuildMode] = 'release';
-    environment.defines[kIosArchs] = 'x86_64';
 
     expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
       .having(
@@ -238,30 +238,65 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testWithoutContext('Unpack copies Flutter.framework', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory outputDir = fileSystem.directory('output');
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      processManager: processManager,
-      artifacts: artifacts,
-      logger: logger,
-      fileSystem: fileSystem,
-      outputDir: outputDir,
-    );
+  group('copy engine Flutter.framework', () {
+    testWithoutContext('iphonesimulator', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        },
+      );
 
-    processManager.addCommand(
-      FakeCommand(command: <String>[
-        'rsync',
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store/',
-        'Artifact.flutterFramework.TargetPlatform.ios.debug',
-        outputDir.path,
-      ]),
-    );
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+          outputDir.path,
+        ]),
+      );
 
-    await const DebugUnpackIOS().build(environment);
+      await const DebugUnpackIOS().build(environment);
+    });
+
+    testWithoutContext('iphoneos', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          outputDir.path,
+        ]),
+      );
+
+      await const DebugUnpackIOS().build(environment);
+    });
   });
 }
