@@ -167,18 +167,22 @@ class Cache {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
+    OperatingSystemUtils operatingSystemUtils;
+    if (processManager != null) {
+      operatingSystemUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+    }
     return Cache(
       rootOverride: rootOverride ??= fileSystem.directory('cache'),
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
-      osUtils: OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
+      osUtils: operatingSystemUtils,
     );
   }
 
