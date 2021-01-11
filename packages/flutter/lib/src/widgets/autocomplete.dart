@@ -444,10 +444,12 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert((focusNode == null) == (textEditingController == null)),
        super(key: key);
 
+  /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
+  /// {@endtemplate}
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.

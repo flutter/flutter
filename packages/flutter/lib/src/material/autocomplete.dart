@@ -14,6 +14,7 @@ class Autocomplete<T extends Object> extends StatefulWidget {
   const Autocomplete({
     Key? key,
     required this.optionsBuilder,
+    this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.onSelected,
   }) : assert(displayStringForOption != null),
@@ -23,11 +24,25 @@ class Autocomplete<T extends Object> extends StatefulWidget {
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
 
+  /// {@macro flutter.widgets.RawAutocomplete.fieldViewBuilder}
+  ///
+  /// If not provided, will build a standard Material-style text field by
+  /// default.
+  final AutocompleteFieldViewBuilder fieldViewBuilder;
+
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
   final AutocompleteOnSelected<T>? onSelected;
 
   /// {@macro flutter.widgets.RawAutocomplete.optionsBuilder}
   final AutocompleteOptionsBuilder<T> optionsBuilder;
+
+  static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+    return _AutocompleteField(
+      focusNode: focusNode,
+      textEditingController: textEditingController,
+      onFieldSubmitted: onFieldSubmitted,
+    );
+  }
 
   @override
   _AutocompleteState<T> createState() => _AutocompleteState<T>();
@@ -38,13 +53,7 @@ class _AutocompleteState<T extends Object> extends State<Autocomplete<T>> {
   Widget build(BuildContext context) {
     return RawAutocomplete<T>(
       displayStringForOption: widget.displayStringForOption,
-      fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-        return _AutocompleteField(
-          focusNode: focusNode,
-          textEditingController: textEditingController,
-          onFieldSubmitted: onFieldSubmitted,
-        );
-      },
+      fieldViewBuilder: widget.fieldViewBuilder,
       optionsBuilder: widget.optionsBuilder,
       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteResults<T>(
