@@ -680,8 +680,8 @@ void main() {
 
   testWidgets('RefreshIndicator.color can be updated at runtime', (WidgetTester tester) async {
     refreshCalled = false;
-    Color color1 = Colors.green;
-    final Color finalColor = Colors.red;
+    Color refreshIndicatorColor = Colors.green;
+    const Color red = Colors.red;
     late StateSetter setState;
 
     await tester.pumpWidget(
@@ -692,7 +692,7 @@ void main() {
             return RefreshIndicator(
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               onRefresh: holdRefresh,
-              color: color1,
+              color: refreshIndicatorColor,
               child: ListView(
                 reverse: true,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -715,14 +715,14 @@ void main() {
 
     await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
     await tester.pump();
-    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, color1.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, refreshIndicatorColor.withOpacity(1.0));
 
     setState(() {
-      color1 = finalColor;
+      refreshIndicatorColor = red;
     });
 
     await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
     await tester.pump();
-    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, finalColor.withOpacity(1.0));
+    expect(tester.widget<RefreshProgressIndicator>(find.byType(RefreshProgressIndicator)).valueColor!.value, red.withOpacity(1.0));
   });
 }
