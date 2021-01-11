@@ -399,20 +399,30 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  ///  * [changedExternalState], which is called when the [Navigator] rebuilds.
+  ///  * [changedExternalState], which is called when the [Navigator] has
+  ///    updated in some manner that might affect the routes.
   @protected
   @mustCallSuper
   void changedInternalState() { }
 
-  /// Called whenever the [Navigator] has its widget rebuilt, to indicate that
-  /// the route may wish to rebuild as well.
+  /// Called whenever the [Navigator] has updated in some manner that might
+  /// affect routes, to indicate that the route may wish to rebuild as well.
   ///
-  /// This is called by the [Navigator] whenever the [NavigatorState]'s
-  /// [State.widget] changes, for example because the [MaterialApp] has been rebuilt.
-  /// This ensures that routes that directly refer to the state of the widget
-  /// that built the [MaterialApp] will be notified when that widget rebuilds,
-  /// since it would otherwise be difficult to notify the routes that state they
-  /// depend on may have changed.
+  /// This is called by the [Navigator] whenever the
+  /// [NavigatorState]'s [State.widget] changes (as in [State.didUpdateWidget]),
+  /// for example because the [MaterialApp] has been rebuilt. This
+  /// ensures that routes that directly refer to the state of the
+  /// widget that built the [MaterialApp] will be notified when that
+  /// widget rebuilds, since it would otherwise be difficult to notify
+  /// the routes that state they depend on may have changed.
+  ///
+  /// It is also called whenever the [Navigator]'s dependencies change
+  /// (as in [State.didChangeDependencies]). This allows routes to use the
+  /// [Navigator]'s context ([NavigatorState.context]), for example in
+  /// [ModalRoute.barrierColor], and update accordingly.
+  ///
+  /// The [ModalRoute] subclass overrides this to force the barrier
+  /// overlay to rebuild.
   ///
   /// See also:
   ///
@@ -3442,6 +3452,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.of(context));
+    for (final _RouteEntry entry in _history)
+      entry.route.changedExternalState();
   }
 
   void _updateHeroController(HeroController? newHeroController) {
