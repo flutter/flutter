@@ -461,7 +461,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesWebRendererOption() {
     argParser.addOption('web-renderer',
-      defaultsTo: 'html',
+      defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web. Possible values are:\n'
             'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
@@ -661,7 +661,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cached-ness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.',
+      hide: hide,
     );
   }
 
@@ -674,6 +675,7 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+      hide: hide,
     );
   }
 
@@ -900,7 +902,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer')) {
       dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 

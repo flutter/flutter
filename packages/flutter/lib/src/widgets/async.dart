@@ -6,15 +6,11 @@
 ///
 /// Asynchronous computations are represented by [Future]s and [Stream]s.
 
-import 'dart:async' show Future, Stream, StreamSubscription;
+import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
-
-// Examples can assume:
-// dynamic _lot;
-// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
@@ -387,7 +383,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2,
+///     style: Theme.of(context).textTheme.headline2!,
 ///     textAlign: TextAlign.center,
 ///     child: Container(
 ///       alignment: FractionalOffset.center,
@@ -629,7 +625,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// Widget build(BuildContext context) {
 ///   return DefaultTextStyle(
-///     style: Theme.of(context).textTheme.headline2,
+///     style: Theme.of(context).textTheme.headline2!,
 ///     textAlign: TextAlign.center,
 ///     child: FutureBuilder<String>(
 ///       future: _calculation, // a previously-obtained Future<String> or null

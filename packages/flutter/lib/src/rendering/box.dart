@@ -715,7 +715,7 @@ class BoxHitTestResult extends HitTestResult {
   ///   }
   ///
   ///   @override
-  ///   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  ///   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
   ///     return result.addWithPaintTransform(
   ///       transform: _effectiveTransform,
   ///       position: position,

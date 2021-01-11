@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:vector_math/vector_math_64.dart';
@@ -226,10 +225,42 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ScaleGestureRecognizer({
     Object? debugOwner,
     PointerDeviceKind? kind,
-  }) : super(debugOwner: debugOwner, kind: kind);
+    this.dragStartBehavior = DragStartBehavior.down,
+  }) : assert(dragStartBehavior != null),
+       super(debugOwner: debugOwner, kind: kind);
+
+  /// Determines what point is used as the starting point in all calculations
+  /// involving this gesture.
+  ///
+  /// When set to [DragStartBehavior.down], the scale is calculated starting
+  /// from the position where the pointer first contacted the screen.
+  ///
+  /// When set to [DragStartBehavior.start], the scale is calculated starting
+  /// from the position where the scale gesture began. The scale gesture may
+  /// begin after the time that the pointer first contacted the screen if there
+  /// are multiple listeners competing for the gesture. In that case, the
+  /// gesture arena waits to determine whether or not the gesture is a scale
+  /// gesture before giving the gesture to this GestureRecognizer. This happens
+  /// in the case of nested GestureDetectors, for example.
+  ///
+  /// Defaults to [DragStartBehavior.down].
+  ///
+  /// See also:
+  ///
+  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  ///   which provides more information about the gesture arena.
+  DragStartBehavior dragStartBehavior;
 
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
+  ///
+  /// This won't be called until the gesture arena has determined that this
+  /// GestureRecognizer has won the gesture.
+  ///
+  /// See also:
+  ///
+  /// * [https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation],
+  ///   which provides more information about the gesture arena.
   GestureScaleStartCallback? onStart;
 
   /// The pointers in contact with the screen have indicated a new focal point
@@ -461,6 +492,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _ScaleState.possible) {
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
+      if (dragStartBehavior == DragStartBehavior.start) {
+        _initialFocalPoint = _currentFocalPoint;
+        _initialSpan = _currentSpan;
+        _initialLine = _currentLine;
+        _initialHorizontalSpan = _currentHorizontalSpan;
+        _initialVerticalSpan = _currentVerticalSpan;
+      }
     }
   }
 

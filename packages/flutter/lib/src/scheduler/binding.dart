@@ -954,20 +954,45 @@ mixin SchedulerBinding on BindingBase {
 
   int _debugFrameNumber = 0;
   String? _debugBanner;
-  bool _ignoreNextEngineDrawFrame = false;
+
+  // Whether the current engine frame needs to be postponed till after the
+  // warm-up frame.
+  //
+  // Engine may begin a frame in the middle of the warm-up frame because the
+  // warm-up frame is scheduled by timers while the engine frame is scheduled
+  // by platform specific frame scheduler (e.g. `requestAnimationFrame` on the
+  // web). When this happens, we let the warm-up frame finish, and postpone the
+  // engine frame.
+  bool _rescheduleAfterWarmUpFrame = false;
 
   void _handleBeginFrame(Duration rawTimeStamp) {
     if (_warmUpFrame) {
-      assert(!_ignoreNextEngineDrawFrame);
-      _ignoreNextEngineDrawFrame = true;
+      // "begin frame" and "draw frame" must strictly alternate. Therefore
+      // _rescheduleAfterWarmUpFrame cannot possibly be true here as it is
+      // reset by _handleDrawFrame.
+      assert(!_rescheduleAfterWarmUpFrame);
+      _rescheduleAfterWarmUpFrame = true;
       return;
     }
     handleBeginFrame(rawTimeStamp);
   }
 
   void _handleDrawFrame() {
-    if (_ignoreNextEngineDrawFrame) {
-      _ignoreNextEngineDrawFrame = false;
+    if (_rescheduleAfterWarmUpFrame) {
+      _rescheduleAfterWarmUpFrame = false;
+      // Reschedule in a post-frame callback to allow the draw-frame phase of
+      // the warm-up frame to finish.
+      addPostFrameCallback((Duration timeStamp) {
+        // Force an engine frame.
+        //
+        // We need to reset _hasScheduledFrame here because we cancelled the
+        // original engine frame, and therefore did not run handleBeginFrame
+        // who is responsible for resetting it. So if a frame callback set this
+        // to true in the "begin frame" part of the warm-up frame, it will
+        // still be true here and cause us to skip scheduling an engine frame.
+        _hasScheduledFrame = false;
+        scheduleFrame();
+      });
       return;
     }
     handleDrawFrame();

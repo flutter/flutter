@@ -124,13 +124,13 @@ void main() {
     ];
 
     const Map<String, String> pluginContentWitnesses = <String, String>{
-      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      'ios/Flutter/Debug.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     const Map<String, String> modulePluginContentWitnesses = <String, String>{
-      '.ios/Config/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      '.ios/Config/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      '.ios/Config/Debug.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      '.ios/Config/Release.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     void expectDependenciesResolved(String projectPath) {
@@ -227,7 +227,7 @@ void main() {
       ),
     });
 
-    testUsingContext('set the number of plugins as usage value', () async {
+    testUsingContext('set no plugins as usage value', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
@@ -237,6 +237,31 @@ void main() {
 
       expect(await getCommand.usageValues,
              containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('set the number of plugins as usage value', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android,macos,windows'],
+      );
+      final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
+
+      final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      // Should be 1 instead of 2, but integration_test is always included.
+      // https://github.com/flutter/flutter/issues/56591
+      expect(await getCommand.usageValues,
+          containsPair(CustomDimensions.commandPackagesNumberPlugins, '2'));
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,

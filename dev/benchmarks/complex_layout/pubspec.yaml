@@ -2,7 +2,6 @@ name: complex_layout
 description: A benchmark of a relatively complex layout.
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
