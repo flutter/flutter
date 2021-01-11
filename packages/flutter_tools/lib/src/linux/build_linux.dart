@@ -7,20 +7,22 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../migrations/cmake_custom_command_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
 
 // Matches the following error and warning patterns:
-// - <file path>:<line>:<column>: error: <error...>
+// - <file path>:<line>:<column>: (fatal) error: <error...>
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
-final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(?:error|warning):\s.*', caseSensitive: false);
+final RegExp errorMatcher = RegExp(r'(?:.*:\d+:\d+|clang):\s?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -33,6 +35,15 @@ Future<void> buildLinux(
     throwToolExit('No Linux desktop project configured. See '
       'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
       'to learn about adding Linux support to a project.');
+  }
+
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    CmakeCustomCommandMigration(linuxProject, globals.logger),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Unable to migrate project files');
   }
 
   // Build the environment that needs to be set for the re-entrant flutter build

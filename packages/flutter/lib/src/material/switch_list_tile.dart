@@ -10,13 +10,14 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // void setState(VoidCallback fn) { }
 // bool _isSelected;
 
 enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=0igIjvtEWNU}
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the switch. Tapping and dragging the [Switch] also triggers the [onChanged]
@@ -46,7 +47,7 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
@@ -85,7 +86,7 @@ enum _SwitchListTileType { material, adaptive }
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
@@ -99,10 +100,10 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LinkedLabelSwitch extends StatelessWidget {
 ///   const LinkedLabelSwitch({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -169,7 +170,7 @@ enum _SwitchListTileType { material, adaptive }
 /// combining [Switch] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///
@@ -179,16 +180,14 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LabeledSwitch extends StatelessWidget {
 ///   const LabeledSwitch({
-///     this.label,
-///     this.padding,
-///     this.groupValue,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
-///   final bool groupValue;
 ///   final bool value;
 ///   final Function onChanged;
 ///
