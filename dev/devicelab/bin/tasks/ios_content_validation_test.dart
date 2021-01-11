@@ -20,13 +20,23 @@ Future<void> main() async {
           ]);
         });
 
-        checkDirectoryExists(path.join(
+        final String archivePath = path.join(
           flutterProject.rootPath,
           'build',
           'ios',
           'archive',
           'Runner.xcarchive',
+        );
+
+        checkDirectoryExists(path.join(
+          archivePath,
           'Products',
+        ));
+
+        checkDirectoryExists(path.join(
+          archivePath,
+          'dSYMs',
+          'Runner.app.dSYM',
         ));
       });
 
