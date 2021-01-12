@@ -727,7 +727,7 @@ void main() {
     expect(retrievedRouteSettings, routeSettings);
   });
 
-  testWidgets('showModalBottomSheet should move along keyboard',
+  testWidgets('showModalBottomSheet should move along on-screen keyboard',
           (WidgetTester tester) async {
     late BuildContext savedContext;
 
