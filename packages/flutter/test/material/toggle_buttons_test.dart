@@ -1477,7 +1477,7 @@ void main() {
           child: RepaintBoundary(
             child: ToggleButtons(
               borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-              isSelected: const <bool>[false],
+              isSelected: const <bool>[true],
               onPressed: (int index) {},
               children: const <Widget>[
                 Text('First child'),
@@ -1525,7 +1525,7 @@ void main() {
                 bottomRight: Radius.elliptical(0, 10),
                 bottomLeft: Radius.elliptical(10, 0),
               ),
-              isSelected: const <bool>[false],
+              isSelected: const <bool>[true],
               onPressed: (int index) {},
               children: const <Widget>[
                 Text('First child'),
