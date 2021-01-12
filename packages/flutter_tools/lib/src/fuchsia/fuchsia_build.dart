@@ -8,7 +8,6 @@ import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
