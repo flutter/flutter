@@ -44,6 +44,16 @@ sk_sp<GrDirectContext> IOSContextGL::CreateResourceContext() {
 }
 
 // |IOSContext|
+sk_sp<GrDirectContext> IOSContextGL::GetMainContext() const {
+  /// TODO(73744): Currently the GPUSurfaceGL creates the main context for
+  /// OpenGL.  With Metal the IOSContextMetal creates the main context and is
+  /// shared across surfaces.  We should refactor the OpenGL Context/Surfaces to
+  /// behave like the Metal equivalents.  Until then engines in the same group
+  /// will have a heavier memory cost if they are using OpenGL.
+  return nullptr;
+}
+
+// |IOSContext|
 std::unique_ptr<GLContextResult> IOSContextGL::MakeCurrent() {
   return std::make_unique<GLContextSwitch>(
       std::make_unique<IOSSwitchableGLContext>(context_.get()));
