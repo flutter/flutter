@@ -3015,22 +3015,7 @@ void main() {
       // Cursor move doesn't trigger a toolbar initially.
       expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.moveBy(const Offset(50, 0));
-      await tester.pump();
-
-      // The selection position is now moved with the drag.
-      expect(
-        controller.selection,
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: 8,
-          affinity: TextAffinity.downstream,
-        ),
-      );
-      // Still no toolbar.
-      expect(find.byType(CupertinoButton), findsNothing);
-
-      await gesture.moveBy(const Offset(50, 0));
+      await gesture.moveBy(const Offset(100, 0));
       await tester.pump();
 
       // The selection position is now moved with the drag.
@@ -3039,6 +3024,21 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 12,
+          affinity: TextAffinity.downstream,
+        ),
+      );
+      // Still no toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.moveBy(const Offset(100, 0));
+      await tester.pump();
+
+      // The selection position is now moved with the drag.
+      expect(
+        controller.selection,
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 23,
           affinity: TextAffinity.downstream,
         ),
       );
@@ -3053,13 +3053,93 @@ void main() {
         controller.selection,
         const TextSelection(
           baseOffset: 0,
-          extentOffset: 12,
+          extentOffset: 23,
           affinity: TextAffinity.downstream,
         ),
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets(
+      'long press drag moves the cursor under the drag and shows toolbar on lift (macOS)',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: Center(
+                child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+              ),
+            ),
+          ),
+        );
+
+        final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+        final TestGesture gesture =
+        await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+        await tester.pump(const Duration(milliseconds: 500));
+
+        final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+        final TextEditingController controller = editableTextWidget.controller;
+
+        // The longpressed word is selected.
+        expect(
+          controller.selection,
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 7,
+            affinity: TextAffinity.downstream,
+          ),
+        );
+        // Cursor move doesn't trigger a toolbar initially.
+        expect(find.byType(CupertinoButton), findsNothing);
+
+        await gesture.moveBy(const Offset(50, 0));
+        await tester.pump();
+
+        // The selection position is now moved with the drag.
+        expect(
+          controller.selection,
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 8,
+            affinity: TextAffinity.downstream,
+          ),
+        );
+        // Still no toolbar.
+        expect(find.byType(CupertinoButton), findsNothing);
+
+        await gesture.moveBy(const Offset(50, 0));
+        await tester.pump();
+
+        // The selection position is now moved with the drag.
+        expect(
+          controller.selection,
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 12,
+            affinity: TextAffinity.downstream,
+          ),
+        );
+        // Still no toolbar.
+        expect(find.byType(CupertinoButton), findsNothing);
+
+        await gesture.up();
+        await tester.pump();
+
+        // The selection isn't affected by the gesture lift.
+        expect(
+          controller.selection,
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 12,
+            affinity: TextAffinity.downstream,
+          ),
+        );
+        // The toolbar now shows up.
+        expect(find.byType(CupertinoButton), findsNWidgets(1));
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3170,7 +3250,7 @@ void main() {
   );
 
   testWidgets(
-    'long tap still selects after a double tap select',
+    'long tap still selects after a double tap select (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3202,14 +3282,58 @@ void main() {
       await tester.pump();
 
       // Selected the "word" where the tap happened, which is the first space.
+      // Because the "word" is a whitespace, the selection will shift to the
+      // previous "word" that is not a whitespace.
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 7, extentOffset: 8),
+        const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets(
+      'long tap still selects after a double tap select (macOS)',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: Center(
+                child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+              ),
+            ),
+          ),
+        );
+
+        final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+        await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.pump(const Duration(milliseconds: 50));
+
+        final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+        final TextEditingController controller = editableTextWidget.controller;
+
+        // First tap moved the cursor to the beginning of the second word.
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
+        );
+        await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.longPressAt(selectableTextStart + const Offset(100.0, 5.0));
+        await tester.pump();
+
+        // Selected the "word" where the tap happened, which is the first space.
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 7, extentOffset: 8),
+        );
+
+        // Long press toolbar.
+        expect(find.byType(CupertinoButton), findsNWidgets(1));
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 //convert
   testWidgets(
     'double tap after a long tap is not affected',
@@ -4252,4 +4376,165 @@ void main() {
     await tester.tap(find.text('Select all'));
     expect(onSelectionChangedCallCount, equals(3));
   });
+
+  testWidgets('selecting a space selects the previous word on mobile', (WidgetTester tester) async {
+    TextSelection? selection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableText(
+          ' blah blah',
+          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+            selection = newSelection;
+          },
+        ),
+      ),
+    );
+
+    expect(selection, isNull);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Long press on the second space and the previous word is selected.
+    await tester.longPressAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 1);
+    expect(selection!.extentOffset, 5);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Long press on the first space and the space is selected because there is
+    // no previous word.
+    await tester.longPressAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 0);
+    expect(selection!.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
+
+  testWidgets('selecting a space selects the space on non-mobile platforms', (WidgetTester tester) async {
+    TextSelection? selection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText(
+              ' blah blah',
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+                selection = newSelection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(selection, isNull);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 5);
+    expect(selection!.extentOffset, 6);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 10));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 10);
+    expect(selection!.extentOffset, 10);
+
+    // Double tapping the first space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 0);
+    expect(selection!.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
+  testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
+    TextSelection? selection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText(
+              ' blah blah  \n  blah',
+              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause){
+                selection = newSelection;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(selection, isNull);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 19);
+    expect(selection!.extentOffset, 19);
+
+    // Double tapping the second space selects the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 1);
+    expect(selection!.extentOffset, 5);
+
+    // Double tapping does the same thing for the first space.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 0);
+    expect(selection!.extentOffset, 1);
+
+    // Put the cursor at the end of the field.
+    await tester.tapAt(textOffsetToPosition(tester, 19));
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 19);
+    expect(selection!.extentOffset, 19);
+
+    // Double tapping the last space selects all previous contiguous spaces on
+    // both lines and the previous word.
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, 14));
+    await tester.pumpAndSettle();
+    expect(selection, isNotNull);
+    expect(selection!.baseOffset, 6);
+    expect(selection!.extentOffset, 14);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 }

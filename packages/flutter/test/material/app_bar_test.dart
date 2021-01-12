@@ -1122,6 +1122,97 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+      key: const ValueKey<String>('1'),
+      child: Scaffold(
+        key: const ValueKey<String>('1'),
+        appBar: AppBar(),
+      )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+    // Update pages
+    pages = <Page<void>>[ page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    // The page2 should have a back button
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+    // Update pages
+    pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+    // The back button should persist during the pop animation.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+  });
+
   testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
