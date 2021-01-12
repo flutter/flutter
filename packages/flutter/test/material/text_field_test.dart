@@ -8695,7 +8695,7 @@ void main() {
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    Widget textFieldBuilder({FloatingLabelBehavior behavior = FloatingLabelBehavior.auto, }) {
+    Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
       return MaterialApp(
         theme: ThemeData(
           inputDecorationTheme: InputDecorationTheme(
