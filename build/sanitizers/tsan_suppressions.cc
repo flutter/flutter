@@ -72,9 +72,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/239359
 "race:media::TestInputCallback::OnData\n"
 
-// http://crbug.com/244368
-"race:skia::BeginPlatformPaint\n"
-
 // http://crbug.com/244385
 "race:unixTempFileDir\n"
 
@@ -111,9 +108,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/258479
 "race:SamplingStateScope\n"
 "race:g_trace_state\n"
-
-// http://crbug.com/258499
-"race:third_party/skia/include/core/SkRefCnt.h\n"
 
 // http://crbug.com/268924
 "race:base::g_power_monitor\n"
@@ -285,9 +279,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/417193
 // Suppressing both AudioContext.{cpp,h}.
 "race:modules/webaudio/AudioContext\n"
-
-// https://code.google.com/p/skia/issues/detail?id=3294
-"race:SkBaseMutex::acquire\n"
 
 // https://crbug.com/430533
 "race:TileTaskGraphRunner::Run\n"
