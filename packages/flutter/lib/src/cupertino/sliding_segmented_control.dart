@@ -479,13 +479,14 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   // Whether the current drag gesture started on a selected segment. When this
-  // flag is false, the thumb can only change position when in a touchUp event.
-  // Otherwise the thumb can be dragged around in a ongoing drag gesture.
+  // flag is false, the `onUpdate` method does not update `highlighted`.
+  // Otherwise the thumb can be dragged around in an ongoing drag gesture.
   bool? _startedOnSelectedSegment;
 
   // Whether an ongoing horizontal drag gesture that started on the thumb is
-  // present. When true, prevent developer from programmatically changing the
-  // highlighted segment.
+  // present. When true, defer/ignore changes to the `highlighted` variable
+  // from other sources (except for semantics) until the gesture ends, preventing
+  // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
   T segmentForXPosition(double dx) {
@@ -545,9 +546,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
-    // paint method will create a new tween to drive the animation with. The
-    // current thumb will be painted at the same location twice when the
-    // animation starts.
+    // paint method will create a new tween to drive the animation with. A
+    // caveat: the current thumb will be painted at the same location twice
+    // before and after the new animation starts.
     thumbController.animateWith(_kThumbSpringAnimationSimulation);
     thumbAnimatable = null;
   }
@@ -644,7 +645,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         highlightedIndex = index;
       }
 
-      // Insert separator first.
       if (index != 0) {
         children.add(
           _SegmentSeparator<T>(
@@ -796,7 +796,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   final _SegmentedControlState<T> state;
 
-  // The current **Unscaled** Thumb Rect.
+  // The current **Unscaled** Thumb Rect in this RenderBox's coordinate space.
   Rect? currentThumbRect;
 
   @override
@@ -977,7 +977,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       start += child.size.width;
       assert(
         index.isEven || child.size.width == _kSeparatorWidth + _kSeparatorInset.horizontal,
-        '$child @ $index: ${child.size.width} != ${_kSeparatorWidth + _kSeparatorInset.horizontal}',
+        '${child.size.width} != ${_kSeparatorWidth + _kSeparatorInset.horizontal}',
       );
       child = childAfter(child);
       index += 1;
@@ -995,18 +995,21 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
 
     final int? highlightedChildIndex = highlightedIndex;
-    // Paint thumb if highlightedIndex is not null.
+    // Paint thumb if there's a highlighted segment.
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
 
       final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
       final Rect newThumbRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
 
-      // Update thumb animation if there is one.
+      // Update thumb animation's tween, in case the end rect changed (e.g., a
+      // new segment is added during the animation).
       if (state.thumbController.isAnimating) {
         final Animatable<Rect?>? thumbTween = state.thumbAnimatable;
         if (thumbTween == null) {
           // This is the first frame of the animation.
+          // TODO(LongCatIsLooong): `currentThumbRect` can be outside of the
+          // bounding box of the render object.
           state.thumbAnimatable = RectTween(begin: currentThumbRect ?? newThumbRect, end: newThumbRect);
         } else if (newThumbRect != thumbTween.transform(1)) {
           // The thumbTween of the running sliding animation needs updating,
