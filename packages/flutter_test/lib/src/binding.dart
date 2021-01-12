@@ -181,7 +181,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
-    debugCheckIntrinsicSizes = checkIntrinsicSizes;
+    debugCheckIntrinsicSizes = checkIntrinsicSizes ?? debugCheckIntrinsicSizes;
   }
 
   @override
@@ -292,7 +292,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// When set to true, tests always run with additional aggressive intrinsic
   /// sizing tests during layout.
   @protected
-  bool get checkIntrinsicSizes => false;
+  bool? get checkIntrinsicSizes => null;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
