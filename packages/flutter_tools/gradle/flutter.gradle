@@ -318,25 +318,18 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            // The embedding is a compileOnly dependency of a Flutter plugin,
-            // however prior to Gradle 6.0.0, it must be an API dependency.
+            // The embedding is a compileOnly dependency of a Flutter plugin, since it's provided
+            // by the app as an API dependency.
             //
-            // Not doing so, causes transitive dependency resolution conflicts.
-            // That is, the embedding dependencies resolved in the plugin are
-            // different than the ones resolved in the app.
-            if (isGradleVersionGraterOrEqualThan('6.0.0')) {
-              addCompileOnlyDependency(
-                pluginProject,
-                buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-              )
-            } else {
-              addApiDependencies(
-                pluginProject,
-                buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-              )
-            }
+            // However, the embedding must remain as an API dependency to be able to desugar
+            // the classes used by a plugin.
+            // See https://issuetracker.google.com/139821726, and
+            // https://github.com/flutter/flutter/issues/72185 for more details.
+            addApiDependencies(
+              pluginProject,
+              buildType.name,
+              "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+            )
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
