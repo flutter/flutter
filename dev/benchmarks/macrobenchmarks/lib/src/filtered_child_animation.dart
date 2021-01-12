@@ -119,12 +119,14 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
         break;
       case FilterType.rotateFilter:
         builder = (BuildContext context, Widget child) => ImageFiltered(
-          imageFilterCallback: (Rect bounds) => ImageFilter.matrix((
-              Matrix4.identity()
-                ..translate(bounds.center.dx, bounds.center.dy)
-                ..rotateZ(_controller.value * 2.0 * pi)
-                ..translate(- bounds.center.dx, - bounds.center.dy)
-          ).storage),
+          imageFilterCallback: (Rect bounds) => ImageFilter.matrix(
+            (
+                Matrix4.identity()
+                  ..translate(bounds.center.dx, bounds.center.dy)
+                  ..rotateZ(_controller.value * 2.0 * pi)
+                  ..translate(- bounds.center.dx, - bounds.center.dy)
+            ).storage,
+          ),
           child: child,
         );
         break;

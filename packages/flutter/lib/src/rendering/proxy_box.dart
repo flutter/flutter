@@ -1137,6 +1137,81 @@ class RenderShaderMask extends RenderProxyBox {
   }
 }
 
+/// Signature for a function that creates a [ui.ImageFilter] for a given [Rect].
+///
+/// Used by [RenderImageFiltered] and the [ImageFiltered] widget. The [bounds] are
+/// computed after the layout of the tree and can be used to construct a [ui.ImageFilter]
+/// that might depend on the size and location of its input, such as [ui.ImageFilter.matrix].
+typedef ImageFilterCallback = ui.ImageFilter Function(Rect bounds);
+
+/// Applies a [ui.ImageFilter] to its child.
+///
+/// For example, a [ui.ImageFilter.blur] might be used to obscure a single child, or a
+/// [ui.ImageFilter.matrix] might be used to quickly animate the transform of a complex
+/// child using a bitmap operation for performance reasons.
+class RenderImageFiltered extends RenderProxyBox {
+  /// Creates a [RenderObject] that applies a [ui.ImageFilter] to its child.
+  ///
+  /// Only one of the imageFilter or the imageFilterCallback should be specified
+  /// and the other must be null, both here or whenever the [paint] method is invoked.
+  RenderImageFiltered({
+    required ui.ImageFilter? imageFilter,
+    required ImageFilterCallback? imageFilterCallback,
+  })
+      : assert((imageFilter == null) != (imageFilterCallback == null)),
+        _imageFilter = imageFilter,
+        _imageFilterCallback = imageFilterCallback;
+
+  /// The [ui.ImageFilter] to apply to this child, or null if the filter will be supplied
+  /// instead by the [imageFilterCallback].
+  ///
+  /// If the nullness of the [imageFilter] is changed here, then either it or the
+  /// [imageFilterCallback] should be changed so that only one of them is specified
+  /// before [paint] is called.
+  ui.ImageFilter? get imageFilter => _imageFilter;
+  ui.ImageFilter? _imageFilter;
+  set imageFilter(ui.ImageFilter? value) {
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsPaint();
+    }
+  }
+
+  /// Called to create the [ui.ImageFilter] to apply to this child, if the [imageFilter]
+  /// property is null.
+  ///
+  /// The image filter callback is called with the bounds of the child after layout so that
+  /// it can customize the filter to the size and location of the child.
+  ///
+  /// If the nullness of the [imageFilterCallback] is changed here, then either it or the
+  /// [imageFilter] should be changed so that only one of them is specified before
+  /// [paint] is called.
+  ImageFilterCallback? get imageFilterCallback => _imageFilterCallback;
+  ImageFilterCallback? _imageFilterCallback;
+  set imageFilterCallback(ImageFilterCallback? value) {
+    if (value != _imageFilterCallback) {
+      _imageFilterCallback = value;
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert((imageFilter == null) != (imageFilterCallback == null));
+    final ui.ImageFilter filter = imageFilter ?? imageFilterCallback!(offset & size);
+    if (layer == null) {
+      layer = ImageFilterLayer(imageFilter: filter);
+    } else {
+      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+      filterLayer.imageFilter = filter;
+    }
+    context.pushLayer(layer!, super.paint, offset);
+  }
+}
+
 /// Applies a filter to the existing painted content and then paints [child].
 ///
 /// This effect is relatively expensive, especially if the filter is non-local,

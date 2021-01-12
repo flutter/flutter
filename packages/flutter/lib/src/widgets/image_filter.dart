@@ -9,38 +9,89 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
-/// Signature for a function that creates an [ImageFilter] for a given [Rect].
-///
-/// Used by [RenderImageFiltered] and the [ImageFiltered] widget.
-typedef ImageFilterCallback = ImageFilter Function(Rect bounds);
-
 /// Applies an [ImageFilter] to its child.
+///
+/// For example, an [ImageFilter.blur] can be applied to blur a child that
+/// needs to be obscured, or an [ImageFilter.matrix] can be used to apply a
+/// bitmap transform to a child at a small trade-off of quality for performance.
+///
+/// {@tool snippet}
+///
+/// This example makes the text blurry:
+///
+/// ```dart
+/// ImageFiltered(
+///   imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+///   child: const Text('I am blurry'),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// This example makes the text (or other complicated widget) rotate
+/// around its center based on an [AnimationController] value.
+///
+/// ```dart
+/// ImageFiltered(
+///   imageFilterCallback: (Rect bounds) => ImageFilter.matrix(
+///     (
+///       Matrix4.identity()
+///         ..translate(bounds.center.dx, bounds.center.dy)
+///         ..rotateZ(_rotationController.value * pi * 2.0)
+///         ..translate(- bounds.center.dx, - bounds.center.dy)
+///     ).storage,
+///   ),
+///   child: Text('<Insert complicated rendering child here>'),
+/// );
+/// ```
+/// {@end-tool}
+///
+/// The [ImageFilter] can either be supplied directly at construction time
+/// using the [imageFilter] property or it can be generated during the paint
+/// operation using the [imageFilterCallback] function. Only one of these
+/// properties can be specified and the other must be null.
+///
+/// The [imageFilter] property will suffice for most [ImageFilter] objects
+/// that don't depend on the coordinate location of their source pixels, such
+/// as an [ImageFilter.blur].
+///
+/// The [imageFilterCallback] function will be called with the bounds of
+/// the eventual RenderObject after layout so that an [ImageFilter] (such
+/// as [ImageFilter.matrix]) that might have different values depending on
+/// the bounds of the child can be properly constructed.
 ///
 /// See also:
 ///
 /// * [BackdropFilter], which applies an [ImageFilter] to everything
 ///   behind its child.
 /// * [ColorFiltered], which applies a [ColorFilter] to its child.
+/// * [ShaderMask], which applies a shader as a mask to its child.
 @immutable
 class ImageFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies an [ImageFilter] to its child.
   ///
-  /// The [imageFilter] must not be null.
+  /// Only one of the [imageFilter] or the [imageFilterCallback] should be
+  /// specified and the other must be null.
   const ImageFiltered({
     Key? key,
     this.imageFilter,
     this.imageFilterCallback,
     Widget? child,
   }) : assert(imageFilter != null || imageFilterCallback != null,
-              'One of imageFilter or imageFilterCallback should be non-null'),
+              'One of imageFilter or imageFilterCallback should be specified'),
        assert(imageFilter == null || imageFilterCallback == null,
-              'Only one of imageFilter or imageFilterCallback should be non-null'),
+              'Only one of imageFilter or imageFilterCallback should be specified'),
        super(key: key, child: child);
 
-  /// The image filter to apply to the child of this widget.
+  /// The image filter to apply to the child of this widget, or null if the
+  /// [imageFilterCallback] is being used to construct a customized filter
+  /// for every layout.
   final ImageFilter? imageFilter;
 
-  /// The callback
+  /// The callback to be used to generate an [ImageFilter] after layout that
+  /// might need to be computed based on the bounds of the child, or null if
+  /// the filter was specified directly using the [imageFilter] property.
   final ImageFilterCallback? imageFilterCallback;
 
   @override
@@ -62,78 +113,5 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageFilter>('imageFilter', imageFilter));
-  }
-}
-
-/// Applies an [ImageFilter] to its child.
-class RenderImageFiltered extends RenderProxyBox {
-  /// Creates a [RenderObject] that applies an [ImageFilter] to its child.
-  ///
-  /// One of the [imageFilter] or [imageFilterCallback] should not be null here
-  /// or whenever the [paint] method is invoked.
-  /// The [imageFilter] will be used if it is not null, otherwise the filter
-  /// will be obtained from the [imageFilterCallback].
-  RenderImageFiltered({
-    required ImageFilter? imageFilter,
-    required ImageFilterCallback? imageFilterCallback,
-  })
-      : assert(imageFilter != null || imageFilterCallback != null),
-        _imageFilter = imageFilter,
-        _imageFilterCallback = imageFilterCallback;
-
-  /// The [ImageFilter] to apply to this child, or null if the filter will be supplied
-  /// instead by the [imageFilterCallback].
-  ///
-  /// If the [imageFilter] is set to null here, then either it or the [imageFilterCallback]
-  /// should be set to a non-null value before [paint] is called.
-  ImageFilter? get imageFilter => _imageFilter;
-  ImageFilter? _imageFilter;
-  set imageFilter(ImageFilter? value) {
-    if (value != _imageFilter) {
-      _imageFilter = value;
-      markNeedsPaint();
-    }
-  }
-
-  /// Called to create the [ImageFilter] to apply to the child if the [imageFilter]
-  /// property is null.
-  ///
-  /// The image filter callback is called with the current bounds of the child so that
-  /// it can customize the filter to the size and location of the child.
-  ///
-  /// If the [imageFilterCallback] is set to null here, then either it or the [imageFilter]
-  /// should be set to a non-null value before [paint] is called.
-  ImageFilterCallback? get imageFilterCallback => _imageFilterCallback;
-  ImageFilterCallback? _imageFilterCallback;
-  set imageFilterCallback(ImageFilterCallback? value) {
-    if (value != _imageFilterCallback) {
-      _imageFilterCallback = value;
-      markNeedsPaint();
-    }
-  }
-
-  @override
-  bool get alwaysNeedsCompositing => child != null;
-
-  ImageFilter? _previousFilter;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(imageFilter != null || imageFilterCallback != null);
-    ImageFilter newFilter = imageFilter ?? imageFilterCallback!(offset & size);
-    if (_previousFilter == newFilter) {
-      // Reuse the previous value if it is the same filter so that native layers
-      // can detect the stability for caching and dirty region calculations.
-      newFilter = _previousFilter!;
-    } else {
-      _previousFilter = newFilter;
-    }
-    if (layer == null) {
-      layer = ImageFilterLayer(imageFilter: newFilter);
-    } else {
-      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
-      filterLayer.imageFilter = newFilter;
-    }
-    context.pushLayer(layer!, super.paint, offset);
   }
 }
