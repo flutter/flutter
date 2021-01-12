@@ -318,11 +318,9 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            // The embedding is a compileOnly dependency of a Flutter plugin, since it's provided
-            // by the app as an API dependency.
+            // The embedding is API dependency of the plugin, so the AGP is able to desugar
+            // default method implementations when the interface is implemented by a plugin.
             //
-            // However, the embedding must remain as an API dependency to be able to desugar
-            // the classes used by a plugin.
             // See https://issuetracker.google.com/139821726, and
             // https://github.com/flutter/flutter/issues/72185 for more details.
             addApiDependencies(
