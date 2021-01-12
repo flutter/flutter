@@ -109,7 +109,6 @@ class _AutocompleteState<T extends Object> extends State<Autocomplete<T>> {
           displayStringForOption: widget.displayStringForOption,
           onSelected: onSelected,
           options: options,
-          //textEditingController: textEditingController,
         );
       },
       onSelected: widget.onSelected,
@@ -151,7 +150,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
-    //required this.textEditingController,
   }) : super(key: key);
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -159,8 +157,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
-
-  //final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
