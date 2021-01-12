@@ -14,7 +14,7 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        section('APK content for task assembleRelease with --obfuscate');
+        section('APK contains plugin classes');
         flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10');
 
         await inDirectory(flutterProject.rootPath, () async {
