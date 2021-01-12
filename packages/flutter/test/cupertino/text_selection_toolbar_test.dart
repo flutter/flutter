@@ -184,7 +184,7 @@ void main() {
     expect(find.byType(Container), findsNWidgets(7));
     expect(_findOverflowNextButton(), findsOneWidget);
     expect(_findOverflowBackButton(), findsNothing);
-  });
+  }, skip: kIsWeb);
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
@@ -233,7 +233,7 @@ void main() {
     await tester.pump();
     toolbarY = tester.getTopLeft(_findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
-  });
+  }, skip: kIsWeb);
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
