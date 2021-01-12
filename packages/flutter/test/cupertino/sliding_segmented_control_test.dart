@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -1097,7 +1098,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('computeDryLayout does not crash', (WidgetTester tester) async {
+  testWidgets('computeDryLayout is pure', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73362.
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
@@ -1105,21 +1106,30 @@ void main() {
       2: Text('C'),
     };
 
+    const Key key = ValueKey<int>(1);
+
     await tester.pumpWidget(
-      boilerplate(
-        builder: (BuildContext context) {
-          return IntrinsicHeight(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 10,
             child: CupertinoSlidingSegmentedControl<int>(
+              key: key,
               children: children,
               groupValue: groupValue,
               onValueChanged: defaultCallback,
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
 
-    //expect(tester.takeException(), isNull);
+    final RenderBox renderBox = getRenderSegmentedControl(tester) as RenderBox;
+
+    final Size size = renderBox.getDryLayout(const BoxConstraints());
+    expect(size.width, greaterThan(10));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {

@@ -612,9 +612,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     _startedOnSelectedSegment = null;
   }
 
-  // The segment the sliding thumb is currently located, or animating towards
-  // to. It may have a different value from widget.groupValue, since this widget
-  // does not report a selection change via `onValueChanged` until the user stops
+  // The segment the sliding thumb is currently located, or animating to. It may
+  // have a different value from widget.groupValue, since this widget does not
+  // report a selection change via `onValueChanged` until the user stops
   // interacting with the widget (onTapUp). For example, the user can drag the
   // thumb around, and the `onValueChanged` callback will not be invoked until
   // the thumb is let go.
@@ -886,7 +886,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMinIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    double maxMinChildHeight = 0;
+    double maxMinChildHeight = _kMinSegmentedControlHeight;
     while (child != null) {
       final double childHeight = child.getMinIntrinsicHeight(width);
       maxMinChildHeight = math.max(maxMinChildHeight, childHeight);
@@ -898,7 +898,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    double maxMaxChildHeight = 0;
+    double maxMaxChildHeight = _kMinSegmentedControlHeight;
     while (child != null) {
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxMaxChildHeight = math.max(maxMaxChildHeight, childHeight);
@@ -941,7 +941,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     return Size(childWidth, maxHeight);
   }
 
-  Size _computeOverallSizeFromChildSize(Size childSize) {
+  Size _computeOverallSizeFromChildSize(Size childSize, BoxConstraints constraints) {
     final int childCount = this.childCount ~/ 2 + 1;
     return constraints.constrain(Size(childSize.width * childCount + totalSeparatorWidth, childSize.height));
   }
@@ -949,7 +949,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     final Size childSize = _calculateChildSize(constraints);
-    return _computeOverallSizeFromChildSize(childSize);
+    return _computeOverallSizeFromChildSize(childSize, constraints);
   }
 
   @override
@@ -976,7 +976,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       index += 1;
     }
 
-    size = _computeOverallSizeFromChildSize(childSize);
+    size = _computeOverallSizeFromChildSize(childSize, constraints);
   }
 
   @override
