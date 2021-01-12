@@ -394,7 +394,7 @@
          "name": "Linux web_tool_tests",
          "repo": "flutter",
          "task_name": "linux_web_tool_tests",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux web_benchmarks_canvaskit",
