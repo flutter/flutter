@@ -1034,7 +1034,7 @@ Future<void> _runWebIntegrationTests() async {
   );
   await _runWebReleaseTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
-      '--dart-define=test.valueA=Example.A',
+      '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
     ]
   );
