@@ -48,8 +48,7 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  * FlutterViewController and other `UIViewController`s.
  */
 FLUTTER_EXPORT
-@interface FlutterViewController
-    : UIViewController <FlutterTextureRegistry, FlutterPluginRegistry, UIPointerInteractionDelegate>
+@interface FlutterViewController : UIViewController <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**
  * Initializes this FlutterViewController with the specified `FlutterEngine`.

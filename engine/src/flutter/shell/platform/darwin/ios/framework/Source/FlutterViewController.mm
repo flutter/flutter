@@ -34,28 +34,6 @@ NSNotificationName const FlutterViewControllerHideHomeIndicator =
 NSNotificationName const FlutterViewControllerShowHomeIndicator =
     @"FlutterViewControllerShowHomeIndicator";
 
-// Struct holding the mouse state. The engine doesn't keep track of which
-// mouse buttons have been pressed, so it's the embedding's responsibility.
-typedef struct MouseState {
-  // True if the last event sent to Flutter had at least one mouse button.
-  // pressed.
-  bool flutter_state_is_down = false;
-
-  // True if kAdd has been sent to Flutter. Used to determine whether
-  // to send a kAdd event before sending an incoming mouse event, since
-  // Flutter expects pointers to be added before events are sent for them.
-  bool flutter_state_is_added = false;
-
-  // Current coordinate of the mouse cursor in physical device pixels.
-  CGPoint location = CGPointZero;
-
-  // Last reported translation for an in-flight pan gesture in physical device pixels.
-  CGPoint last_translation = CGPointZero;
-
-  // The currently pressed buttons, as represented in FlutterPointerEvent.
-  uint64_t buttons = 0;
-} MouseState;
-
 // This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
@@ -100,9 +78,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
   // UIScrollView with height zero and a content offset so we can get those events. See also:
   // https://github.com/flutter/flutter/issues/35050
   fml::scoped_nsobject<UIScrollView> _scrollView;
-  fml::scoped_nsobject<UIPointerInteraction> _pointerInteraction API_AVAILABLE(ios(13.4));
-  fml::scoped_nsobject<UIPanGestureRecognizer> _panGestureRecognizer API_AVAILABLE(ios(13.4));
-  MouseState _mouseState;
 }
 
 @synthesize displayingFlutterUI = _displayingFlutterUI;
@@ -628,17 +603,6 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
   [_engine.get() attachView];
 
-  if (@available(iOS 13.4, *)) {
-    _pointerInteraction.reset([[UIPointerInteraction alloc] initWithDelegate:self]);
-    [self.view addInteraction:_pointerInteraction];
-
-    _panGestureRecognizer.reset(
-        [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(scrollEvent:)]);
-    _panGestureRecognizer.get().allowedScrollTypesMask = UIScrollTypeMaskAll;
-    _panGestureRecognizer.get().allowedTouchTypes = @[ @(UITouchTypeIndirectPointer) ];
-    [_flutterView.get() addGestureRecognizer:_panGestureRecognizer.get()];
-  }
-
   [super viewDidLoad];
 }
 
@@ -795,9 +759,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         return flutter::PointerData::DeviceKind::kTouch;
       case UITouchTypeStylus:
         return flutter::PointerData::DeviceKind::kStylus;
-      case UITouchTypeIndirectPointer:
-        return flutter::PointerData::DeviceKind::kMouse;
       default:
+        // TODO(53696): Handle the UITouchTypeIndirectPointer enum value.
         FML_DLOG(INFO) << "Unhandled touch type: " << touch.type;
         break;
     }
@@ -1458,69 +1421,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (BOOL)isPresentingViewController {
   return self.presentedViewController != nil || self.isPresentingViewControllerAnimating;
-}
-
-- (flutter::PointerData)generatePointerDataForMouse API_AVAILABLE(ios(13.4)) {
-  flutter::PointerData pointer_data;
-
-  pointer_data.Clear();
-
-  pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
-  pointer_data.change = _mouseState.flutter_state_is_added ? flutter::PointerData::Change::kAdd
-                                                           : flutter::PointerData::Change::kHover;
-  pointer_data.pointer_identifier = reinterpret_cast<int64_t>(_pointerInteraction.get());
-
-  pointer_data.physical_x = _mouseState.location.x;
-  pointer_data.physical_y = _mouseState.location.y;
-
-  return pointer_data;
-}
-
-- (UIPointerRegion*)pointerInteraction:(UIPointerInteraction*)interaction
-                      regionForRequest:(UIPointerRegionRequest*)request
-                         defaultRegion:(UIPointerRegion*)defaultRegion API_AVAILABLE(ios(13.4)) {
-  if (request != nil) {
-    auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-    const CGFloat scale = [UIScreen mainScreen].scale;
-    _mouseState.location = {request.location.x * scale, request.location.y * scale};
-
-    flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-
-    pointer_data.signal_kind = flutter::PointerData::SignalKind::kNone;
-    packet->SetPointerData(/*index=*/0, pointer_data);
-
-    [_engine.get() dispatchPointerDataPacket:std::move(packet)];
-  }
-  return nil;
-}
-
-- (void)scrollEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
-  CGPoint translation = [recognizer translationInView:self.view];
-  const CGFloat scale = [UIScreen mainScreen].scale;
-
-  translation.x *= scale;
-  translation.y *= scale;
-
-  auto packet = std::make_unique<flutter::PointerDataPacket>(1);
-
-  flutter::PointerData pointer_data = [self generatePointerDataForMouse];
-  pointer_data.signal_kind = flutter::PointerData::SignalKind::kScroll;
-  pointer_data.scroll_delta_x = (translation.x - _mouseState.last_translation.x);
-  pointer_data.scroll_delta_y = -(translation.y - _mouseState.last_translation.y);
-
-  // The translation reported by UIPanGestureRecognizer is the total translation
-  // generated by the pan gesture since the gesture began. We need to be able
-  // to keep track of the last translation value in order to generate the deltaX
-  // and deltaY coordinates for each subsequent scroll event.
-  if (recognizer.state != UIGestureRecognizerStateEnded) {
-    _mouseState.last_translation = translation;
-  } else {
-    _mouseState.last_translation = CGPointZero;
-  }
-
-  packet->SetPointerData(/*index=*/0, pointer_data);
-
-  [_engine.get() dispatchPointerDataPacket:std::move(packet)];
 }
 
 @end
