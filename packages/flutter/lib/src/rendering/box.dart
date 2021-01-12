@@ -1449,6 +1449,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// ## Examples
   ///
   /// ### Text
@@ -1601,6 +1605,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
@@ -1678,6 +1686,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// See also:
   ///
@@ -1763,6 +1775,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// See also:
   ///
