@@ -265,7 +265,11 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double 
 ///
 /// See [the rendering library](rendering/rendering-library.html) for a complete
 /// list.
-bool debugAssertAllRenderVarsUnset(String reason) {
+///
+/// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
+/// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
+/// test framework itself overrides this value in some cases.)
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -277,6 +281,7 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugPrintMarkNeedsLayoutStacks ||
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
+        debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled ||
         debugOnProfilePaint != null) {
       throw FlutterError(reason);

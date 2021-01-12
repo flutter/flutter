@@ -781,6 +781,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
     assert(inTest);
+    // So that we can assert that it remains the same after the test finishes.
+    _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
@@ -813,6 +815,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  late bool _beforeTestCheckIntrinsicSizes;
+
   void _verifyInvariants() {
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
@@ -830,6 +834,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
+      debugCheckIntrinsicSizesOverride: _beforeTestCheckIntrinsicSizes,
     ));
     assert(debugAssertAllWidgetVarsUnset(
       'The value of a widget debug variable was changed by the test.',
