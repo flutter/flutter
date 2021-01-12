@@ -6,9 +6,6 @@ part of reporting;
 
 class DisabledUsage implements Usage {
   @override
-  bool get isFirstRun => false;
-
-  @override
   bool get suppressAnalytics => true;
 
   @override

@@ -47,6 +47,9 @@ abstract class PersistentToolState {
   /// Update the last active version for a given [channel].
   void updateLastActiveVersion(String fullGitHash, Channel channel);
 
+  /// Return the hash of the last active license terms.
+  String lastActiveLicenseTerms;
+
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
 }
@@ -82,6 +85,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.stable: 'last-active-stable-version'
   };
   static const String _kBotKey = 'is-bot';
+  static const String _kLicenseHash = 'license-hash';
 
   final Config _config;
 
@@ -107,6 +111,15 @@ class _DefaultPersistentToolState implements PersistentToolState {
     final String versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
     _config.setValue(versionKey, fullGitHash);
+  }
+
+  @override
+  String get lastActiveLicenseTerms => _config.getValue(_kLicenseHash) as String;
+
+  @override
+  set lastActiveLicenseTerms(String value) {
+    assert(value != null);
+    _config.setValue(_kLicenseHash, value);
   }
 
   String _versionKeyFor(Channel channel) {
