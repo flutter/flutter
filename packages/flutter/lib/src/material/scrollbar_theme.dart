@@ -16,8 +16,8 @@ import 'theme.dart';
 /// `ScrollbarTheme.of(context)`. Instances of [ScrollbarThemeData] can be customized
 /// with [ScrollbarThemeData.copyWith].
 ///
-/// Typically a [ScrollbarThemeData] is specified as part of the overall [Theme] with
-/// [ThemeData.scrollbarTheme].
+/// Typically the [ScrollbarThemeData] of a [ScrollbarTheme] is specified as part of the overall
+/// [Theme] with [ThemeData.scrollbarTheme].
 ///
 /// All [ScrollbarThemeData] properties are `null` by default. When null, the [Scrollbar]
 /// computes its own default values, typically based on the overall theme's

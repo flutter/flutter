@@ -792,8 +792,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Overridable getter to indicate that the scrollbar should be visible, even
   /// when a scroll is not underway.
   ///
-  /// Subclasses can override this getter to incorporate theme defaults, like the
-  /// [Scrollbar] class.
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? false;
 
