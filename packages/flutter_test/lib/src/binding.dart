@@ -181,7 +181,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
-    debugCheckIntrinsicSizes = checkIntrinsicSizes;
+    debugCheckIntrinsicSizes = _checkIntrinsicSizes;
   }
 
   @override
@@ -293,7 +293,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
   /// always run with aggressive intrinsic sizing tests enabled.
   @protected
-  bool get checkIntrinsicSizes => false;
+  bool get _checkIntrinsicSizes => false;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
@@ -831,7 +831,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
-      debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
+      debugCheckIntrinsicSizesOverride: _checkIntrinsicSizes,
     ));
     assert(debugAssertAllWidgetVarsUnset(
       'The value of a widget debug variable was changed by the test.',
@@ -945,7 +945,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool get disableShadows => true;
 
   @override
-  bool get checkIntrinsicSizes => true;
+  bool get _checkIntrinsicSizes => true;
 
   /// The value of [defaultTestTimeout] can be set to `None` to enable debugging flutter tests where
   /// we would not want to timeout the test. This is expected to be used by test tooling which
