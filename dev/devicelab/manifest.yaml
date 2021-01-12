@@ -499,7 +499,6 @@ tasks:
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
-    flaky: true # https://github.com/flutter/flutter/issues/71178
 
   smoke_catalina_start_up:
     description: >
