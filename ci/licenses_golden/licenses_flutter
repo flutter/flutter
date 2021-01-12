@@ -922,6 +922,7 @@ FILE: ../../../flutter/shell/platform/common/cpp/path_utils_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_export.h
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_messenger.h
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_plugin_registrar.h
+FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_texture_registrar.h
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model_unittests.cc
