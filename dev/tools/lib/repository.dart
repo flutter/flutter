@@ -71,7 +71,8 @@ abstract class Repository {
       );
     }
     if (!_checkoutDirectory.existsSync()) {
-      stdio.printTrace('Cloning $name from $upstream to ${_checkoutDirectory.path}...');
+      stdio.printTrace(
+          'Cloning $name from $upstream to ${_checkoutDirectory.path}...');
       git.run(
         <String>['clone', '--', upstream, _checkoutDirectory.path],
         'Cloning $name repo',
@@ -91,7 +92,8 @@ abstract class Repository {
     }
 
     final String revision = reverseParse('HEAD');
-    stdio.printTrace('Repository $name is checked out at revision "$revision".');
+    stdio
+        .printTrace('Repository $name is checked out at revision "$revision".');
     return _checkoutDirectory;
   }
 
@@ -277,32 +279,24 @@ class FrameworkRepository extends Repository {
   ///
   /// This is useful when testing a commit that has not been merged upstream
   /// yet.
-  factory FrameworkRepository.hostRepoAsUpstream(
+  factory FrameworkRepository.localRepoAsUpstream(
     Checkouts checkouts, {
     String name = 'framework',
-    bool localUpstream = false,
     bool useExistingCheckout = false,
+    @required String upstreamPath,
   }) {
-    final Directory flutterRoot = checkouts
-        // flutter/dev/tools/checkouts
-        .directory
-        // flutter/dev/tools
-        .parent
-        // flutter/dev
-        .parent
-        // flutter
-        .parent;
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstream: 'file://${flutterRoot.path}/',
-      localUpstream: localUpstream,
+      upstream: 'file://$upstreamPath/',
+      localUpstream: false,
       useExistingCheckout: useExistingCheckout,
     );
   }
 
   final Checkouts checkouts;
-  static const String defaultUpstream = 'https://github.com/flutter/flutter.git';
+  static const String defaultUpstream =
+      'https://github.com/flutter/flutter.git';
 
   String get cacheDirectory => fileSystem.path.join(
         checkoutDirectory.path,
@@ -387,45 +381,16 @@ class Checkouts {
     @required this.platform,
     @required this.processManager,
     @required this.stdio,
-    Directory parentDirectory,
-    String directoryName = 'checkouts',
-  }) {
-    if (parentDirectory != null) {
-      directory = parentDirectory.childDirectory(directoryName);
-    } else {
-      String filePath;
-      // If a test
-      if (platform.script.scheme == 'data') {
-        final RegExp pattern = RegExp(
-          r'(file:\/\/[^"]*[/\\]dev\/tools[/\\][^"]+\.dart)',
-          multiLine: true,
-        );
-        final Match match =
-            pattern.firstMatch(Uri.decodeFull(platform.script.path));
-        if (match == null) {
-          throw Exception(
-            'Cannot determine path of script!\n${platform.script.path}',
-          );
-        }
-        filePath = Uri.parse(match.group(1)).path.replaceAll(r'%20', ' ');
-      } else {
-        filePath = platform.script.toFilePath();
-      }
-      final String checkoutsDirname = fileSystem.path.normalize(
-        fileSystem.path.join(
-          fileSystem.path.dirname(filePath),
-          '..',
-          'checkouts',
-        ),
-      );
-      directory = fileSystem.directory(checkoutsDirname);
-    }
+    @required Directory parentDirectory,
+    String directoryName = 'flutter_conductor_checkouts',
+  })  : assert(parentDirectory != null),
+        directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
   }
 
-  Directory directory;
+  final Directory directory;
   final FileSystem fileSystem;
   final Platform platform;
   final ProcessManager processManager;

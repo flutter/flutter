@@ -11,6 +11,7 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:dev_tools/codesign.dart';
+import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/stdio.dart';
@@ -30,6 +31,7 @@ Future<void> main(List<String> args) async {
   );
   final Checkouts checkouts = Checkouts(
     fileSystem: fileSystem,
+    parentDirectory: flutterRoot.parent,
     platform: platform,
     processManager: processManager,
     stdio: stdio,
@@ -66,13 +68,3 @@ Future<void> main(List<String> args) async {
   }
 }
 
-bool assertsEnabled() {
-  // Verify asserts enabled
-  bool assertsEnabled = false;
-
-  assert(() {
-    assertsEnabled = true;
-    return true;
-  }());
-  return assertsEnabled;
-}

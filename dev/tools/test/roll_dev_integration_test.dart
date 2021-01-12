@@ -7,6 +7,7 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/roll_dev.dart' show rollDev;
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/version.dart';
@@ -32,6 +33,7 @@ void main() {
       stdio = TestStdio(verbose: true);
       checkouts = Checkouts(
         fileSystem: fileSystem,
+        parentDirectory: flutterRoot.parent,
         platform: platform,
         processManager: processManager,
         stdio: stdio,

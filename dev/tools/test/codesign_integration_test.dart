@@ -9,9 +9,8 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:dev_tools/codesign.dart' show CodesignCommand;
-import 'package:dev_tools/globals.dart' show ConductorException;
+import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart' show Checkouts;
-import 'package:dev_tools/stdio.dart' show VerboseStdio;
 
 import './common.dart';
 
@@ -21,11 +20,13 @@ void main() {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
     const ProcessManager processManager = LocalProcessManager();
+    final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
+      parentDirectory: flutterRoot.parent,
       platform: platform,
       processManager: processManager,
-      stdio: VerboseStdio.local(),
+      stdio: stdio,
     );
 
     final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
@@ -38,8 +39,12 @@ void main() {
         // Only verify if the correct binaries are in the cache
         '--no-signatures',
       ]);
-    } on ConductorException {
+    } on ConductorException catch (e) {
       print(fixItInstructions);
+      fail(e.message);
+    } on Exception {
+      print('stdout:\n${stdio.stdout}');
+      print('stderr:\n${stdio.error}');
       rethrow;
     }
   }, onPlatform: <String, dynamic>{
