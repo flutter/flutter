@@ -181,7 +181,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
-    debugCheckIntrinsicSizes = checkIntrinsicSizes ?? debugCheckIntrinsicSizes;
   }
 
   @override
@@ -286,13 +285,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
-
-  /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
-  ///
-  /// When set to true, tests always run with additional aggressive intrinsic
-  /// sizing tests during layout.
-  @protected
-  bool? get checkIntrinsicSizes => null;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
