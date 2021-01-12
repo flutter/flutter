@@ -39,7 +39,7 @@ dependencies:
   web_socket_channel: 1.1.0
   stream_channel: 2.1.0-nullsafety.3
   shelf_web_socket: 0.2.3
-  shelf_static: 0.2.8
+  shelf_static: 0.2.9+1
   pub_semver: 1.4.4
   pool: 1.5.0-nullsafety.3
   path: 1.8.0-nullsafety.3
@@ -110,4 +110,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 9663
+# PUBSPEC CHECKSUM: 36c0
