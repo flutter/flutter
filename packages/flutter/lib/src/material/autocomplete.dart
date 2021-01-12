@@ -24,7 +24,7 @@ import 'text_form_field.dart';
 ///
 /// ```dart
 /// class AutocompleteBasicExample extends StatelessWidget {
-///   AutocompleteBasicExample({Key key}) : super(key: key);
+///   AutocompleteBasicExample({Key? key}) : super(key: key);
 ///
 ///   final List<String> _kOptions = <String>[
 ///     'aardvark',
@@ -36,10 +36,10 @@ import 'text_form_field.dart';
 ///   Widget build(BuildContext context) {
 ///     return Autocomplete<String>(
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         if (textEditingValue.text == null || textEditingValue.text == '') {
+///         if (textEditingValue.text == '') {
 ///           return const Iterable<String>.empty();
 ///         }
-///         return kOptions.where((String option) {
+///         return _kOptions.where((String option) {
 ///           return option.contains(textEditingValue.text.toLowerCase());
 ///         });
 ///       },
