@@ -891,12 +891,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
-          )
+          ),
       );
 
       await tester.pumpWidget(
@@ -919,12 +918,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
-          )
+          ),
       );
 
       await tester.pumpWidget(
@@ -946,12 +944,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
-          )
+          ),
       );
     },
   );
@@ -987,12 +984,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
             strokeWidth: customWidth,
-          )
+          ),
       );
 
       await tester.pumpWidget(
@@ -1017,12 +1013,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
             strokeWidth: customWidth,
-          )
+          ),
       );
 
       await tester.pumpWidget(
@@ -1046,12 +1041,11 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // If only one button, we can paint border with one path.
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
             strokeWidth: customWidth,
-          )
+          ),
       );
     },
   );
