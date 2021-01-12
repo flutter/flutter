@@ -690,7 +690,7 @@ Information about project "Runner":
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
       expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
-      expect(buildPhaseScriptContents.contains('"EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386"'), isTrue);
+      expect(buildPhaseScriptContents.contains('"EXCLUDED_ARCHS'), isFalse);
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
