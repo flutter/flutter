@@ -783,8 +783,7 @@ void main() {
     // Tap up and the sliding animation should play.
     await gesture.up();
     await tester.pump();
-    // 10 ms isn't long enough for this gesture to be recognized as a longpress,
-    // the thumb.
+    // 10 ms isn't long enough for this gesture to be recognized as a longpress.
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(currentThumbScale(tester), 1);
@@ -1131,6 +1130,41 @@ void main() {
     expect(size.width, greaterThan(10));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/62063.
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
+
+    groupValue = null;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final RenderBox renderBox = getRenderSegmentedControl(tester) as RenderBox;
+    final Size size = renderBox.size;
+
+    for (final int value in children.keys) {
+      setState!(() { groupValue = value; });
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(renderBox.size, size);
+    }
+  });
+
 
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{

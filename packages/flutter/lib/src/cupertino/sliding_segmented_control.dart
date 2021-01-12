@@ -59,6 +59,12 @@ const double _kTouchYDistanceThreshold = 50.0 * 50.0;
 // Inspected from iOS 13.2 simulator.
 const double _kCornerRadius = 8;
 
+// The minimum opacity of an unselected segment, when the user presses on the
+// segment and it starts to fadeout.
+//
+// Inspected from iOS 13.2 simulator.
+const double _kContentPressedMinOpacity = 0.2;
+
 // The spring animation used when the thumb changes its rect.
 final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
   const SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799),
@@ -99,9 +105,8 @@ class _Segment extends StatefulWidget {
 }
 
 class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segment> {
-  static final Tween<double> highlightPressScaleTween = Tween<double>(begin: 1.0, end: _kMinThumbScale);
   late final AnimationController highlightPressScaleController;
-  late Animation<double> highlightPressScaleAnimation = highlightPressScaleController.drive(highlightPressScaleTween);
+  late Animation<double> highlightPressScaleAnimation;
 
   @override
   void initState() {
@@ -110,6 +115,10 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
       duration: _kOpacityAnimationDuration,
       value: widget.shouldScaleContent ? 1 : 0,
       vsync: this,
+    );
+
+    highlightPressScaleAnimation = highlightPressScaleController.drive(
+      Tween<double>(begin: 1.0, end: _kMinThumbScale),
     );
   }
 
@@ -122,7 +131,7 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
       highlightPressScaleAnimation = highlightPressScaleController.drive(
         Tween<double>(
           begin: highlightPressScaleAnimation.value,
-          end: widget.shouldScaleContent ? highlightPressScaleTween.end : highlightPressScaleTween.begin,
+          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0
         ),
       );
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
@@ -131,21 +140,21 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
 
   @override
   Widget build(BuildContext context) {
-    // Expand the hitTest area.
     return MetaData(
+      // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
       child: IndexedStack(
         index: 0,
         alignment: Alignment.center,
         children: <Widget>[
           AnimatedOpacity(
-            opacity: widget.shouldFadeoutContent ? 0.2 : 1,
+            opacity: widget.shouldFadeoutContent ? _kContentPressedMinOpacity : 1,
             duration: _kOpacityAnimationDuration,
             curve: Curves.ease,
             child: AnimatedDefaultTextStyle(
               style: DefaultTextStyle.of(context)
                 .style
-                .merge(TextStyle(fontWeight: widget.highlighted? FontWeight.w500 : FontWeight.normal)),
+                .merge(TextStyle(fontWeight: widget.highlighted ? FontWeight.w500 : FontWeight.normal)),
               duration: _kHighlightAnimationDuration,
               curve: Curves.ease,
               child: ScaleTransition(
@@ -177,7 +186,7 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
   }
 }
 
-// Fadeout the separator when either adjacent segmment is highlighted.
+// Fadeout the separator when either adjacent segment is highlighted.
 class _SegmentSeparator<T> extends StatefulWidget {
   const _SegmentSeparator({
     required ValueKey<T> key,
@@ -259,8 +268,8 @@ class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerP
 /// argument must be an ordered [Map] such as a [LinkedHashMap], the ordering of
 /// the keys will determine the order of the widgets in the segmented control.
 ///
-/// The widget calls the [onValueChanged] callback *when the user gesture ends*
-/// and a different option is selected. The map key associated with the newly
+/// The widget calls the [onValueChanged] callback *when a valid user gesture
+/// completes on a unselected segment*. The map key associated with the newly
 /// selected widget is returned in the [onValueChanged] callback. Typically,
 /// widgets that use a segmented control will listen for the [onValueChanged]
 /// callback and rebuild the segmented control with a new [groupValue] to update
@@ -279,8 +288,6 @@ class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerP
 ///
 /// See also:
 ///
-///  * [CupertinoSlidingSegmentedControl], a segmented control widget in the
-///    style introduced in iOS 13.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
