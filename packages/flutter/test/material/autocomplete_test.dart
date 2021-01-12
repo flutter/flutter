@@ -200,4 +200,57 @@ void main() {
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
     expect(field.controller!.text, kOptionsUsers.first.name);
   });
+
+  testWidgets('can build a custom field', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+              return Container(key: fieldKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The custom field is rendered and not the default TextFormField.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byType(TextFormField), findsNothing);
+  });
+
+  testWidgets('can build custom options', (WidgetTester tester) async {
+    final GlobalKey optionsKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The default field is rendered but not the options, yet.
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byType(TextFormField), findsOneWidget);
+
+    // Focus the empty field. The custom options is displayed.
+    await tester.tap(find.byType(TextFormField));
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+  });
 }
