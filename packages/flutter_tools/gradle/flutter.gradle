@@ -213,7 +213,7 @@ class FlutterPlugin implements Plugin<Project> {
         // The embedding is set as an API dependency in a Flutter plugin.
         // Therefore, don't make the app project depend on the embedding if there are Flutter
         // plugins since it causes duplicated classes.
-        if (getPluginList().size() == 0) {
+        if (!isFlutterAppProject() || getPluginList().size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -647,6 +647,10 @@ class FlutterPlugin implements Plugin<Project> {
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
 
+    private boolean isFlutterAppProject() {
+        return project.android.hasProperty("applicationVariants")
+    }
+
     private void addFlutterTasks(Project project) {
         if (project.state.failure) {
             return
@@ -804,8 +808,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         }
-        boolean isFlutterAppProject = project.android.hasProperty("applicationVariants")
-        if (isFlutterAppProject) {
+        if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
                 if (!shouldConfigureFlutterTask(assembleTask)) {
