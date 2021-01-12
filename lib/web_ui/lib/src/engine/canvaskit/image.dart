@@ -46,12 +46,10 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   }
 
   request.onError.listen((html.ProgressEvent event) {
-    completer.completeError(ImageCodecException(
-      '$_kNetworkImageMessage\n'
-      'Image URL: $url\n'
-      'Trying to load an image from another domain? Find answers at:\n'
-      'https://flutter.dev/docs/development/platform-integration/web-images'
-    ));
+    completer.completeError(ImageCodecException('$_kNetworkImageMessage\n'
+        'Image URL: $url\n'
+        'Trying to load an image from another domain? Find answers at:\n'
+        'https://flutter.dev/docs/development/platform-integration/web-images'));
   });
 
   request.onLoad.listen((html.ProgressEvent event) {
@@ -63,10 +61,10 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
     final bool success = accepted || fileUri || notModified || unknownRedirect;
 
     if (!success) {
-      completer.completeError(ImageCodecException(
-        '$_kNetworkImageMessage\n'
-        'Image URL: $url\n'
-        'Server response code: $status'),
+      completer.completeError(
+        ImageCodecException('$_kNetworkImageMessage\n'
+            'Image URL: $url\n'
+            'Server response code: $status'),
       );
       return;
     }
@@ -88,7 +86,8 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
 /// The CanvasKit implementation of [ui.Codec].
 ///
 /// Wraps `SkAnimatedImage`.
-class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage> implements ui.Codec {
+class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
+    implements ui.Codec {
   /// Decodes an image from a list of encoded bytes.
   CkAnimatedImage.decodeFromBytes(this._bytes, this.src);
 
@@ -97,7 +96,8 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage> implements ui.C
 
   @override
   SkAnimatedImage createDefault() {
-    final SkAnimatedImage? animatedImage = canvasKit.MakeAnimatedImageFromEncoded(_bytes);
+    final SkAnimatedImage? animatedImage =
+        canvasKit.MakeAnimatedImageFromEncoded(_bytes);
     if (animatedImage == null) {
       throw ImageCodecException(
         'Failed to decode image data.\n'
@@ -183,13 +183,15 @@ class CkImage implements ui.Image, StackTraceDebugger {
       final int originalHeight = skImage.height();
       box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
         return canvasKit.MakeImage(
-          originalBytes.buffer.asUint8List(),
-          originalWidth,
-          originalHeight,
-          canvasKit.AlphaType.Premul,
-          canvasKit.ColorType.RGBA_8888,
-          SkColorSpaceSRGB,
-        );
+            SkImageInfo(
+              alphaType: canvasKit.AlphaType.Premul,
+              colorType: canvasKit.ColorType.RGBA_8888,
+              colorSpace: SkColorSpaceSRGB,
+              width: originalWidth,
+              height: originalHeight,
+            ),
+            originalBytes.buffer.asUint8List(),
+            4 * originalWidth);
       });
     }
   }
@@ -300,7 +302,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
         width: skImage.width(),
         height: skImage.height(),
       );
-      bytes = skImage.readPixels(imageInfo, 0, 0);
+      bytes = skImage.readPixels(0, 0, imageInfo);
     } else {
       final SkData skData = skImage.encodeToData(); //defaults to PNG 100%
       // make a copy that we can return

@@ -22,8 +22,10 @@ void main() {
 
 const ui.Rect region = const ui.Rect.fromLTRB(0, 0, 500, 250);
 
-Future<void> matchPictureGolden(String goldenFile, CkPicture picture, { bool write = false }) async {
-  final EnginePlatformDispatcher dispatcher = ui.window.platformDispatcher as EnginePlatformDispatcher;
+Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
+    {bool write = false}) async {
+  final EnginePlatformDispatcher dispatcher =
+      ui.window.platformDispatcher as EnginePlatformDispatcher;
   final LayerSceneBuilder sb = LayerSceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(ui.Offset.zero, picture);
@@ -35,18 +37,21 @@ void testMain() {
   group('CkCanvas', () {
     setUpCanvasKitTest();
 
-    test('renders using non-recording canvas if weak refs are supported', () async {
+    test('renders using non-recording canvas if weak refs are supported',
+        () async {
       expect(browserSupportsFinalizationRegistry, isTrue,
           reason: 'This test specifically tests non-recording canvas, which '
-                  'only works if FinalizationRegistry is available.');
+              'only works if FinalizationRegistry is available.');
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(region);
       expect(canvas.runtimeType, CkCanvas);
       drawTestPicture(canvas);
-      await matchPictureGolden('canvaskit_picture_original.png', recorder.endRecording());
+      await matchPictureGolden(
+          'canvaskit_picture_original.png', recorder.endRecording());
     });
 
-    test('renders using a recording canvas if weak refs are not supported', () async {
+    test('renders using a recording canvas if weak refs are not supported',
+        () async {
       browserSupportsFinalizationRegistry = false;
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(region);
@@ -54,23 +59,31 @@ void testMain() {
       drawTestPicture(canvas);
 
       final CkPicture originalPicture = recorder.endRecording();
-      await matchPictureGolden('canvaskit_picture_original.png', originalPicture);
+      await matchPictureGolden(
+          'canvaskit_picture_original.png', originalPicture);
 
-      final ByteData originalPixels = await (await originalPicture.toImage(50, 50)).toByteData() as ByteData;
+      final ByteData originalPixels =
+          await (await originalPicture.toImage(50, 50)).toByteData()
+              as ByteData;
 
       // Test that a picture restored from a snapshot looks the same.
       final CkPictureSnapshot? snapshot = canvas.pictureSnapshot;
       expect(snapshot, isNotNull);
       final SkPicture restoredSkPicture = snapshot!.toPicture();
       expect(restoredSkPicture, isNotNull);
-      final CkPicture restoredPicture = CkPicture(restoredSkPicture, ui.Rect.fromLTRB(0, 0, 50, 50), snapshot);
-      final ByteData restoredPixels = await (await restoredPicture.toImage(50, 50)).toByteData() as ByteData;
+      final CkPicture restoredPicture = CkPicture(
+          restoredSkPicture, ui.Rect.fromLTRB(0, 0, 50, 50), snapshot);
+      final ByteData restoredPixels =
+          await (await restoredPicture.toImage(50, 50)).toByteData()
+              as ByteData;
 
-      await matchPictureGolden('canvaskit_picture_restored.png', restoredPicture);
-      expect(restoredPixels.buffer.asUint8List(), originalPixels.buffer.asUint8List());
+      await matchPictureGolden(
+          'canvaskit_picture_restored.png', restoredPicture);
+      expect(restoredPixels.buffer.asUint8List(),
+          originalPixels.buffer.asUint8List());
     });
-  // TODO: https://github.com/flutter/flutter/issues/60040
-  // TODO: https://github.com/flutter/flutter/issues/71520
+    // TODO: https://github.com/flutter/flutter/issues/60040
+    // TODO: https://github.com/flutter/flutter/issues/71520
   }, skip: isIosSafari || isFirefox);
 }
 
@@ -149,7 +162,7 @@ void drawTestPicture(CkCanvas canvas) {
       ..[1] = 0
       ..[2] = 15
       ..[3] = 15,
-    [Float32List(4)],
+    Uint32List.fromList(<int>[0x00000000]),
     ui.BlendMode.srcOver,
   );
 
@@ -242,8 +255,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawShadow(
-    CkPath()
-      ..addRect(ui.Rect.fromLTRB(0, 0, 40, 30)),
+    CkPath()..addRect(ui.Rect.fromLTRB(0, 0, 40, 30)),
     ui.Color(0xFF00FF00),
     4,
     true,
@@ -283,7 +295,8 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
   canvas.rotate(-math.pi / 8);
   canvas.drawLine(ui.Offset.zero, ui.Offset(30, 30), CkPaint());
-  canvas.drawCircle(ui.Offset(30, 30), 7, CkPaint()..color = ui.Color(0xFF00AA00));
+  canvas.drawCircle(
+      ui.Offset(30, 30), 7, CkPaint()..color = ui.Color(0xFF00AA00));
   canvas.restore();
 
   canvas.translate(60, 0);
@@ -309,7 +322,8 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.saveLayer(region, CkPaint());
   canvas.drawCircle(ui.Offset(30, 30), 10, CkPaint());
   {
-    canvas.saveLayerWithFilter(region, ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10));
+    canvas.saveLayerWithFilter(
+        region, ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10));
     canvas.drawCircle(ui.Offset(10, 10), 10, CkPaint());
     canvas.drawCircle(ui.Offset(50, 50), 10, CkPaint());
     canvas.restore();
@@ -389,14 +403,17 @@ CkImage generateTestImage() {
   ctx.fillRect(10, 0, 10, 10);
   ctx.fillStyle = '#FF00FF';
   ctx.fillRect(10, 10, 10, 10);
-  final Uint8List imageData = ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
+  final Uint8List imageData =
+      ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
   final SkImage skImage = canvasKit.MakeImage(
-    imageData,
-    20,
-    20,
-    canvasKit.AlphaType.Premul,
-    canvasKit.ColorType.RGBA_8888,
-    SkColorSpaceSRGB,
-  );
+      SkImageInfo(
+        width: 20,
+        height: 20,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+      ),
+      imageData,
+      4 * 20);
   return CkImage(skImage);
 }
