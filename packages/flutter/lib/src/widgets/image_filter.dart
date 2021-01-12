@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+
+// Examples can assume:
+// late AnimationController controller;
 
 /// Applies an [ImageFilter] to its child.
 ///
@@ -21,7 +24,7 @@ import 'framework.dart';
 ///
 /// ```dart
 /// ImageFiltered(
-///   imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+///   imageFilter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
 ///   child: const Text('I am blurry'),
 /// )
 /// ```
@@ -34,16 +37,16 @@ import 'framework.dart';
 ///
 /// ```dart
 /// ImageFiltered(
-///   imageFilterCallback: (Rect bounds) => ImageFilter.matrix(
+///   imageFilterCallback: (Rect bounds) => ui.ImageFilter.matrix(
 ///     (
 ///       Matrix4.identity()
 ///         ..translate(bounds.center.dx, bounds.center.dy)
-///         ..rotateZ(_rotationController.value * pi * 2.0)
+///         ..rotateZ(controller.value * math.pi * 2.0)
 ///         ..translate(- bounds.center.dx, - bounds.center.dy)
 ///     ).storage,
 ///   ),
 ///   child: Text('<Insert complicated rendering child here>'),
-/// );
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -87,7 +90,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the child of this widget, or null if the
   /// [imageFilterCallback] is being used to construct a customized filter
   /// for every layout.
-  final ImageFilter? imageFilter;
+  final ui.ImageFilter? imageFilter;
 
   /// The callback to be used to generate an [ImageFilter] after layout that
   /// might need to be computed based on the bounds of the child, or null if
@@ -112,6 +115,6 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ImageFilter>('imageFilter', imageFilter));
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
   }
 }
