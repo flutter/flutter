@@ -241,7 +241,7 @@ final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEd
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
-        editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+        editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard, false);
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -257,7 +257,7 @@ final TextEditingAction<AltArrowRightTextIntent> _altArrowRightTextAction = Text
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
-        editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+        editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard, false);
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

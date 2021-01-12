@@ -629,12 +629,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text) {
+  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
     // If the selection is already all the way left, there is nothing to do.
     if (selection.extentOffset <= 0) {
       return selection;
     }
-    final int previousExtent = previousCharacter(selection.extentOffset, text);
+    final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
     return selection.copyWith(extentOffset: previousExtent);
   }
 
@@ -651,17 +651,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text) {
+  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text, [bool includeWhitespace = true]) {
     // If the selection is already all the way right, there is nothing to do.
     if (selection.extentOffset >= text.length) {
       return selection;
     }
-    final int nextExtent = nextCharacter(selection.extentOffset, text);
+    final int nextExtent = nextCharacter(selection.extentOffset, text, includeWhitespace);
     return selection.copyWith(extentOffset: nextExtent);
   }
 
-  // TODO(justinmc): Keep working towards a more generic or more organized way
-  // to handle the arrow key movements.
   void moveSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionLeft(
       selection!,
@@ -708,7 +706,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  void moveSelectionLeftByWord(SelectionChangedCause cause) {
+  void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _moveSelectionToStart(cause);
@@ -720,6 +718,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection nextSelection = _moveGivenSelectionLeftByWord(
       _textPainter,
       selection!,
+      includeWhitespace,
     );
     if (nextSelection == selection) {
       return;
@@ -745,7 +744,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return TextSelection(baseOffset: word.start, extentOffset: word.start);
   }
 
-  void moveSelectionRightByWord(SelectionChangedCause cause) {
+  void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _moveSelectionToEnd(cause);
@@ -757,6 +756,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final TextSelection nextSelection = _moveGivenSelectionRightByWord(
       _textPainter,
       selection!,
+      includeWhitespace,
     );
     if (nextSelection == selection) {
       return;
