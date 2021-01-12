@@ -647,7 +647,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!globals.xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isRequiredVersionSatisfactory) {
     globals.printError('Found "${globals.xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

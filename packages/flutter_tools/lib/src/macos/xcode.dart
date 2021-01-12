@@ -29,6 +29,10 @@ const int kXcodeRequiredVersionMajor = 11;
 const int kXcodeRequiredVersionMinor = 0;
 const int kXcodeRequiredVersionPatch = 0;
 
+const int kXcodeRecommendedVersionMajor = 12;
+const int kXcodeRecommendedVersionMinor = 0;
+const int kXcodeRecommendedVersionPatch = 1;
+
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
 ///
@@ -60,7 +64,7 @@ class Xcode {
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
-  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
@@ -132,18 +136,31 @@ class Xcode {
     return _isSimctlInstalled;
   }
 
-  bool get isVersionSatisfactory {
+  bool get isRequiredVersionSatisfactory {
     if (!_xcodeProjectInterpreter.isInstalled) {
       return false;
     }
-    if (majorVersion > kXcodeRequiredVersionMajor) {
+    return _isAtLeastVersion(kXcodeRequiredVersionMajor,
+        kXcodeRequiredVersionMinor, kXcodeRequiredVersionPatch);
+  }
+
+  bool get isRecommendedVersionSatisfactory {
+    if (!_xcodeProjectInterpreter.isInstalled) {
+      return false;
+    }
+    return _isAtLeastVersion(kXcodeRecommendedVersionMajor,
+        kXcodeRecommendedVersionMinor, kXcodeRecommendedVersionPatch);
+  }
+
+  bool _isAtLeastVersion(int major, int minor, int patch) {
+    if (majorVersion > major) {
       return true;
     }
-    if (majorVersion == kXcodeRequiredVersionMajor) {
-      if (minorVersion == kXcodeRequiredVersionMinor) {
-        return patchVersion >= kXcodeRequiredVersionPatch;
+    if (majorVersion == major) {
+      if (minorVersion == minor) {
+        return patchVersion >= patch;
       }
-      return minorVersion >= kXcodeRequiredVersionMinor;
+      return minorVersion >= minor;
     }
     return false;
   }

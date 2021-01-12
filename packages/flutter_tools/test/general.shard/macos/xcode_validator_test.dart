@@ -40,12 +40,36 @@ void main() {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText)
           .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
+      when(xcode.majorVersion).thenReturn(7);
+      when(xcode.minorVersion).thenReturn(0);
+      when(xcode.patchVersion).thenReturn(1);
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+      when(xcode.isRecommendedVersionSatisfactory).thenReturn(false);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.error);
+      expect(result.messages.last.message, contains('Xcode 7.0.1 out of date (12.0.1 is recommended)'));
+    });
+
+    testWithoutContext('Emits partial status when Xcode below recommended version', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.versionText)
+          .thenReturn('Xcode 11.0\nBuild version 11A420a\n');
+      when(xcode.majorVersion).thenReturn(11);
+      when(xcode.minorVersion).thenReturn(0);
+      when(xcode.patchVersion).thenReturn(0);
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.isRecommendedVersionSatisfactory).thenReturn(false);
+      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
+      final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
+      final ValidationResult result = await validator.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.messages.last.type, ValidationMessageType.hint);
+      expect(result.messages.last.message, contains('Xcode 11.0.0 out of date (12.0.1 is recommended)'));
     });
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {
@@ -53,6 +77,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.isRecommendedVersionSatisfactory).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
       when(xcode.isSimctlInstalled).thenReturn(true);
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
@@ -65,6 +90,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.isRecommendedVersionSatisfactory).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(false);
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
@@ -78,6 +104,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.isRecommendedVersionSatisfactory).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());

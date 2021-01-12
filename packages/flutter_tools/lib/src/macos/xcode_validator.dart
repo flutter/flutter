@@ -29,18 +29,28 @@ class XcodeValidator extends DoctorValidator {
       xcodeStatus = ValidationType.installed;
 
       messages.add(ValidationMessage(_userMessages.xcodeLocation(_xcode.xcodeSelectPath)));
-
-      xcodeVersionInfo = _xcode.versionText;
-      if (xcodeVersionInfo.contains(',')) {
-        xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      }
       messages.add(ValidationMessage(_xcode.versionText));
 
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          _userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor, kXcodeRequiredVersionPatch)
-        ));
+        messages.add(ValidationMessage.error(_userMessages.xcodeOutdated(
+          _xcode.majorVersion,
+          _xcode.minorVersion,
+          _xcode.patchVersion,
+          kXcodeRecommendedVersionMajor,
+          kXcodeRecommendedVersionMinor,
+          kXcodeRecommendedVersionPatch,
+        )));
+      } else if (!_xcode.isRecommendedVersionSatisfactory) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(ValidationMessage.hint(_userMessages.xcodeOutdated(
+          _xcode.majorVersion,
+          _xcode.minorVersion,
+          _xcode.patchVersion,
+          kXcodeRecommendedVersionMajor,
+          kXcodeRecommendedVersionMinor,
+          kXcodeRecommendedVersionPatch,
+        )));
       }
 
       if (!_xcode.eulaSigned) {
