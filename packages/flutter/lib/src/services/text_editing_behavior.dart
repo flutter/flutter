@@ -11,8 +11,12 @@ import 'package:flutter/widgets.dart';
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
+class AltArrowLeftTextIntent extends Intent {}
+class AltArrowRightTextIntent extends Intent {}
 class ArrowLeftTextIntent extends Intent {}
 class ArrowRightTextIntent extends Intent {}
+class ControlArrowLeftTextIntent extends Intent {}
+class ControlArrowRightTextIntent extends Intent {}
 class ShiftArrowLeftTextIntent extends Intent {}
 class ShiftArrowRightTextIntent extends Intent {}
 
@@ -152,12 +156,16 @@ class TextEditingAction<T extends Intent> extends Action<T> {
 ///
 /// * [Actions], the widget that accepts a map like this.
 final Map<Type, Action<Intent>> textEditingActionsMap = <Type, Action<Intent>>{
-  SingleTapUpTextIntent: _singleTapUpTextAction,
-  TapDownTextIntent: _tapDownTextAction,
+  AltArrowLeftTextIntent: _altArrowLeftTextAction,
+  AltArrowRightTextIntent: _altArrowRightTextAction,
   ArrowLeftTextIntent: _arrowLeftTextAction,
   ArrowRightTextIntent: _arrowRightTextAction,
+  ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
+  ControlArrowRightTextIntent: _controlArrowRightTextAction,
   ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
   ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
+  SingleTapUpTextIntent: _singleTapUpTextAction,
+  TapDownTextIntent: _tapDownTextAction,
 };
 
 final CallbackAction<SingleTapUpTextIntent> _singleTapUpTextAction = CallbackAction<SingleTapUpTextIntent>(
@@ -228,27 +236,91 @@ final CallbackAction<TapDownTextIntent> _tapDownTextAction = CallbackAction<TapD
   },
 );
 
+final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEditingAction<AltArrowLeftTextIntent>(
+  onInvoke: (AltArrowLeftTextIntent intent, EditableTextState editableTextState) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+  },
+);
+
+final TextEditingAction<AltArrowRightTextIntent> _altArrowRightTextAction = TextEditingAction<AltArrowRightTextIntent>(
+  onInvoke: (AltArrowRightTextIntent intent, EditableTextState editableTextState) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+  },
+);
+
 final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
   onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
-    editableTextState.renderEditable.moveSelectionLeft();
+    editableTextState.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
   },
 );
 
 final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
   onInvoke: (ArrowRightTextIntent intent, EditableTextState editableTextState) {
-    editableTextState.renderEditable.moveSelectionRight();
+    editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+  },
+);
+
+final TextEditingAction<ControlArrowLeftTextIntent> _controlArrowLeftTextAction = TextEditingAction<ControlArrowLeftTextIntent>(
+  onInvoke: (ControlArrowLeftTextIntent intent, EditableTextState editableTextState) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+        break;
+    }
+  },
+);
+
+final TextEditingAction<ControlArrowRightTextIntent> _controlArrowRightTextAction = TextEditingAction<ControlArrowRightTextIntent>(
+  onInvoke: (ControlArrowRightTextIntent intent, EditableTextState editableTextState) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+        break;
+    }
   },
 );
 
 final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
   onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
-    editableTextState.renderEditable.extendSelectionLeft();
+    editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
   },
 );
 
 final TextEditingAction<ShiftArrowRightTextIntent> _shiftArrowRightTextAction = TextEditingAction<ShiftArrowRightTextIntent>(
   onInvoke: (ShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
-    editableTextState.renderEditable.extendSelectionRight();
+    editableTextState.renderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
   },
 );
 
