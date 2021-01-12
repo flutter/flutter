@@ -301,10 +301,15 @@ ParagraphBuilder::ParagraphBuilder(
   ParagraphBuilderFactory factory = txt::ParagraphBuilder::CreateTxtBuilder;
 
 #if FLUTTER_ENABLE_SKSHAPER
-  if (UIDartState::Current()->enable_skparagraph()) {
+#if FLUTTER_ALWAYS_USE_SKSHAPER
+  bool enable_skparagraph = true;
+#else
+  bool enable_skparagraph = UIDartState::Current()->enable_skparagraph();
+#endif
+  if (enable_skparagraph) {
     factory = txt::ParagraphBuilder::CreateSkiaBuilder;
   }
-#endif
+#endif  // FLUTTER_ENABLE_SKSHAPER
 
   m_paragraphBuilder = factory(style, font_collection.GetFontCollection());
 }
