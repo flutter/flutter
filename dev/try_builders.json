@@ -70,6 +70,13 @@
          "enabled":true
       },
       {
+        "name":"Linux gradle_desugar_classes_test",
+        "repo":"flutter",
+        "task_name":"linux_gradle_desugar_classes_test",
+        "enabled":true,
+        "run_if":["dev/**", "bin/**"]
+      },
+      {
          "name":"Linux gradle_non_android_plugin_test",
          "repo":"flutter",
          "task_name":"linux_gradle_non_android_plugin_test",
