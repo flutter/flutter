@@ -985,7 +985,7 @@ void main() {
       expect(scale, greaterThan(1.0));
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
-    
+
     testWidgets('Check if ClipRect is present in the tree', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
