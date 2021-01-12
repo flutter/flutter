@@ -13,7 +13,7 @@ the steps you took to create the issue, affected versions, and if known, mitigat
 We should reply within three working days, probably much sooner.
 
 We use GitHub's security advisory feature to track open security issues. You should expect
-a close collaboration as we work to resolve the issue you have resolved. Please reach out to
+a close collaboration as we work to resolve the issue you have reported. Please reach out to
 `security@flutter.dev` again if you do not receive prompt attention and regular updates.
 
 You may also reach out to the team via our public [Discord] chat channels; however, please make
