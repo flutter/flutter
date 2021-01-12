@@ -13,6 +13,7 @@ _public_headers = [
   "public/flutter_export.h",
   "public/flutter_messenger.h",
   "public/flutter_plugin_registrar.h",
+  "public/flutter_texture_registrar.h",
 ]
 
 # Any files that are built by clients (client_wrapper code, library headers for
