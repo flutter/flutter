@@ -144,10 +144,11 @@ static void fl_mouse_cursor_plugin_dispose(GObject* object) {
   FlMouseCursorPlugin* self = FL_MOUSE_CURSOR_PLUGIN(object);
 
   g_clear_object(&self->channel);
-  g_object_remove_weak_pointer(G_OBJECT(self->view),
-                               reinterpret_cast<gpointer*>(&(self->view)));
-  self->view = nullptr;
-
+  if (self->view != nullptr) {
+    g_object_remove_weak_pointer(G_OBJECT(self->view),
+                                 reinterpret_cast<gpointer*>(&(self->view)));
+    self->view = nullptr;
+  }
   g_clear_pointer(&self->system_cursor_table, g_hash_table_unref);
 
   G_OBJECT_CLASS(fl_mouse_cursor_plugin_parent_class)->dispose(object);

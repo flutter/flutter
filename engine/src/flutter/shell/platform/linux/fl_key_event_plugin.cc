@@ -115,9 +115,11 @@ G_DEFINE_TYPE(FlKeyEventResponseData, fl_key_event_response_data, G_TYPE_OBJECT)
 static void fl_key_event_response_data_dispose(GObject* object) {
   g_return_if_fail(FL_IS_KEY_EVENT_RESPONSE_DATA(object));
   FlKeyEventResponseData* self = FL_KEY_EVENT_RESPONSE_DATA(object);
-  // Don't need to weak pointer anymore.
-  g_object_remove_weak_pointer(G_OBJECT(self->plugin),
-                               reinterpret_cast<gpointer*>(&(self->plugin)));
+  if (self->plugin != nullptr) {
+    g_object_remove_weak_pointer(G_OBJECT(self->plugin),
+                                 reinterpret_cast<gpointer*>(&(self->plugin)));
+    self->plugin = nullptr;
+  }
 }
 
 // Class initialization method for FlKeyEventResponseData private class.
@@ -267,9 +269,12 @@ static void fl_key_event_plugin_dispose(GObject* object) {
   FlKeyEventPlugin* self = FL_KEY_EVENT_PLUGIN(object);
 
   g_clear_object(&self->channel);
-  g_object_remove_weak_pointer(
-      G_OBJECT(self->text_input_plugin),
-      reinterpret_cast<gpointer*>(&(self->text_input_plugin)));
+  if (self->text_input_plugin != nullptr) {
+    g_object_remove_weak_pointer(
+        G_OBJECT(self->text_input_plugin),
+        reinterpret_cast<gpointer*>(&(self->text_input_plugin)));
+    self->text_input_plugin = nullptr;
+  }
   g_ptr_array_free(self->pending_events, TRUE);
 
   G_OBJECT_CLASS(fl_key_event_plugin_parent_class)->dispose(object);
