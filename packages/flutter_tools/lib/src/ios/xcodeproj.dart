@@ -108,9 +108,7 @@ void _updateGeneratedEnvironmentVariablesScript({
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (final String line in xcodeBuildSettings) {
-    if (!line.contains('[')) { // Exported conditional Xcode build settings do not work.
-      localsBuffer.writeln('export "$line"');
-    }
+    localsBuffer.writeln('export "$line"');
   }
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
@@ -211,9 +209,6 @@ List<String> _xcodeBuildSettingsLines({
   if (useMacOSConfig) {
     // ARM not yet supported https://github.com/flutter/flutter/issues/69221
     xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
-  } else {
-    // Apple Silicon ARM simulators not yet supported.
-    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=arm64 i386');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
