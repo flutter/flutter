@@ -731,7 +731,7 @@ void main() {
           (WidgetTester tester) async {
     late BuildContext savedContext;
 
-    //Wrapping Builder with MediaQuery for KeyboardHeight
+    // Show a keyboard (simulate by space at the bottom of the screen).
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
