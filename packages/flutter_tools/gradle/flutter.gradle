@@ -184,8 +184,7 @@ class FlutterPlugin implements Plugin<Project> {
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
         }
-        project.android.buildTypes.each this.&addFlutterDependencies
-        project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
+        project.android.buildTypes.all this.&addFlutterDependencies
     }
 
     /**
@@ -334,8 +333,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-            project.android.buildTypes.each addEmbeddingDependencyToPlugin
-            project.android.buildTypes.whenObjectAdded addEmbeddingDependencyToPlugin
+            project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
     }
 
