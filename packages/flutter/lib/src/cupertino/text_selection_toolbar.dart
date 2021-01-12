@@ -203,7 +203,6 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     }
     _anchor = value;
     markNeedsLayout();
-    markNeedsSemanticsUpdate();
   }
 
   bool _isAbove;
@@ -213,7 +212,6 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     }
     _isAbove = value;
     markNeedsLayout();
-    markNeedsSemanticsUpdate();
   }
 
   // The child is tall enough to have the arrow clipped out of it on both sides
@@ -439,17 +437,17 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       opacity: _controller,
       child: _CupertinoTextSelectionToolbarItems(
         page: _page,
-        backButton: CupertinoTextSelectionToolbarButton(
+        backButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handlePreviousPage,
-          child: CupertinoTextSelectionToolbarButton.getText('◀'),
+          text: '◀',
         ),
         dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
-        nextButton: CupertinoTextSelectionToolbarButton(
+        nextButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handleNextPage,
-          child: CupertinoTextSelectionToolbarButton.getText('▶'),
+          text: '▶',
         ),
-        nextButtonDisabled: CupertinoTextSelectionToolbarButton(
-          child: CupertinoTextSelectionToolbarButton.getText('▶', false),
+        nextButtonDisabled: CupertinoTextSelectionToolbarButton.text(
+          text: '▶',
         ),
         children: widget.children,
       ),

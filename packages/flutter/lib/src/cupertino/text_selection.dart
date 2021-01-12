@@ -150,9 +150,9 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
         items.add(onePhysicalPixelVerticalDivider);
       }
 
-      items.add(CupertinoTextSelectionToolbarButton(
+      items.add(CupertinoTextSelectionToolbarButton.text(
         onPressed: onPressed,
-        child: CupertinoTextSelectionToolbarButton.getText(text),
+        text: text,
       ));
     }
 

@@ -30,6 +30,21 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     required this.child,
   }) : super(key: key);
 
+  /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
+  /// a [Text] widget styled like the default iOS text selection toolbar button.
+  CupertinoTextSelectionToolbarButton.text({
+    Key? key,
+    this.onPressed,
+    required String text,
+  }) : child = Text(
+         text,
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
+         ),
+       ),
+       super(key: key);
+
   /// The child of this button.
   ///
   /// Usually a [Text] or an [Icon].
@@ -37,21 +52,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   /// Called when this button is pressed.
   final VoidCallback? onPressed;
-
-  /// Returns a [Text] widget in the style of the iOS text selection toolbar
-  /// buttons.
-  ///
-  /// Pass the resulting widget into the [child] parameter when using a
-  /// CupertinoTextSelectionToolbarButton in a CupertinoTextSelectionToolbar.
-  static Text getText(String string, [bool enabled = true]) {
-    return Text(
-      string,
-      overflow: TextOverflow.ellipsis,
-      style: _kToolbarButtonFontStyle.copyWith(
-        color: enabled ? CupertinoColors.white : CupertinoColors.inactiveGray,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
