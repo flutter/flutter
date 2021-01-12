@@ -336,12 +336,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // Returns `true` if the current Gradle version is greater or equal to the given version.
-    private isGradleVersionGraterOrEqualThan(String version) {
-      return VersionNumber.parse(project.gradle.gradleVersion)
-          .compareTo(VersionNumber.parse(version)) >= 0
-    }
-
     // Returns `true` if the given path contains an `android/build.gradle` file.
     //
     // TODO(egarciad): Fix https://github.com/flutter/flutter/issues/39657.
