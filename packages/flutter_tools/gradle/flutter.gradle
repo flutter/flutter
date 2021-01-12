@@ -210,10 +210,13 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        // Add the embedding dependency.
-        addApiDependencies(project, buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-
+        // The embedding is set as an API dependency in a Flutter plugin.
+        // Therefore, don't make the app project depend on the embedding if there are Flutter
+        // plugins since it causes duplicated classes.
+        if (getPluginList().size() == 0) {
+            addApiDependencies(project, buildType.name,
+                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+        }
         List<String> platforms = getTargetPlatforms().collect()
         // Debug mode includes x86 and x64, which are commonly used in emulators.
         if (flutterBuildMode == "debug" && !useLocalEngine()) {
@@ -303,7 +306,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Add plugin dependency to the app project.
         project.dependencies {
-            implementation pluginProject
+            api pluginProject
         }
         Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
