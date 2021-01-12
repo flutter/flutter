@@ -45,7 +45,7 @@ class WebExperiments {
 
   static const bool _defaultUseCanvasRichText = const bool.fromEnvironment(
     'FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_RICH_TEXT',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   bool _useCanvasRichText = _defaultUseCanvasRichText;
