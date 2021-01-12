@@ -25,9 +25,11 @@ G_DEFINE_TYPE(FlPluginRegistrar, fl_plugin_registrar, G_TYPE_OBJECT)
 static void fl_plugin_registrar_dispose(GObject* object) {
   FlPluginRegistrar* self = FL_PLUGIN_REGISTRAR(object);
 
-  g_object_remove_weak_pointer(G_OBJECT(self->view),
-                               reinterpret_cast<gpointer*>(&(self->view)));
-  self->view = nullptr;
+  if (self->view != nullptr) {
+    g_object_remove_weak_pointer(G_OBJECT(self->view),
+                                 reinterpret_cast<gpointer*>(&(self->view)));
+    self->view = nullptr;
+  }
   g_clear_object(&self->messenger);
 
   G_OBJECT_CLASS(fl_plugin_registrar_parent_class)->dispose(object);
