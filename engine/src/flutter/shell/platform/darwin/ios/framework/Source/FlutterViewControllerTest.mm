@@ -12,15 +12,10 @@
 
 FLUTTER_ASSERT_ARC
 
-namespace flutter {
-class PointerDataPacket {};
-}
-
 @interface FlutterEngine ()
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute;
-- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 @end
 
 @interface FlutterEngine (TestLowMemory)
@@ -69,7 +64,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
 - (void)dispatchPresses:(NSSet<UIPress*>*)presses;
-- (void)scrollEvent:(UIPanGestureRecognizer*)recognizer;
 @end
 
 @implementation FlutterViewControllerTest
@@ -649,53 +643,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
   // Clean up mocks
   [keyEventChannel stopMocking];
-}
-
-- (void)testPanGestureRecognizer API_AVAILABLE(ios(13.4)) {
-  if (@available(iOS 13.4, *)) {
-    // noop
-  } else {
-    return;
-  }
-
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                    nibName:nil
-                                                                     bundle:nil];
-  XCTAssertNotNil(vc);
-  UIView* view = vc.view;
-  XCTAssertNotNil(view);
-  NSArray* gestureRecognizers = view.gestureRecognizers;
-  XCTAssertNotNil(gestureRecognizers);
-
-  BOOL found = NO;
-  for (id gesture in gestureRecognizers) {
-    if ([gesture isKindOfClass:[UIPanGestureRecognizer class]]) {
-      found = YES;
-      break;
-    }
-  }
-  XCTAssertTrue(found);
-}
-
-- (void)testMouseSupport API_AVAILABLE(ios(13.4)) {
-  if (@available(iOS 13.4, *)) {
-    // noop
-  } else {
-    return;
-  }
-
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                    nibName:nil
-                                                                     bundle:nil];
-  XCTAssertNotNil(vc);
-
-  id mockPanGestureRecognizer = OCMClassMock([UIPanGestureRecognizer class]);
-  XCTAssertNotNil(mockPanGestureRecognizer);
-
-  [vc scrollEvent:mockPanGestureRecognizer];
-
-  [[[self.mockEngine verify] ignoringNonObjectArgs]
-      dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>()];
 }
 
 - (NSSet<UIPress*>*)fakeUiPressSetForPhase:(UIPressPhase)phase
