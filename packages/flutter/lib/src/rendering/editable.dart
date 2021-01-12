@@ -616,6 +616,51 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
+  void extendSelectionLeft() {
+    final TextSelection nextSelection = _extendGivenSelectionLeft(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    final int distance = selection!.extentOffset - nextSelection.extentOffset;
+    _cursorResetLocation -= distance;
+    // TODO(justinmc): I should probably receive the cause and pass it through?
+    _updateSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.extentOffset <= 0) {
+      return selection;
+    }
+    final int previousExtent = previousCharacter(selection.extentOffset, text);
+    return selection.copyWith(extentOffset: previousExtent);
+  }
+
+  void extendSelectionRight() {
+    final TextSelection nextSelection = _extendGivenSelectionRight(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    final int distance = nextSelection.extentOffset - selection!.extentOffset;
+    _cursorResetLocation += distance;
+    _updateSelection(nextSelection, SelectionChangedCause.keyboard);
+  }
+
+  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.extentOffset >= text.length) {
+      return selection;
+    }
+    final int nextExtent = nextCharacter(selection.extentOffset, text);
+    return selection.copyWith(extentOffset: nextExtent);
+  }
+
   // TODO(justinmc): Keep working towards a more generic or more organized way
   // to handle the arrow key movements.
   void moveSelectionLeft() {
@@ -755,7 +800,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         // The directional arrows move the TextSelection.extentOffset, while the
         // base remains fixed.
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
-          // TODO(justinmc): This has been moved to _moveselectionRight above.
+          // TODO(justinmc): This has been moved to _move/extendselectionRight above.
           int nextExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             nextExtent = newSelection.end;
@@ -768,7 +813,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             _cursorResetLocation += distance;
           }
         } else if (leftArrow && newSelection.extentOffset > 0) {
-          // TODO(justinmc): This has been moved to _moveselectionleft above.
+          // TODO(justinmc): This has been moved to _move/extendselectionleft above.
           int previousExtent;
           if (!shift && !wordModifier && !lineModifier && newSelection.start != newSelection.end) {
             previousExtent = newSelection.start;

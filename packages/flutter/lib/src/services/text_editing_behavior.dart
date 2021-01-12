@@ -13,6 +13,8 @@ const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 class ArrowLeftTextIntent extends Intent {}
 class ArrowRightTextIntent extends Intent {}
+class ShiftArrowLeftTextIntent extends Intent {}
+class ShiftArrowRightTextIntent extends Intent {}
 
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
@@ -154,6 +156,8 @@ final Map<Type, Action<Intent>> textEditingActionsMap = <Type, Action<Intent>>{
   TapDownTextIntent: _tapDownTextAction,
   ArrowLeftTextIntent: _arrowLeftTextAction,
   ArrowRightTextIntent: _arrowRightTextAction,
+  ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
+  ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
 };
 
 final CallbackAction<SingleTapUpTextIntent> _singleTapUpTextAction = CallbackAction<SingleTapUpTextIntent>(
@@ -233,6 +237,18 @@ final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingA
 final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
   onInvoke: (ArrowRightTextIntent intent, EditableTextState editableTextState) {
     editableTextState.renderEditable.moveSelectionRight();
+  },
+);
+
+final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
+  onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
+    editableTextState.renderEditable.extendSelectionLeft();
+  },
+);
+
+final TextEditingAction<ShiftArrowRightTextIntent> _shiftArrowRightTextAction = TextEditingAction<ShiftArrowRightTextIntent>(
+  onInvoke: (ShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
+    editableTextState.renderEditable.extendSelectionRight();
   },
 );
 
