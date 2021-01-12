@@ -15,8 +15,6 @@ import 'package:test/test.dart';
 import 'common.dart';
 
 const MethodCodec codec = StandardMethodCodec();
-final EngineSingletonFlutterWindow window =
-    EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -25,6 +23,10 @@ void main() {
 void testMain() {
   group('HtmlViewEmbedder', () {
     setUpCanvasKitTest();
+
+    setUp(() {
+      window.debugOverrideDevicePixelRatio(1);
+    });
 
     test('embeds interactive platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
@@ -84,6 +86,7 @@ void testMain() {
         'url("#svgClip1")',
       );
     });
+
     test('correctly transforms platform views', () async {
       ui.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -112,6 +115,76 @@ void testMain() {
         // So the translate should be 515 (5 * 100 + 5 * 3), and not
         // 503 (5 * 100 + 3).
         'matrix3d(5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 515, 515, 0, 1)',
+      );
+    });
+
+    // Returns the list of CSS transforms applied to the ancestor chain of
+    // elements starting from `viewHost`, up until and excluding <flt-scene>.
+    List<String> getTransformChain(html.Element viewHost) {
+      final List<String> chain = <String>[];
+      html.Element? element = viewHost;
+      while(element != null && element.tagName.toLowerCase() != 'flt-scene') {
+        chain.add(element.style.transform);
+        element = element.parent;
+      }
+      return chain;
+    }
+
+    test('converts device pixels to logical pixels (no clips)', () async {
+      window.debugOverrideDevicePixelRatio(4);
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(1, 1);
+      sb.pushOffset(2, 2);
+      sb.pushOffset(3, 3);
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      final html.Element viewHost = domRenderer.sceneElement!
+        .querySelectorAll('#view-0')
+        .single;
+
+      expect(
+        getTransformChain(viewHost),
+        <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)'],
+      );
+    });
+
+    test('converts device pixels to logical pixels (with clips)', () async {
+      window.debugOverrideDevicePixelRatio(4);
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(3, 3);
+      sb.pushClipRect(ui.Rect.largest);
+      sb.pushOffset(6, 6);
+      sb.pushClipRect(ui.Rect.largest);
+      sb.pushOffset(9, 9);
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+      final html.Element viewHost = domRenderer.sceneElement!
+        .querySelectorAll('#view-0')
+        .single;
+
+      expect(
+        getTransformChain(viewHost),
+        <String>[
+          'matrix(1, 0, 0, 1, 9, 9)',
+          'matrix(1, 0, 0, 1, 6, 6)',
+          'matrix(0.25, 0, 0, 0.25, 0.75, 0.75)',
+        ],
       );
     });
 
