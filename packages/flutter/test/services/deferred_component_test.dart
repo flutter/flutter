@@ -24,24 +24,6 @@ void main() {
     ));
   });
 
-  test('getDeferredComponentInstallState test', () async {
-    final List<MethodCall> log = <MethodCall>[];
-
-    SystemChannels.deferredComponent.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
-
-    final String? result = await DeferredComponent.getDeferredComponentInstallState(moduleName: 'testModuleName');
-    // Null because test does not have engine attached to implement the message channel.
-    expect(result, null);
-
-    expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'getDeferredComponentInstallState',
-      arguments: <String, dynamic>{'loadingUnitId': -1, 'moduleName': 'testModuleName'},
-    ));
-  });
-
   test('uninstallDeferredComponent test', () async {
     final List<MethodCall> log = <MethodCall>[];
 

@@ -13,7 +13,13 @@ import 'system_channels.dart';
 /// avoiding installing unnessecary code/assets on end user devices. Common
 /// use cases include deferring installation of advanced or infrequently
 /// used features and limiting locale specific features to users of matching
-/// locales.
+/// locales. Deferred components can only deliver split off parts of the same
+/// app that was built and installed on the device. It cannot load new code
+/// written after the app is distributed.
+///
+/// Deferred components are currently and Android-only feature. The methods in
+/// this class are a no-op and all assets and dart code are already available
+/// without installation if called on other platforms.
 class DeferredComponent {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
@@ -47,6 +53,9 @@ class DeferredComponent {
   /// This method will not load associated dart libraries contained in the dynamic
   /// feature module, though it will download the files necessary and subsequent
   /// calls to `loadLibrary()` to load will complete faster.
+  ///
+  /// Assets installed by this method may be accessed in the same way as any other
+  /// local asset by providing a string path to the asset.
   ///
   /// See also:
   ///
