@@ -15,7 +15,7 @@ import 'text_form_field.dart';
 ///    contains more detailed examples.
 ///
 /// {@tool dartpad --template=freeform}
-/// This example shows how to create a very basic autocomplete widget using the
+/// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
 /// ```dart imports
@@ -45,6 +45,47 @@ import 'text_form_field.dart';
 ///       },
 ///       onSelected: (String selection) {
 ///         print('You just selected $selection');
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows how to create an Autocomplete widget with a custom type.
+/// Try searching with text from the name or email field.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// class AutocompleteBasicUserExample extends StatelessWidget {
+///   AutocompleteBasicUserExample({Key key}) : super(key: key);
+///
+///   static final List<User> _userOptions = <User>[
+///     User(name: 'Alice', email: 'alice@example.com'),
+///     User(name: 'Bob', email: 'bob@example.com'),
+///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
+///   ];
+///
+///   static String _displayStringForOption(User option) => option.name;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Autocomplete<User>(
+///       displayStringForOption: _displayStringForOption,
+///       optionsBuilder: (TextEditingValue textEditingValue) {
+///         if (textEditingValue.text == null || textEditingValue.text == '') {
+///           return const Iterable<User>.empty();
+///         }
+///         return _userOptions.where((User option) {
+///           return option.toString().contains(textEditingValue.text.toLowerCase());
+///         });
+///       },
+///       onSelected: (User selection) {
+///         print('You just selected ${_displayStringForOption(selection)}');
 ///       },
 ///     );
 ///   }
