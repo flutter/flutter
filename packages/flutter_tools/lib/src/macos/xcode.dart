@@ -14,6 +14,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -25,13 +26,8 @@ import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
-const int kXcodeRequiredVersionMajor = 11;
-const int kXcodeRequiredVersionMinor = 0;
-const int kXcodeRequiredVersionPatch = 0;
-
-const int kXcodeRecommendedVersionMajor = 12;
-const int kXcodeRecommendedVersionMinor = 0;
-const int kXcodeRecommendedVersionPatch = 1;
+Version get xcodeRequiredVersion => Version(11, 0, 0, text: '11.0');
+Version get xcodeRecommendedVersion => Version(12, 0, 1, text: '12.0.1');
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
@@ -89,9 +85,13 @@ class Xcode {
     return _xcodeProjectInterpreter.isInstalled;
   }
 
-  int get majorVersion => _xcodeProjectInterpreter.majorVersion;
-  int get minorVersion => _xcodeProjectInterpreter.minorVersion;
-  int get patchVersion => _xcodeProjectInterpreter.patchVersion;
+  Version get currentVersion => Version(
+        _xcodeProjectInterpreter.majorVersion,
+        _xcodeProjectInterpreter.minorVersion,
+        _xcodeProjectInterpreter.patchVersion,
+        text:
+            '${_xcodeProjectInterpreter.majorVersion}.${_xcodeProjectInterpreter.minorVersion}.${_xcodeProjectInterpreter.patchVersion}',
+      );
 
   String get versionText => _xcodeProjectInterpreter.versionText;
 
@@ -140,29 +140,14 @@ class Xcode {
     if (!_xcodeProjectInterpreter.isInstalled) {
       return false;
     }
-    return _isAtLeastVersion(kXcodeRequiredVersionMajor,
-        kXcodeRequiredVersionMinor, kXcodeRequiredVersionPatch);
+    return currentVersion >= xcodeRequiredVersion;
   }
 
   bool get isRecommendedVersionSatisfactory {
     if (!_xcodeProjectInterpreter.isInstalled) {
       return false;
     }
-    return _isAtLeastVersion(kXcodeRecommendedVersionMajor,
-        kXcodeRecommendedVersionMinor, kXcodeRecommendedVersionPatch);
-  }
-
-  bool _isAtLeastVersion(int major, int minor, int patch) {
-    if (majorVersion > major) {
-      return true;
-    }
-    if (majorVersion == major) {
-      if (minorVersion == minor) {
-        return patchVersion >= patch;
-      }
-      return minorVersion >= minor;
-    }
-    return false;
+    return currentVersion >= xcodeRecommendedVersion;
   }
 
   /// See [XcodeProjectInterpreter.xcrunCommand].
