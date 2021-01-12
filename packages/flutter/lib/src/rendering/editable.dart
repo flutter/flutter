@@ -616,6 +616,107 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
+  static TextSelection _moveGivenSelectionLeft(TextSelection selection, String text) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    int previousExtent;
+    if (selection.start != selection.end) {
+      previousExtent = selection.start;
+    } else {
+      previousExtent = previousCharacter(selection.extentOffset, text);
+    }
+    final TextSelection newSelection = selection.copyWith(
+      extentOffset: previousExtent,
+    );
+
+    final int newOffset = newSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  // Return a new selection that has been moved right once.
+  //
+  // If it can't be moved right, the original TextSelection is returned.
+  static TextSelection _moveGivenSelectionRight(TextSelection selection, String text) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset >= text.length) {
+      return selection;
+    }
+
+    int nextExtent;
+    if (selection.start != selection.end) {
+      nextExtent = selection.end;
+    } else {
+      nextExtent = nextCharacter(selection.extentOffset, text);
+    }
+    final TextSelection nextSelection = selection.copyWith(extentOffset: nextExtent);
+
+    int newOffset = nextSelection.extentOffset;
+    newOffset = nextSelection.baseOffset > nextSelection.extentOffset
+        ? nextSelection.baseOffset : nextSelection.extentOffset;
+    return TextSelection.fromPosition(TextPosition(offset: newOffset));
+  }
+
+  static TextSelection _moveGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    // If we can just return the start of the text without checking for a word.
+    if (selection.extentOffset == 0 || selection.extentOffset == 1) {
+      return const TextSelection.collapsed(offset: 0);
+    }
+
+    // If the selection is one space from the left, just move it once left.
+    final String text = textPainter.text!.toPlainText();
+    if (selection.extentOffset == 1) {
+      return _moveGivenSelectionLeft(selection, text);
+    }
+
+    final int startPoint = previousCharacter(selection.extentOffset, text, includeWhitespace);
+    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return TextSelection(baseOffset: word.start, extentOffset: word.start);
+  }
+
+  static TextSelection _moveGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (selection.isCollapsed && selection.extentOffset == text.length) {
+      return selection;
+    }
+
+    // If we can just return the end of the text without checking for a word.
+    if (selection.extentOffset == text.length - 1
+        || selection.extentOffset == text.length) {
+      return TextSelection.collapsed(offset: text.length);
+    }
+
+    final int startPoint = nextCharacter(selection.extentOffset, text, includeWhitespace);
+    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return TextSelection(baseOffset: word.end, extentOffset: word.end);
+  }
+
+  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.extentOffset <= 0) {
+      return selection;
+    }
+    final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
+    return selection.copyWith(extentOffset: previousExtent);
+  }
+
+  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    if (selection.extentOffset >= text.length) {
+      return selection;
+    }
+    final int nextExtent = nextCharacter(selection.extentOffset, text, includeWhitespace);
+    return selection.copyWith(extentOffset: nextExtent);
+  }
+
   void extendSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _extendGivenSelectionLeft(
       selection!,
@@ -627,15 +728,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int distance = selection!.extentOffset - nextSelection.extentOffset;
     _cursorResetLocation -= distance;
     _updateSelection(nextSelection, cause);
-  }
-
-  static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.extentOffset <= 0) {
-      return selection;
-    }
-    final int previousExtent = previousCharacter(selection.extentOffset, text, includeWhitespace);
-    return selection.copyWith(extentOffset: previousExtent);
   }
 
   void extendSelectionRight(SelectionChangedCause cause) {
@@ -651,15 +743,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  static TextSelection _extendGivenSelectionRight(TextSelection selection, String text, [bool includeWhitespace = true]) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.extentOffset >= text.length) {
-      return selection;
-    }
-    final int nextExtent = nextCharacter(selection.extentOffset, text, includeWhitespace);
-    return selection.copyWith(extentOffset: nextExtent);
-  }
-
   void moveSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionLeft(
       selection!,
@@ -670,28 +753,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _cursorResetLocation -= selection!.extentOffset - nextSelection.extentOffset;
     _updateSelection(nextSelection, cause);
-  }
-
-  static TextSelection _moveGivenSelectionLeft(TextSelection selection, String text) {
-    // If the selection is already all the way left, there is nothing to do.
-    if (selection.extentOffset <= 0) {
-      return selection;
-    }
-
-    int previousExtent;
-    // TODO(justinmc): This seems to collapse a selection that isn't collapsed
-    // but not move it. Is that what we expect to happen?
-    if (selection.start != selection.end) {
-      previousExtent = selection.start;
-    } else {
-      previousExtent = previousCharacter(selection.extentOffset, text);
-    }
-    final TextSelection newSelection = selection.copyWith(
-      extentOffset: previousExtent,
-    );
-
-    final int newOffset = newSelection.extentOffset;
-    return TextSelection.fromPosition(TextPosition(offset: newOffset));
   }
 
   void _moveSelectionToEnd(SelectionChangedCause cause) {
@@ -726,24 +787,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  static TextSelection _moveGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
-    // If the selection is already all the way left, there is nothing to do.
-    // TODO(justinmc): If the selection isn't collapsed, it should collapse. Here and elsewhere.
-    if (selection.extentOffset <= 0) {
-      return selection;
-    }
-
-    // If the selection is one space from the left, just move it once left.
-    final String text = textPainter.text!.toPlainText();
-    if (selection.extentOffset == 1) {
-      return _moveGivenSelectionLeft(selection, text);
-    }
-
-    final int startPoint = previousCharacter(selection.extentOffset, text, includeWhitespace);
-    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
-    return TextSelection(baseOffset: word.start, extentOffset: word.start);
-  }
-
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -762,47 +805,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _updateSelection(nextSelection, cause);
-  }
-
-  static TextSelection _moveGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
-    // If the selection is already all the way right, there is nothing to do.
-    final String text = textPainter.text!.toPlainText();
-    if (selection.isCollapsed && selection.extentOffset == text.length) {
-      return selection;
-    }
-
-    // If we can just return the end of the text without checking for a word.
-    if (selection.extentOffset == text.length - 1
-        || selection.extentOffset == text.length) {
-      return TextSelection.collapsed(offset: text.length);
-    }
-
-    final int startPoint = nextCharacter(selection.extentOffset, text, includeWhitespace);
-    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
-    return TextSelection(baseOffset: word.end, extentOffset: word.end);
-  }
-
-  // Return a new selection that has been moved right once.
-  //
-  // If it can't be moved right, the original TextSelection is returned.
-  static TextSelection _moveGivenSelectionRight(TextSelection selection, String text) {
-    // If the selection is already all the way right, there is nothing to do.
-    if (selection.extentOffset >= text.length) {
-      return selection;
-    }
-
-    int nextExtent;
-    if (selection.start != selection.end) {
-      nextExtent = selection.end;
-    } else {
-      nextExtent = nextCharacter(selection.extentOffset, text);
-    }
-    final TextSelection nextSelection = selection.copyWith(extentOffset: nextExtent);
-
-    int newOffset = nextSelection.extentOffset;
-    newOffset = nextSelection.baseOffset > nextSelection.extentOffset
-        ? nextSelection.baseOffset : nextSelection.extentOffset;
-    return TextSelection.fromPosition(TextPosition(offset: newOffset));
   }
 
   void moveSelectionRight(SelectionChangedCause cause) {
