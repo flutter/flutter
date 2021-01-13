@@ -742,6 +742,7 @@ void main() {
       applyElevationOverlayColor: false,
       pageTransitionsTheme: pageTransitionTheme,
       appBarTheme: const AppBarTheme(color: Colors.black),
+      scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
