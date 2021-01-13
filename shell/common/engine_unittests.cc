@@ -8,6 +8,7 @@
 
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/testing/fixture_test.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "rapidjson/document.h"
@@ -67,6 +68,7 @@ class MockRuntimeController : public RuntimeController {
   MOCK_METHOD1(DispatchPlatformMessage, bool(fml::RefPtr<PlatformMessage>));
   MOCK_METHOD3(LoadDartDeferredLibraryError,
                void(intptr_t, const std::string, bool));
+  MOCK_CONST_METHOD0(GetDartVM, DartVM*());
 };
 
 fml::RefPtr<PlatformMessage> MakePlatformMessage(
@@ -95,7 +97,7 @@ fml::RefPtr<PlatformMessage> MakePlatformMessage(
   return message;
 }
 
-class EngineTest : public ::testing::Test {
+class EngineTest : public testing::FixtureTest {
  public:
   EngineTest()
       : thread_host_("EngineTest",
@@ -120,6 +122,7 @@ class EngineTest : public ::testing::Test {
 
  protected:
   void SetUp() override {
+    settings_ = CreateSettingsForFixture();
     dispatcher_maker_ = [](PointerDataDispatcher::Delegate&) {
       return nullptr;
     };
@@ -147,6 +150,7 @@ TEST_F(EngineTest, Create) {
         /*settings=*/settings_,
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
         /*runtime_controller=*/std::move(runtime_controller_));
     EXPECT_TRUE(engine);
   });
@@ -167,6 +171,7 @@ TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
         /*settings=*/settings_,
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     fml::RefPtr<PlatformMessageResponse> response =
@@ -192,6 +197,7 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRoute) {
         /*settings=*/settings_,
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     fml::RefPtr<PlatformMessageResponse> response =
@@ -224,6 +230,7 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         /*settings=*/settings_,
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     fml::RefPtr<PlatformMessageResponse> response =
@@ -236,6 +243,32 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         MakePlatformMessage("flutter/navigation", values, response);
     engine->DispatchPlatformMessage(message);
     EXPECT_EQ(engine->InitialRoute(), "");
+  });
+}
+
+TEST_F(EngineTest, SpawnSharesFontLibrary) {
+  PostUITaskSync([this] {
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    auto vm_ref = DartVMRef::Create(settings_);
+    EXPECT_CALL(*mock_runtime_controller, GetDartVM())
+        .WillRepeatedly(::testing::Return(vm_ref.get()));
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings_,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(mock_runtime_controller));
+
+    auto spawn =
+        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr);
+    EXPECT_TRUE(spawn != nullptr);
+    EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });
 }
 
@@ -259,6 +292,7 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
         /*settings=*/settings_,
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     engine->LoadDartDeferredLibraryError(error_id, error_message, true);

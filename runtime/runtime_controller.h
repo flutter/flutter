@@ -560,7 +560,7 @@ class RuntimeController : public PlatformConfigurationClient {
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
   const fml::WeakPtr<IOManager>& GetIOManager() const { return io_manager_; }
 
-  DartVM* GetDartVM() const { return vm_; }
+  virtual DartVM* GetDartVM() const { return vm_; }
 
   const fml::RefPtr<const DartSnapshot>& GetIsolateSnapshot() const {
     return isolate_snapshot_;
