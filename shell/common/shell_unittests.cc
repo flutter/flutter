@@ -218,6 +218,16 @@ static void TestDartVmFlags(std::vector<const char*>& flags) {
   }
 }
 
+static void PostSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
+                     const fml::closure& task) {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(task_runner, [&latch, &task] {
+    task();
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 TEST_F(ShellTest, InitializeWithInvalidThreads) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -2437,30 +2447,30 @@ TEST_F(ShellTest, Spawn) {
   main_latch.Wait();
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
 
-  {
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        shell->GetTaskRunners().GetPlatformTaskRunner(),
-        [this, &spawner = shell, &latch, settings]() {
-          MockPlatformViewDelegate platform_view_delegate;
-          auto spawn = spawner->Spawn(
-              settings,
-              [&platform_view_delegate](Shell& shell) {
-                auto result = std::make_unique<MockPlatformView>(
-                    platform_view_delegate, shell.GetTaskRunners());
-                ON_CALL(*result, CreateRenderingSurface())
-                    .WillByDefault(::testing::Invoke(
-                        [] { return std::make_unique<MockSurface>(); }));
-                return result;
-              },
-              [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
-          ASSERT_NE(nullptr, spawn.get());
-          ASSERT_TRUE(ValidateShell(spawn.get()));
-          DestroyShell(std::move(spawn));
-          latch.Signal();
-        });
-    latch.Wait();
-  }
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [this,
+                                                             &spawner = shell,
+                                                             settings]() {
+    MockPlatformViewDelegate platform_view_delegate;
+    auto spawn = spawner->Spawn(
+        settings,
+        [&platform_view_delegate](Shell& shell) {
+          auto result = std::make_unique<MockPlatformView>(
+              platform_view_delegate, shell.GetTaskRunners());
+          ON_CALL(*result, CreateRenderingSurface())
+              .WillByDefault(::testing::Invoke(
+                  [] { return std::make_unique<MockSurface>(); }));
+          return result;
+        },
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+    ASSERT_NE(nullptr, spawn.get());
+    ASSERT_TRUE(ValidateShell(spawn.get()));
+
+    PostSync(spawner->GetTaskRunners().GetIOTaskRunner(), [&spawner, &spawn] {
+      ASSERT_EQ(spawner->GetIOManager()->GetResourceContext().get(),
+                spawn->GetIOManager()->GetResourceContext().get());
+    });
+    DestroyShell(std::move(spawn));
+  });
 
   DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

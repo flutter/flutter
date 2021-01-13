@@ -55,6 +55,10 @@ class ShellIOManager final : public IOManager {
   // |IOManager|
   std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() override;
 
+  sk_sp<GrDirectContext> GetSharedResourceContext() const {
+    return resource_context_;
+  };
+
  private:
   // Resource context management.
   sk_sp<GrDirectContext> resource_context_;
