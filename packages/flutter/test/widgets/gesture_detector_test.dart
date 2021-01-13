@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 
 void main() {
   const Offset forcePressOffset = Offset(400.0, 50.0);
+  // debugPrintGestureArenaDiagnostics = true;
 
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
@@ -439,6 +440,51 @@ void main() {
       await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
       expect(longPressUp, 1);
     }, variant: buttonVariant);
+
+    testWidgets('Competition', (WidgetTester tester) async {
+      int tapCount = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onTap: () => tapCount++,
+            child: Column(
+              children: <Widget>[
+                GestureDetector(
+                  onDoubleTap: () {},
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: Container(
+                      color: const Color(0xFF00FF00),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Container(
+                    color: const Color(0xFF0000FF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Tap inside container.
+      await tester.tapAt(const Offset(400.0, 10.0));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Tap and move outside container quickly.
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 110.0), pointer: 7);
+      await gesture.moveTo(const Offset(400.0, 110.0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(tapCount, 1);
+    },);
   });
 
   testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {

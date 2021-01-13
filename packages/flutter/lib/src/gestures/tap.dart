@@ -281,7 +281,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   void _checkUp() {
-    if (!_wonArenaForPrimaryPointer || _up == null) {
+    if (!_wonArenaForPrimaryPointer || _up == null || _up!.pointer != _down!.pointer) {
       return;
     }
     handleTapUp(down: _down!, up: _up!);
