@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 
 void main() {
   const Offset forcePressOffset = Offset(400.0, 50.0);
-  // debugPrintGestureArenaDiagnostics = true;
 
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
