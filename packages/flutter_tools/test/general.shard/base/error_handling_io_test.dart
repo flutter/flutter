@@ -76,7 +76,7 @@ void setupWriteMocks({
   when(mockFile.openSync(
     mode: anyNamed('mode'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
-  when(mockFile.create(recursive: anyNamed('recursive')))
+  when(mockFile.createSync(recursive: anyNamed('recursive')))
     .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
