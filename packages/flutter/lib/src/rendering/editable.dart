@@ -1784,6 +1784,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   Offset? _lastTapDownPosition;
 
+  // TODO(justinmc): Is it ok to expose this like this? Any better way?
+  Offset? get lastTapDownPosition => _lastTapDownPosition;
+
   /// Tracks the position of a secondary tap event.
   ///
   /// Should be called before attempting to change the selection based on the

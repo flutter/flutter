@@ -97,16 +97,17 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  /// Builder for iOS-style copy/paste text selection toolbar.
+  /// Builder for the Mac-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
     double textLineHeight,
-    Offset position,
+    Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastTapDownPosition,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
@@ -116,7 +117,8 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      position: position,
+      selectionMidpoint: selectionMidpoint,
+      lastTapDownPosition: lastTapDownPosition,
       textLineHeight: textLineHeight,
     );
   }
@@ -203,8 +205,9 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleCut,
     required this.handlePaste,
     required this.handleSelectAll,
-    required this.position,
+    required this.selectionMidpoint,
     required this.textLineHeight,
+    this.lastTapDownPosition,
   }) : super(key: key);
 
   final ClipboardStatusNotifier? clipboardStatus;
@@ -214,7 +217,8 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
   final VoidCallback? handleCut;
   final VoidCallback? handlePaste;
   final VoidCallback? handleSelectAll;
-  final Offset position;
+  final Offset? lastTapDownPosition;
+  final Offset selectionMidpoint;
   final double textLineHeight;
 
   @override
@@ -285,25 +289,15 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // The toolbar should appear below the TextField when there is not enough
-    // space above the TextField to show it, assuming there's always enough
-    // space at the bottom in this case.
-    final double anchorX = (widget.position.dx + widget.globalEditableRegion.left).clamp(
+    // TODO(justinmc): Can the menu ever be shown without a lastTapDownPosition?
+    final Offset anchorBasis = widget.lastTapDownPosition ?? widget.selectionMidpoint;
+    final double anchorX = (anchorBasis.dx - widget.globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
-
-    // The y-coordinate has to be calculated instead of directly quoting
-    // position.dy, since the caller
-    // (TextSelectionOverlay._buildToolbar) does not know whether the toolbar is
-    // going to be facing up or down.
-    final Offset anchorAbove = Offset(
+    final Offset anchor = Offset(
       anchorX,
-      widget.endpoints.first.point.dy - widget.textLineHeight + widget.globalEditableRegion.top,
-    );
-    final Offset anchorBelow = Offset(
-      anchorX,
-      widget.endpoints.last.point.dy + widget.globalEditableRegion.top,
+      anchorBasis.dy - widget.globalEditableRegion.top,
     );
 
     final List<Widget> items = <Widget>[];
@@ -346,8 +340,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     return CupertinoDesktopTextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
+      anchor: anchor,
       children: items,
     );
   }

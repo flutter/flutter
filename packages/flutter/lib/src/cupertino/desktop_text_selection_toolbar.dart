@@ -40,18 +40,13 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of CupertinoTextSelectionToolbar.
   const CupertinoDesktopTextSelectionToolbar({
     Key? key,
-    required this.anchorAbove,
-    required this.anchorBelow,
+    required this.anchor,
     required this.children,
     this.toolbarBuilder = _defaultToolbarBuilder,
   }) : assert(children.length > 0),
        super(key: key);
 
-  /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
-  final Offset anchorAbove;
-
-  /// {@macro flutter.material.TextSelectionToolbar.anchorBelow}
-  final Offset anchorBelow;
+  final Offset anchor;
 
   /// {@macro flutter.material.TextSelectionToolbar.children}
   ///
@@ -94,9 +89,10 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
-        delegate: TextSelectionToolbarLayoutDelegate(
-          anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
-          anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+        delegate: _DesktopTextSelectionToolbarLayoutDelegate(
+          anchor: anchor,
+          //anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
+          //anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
         ),
         child: Container(
           width: _kToolbarWidth,
@@ -122,5 +118,71 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// Positions the toolbar at [anchor] if it fits, otherwise moves it up until it
+// is fully on-screen.
+//
+// See also:
+//
+//   * [CupertinoDesktopTextSelectionToolbar], which uses this to position itself.
+//   * [TextSelectionToolbarLayoutDelegate], which does a similar layout for
+//     the mobile text selection toolbars.
+class _DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
+  /// Creates an instance of TextSelectionToolbarLayoutDelegate.
+  _DesktopTextSelectionToolbarLayoutDelegate({
+    required this.anchor,
+  });
+
+  /// The point at which to render the menu, if possible.
+  ///
+  /// Should be provided in local coordinates.
+  final Offset anchor;
+
+  // Return the value that centers width as closely as possible to position
+  // while fitting inside of min and max.
+  static double _centerOn(double position, double width, double max) {
+    // If it overflows on the left, put it as far left as possible.
+    if (position - width / 2.0 < 0.0) {
+      return 0.0;
+    }
+
+    // If it overflows on the right, put it as far right as possible.
+    if (position + width / 2.0 > max) {
+      return max - width;
+    }
+
+    // Otherwise it fits while perfectly centered.
+    return position - width / 2.0;
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.loosen();
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final bool fitsAbove = anchor.dy >= childSize.height;
+
+    return anchor;
+    /*
+    return Offset(
+      _centerOn(
+        anchor.dx,
+        childSize.width,
+        size.width,
+      ),
+      fitsAbove
+        ? math.max(0.0, anchor.dy - childSize.height)
+        : anchor.dy,
+    );
+    */
+  }
+
+  @override
+  bool shouldRelayout(_DesktopTextSelectionToolbarLayoutDelegate oldDelegate) {
+    return anchor != oldDelegate.anchor;
   }
 }

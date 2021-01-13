@@ -131,6 +131,7 @@ abstract class TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastTapDownPosition,
   );
 
   /// Returns the size of the selection handle.
@@ -585,6 +586,7 @@ class TextSelectionOverlay {
                 endpoints,
                 selectionDelegate!,
                 clipboardStatus!,
+                renderObject.lastTapDownPosition,
               );
             },
           ),
