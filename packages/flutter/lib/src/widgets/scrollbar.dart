@@ -600,15 +600,14 @@ class RawScrollbar extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.isAlwaysShown = false,
+    this.isAlwaysShown,
     this.radius,
     this.thickness,
     this.thumbColor,
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
-  }) : assert(isAlwaysShown != null),
-       assert(child != null),
+  }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
        assert(pressDuration != null),
@@ -683,7 +682,7 @@ class RawScrollbar extends StatefulWidget {
   /// [controller] property has not been set, the [PrimaryScrollController] will
   /// be used.
   ///
-  /// Defaults to false.
+  /// Defaults to false when null.
   ///
   /// {@tool snippet}
   ///
@@ -728,7 +727,7 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  final bool isAlwaysShown;
+  final bool? isAlwaysShown;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
   ///
@@ -790,6 +789,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   late final ScrollbarPainter scrollbarPainter;
 
+  /// Overridable getter to indicate that the scrollbar should be visible, even
+  /// when a scroll is not underway.
+  ///
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
+  @protected
+  bool get showScrollbar => widget.isAlwaysShown ?? false;
+
   @override
   void initState() {
     super.initState();
@@ -820,7 +827,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      if (widget.isAlwaysShown) {
+      if (showScrollbar) {
         _fadeoutTimer?.cancel();
         // Wait one frame and cause an empty scroll event.  This allows the
         // thumb to show immediately when isAlwaysShown is true. A scroll
@@ -881,7 +888,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _maybeStartFadeoutTimer() {
-    if (!widget.isAlwaysShown) {
+    if (!showScrollbar) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
         _fadeoutAnimationController.reverse();

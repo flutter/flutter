@@ -217,7 +217,7 @@
          "name":"Mac build_gallery",
          "repo":"flutter",
          "task_name":"mac_build_gallery",
-         "enabled":true
+         "enabled":false
       },
       {
          "name":"Mac framework_tests",

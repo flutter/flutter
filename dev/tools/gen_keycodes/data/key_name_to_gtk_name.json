@@ -1,6 +1,6 @@
 {
   "altLeft": ["Alt_L"],
-  "altRight": ["Alt_R"],
+  "altRight": ["Alt_R", "ISO_Level3_Shift"],
   "arrowDown": ["Down", "KP_Down"],
   "arrowLeft": ["Left", "KP_Left"],
   "arrowRight": ["Right", "KP_Right"],

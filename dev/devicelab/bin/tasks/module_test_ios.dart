@@ -305,8 +305,8 @@ Future<void> main() async {
       );
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
-      final int xcodebuildExitCode = await inDirectory<int>(objectiveCHostApp, () =>
-        exec(
+      final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>
+        eval(
           'xcodebuild',
           <String>[
             '-workspace',
@@ -315,7 +315,7 @@ Future<void> main() async {
             'Host',
             '-configuration',
             'Debug',
-            'ARCHS=i386', // i386 is not supported in Debug mode.
+            'FLUTTER_ENGINE=bogus', // Force a Flutter error.
             'CODE_SIGNING_ALLOWED=NO',
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
@@ -327,7 +327,9 @@ Future<void> main() async {
         )
       );
 
-      if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
+      if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
+          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 

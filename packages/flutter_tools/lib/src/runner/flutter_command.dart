@@ -128,6 +128,9 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
 
+  /// The option name for a custom DevTools server address.
+  static const String kDevToolsServerAddress = 'devtools-server-address';
+
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
@@ -322,6 +325,13 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
+  void addDevToolsOptions() {
+    argParser.addOption(kDevToolsServerAddress,
+      help: 'When this value is provided, the Flutter tool will not spin up a '
+          'new DevTools server instance, but instead will use the one provided '
+          'at this address.');
+  }
+
   void addDdsOptions({@required bool verboseHelp}) {
     argParser.addOption('dds-port',
       help: 'When this value is provided, the Dart Development Service (DDS) will be '
@@ -363,6 +373,16 @@ abstract class FlutterCommand extends Command<void> {
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
+  }
+
+  Uri get devToolsServerAddress {
+    if (argResults.wasParsed(kDevToolsServerAddress)) {
+      final Uri uri = Uri.tryParse(stringArg(kDevToolsServerAddress));
+      if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
+        return uri;
+      }
+    }
+    return null;
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -461,7 +481,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesWebRendererOption() {
     argParser.addOption('web-renderer',
-      defaultsTo: 'html',
+      defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web. Possible values are:\n'
             'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
@@ -902,7 +922,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer')) {
       dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
