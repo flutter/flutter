@@ -354,6 +354,7 @@ def parse_args(args):
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64')
   parser.add_argument('--simulator', action='store_true', default=False)
+  parser.add_argument('--linux', dest='target_os', action='store_const', const='linux')
   parser.add_argument('--fuchsia', dest='target_os', action='store_const', const='fuchsia')
   parser.add_argument('--fuchsia-legacy', default=True, action='store_true')
   parser.add_argument('--no-fuchsia-legacy', dest='fuchsia_legacy', action='store_false')
