@@ -345,7 +345,8 @@ abstract class FlutterCommand extends Command<void> {
             ' attaching to an application currently connected to by "flutter run") or'
             ' when running certain tests.\n'
             'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
-            ' already connected to the target application.'
+            ' already connected to the target application.',
+      defaultsTo: true,
     );
   }
 
