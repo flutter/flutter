@@ -297,6 +297,7 @@ class Engine final : public RuntimeDelegate,
          Settings settings,
          std::unique_ptr<Animator> animator,
          fml::WeakPtr<IOManager> io_manager,
+         const std::shared_ptr<FontCollection>& font_collection,
          std::unique_ptr<RuntimeController> runtime_controller);
 
   //----------------------------------------------------------------------------
@@ -888,7 +889,7 @@ class Engine final : public RuntimeDelegate,
   std::shared_ptr<AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
-  FontCollection font_collection_;
+  std::shared_ptr<FontCollection> font_collection_;
   ImageDecoder image_decoder_;
   TaskRunners task_runners_;
   size_t hint_freed_bytes_since_last_idle_ = 0;

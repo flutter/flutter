@@ -43,6 +43,7 @@ Engine::Engine(
     Settings settings,
     std::unique_ptr<Animator> animator,
     fml::WeakPtr<IOManager> io_manager,
+    const std::shared_ptr<FontCollection>& font_collection,
     std::unique_ptr<RuntimeController> runtime_controller)
     : delegate_(delegate),
       settings_(std::move(settings)),
@@ -50,6 +51,7 @@ Engine::Engine(
       runtime_controller_(std::move(runtime_controller)),
       activity_running_(true),
       have_surface_(false),
+      font_collection_(font_collection),
       image_decoder_(task_runners, image_decoder_task_runner, io_manager),
       task_runners_(std::move(task_runners)),
       weak_factory_(this) {
@@ -75,6 +77,7 @@ Engine::Engine(Delegate& delegate,
              settings,
              std::move(animator),
              io_manager,
+             std::make_shared<FontCollection>(),
              nullptr) {
   runtime_controller_ = std::make_unique<RuntimeController>(
       *this,                                 // runtime delegate
@@ -111,6 +114,7 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*settings=*/settings,
       /*animator=*/std::move(animator),
       /*io_manager=*/runtime_controller_->GetIOManager(),
+      /*font_collection=*/font_collection_,
       /*runtime_controller=*/nullptr);
   result->runtime_controller_ = runtime_controller_->Spawn(
       *result,                               // runtime delegate
@@ -132,7 +136,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
 
 void Engine::SetupDefaultFontManager() {
   TRACE_EVENT0("flutter", "Engine::SetupDefaultFontManager");
-  font_collection_.SetupDefaultFontManager();
+  font_collection_->SetupDefaultFontManager();
 }
 
 std::shared_ptr<AssetManager> Engine::GetAssetManager() {
@@ -152,10 +156,10 @@ bool Engine::UpdateAssetManager(
   }
 
   // Using libTXT as the text engine.
-  font_collection_.RegisterFonts(asset_manager_);
+  font_collection_->RegisterFonts(asset_manager_);
 
   if (settings_.use_test_fonts) {
-    font_collection_.RegisterTestFonts();
+    font_collection_->RegisterTestFonts();
   }
 
   return true;
@@ -492,7 +496,7 @@ void Engine::SetNeedsReportTimings(bool needs_reporting) {
 }
 
 FontCollection& Engine::GetFontCollection() {
-  return font_collection_;
+  return *font_collection_;
 }
 
 void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
