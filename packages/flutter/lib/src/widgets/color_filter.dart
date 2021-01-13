@@ -22,7 +22,7 @@ import 'framework.dart';
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// These two images have two [ColorFilter]s applied with different [BlendMode]s,
-/// a red color via [BlendMode.modulate] and a grey color via [BlendMode.saturation].
+/// one with red color and [BlendMode.modulate] another with a grey color and [BlendMode.saturation].
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
