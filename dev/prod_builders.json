@@ -601,6 +601,12 @@
          "flaky": false
       },
       {
+         "name": "Windows hot_mode_dev_cycle_win_target__benchmark",
+         "repo": "flutter",
+         "task_name": "windows_hot_mode_dev_cycle_win_target__benchmark",
+         "flaky": false
+      },
+      {
          "name": "Windows module_custom_host_app_name_test",
          "repo": "flutter",
          "task_name": "win_module_custom_host_app_name_test",
