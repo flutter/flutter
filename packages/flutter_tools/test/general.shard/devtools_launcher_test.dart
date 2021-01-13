@@ -107,6 +107,7 @@ void main() {
             'global',
             'run',
             'devtools',
+            '--no-launch-browser',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
           completer: completer,
