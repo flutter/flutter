@@ -85,7 +85,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -133,7 +133,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -205,7 +205,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -285,7 +285,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -358,7 +358,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -435,7 +435,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -528,7 +528,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -625,7 +625,7 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}checkouts/framework',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
