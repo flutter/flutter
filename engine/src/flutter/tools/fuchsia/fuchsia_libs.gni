@@ -48,17 +48,17 @@ common_libs = [
   {
     name = "libc++.so.2"
     path = rebase_path(
-            "$clang_base/${clang_manifest_json.md5_33bfe15b05ada4ed326fbc33adb39b95}")
+            "$clang_base/${clang_manifest_json.md5_19df03aecdc9eb27bc8b4038352f2b27}")
   },
   {
     name = "libc++abi.so.1"
     path = rebase_path(
-            "$clang_base/${clang_manifest_json.md5_916c01a85e3353f124776599819ecb1c}")
+            "$clang_base/${clang_manifest_json.md5_6aff1b5f218d4a9278d85d63d0695af8}")
   },
   {
     name = "libunwind.so.1"
     path = rebase_path(
-            "$clang_base/${clang_manifest_json.md5_beb70f40d525448b39ea87d9f5811e56}")
+            "$clang_base/${clang_manifest_json.md5_fb2bd871885ef42c2cf3138655f901ed}")
   },
 ]
 
