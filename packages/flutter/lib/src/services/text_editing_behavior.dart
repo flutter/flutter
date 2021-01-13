@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/widgets.dart';
 
 // TODO(justinmc): Remove from widgets/text_selection.dart.
@@ -15,8 +16,11 @@ class AltArrowLeftTextIntent extends Intent {}
 class AltArrowRightTextIntent extends Intent {}
 class ArrowLeftTextIntent extends Intent {}
 class ArrowRightTextIntent extends Intent {}
+class ControlATextIntent extends Intent {}
 class ControlArrowLeftTextIntent extends Intent {}
 class ControlArrowRightTextIntent extends Intent {}
+class ControlCTextIntent extends Intent {}
+class MetaCTextIntent extends Intent {}
 class ShiftArrowLeftTextIntent extends Intent {}
 class ShiftArrowRightTextIntent extends Intent {}
 
@@ -160,8 +164,11 @@ final Map<Type, Action<Intent>> textEditingActionsMap = <Type, Action<Intent>>{
   AltArrowRightTextIntent: _altArrowRightTextAction,
   ArrowLeftTextIntent: _arrowLeftTextAction,
   ArrowRightTextIntent: _arrowRightTextAction,
+  ControlATextIntent: _controlATextAction,
   ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
   ControlArrowRightTextIntent: _controlArrowRightTextAction,
+  ControlCTextIntent: _controlCTextAction,
+  MetaCTextIntent: _metaCTextAction,
   ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
   ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
   SingleTapUpTextIntent: _singleTapUpTextAction,
@@ -280,6 +287,18 @@ final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditin
   },
 );
 
+final TextEditingAction<ControlCTextIntent> _controlCTextAction = TextEditingAction<ControlCTextIntent>(
+  onInvoke: (ControlCTextIntent intent, EditableTextState editableTextState) {
+    print('justin copy (with control, not command)');
+  },
+);
+
+final TextEditingAction<ControlATextIntent> _controlATextAction = TextEditingAction<ControlATextIntent>(
+  onInvoke: (ControlATextIntent intent, EditableTextState editableTextState) {
+    // TODO(justinmc): Select all.
+  },
+);
+
 final TextEditingAction<ControlArrowLeftTextIntent> _controlArrowLeftTextAction = TextEditingAction<ControlArrowLeftTextIntent>(
   onInvoke: (ControlArrowLeftTextIntent intent, EditableTextState editableTextState) {
     switch (defaultTargetPlatform) {
@@ -309,6 +328,24 @@ final TextEditingAction<ControlArrowRightTextIntent> _controlArrowRightTextActio
         editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
         break;
     }
+  },
+);
+
+final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
+  onInvoke: (MetaCTextIntent intent, EditableTextState editableTextState) {
+    // TODO(justinmc): This needs to be deduplicated with text_selection.dart.
+    final TextSelectionDelegate delegate = editableTextState.renderEditable.textSelectionDelegate;
+    final TextEditingValue value = delegate.textEditingValue;
+    Clipboard.setData(ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+    //clipboardStatus?.update();
+    delegate.textEditingValue = TextEditingValue(
+      text: value.text,
+      selection: TextSelection.collapsed(offset: value.selection.end),
+    );
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    //delegate.hideToolbar();
   },
 );
 
