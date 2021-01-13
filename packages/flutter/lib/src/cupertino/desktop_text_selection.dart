@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
 import 'localizations.dart';
@@ -25,26 +23,6 @@ const double _kSelectionHandleRadius = 6;
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
-
-// Vertical distance between the tip of the arrow and the line of text the arrow
-// is pointing to. The value used here is eyeballed.
-const double _kToolbarContentDistance = 8.0;
-// Values derived from https://developer.apple.com/design/resources/.
-// 92% Opacity ~= 0xEB
-
-// Values extracted from https://developer.apple.com/design/resources/.
-// The height of the toolbar, including the arrow.
-// TODO(justinmc): remove.
-const double _kToolbarHeight = 43.0;
-const Size _kToolbarArrowSize = Size(14.0, 7.0);
-
-const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
-  inherit: false,
-  fontSize: 14.0,
-  letterSpacing: -0.15,
-  fontWeight: FontWeight.w400,
-  color: CupertinoColors.inactiveGray,
-);
 
 // This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
 // Macbook Pro.
@@ -190,7 +168,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   }
 }
 
-/// Text selection controls that follows iOS design conventions.
+/// Text selection controls that follows Mac design conventions.
 final TextSelectionControls cupertinoDesktopTextSelectionControls =
     _CupertinoDesktopTextSelectionControls();
 

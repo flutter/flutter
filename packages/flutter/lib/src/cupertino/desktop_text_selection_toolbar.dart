@@ -33,7 +33,7 @@ typedef CupertinoDesktopToolbarBuilder = Widget Function(
   Widget child,
 );
 
-/// An iOS-style text selection toolbar.
+/// A Mac-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
@@ -41,13 +41,10 @@ typedef CupertinoDesktopToolbarBuilder = Widget Function(
 /// Tries to position itself as closesly as possible to [anchor] while remaining
 /// fully on-screen.
 ///
-/// If any children don't fit in the menu, an overflow menu will automatically
-/// be created.
-///
 /// See also:
 ///
 ///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an iOS-style toolbar.
+///    build a Mac-style toolbar.
 ///  * [TextSelectionToolbar], which is similar, but builds an Android-style
 ///    toolbar.
 class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
