@@ -326,8 +326,10 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
   ///
+  /// This attribute must be an ordered [Map] such as a [LinkedHashMap]. Each
+  /// widget is typically a single-line [Text] widget or an [Icon] widget.
+  ///
   /// The map must have more than one entry.
-  /// This attribute must be an ordered [Map] such as a [LinkedHashMap].
   final Map<T, Widget> children;
 
   /// The identifier of the widget that is currently selected.
