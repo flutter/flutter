@@ -17,7 +17,7 @@ import 'system_channels.dart';
 /// app that was built and installed on the device. It cannot load new code
 /// written after the app is distributed.
 ///
-/// Deferred components are currently and Android-only feature. The methods in
+/// Deferred components are currently an Android-only feature. The methods in
 /// this class are a no-op and all assets and dart code are already available
 /// without installation if called on other platforms.
 class DeferredComponent {
@@ -75,7 +75,7 @@ class DeferredComponent {
   ///
   /// Since uninstallation typically requires significant disk i/o, this method only
   /// signals the intent to uninstall. Completion of the returned future indicates
-  /// that the request to uninstall has been registered. Actual uninstallation (eg,
+  /// that the request to uninstall has been registered. Actual uninstallation (e.g.,
   /// removal of assets and files) may occur at a later time. However, once uninstallation
   /// is requested, the deferred component should not be used anymore until
   /// [installDeferredComponent] or `loadLibrary()` is called again.
