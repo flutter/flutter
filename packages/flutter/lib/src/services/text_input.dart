@@ -1114,21 +1114,17 @@ class _TextInputChannelConnection extends TextInputConnection {
     );
   }
 
-  static Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    final TextInputConnection? connection = TextInput._instance._currentConnection;
-    if (connection is! _TextInputChannelConnection)
-      return;
+  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    final TextInputClient client = connection._client;
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
-      assert(client != null);
-      connection.setClient(TextInput._instance._currentConfiguration);
-      final TextEditingValue? editingValue = client.currentTextEditingValue;
+      assert(_client != null);
+      setClient(TextInput._instance._currentConfiguration);
+      final TextEditingValue? editingValue = _client.currentTextEditingValue;
       if (editingValue != null) {
-        connection.setEditingState(editingValue);
+        setEditingState(editingValue);
       }
       return;
     }
@@ -1136,8 +1132,8 @@ class _TextInputChannelConnection extends TextInputConnection {
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      assert(client != null);
-      final AutofillScope? scope = client.currentAutofillScope;
+      assert(_client != null);
+      final AutofillScope? scope = _client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
         final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
@@ -1151,31 +1147,31 @@ class _TextInputChannelConnection extends TextInputConnection {
 
     final int clientId = args[0] as int;
     // The incoming message was for a different client.
-    if (clientId != connection._id)
+    if (clientId != _id)
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        _client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.performAction':
-        client.performAction(_toTextInputAction(args[1] as String));
+        _client.performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.performPrivateCommand':
-        client.performPrivateCommand(args[1]['action'] as String,
+        _client.performPrivateCommand(args[1]['action'] as String,
           args[1]['data'] as Map<String, dynamic>);
         break;
       case 'TextInputClient.updateFloatingCursor':
-        client.updateFloatingCursor(_toTextPoint(
+        _client.updateFloatingCursor(_toTextPoint(
           _toTextCursorAction(args[1] as String),
           args[2] as Map<String, dynamic>,
         ));
         break;
       case 'TextInputClient.onConnectionClosed':
-        client.connectionClosed();
+        _client.connectionClosed();
         TextInput.reset();
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
-        client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        _client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       default:
         throw MissingPluginException();
@@ -1292,8 +1288,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///    wants to take user input from the keyboard.
 class TextInput {
   TextInput._() {
-    _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_TextInputChannelConnection._handleTextInputInvocation);
+    _currentSource.init();
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -1305,12 +1300,17 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_TextInputChannelConnection._handleTextInputInvocation);
+      _TextInputSource.setChannel(newChannel);
       return true;
     }());
   }
 
   static final TextInput _instance = TextInput._();
+
+  static void _setSource(_TextInputSource source) {
+    _instance._currentSource.cleanup();
+    _instance._currentSource = source..init();
+  }
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
@@ -1351,7 +1351,7 @@ class TextInput {
     assert(client != null);
     assert(configuration != null);
     _instance._detach();
-    final TextInputConnection connection = _TextInputChannelConnection(client, _instance._channel);
+    final TextInputConnection connection = _instance._currentSource.attach(client);
     _instance._attach(connection, configuration);
     return connection;
   }
@@ -1389,8 +1389,7 @@ class TextInput {
     return true;
   }
 
-  late MethodChannel _channel;
-
+  _TextInputSource _currentSource = _TextInputSource();
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
@@ -1435,6 +1434,7 @@ class TextInput {
       return;
     _currentConnection!.clearClient();
     _scheduleHide(_currentConnection!);
+    _currentSource.detach(_currentConnection!._client);
     _currentConnection = null;
   }
 
@@ -1497,9 +1497,42 @@ class TextInput {
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
-    TextInput._instance._channel.invokeMethod<void>(
+    _instance._currentSource.finishAutofillContext(shouldSave: shouldSave);
+  }
+}
+
+class _TextInputSource {
+  static MethodChannel? _channel;
+
+  static void setChannel(MethodChannel newChannel) {
+    _channel = newChannel..setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  void init() {
+    _channel ??= SystemChannels.textInput;
+    _channel!.setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  void cleanup() {
+    _channel!.setMethodCallHandler((MethodCall methodCall) async {});
+  }
+
+  TextInputConnection attach(TextInputClient client) {
+    return _TextInputChannelConnection(client, _channel!);
+  }
+
+  void detach(TextInputClient client) {}
+
+  void finishAutofillContext({bool shouldSave = true}) {
+    _channel!.invokeMethod<void>(
       'TextInput.finishAutofillContext',
-      shouldSave ,
+      shouldSave,
     );
+  }
+
+  static Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    final TextInputConnection? connection = TextInput._instance._currentConnection;
+    if (connection is _TextInputChannelConnection)
+      return connection._handleTextInputInvocation(methodCall);
   }
 }
