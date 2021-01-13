@@ -264,6 +264,17 @@ class ErrorHandlingFile
   }
 
   @override
+  void createSync({bool recursive = false}) {
+    _runSync<void>(
+      () => delegate.createSync(
+        recursive: recursive,
+      ),
+      platform: _platform,
+      failureMessage: 'Flutter failed to create file at "${delegate.path}"',
+    );
+  }
+
+  @override
   RandomAccessFile openSync({FileMode mode = FileMode.read}) {
     return _runSync<RandomAccessFile>(
       () => delegate.openSync(
