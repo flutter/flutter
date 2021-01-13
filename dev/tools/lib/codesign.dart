@@ -32,7 +32,9 @@ const String kUpstream = 'upstream';
 class CodesignCommand extends Command<void> {
   CodesignCommand({
     @required this.checkouts,
-  })  : fileSystem = checkouts.fileSystem,
+    @required this.flutterRoot,
+  })  : assert(flutterRoot != null),
+        fileSystem = checkouts.fileSystem,
         platform = checkouts.platform,
         stdio = checkouts.stdio,
         processManager = checkouts.processManager {
@@ -64,6 +66,9 @@ class CodesignCommand extends Command<void> {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+
+  /// Root directory of the Flutter repository.
+  final Directory flutterRoot;
 
   FrameworkRepository _framework;
   FrameworkRepository get framework => _framework ??= FrameworkRepository.localRepoAsUpstream(

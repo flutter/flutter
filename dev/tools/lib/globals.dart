@@ -39,7 +39,7 @@ class ConductorException implements Exception {
 }
 
 Directory _flutterRoot;
-Directory get flutterRoot {
+Directory get localFlutterRoot {
   if (_flutterRoot != null) {
     return _flutterRoot;
   }

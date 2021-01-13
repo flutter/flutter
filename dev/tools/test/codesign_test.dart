@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/repository.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
@@ -15,12 +16,12 @@ import './common.dart';
 
 void main() {
   group('codesign command', () {
-    const String flutterRoot = '/flutter/';
-    const String checkoutsParentDirectory = '${flutterRoot}dev/tools/';
+    const String flutterRoot = '/flutter';
+    const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
     const String flutterCache =
-        '${checkoutsParentDirectory}checkouts/framework/bin/cache';
+        '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache';
     const String flutterBin =
-        '${checkoutsParentDirectory}checkouts/framework/bin/flutter';
+        '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/flutter';
     const String revision = 'abcd1234';
     CommandRunner<void> runner;
     Checkouts checkouts;
@@ -59,6 +60,7 @@ void main() {
         checkouts: checkouts,
         binariesWithEntitlements: binariesWithEntitlements,
         binariesWithoutEntitlements: binariesWithoutEntitlements,
+        flutterRoot: fileSystem.directory(flutterRoot),
       );
       runner = CommandRunner<void>('codesign-test', '')
         ..addCommand(command);
@@ -108,8 +110,8 @@ void main() {
           'git',
           'clone',
           '--',
-          'file://$flutterRoot',
-          '${checkoutsParentDirectory}checkouts/framework',
+          'file://$flutterRoot/',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -138,7 +140,7 @@ void main() {
         FakeCommand(
           command: const <String>[
             'find',
-            '${checkoutsParentDirectory}checkouts/framework/bin/cache',
+            '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache',
             '-type',
             'f',
           ],
@@ -192,8 +194,8 @@ void main() {
           'git',
           'clone',
           '--',
-          'file://$flutterRoot',
-          '${checkoutsParentDirectory}checkouts/framework',
+          'file://$flutterRoot/',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -222,7 +224,7 @@ void main() {
         FakeCommand(
           command: const <String>[
             'find',
-            '${checkoutsParentDirectory}checkouts/framework/bin/cache',
+            '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache',
             '-type',
             'f',
           ],
@@ -276,8 +278,8 @@ void main() {
           'git',
           'clone',
           '--',
-          'file://$flutterRoot',
-          '${checkoutsParentDirectory}checkouts/framework',
+          'file://$flutterRoot/',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -306,7 +308,7 @@ void main() {
         FakeCommand(
           command: const <String>[
             'find',
-            '${checkoutsParentDirectory}checkouts/framework/bin/cache',
+            '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache',
             '-type',
             'f',
           ],
@@ -332,8 +334,8 @@ void main() {
           'git',
           'clone',
           '--',
-          'file://$flutterRoot',
-          '${checkoutsParentDirectory}checkouts/framework',
+          'file://$flutterRoot/',
+          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -362,7 +364,7 @@ void main() {
         FakeCommand(
           command: const <String>[
             'find',
-            '${checkoutsParentDirectory}checkouts/framework/bin/cache',
+            '${checkoutsParentDirectory}flutter_conductor_checkouts/framework/bin/cache',
             '-type',
             'f',
           ],
@@ -399,7 +401,8 @@ class FakeCodesignCommand extends CodesignCommand {
     @required Checkouts checkouts,
     @required this.binariesWithEntitlements,
     @required this.binariesWithoutEntitlements,
-  }) : super(checkouts: checkouts);
+    @required Directory flutterRoot,
+  }) : super(checkouts: checkouts, flutterRoot: flutterRoot);
 
   @override
   final List<String> binariesWithEntitlements;

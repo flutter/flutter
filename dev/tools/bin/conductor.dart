@@ -31,7 +31,7 @@ Future<void> main(List<String> args) async {
   );
   final Checkouts checkouts = Checkouts(
     fileSystem: fileSystem,
-    parentDirectory: flutterRoot.parent,
+    parentDirectory: localFlutterRoot.parent,
     platform: platform,
     processManager: processManager,
     stdio: stdio,
@@ -52,6 +52,7 @@ Future<void> main(List<String> args) async {
     ),
     CodesignCommand(
       checkouts: checkouts,
+      flutterRoot: localFlutterRoot,
     ),
   ].forEach(runner.addCommand);
 
