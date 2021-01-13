@@ -114,7 +114,7 @@ void main() {
       ]),
     );
 
-    final DevToolsServerAddress address = await launcher.serve(openInBrowser: true);
+    final DevToolsServerAddress address = await launcher.serve();
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
   });

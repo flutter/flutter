@@ -1256,8 +1256,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> serveDevToolsGracefully({
-    Uri devToolsServerAddress,
-    bool openInBrowser = false,
+    Uri devToolsServerAddress
   }) async {
     if (!supportsServiceProtocol) {
       return;
@@ -1267,7 +1266,7 @@ abstract class ResidentRunner {
     if (devToolsServerAddress != null) {
       _devToolsLauncher.devToolsUri = devToolsServerAddress;
     } else {
-      await _devToolsLauncher.serve(openInBrowser: openInBrowser);
+      await _devToolsLauncher.serve();
     }
   }
 
@@ -1655,12 +1654,10 @@ abstract class DevtoolsLauncher {
 
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
-  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
+  Future<void> launch(Uri vmServiceUri);
 
-  // TODO(kenz): remove the openInBrowser parameter, as it is unnecessary after
-  // removing the 'v' terminal hotkey.
   /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
+  Future<DevToolsServerAddress> serve();
 
   Future<void> close();
 

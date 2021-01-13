@@ -44,7 +44,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
   @override
-  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false}) async {
+  Future<void> launch(Uri vmServiceUri) async {
     // Place this entire method in a try/catch that swallows exceptions because
     // we do not want to block Flutter run/attach operations on a DevTools
     // failure.
@@ -82,7 +82,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'global',
         'run',
         'devtools',
-        if (!openInBrowser) '--no-launch-browser',
+        '--no-launch-browser',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
       ]);
       final Completer<Uri> completer = Completer<Uri>();
@@ -171,8 +171,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   }
 
   @override
-  Future<DevToolsServerAddress> serve({bool openInBrowser = false}) async {
-    await launch(null, openInBrowser: openInBrowser);
+  Future<DevToolsServerAddress> serve() async {
+    await launch(null);
     return activeDevToolsServer;
   }
 
