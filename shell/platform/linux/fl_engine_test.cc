@@ -71,6 +71,38 @@ TEST(FlEngineTest, MousePointer) {
   EXPECT_TRUE(called);
 }
 
+// Checks dispatching a semantics action works.
+TEST(FlEngineTest, DispatchSemanticsAction) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+  embedder_api->DispatchSemanticsAction = MOCK_ENGINE_PROC(
+      DispatchSemanticsAction,
+      ([&called](auto engine, uint64_t id, FlutterSemanticsAction action,
+                 const uint8_t* data, size_t data_length) {
+        EXPECT_EQ(id, static_cast<uint64_t>(42));
+        EXPECT_EQ(action, kFlutterSemanticsActionTap);
+        EXPECT_EQ(data_length, static_cast<size_t>(4));
+        EXPECT_EQ(data[0], 't');
+        EXPECT_EQ(data[1], 'e');
+        EXPECT_EQ(data[2], 's');
+        EXPECT_EQ(data[3], 't');
+        called = true;
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
+  fl_engine_dispatch_semantics_action(engine, 42, kFlutterSemanticsActionTap,
+                                      data);
+
+  EXPECT_TRUE(called);
+}
+
 // Checks sending platform messages works.
 TEST(FlEngineTest, PlatformMessage) {
   g_autoptr(FlEngine) engine = make_mock_engine();
