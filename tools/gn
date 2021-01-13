@@ -344,7 +344,7 @@ def parse_args(args):
   parser.add_argument('--full-dart-debug', default=False, action='store_true', help='Implies --dart-debug ' +
       'and also disables optimizations in the Dart VM making it easier to step through VM code in the debugger.')
 
-  parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'linux', 'fuchsia', 'win'])
+  parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'linux', 'fuchsia', 'win', 'winuwp'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
