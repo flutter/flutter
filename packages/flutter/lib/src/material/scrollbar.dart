@@ -26,6 +26,9 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
+/// Dynamically changes to an iOS style scrollbar that looks like
+/// [CupertinoScrollbar] on the iOS platform.
+///
 /// The color of the Scrollbar will change when dragged. A hover animation is
 /// also triggered when used on web and desktop platforms. A scrollbar track
 /// can also been drawn when triggered by a hover event, which is controlled by
@@ -42,7 +45,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-class Scrollbar extends RawScrollbar {
+class Scrollbar extends StatefulWidget {
   /// Creates a material design scrollbar that by default will connect to the
   /// closest Scrollable descendant of [child].
   ///
@@ -58,6 +61,96 @@ class Scrollbar extends RawScrollbar {
   /// except for when executing on [TargetPlatform.android], which will render the
   /// thumb without a radius.
   const Scrollbar({
+    Key? key,
+    required this.child,
+    this.controller,
+    this.isAlwaysShown,
+    this.showTrackOnHover,
+    this.hoverThickness,
+    this.thickness,
+    this.radius,
+  }) : super(key: key);
+
+  final Widget child;
+  final ScrollController? controller;
+  final bool? isAlwaysShown;
+
+  /// Controls if the track will show on hover and remain, including during drag.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  final bool? showTrackOnHover;
+
+  /// The thickness of the scrollbar when a hover state is active and
+  /// [showTrackOnHover] is true.
+  ///
+  /// If this property is null, then [ScrollbarThemeData.thickness] of
+  /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
+  /// null, the default value is 12.0 pixels.
+  final double? hoverThickness;
+
+  final double? thickness;
+  final Radius? radius;
+
+  @override
+  _ScrollbarState createState() => _ScrollbarState();
+}
+
+class _ScrollbarState extends State<Scrollbar> {
+  late bool _useCupertinoScrollbar;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ThemeData theme = Theme.of(context);
+    switch (theme.platform) {
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _useCupertinoScrollbar = false;
+        break;
+      case TargetPlatform.iOS:
+        _useCupertinoScrollbar = true;
+        break;
+      case TargetPlatform.macOS:
+        // The current CupertinoScrollbar is not intended for desktop.
+        // TODO(Piinks): Update CupertinoScrollbar appearance for desktop.
+        _useCupertinoScrollbar = false;
+        break;
+    }
+  }
+
+  @override	  @override
+  Widget build(BuildContext context) {
+    if (_useCupertinoScrollbar) {
+      return CupertinoScrollbar(
+        child: widget.child,
+        isAlwaysShown: widget.isAlwaysShown ?? false,
+        thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        controller: widget.controller,
+      );
+    }
+    return _MaterialScrollbar(
+      key: widget.key,
+      child: widget.child,
+      controller: widget.controller,
+      isAlwaysShown: widget.isAlwaysShown,
+      showTrackOnHover: widget.showTrackOnHover,
+      hoverThickness: widget.hoverThickness,
+      thickness: widget.thickness,
+      radius: widget.radius,
+    );
+  }
+}
+
+class _MaterialScrollbar extends RawScrollbar {
+  const _MaterialScrollbar({
     Key? key,
     required Widget child,
     ScrollController? controller,
@@ -78,26 +171,14 @@ class Scrollbar extends RawScrollbar {
          pressDuration: Duration.zero,
        );
 
-  /// Controls if the track will show on hover and remain, including during drag.
-  ///
-  /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
-  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
-  /// is false.
   final bool? showTrackOnHover;
-
-  /// The thickness of the scrollbar when a hover state is active and
-  /// [showTrackOnHover] is true.
-  ///
-  /// If this property is null, then [ScrollbarThemeData.thickness] of
-  /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
-  /// null, the default value is 12.0 pixels.
   final double? hoverThickness;
 
   @override
-  _ScrollbarState createState() => _ScrollbarState();
+  _MaterialScrollbarState createState() => _MaterialScrollbarState();
 }
 
-class _ScrollbarState extends RawScrollbarState<Scrollbar> {
+class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late AnimationController _hoverAnimationController;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
