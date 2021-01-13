@@ -385,7 +385,6 @@ void main() {
     testWithoutContext(
       'supports screenshots',
       () async {
-        // expect(deviceUnderTest.supportsScreenshot, true);
         final File screenshot = MemoryFileSystem.test().file('screenshot.png');
         await deviceUnderTest.takeScreenshot(screenshot);
         verify(mockProcessManager.run(
