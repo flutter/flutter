@@ -66,6 +66,7 @@ class Scrollbar extends RawScrollbar {
     this.hoverThickness,
     double? thickness,
     Radius? radius,
+    ScrollNotificationPredicate? notificationPredicate,
   }) : super(
          key: key,
          child: child,
@@ -76,6 +77,7 @@ class Scrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
+         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
   /// Controls if the track will show on hover and remain, including during drag.

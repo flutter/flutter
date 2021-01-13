@@ -607,6 +607,7 @@ class RawScrollbar extends StatefulWidget {
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -760,6 +761,13 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Cannot be null, defaults to [Duration.zero].
   final Duration pressDuration;
+
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate notificationPredicate;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
@@ -1025,6 +1033,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    if (!widget.notificationPredicate(notification))
+      return false;
 
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
