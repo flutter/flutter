@@ -16,21 +16,24 @@ import './common.dart';
 
 /// Verify all binaries in the Flutter cache are expected by Conductor.
 void main() {
-  test('validate the expected binaries from the conductor codesign command are present in the cache', () async {
+  test(
+      'validate the expected binaries from the conductor codesign command are present in the cache',
+      () async {
     const Platform platform = LocalPlatform();
     const FileSystem fileSystem = LocalFileSystem();
     const ProcessManager processManager = LocalProcessManager();
     final TestStdio stdio = TestStdio(verbose: true);
     final Checkouts checkouts = Checkouts(
       fileSystem: fileSystem,
-      parentDirectory: flutterRoot.parent,
+      parentDirectory: localFlutterRoot.parent,
       platform: platform,
       processManager: processManager,
       stdio: stdio,
     );
 
     final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
-        ..addCommand(CodesignCommand(checkouts: checkouts));
+      ..addCommand(
+          CodesignCommand(checkouts: checkouts, flutterRoot: localFlutterRoot));
 
     try {
       await runner.run(<String>[

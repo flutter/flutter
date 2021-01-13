@@ -33,7 +33,7 @@ void main() {
       stdio = TestStdio(verbose: true);
       checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: flutterRoot.parent,
+        parentDirectory: localFlutterRoot.parent,
         platform: platform,
         processManager: processManager,
         stdio: stdio,
