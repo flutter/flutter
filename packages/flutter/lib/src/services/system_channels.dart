@@ -333,11 +333,6 @@ class SystemChannels {
   ///    future will complete an error. Calling `loadLibrary()` on a deferred
   ///    imported library is equivalent to calling this method with a
   ///    loadingUnitId and null moduleName.
-  ///  * `getDeferredComponentInstallState`: Gets the current installation state of
-  ///    the deferred component identified by the loadingUnitId or moduleName.
-  ///    This method returns a string that represents the state. Depending on
-  ///    the implementation, this string may vary, but the default Google Play
-  ///    Store implementation retuns a state in the [DeferredComponentInstallState] enum
   ///  * `uninstallDeferredComponent`:  Requests that a deferred component identified by
   ///    the provided loadingUnitId or moduleName be uninstalled. Since
   ///    uninstallation typically requires significant disk i/o, this method only
