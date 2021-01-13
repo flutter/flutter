@@ -468,7 +468,7 @@ flt-glass-pane * {
     if (useCanvasKit) {
       _canvasKitScript?.remove();
       _canvasKitScript = html.ScriptElement();
-      _canvasKitScript!.src = canvasKitBaseUrl + 'canvaskit.js';
+      _canvasKitScript!.src = canvasKitJavaScriptBindingsUrl;
 
       // TODO(hterkelsen): Rather than this monkey-patch hack, we should
       // build CanvasKit ourselves. See:

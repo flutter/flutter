@@ -47,6 +47,26 @@ const bool canvasKitForceCpuOnly = bool.fromEnvironment(
 
 /// The URL to use when downloading the CanvasKit script and associated wasm.
 ///
+/// The expected directory structure nested under this URL is as follows:
+///
+///     /canvaskit.js              - the release build of CanvasKit JS API bindings
+///     /canvaskit.wasm            - the release build of CanvasKit WASM module
+///     /profiling/canvaskit.js    - the profile build of CanvasKit JS API bindings
+///     /profiling/canvaskit.wasm  - the profile build of CanvasKit WASM module
+///
+/// The base URL can be overridden using the `FLUTTER_WEB_CANVASKIT_URL`
+/// environment variable, which can be set in the Flutter tool using the
+/// `--dart-define` option. The value must end with a `/`.
+///
+/// Example:
+///
+/// ```
+/// flutter run \
+///   -d chrome \
+///   --web-renderer=canvaskit \
+///   --dart-define=FLUTTER_WEB_CANVASKIT_URL=https://example.com/custom-canvaskit-build/
+/// ```
+///
 /// When CanvasKit pushes a new release to NPM, update this URL to reflect the
 /// most recent version. For example, if CanvasKit releases version 0.34.0 to
 /// NPM, update this URL to `https://unpkg.com/canvaskit-wasm@0.34.0/bin/`.
@@ -54,6 +74,9 @@ const String canvasKitBaseUrl = String.fromEnvironment(
   'FLUTTER_WEB_CANVASKIT_URL',
   defaultValue: 'https://unpkg.com/canvaskit-wasm@0.22.0/bin/',
 );
+final String canvasKitBuildUrl = canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
+final String canvasKitJavaScriptBindingsUrl = canvasKitBuildUrl + 'canvaskit.js';
+String canvasKitWasmModuleUrl(String file) => canvasKitBuildUrl + file;
 
 /// Initialize CanvasKit.
 ///
@@ -63,10 +86,8 @@ Future<void> initializeCanvasKit() {
   late StreamSubscription<html.Event> loadSubscription;
   loadSubscription = domRenderer.canvasKitScript!.onLoad.listen((_) {
     loadSubscription.cancel();
-    final CanvasKitInitPromise canvasKitInitPromise =
-        CanvasKitInit(CanvasKitInitOptions(
-      locateFile: js.allowInterop(
-          (String file, String unusedBase) => canvasKitBaseUrl + file),
+    final CanvasKitInitPromise canvasKitInitPromise = CanvasKitInit(CanvasKitInitOptions(
+      locateFile: js.allowInterop((String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
     ));
     canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
       canvasKit = ck;
