@@ -704,12 +704,10 @@ if (is_win) {
     default_warning_flags += [ "-Wno-deprecated-declarations" ]
   }
 
-  if (is_fuchsia) {
-    default_warning_flags += [
-      # Needed for compiling Skia with clang-12
-      "-Wno-psabi",
-   ]
-  }
+  default_warning_flags += [
+    # Needed for compiling Skia with clang-12
+    "-Wno-psabi",
+  ]
 }
 
 # chromium_code ---------------------------------------------------------------
