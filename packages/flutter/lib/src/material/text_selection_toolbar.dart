@@ -25,6 +25,8 @@ const double _kToolbarHeight = 44.0;
 /// See also:
 ///
 ///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
+///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
+///     for a Cupertino-style toolbar.
 typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 
 /// A fully-functional Material-style text selection toolbar.
@@ -34,6 +36,13 @@ typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
 ///
 /// If any children don't fit in the menu, an overflow menu will automatically
 /// be created.
+///
+/// See also:
+///
+///  * [TextSelectionControls.buildToolbar], where this is used by default to
+///    build an Android-style toolbar.
+///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
+///    style toolbar.
 class TextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbar.
   const TextSelectionToolbar({
@@ -45,31 +54,39 @@ class TextSelectionToolbar extends StatelessWidget {
   }) : assert(children.length > 0),
        super(key: key);
 
+  /// {@template flutter.material.TextSelectionToolbar.anchorAbove}
   /// The focal point above which the toolbar attempts to position itself.
   ///
   /// If there is not enough room above before reaching the top of the screen,
   /// then the toolbar will position itself below [anchorBelow].
+  /// {@endtemplate}
   final Offset anchorAbove;
 
+  /// {@template flutter.material.TextSelectionToolbar.anchorBelow}
   /// The focal point below which the toolbar attempts to position itself, if it
   /// doesn't fit above [anchorAbove].
+  /// {@endtemplate}
   final Offset anchorBelow;
 
+  /// {@template flutter.material.TextSelectionToolbar.children}
   /// The children that will be displayed in the text selection toolbar.
   ///
   /// Typically these are buttons.
   ///
   /// Must not be empty.
+  /// {@endtemplate}
   ///
   /// See also:
   ///   * [TextSelectionToolbarTextButton], which builds a default Material-
   ///     style text selection toolbar text button.
   final List<Widget> children;
 
+  /// {@template flutter.material.TextSelectionToolbar.toolbarBuilder}
   /// Builds the toolbar container.
   ///
   /// Useful for customizing the high-level background of the toolbar. The given
   /// child Widget will contain all of the [children].
+  /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
 
   // Build the default Android Material text selection menu toolbar.
@@ -81,29 +98,26 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingTop = MediaQuery.of(context).padding.top
+    final double paddingAbove = MediaQuery.of(context).padding.top
         + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy - paddingTop;
+    final double availableHeight = anchorAbove.dy - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
-    final Offset anchor = fitsAbove ? anchorAbove : anchorBelow;
-    final Offset localAnchor = Offset(
-      anchor.dx - _kToolbarScreenPadding,
-      anchor.dy - paddingTop,
-    );
+    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         _kToolbarScreenPadding,
-        paddingTop,
+        paddingAbove,
         _kToolbarScreenPadding,
         _kToolbarScreenPadding,
       ),
       child: Stack(
         children: <Widget>[
           CustomSingleChildLayout(
-            delegate: _TextSelectionToolbarLayoutDelegate(
-              localAnchor,
-              fitsAbove,
+            delegate: TextSelectionToolbarLayoutDelegate(
+              anchorAbove: anchorAbove - localAdjustment,
+              anchorBelow: anchorBelow - localAdjustment,
+              fitsAbove: fitsAbove,
             ),
             child: _TextSelectionToolbarOverflowable(
               isAbove: fitsAbove,
@@ -114,66 +128,6 @@ class TextSelectionToolbar extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-// Positions the toolbar at the given anchor, ensuring that it remains on
-// screen.
-class _TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayoutDelegate(
-    this.anchor,
-    this.fitsAbove,
-  );
-
-  // Anchor position of the toolbar in global coordinates.
-  final Offset anchor;
-
-  // Whether the closed toolbar fits above the anchor position.
-  //
-  // If the closed toolbar doesn't fit, then the menu is rendered below the
-  // anchor position. It should never happen that the toolbar extends below the
-  // padded bottom of the screen.
-  final bool fitsAbove;
-
-  // Return the value that centers width as closely as possible to position
-  // while fitting inside of min and max.
-  static double _centerOn(double position, double width, double max) {
-    // If it overflows on the left, put it as far left as possible.
-    if (position - width / 2.0 < 0.0) {
-      return 0.0;
-    }
-
-    // If it overflows on the right, put it as far right as possible.
-    if (position + width / 2.0 > max) {
-      return max - width;
-    }
-
-    // Otherwise it fits while perfectly centered.
-    return position - width / 2.0;
-  }
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.loosen();
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(
-      _centerOn(
-        anchor.dx,
-        childSize.width,
-        size.width,
-      ),
-      fitsAbove
-        ? math.max(0.0, anchor.dy - childSize.height)
-        : anchor.dy,
-    );
-  }
-
-  @override
-  bool shouldRelayout(_TextSelectionToolbarLayoutDelegate oldDelegate) {
-    return anchor != oldDelegate.anchor || fitsAbove != oldDelegate.fitsAbove;
   }
 }
 

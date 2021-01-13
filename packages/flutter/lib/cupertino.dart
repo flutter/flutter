@@ -55,6 +55,8 @@ export 'src/cupertino/tab_view.dart';
 export 'src/cupertino/text_field.dart';
 export 'src/cupertino/text_form_field_row.dart';
 export 'src/cupertino/text_selection.dart';
+export 'src/cupertino/text_selection_toolbar.dart';
+export 'src/cupertino/text_selection_toolbar_button.dart';
 export 'src/cupertino/text_theme.dart';
 export 'src/cupertino/theme.dart';
 export 'src/cupertino/thumb_painter.dart';
