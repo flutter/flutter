@@ -72,7 +72,12 @@ class ColdRunner extends ResidentRunner {
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
       try {
-        await connectToServiceProtocol();
+        await Future.wait(<Future<void>>[
+          connectToServiceProtocol(),
+          serveDevToolsGracefully(
+            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          ),
+        ]);
       } on String catch (message) {
         globals.printError(message);
         appFailedToStart();
@@ -115,7 +120,7 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    writeVmserviceFile();
+    writeVmServiceFile();
 
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
@@ -132,10 +137,15 @@ class ColdRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(
-        getSkSLMethod: writeSkSL,
-        allowExistingDdsInstance: allowExistingDdsInstance,
-      );
+      await Future.wait(<Future<void>>[
+        connectToServiceProtocol(
+          getSkSLMethod: writeSkSL,
+          allowExistingDdsInstance: allowExistingDdsInstance,
+        ),
+        serveDevToolsGracefully(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        ),
+      ]);
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
@@ -195,6 +205,19 @@ class ColdRunner extends ResidentRunner {
           'An Observatory debugger and profiler on $dname is available at: '
           '${device.vmService.httpAddress}',
         );
+
+        final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
+        if (devToolsServerAddress != null) {
+          final Uri uri = devToolsServerAddress.uri?.replace(
+            queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+          );
+          if (uri != null) {
+            globals.printStatus(
+              '\nFlutter DevTools, a Flutter debugger and profiler, on '
+              '${device.device.name} is available at: $uri',
+            );
+          }
+        }
       }
     }
   }
