@@ -24,8 +24,8 @@ const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
 /// text.
 ///
-/// Tries to position itself above [anchorAbove], but if it doesn't fit, then
-/// it positions itself below [anchorBelow].
+/// Tries to position itself as closesly as possible to [anchor] while remaining
+/// fully on-screen.
 ///
 /// If any children don't fit in the menu, an overflow menu will automatically
 /// be created.
@@ -46,6 +46,8 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   }) : assert(children.length > 0),
        super(key: key);
 
+  /// The point at which the toolbar will attempt to position itself as closely
+  /// as possible.
   final Offset anchor;
 
   /// {@macro flutter.material.TextSelectionToolbar.children}
@@ -77,8 +79,6 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
-
-    const Offset contentPaddingAdjustment = Offset.zero;// Offset(0.0, _kToolbarContentDistance);
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
@@ -90,9 +90,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       ),
       child: CustomSingleChildLayout(
         delegate: _DesktopTextSelectionToolbarLayoutDelegate(
-          anchor: anchor,
-          //anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
-          //anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
+          anchor: anchor - localAdjustment,
         ),
         child: Container(
           width: _kToolbarWidth,
@@ -121,8 +119,8 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   }
 }
 
-// Positions the toolbar at [anchor] if it fits, otherwise moves it up until it
-// is fully on-screen.
+// Positions the toolbar at [anchor] if it fits, otherwise moves it so that it
+// just fits fully on-screen.
 //
 // See also:
 //
@@ -140,23 +138,6 @@ class _DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelega
   /// Should be provided in local coordinates.
   final Offset anchor;
 
-  // Return the value that centers width as closely as possible to position
-  // while fitting inside of min and max.
-  static double _centerOn(double position, double width, double max) {
-    // If it overflows on the left, put it as far left as possible.
-    if (position - width / 2.0 < 0.0) {
-      return 0.0;
-    }
-
-    // If it overflows on the right, put it as far right as possible.
-    if (position + width / 2.0 > max) {
-      return max - width;
-    }
-
-    // Otherwise it fits while perfectly centered.
-    return position - width / 2.0;
-  }
-
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return constraints.loosen();
@@ -164,21 +145,14 @@ class _DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelega
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final bool fitsAbove = anchor.dy >= childSize.height;
-
-    return anchor;
-    /*
-    return Offset(
-      _centerOn(
-        anchor.dx,
-        childSize.width,
-        size.width,
-      ),
-      fitsAbove
-        ? math.max(0.0, anchor.dy - childSize.height)
-        : anchor.dy,
+    final Offset overhang = Offset(
+      anchor.dx + childSize.width - size.width,
+      anchor.dy + childSize.height - size.height,
     );
-    */
+    return Offset(
+      overhang.dx > 0.0 ? anchor.dx - overhang.dx : anchor.dx,
+      overhang.dy > 0.0 ? anchor.dy - overhang.dy : anchor.dy,
+    );
   }
 
   @override

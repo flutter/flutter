@@ -289,15 +289,12 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // TODO(justinmc): Can the menu ever be shown without a lastTapDownPosition?
-    final Offset anchorBasis = widget.lastTapDownPosition ?? widget.selectionMidpoint;
-    final double anchorX = (anchorBasis.dx - widget.globalEditableRegion.left).clamp(
-      _kArrowScreenPadding + mediaQuery.padding.left,
-      mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
-    );
-    final Offset anchor = Offset(
-      anchorX,
-      anchorBasis.dy - widget.globalEditableRegion.top,
+    final Offset midpointAnchor = Offset(
+      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
+        _kArrowScreenPadding + mediaQuery.padding.left,
+        mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
+      ),
+      widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );
 
     final List<Widget> items = <Widget>[];
@@ -340,7 +337,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     return CupertinoDesktopTextSelectionToolbar(
-      anchor: anchor,
+      // TODO(justinmc): Can the menu ever be shown without a lastTapDownPosition?
+      anchor: widget.lastTapDownPosition ?? midpointAnchor,
       children: items,
     );
   }
