@@ -213,7 +213,7 @@ class ButtonStyle with Diagnosticable {
   ///
   /// Typically buttons are sized to be just big enough to contain the child and its
   /// padding. If the button's size is constrained to a fixed size, for example by
-  /// enclosing with a [SizedBox], this property defines how the child is aligned
+  /// enclosing it with a [SizedBox], this property defines how the child is aligned
   /// within the available space.
   ///
   /// Always defaults to [Alignment.center].
