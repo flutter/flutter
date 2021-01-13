@@ -10,6 +10,7 @@
 #endif
 #include <cstring>
 
+#include "flutter/shell/platform/linux/fl_accessibility_plugin.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_plugin.h"
@@ -18,6 +19,7 @@
 #include "flutter/shell/platform/linux/fl_renderer_wayland.h"
 #include "flutter/shell/platform/linux/fl_renderer_x11.h"
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
@@ -39,6 +41,7 @@ struct _FlView {
   int64_t button_state;
 
   // Flutter system channel handlers.
+  FlAccessibilityPlugin* accessibility_plugin;
   FlKeyEventPlugin* key_event_plugin;
   FlMouseCursorPlugin* mouse_cursor_plugin;
   FlPlatformPlugin* platform_plugin;
@@ -56,6 +59,15 @@ G_DEFINE_TYPE_WITH_CODE(
     GTK_TYPE_WIDGET,
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_view_plugin_registry_iface_init))
+
+static void fl_view_update_semantics_node_cb(FlEngine* engine,
+                                             const FlutterSemanticsNode* node,
+                                             gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
+  fl_accessibility_plugin_handle_update_semantics_node(
+      self->accessibility_plugin, node);
+}
 
 // Converts a GDK button event into a Flutter event and sends it to the engine.
 static gboolean fl_view_send_pointer_button_event(FlView* self,
@@ -155,9 +167,12 @@ static void fl_view_constructed(GObject* object) {
   GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(self));
   self->renderer = fl_view_get_renderer_for_display(display);
   self->engine = fl_engine_new(self->project, self->renderer);
+  fl_engine_set_update_semantics_node_handler(
+      self->engine, fl_view_update_semantics_node_cb, self, nullptr);
 
   // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
+  self->accessibility_plugin = fl_accessibility_plugin_new(self);
   self->text_input_plugin = fl_text_input_plugin_new(messenger, self);
   self->key_event_plugin =
       fl_key_event_plugin_new(messenger, self->text_input_plugin);
@@ -213,9 +228,15 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
 static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
 
+  if (self->engine != nullptr) {
+    fl_engine_set_update_semantics_node_handler(self->engine, nullptr, nullptr,
+                                                nullptr);
+  }
+
   g_clear_object(&self->project);
   g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
+  g_clear_object(&self->accessibility_plugin);
   g_clear_object(&self->key_event_plugin);
   g_clear_object(&self->mouse_cursor_plugin);
   g_clear_object(&self->platform_plugin);
@@ -383,6 +404,9 @@ static void fl_view_class_init(FlViewClass* klass) {
           fl_dart_project_get_type(),
           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
                                    G_PARAM_STATIC_STRINGS)));
+
+  gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
+                                       fl_view_accessible_get_type());
 }
 
 static void fl_view_init(FlView* self) {

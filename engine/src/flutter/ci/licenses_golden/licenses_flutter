@@ -1324,6 +1324,11 @@ FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/linux/egl_utils.cc
 FILE: ../../../flutter/shell/platform/linux/egl_utils.h
 FILE: ../../../flutter/shell/platform/linux/egl_utils_test.cc
+FILE: ../../../flutter/shell/platform/linux/fl_accessibility_plugin.cc
+FILE: ../../../flutter/shell/platform/linux/fl_accessibility_plugin.h
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_node.cc
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_node.h
+FILE: ../../../flutter/shell/platform/linux/fl_accessible_node_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_basic_message_channel.cc
 FILE: ../../../flutter/shell/platform/linux/fl_basic_message_channel_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_binary_codec.cc
@@ -1388,6 +1393,8 @@ FILE: ../../../flutter/shell/platform/linux/fl_text_input_plugin.h
 FILE: ../../../flutter/shell/platform/linux/fl_value.cc
 FILE: ../../../flutter/shell/platform/linux/fl_value_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view.cc
+FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.cc
+FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_codec.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h

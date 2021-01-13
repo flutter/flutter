@@ -18,6 +18,8 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "gtest/gtest.h"
 
+const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
+
 struct _FlutterEngine {
   bool running;
   FlutterPlatformMessageCallback platform_message_callback;
@@ -444,6 +446,21 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    bool enabled) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineDispatchSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    uint64_t id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length) {
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -473,6 +490,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
       &FlutterEngineSendPlatformMessageResponse;
   table->RunTask = &FlutterEngineRunTask;
   table->UpdateLocales = &FlutterEngineUpdateLocales;
+  table->UpdateSemanticsEnabled = &FlutterEngineUpdateSemanticsEnabled;
+  table->DispatchSemanticsAction = &FlutterEngineDispatchSemanticsAction;
   table->RunsAOTCompiledDartCode = &FlutterEngineRunsAOTCompiledDartCode;
 
   return kSuccess;
