@@ -40,7 +40,7 @@
          "name": "Linux animated_placeholder_perf",
          "repo": "flutter",
          "task_name": "linux_animated_placeholder_perf",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux backdrop_filter_perf__e2e_summary",
@@ -340,7 +340,7 @@
          "name": "Linux multi_widget_construction_perf__timeline_summary",
          "repo": "flutter",
          "task_name": "linux_multi_widget_construction_perf__timeline_summary",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Linux new_gallery__crane_perf",
