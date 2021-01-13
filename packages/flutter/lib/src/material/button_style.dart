@@ -209,7 +209,7 @@ class ButtonStyle with Diagnosticable {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
-  /// The alignment of the button's [child].
+  /// The alignment of the button's child.
   ///
   /// Typically buttons are sized to be just big enough to contain the child and its
   /// padding. If the button's size is constrained to a fixed size, for example by
