@@ -1143,7 +1143,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
         textSelectionControls ??= cupertinoTextSelectionControls;
@@ -1154,6 +1153,20 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
+        break;
+
+      case TargetPlatform.macOS:
+        // TODO(justinmc): De-duplicate some of this stuff with iOS above, or
+        // customize it.
+        final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
+        forcePressEnabled = true;
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        paintCursorAboveText = true;
+        cursorOpacityAnimates = true;
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorRadius ??= const Radius.circular(2.0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:

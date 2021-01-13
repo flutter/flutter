@@ -1056,6 +1056,36 @@ class TextSelectionGestureDetectorBuilder {
       editableText.showToolbar();
   }
 
+  /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
+  ///
+  /// By default, selects the word if possible and shows the toolbar.
+  @protected
+  void onSecondaryTap() {
+    // TODO(justinmc): Maybe selection doesnt need to be enabled to show the
+    // toolbar? Maybe no shouldShowSelectionToolbar either?
+    if (delegate.selectionEnabled) {
+      // TODO(justinmc): Needs a new cause.
+      if (!renderEditable.tapIsOnSelection()) {
+        renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+      }
+      if (shouldShowSelectionToolbar)
+        editableText.showToolbar();
+    }
+  }
+
+  /// Handler for [TextSelectionGestureDetector.onSecondaryTapDown].
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onSecondaryTapDown], which triggers this
+  ///    callback.
+  ///  * [onSecondaryTap], which is typically called after this.
+  @protected
+  void onSecondaryTapDown(TapDownDetails details) {
+    renderEditable.handleTapDown(details);
+    _shouldShowSelectionToolbar = true;
+  }
+
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
   /// By default, it selects a word through [RenderEditable.selectWord] if
@@ -1142,6 +1172,8 @@ class TextSelectionGestureDetectorBuilder {
       onTapDown: onTapDown,
       onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
       onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
+      onSecondaryTap: onSecondaryTap,
+      onSecondaryTapDown: onSecondaryTapDown,
       onSingleTapUp: onSingleTapUp,
       onSingleTapCancel: onSingleTapCancel,
       onSingleLongTapStart: onSingleLongTapStart,
@@ -1179,6 +1211,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onTapDown,
     this.onForcePressStart,
     this.onForcePressEnd,
+    this.onSecondaryTap,
+    this.onSecondaryTapDown,
     this.onSingleTapUp,
     this.onSingleTapCancel,
     this.onSingleLongTapStart,
@@ -1205,6 +1239,12 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called when a pointer that had previously triggered [onForcePressStart] is
   /// lifted off the screen.
   final GestureForcePressEndCallback? onForcePressEnd;
+
+  /// Called for a tap event with the secondary mouse button.
+  final GestureTapCallback? onSecondaryTap;
+
+  /// Called for a tap down event with the secondary mouse button.
+  final GestureTapDownCallback? onSecondaryTapDown;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured with [onTapDown] and
@@ -1419,6 +1459,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       () => _TransparentTapGestureRecognizer(debugOwner: this),
       (_TransparentTapGestureRecognizer instance) {
         instance
+          ..onSecondaryTap = widget.onSecondaryTap
+          ..onSecondaryTapDown = widget.onSecondaryTapDown
           ..onTapDown = _handleTapDown
           ..onTapUp = _handleTapUp
           ..onTapCancel = _handleTapCancel;

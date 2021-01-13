@@ -1784,6 +1784,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   Offset? _lastTapDownPosition;
 
+  /// Tracks the position of a secondary tap event.
+  ///
+  /// Should be called before attempting to change the selection based on the
+  /// position of a secondary tap.
+  void handleSecondaryTapDown(TapDownDetails details) {
+    _lastTapDownPosition = details.globalPosition;
+  }
+
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
   /// callback.
@@ -1796,6 +1804,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
     handleTapDown(details);
+  }
+
+  // TODO(justinmc): This is hacky, I'd like to do the refactor to find a nice
+  // way to do stuff like this. If refactor not possible, then make sure you do
+  // want to add this method and there's not an easier way.
+  ///
+  bool tapIsOnSelection() {
+    assert(_lastTapDownPosition != null);
+    if (selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = getPositionForPoint(_lastTapDownPosition!);
+
+    return selection!.base.offset <= textPosition.offset
+        && selection!.extent.offset >= textPosition.offset;
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
