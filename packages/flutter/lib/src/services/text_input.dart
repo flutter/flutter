@@ -1307,11 +1307,6 @@ class TextInput {
 
   static final TextInput _instance = TextInput._();
 
-  static void _setSource(_TextInputSource source) {
-    _instance._currentSource.cleanup();
-    _instance._currentSource = source..init();
-  }
-
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
     TextInputAction.unspecified,
@@ -1389,7 +1384,7 @@ class TextInput {
     return true;
   }
 
-  _TextInputSource _currentSource = _TextInputSource();
+  final _TextInputSource _currentSource = _TextInputSource();
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
