@@ -71,6 +71,10 @@ class TextLayoutService {
     didExceedMaxLines = false;
     lines.clear();
 
+    if (spanCount == 0) {
+      return;
+    }
+
     final Spanometer spanometer = Spanometer(paragraph, context);
 
     int spanIndex = 0;
