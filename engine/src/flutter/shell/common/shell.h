@@ -98,6 +98,20 @@ class Shell final : public PlatformView::Delegate,
  public:
   template <class T>
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
+  typedef std::function<std::unique_ptr<Engine>(
+      Engine::Delegate& delegate,
+      const PointerDataDispatcherMaker& dispatcher_maker,
+      DartVM& vm,
+      fml::RefPtr<const DartSnapshot> isolate_snapshot,
+      TaskRunners task_runners,
+      const PlatformData platform_data,
+      Settings settings,
+      std::unique_ptr<Animator> animator,
+      fml::WeakPtr<IOManager> io_manager,
+      fml::RefPtr<SkiaUnrefQueue> unref_queue,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      std::shared_ptr<VolatilePathTracker> volatile_path_tracker)>
+      EngineCreateCallback;
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings. The
@@ -170,6 +184,27 @@ class Shell final : public PlatformView::Delegate,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
   //----------------------------------------------------------------------------
+  /// @brief      Creates a shell instance using the provided settings.
+  /// @details    This version of Create can take in a running DartVMRef and a
+  ///             function that defines how the Shell's Engine should be
+  ///             created.
+  /// @param[in]  vm             A running DartVMRef where this Shell's Dart
+  ///                            code will be executed.
+  /// @param[in]  on_create_engine   A function that creates an Engine during
+  ///                            initialization.
+  /// @see        Shell::Create
+  ///
+  static std::unique_ptr<Shell> Create(
+      TaskRunners task_runners,
+      const PlatformData platform_data,
+      Settings settings,
+      fml::RefPtr<const DartSnapshot> isolate_snapshot,
+      const CreateCallback<PlatformView>& on_create_platform_view,
+      const CreateCallback<Rasterizer>& on_create_rasterizer,
+      DartVMRef vm,
+      const EngineCreateCallback& on_create_engine);
+
+  //----------------------------------------------------------------------------
   /// @brief      Destroys the shell. This is a synchronous operation and
   ///             synchronous barrier blocks are introduced on the various
   ///             threads to ensure shutdown of all shell sub-components before
@@ -188,7 +223,7 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<Shell> Spawn(
       Settings settings,
       const CreateCallback<PlatformView>& on_create_platform_view,
-      const CreateCallback<Rasterizer>& on_create_rasterizer);
+      const CreateCallback<Rasterizer>& on_create_rasterizer) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Starts an isolate for the given RunConfiguration.
@@ -429,7 +464,8 @@ class Shell final : public PlatformView::Delegate,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer);
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      const EngineCreateCallback& on_create_engine);
 
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,

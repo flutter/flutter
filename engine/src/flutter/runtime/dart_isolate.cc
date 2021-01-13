@@ -73,6 +73,29 @@ Dart_IsolateFlags DartIsolate::Flags::Get() const {
   return flags_;
 }
 
+std::weak_ptr<DartIsolate> DartIsolate::SpawnIsolate(
+    const Settings& settings,
+    std::unique_ptr<PlatformConfiguration> platform_configuration,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    fml::WeakPtr<HintFreedDelegate> hint_freed_delegate,
+    std::string advisory_script_uri,
+    std::string advisory_script_entrypoint,
+    Flags flags,
+    const fml::closure& isolate_create_callback,
+    const fml::closure& isolate_shutdown_callback,
+    std::optional<std::string> dart_entrypoint,
+    std::optional<std::string> dart_entrypoint_library,
+    std::unique_ptr<IsolateConfiguration> isolate_configration) const {
+  return CreateRunningRootIsolate(
+      settings, GetIsolateGroupData().GetIsolateSnapshot(), GetTaskRunners(),
+      std::move(platform_configuration), snapshot_delegate, hint_freed_delegate,
+      GetIOManager(), GetSkiaUnrefQueue(), GetImageDecoder(),
+      advisory_script_uri, advisory_script_entrypoint, flags,
+      isolate_create_callback, isolate_shutdown_callback, dart_entrypoint,
+      dart_entrypoint_library, std::move(isolate_configration),
+      GetVolatilePathTracker(), this);
+}
+
 std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     const Settings& settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
@@ -91,7 +114,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     std::optional<std::string> dart_entrypoint,
     std::optional<std::string> dart_entrypoint_library,
     std::unique_ptr<IsolateConfiguration> isolate_configration,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+    const DartIsolate* spawning_isolate) {
   if (!isolate_snapshot) {
     FML_LOG(ERROR) << "Invalid isolate snapshot.";
     return {};
@@ -135,7 +159,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
   });
 
   if (isolate->GetPhase() != DartIsolate::Phase::LibrariesSetup) {
-    FML_LOG(ERROR) << "Root isolate was created in an incorrect phase.";
+    FML_LOG(ERROR) << "Root isolate was created in an incorrect phase: "
+                   << static_cast<int>(isolate->GetPhase());
     return {};
   }
 
@@ -190,7 +215,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     Flags flags,
     const fml::closure& isolate_create_callback,
     const fml::closure& isolate_shutdown_callback,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+    const DartIsolate* spawning_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
 
   // The child isolate preparer is null but will be set when the isolate is
@@ -223,13 +249,28 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
           )));
 
   DartErrorString error;
+  Dart_Isolate vm_isolate = nullptr;
   auto isolate_flags = flags.Get();
-  Dart_Isolate vm_isolate = CreateDartIsolateGroup(
+  /// TODO(b/72025) This will be where we call Dart_CreateIsolateInGroup if
+  /// spawning_isolate != nullptr.
+  vm_isolate = CreateDartIsolateGroup(
       std::move(isolate_group_data), std::move(isolate_data), &isolate_flags,
-      error.error());
+      error.error(),
+      [](std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+         std::shared_ptr<DartIsolate>* isolate_data, Dart_IsolateFlags* flags,
+         char** error) {
+        return Dart_CreateIsolateGroup(
+            (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
+            (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
+            (*isolate_group_data)->GetIsolateSnapshot()->GetDataMapping(),
+            (*isolate_group_data)
+                ->GetIsolateSnapshot()
+                ->GetInstructionsMapping(),
+            flags, isolate_group_data, isolate_data, error);
+      });
 
   if (error) {
-    FML_LOG(ERROR) << "CreateDartIsolateGroup failed: " << error.str();
+    FML_LOG(ERROR) << "CreateRootIsolate failed: " << error.str();
   }
 
   if (vm_isolate == nullptr) {
@@ -809,6 +850,11 @@ DartIsolateGroupData& DartIsolate::GetIsolateGroupData() {
   return **isolate_group_data;
 }
 
+const DartIsolateGroupData& DartIsolate::GetIsolateGroupData() const {
+  DartIsolate* non_const_this = const_cast<DartIsolate*>(this);
+  return non_const_this->GetIsolateGroupData();
+}
+
 // |Dart_IsolateGroupCreateCallback|
 Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
     const char* advisory_script_uri,
@@ -871,7 +917,19 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
           nullptr)));                            // volatile path tracker
 
   Dart_Isolate vm_isolate = CreateDartIsolateGroup(
-      std::move(isolate_group_data), std::move(isolate_data), flags, error);
+      std::move(isolate_group_data), std::move(isolate_data), flags, error,
+      [](std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+         std::shared_ptr<DartIsolate>* isolate_data, Dart_IsolateFlags* flags,
+         char** error) {
+        return Dart_CreateIsolateGroup(
+            (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
+            (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
+            (*isolate_group_data)->GetIsolateSnapshot()->GetDataMapping(),
+            (*isolate_group_data)
+                ->GetIsolateSnapshot()
+                ->GetInstructionsMapping(),
+            flags, isolate_group_data, isolate_data, error);
+      });
 
   if (*error) {
     FML_LOG(ERROR) << "CreateDartIsolateGroup failed: " << error;
@@ -933,16 +991,16 @@ Dart_Isolate DartIsolate::CreateDartIsolateGroup(
     std::unique_ptr<std::shared_ptr<DartIsolateGroupData>> isolate_group_data,
     std::unique_ptr<std::shared_ptr<DartIsolate>> isolate_data,
     Dart_IsolateFlags* flags,
-    char** error) {
+    char** error,
+    std::function<Dart_Isolate(std::shared_ptr<DartIsolateGroupData>*,
+                               std::shared_ptr<DartIsolate>*,
+                               Dart_IsolateFlags*,
+                               char**)> make_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::CreateDartIsolateGroup");
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
-  Dart_Isolate isolate = Dart_CreateIsolateGroup(
-      (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
-      (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
-      (*isolate_group_data)->GetIsolateSnapshot()->GetDataMapping(),
-      (*isolate_group_data)->GetIsolateSnapshot()->GetInstructionsMapping(),
-      flags, isolate_group_data.get(), isolate_data.get(), error);
+  Dart_Isolate isolate =
+      make_isolate(isolate_group_data.get(), isolate_data.get(), flags, error);
 
   if (isolate == nullptr) {
     return nullptr;
