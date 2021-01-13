@@ -31,6 +31,8 @@ class DartVMRef {
       fml::RefPtr<DartSnapshot> vm_snapshot = nullptr,
       fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr);
 
+  DartVMRef(const DartVMRef&) = default;
+
   DartVMRef(DartVMRef&&);
 
   ~DartVMRef();
@@ -53,7 +55,17 @@ class DartVMRef {
     return vm_.get();
   }
 
+  const DartVM* get() const {
+    FML_DCHECK(vm_);
+    return vm_.get();
+  }
+
   DartVM* operator->() {
+    FML_DCHECK(vm_);
+    return vm_.get();
+  }
+
+  const DartVM* operator->() const {
     FML_DCHECK(vm_);
     return vm_.get();
   }
@@ -72,8 +84,6 @@ class DartVMRef {
 
   // Only used by Dart Isolate to register itself with the VM.
   static DartVM* GetRunningVM();
-
-  FML_DISALLOW_COPY_AND_ASSIGN(DartVMRef);
 };
 
 }  // namespace flutter
