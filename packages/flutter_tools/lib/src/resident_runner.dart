@@ -774,7 +774,7 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  DevtoolsLauncher _devToolsLauncher;
+  DevtoolsLauncher _devtoolsLauncher;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -926,7 +926,7 @@ abstract class ResidentRunner {
   }
 
   @protected
-  void writeVmServiceFile() {
+  void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
         final String address = flutterDevices.first.vmService.wsAddress.toString();
@@ -941,7 +941,7 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    await shutdownDevTools();
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -949,7 +949,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> detach() async {
-    await shutdownDevTools();
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     await shutdownDartDevelopmentService();
@@ -1250,29 +1250,22 @@ abstract class ResidentRunner {
     }
   }
 
-  DevToolsServerAddress activeDevToolsServer() {
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    return _devToolsLauncher.activeDevToolsServer;
-  }
-
-  Future<void> serveDevToolsGracefully({
-    Uri devToolsServerAddress
-  }) async {
+  Future<bool> launchDevTools({bool openInBrowser = false}) async {
     if (!supportsServiceProtocol) {
-      return;
+      return false;
     }
-
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (devToolsServerAddress != null) {
-      _devToolsLauncher.devToolsUri = devToolsServerAddress;
-    } else {
-      await _devToolsLauncher.serve();
-    }
+    assert(supportsServiceProtocol);
+    _devtoolsLauncher ??= DevtoolsLauncher.instance;
+    unawaited(_devtoolsLauncher.launch(
+      flutterDevices.first.vmService.httpAddress,
+      openInBrowser: openInBrowser,
+    ));
+    return true;
   }
 
-  Future<void> shutdownDevTools() async {
-    await _devToolsLauncher?.close();
-    _devToolsLauncher = null;
+  Future<void> shutdownDevtools() async {
+    await _devtoolsLauncher?.close();
+    _devtoolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1558,6 +1551,8 @@ class TerminalHandler {
         return residentRunner.debugDumpRenderTree();
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+      case 'v':
+        return residentRunner.launchDevTools(openInBrowser: true);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1650,25 +1645,16 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Uri devToolsUri;
-
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
-  Future<void> launch(Uri vmServiceUri);
+  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
 
   /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve();
+  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
 
   Future<void> close();
 
   static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
-
-  DevToolsServerAddress get activeDevToolsServer {
-    if (devToolsUri == null) {
-      return null;
-    }
-    return DevToolsServerAddress(devToolsUri.host, devToolsUri.port);
-  }
 }
 
 class DevToolsServerAddress {
@@ -1676,11 +1662,4 @@ class DevToolsServerAddress {
 
   final String host;
   final int port;
-
-  Uri get uri {
-    if (host == null || port == null) {
-      return null;
-    }
-    return Uri(scheme: 'http', host: host, port: port);
-  }
 }

@@ -134,7 +134,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
-    addDevToolsOptions();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
   }
 
@@ -196,7 +195,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         hostVmServicePort: hostVmservicePort,
         disablePortPublication: disablePortPublication,
         ddsPort: ddsPort,
-        devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArg('verbose-system-logs'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',

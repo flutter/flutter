@@ -174,18 +174,13 @@ class HotRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await Future.wait(<Future<void>>[
-        connectToServiceProtocol(
-          reloadSources: _reloadSourcesService,
-          restart: _restartService,
-          compileExpression: _compileExpressionService,
-          getSkSLMethod: writeSkSL,
-          allowExistingDdsInstance: allowExistingDdsInstance,
-        ),
-        serveDevToolsGracefully(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        ),
-      ]);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        restart: _restartService,
+        compileExpression: _compileExpressionService,
+        getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
+      );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
@@ -285,7 +280,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
-    writeVmServiceFile();
+    writeVmserviceFile();
 
     int result = 0;
     if (stayResident) {
@@ -1092,19 +1087,6 @@ class HotRunner extends ResidentRunner {
         'An Observatory debugger and profiler on ${device.device.name} is available at: '
         '${device.vmService.httpAddress}',
       );
-
-      final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
-      if (devToolsServerAddress != null) {
-        final Uri uri = devToolsServerAddress.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
-        );
-        if (uri != null) {
-          globals.printStatus(
-            '\nFlutter DevTools, a Flutter debugger and profiler, on '
-            '${device.device.name} is available at: $uri',
-          );
-        }
-      }
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
