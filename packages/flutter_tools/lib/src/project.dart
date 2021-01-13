@@ -221,6 +221,12 @@ class FlutterProject {
     } on YamlException catch (e) {
       logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       logger.printError('$e');
+    } on FormatException catch (e) {
+      logger.printError('Error detected while parsing pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
+    } on FileSystemException catch (e) {
+      logger.printError('Error detected while reading pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
