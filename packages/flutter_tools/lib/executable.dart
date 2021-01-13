@@ -156,6 +156,8 @@ Future<void> main(List<String> args) async {
          processManager: globals.processManager,
          pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
          logger: globals.logger,
+         platform: globals.platform,
+         persistentToolState: globals.persistentToolState,
        ),
        Logger: () {
         final LoggerFactory loggerFactory = LoggerFactory(
