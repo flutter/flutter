@@ -71,8 +71,13 @@ class Scrollbar extends StatefulWidget {
     this.radius,
   }) : super(key: key);
 
+  /// {@macro flutter.widgets.Scrollbar.child}
   final Widget child;
+
+  /// {@macro flutter.widgets.Scrollbar.controller}
   final ScrollController? controller;
+
+  /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
   final bool? isAlwaysShown;
 
   /// Controls if the track will show on hover and remain, including during drag.
@@ -90,7 +95,20 @@ class Scrollbar extends StatefulWidget {
   /// null, the default value is 12.0 pixels.
   final double? hoverThickness;
 
+  /// The thickness of the scrollbar in the cross axis of the scrollable.
+  ///
+  /// If null, the default value is platform dependent. On [TargetPlatform.android],
+  /// the default thickness is 4.0 pixels. On [TargetPlatform.iOS],
+  /// [CupertinoScrollbar.defaultThickness] is used. The remaining platforms have a
+  /// default thickness of 8.0 pixels.
   final double? thickness;
+
+  /// The color of the scrollbar thumb.
+  ///
+  /// If null, the default value is platform dependent. On [TargetPlatform.android],
+  /// no radius is applied to the scrollbar thumb. On [TargetPlatform.iOS],
+  /// [CupertinoScrollbar.defaultRadius] is used. The remaining platforms have a
+  /// default [Radius.circular] of 8.0 pixels.
   final Radius? radius;
 
   @override
