@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import 'feedback_tester.dart';
@@ -1134,7 +1133,7 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
 
-    expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
+    expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('text field build empty toolbar when no options available', (WidgetTester tester) async {
