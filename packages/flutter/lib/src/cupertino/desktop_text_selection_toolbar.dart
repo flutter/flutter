@@ -19,87 +19,6 @@ const Color _kToolbarBorderColor = Color(0xFF505152);
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
 const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
 
-/*
-/// An iOS-style toolbar that appears in response to text selection.
-///
-/// Typically displays buttons for text manipulation, e.g. copying and pasting text.
-///
-/// See also:
-///
-///  * [TextSelectionControls.buildToolbar], where [CupertinoDesktopTextSelectionToolbar]
-///    will be used to build an iOS-style toolbar.
-@visibleForTesting
-class CupertinoDesktopTextSelectionToolbar extends SingleChildRenderObjectWidget {
-  const CupertinoDesktopTextSelectionToolbar({
-    Key? key,
-    required Offset anchor,
-    Widget? child,
-  }) : _anchor = anchor,
-       super(key: key, child: child);
-
-  final Offset _anchor;
-
-  @override
-  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(_anchor, null);
-
-  @override
-  void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
-    renderObject.anchor = _anchor;
-  }
-}
-
-// TODO(justinmc): In regular Coop, this was moved to public TextSelectionToolbarLayout.
-class _ToolbarRenderBox extends RenderShiftedBox {
-  _ToolbarRenderBox(
-    this._anchor,
-    RenderBox? child,
-  ) : super(child);
-
-
-  @override
-  bool get isRepaintBoundary => true;
-
-  Offset _anchor;
-  set anchor(Offset value) {
-    if (_anchor == value) {
-      return;
-    }
-    _anchor = value;
-    markNeedsLayout();
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void performLayout() {
-    if (child == null) {
-      return;
-    }
-    size = constraints.biggest;
-    child!.layout(constraints, parentUsesSize: true);
-
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-
-    // The local x-coordinate of the center of the toolbar.
-    final double upperBound = size.width - child!.size.width/2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = _anchor.dx.clamp(_kToolbarScreenPadding, upperBound);
-
-    // TODO(justinmc): When reaching the bottom of the screen, should move up.
-    childParentData.offset = Offset(adjustedCenterX, _anchor.dy);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      return;
-    }
-
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    context.paintChild(child!, childParentData.offset);
-  }
-}
-*/
-
-
 /// An iOS-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
@@ -179,114 +98,26 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
           anchorAbove: anchorAbove - localAdjustment - contentPaddingAdjustment,
           anchorBelow: anchorBelow - localAdjustment + contentPaddingAdjustment,
         ),
-        child: _CupertinoDesktopTextSelectionToolbarContent(
-          children: children,
-        ),
-      ),
-    );
-  }
-}
-
-// TODO(justinmc): Anything I can take from the refactored mobile Content?
-// Renders the content of the selection menu and maintains the page state.
-class _CupertinoDesktopTextSelectionToolbarContent extends StatefulWidget {
-  const _CupertinoDesktopTextSelectionToolbarContent({
-    Key? key,
-    required this.children,
-  }) : assert(children != null),
-       // This ignore is used because .isNotEmpty isn't compatible with const.
-       assert(children.length > 0), // ignore: prefer_is_empty
-       super(key: key);
-
-  final List<Widget> children;
-
-  @override
-  _CupertinoDesktopTextSelectionToolbarContentState createState() => _CupertinoDesktopTextSelectionToolbarContentState();
-}
-
-class _CupertinoDesktopTextSelectionToolbarContentState extends State<_CupertinoDesktopTextSelectionToolbarContent> with TickerProviderStateMixin {
-  // Controls the fading of the buttons within the menu during page transitions.
-  late AnimationController _controller;
-  int _page = 0;
-  int? _nextPage;
-
-  void _handleNextPage() {
-    _controller.reverse();
-    _controller.addStatusListener(_statusListener);
-    _nextPage = _page + 1;
-  }
-
-  void _handlePreviousPage() {
-    _controller.reverse();
-    _controller.addStatusListener(_statusListener);
-    _nextPage = _page - 1;
-  }
-
-  void _statusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
-      return;
-    }
-
-    setState(() {
-      _page = _nextPage!;
-      _nextPage = null;
-    });
-    _controller.forward();
-    _controller.removeStatusListener(_statusListener);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      value: 1.0,
-      vsync: this,
-      // This was eyeballed on a physical iOS device running iOS 13.
-      duration: const Duration(milliseconds: 150),
-    );
-  }
-
-  @override
-  void didUpdateWidget(_CupertinoDesktopTextSelectionToolbarContent oldWidget) {
-    // If the children are changing, the current page should be reset.
-    if (widget.children != oldWidget.children) {
-      _page = 0;
-      _nextPage = null;
-      _controller.forward();
-      _controller.removeStatusListener(_statusListener);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: _kToolbarWidth,
-      decoration: BoxDecoration(
-        color: _kToolbarBackgroundColor,
-        border: Border.all(
-          color: _kToolbarBorderColor,
-        ),
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius)
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 0.0,
-          // This value was measured from a screenshot of TextEdit on MacOS
-          // 10.15.7 on a Macbook Pro.
-          vertical: 3.0,
-        ),
-        child: FadeTransition(
-          opacity: _controller,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: widget.children,
+        child: Container(
+          width: _kToolbarWidth,
+          decoration: BoxDecoration(
+            color: _kToolbarBackgroundColor,
+            border: Border.all(
+              color: _kToolbarBorderColor,
+            ),
+            borderRadius: const BorderRadius.all(_kToolbarBorderRadius)
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 0.0,
+              // This value was measured from a screenshot of TextEdit on MacOS
+              // 10.15.7 on a Macbook Pro.
+              vertical: 3.0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: children,
+            ),
           ),
         ),
       ),
