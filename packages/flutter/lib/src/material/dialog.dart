@@ -995,6 +995,45 @@ Future<T?> showDialog<T>({
   );
 }
 
+/// A dialog route that uses the Material design default settings.
+class MaterialDialogRoute<T> extends DialogRoute<T> {
+  /// A dialog route that uses the Material design default settings.
+  MaterialDialogRoute({
+    required WidgetBuilder builder,
+    required BuildContext context,
+    bool barrierDismissible = true,
+    Color? barrierColor = Colors.black54,
+    Duration transitionDuration = const Duration(milliseconds: 150),
+    RouteTransitionsBuilder? transitionBuilder = _buildMaterialDialogTransitions,
+    RouteSettings? settings,
+    bool useSafeArea = true,
+    bool useRootNavigator = true,
+  }) : assert(barrierDismissible != null),
+      super(
+        pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+          final CapturedThemes themes = InheritedTheme.capture(
+            from: context,
+            to: Navigator.of(
+              context,
+              rootNavigator: useRootNavigator,
+            ).context,
+          );
+          final Widget pageChild = Builder(builder: builder);
+          Widget dialog = themes.wrap(pageChild);
+          if (useSafeArea) {
+            dialog = SafeArea(child: dialog);
+          }
+          return dialog;
+        },
+        barrierDismissible: barrierDismissible,
+        barrierColor: barrierColor,
+        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        transitionDuration: transitionDuration,
+        transitionBuilder: transitionBuilder,
+        settings: settings,
+      );
+}
+
 double _paddingScaleFactor(double textScaleFactor) {
   final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
   // The final padding scale factor is clamped between 1/3 and 1. For example,

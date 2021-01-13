@@ -1744,29 +1744,10 @@ abstract class RouteAware {
   void didPushNext() { }
 }
 
-// Investigate making this restorable.
-class DialogRoute<T> extends _DialogRoute<T> {
+/// A general dialog route which allows for customization of the dialog popup.
+class DialogRoute<T> extends PopupRoute<T> {
+  /// A general dialog route which allows for customization of the dialog popup.
   DialogRoute({
-    required RoutePageBuilder pageBuilder,
-    bool barrierDismissible = true,
-    String? barrierLabel,
-    Color? barrierColor = const Color(0x80000000),
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder? transitionBuilder,
-    RouteSettings? settings,
-  }) : assert(barrierDismissible != null),
-      super(
-        settings: settings,
-        pageBuilder: pageBuilder,
-        barrierColor: barrierColor,
-        barrierLabel: barrierLabel,
-        transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder,
-      );
-}
-
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
     required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
     String? barrierLabel,
@@ -1894,7 +1875,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

@@ -1156,3 +1156,30 @@ Future<T?> showCupertinoDialog<T>({
     routeSettings: routeSettings,
   );
 }
+
+/// A dialog route that shows an iOS-style dialog.
+class CupertinoDialogRoute<T> extends DialogRoute<T> {
+  /// A dialog route that shows an iOS-style dialog.
+  CupertinoDialogRoute({
+    required WidgetBuilder builder,
+    required BuildContext context,
+    bool barrierDismissible = true,
+    Color? barrierColor,
+    String? barrierLabel,
+    // This transition duration was eyeballed comparing with iOS
+    Duration transitionDuration = const Duration(milliseconds: 250),
+    RouteTransitionsBuilder? transitionBuilder = _buildCupertinoDialogTransitions,
+    RouteSettings? settings,
+  }) : assert(barrierDismissible != null),
+      super(
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return builder(context);
+        },
+        barrierDismissible: barrierDismissible,
+        barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+        transitionDuration: transitionDuration,
+        transitionBuilder: transitionBuilder,
+        settings: settings,
+      );
+}
