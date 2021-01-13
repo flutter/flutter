@@ -184,8 +184,6 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
         logger: globals.logger,
-        platform: globals.platform,
-        persistentToolState: globals.persistentToolState,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,

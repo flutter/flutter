@@ -290,48 +290,6 @@ void main() {
       expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
     });
 
-    testUsingContext('devToolsServerAddress returns parsed uri', () async {
-      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
-      await createTestCommandRunner(command).run(<String>[
-        'dummy',
-        '--${FlutterCommand.kDevToolsServerAddress}',
-        'http://127.0.0.1:9105',
-      ]);
-      expect(command.devToolsServerAddress.toString(), equals('http://127.0.0.1:9105'));
-    });
-
-    testUsingContext('devToolsServerAddress returns null for bad input', () async {
-      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>[
-        'dummy',
-        '--${FlutterCommand.kDevToolsServerAddress}',
-        'hello-world',
-      ]);
-      expect(command.devToolsServerAddress, isNull);
-
-      await runner.run(<String>[
-        'dummy',
-        '--${FlutterCommand.kDevToolsServerAddress}',
-        '',
-      ]);
-      expect(command.devToolsServerAddress, isNull);
-
-      await runner.run(<String>[
-        'dummy',
-        '--${FlutterCommand.kDevToolsServerAddress}',
-        '9101',
-      ]);
-      expect(command.devToolsServerAddress, isNull);
-
-      await runner.run(<String>[
-        'dummy',
-        '--${FlutterCommand.kDevToolsServerAddress}',
-        '127.0.0.1:9101',
-      ]);
-      expect(command.devToolsServerAddress, isNull);
-    });
-
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
