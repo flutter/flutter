@@ -34,6 +34,113 @@ ui.TextPosition fromPositionWithAffinity(SkTextPosition positionWithAffinity) {
   );
 }
 
+/// Shadow flag constants derived from Skia's SkShadowFlags.h.
+class SkiaShadowFlags {
+  /// The occluding object is opaque, making the part of the shadow under the
+  /// occluder invisible. This allows some optimizations because some parts of
+  /// the shadow do not need to be accurate.
+  static const int kNone_ShadowFlag = 0x00;
+
+  /// The occluding object is not opaque, making the part of the shadow under the
+  /// occluder visible. This requires that the shadow is rendered more accurately
+  /// and therefore is slightly more expensive.
+  static const int kTransparentOccluder_ShadowFlag = 0x01;
+
+  /// Light position represents a direction, light radius is blur radius at
+  /// elevation 1.
+  ///
+  /// This makes the shadow to have a fixed position relative to the shape that
+  /// casts it.
+  static const int kDirectionalLight_ShadowFlag = 0x04;
+
+  /// Complete value for the `flags` argument for opaque occluder.
+  static const int kDefaultShadowFlags = kDirectionalLight_ShadowFlag | kNone_ShadowFlag;
+
+  /// Complete value for the `flags` argument for transparent occluder.
+  static const int kTransparentOccluderShadowFlags = kDirectionalLight_ShadowFlag | kTransparentOccluder_ShadowFlag;
+}
+
+// These numbers have been chosen empirically to give a result closest to the
+// material spec.
+const double ckShadowAmbientAlpha = 0.039;
+const double ckShadowSpotAlpha = 0.25;
+const double ckShadowLightRadius = 1.1;
+const double ckShadowLightHeight = 600.0;
+const double ckShadowLightXOffset = 0;
+const double ckShadowLightYOffset = -450;
+const double ckShadowLightXTangent = ckShadowLightXOffset / ckShadowLightHeight;
+const double ckShadowLightYTangent = ckShadowLightYOffset / ckShadowLightHeight;
+
+/// Computes the smallest rectangle that contains the shadow.
+// Most of this logic is borrowed from SkDrawShadowInfo.cpp in Skia.
+// TODO(yjbanov): switch to SkDrawShadowMetrics::GetLocalBounds when available
+//                See:
+//                  - https://bugs.chromium.org/p/skia/issues/detail?id=11146
+//                  - https://github.com/flutter/flutter/issues/73492
+ui.Rect computeSkShadowBounds(
+  CkPath path,
+  double elevation,
+  double devicePixelRatio,
+  Matrix4 matrix,
+) {
+  ui.Rect pathBounds = path.getBounds();
+
+  if (elevation == 0) {
+    return pathBounds;
+  }
+
+  // For visual correctness the shadow offset and blur does not change with
+  // parent transforms. Therefore, in general case we have to first transform
+  // the shape bounds to device coordinates, then compute the shadow bounds,
+  // then transform the bounds back to local coordinates. However, if the
+  // transform is an identity or translation (a common case), we can skip this
+  // step. With directional lighting translation does not affect the size or
+  // shape of the shadow. Skipping this step saves us two transformRects and
+  // one matrix inverse.
+  final bool isComplex = !matrix.isIdentityOrTranslation();
+  if (isComplex) {
+    pathBounds = transformRect(matrix, pathBounds);
+  }
+
+  double left = pathBounds.left;
+  double top = pathBounds.top;
+  double right = pathBounds.right;
+  double bottom = pathBounds.bottom;
+
+  final double ambientBlur = ambientBlurRadius(elevation);
+  final double spotBlur = ckShadowLightRadius * elevation;
+  final double spotOffsetX = -elevation * ckShadowLightXTangent;
+  final double spotOffsetY = -elevation * ckShadowLightYTangent;
+
+  // The extra +1/-1 are to cover possible floating point errors.
+  left = left - 1 + (spotOffsetX - ambientBlur - spotBlur) * devicePixelRatio;
+  top = top - 1 + (spotOffsetY - ambientBlur - spotBlur) * devicePixelRatio;
+  right = right + 1 + (spotOffsetX + ambientBlur + spotBlur) * devicePixelRatio;
+  bottom = bottom + 1 + (spotOffsetY + ambientBlur + spotBlur) * devicePixelRatio;
+
+  final ui.Rect shadowBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+
+  if (isComplex) {
+    final Matrix4 inverse = Matrix4.zero();
+    // The inverse only makes sense if the determinat is non-zero.
+    if (inverse.copyInverse(matrix) != 0.0) {
+      return transformRect(inverse, shadowBounds);
+    } else {
+      return shadowBounds;
+    }
+  } else {
+    return shadowBounds;
+  }
+}
+
+const double kAmbientHeightFactor = 1.0 / 128.0;
+const double kAmbientGeomFactor = 64.0;
+const double kMaxAmbientRadius = 300 * kAmbientHeightFactor * kAmbientGeomFactor;
+
+double ambientBlurRadius(double height) {
+  return math.min(height * kAmbientHeightFactor * kAmbientGeomFactor, kMaxAmbientRadius);
+}
+
 void drawSkShadow(
   SkCanvas skCanvas,
   CkPath path,
@@ -42,17 +149,12 @@ void drawSkShadow(
   bool transparentOccluder,
   double devicePixelRatio,
 ) {
-  const double ambientAlpha = 0.039;
-  const double spotAlpha = 0.25;
+  final int flags = transparentOccluder
+    ? SkiaShadowFlags.kTransparentOccluderShadowFlags
+    : SkiaShadowFlags.kDefaultShadowFlags;
 
-  final int flags = transparentOccluder ? 0x01 : 0x00;
-
-  final ui.Rect bounds = path.getBounds();
-  final double shadowX = (bounds.left + bounds.right) / 2.0;
-  final double shadowY = bounds.top - 600.0;
-
-  ui.Color inAmbient = color.withAlpha((color.alpha * ambientAlpha).round());
-  ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
+  ui.Color inAmbient = color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());
+  ui.Color inSpot = color.withAlpha((color.alpha * ckShadowSpotAlpha).round());
 
   final SkTonalColors inTonalColors = SkTonalColors(
     ambient: makeFreshSkColor(inAmbient),
@@ -67,10 +169,10 @@ void drawSkShadow(
     Float32List(3)
       ..[2] = devicePixelRatio * elevation,
     Float32List(3)
-      ..[0] = shadowX
-      ..[1] = shadowY
-      ..[2] = devicePixelRatio * kLightHeight,
-    devicePixelRatio * kLightRadius,
+      ..[0] = ckShadowLightXOffset
+      ..[1] = ckShadowLightYOffset
+      ..[2] = devicePixelRatio * ckShadowLightHeight,
+    devicePixelRatio * ckShadowLightRadius,
     tonalColors.ambient,
     tonalColors.spot,
     flags,
