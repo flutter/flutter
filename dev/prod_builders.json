@@ -289,6 +289,12 @@
          "flaky": false
       },
       {
+         "name": "Linux hot_mode_dev_cycle_linux_target__benchmark",
+         "repo": "flutter",
+         "task_name": "linux_hot_mode_dev_cycle_linux_target__benchmark",
+         "flaky": false
+      },
+      {
          "name": "Linux image_list_jit_reported_duration",
          "repo": "flutter",
          "task_name": "linux_image_list_jit_reported_duration",
