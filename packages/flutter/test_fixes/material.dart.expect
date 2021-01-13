@@ -5,6 +5,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
+
+  // Changes made in https://github.com/flutter/flutter/pull/26259
+  const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
+  final bool resize = scaffold.resizeToAvoidBottomInset;
+
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(builder: (context) => Text('Fix me.'));
 
