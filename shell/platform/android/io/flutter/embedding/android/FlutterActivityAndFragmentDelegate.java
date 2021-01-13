@@ -399,7 +399,11 @@ import java.util.Arrays;
     if (host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
       if (data != null && !data.getPath().isEmpty()) {
-        return data.getPath();
+        String pathAndQuery = data.getPath();
+        if (!data.getQuery().isEmpty()) {
+          pathAndQuery += "?" + data.getQuery();
+        }
+        return pathAndQuery;
       }
     }
     return null;
