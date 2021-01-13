@@ -547,8 +547,8 @@ void _testCullRectComputation() {
     'renders clipped text with high quality',
     () async {
       // To reproduce blurriness we need real clipping.
-      final Paragraph paragraph =
-          (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
+      final DomParagraph paragraph =
+          (DomParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
       paragraph.layout(const ParagraphConstraints(width: 1000));
 
       final Rect canvasSize = Rect.fromLTRB(

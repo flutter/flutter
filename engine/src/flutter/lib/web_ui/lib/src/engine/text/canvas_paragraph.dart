@@ -96,6 +96,7 @@ class CanvasParagraph implements EngineParagraph {
 
     isLaidOut = true;
     _lastUsedConstraints = constraints;
+    _cachedDomElement = null;
   }
 
   // TODO(mdebbar): Returning true means we always require a bitmap canvas. Revisit
@@ -115,6 +116,7 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   html.HtmlElement toDomElement() {
+    assert(isLaidOut);
     final html.HtmlElement? domElement = _cachedDomElement;
     if (domElement == null) {
       return _cachedDomElement ??= _createDomElement();
@@ -123,49 +125,73 @@ class CanvasParagraph implements EngineParagraph {
   }
 
   html.HtmlElement _createDomElement() {
-    final html.HtmlElement element =
+    final html.HtmlElement rootElement =
         domRenderer.createElement('p') as html.HtmlElement;
 
     // 1. Set paragraph-level styles.
-    _applyParagraphStyleToElement(element: element, style: paragraphStyle);
-    final html.CssStyleDeclaration cssStyle = element.style;
+    _applyParagraphStyleToElement(element: rootElement, style: paragraphStyle);
+    final html.CssStyleDeclaration cssStyle = rootElement.style;
     cssStyle
       ..position = 'absolute'
-      ..whiteSpace = 'pre-wrap'
-      ..overflowWrap = 'break-word';
+      // Prevent the browser from doing any line breaks in the paragraph. We want
+      // to insert our own <BR> breaks based on layout results.
+      ..whiteSpace = 'pre';
 
     if (paragraphStyle._maxLines != null || paragraphStyle._ellipsis != null) {
-      cssStyle..overflowY = 'hidden';
+      cssStyle
+        ..overflowY = 'hidden'
+        ..height = '${height}px';
     }
 
     if (paragraphStyle._ellipsis != null &&
         (paragraphStyle._maxLines == null || paragraphStyle._maxLines == 1)) {
       cssStyle
+        ..width = '${width}px'
         ..overflowX = 'hidden'
-        ..whiteSpace = 'pre'
         ..textOverflow = 'ellipsis';
     }
 
     // 2. Append all spans to the paragraph.
-    for (final ParagraphSpan span in spans) {
-      if (span is FlatTextSpan) {
-        final html.HtmlElement spanElement =
-            domRenderer.createElement('span') as html.HtmlElement;
-        _applyTextStyleToElement(
-          element: spanElement,
-          style: span.style,
-          isSpan: true,
-        );
-        domRenderer.appendText(spanElement, span.textOf(this));
-        domRenderer.append(element, spanElement);
-      } else if (span is PlaceholderSpan) {
-        domRenderer.append(
-          element,
-          _createPlaceholderElement(placeholder: span),
-        );
+
+    ParagraphSpan? span;
+    late html.HtmlElement element;
+    final List<EngineLineMetrics> lines = computeLineMetrics();
+
+    for (int i = 0; i < lines.length; i++) {
+      // Insert a <BR> element before each line except the first line.
+      if (i > 0) {
+        domRenderer.append(element, domRenderer.createElement('br'));
+      }
+
+      for (final RangeBox box in lines[i].boxes!) {
+        if (box is SpanBox) {
+          if (box.span != span) {
+            span = box.span;
+            element = domRenderer.createElement('span') as html.HtmlElement;
+            _applyTextStyleToElement(
+              element: element,
+              style: box.span.style,
+              isSpan: true
+            );
+            domRenderer.append(rootElement, element);
+          }
+          domRenderer.appendText(element, box.toText());
+        } else if (box is PlaceholderBox) {
+          span = box.placeholder;
+          // If there's a line-end after this placeholder, we want the <BR> to
+          // be inserted in the root paragraph element.
+          element = rootElement;
+          domRenderer.append(
+            rootElement,
+            _createPlaceholderElement(placeholder: box.placeholder),
+          );
+        } else {
+          throw UnimplementedError('Unknown box type: ${box.runtimeType}');
+        }
       }
     }
-    return element;
+
+    return rootElement;
   }
 
   @override
