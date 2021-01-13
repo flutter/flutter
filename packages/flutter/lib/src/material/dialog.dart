@@ -995,43 +995,45 @@ Future<T?> showDialog<T>({
   );
 }
 
-/// A dialog route that uses the Material design default settings.
-class MaterialDialogRoute<T> extends DialogRoute<T> {
-  /// A dialog route that uses the Material design default settings.
-  MaterialDialogRoute({
-    required WidgetBuilder builder,
+/// A dialog route with Material entrance and exit animations,
+/// modal barrier color, and modal barrier behavior (dialog is dismissible
+/// with a tap on the barrier).
+class DialogRoute<T> extends RawDialogRoute<T> {
+  /// A dialog route with Material entrance and exit animations,
+  /// modal barrier color, and modal barrier behavior (dialog is dismissible
+  /// with a tap on the barrier).
+  DialogRoute({
     required BuildContext context,
+    required WidgetBuilder builder,
     bool barrierDismissible = true,
     Color? barrierColor = Colors.black54,
-    Duration transitionDuration = const Duration(milliseconds: 150),
-    RouteTransitionsBuilder? transitionBuilder = _buildMaterialDialogTransitions,
-    RouteSettings? settings,
     bool useSafeArea = true,
     bool useRootNavigator = true,
+    RouteSettings? settings,
   }) : assert(barrierDismissible != null),
-      super(
-        pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-          final CapturedThemes themes = InheritedTheme.capture(
-            from: context,
-            to: Navigator.of(
-              context,
-              rootNavigator: useRootNavigator,
-            ).context,
-          );
-          final Widget pageChild = Builder(builder: builder);
-          Widget dialog = themes.wrap(pageChild);
-          if (useSafeArea) {
-            dialog = SafeArea(child: dialog);
-          }
-          return dialog;
-        },
-        barrierDismissible: barrierDismissible,
-        barrierColor: barrierColor,
-        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        transitionDuration: transitionDuration,
-        transitionBuilder: transitionBuilder,
-        settings: settings,
-      );
+       super(
+         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+           final CapturedThemes themes = InheritedTheme.capture(
+             from: context,
+             to: Navigator.of(
+               context,
+               rootNavigator: useRootNavigator,
+             ).context,
+           );
+           final Widget pageChild = Builder(builder: builder);
+           Widget dialog = themes.wrap(pageChild);
+           if (useSafeArea) {
+             dialog = SafeArea(child: dialog);
+           }
+           return dialog;
+         },
+         barrierDismissible: barrierDismissible,
+         barrierColor: barrierColor,
+         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+         transitionDuration: const Duration(milliseconds: 150),
+         transitionBuilder: _buildMaterialDialogTransitions,
+         settings: settings,
+       );
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
