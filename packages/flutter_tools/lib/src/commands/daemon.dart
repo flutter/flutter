@@ -871,8 +871,7 @@ class DevToolsDomain extends Domain {
 
   Future<Map<String, dynamic>> serve([ Map<String, dynamic> args ]) async {
     _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final bool openInBrowser = args != null && (args['openInBrowser'] == 'true');
-    final DevToolsServerAddress server = await _devtoolsLauncher.serve(openInBrowser: openInBrowser);
+    final DevToolsServerAddress server = await _devtoolsLauncher.serve();
     return<String, dynamic>{
       'host': server?.host,
       'port': server?.port,
