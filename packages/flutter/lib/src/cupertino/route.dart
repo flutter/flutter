@@ -1158,7 +1158,7 @@ Future<T?> showCupertinoDialog<T>({
 }
 
 /// A dialog route that shows an iOS-style dialog.
-class CupertinoDialogRoute<T> extends DialogRoute<T> {
+class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({
     required WidgetBuilder builder,
