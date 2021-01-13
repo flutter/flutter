@@ -480,6 +480,8 @@ class DomParagraph implements EngineParagraph {
 
     final html.CssStyleDeclaration paragraphStyle = paragraphElement.style;
     paragraphStyle
+      ..height = '${height}px'
+      ..width = '${width}px'
       ..position = 'absolute'
       ..whiteSpace = 'pre-wrap'
       ..overflowWrap = 'break-word'

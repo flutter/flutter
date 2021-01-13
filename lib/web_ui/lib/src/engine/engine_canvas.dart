@@ -254,9 +254,6 @@ html.Element _drawParagraphElement(
   assert(paragraph.isLaidOut);
 
   final html.HtmlElement paragraphElement = paragraph.toDomElement();
-  paragraphElement.style
-      ..height = '${paragraph.height}px'
-      ..width = '${paragraph.width}px';
 
   if (transform != null) {
     setElementTransform(
