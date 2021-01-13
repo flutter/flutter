@@ -67,4 +67,3 @@ Future<void> main(List<String> args) async {
     io.exit(1);
   }
 }
-
