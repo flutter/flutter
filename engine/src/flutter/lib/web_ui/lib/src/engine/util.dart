@@ -446,9 +446,9 @@ const Set<String> _genericFontFamilies = <String>{
 /// For iOS, default to -apple-system, where it should be available, otherwise
 /// default to Arial. BlinkMacSystemFont is used for Chrome on iOS.
 final String _fallbackFontFamily =
-    _isMacOrIOS ? '-apple-system, BlinkMacSystemFont' : 'Arial';
+    isMacOrIOS ? '-apple-system, BlinkMacSystemFont' : 'Arial';
 
-bool get _isMacOrIOS =>
+bool get isMacOrIOS =>
     operatingSystem == OperatingSystem.iOs ||
     operatingSystem == OperatingSystem.macOs;
 
@@ -460,7 +460,7 @@ String? canonicalizeFontFamily(String? fontFamily) {
   if (_genericFontFamilies.contains(fontFamily)) {
     return fontFamily;
   }
-  if (_isMacOrIOS) {
+  if (isMacOrIOS) {
     // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
     // on sans-serif.
     // Map to San Francisco Text/Display fonts, use -apple-system,
