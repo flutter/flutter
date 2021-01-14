@@ -45,7 +45,6 @@ class Git {
     return processManager.runSync(
       <String>['git', ...args],
       workingDirectory: workingDirectory,
-      environment: <String, String>{'GIT_TRACE': '1'},
     );
   }
 

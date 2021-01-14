@@ -7,7 +7,6 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/roll_dev.dart' show rollDev;
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/version.dart';
@@ -23,8 +22,8 @@ void main() {
     const String usageString = 'Usage: flutter conductor.';
 
     Checkouts checkouts;
-    FrameworkRepository frameworkUpstream;
-    FrameworkRepository framework;
+    Repository frameworkUpstream;
+    Repository framework;
 
     setUp(() {
       platform = const LocalPlatform();
@@ -33,20 +32,22 @@ void main() {
       stdio = TestStdio(verbose: true);
       checkouts = Checkouts(
         fileSystem: fileSystem,
-        parentDirectory: localFlutterRoot.parent,
         platform: platform,
         processManager: processManager,
-        stdio: stdio,
       );
 
-      frameworkUpstream = FrameworkRepository(checkouts, localUpstream: true);
+      frameworkUpstream = checkouts.addRepo(
+        repoType: RepositoryType.framework,
+        name: 'framework-upstream',
+        stdio: stdio,
+        platform: platform,
+        localUpstream: true,
+        fileSystem: fileSystem,
+        useExistingCheckout: false,
+      );
 
       // This repository has [frameworkUpstream] set as its push/pull remote.
-      framework = FrameworkRepository(
-        checkouts,
-        name: 'test-framework',
-        upstream: 'file://${frameworkUpstream.checkoutDirectory.path}/',
-      );
+      framework = frameworkUpstream.cloneRepository('test-framework');
     });
 
     test('increment m', () {
@@ -67,6 +68,8 @@ void main() {
           usage: usageString,
           argResults: fakeArgResults,
           stdio: stdio,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: framework,
         ),
         true,
@@ -104,6 +107,8 @@ void main() {
           usage: usageString,
           argResults: fakeArgResults,
           stdio: stdio,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: framework,
         ),
         true,
