@@ -24,7 +24,7 @@ void main() {
     FakeArgResults fakeArgResults;
     MemoryFileSystem fileSystem;
     TestStdio stdio;
-    FrameworkRepository repo;
+    Repository repo;
     Checkouts checkouts;
     FakePlatform platform;
     FakeProcessManager processManager;
@@ -39,9 +39,12 @@ void main() {
         parentDirectory: fileSystem.directory(checkoutsParentDirectory),
         platform: platform,
         processManager: processManager,
+      );
+      repo = checkouts.addRepo(
+        platform: platform,
+        repoType: RepositoryType.framework,
         stdio: stdio,
       );
-      repo = FrameworkRepository(checkouts);
     });
 
     test('returns false if level not provided', () {
@@ -53,6 +56,8 @@ void main() {
       expect(
         rollDev(
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
           usage: usage,
@@ -70,6 +75,8 @@ void main() {
       expect(
         rollDev(
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
           usage: usage,
@@ -85,13 +92,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -113,6 +115,8 @@ void main() {
       try {
         rollDev(
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
           usage: usage,
@@ -133,13 +137,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -188,6 +187,8 @@ void main() {
         rollDev(
           usage: usage,
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
         ),
@@ -205,13 +206,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -271,6 +267,8 @@ void main() {
         () => rollDev(
           usage: usage,
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
         ),
@@ -285,13 +283,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -340,6 +333,8 @@ void main() {
         () => rollDev(
           usage: usage,
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
         ),
@@ -358,13 +353,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -420,6 +410,8 @@ void main() {
       expect(
         () => rollDev(
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
           usage: usage,
@@ -435,13 +427,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -514,6 +501,8 @@ void main() {
         rollDev(
           usage: usage,
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
         ),
@@ -528,13 +517,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -611,6 +595,8 @@ void main() {
         rollDev(
           usage: usage,
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
         ),
@@ -625,13 +611,8 @@ void main() {
           'clone',
           '--',
           kUpstreamRemote,
-          '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+          '${checkoutsParentDirectory}checkouts/framework',
         ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit),
         const FakeCommand(command: <String>[
           'git',
           'remote',
@@ -703,6 +684,8 @@ void main() {
       expect(
         rollDev(
           argResults: fakeArgResults,
+          fileSystem: fileSystem,
+          platform: platform,
           repository: repo,
           stdio: stdio,
           usage: usage,
