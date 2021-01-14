@@ -11,6 +11,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
@@ -89,7 +90,7 @@ static FlutterLocale FlutterLocaleFromNSLocale(NSLocale* locale) {
 }
 
 - (id<FlutterTextureRegistry>)textures {
-  return _flutterEngine.openGLRenderer;
+  return _flutterEngine.renderer;
 }
 
 - (NSView*)view {
@@ -130,6 +131,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // Pointer to the Dart AOT snapshot and instruction data.
   _FlutterEngineAOTData* _aotData;
 
+  // If set to true, engine will render using metal. This is controlled by SHELL_ENABLE_METAL
+  // for now, intent is to be made default in the future.
+  BOOL _enableMetalRendering;
+
   // _macOSGLCompositor is created when the engine is created and
   // it's destruction is handled by ARC when the engine is destroyed.
   std::unique_ptr<flutter::FlutterGLCompositor> _macOSGLCompositor;
@@ -151,9 +156,19 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _project = project ?: [[FlutterDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
+
+#ifdef SHELL_ENABLE_METAL
+  _enableMetalRendering = YES;
+#endif
+
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
-  _openGLRenderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:self];
+
+  if (_enableMetalRendering) {
+    _renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:self];
+  } else {
+    _renderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:self];
+  }
 
   NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
   [notificationCenter addObserver:self
@@ -180,8 +195,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     NSLog(@"Attempted to run an engine with no view controller without headless mode enabled.");
     return NO;
   }
-
-  const FlutterRendererConfig rendererConfig = [_openGLRenderer createRendererConfig];
 
   // TODO(stuartmorgan): Move internal channel registration from FlutterViewController to here.
 
@@ -237,6 +250,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   flutterArguments.compositor = [self createFlutterCompositor];
 
+  FlutterRendererConfig rendererConfig = [_renderer createRendererConfig];
   FlutterEngineResult result = _embedderAPI.Initialize(
       FLUTTER_ENGINE_VERSION, &rendererConfig, &flutterArguments, (__bridge void*)(self), &_engine);
   if (result != kSuccess) {
@@ -284,7 +298,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (void)setViewController:(FlutterViewController*)controller {
   _viewController = controller;
-  [_openGLRenderer setFlutterView:controller.flutterView];
+  [_renderer setFlutterView:controller.flutterView];
 
   if (!controller && !_allowHeadlessExecution) {
     [self shutDownEngine];
@@ -292,17 +306,23 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (FlutterCompositor*)createFlutterCompositor {
+  // When rendering with metal do not support platform views.
+  if (_enableMetalRendering) {
+    return nil;
+  }
+
   // TODO(richardjcai): Add support for creating a FlutterGLCompositor
   // with a nil _viewController for headless engines.
   // https://github.com/flutter/flutter/issues/71606
-  if (_viewController == nullptr) {
-    return nullptr;
+  if (!_viewController) {
+    return nil;
   }
 
-  [_openGLRenderer.openGLContext makeCurrentContext];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(_renderer);
+  [openGLRenderer.openGLContext makeCurrentContext];
 
-  _macOSGLCompositor = std::make_unique<flutter::FlutterGLCompositor>(
-      _viewController, _openGLRenderer.openGLContext);
+  _macOSGLCompositor =
+      std::make_unique<flutter::FlutterGLCompositor>(_viewController, openGLRenderer.openGLContext);
 
   _compositor = {};
   _compositor.struct_size = sizeof(FlutterCompositor);
@@ -331,9 +351,12 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
                                                                                layers_count);
   };
 
-  __weak FlutterEngine* weak_self = self;
-  _macOSGLCompositor->SetPresentCallback(
-      [weak_self]() { return [weak_self.openGLRenderer glPresent]; });
+  __weak FlutterEngine* weakSelf = self;
+  _macOSGLCompositor->SetPresentCallback([weakSelf]() {
+    FlutterOpenGLRenderer* openGLRenderer =
+        reinterpret_cast<FlutterOpenGLRenderer*>(weakSelf.renderer);
+    return [openGLRenderer glPresent];
+  });
 
   _compositor.avoid_backing_store_cache = true;
 
@@ -559,7 +582,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 #pragma mark - FlutterTextureRegistrar
 
 - (int64_t)registerTexture:(id<FlutterTexture>)texture {
-  return [_openGLRenderer registerTexture:texture];
+  return [_renderer registerTexture:texture];
 }
 
 - (BOOL)registerTextureWithID:(int64_t)textureId {
@@ -567,7 +590,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)textureFrameAvailable:(int64_t)textureID {
-  [_openGLRenderer textureFrameAvailable:textureID];
+  [_renderer textureFrameAvailable:textureID];
 }
 
 - (BOOL)markTextureFrameAvailable:(int64_t)textureID {
@@ -575,7 +598,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)unregisterTexture:(int64_t)textureID {
-  [_openGLRenderer unregisterTexture:textureID];
+  [_renderer unregisterTexture:textureID];
 }
 
 - (BOOL)unregisterTextureWithID:(int64_t)textureID {

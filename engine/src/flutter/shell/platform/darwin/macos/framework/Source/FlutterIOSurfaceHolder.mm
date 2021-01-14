@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
 
-#include <OpenGL/gl.h>
+#import <OpenGL/gl.h>
 
 @interface FlutterIOSurfaceHolder () {
   IOSurfaceRef _ioSurface;

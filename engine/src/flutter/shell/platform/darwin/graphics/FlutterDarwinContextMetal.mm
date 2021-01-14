@@ -21,40 +21,40 @@ static GrContextOptions CreateMetalGrContextOptions() {
 @implementation FlutterDarwinContextMetal
 
 - (instancetype)initWithDefaultMTLDevice {
-  id<MTLDevice> mtlDevice = MTLCreateSystemDefaultDevice();
-  return [self initWithMTLDevice:mtlDevice commandQueue:[mtlDevice newCommandQueue]];
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  return [self initWithMTLDevice:device commandQueue:[device newCommandQueue]];
 }
 
-- (instancetype)initWithMTLDevice:(id<MTLDevice>)mtlDevice
+- (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue {
   self = [super init];
   if (self != nil) {
-    _mtlDevice = mtlDevice;
+    _device = device;
 
-    if (!_mtlDevice) {
+    if (!_device) {
       FML_DLOG(ERROR) << "Could not acquire Metal device.";
       [self release];
       return nil;
     }
 
-    _mtlCommandQueue = commandQueue;
+    _commandQueue = commandQueue;
 
-    if (!_mtlCommandQueue) {
+    if (!_commandQueue) {
       FML_DLOG(ERROR) << "Could not create Metal command queue.";
       [self release];
       return nil;
     }
 
-    [_mtlCommandQueue setLabel:@"Flutter Main Queue"];
+    [_commandQueue setLabel:@"Flutter Main Queue"];
 
     auto contextOptions = CreateMetalGrContextOptions();
 
     // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
     // when the GrDirectContext is collected.
     _mainContext =
-        GrDirectContext::MakeMetal([_mtlDevice retain], [_mtlCommandQueue retain], contextOptions);
+        GrDirectContext::MakeMetal([_device retain], [_commandQueue retain], contextOptions);
     _resourceContext =
-        GrDirectContext::MakeMetal([_mtlDevice retain], [_mtlCommandQueue retain], contextOptions);
+        GrDirectContext::MakeMetal([_device retain], [_commandQueue retain], contextOptions);
 
     if (!_mainContext || !_resourceContext) {
       FML_DLOG(ERROR) << "Could not create Skia Metal contexts.";

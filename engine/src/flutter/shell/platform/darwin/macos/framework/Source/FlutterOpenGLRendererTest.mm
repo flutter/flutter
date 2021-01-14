@@ -40,7 +40,8 @@ TEST(FlutterOpenGLRenderer, RegisterExternalTexture) {
         return kSuccess;
       });
 
-  [engine.openGLRenderer registerTexture:flutterTexture];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  [openGLRenderer registerTexture:flutterTexture];
   EXPECT_TRUE(called);
 
   [engine shutDownEngine];
@@ -53,7 +54,8 @@ TEST(FlutterOpenGLRenderer, UnregisterExternalTexture) {
   id<FlutterTexture> flutterTexture = OCMProtocolMock(@protocol(FlutterTexture));
   bool called = false;
 
-  int64_t registeredTextureId = [engine.openGLRenderer registerTexture:flutterTexture];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  int64_t registeredTextureId = [openGLRenderer registerTexture:flutterTexture];
   engine.embedderAPI.UnregisterExternalTexture =
       MOCK_ENGINE_PROC(UnregisterExternalTexture, [&](auto engine, int64_t textureIdentifier) {
         called = true;
@@ -61,7 +63,7 @@ TEST(FlutterOpenGLRenderer, UnregisterExternalTexture) {
         return kSuccess;
       });
 
-  [engine.openGLRenderer unregisterTexture:registeredTextureId];
+  [openGLRenderer unregisterTexture:registeredTextureId];
   EXPECT_TRUE(called);
 
   [engine shutDownEngine];
@@ -74,7 +76,8 @@ TEST(FlutterOpenGLRenderer, MarkExternalTextureFrameAvailable) {
   id<FlutterTexture> flutterTexture = OCMProtocolMock(@protocol(FlutterTexture));
   bool called = false;
 
-  int64_t registeredTextureId = [engine.openGLRenderer registerTexture:flutterTexture];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  int64_t registeredTextureId = [openGLRenderer registerTexture:flutterTexture];
   engine.embedderAPI.MarkExternalTextureFrameAvailable = MOCK_ENGINE_PROC(
       MarkExternalTextureFrameAvailable, [&](auto engine, int64_t textureIdentifier) {
         called = true;
@@ -82,7 +85,7 @@ TEST(FlutterOpenGLRenderer, MarkExternalTextureFrameAvailable) {
         return kSuccess;
       });
 
-  [engine.openGLRenderer textureFrameAvailable:registeredTextureId];
+  [openGLRenderer textureFrameAvailable:registeredTextureId];
   EXPECT_TRUE(called);
 
   [engine shutDownEngine];
@@ -109,7 +112,7 @@ TEST(FlutterOpenGLRenderer, FBOReturnedByFlutterView) {
   dimensions.height = 200;
   frameInfo.size = dimensions;
   CGSize size = CGSizeMake(dimensions.width, dimensions.height);
-  [[mockFlutterView expect] frameBufferIDForSize:size];
+  [[mockFlutterView expect] backingStoreForSize:size];
   [renderer setFlutterView:mockFlutterView];
   [renderer openGLContext];
   [renderer fboForFrameInfo:&frameInfo];

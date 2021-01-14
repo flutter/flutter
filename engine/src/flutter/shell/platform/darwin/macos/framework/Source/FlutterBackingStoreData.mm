@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.h"
+
+#import <OpenGL/gl.h>
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
-
-#include <OpenGL/gl.h>
 
 @implementation FlutterBackingStoreData
 

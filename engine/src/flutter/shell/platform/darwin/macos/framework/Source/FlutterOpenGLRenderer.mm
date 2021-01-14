@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
-#include "flutter/shell/platform/embedder/embedder.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
@@ -12,23 +10,28 @@
 #pragma mark - Static methods for openGL callbacks that require the engine.
 
 static bool OnMakeCurrent(FlutterEngine* engine) {
-  return [engine.openGLRenderer makeCurrent];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer makeCurrent];
 }
 
 static bool OnClearCurrent(FlutterEngine* engine) {
-  return [engine.openGLRenderer clearCurrent];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer clearCurrent];
 }
 
 static bool OnPresent(FlutterEngine* engine) {
-  return [engine.openGLRenderer glPresent];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer glPresent];
 }
 
 static uint32_t OnFBO(FlutterEngine* engine, const FlutterFrameInfo* info) {
-  return [engine.openGLRenderer fboForFrameInfo:info];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer fboForFrameInfo:info];
 }
 
 static bool OnMakeResourceCurrent(FlutterEngine* engine) {
-  return [engine.openGLRenderer makeResourceCurrent];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer makeResourceCurrent];
 }
 
 static bool OnAcquireExternalTexture(FlutterEngine* engine,
@@ -36,8 +39,9 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
                                      size_t width,
                                      size_t height,
                                      FlutterOpenGLTexture* openGlTexture) {
-  return [engine.openGLRenderer populateTextureWithIdentifier:textureIdentifier
-                                                openGLTexture:openGlTexture];
+  FlutterOpenGLRenderer* openGLRenderer = reinterpret_cast<FlutterOpenGLRenderer*>(engine.renderer);
+  return [openGLRenderer populateTextureWithIdentifier:textureIdentifier
+                                         openGLTexture:openGlTexture];
 }
 
 #pragma mark - FlutterOpenGLRenderer implementation.
@@ -98,7 +102,9 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (uint32_t)fboForFrameInfo:(const FlutterFrameInfo*)info {
   CGSize size = CGSizeMake(info->size.width, info->size.height);
-  return [_flutterView frameBufferIDForSize:size];
+  FlutterOpenGLRenderBackingStore* backingStore =
+      reinterpret_cast<FlutterOpenGLRenderBackingStore*>([_flutterView backingStoreForSize:size]);
+  return backingStore.frameBufferID;
 }
 
 - (NSOpenGLContext*)resourceContext {
@@ -162,8 +168,6 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     NSLog(@"Unable to unregister texture with id: %lld.", textureID);
   }
 }
-
-#pragma mark - Private methods
 
 - (FlutterRendererConfig)createRendererConfig {
   const FlutterRendererConfig rendererConfig = {
