@@ -27,8 +27,13 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+String rootSemanticStyle = '';
+
 void testMain() {
   setUp(() {
+    rootSemanticStyle = browserEngine != BrowserEngine.edge
+        ? 'filter: opacity(0%); color: rgba(0, 0, 0, 0)' :
+        'color: rgba(0, 0, 0, 0); filter: opacity(0%)';
     EngineSemanticsOwner.debugResetSemantics();
   });
 
@@ -140,7 +145,7 @@ void _testEngineSemanticsOwner() {
     expect(tree[1].label, 'Hello');
 
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-c>
     <sem aria-label="Hello">
       <sem-v>Hello</sem-v>
@@ -152,7 +157,7 @@ void _testEngineSemanticsOwner() {
     renderLabel('World');
 
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-c>
     <sem aria-label="World">
       <sem-v>World</sem-v>
@@ -164,16 +169,14 @@ void _testEngineSemanticsOwner() {
     renderLabel('');
 
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-c>
     <sem></sem>
   </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('clears semantics tree when disabled', () {
     expect(semantics().debugSemanticsTree, isEmpty);
@@ -248,15 +251,13 @@ void _testHeader() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="heading" aria-label="Header of the page" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem role="heading" aria-label="Header of the page" style="$rootSemanticStyle">
   <sem-v>Header of the page</sem-v>
 </sem>
 ''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 }
 
 void _testLongestIncreasingSubsequence() {
@@ -326,7 +327,7 @@ void _testContainer() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -337,15 +338,19 @@ void _testContainer() {
     final html.Element container =
         html.document.querySelector('flt-semantics-container');
 
-    expect(parentElement.style.transform, '');
-    expect(parentElement.style.transformOrigin, '');
-    expect(container.style.transform, '');
-    expect(container.style.transformOrigin, '');
-
+    if (operatingSystem == OperatingSystem.macOs) {
+      expect(parentElement.style.transform, 'translate(0px, 0px)');
+      expect(parentElement.style.transformOrigin, '0px 0px 0px');
+      expect(container.style.transform, 'translate(0px, 0px)');
+      expect(container.style.transformOrigin, '0px 0px 0px');
+    } else {
+      expect(parentElement.style.transform, '');
+      expect(parentElement.style.transformOrigin, '');
+      expect(container.style.transform, '');
+      expect(container.style.transformOrigin, '');
+    }
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('container node compensates for rect offset', () async {
     semantics()
@@ -366,7 +371,7 @@ void _testContainer() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -389,9 +394,61 @@ void _testContainer() {
       expect(container.style.left, '-10px');
     }
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
+
+  test('0 offsets are not removed for voiceover', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      id: 0,
+      actions: 0,
+      flags: 0,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+    );
+
+    semantics().updateSemantics(builder.build());
+    if (browserEngine == BrowserEngine.edge) {
+      expectSemanticsTree('''
+<sem style="color: rgba(0, 0, 0, 0); filter: opacity(0%)">
+  <sem-c>
+    <sem></sem>
+  </sem-c>
+</sem>''');
+    } else {
+      expectSemanticsTree('''
+<sem style="$rootSemanticStyle">
+  <sem-c>
+    <sem></sem>
+  </sem-c>
+</sem>''');
+    }
+    final html.Element parentElement =
+        html.document.querySelector('flt-semantics');
+    final html.Element container =
+        html.document.querySelector('flt-semantics-container');
+    if (operatingSystem == OperatingSystem.macOs ||
+        operatingSystem == OperatingSystem.iOs) {
+      if (isDesktop) {
+        expect(parentElement.style.transform, 'translate(0px, 0px)');
+        expect(parentElement.style.transformOrigin, '0px 0px 0px');
+        expect(container.style.transform, 'translate(0px, 0px)');
+        expect(container.style.transformOrigin, '0px 0px 0px');
+      } else {
+        expect(parentElement.style.top, '0px');
+        expect(parentElement.style.left, '0px');
+        expect(container.style.top, '0px');
+        expect(container.style.left, '0px');
+      }
+    }
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testVerticalScrolling() {
@@ -412,13 +469,11 @@ void _testVerticalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-y: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
 </sem>''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('scrollable node with children has a container node', () async {
     semantics()
@@ -439,7 +494,7 @@ void _testVerticalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-y: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -453,9 +508,7 @@ void _testVerticalScrolling() {
     expect(scrollable.scrollTop, 0);
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('scrollable node dispatches scroll events', () async {
     final StreamController<int> idLogController = StreamController<int>();
@@ -509,7 +562,7 @@ void _testVerticalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-y: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-y: scroll">
   <sem-c>
     <sem></sem>
     <sem></sem>
@@ -547,9 +600,7 @@ void _testVerticalScrolling() {
     expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 }
 
 void _testHorizontalScrolling() {
@@ -570,13 +621,11 @@ void _testHorizontalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-x: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
 </sem>''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('scrollable node with children has a container node', () async {
     semantics()
@@ -597,7 +646,7 @@ void _testHorizontalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-x: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
   <sem-c>
     <sem></sem>
   </sem-c>
@@ -611,9 +660,7 @@ void _testHorizontalScrolling() {
     expect(scrollable.scrollLeft, 0);
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('scrollable node dispatches scroll events', () async {
     final SemanticsActionLogger logger = SemanticsActionLogger();
@@ -648,7 +695,7 @@ void _testHorizontalScrolling() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0); touch-action: none; overflow-x: scroll">
+<sem style="$rootSemanticStyle; touch-action: none; overflow-x: scroll">
   <sem-c>
     <sem></sem>
     <sem></sem>
@@ -685,9 +732,7 @@ void _testHorizontalScrolling() {
     expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 }
 
 void _testIncrementables() {
@@ -709,14 +754,12 @@ void _testIncrementables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="1">
 </sem>''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('increments', () async {
     final SemanticsActionLogger logger = SemanticsActionLogger();
@@ -738,7 +781,7 @@ void _testIncrementables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
@@ -751,9 +794,7 @@ void _testIncrementables() {
     expect(await logger.actionLog.first, ui.SemanticsAction.increase);
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 
   test('decrements', () async {
     final SemanticsActionLogger logger = SemanticsActionLogger();
@@ -775,7 +816,7 @@ void _testIncrementables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
@@ -814,7 +855,7 @@ void _testIncrementables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="0">
 </sem>''');
 
@@ -843,7 +884,7 @@ void _testTextField() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <input value="hello" />
 </sem>''');
 
@@ -914,7 +955,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="switch" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="switch" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -942,7 +983,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="switch" aria-disabled="true" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="switch" aria-disabled="true" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -970,7 +1011,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="switch" aria-checked="false" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="switch" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -999,7 +1040,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="checkbox" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="checkbox" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1027,7 +1068,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="checkbox" aria-disabled="true" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="checkbox" aria-disabled="true" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1055,7 +1096,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="checkbox" aria-checked="false" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="checkbox" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1085,7 +1126,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="radio" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="radio" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1114,7 +1155,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="radio" aria-disabled="true" aria-checked="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="radio" aria-disabled="true" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1143,7 +1184,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="radio" aria-checked="false" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="radio" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1173,7 +1214,7 @@ void _testTappable() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="button" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="button" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1200,7 +1241,7 @@ void _testTappable() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="button" aria-disabled="true" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="button" aria-disabled="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1228,7 +1269,7 @@ void _testImage() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="img" aria-label="Test Image Label" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem role="img" aria-label="Test Image Label" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1256,7 +1297,7 @@ void _testImage() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-img role="img" aria-label="Test Image Label">
   </sem-img>
   <sem-c>
@@ -1286,7 +1327,7 @@ void _testImage() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree(
-        '''<sem role="img" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>''');
+        '''<sem role="img" style="$rootSemanticStyle"></sem>''');
 
     semantics().semanticsEnabled = false;
   },
@@ -1312,7 +1353,7 @@ void _testImage() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
+<sem style="$rootSemanticStyle">
   <sem-img role="img">
   </sem-img>
   <sem-c>
@@ -1345,7 +1386,7 @@ void _testLiveRegion() {
     semantics().updateSemantics(builder.build());
 
     expectSemanticsTree('''
-<sem aria-label="This is a snackbar" aria-live="polite" style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"><sem-v>This is a snackbar</sem-v></sem>
+<sem aria-label="This is a snackbar" aria-live="polite" style="$rootSemanticStyle"><sem-v>This is a snackbar</sem-v></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1370,13 +1411,11 @@ void _testLiveRegion() {
     semantics().updateSemantics(builder.build());
 
     expectSemanticsTree('''
-<sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)"></sem>
+<sem style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
-  },
-      // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+  });
 }
 
 void expectSemanticsTree(String semanticsHtml) {
