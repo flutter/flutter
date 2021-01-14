@@ -1,4 +1,4 @@
-Signature: aeef0817a269e571e366a8f3518f6483
+Signature: 7d58418b106501c3cb5d2c7ab43e01e8
 
 UNUSED LICENSES:
 
@@ -7128,6 +7128,8 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
+FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
+FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 ----------------------------------------------------------------------------------------------------
