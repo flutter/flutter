@@ -139,8 +139,9 @@ class UserMessages {
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
-  String xcodeOutdated(int versionMajor, int versionMinor, int versionPatch) =>
-      'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.$versionPatch.\n'
+
+  String xcodeOutdated(String currentVersion, String recommendedVersion) =>
+      'Xcode $currentVersion out of date ($recommendedVersion is recommended).\n'
       'Download the latest version or update via the Mac App Store.';
   String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>

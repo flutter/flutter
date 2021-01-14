@@ -6,6 +6,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
+import '../../base/version.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
@@ -99,7 +100,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
       // Print scary message if the user is on Xcode 11.4 or greater, or if Xcode isn't installed.
       final bool xcodeIsInstalled = _xcode.isInstalled;
-      if(!xcodeIsInstalled || (_xcode.majorVersion > 11 || (_xcode.majorVersion == 11 && _xcode.minorVersion >= 4))) {
+      if(!xcodeIsInstalled || _xcode.currentVersion >= Version(11, 4, 0)) {
         UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
         throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
       }
