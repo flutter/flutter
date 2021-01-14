@@ -20,12 +20,12 @@ IOSContextMetal::IOSContextMetal() {
     return;
   }
 
-  main_command_queue_.reset([darwin_context_metal_.get().mtlCommandQueue retain]);
+  main_command_queue_.reset([darwin_context_metal_.get().commandQueue retain]);
 
   CVMetalTextureCacheRef texture_cache_raw = NULL;
   auto cv_return = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
                                              NULL,  // cache attributes (NULL default)
-                                             darwin_context_metal_.get().mtlDevice,  // metal device
+                                             darwin_context_metal_.get().device,  // metal device
                                              NULL,  // texture attributes (NULL default)
                                              &texture_cache_raw  // [out] cache
   );

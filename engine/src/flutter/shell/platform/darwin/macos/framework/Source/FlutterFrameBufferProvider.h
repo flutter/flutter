@@ -9,7 +9,7 @@
  */
 @interface FlutterFrameBufferProvider : NSObject
 
-- (nullable instancetype)initWithOpenGLContext:(nonnull const NSOpenGLContext*)opengLContext;
+- (nullable instancetype)initWithOpenGLContext:(nonnull const NSOpenGLContext*)openGLContext;
 
 /**
  * Returns the id of the framebuffer.

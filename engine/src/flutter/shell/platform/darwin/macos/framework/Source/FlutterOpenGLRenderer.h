@@ -4,16 +4,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 
 /**
  * Provides the renderer config needed to initialize the embedder engine and also handles external
  * texture management. This is initialized during FlutterEngine creation and then attached to the
  * FlutterView once the FlutterViewController is initializer.
  */
-@interface FlutterOpenGLRenderer : NSObject <FlutterTextureRegistry>
+@interface FlutterOpenGLRenderer : NSObject <FlutterRenderer>
 
 /**
  * The resource context used by the engine for texture uploads. FlutterViews associated with this
@@ -25,17 +23,6 @@
  * The main OpenGL which will be used for rendering contents to the FlutterView.
  */
 @property(readwrite, nonatomic, nonnull) NSOpenGLContext* openGLContext;
-
-/**
- * Intializes the renderer with the given FlutterEngine.
- */
-- (nullable instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine;
-
-/**
- * Sets the FlutterView and the corresponding rendering OpenGL context. Unsets the resource context
- * if the view is nil.
- */
-- (void)setFlutterView:(nullable FlutterView*)view;
 
 /**
  * Called by the engine to make the context the engine should draw into current.
@@ -67,11 +54,5 @@
  */
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID
                         openGLTexture:(nonnull FlutterOpenGLTexture*)openGLTexture;
-
-/**
- * Creates a FlutterRendererConfig that renders using OpenGL context(s) held
- * by this class.
- */
-- (FlutterRendererConfig)createRendererConfig;
 
 @end
