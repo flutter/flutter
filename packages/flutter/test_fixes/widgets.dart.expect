@@ -23,4 +23,9 @@ void main() {
   buildContext.findAncestorStateOfType<targetType>();
   buildContext.findRootAncestorStateOfType<targetType>();
   buildContext.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  final behavior = stack.clipBehavior;
 }
