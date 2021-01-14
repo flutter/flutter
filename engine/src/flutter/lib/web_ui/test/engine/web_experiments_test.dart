@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
 const bool _defaultUseCanvasText = true;
-const bool _defaultUseCanvasRichText = false;
+const bool _defaultUseCanvasRichText = true;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

@@ -230,7 +230,7 @@ void testMain() async {
     canvas.drawParagraph(paragraph, const Offset(180, 50));
 
     expect(
-      canvas.rootElement.querySelectorAll('p').map<String>((e) => e.innerText).toList(),
+      canvas.rootElement.querySelectorAll('p').map<String>((e) => e.text).toList(),
       <String>[text],
       reason: 'Expected to render text using HTML',
     );
