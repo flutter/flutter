@@ -1809,19 +1809,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     handleTapDown(details);
   }
 
-  /// Returns true iff _lastTapDownPosition was on selection.
-  bool tapIsOnSelection() {
-    assert(_lastTapDownPosition != null);
-    if (selection == null) {
-      return false;
-    }
-
-    final TextPosition textPosition = getPositionForPoint(_lastTapDownPosition!);
-
-    return selection!.base.offset <= textPosition.offset
-        && selection!.extent.offset >= textPosition.offset;
-  }
-
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTap]
   /// callback.
