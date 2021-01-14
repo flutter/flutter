@@ -5,10 +5,7 @@
 #include "flutter/lib/ui/painting/image_filter.h"
 
 #include "flutter/lib/ui/painting/matrix.h"
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
-#include "third_party/skia/include/effects/SkImageSource.h"
-#include "third_party/skia/include/effects/SkPictureImageFilter.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -48,11 +45,11 @@ ImageFilter::ImageFilter() {}
 ImageFilter::~ImageFilter() {}
 
 void ImageFilter::initImage(CanvasImage* image) {
-  filter_ = SkImageSource::Make(image->image());
+  filter_ = SkImageFilters::Image(image->image());
 }
 
 void ImageFilter::initPicture(Picture* picture) {
-  filter_ = SkPictureImageFilter::Make(picture->picture());
+  filter_ = SkImageFilters::Picture(picture->picture());
 }
 
 void ImageFilter::initBlur(double sigma_x,
@@ -63,7 +60,7 @@ void ImageFilter::initBlur(double sigma_x,
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
                              int filterQuality) {
-  filter_ = SkImageFilter::MakeMatrixFilter(
+  filter_ = SkImageFilters::MatrixTransform(
       ToSkMatrix(matrix4), static_cast<SkFilterQuality>(filterQuality),
       nullptr);
 }
