@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/license_collector.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 
