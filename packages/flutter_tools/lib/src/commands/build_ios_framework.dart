@@ -153,9 +153,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     if (!boolArg('universal') && !boolArg('xcframework')) {
       throwToolExit('--xcframework or --universal is required.');
     }
-    if (boolArg('xcframework') && globals.xcode.majorVersion < 11) {
-      throwToolExit('--xcframework requires Xcode 11.');
-    }
     if (boolArg('universal')) {
       globals.printError('--universal has been deprecated to support Apple '
           'Silicon ARM simulators and will be removed in a future version of '
