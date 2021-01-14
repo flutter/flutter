@@ -143,7 +143,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 /// [Border.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderTween extends Tween<Border> {
+class BorderTween extends Tween<Border?> {
   /// Creates a [Border] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -152,7 +152,11 @@ class BorderTween extends Tween<Border> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Border lerp(double t) => Border.lerp(begin, end, t)!;
+  Border? lerp(double t) {
+    if (begin == null || end == null)
+      return t < 0.5 ? begin : end;
+    return Border.lerp(begin!, end!, t);
+  }
 }
 
 /// An interpolation between two [Matrix4]s.
