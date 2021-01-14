@@ -116,32 +116,9 @@ class Scrollbar extends StatefulWidget {
 }
 
 class _ScrollbarState extends State<Scrollbar> {
-  late bool _useCupertinoScrollbar;
+  bool get _useCupertinoScrollbar => Theme.of(context).platform == TargetPlatform.iOS;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        _useCupertinoScrollbar = false;
-        break;
-      case TargetPlatform.iOS:
-        _useCupertinoScrollbar = true;
-        break;
-      case TargetPlatform.macOS:
-        // The current CupertinoScrollbar is not intended for desktop.
-        // TODO(Piinks): Update CupertinoScrollbar appearance for desktop.
-        _useCupertinoScrollbar = false;
-        break;
-    }
-  }
-
-  @override	  @override
   Widget build(BuildContext context) {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
@@ -155,7 +132,6 @@ class _ScrollbarState extends State<Scrollbar> {
       );
     }
     return _MaterialScrollbar(
-      key: widget.key,
       child: widget.child,
       controller: widget.controller,
       isAlwaysShown: widget.isAlwaysShown,
