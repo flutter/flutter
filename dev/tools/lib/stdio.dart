@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 
@@ -31,15 +31,9 @@ class VerboseStdio extends Stdio {
     @required this.stdin,
   }) : assert(stdout != null), assert(stderr != null), assert(stdin != null);
 
-  factory VerboseStdio.local() => VerboseStdio(
-    stdout: io.stdout,
-    stderr: io.stderr,
-    stdin: io.stdin,
-  );
-
-  final io.Stdout stdout;
-  final io.Stdout stderr;
-  final io.Stdin stdin;
+  final Stdout stdout;
+  final Stdout stderr;
+  final Stdin stdin;
 
   @override
   void printError(String message) {
