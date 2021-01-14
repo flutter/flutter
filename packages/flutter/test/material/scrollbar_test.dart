@@ -1056,6 +1056,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(CupertinoScrollbar), paints..rrect());
-    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));    expect(scrollbar.controller, isNotNull);
+    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
+    expect(scrollbar.controller, isNotNull);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 }
