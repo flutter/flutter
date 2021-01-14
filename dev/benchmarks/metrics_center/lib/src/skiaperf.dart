@@ -78,7 +78,7 @@ class SkiaPerfPoint extends MetricPoint {
     final String name = p.tags[kNameKey];
 
     if (githubRepo == null || gitHash == null || name == null) {
-      throw '$kGithubRepoKey, $kGitRevisionKey, $kGitRevisionKey must be set in'
+      throw '$kGithubRepoKey, $kGitRevisionKey, $kNameKey must be set in'
           ' the tags of $p.';
     }
 
