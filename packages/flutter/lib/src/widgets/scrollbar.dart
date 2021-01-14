@@ -613,14 +613,17 @@ class RawScrollbar extends StatefulWidget {
        assert(pressDuration != null),
        super(key: key);
 
+  /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
   ///
   /// The scrollbar will be stacked on top of this child. This child (and its
   /// subtree) should include a source of [ScrollNotification] notifications.
   ///
   /// Typically a [ListView] or [CustomScrollView].
+  /// {@endtemplate}
   final Widget child;
 
+  /// {@template flutter.widgets.Scrollbar.controller}
   /// The [ScrollController] used to implement Scrollbar dragging.
   ///
   /// If nothing is passed to controller, the default behavior is to automatically
@@ -670,8 +673,10 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
   final ScrollController? controller;
 
+  /// {@template flutter.widgets.Scrollbar.isAlwaysShown}
   /// Indicates that the scrollbar should be visible, even when a scroll is not
   /// underway.
   ///
@@ -727,6 +732,7 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
   final bool? isAlwaysShown;
 
   /// The [Radius] of the scrollbar thumb's rounded rectangle corners.
