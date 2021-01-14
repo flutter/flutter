@@ -26,7 +26,7 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
   20.0,
   0.0,
   20.0,
-  2.0,
+  3.0,
 );
 
 /// A button in the style of the Mac context menu buttons.
