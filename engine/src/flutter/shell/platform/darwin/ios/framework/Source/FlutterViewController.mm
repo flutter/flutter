@@ -191,7 +191,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
   auto engine = fml::scoped_nsobject<FlutterEngine>{[[FlutterEngine alloc]
                 initWithName:@"io.flutter"
                      project:project
-      allowHeadlessExecution:self.engineAllowHeadlessExecution]};
+      allowHeadlessExecution:self.engineAllowHeadlessExecution
+          restorationEnabled:[self restorationIdentifier] != nil]};
 
   if (!engine) {
     return;
@@ -654,6 +655,7 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
     [self surfaceUpdated:YES];
   }
   [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
+  [[_engine.get() restorationPlugin] markRestorationComplete];
 
   [super viewWillAppear:animated];
 }
@@ -1521,6 +1523,22 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   packet->SetPointerData(/*index=*/0, pointer_data);
 
   [_engine.get() dispatchPointerDataPacket:std::move(packet)];
+}
+
+#pragma mark - State Restoration
+
+- (void)encodeRestorableStateWithCoder:(NSCoder*)coder {
+  NSData* restorationData = [[_engine.get() restorationPlugin] restorationData];
+  [coder encodeDataObject:restorationData];
+}
+
+- (void)decodeRestorableStateWithCoder:(NSCoder*)coder {
+  NSData* restorationData = [coder decodeDataObject];
+  [[_engine.get() restorationPlugin] setRestorationData:restorationData];
+}
+
+- (FlutterRestorationPlugin*)restorationPlugin {
+  return [_engine.get() restorationPlugin];
 }
 
 @end
