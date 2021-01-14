@@ -68,7 +68,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         border: Border.all(
           color: _kToolbarBorderColor,
         ),
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius)
+        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
