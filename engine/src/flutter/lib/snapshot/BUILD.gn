@@ -201,6 +201,7 @@ action("create_arm_gen_snapshot") {
   output_dir = "$root_out_dir/clang_x64"
   script = "//flutter/sky/tools/create_macos_gen_snapshots.py"
   visibility = [ ":*" ]
+  deps = [ "//third_party/dart/runtime/bin:gen_snapshot" ]
   args = [
     "--dst",
     rebase_path(output_dir),
