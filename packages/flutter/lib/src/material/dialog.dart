@@ -961,38 +961,35 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T?> showDialog<T>({
   required BuildContext context,
-  WidgetBuilder? builder,
+  required WidgetBuilder builder,
   bool barrierDismissible = true,
-  Color? barrierColor,
+  Color? barrierColor = Colors.black54,
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  assert(builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final CapturedThemes themes = InheritedTheme.capture(from: context, to: Navigator.of(context, rootNavigator: useRootNavigator).context);
-  return showGeneralDialog(
-    context: context,
-    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-      final Widget pageChild = Builder(builder: builder!);
-      Widget dialog = themes.wrap(pageChild);
-      if (useSafeArea) {
-        dialog = SafeArea(child: dialog);
-      }
-      return dialog;
-    },
-    barrierDismissible: barrierDismissible,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: barrierColor ?? Colors.black54,
-    transitionDuration: const Duration(milliseconds: 150),
-    transitionBuilder: _buildMaterialDialogTransitions,
-    useRootNavigator: useRootNavigator,
-    routeSettings: routeSettings,
+  final CapturedThemes themes = InheritedTheme.capture(
+    from: context,
+    to: Navigator.of(
+      context,
+      rootNavigator: useRootNavigator,
+    ).context,
   );
+
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
+    context: context,
+    builder: builder,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    useSafeArea: useSafeArea,
+    settings: routeSettings,
+    themes: themes,
+  ));
 }
 
 /// A dialog route with Material entrance and exit animations,
@@ -1005,21 +1002,14 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   DialogRoute({
     required BuildContext context,
     required WidgetBuilder builder,
+    required CapturedThemes themes,
     bool barrierDismissible = true,
     Color? barrierColor = Colors.black54,
     bool useSafeArea = true,
-    bool useRootNavigator = true,
     RouteSettings? settings,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-           final CapturedThemes themes = InheritedTheme.capture(
-             from: context,
-             to: Navigator.of(
-               context,
-               rootNavigator: useRootNavigator,
-             ).context,
-           );
            final Widget pageChild = Builder(builder: builder);
            Widget dialog = themes.wrap(pageChild);
            if (useSafeArea) {

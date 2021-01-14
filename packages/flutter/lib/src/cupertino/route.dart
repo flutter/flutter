@@ -1141,20 +1141,15 @@ Future<T?> showCupertinoDialog<T>({
 }) {
   assert(builder != null);
   assert(useRootNavigator != null);
-  return showGeneralDialog(
+
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
+    builder: builder,
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
-    // This transition duration was eyeballed comparing with iOS
-    transitionDuration: const Duration(milliseconds: 250),
-    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-      return builder(context);
-    },
-    transitionBuilder: _buildCupertinoDialogTransitions,
-    useRootNavigator: useRootNavigator,
-    routeSettings: routeSettings,
-  );
+    settings: routeSettings,
+  ));
 }
 
 /// A dialog route that shows an iOS-style dialog.
