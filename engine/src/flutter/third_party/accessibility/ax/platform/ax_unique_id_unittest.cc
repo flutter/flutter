@@ -32,10 +32,6 @@ AXTestSmallBankUniqueId::AXTestSmallBankUniqueId() : AXUniqueId(kMaxId) {}
 AXTestSmallBankUniqueId::~AXTestSmallBankUniqueId() = default;
 
 TEST(AXPlatformUniqueIdTest, UnassignedIdsAreReused) {
-  // TODO(chunhtai): enable this test once the flake has been
-  // resolved.
-  // https://github.com/flutter/flutter/issues/73512
-  GTEST_SKIP() << "Flaky Test: https://github.com/flutter/flutter/issues/73512";
   // Create a bank of ids that uses up all available ids.
   // Then remove an id and replace with a new one. Since it's the only
   // slot available, the id will end up having the same value, rather than
@@ -47,8 +43,7 @@ TEST(AXPlatformUniqueIdTest, UnassignedIdsAreReused) {
   }
 
   static int kIdToReplace = 10;
-  std::unique_ptr<AXTestSmallBankUniqueId>& unique = ids[kIdToReplace];
-  int32_t expected_id = unique->Get();
+  int32_t expected_id = ids[kIdToReplace]->Get();
 
   // Delete one of the ids and replace with a new one.
   ids[kIdToReplace] = nullptr;
@@ -56,6 +51,24 @@ TEST(AXPlatformUniqueIdTest, UnassignedIdsAreReused) {
 
   // Expect that the original Id gets reused.
   EXPECT_EQ(ids[kIdToReplace]->Get(), expected_id);
+}
+
+TEST(AXPlatformUniqueIdTest, DoesCreateCorrectId) {
+  int kLargerThanMaxId = kMaxId * 2;
+  std::unique_ptr<AXUniqueId> ids[kLargerThanMaxId];
+  // Creates and releases to fill up the internal static counter.
+  for (int i = 0; i < kLargerThanMaxId; i++) {
+    ids[i] = std::make_unique<AXUniqueId>();
+  }
+  for (int i = 0; i < kLargerThanMaxId; i++) {
+    ids[i].reset(nullptr);
+  }
+  // Creates an unique id whose max value is less than the internal
+  // static counter.
+  std::unique_ptr<AXTestSmallBankUniqueId> unique_id =
+      std::make_unique<AXTestSmallBankUniqueId>();
+
+  EXPECT_LE(unique_id->Get(), kMaxId);
 }
 
 }  // namespace ui
