@@ -84,6 +84,8 @@ typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetail
 /// See also:
 ///
 ///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
+///   * [CupertinoDesktopTextSelectionToolbar.toolbarBuilder], which is of this
+///     type.
 ///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
 ///     for a Cupertino-style toolbar.
 typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);

@@ -26,6 +26,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastTapDownPosition,
   ) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(

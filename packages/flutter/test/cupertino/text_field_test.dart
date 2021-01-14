@@ -39,13 +39,15 @@ class MockTextSelectionControls extends TextSelectionControls {
 
   @override
   Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      double textLineHeight,
-      Offset position,
-      List<TextSelectionPoint> endpoints,
-      TextSelectionDelegate delegate,
-      ClipboardStatusNotifier clipboardStatus) {
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
+    Offset? lastTapDownPosition,
+  ) {
     throw UnimplementedError();
   }
 

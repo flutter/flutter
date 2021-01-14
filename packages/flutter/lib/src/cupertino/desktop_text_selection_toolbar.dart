@@ -6,8 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'text_selection_toolbar.dart';
-
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // screen.
 const double _kToolbarScreenPadding = 8.0;
