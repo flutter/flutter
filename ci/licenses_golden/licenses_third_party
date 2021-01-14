@@ -1,4 +1,4 @@
-Signature: 1d2ff5f3ca7f8b5c5a9ed29f1665e5fb
+Signature: d2cc8ac6da5f2f9979588619a3b2064c
 
 UNUSED LICENSES:
 
@@ -9761,6 +9761,55 @@ FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/errors.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
+ORIGIN: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/calloc.dart + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart2/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiCall/dart2/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart2/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart/calloc.dart
+FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart2/calloc.dart
+FILE: ../../../third_party/dart/samples/ffi/calloc.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/calloc.dart
+FILE: ../../../third_party/dart/samples_2/ffi/calloc.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/calloc.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/allocation.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -24501,4 +24550,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 374
+Total license count: 375
