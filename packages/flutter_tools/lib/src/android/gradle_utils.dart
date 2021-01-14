@@ -238,7 +238,7 @@ void updateLocalProperties({
   }
 
   if (globals.androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(globals.androidSdk.directory));
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(globals.androidSdk.directory.path));
   }
 
   changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
@@ -269,7 +269,7 @@ void updateLocalProperties({
 void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   if (globals.androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(globals.androidSdk.directory);
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(globals.androidSdk.directory.path);
   }
   settings.writeContents(properties);
 }

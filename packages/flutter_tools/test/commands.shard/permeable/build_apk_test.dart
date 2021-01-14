@@ -172,7 +172,7 @@ void main() {
       });
 
       mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
