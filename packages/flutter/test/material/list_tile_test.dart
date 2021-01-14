@@ -2123,14 +2123,14 @@ void main() {
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
     await tester.pumpAndSettle();
-    // Selected color should be default bodyText2 color.
+    // Selected color should be ThemeData.primaryColor by default.
     expect(textColor(leadingKey), theme.primaryColor);
     expect(textColor(trailingKey), theme.primaryColor);
 
     await tester.pumpWidget(buildFrame(enabled: false));
     // Wait for text color to animate.
     await tester.pumpAndSettle();
-    // Disabled color should be default bodyText2 color.
+    // Disabled color should be ThemeData.disabledColor by default.
     expect(textColor(leadingKey), theme.disabledColor);
     expect(textColor(trailingKey), theme.disabledColor);
   });

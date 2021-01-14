@@ -1078,7 +1078,7 @@ class ListTile extends StatelessWidget {
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
     final TextStyle style = theme.textTheme.bodyText2!;
-    final Color? color = _textColor(theme, tileTheme, theme.textTheme.bodyText2!.color);
+    final Color? color = _textColor(theme, tileTheme, style.color);
     return style.copyWith(color: color);
   }
 
