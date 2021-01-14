@@ -63,6 +63,7 @@ void main() {
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
+        showFirstLastButtons: true,
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
@@ -92,6 +93,28 @@ void main() {
     expect(find.text('Gingerbread (0)'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.chevron_left));
+
+    expect(log, <String>['page-changed: 0']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    await tester.tap(find.byTooltip('Last page'));
+
+    expect(log, <String>['page-changed: 498']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Donut (49)'), findsOneWidget);
+    expect(find.text('KitKat (49)'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('First page'));
 
     expect(log, <String>['page-changed: 0']);
     log.clear();

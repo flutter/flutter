@@ -56,6 +56,16 @@
     "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
   },
 
+  "firstPageTooltip": "First page",
+  "@firstPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the first page of a paginated data table."
+  },
+
+  "lastPageTooltip": "Last page",
+  "@lastPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the last page of a paginated data table."
+  },
+
   "showMenuTooltip": "Show menu",
   "@showMenuTooltip": {
     "description": "The tooltip for the button that shows a popup menu."

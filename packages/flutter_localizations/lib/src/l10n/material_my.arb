@@ -9,6 +9,8 @@
   "previousMonthTooltip": "ယခင်လ",
   "nextPageTooltip": "နောက်စာမျက်နှာ",
   "previousPageTooltip": "ယခင်စာမျက်နှာ",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "မီနူး ပြရန်",
   "aboutListTileTitle": "$applicationName အကြောင်း",
   "licensesPageTitle": "လိုင်စင်များ",

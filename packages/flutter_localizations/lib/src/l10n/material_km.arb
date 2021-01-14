@@ -9,6 +9,8 @@
   "previousMonthTooltip": "ខែមុន",
   "nextPageTooltip": "ទំព័របន្ទាប់",
   "previousPageTooltip": "ទំព័រមុន",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "បង្ហាញ​ម៉ឺនុយ",
   "aboutListTileTitle": "អំពី $applicationName",
   "licensesPageTitle": "អាជ្ញាបណ្ណ",
