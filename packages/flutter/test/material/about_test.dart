@@ -744,7 +744,7 @@ class AboutDialogObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is RawDialogRoute) {
       dialogCount++;
     }
     super.didPush(route, previousRoute);

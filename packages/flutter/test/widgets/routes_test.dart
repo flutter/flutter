@@ -1823,8 +1823,8 @@ class DialogObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('RawDialogRoute')) {
-      dialogRoutes.add(route as ModalRoute<dynamic>);
+    if (route is RawDialogRoute) {
+      dialogRoutes.add(route);
       dialogCount++;
     }
     super.didPush(route, previousRoute);
@@ -1832,7 +1832,7 @@ class DialogObserver extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('RawDialogRoute')) {
+    if (route is RawDialogRoute) {
       dialogRoutes.removeLast();
       dialogCount--;
     }
