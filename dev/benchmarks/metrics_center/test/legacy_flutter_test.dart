@@ -6,8 +6,8 @@ import 'package:gcloud/src/datastore_impl.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:metrics_center/src/common.dart';
 import 'package:metrics_center/src/legacy_flutter.dart';
-import 'package:test/test.dart';
 
+import 'common.dart';
 import 'utility.dart';
 
 const String kTestSourceId = 'test';
