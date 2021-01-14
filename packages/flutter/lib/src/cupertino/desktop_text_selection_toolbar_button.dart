@@ -5,6 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 
+// Colors extracted from https://developer.apple.com/design/resources/.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
+const Color _kToolbarButtonBackgroundColor = Color(0xFF2D2E31);
+
 // These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
 // a Macbook Pro.
 const Color _kToolbarButtonBackgroundColorActive = Color(0xFF0662CD);
@@ -16,28 +20,46 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-// TODO(justinmc): Deduplicate this with desktop_text_selection.dart.
-const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
+// This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
+// Macbook Pro.
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(
+  vertical: 1.0,
+  horizontal: 20.0,
+);
 
-class CupertinoDesktopButton extends StatefulWidget {
-  const CupertinoDesktopButton({
+/// A button in the style of the Mac context menu buttons.
+class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
+  /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
+  const CupertinoDesktopTextSelectionToolbarButton({
     Key? key,
-    required this.padding,
     required this.onPressed,
-    required this.text,
+    required this.child,
   }) : super(key: key);
 
+  /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] whose child is
+  /// a [Text] widget styled like the default Mac context menu button.
+  CupertinoDesktopTextSelectionToolbarButton.text({
+    Key? key,
+    required this.onPressed,
+    required String text,
+  }) : child = Text(
+         text,
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle,
+       ),
+       super(key: key);
+
+  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
   final VoidCallback onPressed;
 
-  final EdgeInsetsGeometry padding;
-
-  final String text;
+  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
+  final Widget child;
 
   @override
-  _CupertinoDesktopButtonState createState() => _CupertinoDesktopButtonState();
+  _CupertinoDesktopTextSelectionToolbarButtonState createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
 }
 
-class _CupertinoDesktopButtonState extends State<CupertinoDesktopButton> {
+class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDesktopTextSelectionToolbarButton> {
   bool _isHovered = false;
 
   void _onEnter(PointerEnterEvent event) {
@@ -60,24 +82,16 @@ class _CupertinoDesktopButtonState extends State<CupertinoDesktopButton> {
         onEnter: _onEnter,
         onExit: _onExit,
         child: CupertinoButton(
+          // TODO(justinmc): alignment: Alignment.centerLeft,
           borderRadius: null,
-          color: _isHovered ? _kToolbarButtonBackgroundColorActive : _kToolbarBackgroundColor,
+          color: _isHovered ? _kToolbarButtonBackgroundColorActive : _kToolbarButtonBackgroundColor,
           minSize: 0.0,
           onPressed: widget.onPressed,
-          padding: widget.padding,
+          padding: _kToolbarButtonPadding,
           pressedOpacity: 0.7,
-          child: Text(
-            // TODO(justinmc): Remove this 'Desktop' text, just using it to
-            // distinguish iOS and Desktop TSM right now.
-            // Eventually, make this look like real desktop while reusing
-            // duplicate stuff with iOS and Material.
-            widget.text,
-            overflow: TextOverflow.ellipsis,
-            style: _kToolbarButtonFontStyle,
-          ),
+          child: widget.child,
         ),
       ),
     );
   }
 }
-

@@ -15,15 +15,6 @@ import 'localizations.dart';
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
 
-// This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
-// Macbook Pro.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(
-  // TODO(justinmc): This vertical padding seems good, but the text seems not
-  // vertically centered within it.
-  vertical: 1.0,
-  horizontal: 20.0,
-);
-
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -190,10 +181,9 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
         items.add(onePhysicalPixelVerticalDivider);
       }
 
-      items.add(CupertinoDesktopButton(
-        text: text,
+      items.add(CupertinoDesktopTextSelectionToolbarButton.text(
         onPressed: onPressed,
-        padding: _kToolbarButtonPadding,
+        text: text,
       ));
     }
 
@@ -217,7 +207,6 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     return CupertinoDesktopTextSelectionToolbar(
-      // TODO(justinmc): Can the menu ever be shown without a lastTapDownPosition?
       anchor: widget.lastTapDownPosition ?? midpointAnchor,
       children: items,
     );
