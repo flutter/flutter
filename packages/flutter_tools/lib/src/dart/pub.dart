@@ -462,13 +462,13 @@ class _DefaultPub implements Pub {
     }
 
     // TODO(jonahwillams): Using raw json manipulation here because
-    // writeAsStringSync always writes to local io, and it changes absolute
+    // savePackageConfig always writes to local io, and it changes absolute
     // paths to relative on round trip.
     // See: https://github.com/dart-lang/package_config/issues/99,
     // and: https://github.com/dart-lang/package_config/issues/100.
 
     // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
-    // surely exists and is correctly formatted.
+    // we can rely on the file to exist and be correctly formatted.
     final dynamic jsonContents =
         json.decode(packageConfigFile.readAsStringSync());
 
