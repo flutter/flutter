@@ -26,15 +26,15 @@ const int kMaxBatchSize = 500;
 /// during the migration.
 @Kind(name: 'MetricPoint', idType: IdType.String)
 class LegacyMetricPointModel extends Model<String> {
-  LegacyMetricPointModel({MetricPoint from}) {
-    if (from != null) {
-      id = from.id;
-      value = from.value;
+  LegacyMetricPointModel({MetricPoint fromMetricPoint}) {
+    if (fromMetricPoint != null) {
+      id = fromMetricPoint.id;
+      value = fromMetricPoint.value;
       originId = 'legacy-flutter';
       sourceTimeMicros = null;
-      tags = from.tags.keys
+      tags = fromMetricPoint.tags.keys
           .map((String key) =>
-              jsonEncode(<String, dynamic>{key: from.tags[key]}))
+              jsonEncode(<String, dynamic>{key: fromMetricPoint.tags[key]}))
           .toList();
     }
   }
@@ -69,7 +69,7 @@ class LegacyFlutterDestination extends MetricDestination {
   @override
   Future<void> update(List<MetricPoint> points) async {
     final List<LegacyMetricPointModel> flutterCenterPoints =
-        points.map((MetricPoint p) => LegacyMetricPointModel(from: p)).toList();
+        points.map((MetricPoint p) => LegacyMetricPointModel(fromMetricPoint: p)).toList();
 
     for (int start = 0; start < points.length; start += kMaxBatchSize) {
       final int end = min(start + kMaxBatchSize, points.length);

@@ -28,7 +28,7 @@ class FlutterEngineMetricPoint extends MetricPoint {
 class FlutterDestination extends MetricDestination {
   // TODO(liyuqian): change the implementation of this class (without changing
   // its public APIs) to remove `LegacyFlutterDestination` and directly use
-  // `SkiaPerfDestination` once the migration if fully done.
+  // `SkiaPerfDestination` once the migration is fully done.
   FlutterDestination._(this._legacyDestination);
 
   static Future<FlutterDestination> makeFromCredentialsJson(

@@ -311,7 +311,7 @@ class SkiaPerfGcsAdaptor {
   /// json files can be put in that leaf directory. We intend to use multiple
   /// json files in the future to scale up the system if too many writes are
   /// competing for the same json file.
-  static Future<String> comptueObjectName(String githubRepo, String revision,
+  static Future<String> computeObjectName(String githubRepo, String revision,
       {GithubHelper githubHelper}) async {
     assert(_githubRepoToGcsName[githubRepo] != null);
     final String topComponent = _githubRepoToGcsName[githubRepo];
@@ -406,7 +406,7 @@ class SkiaPerfDestination extends MetricDestination {
     for (final String repo in pointMap.keys) {
       for (final String revision in pointMap[repo].keys) {
         final String objectName =
-            await SkiaPerfGcsAdaptor.comptueObjectName(repo, revision);
+            await SkiaPerfGcsAdaptor.computeObjectName(repo, revision);
         final Map<String, SkiaPerfPoint> newPoints = pointMap[repo][revision];
         // If too many bots are writing the metrics of a git revision into this
         // single json file (with name `objectName`), the contention on the lock
