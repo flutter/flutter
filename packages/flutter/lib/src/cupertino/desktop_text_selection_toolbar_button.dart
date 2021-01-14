@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -82,7 +86,7 @@ class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDe
         onEnter: _onEnter,
         onExit: _onExit,
         child: CupertinoButton(
-          // TODO(justinmc): alignment: Alignment.centerLeft,
+          alignment: Alignment.centerLeft,
           borderRadius: null,
           color: _isHovered ? _kToolbarButtonBackgroundColorActive : _kToolbarButtonBackgroundColor,
           minSize: 0.0,
