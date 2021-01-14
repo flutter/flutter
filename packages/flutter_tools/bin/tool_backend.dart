@@ -29,6 +29,7 @@ Future<void> main(List<String> arguments) async {
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
+  final bool prefixedErrors = Platform.environment['PREFIXED_ERROR_LOGGING'] == 'true';
 
   Directory.current = projectDirectory;
 
@@ -61,6 +62,8 @@ or
     <String>[
       if (verbose)
         '--verbose',
+      if (prefixedErrors)
+        '--prefixed-errors',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
       'assemble',
