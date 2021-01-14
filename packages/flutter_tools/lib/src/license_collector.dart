@@ -112,6 +112,12 @@ class LicenseCollector {
             'package $package specified an additional license at ${license.path}, but this file '
             'could not be read:\n$err'
           );
+        } on FileSystemException catch (err) {
+          // File cannot be parsed.
+          errorMessages.add(
+            'package $package specified an additional license at ${license.path}, but this file '
+            'could not be read:\n$err'
+          );
         }
       }
     }

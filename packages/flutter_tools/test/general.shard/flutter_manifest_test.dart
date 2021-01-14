@@ -1119,7 +1119,28 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "licenses" to be a list, but got foo.txt (String)\n');
+    expect(logger.errorText, 'Expected "licenses" to be a list of files, but got foo.txt (String)\n');
+  });
+
+  testWithoutContext('FlutterManifest validates individual list items', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  licenses:
+    - foo.txt
+    - bar: fizz
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "licenses" to be a list of files, but element 1 was a YamlMap\n');
   });
 }
 

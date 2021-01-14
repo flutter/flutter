@@ -451,8 +451,11 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         break;
       case 'licenses':
-        if (kvp.value is! YamlList || kvp.value[0] is! String) {
-          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType})');
+        final dynamic value = kvp.value;
+        if (value is YamlList) {
+          _validateListType<String>(value, '${kvp.key}', errors);
+        } else {
+          errors.add('Expected "${kvp.key}" to be a list of files, but got $value (${value.runtimeType})');
         }
         break;
       case 'module':
@@ -483,6 +486,14 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
         break;
+    }
+  }
+}
+
+void _validateListType<T>(YamlList yamlList, String context, List<String> errors) {
+  for (int i = 0; i < yamlList.length; i++) {
+    if (yamlList[i] is! T) {
+      errors.add('Expected "$context" to be a list of files, but element $i was a ${yamlList[i].runtimeType}');
     }
   }
 }
