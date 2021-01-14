@@ -22,9 +22,11 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 
 // This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
 // Macbook Pro.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(
-  vertical: 1.0,
-  horizontal: 20.0,
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
+  20.0,
+  0.0,
+  20.0,
+  2.0,
 );
 
 /// A button in the style of the Mac context menu buttons.
