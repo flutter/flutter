@@ -204,10 +204,28 @@ class SkiaPerfGcsAdaptor {
   ///
   /// The `objectName` must be a properly formatted string returned by
   /// [computeObjectName].
+  ///
+  /// The read may retry multiple times if transient network errors with code
+  /// 504 happens.
   Future<void> writePoints(
       String objectName, List<SkiaPerfPoint> points) async {
     final String jsonString = jsonEncode(SkiaPerfPoint.toSkiaPerfJson(points));
-    await _gcsBucket.writeBytes(objectName, utf8.encode(jsonString));
+    final List<int> content = utf8.encode(jsonString);
+
+    // Retry multiple times as GCS may return 504 timeout.
+    for (int retry = 0; retry < 5; retry += 1) {
+      try {
+        await _gcsBucket.writeBytes(objectName, content);
+        return;
+      } catch (e) {
+        if (e is DetailedApiRequestError && e.status == 504) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+    // Retry one last time and let the exception go through.
+    await _gcsBucket.writeBytes(objectName, content);
   }
 
   /// Read a list of `SkiaPerfPoint` that have been previously written to the
