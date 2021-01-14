@@ -147,6 +147,7 @@ class ElevatedButton extends ButtonStyleButton {
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
     bool? enableFeedback,
+    AlignmentGeometry? alignment,
   }) {
     final MaterialStateProperty<Color?>? backgroundColor = (onSurface == null && primary == null)
       ? null
@@ -180,6 +181,7 @@ class ElevatedButton extends ButtonStyleButton {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
     );
   }
 
@@ -238,6 +240,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
   ///
   /// The default padding values for the [ElevatedButton.icon] factory are slightly different:
   ///
@@ -280,6 +283,7 @@ class ElevatedButton extends ButtonStyleButton {
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
+      alignment: Alignment.center,
     );
   }
 
