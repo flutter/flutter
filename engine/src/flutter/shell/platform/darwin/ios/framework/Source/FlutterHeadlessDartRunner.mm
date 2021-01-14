@@ -35,10 +35,24 @@
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   NSAssert(allowHeadlessExecution == YES,
            @"Cannot initialize a FlutterHeadlessDartRunner without headless execution.");
+  return [self initWithName:labelPrefix
+                     project:projectOrNil
+      allowHeadlessExecution:allowHeadlessExecution
+          restorationEnabled:NO];
+}
+
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)projectOrNil
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution
+          restorationEnabled:(BOOL)restorationEnabled {
+  NSAssert(allowHeadlessExecution == YES,
+           @"Cannot initialize a FlutterHeadlessDartRunner without headless execution.");
   return [super initWithName:labelPrefix
                      project:projectOrNil
-      allowHeadlessExecution:allowHeadlessExecution];
+      allowHeadlessExecution:allowHeadlessExecution
+          restorationEnabled:restorationEnabled];
 }
+
 - (instancetype)init {
   return [self initWithName:@"io.flutter.headless" project:nil];
 }
