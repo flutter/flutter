@@ -1809,10 +1809,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     handleTapDown(details);
   }
 
-  // TODO(justinmc): This is hacky, I'd like to do the refactor to find a nice
-  // way to do stuff like this. If refactor not possible, then make sure you do
-  // want to add this method and there's not an easier way.
-  ///
+  /// Returns true iff _lastTapDownPosition was on selection.
   bool tapIsOnSelection() {
     assert(_lastTapDownPosition != null);
     if (selection == null) {

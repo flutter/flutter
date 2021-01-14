@@ -1073,15 +1073,14 @@ class TextSelectionGestureDetectorBuilder {
   /// By default, selects the word if possible and shows the toolbar.
   @protected
   void onSecondaryTap() {
-    // TODO(justinmc): Maybe selection doesnt need to be enabled to show the
-    // toolbar? Maybe no shouldShowSelectionToolbar either?
     if (delegate.selectionEnabled) {
-      // TODO(justinmc): Needs a new cause.
       if (!renderEditable.tapIsOnSelection()) {
-        renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+        renderEditable.selectWord(cause: SelectionChangedCause.tap);
       }
-      if (shouldShowSelectionToolbar)
+      if (shouldShowSelectionToolbar) {
+        editableText.hideToolbar();
         editableText.showToolbar();
+      }
     }
   }
 
