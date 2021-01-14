@@ -1438,6 +1438,11 @@ class TextInput {
   /// This function should be called to reset the current text input connection
   /// in case the platform sent a notification informing the connection is
   /// closed.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputClient.connectionClosed], a method called to notify the
+  ///    current text input client when the connection is closed.
   static void reset() {
     _instance._currentConnection = null;
   }
