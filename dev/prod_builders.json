@@ -343,12 +343,6 @@
          "flaky": false
       },
       {
-         "name": "Linux multi_widget_construction_perf__timeline_summary",
-         "repo": "flutter",
-         "task_name": "linux_multi_widget_construction_perf__timeline_summary",
-         "flaky": true
-      },
-      {
          "name": "Linux new_gallery__crane_perf",
          "repo": "flutter",
          "task_name": "linux_new_gallery__crane_perf",
