@@ -8,14 +8,10 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
-
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarButtonBackgroundColor = Color(0xFF2D2E31);
+import 'theme.dart';
 
 // These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
 // a Macbook Pro.
-const Color _kToolbarButtonBackgroundColorActive = Color(0xFF0662CD);
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
   fontSize: 14.0,
@@ -88,7 +84,7 @@ class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDe
         child: CupertinoButton(
           alignment: Alignment.centerLeft,
           borderRadius: null,
-          color: _isHovered ? _kToolbarButtonBackgroundColorActive : _kToolbarButtonBackgroundColor,
+          color: _isHovered ? CupertinoTheme.of(context).primaryColor : null,
           minSize: 0.0,
           onPressed: widget.onPressed,
           padding: _kToolbarButtonPadding,
