@@ -476,13 +476,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: borderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -516,13 +509,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: selectedBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -555,13 +541,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: disabledBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,

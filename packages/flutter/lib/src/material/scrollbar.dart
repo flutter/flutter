@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'material_state.dart';
+import 'scrollbar_theme.dart';
 import 'theme.dart';
 
 const double _kScrollbarThickness = 8.0;
@@ -37,6 +38,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///
 ///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
+///  * [ScrollbarTheme], which configures the Scrollbar's appearance.
 ///  * [CupertinoScrollbar], an iOS style scrollbar.
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
@@ -59,8 +61,8 @@ class Scrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool isAlwaysShown = false,
-    this.showTrackOnHover = false,
+    bool? isAlwaysShown,
+    this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
     Radius? radius,
@@ -78,13 +80,17 @@ class Scrollbar extends RawScrollbar {
 
   /// Controls if the track will show on hover and remain, including during drag.
   ///
-  /// Defaults to false, cannot be null.
-  final bool showTrackOnHover;
+  /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
+  /// is false.
+  final bool? showTrackOnHover;
 
   /// The thickness of the scrollbar when a hover state is active and
   /// [showTrackOnHover] is true.
   ///
-  /// Defaults to 12.0 dp when null.
+  /// If this property is null, then [ScrollbarThemeData.thickness] of
+  /// [ThemeData.scrollbarTheme] is used to resolve a thickness. If that is also
+  /// null, the default value is 12.0 pixels.
   final double? hoverThickness;
 
   @override
@@ -96,8 +102,14 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
   late ColorScheme _colorScheme;
+  late ScrollbarThemeData _scrollbarTheme;
   // On Android, scrollbars should match native appearance.
   late bool _useAndroidScrollbar;
+
+  @override
+  bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
+
+  bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
     if (_dragIsActive) MaterialState.dragged,
@@ -125,16 +137,16 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.dragged))
-        return dragColor;
+        return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return hoverColor;
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+        return _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor;
 
       return Color.lerp(
-        idleColor,
-        hoverColor,
+        _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
+        _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor,
         _hoverAnimationController.value,
       )!;
     });
@@ -144,10 +156,11 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover) {
-        return brightness == Brightness.light
-          ? onSurface.withOpacity(0.03)
-          : onSurface.withOpacity(0.05);
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+        return _scrollbarTheme.trackColor?.resolve(states)
+          ?? (brightness == Brightness.light
+            ? onSurface.withOpacity(0.03)
+            : onSurface.withOpacity(0.05));
       }
       return const Color(0x00000000);
     });
@@ -157,10 +170,11 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover) {
-        return brightness == Brightness.light
-          ? onSurface.withOpacity(0.1)
-          : onSurface.withOpacity(0.25);
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
+        return _scrollbarTheme.trackBorderColor?.resolve(states)
+          ?? (brightness == Brightness.light
+            ? onSurface.withOpacity(0.1)
+            : onSurface.withOpacity(0.25));
       }
       return const Color(0x00000000);
     });
@@ -168,10 +182,14 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && widget.showTrackOnHover)
-        return widget.hoverThickness ?? _kScrollbarThicknessWithTrack;
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+        return widget.hoverThickness
+          ?? _scrollbarTheme.thickness?.resolve(states)
+          ?? _kScrollbarThicknessWithTrack;
       // The default scrollbar thickness is smaller on mobile.
-      return widget.thickness ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
+      return widget.thickness
+        ?? _scrollbarTheme.thickness?.resolve(states)
+        ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
     });
   }
 
@@ -190,6 +208,8 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
+    _colorScheme = theme.colorScheme;
+    _scrollbarTheme = theme.scrollbarTheme;
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
@@ -207,16 +227,16 @@ class _ScrollbarState extends RawScrollbarState<Scrollbar> {
 
   @override
   void updateScrollbarPainter() {
-    _colorScheme = Theme.of(context).colorScheme;
     scrollbarPainter
       ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness.resolve(_states)
-      ..radius = widget.radius ?? (_useAndroidScrollbar ? null : _kScrollbarRadius)
-      ..crossAxisMargin = (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
-      ..minLength = _kScrollbarMinLength
+      ..radius = widget.radius ?? _scrollbarTheme.radius ?? (_useAndroidScrollbar ? null : _kScrollbarRadius)
+      ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
+      ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
+      ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding;
   }
 
