@@ -7123,6 +7123,10 @@ void main() {
 
       await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+      );
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -7140,7 +7144,65 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets(
+    'double click after a click on Mac',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(50.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+      );
+
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // First click moved the cursor to the precise location, not the start of
+      // the word.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+      );
+
+      // Double click selection.
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 8, extentOffset: 12),
+      );
+      // The text selection toolbar isn't shown on Mac without a right click.
+      expect(find.byType(CupertinoButton), findsNothing);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('double tap chains work', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -7204,7 +7266,92 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('double click chains work', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
+
+      // First click moves the cursor to the point of the click, not the edge of
+      // the clicked word.
+      final TestGesture gesture = await tester.startGesture(
+        textFieldStart + const Offset(50.0, 9.0),
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 3, affinity: TextAffinity.downstream),
+      );
+
+      // Second click selects.
+      await gesture.down(textFieldStart + const Offset(50.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // Double tap selecting the same word somewhere else is fine.
+      await gesture.down(textFieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream),
+      );
+      await gesture.down(textFieldStart + const Offset(100.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 9, affinity: TextAffinity.downstream),
+      );
+      await gesture.down(textFieldStart + const Offset(150.0, 9.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 8, extentOffset: 12),
+      );
+      expect(find.byType(CupertinoButton), findsNothing);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -7327,7 +7474,78 @@ void main() {
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 0);
     expect(controller.value.selection.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
+
+  testWidgets('selecting a space selects the space on Mac', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: ' blah blah',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, -1);
+    expect(controller.value.selection.extentOffset, -1);
+
+    // Put the cursor at the end of the field.
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 10),
+      pointer: 7,
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double clicking the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.down(textOffsetToPosition(tester, 5));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.down(textOffsetToPosition(tester, 5));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 5);
+    expect(controller.value.selection.extentOffset, 6);
+
+    // Put the cursor at the end of the field.
+    await gesture.down(textOffsetToPosition(tester, 10));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 10);
+    expect(controller.value.selection.extentOffset, 10);
+
+    // Double tapping the second space selects it.
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.down(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.down(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.value.selection, isNotNull);
+    expect(controller.value.selection.baseOffset, 0);
+    expect(controller.value.selection.extentOffset, 1);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('force press does not select a word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -7415,7 +7633,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
