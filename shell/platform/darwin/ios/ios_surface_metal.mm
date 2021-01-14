@@ -22,8 +22,8 @@ IOSSurfaceMetal::IOSSurfaceMetal(fml::scoped_nsobject<CAMetalLayer> layer,
   is_valid_ = layer_;
   auto metal_context = CastToMetalContext(GetContext());
   auto darwin_context = metal_context->GetDarwinContext().get();
-  command_queue_ = darwin_context.mtlCommandQueue;
-  device_ = darwin_context.mtlDevice;
+  command_queue_ = darwin_context.commandQueue;
+  device_ = darwin_context.device;
 }
 
 // |IOSSurface|

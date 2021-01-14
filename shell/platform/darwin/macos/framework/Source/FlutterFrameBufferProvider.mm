@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h"
 
-#include <OpenGL/gl.h>
+#import <OpenGL/gl.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
 

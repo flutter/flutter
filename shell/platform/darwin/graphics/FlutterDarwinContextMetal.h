@@ -26,19 +26,19 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Initializes a FlutterDarwinContextMetal with provided MTLDevice and MTLCommandQueue.
  */
-- (instancetype)initWithMTLDevice:(id<MTLDevice>)mtlDevice
+- (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue;
 
 /**
  * MTLDevice that is backing this context.s
  */
-@property(nonatomic, readonly) id<MTLDevice> mtlDevice;
+@property(nonatomic, readonly) id<MTLDevice> device;
 
 /**
- * MTLCommandQueue that is acquired from the `mtlDevice`. This queue is used both for rendering and
+ * MTLCommandQueue that is acquired from the `device`. This queue is used both for rendering and
  * resource related commands.
  */
-@property(nonatomic, readonly) id<MTLCommandQueue> mtlCommandQueue;
+@property(nonatomic, readonly) id<MTLCommandQueue> commandQueue;
 
 /**
  * Skia GrContext that is used for rendering.

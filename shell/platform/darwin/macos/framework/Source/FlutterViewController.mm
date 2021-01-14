@@ -9,7 +9,9 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/embedder/embedder.h"
@@ -275,13 +277,32 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)loadView {
-  NSOpenGLContext* mainContext = _engine.openGLRenderer.openGLContext;
-  if (!mainContext) {
-    NSLog(@"Unable to create FlutterView; no GL context available.");
-    return;
+  FlutterView* flutterView;
+  BOOL enableMetalRendering = NO;
+#ifdef SHELL_ENABLE_METAL
+  enableMetalRendering = YES;
+#endif
+  if (enableMetalRendering) {
+    FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(_engine.renderer);
+    id<MTLDevice> device = metalRenderer.device;
+    id<MTLCommandQueue> commandQueue = metalRenderer.commandQueue;
+    if (!device || !commandQueue) {
+      NSLog(@"Unable to create FlutterView; no MTLDevice or MTLCommandQueue available.");
+      return;
+    }
+    flutterView = [[FlutterView alloc] initWithMTLDevice:device
+                                            commandQueue:commandQueue
+                                         reshapeListener:self];
+  } else {
+    FlutterOpenGLRenderer* openGLRenderer =
+        reinterpret_cast<FlutterOpenGLRenderer*>(_engine.renderer);
+    NSOpenGLContext* mainContext = openGLRenderer.openGLContext;
+    if (!mainContext) {
+      NSLog(@"Unable to create FlutterView; no GL context available.");
+      return;
+    }
+    flutterView = [[FlutterView alloc] initWithMainContext:mainContext reshapeListener:self];
   }
-  FlutterView* flutterView = [[FlutterView alloc] initWithMainContext:mainContext
-                                                      reshapeListener:self];
   self.view = flutterView;
 }
 
