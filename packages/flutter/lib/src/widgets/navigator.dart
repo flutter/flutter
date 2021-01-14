@@ -464,10 +464,7 @@ abstract class Route<T> {
     return currentRouteEntry.route == this;
   }
 
-  /// Whether this route is the bottom-most route on the navigator.
-  ///
-  /// If this is true, then [Navigator.canPop] will return false if this route's
-  /// [willHandlePopInternally] returns false.
+  /// Whether this route is the bottom-most active route on the navigator.
   ///
   /// If [isFirst] and [isCurrent] are both true then this is the only route on
   /// the navigator (and [isActive] will also be true).
@@ -481,6 +478,29 @@ abstract class Route<T> {
     if (currentRouteEntry == null)
       return false;
     return currentRouteEntry.route == this;
+  }
+
+  /// Whether there is at least one active route underneath this route.
+  @protected
+  bool get hasActiveRouteBelow {
+    if (_navigator == null)
+      return false;
+    bool seenActiveRoute = false;
+    bool exitOnActiveOrSelf(_RouteEntry? e) {
+      assert(e != null);
+      if (e!.route == this)
+        return true;
+      if (_RouteEntry.isPresentPredicate(e)) {
+        seenActiveRoute = true;
+        return true;
+      }
+      return false;
+    }
+    _navigator!._history.cast<_RouteEntry?>().firstWhere(
+      exitOnActiveOrSelf,
+      orElse: () => null,
+    );
+    return seenActiveRoute;
   }
 
   /// Whether this route is on the navigator.

@@ -1483,10 +1483,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether this route can be popped.
   ///
+  /// A route can be popped if there is at least one active route underneath
+  /// this route. Otherwise, it can only be popped if the
+  /// [willHandlePopInternally] returns true.
+  ///
   /// When this changes, if the route is visible, the route will
   /// rebuild, and any widgets that used [ModalRoute.of] will be
   /// notified.
-  bool get canPop => isActive && (!isFirst || willHandlePopInternally);
+  bool get canPop => hasActiveRouteBelow || willHandlePopInternally;
 
   // Internals
 
