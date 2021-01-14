@@ -559,7 +559,7 @@ class BrowserManager {
     }).catchError((dynamic error, StackTrace stackTrace) {
       browser.close();
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     });
