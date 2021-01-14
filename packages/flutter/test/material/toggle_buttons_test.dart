@@ -1511,7 +1511,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('toggle_buttons.oneButton.boardsPaint.png'),
     );
-  },);
+  });
 
   testWidgets('Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
     await tester.pumpWidget(
