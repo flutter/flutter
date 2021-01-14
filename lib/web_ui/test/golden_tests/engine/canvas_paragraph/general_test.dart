@@ -146,4 +146,23 @@ void testMain() async {
 
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_varying_heights');
   });
+
+  test('respects letter-spacing', () {
+    final canvas = BitmapCanvas(bounds, RenderStrategy());
+
+    final CanvasParagraph paragraph = rich(
+      ParagraphStyle(fontFamily: 'Roboto'),
+      (builder) {
+        builder.pushStyle(EngineTextStyle.only(color: blue));
+        builder.addText('Lorem ');
+        builder.pushStyle(EngineTextStyle.only(color: green, letterSpacing: 1));
+        builder.addText('Lorem ');
+        builder.pushStyle(EngineTextStyle.only(color: red, letterSpacing: 3));
+        builder.addText('Lorem');
+      },
+    )..layout(constrain(double.infinity));
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_letter_spacing');
+  });
 }

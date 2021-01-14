@@ -52,7 +52,21 @@ class TextPaintService {
             box.start.index,
             box.end.indexWithoutTrailingNewlines,
           );
-      canvas.fillText(text, x, y, shadows: span.style._shadows);
+      final double? letterSpacing = span.style._letterSpacing;
+      if (letterSpacing == null || letterSpacing == 0.0) {
+        canvas.fillText(text, x, y, shadows: span.style._shadows);
+      } else {
+        // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
+        //                https://github.com/flutter/flutter/issues/51234
+        double charX = x;
+        final int len = text.length;
+        for (int i = 0; i < len; i++) {
+          final String char = text[i];
+          canvas.fillText(char, charX.roundToDouble(), y,
+              shadows: span.style._shadows);
+          charX += letterSpacing + canvas.measureText(char).width!;
+        }
+      }
 
       // Paint the ellipsis using the same span styles.
       final String? ellipsis = line.ellipsis;
