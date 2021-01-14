@@ -1540,7 +1540,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('toggle_buttons.oneButton.boardsPaint2.png'),
     );
-  },);
+  });
 
   testWidgets('ToggleButtons implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
