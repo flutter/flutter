@@ -207,6 +207,7 @@ void PlatformViewIOS::OnPreEngineRestart() const {
     return;
   }
   [owner_controller_.get() platformViewsController]->Reset();
+  [[owner_controller_.get() restorationPlugin] reset];
 }
 
 std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolvedLocales(
