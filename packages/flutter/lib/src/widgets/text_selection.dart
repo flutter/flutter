@@ -78,6 +78,16 @@ enum _TextSelectionHandlePosition { start, end }
 /// having to store the start position.
 typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
 
+/// The type for a Function that builds a toolbar's container with the given
+/// child.
+///
+/// See also:
+///
+///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
+///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
+///     for a Cupertino-style toolbar.
+typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
+
 /// ParentData that determines whether or not to paint the corresponding child.
 ///
 /// Used in the layout of the Cupertino and Material text selection menus, which

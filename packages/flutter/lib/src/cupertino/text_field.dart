@@ -1078,10 +1078,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         break;
 
       case TargetPlatform.macOS:
-        // TODO(justinmc): All of the parameters usually set depending on
-        // the platform here are hardcoded for CupertinoTextField. If they
-        // actually should be different between iOS and Desktop, then you'll
-        // need to set them as variables here.
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         break;
     }

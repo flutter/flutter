@@ -11,10 +11,6 @@ import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
 import 'localizations.dart';
 
-// Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
-// screen. Eyeballed value.
-const double _kArrowScreenPadding = 26.0;
-
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
@@ -48,13 +44,13 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  /// Desktop has no text selection handles.
+  /// Builds the text selection handles, but desktop has none.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     return const SizedBox.shrink();
   }
 
-  /// Desktop has no text selection handles.
+  /// Gets the position for the text selection handles, but desktop has none.
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
@@ -78,7 +74,7 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-    this.lastTapDownPosition,
+    required this.lastTapDownPosition,
   }) : super(key: key);
 
   final ClipboardStatusNotifier? clipboardStatus;
@@ -162,8 +158,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
 
     final Offset midpointAnchor = Offset(
       (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
-        _kArrowScreenPadding + mediaQuery.padding.left,
-        mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
+        mediaQuery.padding.left,
+        mediaQuery.size.width - mediaQuery.padding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );

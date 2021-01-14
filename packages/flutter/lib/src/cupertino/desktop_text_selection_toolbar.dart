@@ -19,24 +19,6 @@ const Color _kToolbarBorderColor = Color(0xFF505152);
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
 const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
 
-/// The type for a Function that builds a toolbar's container with the given
-/// child.
-///
-/// The anchor is provided in global coordinates.
-///
-/// See also:
-///
-///   * [CupertinoDesktopTextSelectionToolbar.toolbarBuilder], which is of this type.
-///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but for a
-///     mobile Cupertino-style toolbar.
-///   * [TextSelectionToolbar.toolbarBuilder], which is similar, but for a
-///     Material-style toolbar.
-typedef CupertinoDesktopToolbarBuilder = Widget Function(
-  BuildContext context,
-  Offset anchor,
-  Widget child,
-);
-
 /// A Mac-style text selection toolbar.
 ///
 /// Typically displays buttons for text manipulation, e.g. copying and pasting
@@ -68,19 +50,19 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.TextSelectionToolbar.children}
   ///
   /// See also:
-  ///   * [CupertinoTextSelectionToolbarButton], which builds a default
-  ///     Cupertino-style text selection toolbar text button.
+  ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
+  ///     Mac-style text selection toolbar text button.
   final List<Widget> children;
 
   /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
   ///
   /// The given anchor and isAbove can be used to position an arrow, as in the
   /// default Cupertino toolbar.
-  final CupertinoDesktopToolbarBuilder toolbarBuilder;
+  final ToolbarBuilder toolbarBuilder;
 
   // Builds a toolbar just like the default Mac toolbar, with the right color
   // background, padding, and rounded corners.
-  static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, Widget child) {
+  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return Container(
       width: _kToolbarWidth,
       decoration: BoxDecoration(
@@ -121,7 +103,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         delegate: _DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: toolbarBuilder(context, anchor, Column(
+        child: toolbarBuilder(context, Column(
           mainAxisSize: MainAxisSize.min,
           children: children,
         )),

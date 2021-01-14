@@ -593,10 +593,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         break;
 
       case TargetPlatform.macOS:
-        // TODO(justinmc): De-duplicate some of this stuff with iOS above, or
-        // customize it.
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
-        forcePressEnabled = true;
+        forcePressEnabled = false;
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
