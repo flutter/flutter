@@ -265,7 +265,6 @@ def to_gn_args(args):
       # Skia has Metal support on macOS version >= 10.14.
       MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION = '10.14'
       gn_args['mac_sdk_min'] = MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION
-      gn_args['mac_deployment_target'] = MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION
 
     if args.enable_vulkan:
       # Enable vulkan in the Flutter shell.
