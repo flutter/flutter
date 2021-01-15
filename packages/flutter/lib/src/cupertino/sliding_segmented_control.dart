@@ -79,9 +79,9 @@ const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
-class _Segment extends StatefulWidget {
+class _Segment<T> extends StatefulWidget {
   const _Segment({
-    required GlobalKey key,
+    required ValueKey<T> key,
     required this.child,
     required this.pressed,
     required this.highlighted,
@@ -101,10 +101,10 @@ class _Segment extends StatefulWidget {
   bool get shouldScaleContent => pressed && highlighted && isDragging;
 
   @override
-  _SegmentState createState() => _SegmentState();
+  _SegmentState<T> createState() => _SegmentState<T>();
 }
 
-class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segment> {
+class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<_Segment<T>> {
   late final AnimationController highlightPressScaleController;
   late Animation<double> highlightPressScaleAnimation;
 
@@ -123,7 +123,7 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
   }
 
   @override
-  void didUpdateWidget(_Segment oldWidget) {
+  void didUpdateWidget(_Segment<T> oldWidget) {
     assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
 
@@ -136,6 +136,12 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
       );
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
     }
+  }
+
+  @override
+  void dispose() {
+    highlightPressScaleController.dispose();
+    super.dispose();
   }
 
   @override
@@ -178,28 +184,22 @@ class _SegmentState extends State<_Segment> with TickerProviderStateMixin<_Segme
       ),
     );
   }
-
-  @override
-  void dispose() {
-    highlightPressScaleController.dispose();
-    super.dispose();
-  }
 }
 
 // Fadeout the separator when either adjacent segment is highlighted.
-class _SegmentSeparator<T> extends StatefulWidget {
+class _SegmentSeparator extends StatefulWidget {
   const _SegmentSeparator({
-    required ValueKey<T> key,
+    required ValueKey<int> key,
     required this.highlighted,
   }) : super(key: key);
 
   final bool highlighted;
 
   @override
-  _SegmentSeparatorState<T> createState() => _SegmentSeparatorState<T>();
+  _SegmentSeparatorState createState() => _SegmentSeparatorState();
 }
 
-class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerProviderStateMixin<_SegmentSeparator<T>>  {
+class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProviderStateMixin<_SegmentSeparator>  {
   late final AnimationController separatorOpacityController;
 
   @override
@@ -214,7 +214,7 @@ class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerP
   }
 
   @override
-  void didUpdateWidget(_SegmentSeparator<T> oldWidget) {
+  void didUpdateWidget(_SegmentSeparator oldWidget) {
     assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
 
@@ -254,7 +254,6 @@ class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerP
   }
 }
 
-
 /// An iOS 13 style segmented control.
 ///
 /// Displays the widgets provided in the [Map] of [children] in a horizontal list.
@@ -269,7 +268,7 @@ class _SegmentSeparatorState<T> extends State<_SegmentSeparator<T>> with TickerP
 /// the keys will determine the order of the widgets in the segmented control.
 ///
 /// The widget calls the [onValueChanged] callback *when a valid user gesture
-/// completes on a unselected segment*. The map key associated with the newly
+/// completes on an unselected segment*. The map key associated with the newly
 /// selected widget is returned in the [onValueChanged] callback. Typically,
 /// widgets that use a segmented control will listen for the [onValueChanged]
 /// callback and rebuild the segmented control with a new [groupValue] to update
@@ -409,9 +408,6 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
 class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
-  // Keys of segments, unordered.
-  final Map<T, GlobalKey> childKeys = <T, GlobalKey>{};
-
   late final AnimationController thumbController = AnimationController(duration: _kSpringAnimationDuration, value: 0, vsync: this);
   Animatable<Rect?>? thumbAnimatable;
 
@@ -459,13 +455,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       thumbAnimatable = null;
       highlighted = widget.groupValue;
     }
-
-    // Remove the GlobalKeys to the children that are no longer present. New
-    // keys will be inserted in the build method.
-    for (final T oldKey in oldWidget.children.keys) {
-      if (!widget.children.containsKey(oldKey))
-        childKeys.remove(oldKey);
-    }
   }
 
   @override
@@ -491,6 +480,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   // them from interfering with the active drag gesture.
   bool get isThumbDragging => _startedOnSelectedSegment ?? false;
 
+  // Converts local coordinate to segments. This method assumes each segment has
+  // the same width.
   T segmentForXPosition(double dx) {
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     final int numOfChildren = widget.children.length;
@@ -506,14 +497,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         break;
     }
 
-    assert(index < widget.children.length);
-    for (final T key in widget.children.keys) {
-      if (index == 0)
-        return key;
-      index -= 1;
-    }
-    assert(false);
-    return widget.children.keys.first;
+    return widget.children.keys.elementAt(index);
   }
 
   bool _hasDraggedTooFar(DragUpdateDetails details) {
@@ -622,9 +606,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     _startedOnSelectedSegment = null;
   }
 
-  // The segment the sliding thumb is currently located, or animating to. It may
-  // have a different value from widget.groupValue, since this widget does not
-  // report a selection change via `onValueChanged` until the user stops
+  // The segment the sliding thumb is currently located at, or animating to. It
+  // may have a different value from widget.groupValue, since this widget does
+  // not report a selection change via `onValueChanged` until the user stops
   // interacting with the widget (onTapUp). For example, the user can drag the
   // thumb around, and the `onValueChanged` callback will not be invoked until
   // the thumb is let go.
@@ -649,8 +633,10 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
       if (index != 0) {
         children.add(
-          _SegmentSeparator<T>(
-            key: ValueKey<T>(entry.key),
+          _SegmentSeparator(
+            // Let separators be TextDirection-invariant. If the TextDirection
+            // changes, the separators should mostly stay where they were.
+            key: ValueKey<int>(index),
             highlighted: isPreviousSegmentHighlighted || isHighlighted,
           ),
         );
@@ -662,8 +648,8 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           onTap: () { widget.onValueChanged(entry.key); },
           inMutuallyExclusiveGroup: true,
           selected: widget.groupValue == entry.key,
-          child: _Segment(
-            key: childKeys.putIfAbsent(entry.key, () => GlobalKey()),
+          child: _Segment<T>(
+            key: ValueKey<T>(entry.key),
             highlighted: isHighlighted,
             pressed: pressed == entry.key,
             isDragging: isThumbDragging,
