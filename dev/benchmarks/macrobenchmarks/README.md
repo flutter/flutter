@@ -55,6 +55,7 @@ The key `[test_name]` can be:
 - `post_backdrop_filter_perf`
 - `simple_animation_perf`
 - `textfield_perf`
+- `fullscreen_textfield_perf`
 
 ### E2E benchmarks
 
