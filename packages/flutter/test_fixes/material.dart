@@ -26,4 +26,54 @@ void main() {
   buildContext.ancestorStateOfType(TypeMatcher<targetType>());
   buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
   buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme textTheme = TextTheme(
+    display4: displayStyle4,
+    display3: displayStyle3,
+    display2: displayStyle2,
+    display1: displayStyle1,
+    headline: headlineStyle,
+    title: titleStyle,
+    subhead: subheadStyle,
+    body2: body2Style,
+    body1: body1Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    subtitle: subtitleStyle,
+    overline: overlineStyle,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    display4: displayStyle4,
+    display3: displayStyle3,
+    display2: displayStyle2,
+    display1: displayStyle1,
+    headline: headlineStyle,
+    title: titleStyle,
+    subhead: subheadStyle,
+    body2: body2Style,
+    body1: body1Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    subtitle: subtitleStyle,
+    overline: overlineStyle,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var style;
+  style = textTheme.display4;
+  style = textTheme.display3;
+  style = textTheme.display2;
+  style = textTheme.display1;
+  style = textTheme.headline;
+  style = textTheme.title;
+  style = textTheme.subhead;
+  style = textTheme.body2;
+  style = textTheme.body1;
+  style = textTheme.caption;
+  style = textTheme.button;
+  style = textTheme.subtitle;
+  style = textTheme.overline;
 }
