@@ -134,6 +134,7 @@ void main() {
         const FakeCommand(command: <String>[
           flutterBin,
           'precache',
+          '--android',
           '--ios',
           '--macos',
         ]),
@@ -218,6 +219,7 @@ void main() {
         const FakeCommand(command: <String>[
           flutterBin,
           'precache',
+          '--android',
           '--ios',
           '--macos',
         ]),
@@ -302,6 +304,7 @@ void main() {
         const FakeCommand(command: <String>[
           flutterBin,
           'precache',
+          '--android',
           '--ios',
           '--macos',
         ]),
@@ -358,6 +361,7 @@ void main() {
         const FakeCommand(command: <String>[
           flutterBin,
           'precache',
+          '--android',
           '--ios',
           '--macos',
         ]),
