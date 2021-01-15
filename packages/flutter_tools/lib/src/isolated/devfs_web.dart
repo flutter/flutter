@@ -707,9 +707,9 @@ class WebDevFS implements DevFS {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', '');
+      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
     } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', '');
+      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
     }
     return _baseUri;
   }
