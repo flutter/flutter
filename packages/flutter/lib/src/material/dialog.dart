@@ -962,8 +962,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// This sample demonstrates how to create a restorable Material dialog. This is
 /// accomplished by enabling state restoration by specifying
-/// `MaterialApp.restorationScopeId` and using `Navigator.restorablePush` to
-/// push `DialogRoute` when the button is tapped.
+/// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [DialogRoute] when the button is tapped.
 ///
 /// To test this out:
 ///   1. Turn on "Don't keep activities", which destroys the Android activity

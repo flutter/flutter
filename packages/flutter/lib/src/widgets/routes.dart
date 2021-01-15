@@ -1881,6 +1881,87 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// ### State Restoration in Dialogs
+///
+/// Using this method with not enable state restoration for the dialog. In order
+/// to enable state restoration for a dialog, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [RawDialogRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable dialog. This is
+/// accomplished by enabling state restoration by specifying
+/// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [RawDialogRoute] when the button is tapped.
+///
+/// To test this out:
+///   1. Turn on "Don't keep activities", which destroys the Android activity
+///      as soon as the user leaves it. This option should become available
+///      when Developer options are turned on for the device.
+///   2. Run the code sample on an Android device.
+///   3. Tap the button to open the dialog.
+///   4. Background the Flutter app, then return to it, noting that the dialog
+///      remains open.
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return WidgetsApp(
+///       restorationScopeId: 'app',
+///       home: MyHomePage(title: 'Restorable Routes Demo'),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatefulWidget {
+///   MyHomePage({this.title});
+///
+///   final String title;
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> {
+///   static Route _dialogBuilder(BuildContext context, Object arguments) {
+///     return RawDialogRoute(
+///       context: context,
+///       builder: (BuildContext context) => AlertDialog(title: Text('Alert!')),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///       ),
+///       body: Center(
+///         child: OutlineButton(
+///           onPressed: () {
+///             Navigator.of(context).restorablePush(_dialogBuilder);
+///           },
+///           child: Text('Open Dialog'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDialog], which displays a Material-style dialog.
