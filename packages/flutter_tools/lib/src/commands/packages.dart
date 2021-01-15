@@ -291,7 +291,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
       // HACK: Supporting old flutter specific behavior
       if (argResults.rest.length == 1) {
         target = findProjectRoot(argResults.rest[0]);
-      } 
+      }
       if (target == null) {
         throwToolExit(
           'Expected to find project root in '
