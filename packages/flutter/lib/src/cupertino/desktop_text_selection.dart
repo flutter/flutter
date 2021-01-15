@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
@@ -124,31 +123,26 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   @override
   void initState() {
     super.initState();
-    _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-    _clipboardStatus.addListener(_onChangedClipboardStatus);
-    _clipboardStatus.update();
+    if (widget.handlePaste != null) {
+      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
+      _clipboardStatus.addListener(_onChangedClipboardStatus);
+      _clipboardStatus.update();
+    }
   }
 
   @override
   void didUpdateWidget(_CupertinoDesktopTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
-      _clipboardStatus.removeListener(_onChangedClipboardStatus);
-      _clipboardStatus.dispose();
-      _clipboardStatus = widget.clipboardStatus!;
-    } else if (oldWidget.clipboardStatus != null) {
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus = ClipboardStatusNotifier();
-        _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus!.removeListener(_onChangedClipboardStatus);
-      } else if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-        _clipboardStatus = widget.clipboardStatus!;
-        _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus!.removeListener(_onChangedClipboardStatus);
+    if (oldWidget.clipboardStatus != widget.clipboardStatus) {
+      if (_clipboardStatus != null) {
+        _clipboardStatus.removeListener(_onChangedClipboardStatus);
+        _clipboardStatus.dispose();
       }
-    }
-    if (widget.handlePaste != null) {
-      _clipboardStatus.update();
+      _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
+      _clipboardStatus.addListener(_onChangedClipboardStatus);
+      if (widget.handlePaste != null) {
+        _clipboardStatus.update();
+      }
     }
   }
 
@@ -168,8 +162,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null
-        && _clipboardStatus.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && _clipboardStatus.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
