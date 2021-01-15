@@ -11,6 +11,52 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: 'Migrate to clipBehavior'
+    date: 2020-09-22
+    element:
+      uris: [ 'widgets.dart' ]
+      field: 'overflow'
+      inClass: 'Stack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: 'Migrate to clipBehavior'
+    date: 2020-09-22
+    element:
+      uris: [ 'widgets.dart' ]
+      constructor: ''
+      inClass: 'Stack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
   # Change made in https://github.com/flutter/flutter/pull/44189.
   - title: 'Rename to dependOnInheritedElement'
     date: 2019-11-22
