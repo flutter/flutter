@@ -47,7 +47,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
-    Offset? lastTapDownPosition,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
@@ -58,7 +58,7 @@ class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       selectionMidpoint: selectionMidpoint,
-      lastTapDownPosition: lastTapDownPosition,
+      lastSecondaryTapDownPosition: lastSecondaryTapDownPosition,
       textLineHeight: textLineHeight,
     );
   }
@@ -93,7 +93,7 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.handleSelectAll,
     required this.selectionMidpoint,
     required this.textLineHeight,
-    required this.lastTapDownPosition,
+    required this.lastSecondaryTapDownPosition,
   }) : super(key: key);
 
   final ClipboardStatusNotifier? clipboardStatus;
@@ -103,7 +103,7 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
   final VoidCallback? handleCut;
   final VoidCallback? handlePaste;
   final VoidCallback? handleSelectAll;
-  final Offset? lastTapDownPosition;
+  final Offset? lastSecondaryTapDownPosition;
   final Offset selectionMidpoint;
   final double textLineHeight;
 
@@ -217,7 +217,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     return _CupertinoDesktopTextSelectionToolbar(
-      anchor: widget.lastTapDownPosition ?? midpointAnchor,
+      anchor: widget.lastSecondaryTapDownPosition ?? midpointAnchor,
       children: items,
     );
   }

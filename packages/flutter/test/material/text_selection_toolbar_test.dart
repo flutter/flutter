@@ -24,7 +24,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
-    Offset? lastTapDownPosition,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1

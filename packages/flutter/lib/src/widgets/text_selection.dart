@@ -142,7 +142,7 @@ abstract class TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
-    Offset? lastTapDownPosition,
+    Offset? lastSecondaryTapDownPosition,
   );
 
   /// Returns the size of the selection handle.
@@ -907,7 +907,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
-  /// Returns true iff lastTapDownPosition was on selection.
+  /// Returns true iff lastSecondaryTapDownPosition was on selection.
   bool get _lastSecondaryTapWasOnSelection {
     assert(renderEditable.lastSecondaryTapDownPosition != null);
     if (renderEditable.selection == null) {

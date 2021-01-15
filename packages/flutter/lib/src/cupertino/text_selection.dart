@@ -230,7 +230,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
-    Offset? lastTapDownPosition,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
