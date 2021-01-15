@@ -43,6 +43,7 @@ void main() {
         '--no-signatures',
       ]);
     } on ConductorException catch (e) {
+      print(stdio.error);
       print(fixItInstructions);
       fail(e.message);
     } on Exception {

@@ -117,7 +117,7 @@ class CodesignCommand extends Command<void> {
     framework.checkout(revision);
 
     // Ensure artifacts present
-    framework.runFlutter(<String>['precache', '--ios', '--macos']);
+    framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
 
     verifyExist();
     if (argResults[kSignatures] as bool) {
