@@ -99,7 +99,7 @@ class GradientSweep extends EngineGradient {
         'float st = angle;');
 
     final String probeName =
-    _writeSharedGradientShader(builder, method, gradient, tileMode);
+    _writeSharedGradientShader(builder, method, gradient, tileMode, false);
     method.addStatement('${fragColor.name} = ${probeName} * scale + bias;');
 
     String shader = builder.build();
@@ -273,7 +273,7 @@ class GradientLinear extends EngineGradient {
             'u_resolution.y - gl_FragCoord.y, 0, 1) * m_gradient;');
     method.addStatement('float st = localCoord.x;');
     final String probeName =
-        _writeSharedGradientShader(builder, method, gradient, tileMode);
+        _writeSharedGradientShader(builder, method, gradient, tileMode, true);
     method.addStatement('${fragColor.name} = ${probeName} * scale + bias;');
     String shader = builder.build();
     return shader;
@@ -311,7 +311,7 @@ void _addColorStopsToCanvasGradient(html.CanvasGradient gradient,
 String _writeSharedGradientShader(ShaderBuilder builder,
     ShaderMethod method,
     NormalizedGradient gradient,
-    ui.TileMode tileMode) {
+    ui.TileMode tileMode, bool shiftOrigin) {
   method.addStatement('vec4 bias;');
   method.addStatement('vec4 scale;');
   // Write uniforms for each threshold, bias and scale.
@@ -331,11 +331,18 @@ String _writeSharedGradientShader(ShaderBuilder builder,
     case ui.TileMode.decal:
       break;
     case ui.TileMode.repeated:
-      method.addStatement('float tiled_st = fract(st);');
+      // st represents our distance from center. Flutter maps the center to
+      // center of gradient ramp so we need to add 0.5 to make sure repeated
+      // pattern center is at origin.
+      method.addStatement(shiftOrigin ?
+          'float tiled_st = fract(st + 0.5);'
+          : 'float tiled_st = fract(st);');
       probeName = 'tiled_st';
       break;
     case ui.TileMode.mirror:
-      method.addStatement('float t_1 = (st - 1.0);');
+      method.addStatement(shiftOrigin ?
+          'float t_1 = (st - 0.5);'
+          : 'float t_1 = (st - 1.0);');
       method.addStatement(
           'float tiled_st = abs((t_1 - 2.0 * floor(t_1 * 0.5)) - 1.0);');
       probeName = 'tiled_st';
@@ -446,7 +453,7 @@ class GradientRadial extends EngineGradient {
     method.addStatement(''
         'float st = abs(dist / u_radius);');
     final String probeName =
-      _writeSharedGradientShader(builder, method, gradient, tileMode);
+      _writeSharedGradientShader(builder, method, gradient, tileMode, false);
     method.addStatement('${fragColor.name} = ${probeName} * scale + bias;');
     String shader = builder.build();
     return shader;
