@@ -248,7 +248,7 @@ class FlutterDevice {
         try {
           service = await connectToVmService(observatoryUri);
           service.dispose();
-        } on Exception catch(exception) {
+        } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
           if (!completer.isCompleted && !_isListeningForObservatoryUri) {
             completer.completeError('failed to connect to $observatoryUri');
