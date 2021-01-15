@@ -1252,14 +1252,8 @@ Future<T?> showCupertinoDialog<T>({
 /// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null`, the default
-/// color `Colors.black54` is used.
-///
-/// The `useSafeArea` argument is used to indicate if the dialog should only
-/// display in 'safe' areas of the screen not used by the operating system
-/// (see [SafeArea] for more details). It is `true` by default, which means
-/// the dialog will not overlap operating system areas. If it is set to `false`
-/// the dialog will only be constrained by the screen size. It can not be `null`.
+/// barrier that darkens everything below the dialog. If `null`, then
+/// [CupertinoDynamicColor.resolve] is used to compute the modal color.
 ///
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
