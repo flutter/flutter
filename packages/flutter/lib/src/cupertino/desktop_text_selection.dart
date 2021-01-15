@@ -112,7 +112,7 @@ class _CupertinoDesktopTextSelectionControlsToolbar extends StatefulWidget {
 }
 
 class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_CupertinoDesktopTextSelectionControlsToolbar> {
-  late ClipboardStatusNotifier _clipboardStatus;
+  ClipboardStatusNotifier? _clipboardStatus;
 
   void _onChangedClipboardStatus() {
     setState(() {
@@ -125,8 +125,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     super.initState();
     if (widget.handlePaste != null) {
       _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus.addListener(_onChangedClipboardStatus);
-      _clipboardStatus.update();
+      _clipboardStatus!.addListener(_onChangedClipboardStatus);
+      _clipboardStatus!.update();
     }
   }
 
@@ -135,13 +135,13 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
       if (_clipboardStatus != null) {
-        _clipboardStatus.removeListener(_onChangedClipboardStatus);
-        _clipboardStatus.dispose();
+        _clipboardStatus!.removeListener(_onChangedClipboardStatus);
+        _clipboardStatus!.dispose();
       }
       _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-      _clipboardStatus.addListener(_onChangedClipboardStatus);
+      _clipboardStatus!.addListener(_onChangedClipboardStatus);
       if (widget.handlePaste != null) {
-        _clipboardStatus.update();
+        _clipboardStatus!.update();
       }
     }
   }
@@ -151,10 +151,10 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     super.dispose();
     // When used in an Overlay, this can be disposed after its creator has
     // already disposed _clipboardStatus.
-    if (!_clipboardStatus.disposed) {
-      _clipboardStatus.removeListener(_onChangedClipboardStatus);
+    if (_clipboardStatus != null && !_clipboardStatus!.disposed) {
+      _clipboardStatus!.removeListener(_onChangedClipboardStatus);
       if (widget.clipboardStatus == null) {
-        _clipboardStatus.dispose();
+        _clipboardStatus!.dispose();
       }
     }
   }
@@ -162,7 +162,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null && _clipboardStatus.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && _clipboardStatus!.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
@@ -204,7 +204,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
     }
     if (widget.handlePaste != null
-        && _clipboardStatus.value == ClipboardStatus.pasteable) {
+        && _clipboardStatus!.value == ClipboardStatus.pasteable) {
       addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
     }
     if (widget.handleSelectAll != null) {

@@ -7144,7 +7144,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets(
     'double click after a click on Mac',
@@ -7266,7 +7266,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('double click chains work', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -7474,7 +7474,7 @@ void main() {
     expect(controller.value.selection, isNotNull);
     expect(controller.value.selection.baseOffset, 0);
     expect(controller.value.selection.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
 
   testWidgets('selecting a space selects the space on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
