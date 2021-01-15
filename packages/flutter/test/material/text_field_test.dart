@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -14,8 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
+import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
-import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import 'feedback_tester.dart';
 
 class MockClipboard {
@@ -166,6 +167,78 @@ void main() {
       ),
     );
   }
+
+  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    // Initially, the menu is not shown and there is no selection.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+    final Offset midBlah1 = textOffsetToPosition(tester, 2);
+
+    // Right clicking shows the menu.
+    final TestGesture gesture = await tester.startGesture(
+      midBlah1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+
+    // Copy the first word.
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+    expect(controller.text, 'blah1 blah2');
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 5));
+    expect(find.byType(CupertinoButton), findsNothing);
+
+    // Paste it at the end.
+    await gesture.down(textOffsetToPosition(tester, controller.text.length));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.selection, const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream));
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsOneWidget);
+    await tester.tap(find.text('Paste'));
+    await tester.pumpAndSettle();
+    expect(controller.text, 'blah1 blah2blah1');
+    expect(controller.selection, const TextSelection(baseOffset: 16, extentOffset: 16));
+
+    // Cut the first word.
+    await gesture.down(midBlah1);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    await tester.tap(find.text('Cut'));
+    await tester.pumpAndSettle();
+    expect(controller.text, ' blah2blah1');
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
+    expect(find.byType(CupertinoButton), findsNothing);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     final VoidCallback onEditingComplete = () { };
