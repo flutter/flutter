@@ -7,9 +7,21 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'desktop_text_selection_toolbar.dart';
-import 'desktop_text_selection_toolbar_button.dart';
+import 'button.dart';
+import 'colors.dart';
 import 'localizations.dart';
+import 'theme.dart';
+
+// Minimal padding from all edges of the selection toolbar to all edges of the
+// screen.
+const double _kToolbarScreenPadding = 8.0;
+
+// These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
+// a Macbook Pro.
+const double _kToolbarWidth = 222.0;
+const Color _kToolbarBorderColor = Color(0xFF505152);
+const Radius _kToolbarBorderRadius = Radius.circular(4.0);
+const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
 
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
@@ -177,7 +189,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
         items.add(onePhysicalPixelVerticalDivider);
       }
 
-      items.add(CupertinoDesktopTextSelectionToolbarButton.text(
+      items.add(_CupertinoDesktopTextSelectionToolbarButton.text(
         onPressed: onPressed,
         text: text,
       ));
@@ -202,9 +214,232 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    return CupertinoDesktopTextSelectionToolbar(
+    return _CupertinoDesktopTextSelectionToolbar(
       anchor: widget.lastTapDownPosition ?? midpointAnchor,
       children: items,
+    );
+  }
+}
+
+/// A Mac-style text selection toolbar.
+///
+/// Typically displays buttons for text manipulation, e.g. copying and pasting
+/// text.
+///
+/// Tries to position itself as closesly as possible to [anchor] while remaining
+/// fully on-screen.
+///
+/// See also:
+///
+///  * [TextSelectionControls.buildToolbar], where this is used by default to
+///    build a Mac-style toolbar.
+///  * [TextSelectionToolbar], which is similar, but builds an Android-style
+///    toolbar.
+class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
+  /// Creates an instance of CupertinoTextSelectionToolbar.
+  const _CupertinoDesktopTextSelectionToolbar({
+    Key? key,
+    required this.anchor,
+    required this.children,
+    this.toolbarBuilder = _defaultToolbarBuilder,
+  }) : assert(children.length > 0),
+       super(key: key);
+
+  /// The point at which the toolbar will attempt to position itself as closely
+  /// as possible.
+  final Offset anchor;
+
+  /// {@macro flutter.material.TextSelectionToolbar.children}
+  ///
+  /// See also:
+  ///   * [CupertinoDesktopTextSelectionToolbarButton], which builds a default
+  ///     Mac-style text selection toolbar text button.
+  final List<Widget> children;
+
+  /// {@macro flutter.material.TextSelectionToolbar.toolbarBuilder}
+  ///
+  /// The given anchor and isAbove can be used to position an arrow, as in the
+  /// default Cupertino toolbar.
+  final ToolbarBuilder toolbarBuilder;
+
+  // Builds a toolbar just like the default Mac toolbar, with the right color
+  // background, padding, and rounded corners.
+  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
+    return Container(
+      width: _kToolbarWidth,
+      decoration: BoxDecoration(
+        color: _kToolbarBackgroundColor,
+        border: Border.all(
+          color: _kToolbarBorderColor,
+        ),
+        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 0.0,
+          // This value was measured from a screenshot of TextEdit on MacOS
+          // 10.15.7 on a Macbook Pro.
+          vertical: 3.0,
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+
+    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        _kToolbarScreenPadding,
+        paddingAbove,
+        _kToolbarScreenPadding,
+        _kToolbarScreenPadding,
+      ),
+      child: CustomSingleChildLayout(
+        delegate: _DesktopTextSelectionToolbarLayoutDelegate(
+          anchor: anchor - localAdjustment,
+        ),
+        child: toolbarBuilder(context, Column(
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        )),
+      ),
+    );
+  }
+}
+
+// Positions the toolbar at [anchor] if it fits, otherwise moves it so that it
+// just fits fully on-screen.
+//
+// See also:
+//
+//   * [CupertinoDesktopTextSelectionToolbar], which uses this to position itself.
+//   * [TextSelectionToolbarLayoutDelegate], which does a similar layout for
+//     the mobile text selection toolbars.
+class _DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
+  /// Creates an instance of TextSelectionToolbarLayoutDelegate.
+  _DesktopTextSelectionToolbarLayoutDelegate({
+    required this.anchor,
+  });
+
+  /// The point at which to render the menu, if possible.
+  ///
+  /// Should be provided in local coordinates.
+  final Offset anchor;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.loosen();
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final Offset overhang = Offset(
+      anchor.dx + childSize.width - size.width,
+      anchor.dy + childSize.height - size.height,
+    );
+    return Offset(
+      overhang.dx > 0.0 ? anchor.dx - overhang.dx : anchor.dx,
+      overhang.dy > 0.0 ? anchor.dy - overhang.dy : anchor.dy,
+    );
+  }
+
+  @override
+  bool shouldRelayout(_DesktopTextSelectionToolbarLayoutDelegate oldDelegate) {
+    return anchor != oldDelegate.anchor;
+  }
+}
+
+// These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
+// a Macbook Pro.
+const TextStyle _kToolbarButtonFontStyle = TextStyle(
+  inherit: false,
+  fontSize: 14.0,
+  letterSpacing: -0.15,
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.white,
+);
+
+// This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
+// Macbook Pro.
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
+  20.0,
+  0.0,
+  20.0,
+  3.0,
+);
+
+/// A button in the style of the Mac context menu buttons.
+class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
+  /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
+  const _CupertinoDesktopTextSelectionToolbarButton({
+    Key? key,
+    required this.onPressed,
+    required this.child,
+  }) : super(key: key);
+
+  /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] whose child is
+  /// a [Text] widget styled like the default Mac context menu button.
+  _CupertinoDesktopTextSelectionToolbarButton.text({
+    Key? key,
+    required this.onPressed,
+    required String text,
+  }) : child = Text(
+         text,
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle,
+       ),
+       super(key: key);
+
+  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.onPressed}
+  final VoidCallback onPressed;
+
+  /// {@macro flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
+  final Widget child;
+
+  @override
+  _CupertinoDesktopTextSelectionToolbarButtonState createState() => _CupertinoDesktopTextSelectionToolbarButtonState();
+}
+
+class _CupertinoDesktopTextSelectionToolbarButtonState extends State<_CupertinoDesktopTextSelectionToolbarButton> {
+  bool _isHovered = false;
+
+  void _onEnter(PointerEnterEvent event) {
+    setState(() {
+      _isHovered = true;
+    });
+  }
+
+  void _onExit(PointerExitEvent event) {
+    setState(() {
+      _isHovered = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: MouseRegion(
+        onEnter: _onEnter,
+        onExit: _onExit,
+        child: CupertinoButton(
+          alignment: Alignment.centerLeft,
+          borderRadius: null,
+          color: _isHovered ? CupertinoTheme.of(context).primaryColor : null,
+          minSize: 0.0,
+          onPressed: widget.onPressed,
+          padding: _kToolbarButtonPadding,
+          pressedOpacity: 0.7,
+          child: widget.child,
+        ),
+      ),
     );
   }
 }
