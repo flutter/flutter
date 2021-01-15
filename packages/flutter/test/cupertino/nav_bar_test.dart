@@ -93,6 +93,36 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
+  testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigator,
+        home: const CupertinoNavigationBar(
+          middle: Text('Page 1'),
+        ),
+      ),
+    );
+    navigator.currentState!.push<void>(CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoNavigationBar(
+            middle: Text('Page 2'),
+          );
+        }
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
+    // Pops the page 2
+    navigator.currentState!.pop();
+    await tester.pump();
+    // Needs another pump to trigger the rebuild;
+    await tester.pump();
+    // The back button should still persist;
+    expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
+    // The app does not crash
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Can specify custom padding', (WidgetTester tester) async {
     final Key middleBox = GlobalKey();
     await tester.pumpWidget(
