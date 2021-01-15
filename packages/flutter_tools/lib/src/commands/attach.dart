@@ -287,7 +287,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             hostPort: hostVmservicePort,
           );
         globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        // This returns multiple URIs!
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
