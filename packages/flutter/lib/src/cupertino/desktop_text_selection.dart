@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
@@ -21,7 +22,14 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarWidth = 222.0;
 const Color _kToolbarBorderColor = Color(0xFF505152);
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
-const Color _kToolbarBackgroundColor = Color(0xFF2D2E31);
+
+// These values were measured from a screenshot of TextEdit on MacOS 10.16 on a
+// Macbook Pro.
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xffECE8E6),
+  darkColor: Color(0xff302928),
+);
+
 
 class _CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
@@ -190,6 +198,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       }
 
       items.add(_CupertinoDesktopTextSelectionToolbarButton.text(
+        context: context,
         onPressed: onPressed,
         text: text,
       ));
@@ -268,7 +277,7 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     return Container(
       width: _kToolbarWidth,
       decoration: BoxDecoration(
-        color: _kToolbarBackgroundColor,
+        color: _kToolbarBackgroundColor.resolveFrom(context),
         border: Border.all(
           color: _kToolbarBorderColor,
         ),
@@ -363,7 +372,6 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontSize: 14.0,
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
-  color: CupertinoColors.white,
 );
 
 // This value was measured from a screenshot of TextEdit on MacOS 10.15.7 on a
@@ -388,12 +396,18 @@ class _CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// a [Text] widget styled like the default Mac context menu button.
   _CupertinoDesktopTextSelectionToolbarButton.text({
     Key? key,
+    required BuildContext context,
     required this.onPressed,
     required String text,
   }) : child = Text(
          text,
          overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: const CupertinoDynamicColor.withBrightness(
+             color: CupertinoColors.black,
+             darkColor: CupertinoColors.white,
+           ).resolveFrom(context),
+         ),
        ),
        super(key: key);
 
