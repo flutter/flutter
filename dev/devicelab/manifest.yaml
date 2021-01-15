@@ -506,12 +506,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
 
-  smoke_catalina_hot_mode_dev_cycle__benchmark:
-    description: >
-      A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
-    stage: devicelab
-    required_agent_capabilities: ["mac-catalina/android"]
-
   # macOS target platform tests
   hot_mode_dev_cycle_macos_target__benchmark:
     description: >
