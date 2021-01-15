@@ -485,22 +485,13 @@ abstract class Route<T> {
   bool get hasActiveRouteBelow {
     if (_navigator == null)
       return false;
-    bool seenActiveRoute = false;
-    bool exitOnActiveOrSelf(_RouteEntry? e) {
-      assert(e != null);
-      if (e!.route == this)
+    for (final _RouteEntry entry in _navigator!._history) {
+      if (entry.route == this)
+        return false;
+      if (_RouteEntry.isPresentPredicate(entry))
         return true;
-      if (_RouteEntry.isPresentPredicate(e)) {
-        seenActiveRoute = true;
-        return true;
-      }
-      return false;
     }
-    _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      exitOnActiveOrSelf,
-      orElse: () => null,
-    );
-    return seenActiveRoute;
+    return false;
   }
 
   /// Whether this route is on the navigator.
