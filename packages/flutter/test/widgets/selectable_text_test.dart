@@ -1937,7 +1937,6 @@ void main() {
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
           ],
           flags: <SemanticsFlag>[
@@ -1963,7 +1962,6 @@ void main() {
           value: 'Guten Tag',
           textSelection: const TextSelection.collapsed(offset: 9),
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -1990,7 +1988,6 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 4),
           value: 'Guten Tag',
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
@@ -2019,7 +2016,6 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 0),
           value: 'Guten Tag',
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.moveCursorForwardByWord,
@@ -2062,7 +2058,6 @@ void main() {
           value: 'Guten Tag',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             // Absent the following because enableInteractiveSelection: false
             // SemanticsAction.moveCursorBackwardByCharacter,
@@ -2108,7 +2103,6 @@ void main() {
           value: 'Hello',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
           ],
           flags: <SemanticsFlag>[
@@ -2135,7 +2129,6 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 5),
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -2162,7 +2155,6 @@ void main() {
           textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
@@ -2218,7 +2210,6 @@ void main() {
           textSelection: const TextSelection.collapsed(offset: 5),
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -2265,7 +2256,6 @@ void main() {
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
-            SemanticsAction.tap,
             SemanticsAction.longPress,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
@@ -2315,7 +2305,7 @@ void main() {
               SemanticsFlag.isTextField,
               SemanticsFlag.isMultiline,
             ],
-            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.longPress],
+            actions: <SemanticsAction>[SemanticsAction.longPress],
             value: testValue,
             textDirection: TextDirection.ltr,
           ),
@@ -2324,7 +2314,7 @@ void main() {
       ignoreRect: true, ignoreTransform: true,
     ));
 
-    semanticsOwner.performAction(inputFieldId, SemanticsAction.tap);
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.longPress);
     await tester.pump();
 
     expect(semantics, hasSemantics(
@@ -2339,7 +2329,6 @@ void main() {
               SemanticsFlag.isFocused,
             ],
             actions: <SemanticsAction>[
-              SemanticsAction.tap,
               SemanticsAction.longPress,
               SemanticsAction.moveCursorBackwardByCharacter,
               SemanticsAction.moveCursorBackwardByWord,

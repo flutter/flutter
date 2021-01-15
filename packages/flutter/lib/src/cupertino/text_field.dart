@@ -1186,7 +1186,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     return Semantics(
       enabled: enabled,
-      onTap: !enabled ? null : () {
+      onTap: !enabled || widget.readOnly ? null : () {
         if (!controller.selection.isValid) {
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }

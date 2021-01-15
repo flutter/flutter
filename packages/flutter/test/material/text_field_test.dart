@@ -3944,6 +3944,27 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Readonly text field does not have tap action', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLength: 10,
+              readOnly: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+
+    semantics.dispose();
+  });
+
   testWidgets('Disabled text field hides helper and counter', (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
