@@ -1,4 +1,4 @@
-Signature: b7ef476595339efadb1e84cd3a461e49
+Signature: b53f0aca18fadfbaa1872d7dbf55697d
 
 UNUSED LICENSES:
 
@@ -549,6 +549,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
@@ -1264,6 +1266,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
@@ -1876,6 +1880,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
@@ -2293,6 +2299,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/wlan_stats.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/trap.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/test_loop.h
@@ -2685,6 +2692,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_editing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/text_input.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/usages.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presentation.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/wlan_service.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/receiver.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/task.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/wait.h
@@ -3402,6 +3410,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/http_error.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/http_error.fidl
@@ -3470,4 +3510,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 14
+Total license count: 15
