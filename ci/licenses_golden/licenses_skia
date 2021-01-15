@@ -1,4 +1,4 @@
-Signature: 388d63e4485424b5efdee12736d07dcc
+Signature: f18191d496c1a6cad1c2f810fc352d35
 
 UNUSED LICENSES:
 
@@ -4152,6 +4152,7 @@ FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeColorMatrix.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeComposite.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeFlood.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeGaussianBlur.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeOffset.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeTurbulence.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilter.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFilterContext.h
@@ -4160,6 +4161,7 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeColorMatrix.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeComposite.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeFlood.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeGaussianBlur.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeOffset.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeTurbulence.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilter.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFilterContext.cpp
