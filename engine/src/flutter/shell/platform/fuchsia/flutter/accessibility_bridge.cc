@@ -117,6 +117,14 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
     (*additional_size) += node.value.size();
   }
 
+  // Set toggled state.
+  if (node.HasFlag(flutter::SemanticsFlags::kHasToggledState)) {
+    states.set_toggled_state(
+        node.HasFlag(flutter::SemanticsFlags::kIsToggled)
+            ? fuchsia::accessibility::semantics::ToggledState::ON
+            : fuchsia::accessibility::semantics::ToggledState::OFF);
+  }
+
   return states;
 }
 
@@ -195,6 +203,9 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
     }
   }
 
+  if (node.HasFlag(flutter::SemanticsFlags::kHasToggledState)) {
+    return fuchsia::accessibility::semantics::Role::TOGGLE_SWITCH;
+  }
   return fuchsia::accessibility::semantics::Role::UNKNOWN;
 }
 
