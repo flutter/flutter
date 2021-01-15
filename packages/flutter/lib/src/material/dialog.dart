@@ -964,10 +964,12 @@ Future<T?> showDialog<T>({
   required WidgetBuilder builder,
   bool barrierDismissible = true,
   Color? barrierColor = Colors.black54,
+  String? barrierLabel,
   bool useSafeArea = true,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
+  assert(builder != null);
   assert(barrierDismissible != null);
   assert(useSafeArea != null);
   assert(useRootNavigator != null);
@@ -984,8 +986,9 @@ Future<T?> showDialog<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
-    barrierDismissible: barrierDismissible,
     barrierColor: barrierColor,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
     settings: routeSettings,
     themes: themes,
@@ -1002,16 +1005,20 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   DialogRoute({
     required BuildContext context,
     required WidgetBuilder builder,
-    required CapturedThemes themes,
-    bool barrierDismissible = true,
+    CapturedThemes? themes,
     Color? barrierColor = Colors.black54,
+    bool barrierDismissible = true,
+    String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
-           Widget dialog = themes.wrap(pageChild);
+           Widget dialog = pageChild;
+           if (themes != null) {
+             dialog = themes.wrap(pageChild);
+           }
            if (useSafeArea) {
              dialog = SafeArea(child: dialog);
            }
@@ -1019,7 +1026,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
          },
          barrierDismissible: barrierDismissible,
          barrierColor: barrierColor,
-         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
          transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
          settings: settings,
