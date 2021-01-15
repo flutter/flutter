@@ -109,8 +109,8 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   flutter::SemanticsNode node0;
   node0.id = 0;
   node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsButton);
-  node0.childrenInTraversalOrder = {1, 2, 3, 4, 5, 6, 7};
-  node0.childrenInHitTestOrder = {1, 2, 3, 4, 5, 6, 7};
+  node0.childrenInTraversalOrder = {1, 2, 3, 4, 5, 6, 7, 8};
+  node0.childrenInHitTestOrder = {1, 2, 3, 4, 5, 6, 7, 8};
   updates.emplace(0, node0);
 
   flutter::SemanticsNode node1;
@@ -164,6 +164,13 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   node7.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
   updates.emplace(7, node7);
 
+  flutter::SemanticsNode node8;
+  node8.childrenInTraversalOrder = {};
+  node8.childrenInHitTestOrder = {};
+  node8.id = 8;
+  node8.flags |= static_cast<int>(flutter::SemanticsFlags::kHasToggledState);
+  updates.emplace(7, node8);
+
   accessibility_bridge_->AddSemanticsNodeUpdate(std::move(updates), 1.f);
   RunLoopUntilIdle();
 
@@ -176,7 +183,8 @@ TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
           {4u, fuchsia::accessibility::semantics::Role::SLIDER},
           {5u, fuchsia::accessibility::semantics::Role::LINK},
           {6u, fuchsia::accessibility::semantics::Role::RADIO_BUTTON},
-          {7u, fuchsia::accessibility::semantics::Role::CHECK_BOX}};
+          {7u, fuchsia::accessibility::semantics::Role::CHECK_BOX},
+          {8u, fuchsia::accessibility::semantics::Role::TOGGLE_SWITCH}};
 
   EXPECT_EQ(0, semantics_manager_.DeleteCount());
   EXPECT_EQ(1, semantics_manager_.UpdateCount());
@@ -363,6 +371,31 @@ TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
             fuchsia::accessibility::semantics::CheckedState::NONE);
   EXPECT_TRUE(states.has_selected());
   EXPECT_TRUE(states.selected());
+
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesToggledState) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasToggledState);
+  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsToggled);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}}, 1.f);
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_states());
+  const auto& states = fuchsia_node.states();
+  EXPECT_TRUE(states.has_toggled_state());
+  EXPECT_EQ(states.toggled_state(),
+            fuchsia::accessibility::semantics::ToggledState::ON);
 
   EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
