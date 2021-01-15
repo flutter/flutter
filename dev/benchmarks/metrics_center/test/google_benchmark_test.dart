@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:metrics_center/src/common.dart';
-import 'package:metrics_center/google_benchmark.dart';
+import 'package:metrics_center/src/google_benchmark.dart';
 
 import 'common.dart';
 import 'utility.dart';
