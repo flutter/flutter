@@ -1,59 +1,32 @@
-## Description
+*Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
-*Replace this paragraph with a description of what this PR is doing. If you're
-modifying existing behavior, describe the existing behavior, how this PR is
-changing it, and what motivated the change.*
+*List which issues are fixed by this PR. You must list at least one issue.*
 
-## Related Issues
+*If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
 
-*Replace this paragraph with a list of issues related to this PR from our [issue
-database]. Indicate, which of these issues are resolved or fixed by this PR.
-There should be at least one issue listed here.*
+## Pre-launch Checklist
 
-## Tests
-
-I added the following tests:
-
-*Replace this with a list of the tests that you added as part of this PR. A
-change in behaviour with no test covering it will likely get reverted
-accidentally sooner or later. PRs must include tests for all
-changed/updated/fixed behaviors. See [testing the engine] for instructions on
-writing and running engine tests.*
-
-## Checklist
-
-Before you create this PR confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
-
-- [ ] I read the [contributor guide] and followed the process outlined there for submitting PRs.
+- [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
+- [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
+- [ ] I read and followed the [Flutter Style Guide] and the [C++, Objective-C, Java style guides].
+- [ ] I listed at least one issue that this PR fixes in the description above.
+- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test exempt. See [testing the engine] for instructions on
+writing and running engine tests.
+- [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I signed the [CLA].
-- [ ] I read and followed the [C++, Objective-C, Java style guides] for the engine.
-- [ ] I read the [tree hygiene] wiki page, which explains my responsibilities.
-- [ ] I updated/added relevant documentation.
 - [ ] All existing and new tests are passing.
-- [ ] I am willing to follow-up on review comments in a timely manner.
+- [ ] The reviewer has submitted any presubmit flakes in this PR using the [engine presubmit flakes form] before re-triggering the failure.
 
-
-## Reviewer Checklist
-
-- [ ] I have submitted any presubmit flakes in this PR using the [engine presubmit flakes form] before re-triggering the failure.
-
-
-## Breaking Change
-
-Did any tests fail when you ran them? Please read [handling breaking changes].
-
-- [ ] No, no existing tests failed, so this is *not* a breaking change.
-- [ ] Yes, this is a breaking change. *If not, delete the remainder of this section.*
-   - [ ] I wrote a design doc: https://flutter.dev/go/template *Replace this with a link to your design doc's short link*
-   - [ ] I got input from the developer relations team, specifically from: *Replace with the names of who gave advice*
-   - [ ] I wrote a migration guide: https://flutter.dev/go/breaking-changes-template *Replace this with a link to a pull request that adds the migration guide to https://flutter.dev/docs/release/breaking-changes*
+If you need help, consider asking for advice on the #hackers-new channel on [Discord].
 
 <!-- Links -->
-[issue database]: https://github.com/flutter/flutter/issues
-[contributor guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
-[testing the engine]: https://github.com/flutter/flutter/wiki/Testing-the-engine
+[Contributor Guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
+[Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
+[Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [C++, Objective-C, Java style guides]: https://github.com/flutter/engine/blob/master/CONTRIBUTING.md#style
+[testing the engine]: https://github.com/flutter/flutter/wiki/Testing-the-engine
 [CLA]: https://cla.developers.google.com/
-[tree hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
-[handling breaking changes]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
+[flutter/tests]: https://github.com/flutter/tests
+[breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
+[Discord]: https://github.com/flutter/flutter/wiki/Chat
 [engine presubmit flakes form]: https://forms.gle/Wc1VyFRYJjQTH6w5A
