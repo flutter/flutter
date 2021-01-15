@@ -188,10 +188,12 @@ class AppBarTheme with Diagnosticable {
     SystemUiOverlayStyle? systemOverlayStyle,
     bool? backwardsCompatibility,
   }) {
+    assert(
+      color == null || backgroundColor == null,
+      'The color and backgroundColor parameters mean the same thing. Only specify one.');
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
-      color: color ?? this.color,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
