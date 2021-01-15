@@ -57,7 +57,6 @@ transforms:
         kind: 'fragment'
         value: 'arguments[overflow]'
 
-
   # Change made in https://github.com/flutter/flutter/pull/44189.
   - title: 'Rename to dependOnInheritedElement'
     date: 2019-11-22
