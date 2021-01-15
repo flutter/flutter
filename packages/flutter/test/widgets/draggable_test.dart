@@ -2807,6 +2807,34 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
     semantics.dispose();
   });
+
+  testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    Future<void> buildWidget({HitTestBehavior? hitTestBehavior}) async {
+      return tester.pumpWidget(MaterialApp(
+        home: Column(
+          children: <Widget>[
+            DragTarget<int>(
+              hitTestBehavior: hitTestBehavior,
+              builder: (BuildContext context, List<int?> data,
+                  List<dynamic> rejects) {
+                return Container(height: 100.0, child: const Text('Target'));
+              },
+            ),
+          ],
+        ),
+      ));
+    }
+
+    // If provided, it changes the default hit test behavior.
+    await buildWidget(hitTestBehavior: hitTestBehavior);
+    expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
+
+    // If not provided, use the default value.
+    await buildWidget();
+    expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, HitTestBehavior.translucent);
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
