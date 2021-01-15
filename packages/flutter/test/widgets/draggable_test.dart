@@ -2808,6 +2808,32 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    Future<void> buildWidget({HitTestBehavior? hitTestBehavior}) async {
+      return tester.pumpWidget(MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              hitTestBehavior: hitTestBehavior,
+              feedback: Container(height: 100.0, child: const Text('Draggable')),
+              child: Container(height: 100.0, child: const Text('Target')),
+            ),
+          ],
+        ),
+      ));
+    }
+
+    // If provided, it changes the default hit test behavior.
+    await buildWidget(hitTestBehavior: hitTestBehavior);
+    expect(tester.widget<Listener>(find.byType(Listener).first).behavior, hitTestBehavior);
+
+    // Use default value if nothing is provided.
+    await buildWidget();
+    expect(tester.widget<Listener>(find.byType(Listener).first).behavior, HitTestBehavior.deferToChild);
+  });
+
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 

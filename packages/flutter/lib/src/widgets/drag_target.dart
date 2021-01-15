@@ -199,7 +199,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
-    this.hitTestBehavior = HitTestBehavior.deferToChild,
+    this.hitTestBehavior,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -353,8 +353,8 @@ class Draggable<T extends Object> extends StatefulWidget {
 
   /// How to behave during hit test.
   ///
-  /// Defaults to [HitTestBehavior.deferToChild].
-  final HitTestBehavior hitTestBehavior;
+  /// If null, defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior? hitTestBehavior;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -534,7 +534,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
-      behavior: widget.hitTestBehavior,
+      behavior: widget.hitTestBehavior ?? HitTestBehavior.deferToChild,
       onPointerDown: canDrag ? _routePointer : null,
       child: showChild ? widget.child : widget.childWhenDragging,
     );
