@@ -1324,15 +1324,16 @@ class _RestorableDialogTestWidgetState extends State<_RestorableDialogTestWidget
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: CupertinoButton(
-          onPressed: () {
-            Navigator.of(context).restorablePush(_dialogBuilder);
-          },
-          child: const Text('X'),
-        ),
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Home'),
       ),
+      child: Center(child: CupertinoButton(
+        onPressed: () {
+          Navigator.of(context).restorablePush(_dialogBuilder);
+        },
+        child: const Text('X'),
+      )),
     );
   }
 }

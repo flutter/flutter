@@ -1170,21 +1170,16 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   static Route _dialogBuilder(BuildContext context, Object arguments) {
-///     return CupertinoDialogRoute(
+///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///     return CupertinoDialogRoute<void>(
 ///       context: context,
 ///       builder: (BuildContext context) {
-///         return CupertinoAlertDialog(
-///           title: Text('Alert'),
-///           content: Text('My alert message'),
-///           actions: [
-///             CupertinoDialogAction(
-///               child: Text('OK'),
-///             ),
-///             CupertinoDialogAction(
-///               isDefaultAction: true,
-///               child: Text('Exit'),
-///             ),
+///         return const CupertinoAlertDialog(
+///           title: Text('Title'),
+///           content: Text('Content'),
+///           actions: <Widget>[
+///             CupertinoDialogAction(child: Text('Yes')),
+///             CupertinoDialogAction(child: Text('No')),
 ///           ],
 ///         );
 ///       },
@@ -1193,15 +1188,15 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     home: CupertinoPageScaffold(
-///       navigationBar: CupertinoNavigationBar(
-///         middle: const Text('Home'),
+///     return CupertinoPageScaffold(
+///       navigationBar: const CupertinoNavigationBar(
+///         middle: Text('Home'),
 ///       ),
 ///       child: Center(child: CupertinoButton(
 ///         onPressed: () {
 ///           Navigator.of(context).restorablePush(_dialogBuilder);
 ///         },
-///         child: Text('Open Dialog'),
+///         child: const Text('Open Dialog'),
 ///       )),
 ///     );
 ///   }

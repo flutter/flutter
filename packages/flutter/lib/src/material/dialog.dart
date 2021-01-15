@@ -1004,25 +1004,22 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   static Route _dialogBuilder(BuildContext context, Object arguments) {
-///     return DialogRoute(
+///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///     return DialogRoute<void>(
 ///       context: context,
-///       builder: (BuildContext context) => AlertDialog(title: Text('Material Alert!')),
+///       builder: (BuildContext context) => const AlertDialog(title: Text('Material Alert!')),
 ///     );
 ///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text(widget.title),
-///       ),
 ///       body: Center(
 ///         child: OutlineButton(
 ///           onPressed: () {
 ///             Navigator.of(context).restorablePush(_dialogBuilder);
 ///           },
-///           child: Text('Open Dialog'),
+///           child: const Text('Open Dialog'),
 ///         ),
 ///       ),
 ///     );

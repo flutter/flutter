@@ -1917,7 +1917,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// class MyApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return WidgetsApp(
+///     return MaterialApp(
 ///       restorationScopeId: 'app',
 ///       home: MyHomePage(title: 'Restorable Routes Demo'),
 ///     );
@@ -1934,25 +1934,27 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   static Route _dialogBuilder(BuildContext context, Object arguments) {
-///     return RawDialogRoute(
-///       context: context,
-///       builder: (BuildContext context) => AlertDialog(title: Text('Alert!')),
+///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///     return RawDialogRoute<void>(
+///       pageBuilder: (
+///         BuildContext context,
+///         Animation<double> animation,
+///         Animation<double> secondaryAnimation,
+///       ) {
+///         return const AlertDialog(title: Text('Alert!'));
+///       },
 ///     );
 ///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text(widget.title),
-///       ),
 ///       body: Center(
 ///         child: OutlineButton(
 ///           onPressed: () {
 ///             Navigator.of(context).restorablePush(_dialogBuilder);
 ///           },
-///           child: Text('Open Dialog'),
+///           child: const Text('Open Dialog'),
 ///         ),
 ///       ),
 ///     );
