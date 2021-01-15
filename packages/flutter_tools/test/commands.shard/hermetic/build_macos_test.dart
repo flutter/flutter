@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,7 +18,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -24,7 +26,7 @@ import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, { String projectFilename }) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -38,6 +40,7 @@ final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{
     'FLUTTER_ROOT': '/',
+    'HOME': '/',
   }
 );
 final Platform notMacosPlatform = FakePlatform(
@@ -49,7 +52,7 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   FileSystem fileSystem;
-  MockUsage usage;
+  Usage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,7 +60,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -228,6 +231,8 @@ void main() {
     createMinimalMockProjectFiles();
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -259,6 +264,7 @@ void main() {
       'TREE_SHAKE_ICONS=true',
       'FLUTTER_TARGET=lib/other.dart',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
+      'EXCLUDED_ARCHS=arm64',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -267,6 +273,7 @@ void main() {
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Artifacts: () => Artifacts.test(),
   });
 
   testUsingContext('macOS build supports build-name and build-number', () async {
@@ -329,26 +336,31 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--no-pub', '--analyze-size']
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub', '--analyze-size']
+      )
     );
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'macos')).called(1);
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: macos, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpMockXcodeBuildHandler('Release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.x86_64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
@@ -360,5 +372,3 @@ void main() {
     Usage: () => usage,
   });
 }
-
-class MockUsage extends Mock implements Usage {}

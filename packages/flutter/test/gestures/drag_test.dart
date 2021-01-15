@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +22,7 @@ void main() {
       didStartPan = true;
     };
 
-    Offset updatedScrollDelta;
+    Offset? updatedScrollDelta;
     pan.onUpdate = (DragUpdateDetails details) {
       updatedScrollDelta = details.delta;
     };
@@ -81,13 +79,13 @@ void main() {
   });
 
   testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-    VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag?.dispose);
-    addTearDown(() => competingDrag?.dispose);
+    addTearDown(() => drag.dispose);
+    addTearDown(() => competingDrag.dispose);
 
-    Offset positionAtOnStart;
+    late Offset positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
       positionAtOnStart = details.globalPosition;
     };
@@ -100,26 +98,21 @@ void main() {
     tester.route(down);
 
     tester.route(pointer.move(const Offset(30.0, 0.0)));
-    drag.dispose();
-    drag = null;
-    competingDrag.dispose();
-    competingDrag = null;
-
     expect(positionAtOnStart, const Offset(30.0, 00.0));
   });
 
   testGesture('Should report most recent point to onStart with a start configuration', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
-    VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..onStart = (_) {};
-    addTearDown(() => drag?.dispose);
-    addTearDown(() => competingDrag?.dispose);
+    addTearDown(() => drag.dispose);
+    addTearDown(() => competingDrag.dispose);
 
-    Offset positionAtOnStart;
+    Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
       positionAtOnStart = details.globalPosition;
     };
-    Offset updateOffset;
+    Offset? updateOffset;
     drag.onUpdate = (DragUpdateDetails details) {
       updateOffset = details.globalPosition;
     };
@@ -132,10 +125,6 @@ void main() {
     tester.route(down);
 
     tester.route(pointer.move(const Offset(30.0, 0.0)));
-    drag.dispose();
-    drag = null;
-    competingDrag.dispose();
-    competingDrag = null;
 
     expect(positionAtOnStart, const Offset(30.0, 0.0));
     expect(updateOffset, null);
@@ -150,7 +139,7 @@ void main() {
       didStartDrag = true;
     };
 
-    double updatedDelta;
+    double? updatedDelta;
     drag.onUpdate = (DragUpdateDetails details) {
       updatedDelta = details.primaryDelta;
     };
@@ -197,12 +186,12 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
-    Duration startTimestamp;
+    Duration? startTimestamp;
     drag.onStart = (DragStartDetails details) {
       startTimestamp = details.sourceTimeStamp;
     };
 
-    Duration updatedTimestamp;
+    Duration? updatedTimestamp;
     drag.onUpdate = (DragUpdateDetails details) {
       updatedTimestamp = details.sourceTimeStamp;
     };
@@ -224,20 +213,20 @@ void main() {
   });
 
   testGesture('Should report initial down point to onStart with a down configuration', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down;
-    VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..onStart = (_) {};
-    addTearDown(() => drag?.dispose);
-    addTearDown(() => competingDrag?.dispose);
+    addTearDown(() => drag.dispose);
+    addTearDown(() => competingDrag.dispose);
 
-    Offset positionAtOnStart;
+    Offset? positionAtOnStart;
     drag.onStart = (DragStartDetails details) {
       positionAtOnStart = details.globalPosition;
     };
-    Offset updateOffset;
-    Offset updateDelta;
+    Offset? updateOffset;
+    Offset? updateDelta;
     drag.onUpdate = (DragUpdateDetails details) {
       updateOffset = details.globalPosition;
       updateDelta = details.delta;
@@ -251,11 +240,6 @@ void main() {
     tester.route(down);
 
     tester.route(pointer.move(const Offset(30.0, 0.0)));
-    drag.dispose();
-    drag = null;
-    competingDrag.dispose();
-    competingDrag = null;
-
     expect(positionAtOnStart, const Offset(10.0, 10.0));
 
     // The drag is horizontal so we're going to ignore the vertical delta position
@@ -265,12 +249,12 @@ void main() {
   });
 
   testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag1 =
-    HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    VerticalDragGestureRecognizer drag2 =
-    VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
-    addTearDown(() => drag1?.dispose);
-    addTearDown(() => drag2?.dispose);
+    final HorizontalDragGestureRecognizer drag1 =
+      HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    final VerticalDragGestureRecognizer drag2 =
+      VerticalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(() => drag1.dispose);
+    addTearDown(() => drag2.dispose);
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };
@@ -313,11 +297,6 @@ void main() {
     tester.route(pointer5.up());
     tester.route(pointer6.up());
 
-    drag1.dispose();
-    drag1 = null;
-    drag2.dispose();
-    drag2 = null;
-
     expect(log, <String>[
       'drag1-down',
       'drag2-down',
@@ -343,8 +322,8 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
-    Velocity velocity;
-    double primaryVelocity;
+    late Velocity velocity;
+    double? primaryVelocity;
     drag.onEnd = (DragEndDetails details) {
       velocity = details.velocity;
       primaryVelocity = details.primaryVelocity;
@@ -376,7 +355,7 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
-    Velocity velocity;
+    late Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
       velocity = details.velocity;
     };
@@ -409,7 +388,7 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
-    Velocity velocity;
+    late Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
       velocity = details.velocity;
     };
@@ -443,8 +422,8 @@ void main() {
       didStartDrag = true;
     };
 
-    Offset updateDelta;
-    double updatePrimaryDelta;
+    Offset? updateDelta;
+    double? updatePrimaryDelta;
     drag.onUpdate = (DragUpdateDetails details) {
       updateDelta = details.delta;
       updatePrimaryDelta = details.primaryDelta;
@@ -500,11 +479,11 @@ void main() {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
-    Offset latestGlobalPosition;
+    Offset? latestGlobalPosition;
     drag.onStart = (DragStartDetails details) {
       latestGlobalPosition = details.globalPosition;
     };
-    Offset latestDelta;
+    Offset? latestDelta;
     drag.onUpdate = (DragUpdateDetails details) {
       latestGlobalPosition = details.globalPosition;
       latestDelta = details.delta;
@@ -543,7 +522,7 @@ void main() {
       didStartDrag = true;
     };
 
-    double updatedDelta;
+    double? updatedDelta;
     drag.onUpdate = (DragUpdateDetails details) {
       updatedDelta = details.primaryDelta;
     };
@@ -609,8 +588,8 @@ void main() {
   });
 
   group('Enforce consistent-button restriction:', () {
-    PanGestureRecognizer pan;
-    TapGestureRecognizer tap;
+    late PanGestureRecognizer pan;
+    late TapGestureRecognizer tap;
     final List<String> logs = <String>[];
 
     setUp(() {
@@ -750,9 +729,9 @@ void main() {
     // competition with a tap gesture recognizer listening on a different button.
 
     final List<String> recognized = <String>[];
-    TapGestureRecognizer tapPrimary;
-    TapGestureRecognizer tapSecondary;
-    PanGestureRecognizer pan;
+    late TapGestureRecognizer tapPrimary;
+    late TapGestureRecognizer tapSecondary;
+    late PanGestureRecognizer pan;
     setUp(() {
       tapPrimary = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -938,12 +917,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['cancelH']);
       logs.clear();
     },
@@ -991,13 +970,13 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
       // Tap is not triggered because pointer2 is not its primary pointer
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['cancelH', 'downT', 'upT']);
       logs.clear();
     },
@@ -1049,12 +1028,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1102,7 +1081,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
@@ -1111,7 +1090,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1167,8 +1146,79 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
+      logs.clear();
+    },
+  );
+
+  testGesture(
+    'On multiple pointers, the last tracking pointer can be rejected by [resolvePointer] when the '
+    'other pointer already accepted the VerticalDragGestureRecognizer',
+    (GestureTester tester) {
+      // Regressing test for https://github.com/flutter/flutter/issues/68373
+      final List<String> logs = <String>[];
+      final VerticalDragGestureRecognizer drag = VerticalDragGestureRecognizer()
+        ..onDown = (DragDownDetails details) { logs.add('downD'); }
+        ..onStart = (DragStartDetails details) { logs.add('startD'); }
+        ..onUpdate = (DragUpdateDetails details) { logs.add('updateD'); }
+        ..onEnd = (DragEndDetails details) { logs.add('endD'); }
+        ..onCancel = () { logs.add('cancelD'); };
+      // Competitor
+      final TapGestureRecognizer tap = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+        ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+        ..onTapCancel = () {};
+      addTearDown(tap.dispose);
+      addTearDown(drag.dispose);
+
+      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
+      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
+      final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.touch);
+      final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.touch);
+
+      final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+      final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 11.0));
+      final PointerDownEvent down3 = pointer3.down(const Offset(12.0, 12.0));
+      final PointerDownEvent down4 = pointer4.down(const Offset(13.0, 13.0));
+
+      tap.addPointer(down1);
+      drag.addPointer(down1);
+      tester.closeArena(pointer1.pointer);
+      tester.route(down1);
+      expect(logs, <String>['downD']);
+      logs.clear();
+
+      tap.addPointer(down2);
+      drag.addPointer(down2);
+      tester.closeArena(pointer2.pointer);
+      tester.route(down2);
+      expect(logs, <String>[]);
+
+      tap.addPointer(down3);
+      drag.addPointer(down3);
+      tester.closeArena(pointer3.pointer);
+      tester.route(down3);
+      expect(logs, <String>[]);
+
+      drag.addPointer(down4);
+      tester.closeArena(pointer4.pointer);
+      tester.route(down4);
+      expect(logs, <String>['startD']);
+      logs.clear();
+
+      tester.route(pointer2.up());
+      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      expect(logs, <String>[]);
+
+      tester.route(pointer4.cancel());
+      expect(logs, <String>[]);
+
+      tester.route(pointer3.cancel());
+      expect(logs, <String>[]);
+
+      tester.route(pointer1.cancel());
+      expect(logs, <String>['endD']);
       logs.clear();
     },
   );

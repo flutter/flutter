@@ -4,9 +4,7 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -297,7 +295,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -317,7 +315,7 @@ typedef TweenConstructor<T extends Object> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [ImplicitlyAnimatedWidgetState.forEachTween].
 ///
-/// {@template flutter.widgets.implicit_animations.tweenVisitorArguments}
+/// {@template flutter.widgets.TweenVisitor.arguments}
 /// The `tween` argument should contain the current tween value. This will
 /// initially be null when the state is first initialized.
 ///
@@ -351,22 +349,21 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController? get controller => _controller;
-  AnimationController? _controller;
+  AnimationController get controller => _controller;
+  late final AnimationController _controller = AnimationController(
+    duration: widget.duration,
+    debugLabel: kDebugMode ? widget.toStringShort() : null,
+    vsync: this,
+  );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double>? get animation => _animation;
-  Animation<double>? _animation;
+  Animation<double> get animation => _animation;
+  late Animation<double> _animation = _createCurve();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      debugLabel: kDebugMode ? widget.toStringShort() : null,
-      vsync: this,
-    );
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       switch (status) {
         case AnimationStatus.completed:
           if (widget.onEnd != null)
@@ -377,7 +374,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         case AnimationStatus.reverse:
       }
     });
-    _updateCurve();
     _constructTweens();
     didUpdateTweens();
   }
@@ -386,27 +382,27 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve)
-      _updateCurve();
-    _controller!.duration = widget.duration;
+      _animation = _createCurve();
+    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
-      _controller!
+      _controller
         ..value = 0.0
         ..forward();
       didUpdateTweens();
     }
   }
 
-  void _updateCurve() {
-    _animation = CurvedAnimation(parent: _controller!, curve: widget.curve);
+  CurvedAnimation _createCurve() {
+    return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -418,7 +414,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (tween == null)
       return;
     tween
-      ..begin = tween.evaluate(_animation!)
+      ..begin = tween.evaluate(_animation)
       ..end = targetValue;
   }
 
@@ -448,7 +444,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// result back into the member variable. The arguments to `visitor` are as
   /// follows:
   ///
-  /// {@macro flutter.widgets.implicit_animations.tweenVisitorArguments}
+  /// {@macro flutter.widgets.TweenVisitor.arguments}
   ///
   /// ### When this method will be called
   ///
@@ -481,14 +477,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
-  ///   ColorTween _colorTween;
+  ///   ColorTween? _colorTween;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Text(
   ///       'Hello World',
   ///       // Computes the value of the text color at any given time.
-  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///       style: TextStyle(color: _colorTween?.evaluate(animation)),
   ///     );
   ///   }
   ///
@@ -503,7 +499,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///       // A function that takes a color value and returns a tween
   ///       // beginning at that value.
   ///       (value) => ColorTween(begin: value),
-  ///     );
+  ///     ) as ColorTween?;
   ///
   ///     // We could have more tweens than one by using the visitor
   ///     // multiple times.
@@ -551,7 +547,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   @override
   void initState() {
     super.initState();
-    controller!.addListener(_handleAnimationChanged);
+    controller.addListener(_handleAnimationChanged);
   }
 
   void _handleAnimationChanged() {
@@ -635,7 +631,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     BoxConstraints? constraints,
     this.margin,
     this.transform,
+    this.transformAlignment,
     this.child,
+    this.clipBehavior = Clip.none,
     Curve curve = Curves.linear,
     required Duration duration,
     VoidCallback? onEnd,
@@ -662,7 +660,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// Align the [child] within the container.
@@ -709,6 +707,28 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;
 
+  /// The alignment of the origin, relative to the size of the container, if [transform] is specified.
+  ///
+  /// When [transform] is null, the value of this property is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [Transform.alignment], which is set by this property.
+  final AlignmentGeometry? transformAlignment;
+
+  /// The clip behavior when [AnimatedContainer.decoration] is not null.
+  ///
+  /// Defaults to [Clip.none]. Must be [Clip.none] if [decoration] is null.
+  ///
+  /// Unlike other properties of [AnimatedContainer], changes to this property
+  /// apply immediately and have no animation.
+  ///
+  /// If a clip is to be applied, the [Decoration.getClipPath] method
+  /// for the provided decoration must return a clip path. (This is not
+  /// supported by all decorations; the default implementation of that
+  /// method throws an [UnsupportedError].)
+  final Clip clipBehavior;
+
   @override
   _AnimatedContainerState createState() => _AnimatedContainerState();
 
@@ -722,6 +742,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('transformAlignment', transformAlignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -733,29 +755,34 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   BoxConstraintsTween? _constraints;
   EdgeInsetsGeometryTween? _margin;
   Matrix4Tween? _transform;
+  AlignmentGeometryTween? _transformAlignment;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween;
-    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween;
-    _decoration = visitor(_decoration, widget.decoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween;
-    _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween;
-    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => BoxConstraintsTween(begin: value as BoxConstraints)) as BoxConstraintsTween;
-    _margin = visitor(_margin, widget.margin, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween;
-    _transform = visitor(_transform, widget.transform, (dynamic value) => Matrix4Tween(begin: value as Matrix4)) as Matrix4Tween;
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
+    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
+    _decoration = visitor(_decoration, widget.decoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween?;
+    _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => DecorationTween(begin: value as Decoration)) as DecorationTween?;
+    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => BoxConstraintsTween(begin: value as BoxConstraints)) as BoxConstraintsTween?;
+    _margin = visitor(_margin, widget.margin, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
+    _transform = visitor(_transform, widget.transform, (dynamic value) => Matrix4Tween(begin: value as Matrix4)) as Matrix4Tween?;
+    _transformAlignment = visitor(_transformAlignment, widget.transformAlignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
   }
 
   @override
   Widget build(BuildContext context) {
+    final Animation<double> animation = this.animation;
     return Container(
       child: widget.child,
-      alignment: _alignment?.evaluate(animation!),
-      padding: _padding?.evaluate(animation!),
-      decoration: _decoration?.evaluate(animation!),
-      foregroundDecoration: _foregroundDecoration?.evaluate(animation!),
-      constraints: _constraints?.evaluate(animation!),
-      margin: _margin?.evaluate(animation!),
-      transform: _transform?.evaluate(animation!),
+      alignment: _alignment?.evaluate(animation),
+      padding: _padding?.evaluate(animation),
+      decoration: _decoration?.evaluate(animation),
+      foregroundDecoration: _foregroundDecoration?.evaluate(animation),
+      constraints: _constraints?.evaluate(animation),
+      margin: _margin?.evaluate(animation),
+      transform: _transform?.evaluate(animation),
+      transformAlignment: _transformAlignment?.evaluate(animation),
+      clipBehavior: widget.clipBehavior,
     );
   }
 
@@ -769,6 +796,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     description.add(DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
     description.add(DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+    description.add(DiagnosticsProperty<AlignmentGeometryTween>('transformAlignment', _transformAlignment, defaultValue: null));
   }
 }
 
@@ -780,6 +808,47 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// The following code implements the [AnimatedPadding] widget, using a [curve] of
+/// [Curves.easeInOut].
+///
+/// ```dart
+/// double padValue = 0.0;
+/// _updatePadding(double value) {
+///   setState(() {
+///     padValue = value;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: [
+///       AnimatedPadding(
+///         padding: EdgeInsets.all(padValue),
+///         duration: const Duration(seconds: 2),
+///         curve: Curves.easeInOut,
+///         child: Container(
+///           width: MediaQuery.of(context).size.width,
+///           height: MediaQuery.of(context).size.height / 5,
+///           color: Colors.blue,
+///         ),
+///       ),
+///       Text('Padding: $padValue'),
+///       ElevatedButton(
+///         child: Text('Change padding'),
+///         onPressed: () {
+///           _updatePadding(padValue == 0.0 ? 100.0 : 0.0);
+///         }
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -808,7 +877,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   @override
@@ -826,14 +895,14 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween;
+    _padding = visitor(_padding, widget.padding, (dynamic value) => EdgeInsetsGeometryTween(begin: value as EdgeInsetsGeometry)) as EdgeInsetsGeometryTween?;
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: _padding!
-        .evaluate(animation!)
+        .evaluate(animation)
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
@@ -942,7 +1011,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// If non-null, sets its height to the child's height multiplied by this factor.
@@ -972,21 +1041,21 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween;
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
     if(widget.heightFactor != null) {
-      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+      _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
     if(widget.widthFactor != null) {
-      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+      _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: _alignment!.evaluate(animation!)!,
-      heightFactor: _heightFactorTween?.evaluate(animation!),
-      widthFactor: _widthFactorTween?.evaluate(animation!),
+      alignment: _alignment!.evaluate(animation)!,
+      heightFactor: _heightFactorTween?.evaluate(animation),
+      widthFactor: _widthFactorTween?.evaluate(animation),
       child: widget.child,
     );
   }
@@ -1025,6 +1094,47 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// [Animation] as an argument. While that allows you to fine-tune the animation,
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// The following example transitions an AnimatedPositioned
+/// between two states. It adjusts the `height`, `width`, and
+/// [Positioned] properties when tapped.
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     width: 200,
+///     height: 350,
+///     child: Stack(
+///       children: [
+///         AnimatedPositioned(
+///           width: selected ? 200.0 : 50.0,
+///           height: selected ? 50.0 : 200.0,
+///           top: selected ? 50.0 : 150.0,
+///           duration: Duration(seconds: 2),
+///           curve: Curves.fastOutSlowIn,
+///           child: GestureDetector(
+///             onTap: () {
+///               setState(() {
+///                 selected = !selected;
+///               });
+///             },
+///             child: Container(
+///               color: Colors.blue,
+///               child: Center(child: Text('Tap me')),
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1076,7 +1186,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -1128,24 +1238,24 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _left = visitor(_left, widget.left, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _right = visitor(_right, widget.right, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    _left = visitor(_left, widget.left, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _right = visitor(_right, widget.right, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
   }
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
       child: widget.child,
-      left: _left?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      right: _right?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      left: _left?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      right: _right?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1211,7 +1321,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -1263,26 +1373,26 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _start = visitor(_start, widget.start, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _end = visitor(_end, widget.end, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    _start = visitor(_start, widget.start, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _top = visitor(_top, widget.top, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _end = visitor(_end, widget.end, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _width = visitor(_width, widget.width, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _height = visitor(_height, widget.height, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return Positioned.directional(
-      textDirection: Directionality.of(context)!,
+      textDirection: Directionality.of(context),
       child: widget.child,
-      start: _start?.evaluate(animation!),
-      top: _top?.evaluate(animation!),
-      end: _end?.evaluate(animation!),
-      bottom: _bottom?.evaluate(animation!),
-      width: _width?.evaluate(animation!),
-      height: _height?.evaluate(animation!),
+      start: _start?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      end: _end?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -1372,7 +1482,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The target opacity.
@@ -1409,12 +1519,12 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
   }
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1542,12 +1652,12 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
   }
 
   @override
   void didUpdateTweens() {
-    _opacityAnimation = animation!.drive(_opacity!);
+    _opacityAnimation = animation.drive(_opacity!);
   }
 
   @override
@@ -1608,7 +1718,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The target text style.
@@ -1671,13 +1781,13 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _style = visitor(_style, widget.style, (dynamic value) => TextStyleTween(begin: value as TextStyle)) as TextStyleTween;
+    _style = visitor(_style, widget.style, (dynamic value) => TextStyleTween(begin: value as TextStyle)) as TextStyleTween?;
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: _style!.evaluate(animation!),
+      style: _style!.evaluate(animation),
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
@@ -1740,7 +1850,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The type of shape.
@@ -1748,7 +1858,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// This property is not animated.
   final BoxShape shape;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
@@ -1798,10 +1908,10 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => BorderRadiusTween(begin: value as BorderRadius)) as BorderRadiusTween;
-    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
-    _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween;
-    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween;
+    _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => BorderRadiusTween(begin: value as BorderRadius)) as BorderRadiusTween?;
+    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
+    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
   }
 
   @override
@@ -1810,11 +1920,11 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       child: widget.child,
       shape: widget.shape,
       clipBehavior: widget.clipBehavior,
-      borderRadius: _borderRadius!.evaluate(animation!),
-      elevation: _elevation!.evaluate(animation!),
-      color: widget.animateColor ? _color!.evaluate(animation!)! : widget.color,
+      borderRadius: _borderRadius!.evaluate(animation),
+      elevation: _elevation!.evaluate(animation),
+      color: widget.animateColor ? _color!.evaluate(animation)! : widget.color,
       shadowColor: widget.animateShadowColor
-          ? _shadowColor!.evaluate(animation!)!
+          ? _shadowColor!.evaluate(animation)!
           : widget.shadowColor,
     );
   }

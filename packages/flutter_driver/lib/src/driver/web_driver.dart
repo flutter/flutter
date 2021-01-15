@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
 
@@ -36,10 +38,10 @@ class WebFlutterDriver extends FlutterDriver {
   DateTime get startTime => _startTime;
 
   @override
-  VMIsolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
+  vms.Isolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
 
   @override
-  VMServiceClient get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
+  vms.VmService get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
 
   @override
   async_io.WebDriver get webDriver => _connection._driver;
@@ -185,7 +187,11 @@ class WebFlutterDriver extends FlutterDriver {
 class FlutterWebConnection {
   /// Creates a FlutterWebConnection with WebDriver
   /// and whether the WebDriver supports timeline action.
-  FlutterWebConnection(this._driver, this.supportsTimelineAction);
+  FlutterWebConnection(this._driver, this.supportsTimelineAction) {
+    _driver.logs.get(async_io.LogType.browser).listen((async_io.LogEntry entry) {
+      print('[${entry.level}]: ${entry.message}');
+    });
+  }
 
   final async_io.WebDriver _driver;
 

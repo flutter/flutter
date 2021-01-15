@@ -96,7 +96,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
     TestAsyncUtils.guardSync();
-    return collectAllElementsFrom(binding.renderViewElement, skipOffstage: false);
+    return collectAllElementsFrom(binding.renderViewElement!, skipOffstage: false);
   }
 
   /// The matching element in the widget tree.
@@ -193,7 +193,7 @@ abstract class WidgetController {
   /// their own render object.
   Iterable<RenderObject> get allRenderObjects {
     TestAsyncUtils.guardSync();
-    return allElements.map<RenderObject>((Element element) => element.renderObject);
+    return allElements.map<RenderObject>((Element element) => element.renderObject!);
   }
 
   /// The render object of the matching widget in the widget tree.
@@ -205,7 +205,7 @@ abstract class WidgetController {
   /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
   T renderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().single.renderObject as T;
+    return finder.evaluate().single.renderObject! as T;
   }
 
   /// The render object of the first matching widget according to a
@@ -216,7 +216,7 @@ abstract class WidgetController {
   /// * Use [renderObject] if you only expect to match one render object.
   T firstRenderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().first.renderObject as T;
+    return finder.evaluate().first.renderObject! as T;
   }
 
   /// The render objects of the matching widgets in the widget tree.
@@ -226,19 +226,19 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.renderObject as T;
+      final T result = element.renderObject! as T;
       return result;
     });
   }
 
   /// Returns a list of all the [Layer] objects in the rendering.
-  List<Layer> get layers => _walkLayers(binding.renderView.debugLayer).toList();
+  List<Layer> get layers => _walkLayers(binding.renderView.debugLayer!).toList();
   Iterable<Layer> _walkLayers(Layer layer) sync* {
     TestAsyncUtils.guardSync();
     yield layer;
     if (layer is ContainerLayer) {
       final ContainerLayer root = layer;
-      Layer child = root.firstChild;
+      Layer? child = root.firstChild;
       while (child != null) {
         yield* _walkLayers(child);
         child = child.nextSibling;
@@ -253,12 +253,12 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> tap(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+  Future<void> tap(Finder finder, {int? pointer, int buttons = kPrimaryButton}) {
     return tapAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
+  Future<void> tapAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await gesture.up();
@@ -270,7 +270,7 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<TestGesture> press(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+  Future<TestGesture> press(Finder finder, {int? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(getCenter(finder), pointer: pointer, buttons: buttons);
     });
@@ -282,13 +282,13 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> longPress(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+  Future<void> longPress(Finder finder, {int? pointer, int buttons = kPrimaryButton}) {
     return longPressAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
+  Future<void> longPressAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await pump(kLongPressTimeout + kPressTimeout);
@@ -302,7 +302,7 @@ abstract class WidgetController {
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
-  /// {@template flutter.flutter_test.fling}
+  /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
   /// Exactly 50 pointer events are synthesized.
@@ -337,7 +337,7 @@ abstract class WidgetController {
     Finder finder,
     Offset offset,
     double speed, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -358,7 +358,7 @@ abstract class WidgetController {
   /// Attempts a fling gesture starting from the given location, moving the
   /// given distance, reaching the given speed.
   ///
-  /// {@macro flutter.flutter_test.fling}
+  /// {@macro flutter.flutter_test.WidgetController.fling}
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
@@ -366,7 +366,7 @@ abstract class WidgetController {
     Offset startLocation,
     Offset offset,
     double speed, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
@@ -387,7 +387,7 @@ abstract class WidgetController {
         await pump(initialOffsetDelay);
       }
       for (int i = 0; i <= kMoveCount; i += 1) {
-        final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+        final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
         await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())));
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
@@ -476,7 +476,7 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
-  /// {@template flutter.flutter_test.drag}
+  /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
   /// calls. Changing `touchSlopX` or `touchSlopY` will change the minimum
@@ -496,7 +496,7 @@ abstract class WidgetController {
   Future<void> drag(
     Finder finder,
     Offset offset, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
@@ -521,11 +521,11 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDragFrom].
   ///
-  /// {@macro flutter.flutter_test.drag}
+  /// {@macro flutter.flutter_test.WidgetController.drag}
   Future<void> dragFrom(
     Offset startLocation,
     Offset offset, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
@@ -613,7 +613,7 @@ abstract class WidgetController {
   /// [fling] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@template flutter.flutter_test.timeddrag}
+  /// {@template flutter.flutter_test.WidgetController.timedDrag}
   /// The move events are sent at a given `frequency` in Hz (or events per
   /// second). It defaults to 60Hz.
   ///
@@ -626,7 +626,7 @@ abstract class WidgetController {
     Finder finder,
     Offset offset,
     Duration duration, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
   }) {
@@ -647,12 +647,12 @@ abstract class WidgetController {
   /// [flingFrom] or ballistic animation, depending on the speed from
   /// `offset/duration`.
   ///
-  /// {@macro flutter.flutter_test.timeddrag}
+  /// {@macro flutter.flutter_test.WidgetController.timedDrag}
   Future<void> timedDragFrom(
     Offset startLocation,
     Offset offset,
     Duration duration, {
-    int pointer,
+    int? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
   }) {
@@ -707,7 +707,7 @@ abstract class WidgetController {
       ]),
     ];
     return TestAsyncUtils.guard<void>(() async {
-      return handlePointerEventRecord(records);
+      await handlePointerEventRecord(records);
     });
   }
 
@@ -731,7 +731,7 @@ abstract class WidgetController {
   /// You can use [startGesture] instead if your gesture begins with a down
   /// event.
   Future<TestGesture> createGesture({
-    int pointer,
+    int? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
@@ -751,7 +751,7 @@ abstract class WidgetController {
   /// down gesture.
   Future<TestGesture> startGesture(
     Offset downLocation, {
-    int pointer,
+    int? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
@@ -812,8 +812,7 @@ abstract class WidgetController {
   Offset _getElementPoint(Finder finder, Offset sizeToPoint(Size size)) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject as RenderBox;
-    assert(box != null);
+    final RenderBox box = element.renderObject! as RenderBox;
     return box.localToGlobal(sizeToPoint(box.size));
   }
 
@@ -822,8 +821,7 @@ abstract class WidgetController {
   Size getSize(Finder finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject as RenderBox;
-    assert(box != null);
+    final RenderBox box = element.renderObject! as RenderBox;
     return box.size;
   }
 
@@ -843,15 +841,18 @@ abstract class WidgetController {
   /// key press. To simulate individual down and/or up events, see
   /// [sendKeyDownEvent] and [sendKeyUpEvent].
   ///
+  /// Returns true if the key down event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
-    await simulateKeyDownEvent(key, platform: platform);
+    final bool handled = await simulateKeyDownEvent(key, platform: platform);
     // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
+    await simulateKeyUpEvent(key, platform: platform);
+    return handled;
   }
 
   /// Simulates sending a physical key down event through the system channel.
@@ -866,11 +867,13 @@ abstract class WidgetController {
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform);
@@ -885,11 +888,13 @@ abstract class WidgetController {
   /// [Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "android". May not be null.
   ///
+  /// Returns true if the key event was handled by the framework.
+  ///
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
@@ -924,10 +929,10 @@ abstract class WidgetController {
       throw StateError('Finder returned more than one element.');
     }
     final Element element = candidates.single;
-    RenderObject renderObject = element.findRenderObject();
-    SemanticsNode result = renderObject.debugSemantics;
+    RenderObject? renderObject = element.findRenderObject();
+    SemanticsNode? result = renderObject?.debugSemantics;
     while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject?.parent as RenderObject;
+      renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
     if (result == null)
@@ -971,11 +976,14 @@ abstract class WidgetController {
   /// that will build child specified by `finder` when there are multiple
   ///[Scrollable]s.
   ///
+  /// Scroll is performed until the start of the `finder` is visible. This is
+  /// due to the default parameter values of [Scrollable.ensureVisible] method.
+  ///
   /// See also [dragUntilVisible].
   Future<void> scrollUntilVisible(
     Finder finder,
     double delta, {
-      Finder scrollable,
+      Finder? scrollable,
       int maxScrolls = 50,
       Duration duration = const Duration(milliseconds: 50),
     }
@@ -984,7 +992,7 @@ abstract class WidgetController {
     scrollable ??= find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
       Offset moveStep;
-      switch(widget<Scrollable>(scrollable).axisDirection) {
+      switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
           break;
@@ -1040,7 +1048,7 @@ class LiveWidgetController extends WidgetController {
   LiveWidgetController(WidgetsBinding binding) : super(binding);
 
   @override
-  Future<void> pump([Duration duration]) async {
+  Future<void> pump([Duration? duration]) async {
     if (duration != null)
       await Future<void>.delayed(duration);
     binding.scheduleFrame();
@@ -1072,7 +1080,7 @@ class LiveWidgetController extends WidgetController {
       // used as state for all pointers which are currently down.
       final Map<int, HitTestResult> hitTestHistory = <int, HitTestResult>{};
       final List<Duration> handleTimeStampDiff = <Duration>[];
-      DateTime startTime;
+      DateTime? startTime;
       for (final PointerEventRecord record in records) {
         final DateTime now = clock.now();
         startTime ??= now;

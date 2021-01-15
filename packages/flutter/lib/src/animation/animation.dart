@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'tween.dart';
 
 // Examples can assume:
-// AnimationController _controller;
+// late AnimationController _controller;
 
 /// The status of an animation.
 enum AnimationStatus {
@@ -191,22 +191,15 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// * "&#x23EE;": [AnimationStatus.dismissed] ([value] == 0.0)
   String toStringDetails() {
     assert(status != null);
-    String icon;
     switch (status) {
       case AnimationStatus.forward:
-        icon = '\u25B6'; // >
-        break;
+        return '\u25B6'; // >
       case AnimationStatus.reverse:
-        icon = '\u25C0'; // <
-        break;
+        return '\u25C0'; // <
       case AnimationStatus.completed:
-        icon = '\u23ED'; // >>|
-        break;
+        return '\u23ED'; // >>|
       case AnimationStatus.dismissed:
-        icon = '\u23EE'; // |<<
-        break;
+        return '\u23EE'; // |<<
     }
-    assert(icon != null);
-    return icon;
   }
 }

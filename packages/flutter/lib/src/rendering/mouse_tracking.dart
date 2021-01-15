@@ -53,13 +53,13 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// All arguments are optional. The [cursor] must not be null.
   const MouseTrackerAnnotation({
     this.onEnter,
-    this.onHover,
     this.onExit,
     this.cursor = MouseCursor.defer,
+    this.validForMouseTracker = true,
   }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// entered the region.
+  /// entered the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has started to be contained by
   /// the region, either due to a pointer event, or due to the movement or
@@ -72,18 +72,8 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.onEnter], which uses this callback.
   final PointerEnterEventListener? onEnter;
 
-  /// Triggered when a mouse pointer has moved onto or within the region without
-  /// buttons pressed.
-  ///
-  /// This callback is not triggered by the movement of an annotation.
-  ///
-  /// See also:
-  ///
-  ///  * [MouseRegion.onHover], which uses this callback.
-  final PointerHoverEventListener? onHover;
-
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// exited the region.
+  /// exited the region and [validForMouseTracker] is true.
   ///
   /// This callback is triggered when the pointer has stopped being contained
   /// by the region, either due to a pointer event, or due to the movement or
@@ -110,6 +100,15 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///
   ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
+
+  /// Whether this is included when [MouseTracker] collects the list of annotations.
+  ///
+  /// If [validForMouseTracker] is false, this object is excluded from the current annotation list
+  /// even if it's included in the hit test, affecting mouse-related behavior such as enter events,
+  /// exit events, and mouse cursors. The [validForMouseTracker] does not affect hit testing.
+  ///
+  /// The [validForMouseTracker] is true for [MouseTrackerAnnotation]s built by the constructor.
+  final bool validForMouseTracker;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -188,7 +187,7 @@ class MouseTrackerUpdateDetails with Diagnosticable {
   const MouseTrackerUpdateDetails.byNewFrame({
     required this.lastAnnotations,
     required this.nextAnnotations,
-    required this.previousEvent,
+    required PointerEvent this.previousEvent,
   }) : assert(previousEvent != null),
        assert(lastAnnotations != null),
        assert(nextAnnotations != null),
@@ -482,8 +481,6 @@ abstract class BaseMouseTracker extends ChangeNotifier {
 mixin _MouseTrackerEventMixin on BaseMouseTracker {
   // Handles device update and dispatches mouse event callbacks.
   static void _handleDeviceUpdateMouseEvents(MouseTrackerUpdateDetails details) {
-    final PointerEvent? previousEvent = details.previousEvent;
-    final PointerEvent? triggeringEvent = details.triggeringEvent;
     final PointerEvent latestEvent = details.latestEvent;
 
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = details.lastAnnotations;
@@ -500,7 +497,7 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
       if (!nextAnnotations.containsKey(annotation))
-        if (annotation.onExit != null)
+        if (annotation.validForMouseTracker && annotation.onExit != null)
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
     });
 
@@ -511,26 +508,8 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.onEnter != null)
+      if (annotation.validForMouseTracker && annotation.onEnter != null)
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
-    }
-
-    // Send hover events to annotations that are in next, in reverse visual
-    // order. The reverse visual order is chosen only because of the simplicity
-    // by keeping the hover events aligned with enter events.
-    if (triggeringEvent is PointerHoverEvent) {
-      final Offset? hoverPositionBeforeUpdate = previousEvent is PointerHoverEvent ? previousEvent.position : null;
-      final bool pointerHasMoved = hoverPositionBeforeUpdate == null || hoverPositionBeforeUpdate != triggeringEvent.position;
-      // If the hover event follows a non-hover event, or has moved since the
-      // last hover, then trigger the hover callback on all annotations.
-      // Otherwise, trigger the hover callback only on annotations that it
-      // newly enters.
-      final Iterable<MouseTrackerAnnotation> hoveringAnnotations = pointerHasMoved ? nextAnnotations.keys.toList().reversed : enteringAnnotations;
-      for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
-        if (annotation.onHover != null) {
-          annotation.onHover!(triggeringEvent.transformed(nextAnnotations[annotation]));
-        }
-      }
     }
   }
 

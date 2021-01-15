@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -179,18 +179,18 @@ enum SchedulerPhase {
 
 /// Scheduler for running the following:
 ///
-/// * _Transient callbacks_, triggered by the system's [Window.onBeginFrame]
-///   callback, for synchronizing the application's behavior to the system's
-///   display. For example, [Ticker]s and [AnimationController]s trigger from
-///   these.
+/// * _Transient callbacks_, triggered by the system's
+///   [dart:ui.PlatformDispatcher.onBeginFrame] callback, for synchronizing the
+///   application's behavior to the system's display. For example, [Ticker]s and
+///   [AnimationController]s trigger from these.
 ///
-/// * _Persistent callbacks_, triggered by the system's [Window.onDrawFrame]
-///   callback, for updating the system's display after transient callbacks have
-///   executed. For example, the rendering layer uses this to drive its
-///   rendering pipeline.
+/// * _Persistent callbacks_, triggered by the system's
+///   [dart:ui.PlatformDispatcher.onDrawFrame] callback, for updating the
+///   system's display after transient callbacks have executed. For example, the
+///   rendering layer uses this to drive its rendering pipeline.
 ///
 /// * _Post-frame callbacks_, which are run after persistent callbacks, just
-///   before returning from the [Window.onDrawFrame] callback.
+///   before returning from the [dart:ui.PlatformDispatcher.onDrawFrame] callback.
 ///
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
@@ -238,20 +238,20 @@ mixin SchedulerBinding on BindingBase {
   /// feel more sluggish.
   ///
   /// Using [addTimingsCallback] is preferred over using
-  /// [Window.onReportTimings] directly because the
-  /// [Window.onReportTimings] API only allows one callback, which
-  /// prevents multiple libraries from registering listeners
-  /// simultaneously, while this API allows multiple callbacks to be
-  /// registered independently.
+  /// [dart:ui.PlatformDispatcher.onReportTimings] directly because the
+  /// [dart:ui.PlatformDispatcher.onReportTimings] API only allows one callback,
+  /// which prevents multiple libraries from registering listeners
+  /// simultaneously, while this API allows multiple callbacks to be registered
+  /// independently.
   ///
-  /// This API is implemented in terms of [Window.onReportTimings]. In
-  /// release builds, when no libraries have registered with this API,
-  /// the [Window.onReportTimings] callback is not set, which disables
-  /// the performance tracking and reduces the runtime overhead to
-  /// approximately zero. The performance overhead of the performance
-  /// tracking when one or more callbacks are registered (i.e. when it
-  /// is enabled) is very approximately 0.01% CPU usage per second
-  /// (measured on an iPhone 6s).
+  /// This API is implemented in terms of
+  /// [dart:ui.PlatformDispatcher.onReportTimings]. In release builds, when no
+  /// libraries have registered with this API, the
+  /// [dart:ui.PlatformDispatcher.onReportTimings] callback is not set, which
+  /// disables the performance tracking and reduces the runtime overhead to
+  /// approximately zero. The performance overhead of the performance tracking
+  /// when one or more callbacks are registered (i.e. when it is enabled) is
+  /// very approximately 0.01% CPU usage per second (measured on an iPhone 6s).
   ///
   /// In debug and profile builds, the [SchedulerBinding] itself
   /// registers a timings callback to update the [Timeline].
@@ -720,8 +720,8 @@ mixin SchedulerBinding on BindingBase {
       scheduleFrame();
   }
 
-  /// Ensures callbacks for `window.onBeginFrame` and `window.onDrawFrame`
-  /// are registered.
+  /// Ensures callbacks for [PlatformDispatcher.onBeginFrame] and
+  /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
     window.onBeginFrame ??= _handleBeginFrame;
@@ -755,7 +755,7 @@ mixin SchedulerBinding on BindingBase {
   }
 
   /// If necessary, schedules a new frame by calling
-  /// [Window.scheduleFrame].
+  /// [dart:ui.PlatformDispatcher.scheduleFrame].
   ///
   /// After this is called, the engine will (eventually) call
   /// [handleBeginFrame]. (This call might be delayed, e.g. if the device's
@@ -794,7 +794,8 @@ mixin SchedulerBinding on BindingBase {
     _hasScheduledFrame = true;
   }
 
-  /// Schedules a new frame by calling [Window.scheduleFrame].
+  /// Schedules a new frame by calling
+  /// [dart:ui.PlatformDispatcher.scheduleFrame].
   ///
   /// After this is called, the engine will call [handleBeginFrame], even if
   /// frames would normally not be scheduled by [scheduleFrame] (e.g. even if
@@ -934,8 +935,9 @@ mixin SchedulerBinding on BindingBase {
   }
   Duration? _currentFrameTimeStamp;
 
-  /// The raw time stamp as provided by the engine to [Window.onBeginFrame]
-  /// for the frame currently being processed.
+  /// The raw time stamp as provided by the engine to
+  /// [dart:ui.PlatformDispatcher.onBeginFrame] for the frame currently being
+  /// processed.
   ///
   /// Unlike [currentFrameTimeStamp], this time stamp is neither adjusted to
   /// offset when the epoch started nor scaled to reflect the [timeDilation] in
@@ -952,20 +954,45 @@ mixin SchedulerBinding on BindingBase {
 
   int _debugFrameNumber = 0;
   String? _debugBanner;
-  bool _ignoreNextEngineDrawFrame = false;
+
+  // Whether the current engine frame needs to be postponed till after the
+  // warm-up frame.
+  //
+  // Engine may begin a frame in the middle of the warm-up frame because the
+  // warm-up frame is scheduled by timers while the engine frame is scheduled
+  // by platform specific frame scheduler (e.g. `requestAnimationFrame` on the
+  // web). When this happens, we let the warm-up frame finish, and postpone the
+  // engine frame.
+  bool _rescheduleAfterWarmUpFrame = false;
 
   void _handleBeginFrame(Duration rawTimeStamp) {
     if (_warmUpFrame) {
-      assert(!_ignoreNextEngineDrawFrame);
-      _ignoreNextEngineDrawFrame = true;
+      // "begin frame" and "draw frame" must strictly alternate. Therefore
+      // _rescheduleAfterWarmUpFrame cannot possibly be true here as it is
+      // reset by _handleDrawFrame.
+      assert(!_rescheduleAfterWarmUpFrame);
+      _rescheduleAfterWarmUpFrame = true;
       return;
     }
     handleBeginFrame(rawTimeStamp);
   }
 
   void _handleDrawFrame() {
-    if (_ignoreNextEngineDrawFrame) {
-      _ignoreNextEngineDrawFrame = false;
+    if (_rescheduleAfterWarmUpFrame) {
+      _rescheduleAfterWarmUpFrame = false;
+      // Reschedule in a post-frame callback to allow the draw-frame phase of
+      // the warm-up frame to finish.
+      addPostFrameCallback((Duration timeStamp) {
+        // Force an engine frame.
+        //
+        // We need to reset _hasScheduledFrame here because we cancelled the
+        // original engine frame, and therefore did not run handleBeginFrame
+        // who is responsible for resetting it. So if a frame callback set this
+        // to true in the "begin frame" part of the warm-up frame, it will
+        // still be true here and cause us to skip scheduling an engine frame.
+        _hasScheduledFrame = false;
+        scheduleFrame();
+      });
       return;
     }
     handleDrawFrame();

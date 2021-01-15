@@ -11,7 +11,7 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// bool _first;
+// bool _first = false;
 
 /// Specifies which of two children to show. See [AnimatedCrossFade].
 ///
@@ -316,12 +316,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
     final bool transitioningForwards = _controller!.status == AnimationStatus.completed ||
                                        _controller!.status == AnimationStatus.forward;
-    Key topKey;
+    final Key topKey;
     Widget topChild;
-    Animation<double> topAnimation;
-    Key bottomKey;
+    final Animation<double> topAnimation;
+    final Key bottomKey;
     Widget bottomChild;
-    Animation<double> bottomAnimation;
+    final Animation<double> bottomAnimation;
     if (transitioningForwards) {
       topKey = kSecondChildKey;
       topChild = widget.secondChild;

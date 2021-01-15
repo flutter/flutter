@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io';
 
@@ -11,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../flutter_test_alternative.dart' show Fake;
-import '../painting/image_data.dart';
+import '../image_data.dart';
 
 void main() {
   final MockHttpClient client = MockHttpClient();
@@ -25,7 +23,7 @@ void main() {
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
 
-    }, createHttpClient: (SecurityContext _) {
+    }, createHttpClient: (SecurityContext? _) {
       return client;
     });
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
@@ -62,7 +60,7 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.decompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(
       onData,
       onDone: onDone,
@@ -78,6 +76,6 @@ class MockHttpHeaders extends Fake implements HttpHeaders {
   @override
   void add(String key, Object value, { bool preserveHeaderCase = false }) {
     headers[key] ??= <String>[];
-    headers[key].add(value.toString());
+    headers[key]!.add(value.toString());
   }
 }

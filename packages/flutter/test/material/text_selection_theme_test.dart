@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -74,7 +72,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, defaultCursorColor);
-    expect(Color(renderEditable.selectionColor.value), defaultSelectionColor);
+    expect(Color(renderEditable.selectionColor!.value), defaultSelectionColor);
 
     // Test the selection handle color.
     await tester.pumpWidget(
@@ -95,7 +93,7 @@ void main() {
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   });
 
-  testWidgets('ThemeDate.textSelectionTheme will be used if provided', (WidgetTester tester) async {
+  testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -117,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor.withAlpha(0));
+    expect(renderEditable.cursorColor, textSelectionTheme.cursorColor!.withAlpha(0));
     expect(renderEditable.selectionColor, textSelectionTheme.selectionColor);
 
     // Test the selection handle color.
@@ -140,7 +138,7 @@ void main() {
     expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextSelectionTheme widget will override ThemeDate.textSelectionTheme', (WidgetTester tester) async {
+  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -170,7 +168,7 @@ void main() {
     await tester.pumpAndSettle();
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor.withAlpha(0));
+    expect(renderEditable.cursorColor, widgetTextSelectionTheme.cursorColor!.withAlpha(0));
     expect(renderEditable.selectionColor, widgetTextSelectionTheme.selectionColor);
 
     // Test the selection handle color.

@@ -59,7 +59,7 @@ import 'image_provider.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@template flutter.painting.boxDecoration.clip}
+/// {@template flutter.painting.BoxDecoration.clip}
 /// The [shape] or the [borderRadius] won't clip the children of the
 /// decorated [Container]. If the clip is required, insert a clip widget
 /// (e.g., [ClipRect], [ClipRRect], [ClipPath]) as the child of the [Container].
@@ -167,7 +167,7 @@ class BoxDecoration extends Decoration {
   /// Applies only to boxes with rectangular shapes; ignored if [shape] is not
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BorderRadiusGeometry? borderRadius;
 
   /// A list of shadows cast by this box behind the box.
@@ -208,7 +208,7 @@ class BoxDecoration extends Decoration {
   /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
   /// [BoxShape.rectangle].
   ///
-  /// {@macro flutter.painting.boxDecoration.clip}
+  /// {@macro flutter.painting.BoxDecoration.clip}
   final BoxShape shape;
 
   @override
@@ -251,7 +251,7 @@ class BoxDecoration extends Decoration {
       return scale(t);
     if (a is BoxDecoration)
       return BoxDecoration.lerp(a, this, t);
-    return super.lerpFrom(a, t) as BoxDecoration;
+    return super.lerpFrom(a, t) as BoxDecoration?;
   }
 
   @override
@@ -260,7 +260,7 @@ class BoxDecoration extends Decoration {
       return scale(1.0 - t);
     if (b is BoxDecoration)
       return BoxDecoration.lerp(this, b, t);
-    return super.lerpTo(b, t) as BoxDecoration;
+    return super.lerpTo(b, t) as BoxDecoration?;
   }
 
   /// Linearly interpolate between two box decorations.
@@ -486,7 +486,7 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius,
+      borderRadius: _decoration.borderRadius as BorderRadius?,
       textDirection: configuration.textDirection,
     );
   }

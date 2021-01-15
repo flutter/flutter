@@ -270,7 +270,7 @@ class CommandHelpOption {
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
 
-    // Terminals seem to require this because we have both boldened and colored
+    // Terminals seem to require this because we have both bolded and colored
     // a line. Otherwise the next line comes out bold until a reset bold.
     if (_terminal.supportsColor) {
       message.write(AnsiTerminal.resetBold);

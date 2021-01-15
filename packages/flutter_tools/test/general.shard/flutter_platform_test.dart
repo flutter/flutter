@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,17 +23,19 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   });
 
   group('FlutterPlatform', () {
     testUsingContext('ensureConfiguration throws an error if an '
       'explicitObservatoryPort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: '/',
         explicitObservatoryPort: 1234,
-        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -44,10 +48,9 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if a precompiled '
       'entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -55,6 +58,49 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    group('Observatory and DDS setup', () {
+      Platform fakePlatform;
+      ProcessManager mockProcessManager;
+      FlutterPlatform flutterPlatform;
+      final Map<Type, Generator> contextOverrides = <Type, Generator>{
+        Platform: () => fakePlatform,
+        ProcessManager: () => mockProcessManager,
+        FileSystem: () => fileSystem,
+      };
+
+      setUp(() {
+        fakePlatform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
+        mockProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/',
+              '--observatory-port=0',
+              '--ipv6',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'example.dill'
+            ],
+            stdout: 'success',
+            stderr: 'failure',
+            exitCode: 0,
+          )
+        ]);
+        flutterPlatform = TestObservatoryFlutterPlatform();
+      });
+
+      testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
+        flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
+        final TestObservatoryFlutterPlatform testPlatform = flutterPlatform as TestObservatoryFlutterPlatform;
+        await testPlatform.ddsServiceUriFuture().then((Uri uri) => expect(uri.port, 1234));
+      }, overrides: contextOverrides);
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -125,20 +171,18 @@ void main() {
 
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       expect(() => installHook(
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
@@ -152,14 +196,12 @@ void main() {
         port: 100,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
-        buildMode: BuildMode.debug,
-        trackWidgetCreation: true,
+        buildInfo: BuildInfo.debug,
         updateGoldens: true,
         buildTestAssets: true,
         observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
-        extraFrontEndOptions: <String>[],
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });
@@ -175,12 +217,48 @@ void main() {
       expect(flutterPlatform.explicitObservatoryPort, equals(200));
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
-      expect(flutterPlatform.buildMode, equals(BuildMode.debug));
-      expect(flutterPlatform.trackWidgetCreation, equals(true));
+      expect(flutterPlatform.buildInfo, equals(BuildInfo.debug));
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.buildTestAssets, equals(true));
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
+  });
+
+  FakeProcessManager fakeProcessManager;
+
+  testUsingContext('Can pass additional arguments to tester binary', () async {
+    final TestFlutterPlatform platform = TestFlutterPlatform(<String>['--foo', '--bar']);
+    platform.loadChannel('test1.dart', MockSuitePlatform());
+    await null;
+
+    expect(fakeProcessManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () {
+      return fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--disable-observatory',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--packages=.dart_tool/package_config.json',
+            '--foo',
+            '--bar',
+            'example.dill'
+          ],
+          stdout: 'success',
+          stderr: 'failure',
+          exitCode: 0,
+        )
+      ]);
+    }
   });
 }
 
@@ -198,8 +276,8 @@ class MockHttpServer extends Mock implements HttpServer {}
 //
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
-  TestFlutterPlatform() : super(
-    buildMode: BuildMode.debug,
+  TestFlutterPlatform([List<String> additionalArguments]) : super(
+    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
     shellPath: '/',
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
@@ -208,10 +286,49 @@ class TestFlutterPlatform extends FlutterPlatform {
     startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
-    extraFrontEndOptions: <String>[],
+    disableDds: true,
+    additionalArguments: additionalArguments,
   );
 
   @override
   @protected
   Future<HttpServer> bind(InternetAddress host, int port) async => MockHttpServer();
+}
+
+// A FlutterPlatform that enables observatory.
+//
+// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
+class TestObservatoryFlutterPlatform extends FlutterPlatform {
+  TestObservatoryFlutterPlatform() : super(
+    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
+    shellPath: '/',
+    precompiledDillPath: 'example.dill',
+    host: InternetAddress.loopbackIPv6,
+    port: 0,
+    updateGoldens: false,
+    startPaused: false,
+    enableObservatory: true,
+    explicitObservatoryPort: 1234,
+    buildTestAssets: false,
+    disableServiceAuthCodes: false,
+    disableDds: false,
+    additionalArguments: null,
+  );
+
+  final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
+
+  Future<Uri> ddsServiceUriFuture() {
+    return _ddsServiceUriCompleter.future;
+  }
+
+  @override
+  @protected
+  Future<HttpServer> bind(InternetAddress host, int port) async => MockHttpServer();
+
+  @override
+  Uri getDdsServiceUri() {
+    final Uri result = super.getDdsServiceUri();
+    _ddsServiceUriCompleter.complete(result);
+    return result;
+  }
 }

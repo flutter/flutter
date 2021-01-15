@@ -20,5 +20,6 @@
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
-  "modalBarrierDismissLabel": "Avvis"
+  "modalBarrierDismissLabel": "Avvis",
+  "searchTextFieldPlaceholderLabel": "Søk"
 }

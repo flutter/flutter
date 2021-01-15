@@ -1,12 +1,42 @@
 {
+  "@datePickerHourSemanticsLabelZero": {
+    "optional": true
+  },
   "datePickerHourSemanticsLabelOne": "$hour o'clock",
+  "@datePickerHourSemanticsLabelOne": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelTwo": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelFew": {
+    "optional": true
+  },
+  "@datePickerHourSemanticsLabelMany": {
+    "optional": true
+  },
   "datePickerHourSemanticsLabelOther": "$hour o'clock",
   "@datePickerHourSemanticsLabel": {
     "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
     "plural": "hour"
   },
 
+  "@datePickerMinuteSemanticsLabelZero": {
+    "optional": true
+  },
   "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "@datePickerMinuteSemanticsLabelOne": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelTwo": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelFew": {
+    "optional": true
+  },
+  "@datePickerMinuteSemanticsLabelMany": {
+    "optional": true
+  },
   "datePickerMinuteSemanticsLabelOther": "$minute minutes",
   "@datePickerMinuteSemanticsLabel": {
     "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
@@ -49,21 +79,66 @@
     "parameters": "tabIndex, tabCount"
   },
 
+  "@timerPickerHourLabelZero": {
+    "optional": true
+  },
   "timerPickerHourLabelOne": "hour",
+  "@timerPickerHourLabelOne": {
+    "optional": true
+  },
+  "@timerPickerHourLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerHourLabelFew": {
+    "optional": true
+  },
+  "@timerPickerHourLabelMany": {
+    "optional": true
+  },
   "timerPickerHourLabelOther": "hours",
   "@timerPickerHourLabel": {
     "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "hour"
   },
 
+  "@timerPickerMinuteLabelZero": {
+    "optional": true
+  },
   "timerPickerMinuteLabelOne": "min.",
+  "@timerPickerMinuteLabelOne": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelFew": {
+    "optional": true
+  },
+  "@timerPickerMinuteLabelMany": {
+    "optional": true
+  },
   "timerPickerMinuteLabelOther": "min.",
   "@timerPickerMinuteLabel": {
     "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "minute"
   },
 
+  "@timerPickerSecondLabelZero": {
+    "optional": true
+  },
   "timerPickerSecondLabelOne": "sec.",
+  "@timerPickerSecondLabelOne": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelTwo": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelFew": {
+    "optional": true
+  },
+  "@timerPickerSecondLabelMany": {
+    "optional": true
+  },
   "timerPickerSecondLabelOther": "sec.",
   "@timerPickerSecondLabel": {
     "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
@@ -88,6 +163,11 @@
   "selectAllButtonLabel": "Select All",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "searchTextFieldPlaceholderLabel": "Search",
+  "@searchTextFieldPlaceholderLabel": {
+    "description": "The default placeholder label used in an iOS styled search bar."
   },
 
   "modalBarrierDismissLabel": "Dismiss",

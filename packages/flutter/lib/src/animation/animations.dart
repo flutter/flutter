@@ -12,7 +12,7 @@ import 'curves.dart';
 import 'listener_helpers.dart';
 
 // Examples can assume:
-// AnimationController controller;
+// late AnimationController controller;
 
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
@@ -491,11 +491,14 @@ class TrainHoppingAnimation extends Animation<double>
   /// The current train argument must not be null but the next train argument
   /// can be null. If the next train is null, then this object will just proxy
   /// the first animation and never hop.
-  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-      : assert(_currentTrain != null) {
+  TrainHoppingAnimation(
+    Animation<double> this._currentTrain,
+    this._nextTrain, {
+    this.onSwitchedTrain,
+  }) : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
       } else if (_currentTrain!.value > _nextTrain!.value) {
         _mode = _TrainHoppingMode.maximize;
@@ -557,7 +560,7 @@ class TrainHoppingAnimation extends Animation<double>
         _currentTrain!
           ..removeStatusListener(_statusChangeHandler)
           ..removeListener(_valueChangeHandler);
-        _currentTrain = _nextTrain!;
+        _currentTrain = _nextTrain;
         _nextTrain = null;
         _currentTrain!.addStatusListener(_statusChangeHandler);
         _statusChangeHandler(_currentTrain!.status);

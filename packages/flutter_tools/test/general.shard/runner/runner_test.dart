@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
@@ -89,9 +90,10 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
+      Artifacts: () => Artifacts.test(),
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand
@@ -130,10 +132,10 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
+      Artifacts: () => Artifacts.test(),
     });
 
     testUsingContext('create local report', () async {
@@ -190,9 +192,10 @@ void main() {
         },
         operatingSystem: 'linux'
       ),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
+      Artifacts: () => Artifacts.test(),
     });
   });
 }
@@ -255,9 +258,6 @@ class CrashingUsage implements Usage {
     }
     _sentException = exception;
   }
-
-  @override
-  bool get isFirstRun => _impl.isFirstRun;
 
   @override
   bool get suppressAnalytics => _impl.suppressAnalytics;

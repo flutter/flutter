@@ -5,25 +5,6 @@
 
 set -e
 
-function deploy {
-  local total_tries="$1"
-  local remaining_tries=$(($total_tries - 1))
-  shift
-  while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
-    remaining_tries=$(($remaining_tries - 1))
-    echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
-    sleep 5
-  done
-
-  [[ "$remaining_tries" == 0 ]] && {
-    echo "Command still failed after $total_tries tries: '$@'"
-    cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
-    return 1
-  }
-  return 0
-}
-
 function script_location() {
   local script_location="${BASH_SOURCE[0]}"
   # Resolve symlinks
@@ -37,7 +18,9 @@ function script_location() {
 
 function generate_docs() {
     # Install and activate dartdoc.
-    "$PUB" global activate dartdoc 0.32.4
+    # NOTE: When updating to a new dartdoc version, please also update
+    # `dartdoc_options.yaml` to include newly introduced error and warning types.
+    "$PUB" global activate dartdoc 0.38.0
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.
@@ -84,25 +67,21 @@ function deploy_docs() {
     # Ensure google webmaster tools can verify our site.
     cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
-    case "$CIRRUS_BRANCH" in
+    case "$LUCI_BRANCH" in
         master)
-            echo "$(date): Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
+            echo "$(date): Updating $LUCI_BRANCH docs: https://master-api.flutter.dev/"
             # Disable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-            export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-            deploy 5 master-docs-flutter-dev
             ;;
         stable)
-            echo "$(date): Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
+            echo "$(date): Updating $LUCI_BRANCH docs: https://api.flutter.dev/"
             # Enable search indexing on the master staging site so searches get only
             # the stable site.
             echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-            export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-            deploy 5 docs-flutter-dev
             ;;
         *)
-            >&2 echo "Docs deployment cannot be run on the $CIRRUS_BRANCH branch."
+            >&2 echo "Docs deployment cannot be run on the $LUCI_BRANCH branch."
             exit 0
     esac
 }
@@ -116,14 +95,13 @@ function move_offline_into_place() {
   mkdir -p doc/offline
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
-  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-  # if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  # else
-  #   echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
-  # fi
-  # mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
-  # du -sh doc/offline/flutter.docset.tar.gz
+  if [[ "$LUCI_BRANCH" == "stable" ]]; then
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  else
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+  fi
+  mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
+  du -sh doc/offline/flutter.docset.tar.gz
 }
 
 # So that users can run this script from anywhere and it will work as expected.
@@ -161,10 +139,9 @@ fi
 
 generate_docs
 # Skip publishing docs for PRs and release candidate branches
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
+if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
   (cd "$FLUTTER_ROOT/dev/docs"; create_offline_zip)
-  # TODO(tvolkert): re-enable (https://github.com/flutter/flutter/issues/60646)
-  # (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
+  (cd "$FLUTTER_ROOT/dev/docs"; create_docset)
   (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
   deploy_docs
 fi

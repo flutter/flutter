@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -50,46 +48,46 @@ class NavigationRailThemeData with Diagnosticable {
   });
 
   /// Color to be used for the [NavigationRail]'s background.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The z-coordinate to be used for the [NavigationRail]'s elevation.
-  final double elevation;
+  final double? elevation;
 
   /// The style to merge with the default text style for
   /// [NavigationRailDestination] labels, when the destination is not selected.
-  final TextStyle unselectedLabelTextStyle;
+  final TextStyle? unselectedLabelTextStyle;
 
   /// The style to merge with the default text style for
   /// [NavigationRailDestination] labels, when the destination is selected.
-  final TextStyle selectedLabelTextStyle;
+  final TextStyle? selectedLabelTextStyle;
 
   /// The theme to merge with the default icon theme for
   /// [NavigationRailDestination] icons, when the destination is not selected.
-  final IconThemeData unselectedIconTheme;
+  final IconThemeData? unselectedIconTheme;
 
   /// The theme to merge with the default icon theme for
   /// [NavigationRailDestination] icons, when the destination is selected.
-  final IconThemeData selectedIconTheme;
+  final IconThemeData? selectedIconTheme;
 
   /// The alignment for the [NavigationRailDestination]s as they are positioned
   /// within the [NavigationRail].
-  final double groupAlignment;
+  final double? groupAlignment;
 
   /// The type that defines the layout and behavior of the labels in the
   /// [NavigationRail].
-  final NavigationRailLabelType labelType;
+  final NavigationRailLabelType? labelType;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationRailThemeData copyWith({
-    Color backgroundColor,
-    double elevation,
-    TextStyle unselectedLabelTextStyle,
-    TextStyle selectedLabelTextStyle,
-    IconThemeData unselectedIconTheme,
-    IconThemeData selectedIconTheme,
-    double groupAlignment,
-    NavigationRailLabelType labelType,
+    Color? backgroundColor,
+    double? elevation,
+    TextStyle? unselectedLabelTextStyle,
+    TextStyle? selectedLabelTextStyle,
+    IconThemeData? unselectedIconTheme,
+    IconThemeData? selectedIconTheme,
+    double? groupAlignment,
+    NavigationRailLabelType? labelType,
   }) {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -108,7 +106,7 @@ class NavigationRailThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationRailThemeData lerp(NavigationRailThemeData a, NavigationRailThemeData b, double t) {
+  static NavigationRailThemeData? lerp(NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -182,9 +180,9 @@ class NavigationRailTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const NavigationRailTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// Specifies the background color, elevation, label text style, icon theme,
@@ -203,14 +201,13 @@ class NavigationRailTheme extends InheritedTheme {
   /// NavigationRailTheme theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
-    final NavigationRailTheme navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
+    final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final NavigationRailTheme ancestorTheme = context.findAncestorWidgetOfExactType<NavigationRailTheme>();
-    return identical(this, ancestorTheme) ? child : NavigationRailTheme(data: data, child: child);
+    return NavigationRailTheme(data: data, child: child);
   }
 
   @override

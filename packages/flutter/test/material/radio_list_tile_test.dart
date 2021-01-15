@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget wrap({Widget child}) {
+Widget wrap({Widget? child}) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: Directionality(
@@ -28,7 +26,7 @@ void main() {
   testWidgets('RadioListTile should initialize according to groupValue',
       (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
-    int selectedValue;
+    int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
     // irrelevant when searching with [find.byType].
     final Type radioListTileType = const RadioListTile<int>(
@@ -53,7 +51,7 @@ void main() {
               body: ListView.builder(
                 itemCount: values.length,
                 itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                  onChanged: (int value) {
+                  onChanged: (int? value) {
                     setState(() {
                       selectedValue = value;
                     });
@@ -89,7 +87,7 @@ void main() {
   testWidgets('RadioListTile simple control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final Key titleKey = UniqueKey();
-    final List<int> log = <int>[];
+    final List<int?> log = <int?>[];
 
     await tester.pumpWidget(
       wrap(
@@ -160,7 +158,7 @@ void main() {
 
   testWidgets('RadioListTile control tests', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
-    int selectedValue;
+    int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
     final Type radioType = const Radio<int>(
@@ -178,7 +176,7 @@ void main() {
               body: ListView.builder(
                 itemCount: values.length,
                 itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                  onChanged: (int value) {
+                  onChanged: (int? value) {
                     log.add(value);
                     setState(() {
                       selectedValue = value;
@@ -228,7 +226,7 @@ void main() {
   testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30311
     final List<int> values = <int>[0, 1, 2];
-    int selectedValue;
+    int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
     final Type radioType = const Radio<int>(
@@ -246,7 +244,7 @@ void main() {
               body: ListView.builder(
                 itemCount: values.length,
                 itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                  onChanged: (int value) {
+                  onChanged: (int? value) {
                     log.add(value);
                     setState(() {
                       selectedValue = value;
@@ -280,7 +278,7 @@ void main() {
   testWidgets('Selected RadioListTile should trigger onChanged when toggleable',
       (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
-    int selectedValue;
+    int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
     final Type radioType = const Radio<int>(
@@ -299,7 +297,7 @@ void main() {
                 itemCount: values.length,
                 itemBuilder: (BuildContext context, int index) {
                   return RadioListTile<int>(
-                    onChanged: (int value) {
+                    onChanged: (int? value) {
                       log.add(value);
                       setState(() {
                         selectedValue = value;
@@ -325,16 +323,16 @@ void main() {
 
     await tester.tap(find.text('0'));
     await tester.pump();
-    expect(log, equals(<int>[0, null]));
+    expect(log, equals(<int?>[0, null]));
 
     await tester.tap(find.byType(radioType).at(0));
     await tester.pump();
-    expect(log, equals(<int>[0, null, 0]));
+    expect(log, equals(<int?>[0, null, 0]));
   });
 
   testWidgets('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int> log = <int>[];
+    final List<int?> log = <int?>[];
 
     await tester.pumpWidget(Material(
       child: Center(
@@ -367,7 +365,7 @@ void main() {
 
     await tester.tap(find.byKey(key));
 
-    expect(log, equals(<int>[null]));
+    expect(log, equals(<int?>[null]));
     log.clear();
 
     await tester.pumpWidget(Material(
@@ -395,7 +393,7 @@ void main() {
         child: RadioListTile<int>(
           value: 1,
           groupValue: 2,
-          onChanged: (int i) {},
+          onChanged: (int? i) {},
           title: const Text('Title'),
         ),
       ),
@@ -431,7 +429,7 @@ void main() {
         child: RadioListTile<int>(
           value: 2,
           groupValue: 2,
-          onChanged: (int i) {},
+          onChanged: (int? i) {},
           title: const Text('Title'),
         ),
       ),
@@ -540,7 +538,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
-    int radioValue = 2;
+    int? radioValue = 2;
     SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
@@ -551,7 +549,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: radioValue,
-          onChanged: (int i) {
+          onChanged: (int? i) {
             radioValue = i;
           },
           title: const Text('Title'),
@@ -566,10 +564,10 @@ void main() {
     expect(radioValue, 1);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics.id,
+      'nodeId': object.debugSemantics!.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -591,7 +589,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
 
     await tester.pumpWidget(
       wrap(
@@ -606,6 +604,109 @@ void main() {
     );
 
     await tester.pump();
-    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+    expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
+    final Type radioType = const Radio<bool>(
+      groupValue: true,
+      value: true,
+      onChanged: null,
+    ).runtimeType;
+
+    await tester.pumpWidget(
+      wrap(
+        child: Center(
+          child: RadioListTile<bool>(
+            groupValue: true,
+            value: true,
+            title: const Text('Title'),
+            onChanged: (_){},
+            contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
+          )
+        )
+      )
+    );
+
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect radioRect = tester.getRect(find.byType(radioType));
+    final Rect titleRect = tester.getRect(find.text('Title'));
+
+    // Get the taller Rect of the Radio and Text widgets
+    final Rect tallerRect = radioRect.height > titleRect.height ? radioRect : titleRect;
+
+    // Get the extra height between the tallerRect and ListTile height
+    final double extraHeight = 56 - tallerRect.height;
+
+    // Check for correct top and bottom padding
+    expect(paddingRect.top, tallerRect.top - extraHeight / 2 - 10); //top padding
+    expect(paddingRect.bottom, tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
+
+    // Check for correct left and right padding
+    expect(paddingRect.left, radioRect.left - 8); //left padding
+    expect(paddingRect.right, titleRect.right + 15); //right padding
+  });
+
+  testWidgets('RadioListTile respects shape', (WidgetTester tester) async {
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
+    );
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: RadioListTile<bool>(
+          value: true,
+          groupValue: true,
+          onChanged: null,
+          title: Text('Title'),
+          shape: shapeBorder,
+        ),
+      ),
+    ));
+
+    expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
+  });
+
+  testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
+    const Color tileColor = Colors.red;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: RadioListTile<bool>(
+            value: false,
+            groupValue: true,
+            onChanged: null,
+            title: Text('Title'),
+            tileColor: tileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
+  });
+
+  testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
+    const Color selectedTileColor = Colors.black;
+
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: RadioListTile<bool>(
+            value: false,
+            groupValue: true,
+            onChanged: null,
+            title: Text('Title'),
+            selected: true,
+            selectedTileColor: selectedTileColor,
+          ),
+        ),
+      ),
+    );
+
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 }

@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -595,7 +592,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           invalidateScopeData(nearestScope);
           return false;
         }
-        ScrollPositionAlignmentPolicy alignmentPolicy;
+        final ScrollPositionAlignmentPolicy alignmentPolicy;
         switch (direction) {
           case TraversalDirection.up:
           case TraversalDirection.left:
@@ -1107,7 +1104,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 
 /// Base class for all sort orders for [OrderedTraversalPolicy] traversal.
 ///
-/// {@template flutter.widgets.focusorder.comparable}
+/// {@template flutter.widgets.FocusOrder.comparable}
 /// Only orders of the same type are comparable. If a set of widgets in the same
 /// [FocusTraversalGroup] contains orders that are not comparable with each
 /// other, it will assert, since the ordering between such keys is undefined. To
@@ -1173,7 +1170,7 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
 /// to a widget subtree that is using a [OrderedTraversalPolicy] to define the
 /// order in which widgets should be traversed with the keyboard.
 ///
-/// {@macro flutter.widgets.focusorder.comparable}
+/// {@macro flutter.widgets.FocusOrder.comparable}
 ///
 /// See also:
 ///
@@ -1211,7 +1208,7 @@ class NumericFocusOrder extends FocusOrder {
 /// This sorts strings using Dart's default string comparison, which is not
 /// locale specific.
 ///
-/// {@macro flutter.widgets.focusorder.comparable}
+/// {@macro flutter.widgets.FocusOrder.comparable}
 ///
 /// See also:
 ///
@@ -1254,7 +1251,7 @@ class _OrderedFocusInfo {
 /// A [FocusTraversalPolicy] that orders nodes by an explicit order that resides
 /// in the nearest [FocusTraversalOrder] widget ancestor.
 ///
-/// {@macro flutter.widgets.focusorder.comparable}
+/// {@macro flutter.widgets.FocusOrder.comparable}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 /// This sample shows how to assign a traversal order to a widget. In the
@@ -1263,7 +1260,11 @@ class _OrderedFocusInfo {
 ///
 /// ```dart preamble
 /// class DemoButton extends StatelessWidget {
-///   const DemoButton({this.name, this.autofocus = false, this.order});
+///   const DemoButton({
+///     required this.name,
+///     this.autofocus = false,
+///     required this.order,
+///   });
 ///
 ///   final String name;
 ///   final bool autofocus;
@@ -1363,7 +1364,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
     final List<FocusNode> unordered = <FocusNode>[];
     final List<_OrderedFocusInfo> ordered = <_OrderedFocusInfo>[];
     for (final FocusNode node in sortedDescendants) {
-      final FocusOrder? order = FocusTraversalOrder.of(node.context!, nullOk: true);
+      final FocusOrder? order = FocusTraversalOrder.maybeOf(node.context!);
       if (order != null) {
         ordered.add(_OrderedFocusInfo(node: node, order: order));
       } else {
@@ -1387,36 +1388,55 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
 /// An inherited widget that describes the order in which its child subtree
 /// should be traversed.
 ///
-/// {@macro flutter.widgets.focusorder.comparable}
+/// {@macro flutter.widgets.FocusOrder.comparable}
 ///
 /// The order for a widget is determined by the [FocusOrder] returned by
 /// [FocusTraversalOrder.of] for a particular context.
 class FocusTraversalOrder extends InheritedWidget {
   /// A const constructor so that subclasses can be const.
-  const FocusTraversalOrder({Key? key, this.order, required Widget child}) : super(key: key, child: child);
+  const FocusTraversalOrder({Key? key, required this.order, required Widget child}) : super(key: key, child: child);
 
   /// The order for the widget descendants of this [FocusTraversalOrder].
-  final FocusOrder? order;
+  final FocusOrder order;
 
   /// Finds the [FocusOrder] in the nearest ancestor [FocusTraversalOrder] widget.
   ///
   /// It does not create a rebuild dependency because changing the traversal
   /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
   /// result of an order change.
-  static FocusOrder? of(BuildContext context, {bool nullOk = false}) {
+  ///
+  /// If no [FocusTraversalOrder] ancestor exists, or the order is null, this
+  /// will assert in debug mode, and throw an exception in release mode.
+  static FocusOrder of(BuildContext context) {
     assert(context != null);
-    assert(nullOk != null);
     final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
-    final FocusOrder? order = marker?.order;
-    if (order == null && !nullOk) {
-      throw FlutterError('FocusTraversalOrder.of() was called with a context that '
-          'does not contain a TraversalOrder widget. No TraversalOrder widget '
+    assert((){
+      if (marker == null) {
+        throw FlutterError(
+          'FocusTraversalOrder.of() was called with a context that '
+          'does not contain a FocusTraversalOrder widget. No TraversalOrder widget '
           'ancestor could be found starting from the context that was passed to '
           'FocusTraversalOrder.of().\n'
           'The context used was:\n'
-          '  $context');
-    }
-    return order;
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return marker!.order;
+  }
+
+  /// Finds the [FocusOrder] in the nearest ancestor [FocusTraversalOrder] widget.
+  ///
+  /// It does not create a rebuild dependency because changing the traversal
+  /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
+  /// result of an order change.
+  ///
+  /// If no [FocusTraversalOrder] ancestor exists, or the order is null, returns null.
+  static FocusOrder? maybeOf(BuildContext context) {
+    assert(context != null);
+    final FocusTraversalOrder? marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder?;
+    return marker?.order;
   }
 
   // Since the order of traversal doesn't affect display of anything, we don't
@@ -1445,7 +1465,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
 /// To prevent the members of the group from being focused, set the
-/// [descendantsAreFocusable] attribute to true.
+/// [descendantsAreFocusable] attribute to false.
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This sample shows three rows of buttons, each grouped by a
@@ -1460,10 +1480,10 @@ class FocusTraversalOrder extends InheritedWidget {
 /// /// the type of T.
 /// class OrderedButton<T> extends StatefulWidget {
 ///   const OrderedButton({
-///     this.name,
+///     required this.name,
 ///     this.canRequestFocus = true,
 ///     this.autofocus = false,
-///     this.order,
+///     required this.order,
 ///   });
 ///
 ///   final String name;
@@ -1476,7 +1496,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
-///   FocusNode focusNode;
+///   late FocusNode focusNode;
 ///
 ///   @override
 ///   void initState() {
@@ -1489,12 +1509,12 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 ///   @override
 ///   void dispose() {
-///     focusNode?.dispose();
+///     focusNode.dispose();
 ///     super.dispose();
 ///   }
 ///
 ///   @override
-///   void didUpdateWidget(OrderedButton oldWidget) {
+///   void didUpdateWidget(OrderedButton<T> oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
 ///     focusNode.canRequestFocus = widget.canRequestFocus;
 ///   }
@@ -1514,7 +1534,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       order = LexicalFocusOrder(widget.order.toString());
 ///     }
 ///
-///     Color overlayColor(Set<MaterialState> states) {
+///     Color? overlayColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused)) {
 ///         return Colors.red;
 ///       }
@@ -1524,7 +1544,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       return null;  // defer to the default overlayColor
 ///     }
 ///
-///     Color foregroundColor(Set<MaterialState> states) {
+///     Color? foregroundColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
 ///         return Colors.white;
 ///       }
@@ -1539,8 +1559,8 @@ class FocusTraversalOrder extends InheritedWidget {
 ///           focusNode: focusNode,
 ///           autofocus: widget.autofocus,
 ///           style: ButtonStyle(
-///             overlayColor: MaterialStateProperty.resolveWith<Color>(overlayColor),
-///             foregroundColor: MaterialStateProperty.resolveWith<Color>(foregroundColor),
+///             overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
+///             foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
 ///           ),
 ///           onPressed: () => _handleOnPressed(),
 ///           child: Text(widget.name),
@@ -1660,7 +1680,7 @@ class FocusTraversalGroup extends StatefulWidget {
 
   /// The child widget of this [FocusTraversalGroup].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// Returns the focus policy set by the [FocusTraversalGroup] that most
@@ -1670,17 +1690,16 @@ class FocusTraversalGroup extends StatefulWidget {
   /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
   /// result of an order change.
   ///
-  /// Will assert if no [FocusTraversalGroup] ancestor is found, and `nullOk` is false.
+  /// Will assert if no [FocusTraversalGroup] ancestor is found.
   ///
-  /// If `nullOk` is true, then it will return null if it doesn't find a
-  /// [FocusTraversalGroup] ancestor.
-  static FocusTraversalPolicy? of(BuildContext context, {bool nullOk = false}) {
+  /// See also:
+  ///
+  ///  * [maybeOf] for a similar function that will return null if no
+  ///    [FocusTraversalGroup] ancestor is found.
+  static FocusTraversalPolicy of(BuildContext context) {
     assert(context != null);
     final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
     assert(() {
-      if (nullOk) {
-        return true;
-      }
       if (inherited == null) {
         throw FlutterError(
           'Unable to find a FocusTraversalGroup widget in the context.\n'
@@ -1696,6 +1715,25 @@ class FocusTraversalGroup extends StatefulWidget {
       }
       return true;
     }());
+    return inherited!.policy;
+  }
+
+  /// Returns the focus policy set by the [FocusTraversalGroup] that most
+  /// tightly encloses the given [BuildContext].
+  ///
+  /// It does not create a rebuild dependency because changing the traversal
+  /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
+  /// result of an order change.
+  ///
+  /// Will return null if it doesn't find a [FocusTraversalGroup] ancestor.
+  ///
+  /// See also:
+  ///
+  ///  * [of] for a similar function that will throw if no [FocusTraversalGroup]
+  ///    ancestor is found.
+  static FocusTraversalPolicy? maybeOf(BuildContext context) {
+    assert(context != null);
+    final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
     return inherited?.policy;
   }
 

@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/android/android_studio_validator.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -51,97 +51,25 @@ final Platform macPlatform = FakePlatform(
 );
 
 void main() {
-  MockProcessManager mockProcessManager;
   MockFlutterVersion mockFlutterVersion;
   BufferLogger logger;
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
     mockFlutterVersion = MockFlutterVersion();
     logger = BufferLogger.test();
   });
 
+  testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
+    const ValidationMessage messageA = ValidationMessage('ab', contextUrl: 'a');
+    const ValidationMessage messageB = ValidationMessage('ab', contextUrl: 'b');
+
+    expect(messageB, isNot(messageA));
+    expect(messageB.hashCode, isNot(messageA.hashCode));
+    expect(messageA, isNot(messageB));
+    expect(messageA.hashCode, isNot(messageB.hashCode));
+  });
+
   group('doctor', () {
-    MockPlistParser mockPlistParser;
-    MemoryFileSystem fileSystem;
-
-    setUp(() {
-      mockPlistParser = MockPlistParser();
-      fileSystem = MemoryFileSystem.test();
-    });
-
-    testUsingContext('intellij validator', () async {
-      const String installPath = '/path/to/intelliJ';
-      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath).validate();
-      expect(result.type, ValidationType.partial);
-      expect(result.statusInfo, 'version test.test.test');
-      expect(result.messages, hasLength(4));
-
-      ValidationMessage message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('IntelliJ '));
-      expect(message.message, 'IntelliJ at $installPath');
-
-      message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
-      expect(message.message, 'Dart plugin version 162.2485');
-
-      message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
-      expect(message.message, contains('Flutter plugin version 0.1.3'));
-      expect(message.message, contains('recommended minimum version'));
-    }, overrides: noColorTerminalOverride);
-
-    testUsingContext('intellij plugins path checking on mac', () async {
-      when(mockPlistParser.getValueFromFile(any, PlistParser.kCFBundleShortVersionStringKey)).thenReturn('2020.10');
-
-      final Directory pluginsDirectory = fileSystem.directory('/foo/bar/Library/Application Support/JetBrains/TestID2020.10/plugins')
-        ..createSync(recursive: true);
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/path/to/app');
-      expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
-      expect(validator.pluginsPath, pluginsDirectory.path);
-    }, overrides: <Type, Generator>{
-      Platform: () => macPlatform,
-      PlistParser: () => mockPlistParser,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => mockProcessManager,
-      FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: macPlatform,
-      )
-    });
-
-    testUsingContext('legacy intellij plugins path checking on mac', () async {
-      when(mockPlistParser.getValueFromFile(any, PlistParser.kCFBundleShortVersionStringKey)).thenReturn('2020.10');
-
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
-      expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
-    }, overrides: <Type, Generator>{
-      Platform: () => macPlatform,
-      PlistParser: () => mockPlistParser,
-      FileSystem: () => fileSystem,
-      FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: macPlatform,
-      ),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('intellij plugins path checking on mac with override', () async {
-      when(mockPlistParser.getValueFromFile(any, 'JetBrainsToolboxApp')).thenReturn('/path/to/JetBrainsToolboxApp');
-
-      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
-      expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
-    }, overrides: <Type, Generator>{
-      PlistParser: () => mockPlistParser,
-      Platform: () => macPlatform,
-      FileSystem: () => fileSystem,
-      FileSystemUtils: () => FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: macPlatform,
-      ),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
       expect(result.type, ValidationType.installed);
@@ -156,6 +84,16 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('No IDE Validator includes expected installation messages', () async {
+      final ValidationResult result = await NoIdeValidator().validate();
+      expect(result.type, ValidationType.missing);
+
+      expect(
+        result.messages.map((ValidationMessage vm) => vm.message),
+        UserMessages().noIdeInstallationInfo,
+      );
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -176,7 +114,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -186,8 +124,9 @@ void main() {
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
-      expect(message.message, startsWith('Flutter extension not installed'));
-      expect(message.isError, isTrue);
+      expect(message.message, startsWith('Flutter extension can be installed from'));
+      expect(message.contextUrl, 'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter');
+      expect(message.isError, false);
     }, overrides: noColorTerminalOverride);
 
     group('device validator', () {
@@ -284,7 +223,6 @@ void main() {
 
     setUp(() {
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
     });
 
     testUsingContext('contains installed', () async {
@@ -411,16 +349,6 @@ void main() {
   });
 
   group('doctor with fake validators', () {
-    MockArtifacts mockArtifacts;
-    const String genSnapshotPath = '/path/to/gen_snapshot';
-    FileSystem memoryFileSystem;
-
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
-      mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
-    });
-
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor(logger).diagnose(verbose: false), isTrue);
       expect(logger.statusText, equals(
@@ -561,92 +489,6 @@ void main() {
               '! Doctor found issues in 4 categories.\n'
       ));
     }, overrides: noColorTerminalOverride);
-
-    testUsingContext('gen_snapshot does not work', () async {
-      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      when(mockProcessManager.runSync(
-        <String>[genSnapshotPath],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(101, 1, '', ''));
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-      final List<String> statusLines = logger.statusText.split('\n');
-      for (final String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
-        expect(statusLines, contains(contains(msg)));
-      }
-      if (globals.platform.isLinux) {
-        for (final String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
-          expect(statusLines, contains(contains(msg)));
-        }
-      }
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-    });
-
-    testUsingContext('gen_snapshot binary not available', () async {
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-      // gen_snapshot is downloaded on demand, and the doctor should not
-      // fail if the gen_snapshot binary is not present.
-      expect(logger.statusText, contains('No issues found!'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('version checking does not work', () async {
-      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      final VersionCheckError versionCheckError = VersionCheckError('version error');
-
-      when(mockFlutterVersion.channel).thenReturn('unknown');
-      when(mockFlutterVersion.frameworkVersion).thenReturn('0.0.0');
-      when(mockFlutterVersion.frameworkDate).thenThrow(versionCheckError);
-
-      when(mockProcessManager.runSync(
-        <String>[genSnapshotPath],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(101, 255, '', ''));
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: false), isTrue);
-
-      expect(logger.statusText, equals(
-        'Doctor summary (to see all details, run flutter doctor -v):\n'
-          '[!] Flutter (Channel unknown, 0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
-          '    ✗ version error\n\n'
-          '! Doctor found issues in 1 category.\n'
-      ));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-      FlutterVersion: () => mockFlutterVersion,
-    });
-
-    testUsingContext('shows mirrors', () async {
-      (globals.platform as FakePlatform).environment = <String, String>{
-        'PUB_HOSTED_URL': 'https://example.com/pub',
-        'FLUTTER_STORAGE_BASE_URL': 'https://example.com/flutter',
-      };
-
-      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: true), isTrue);
-      expect(logger.statusText, contains('Pub download mirror https://example.com/pub'));
-      expect(logger.statusText, contains('Flutter download mirror https://example.com/flutter'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => memoryFileSystem,
-      OutputPreferences: () => OutputPreferences(wrapText: false),
-      ProcessManager: () => mockProcessManager,
-      Platform: _kNoColorOutputPlatform,
-      FlutterVersion: () => mockFlutterVersion,
-    });
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
@@ -842,6 +684,13 @@ void main() {
     FlutterVersion: () => mockFlutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
+
+  testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
 }
 
 class NoOpDoctor implements Doctor {
@@ -855,7 +704,12 @@ class NoOpDoctor implements Doctor {
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
 
   @override
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    bool showColor = true,
+    AndroidLicenseValidator androidLicenseValidator,
+  }) async => true;
 
   @override
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
@@ -871,16 +725,6 @@ class NoOpDoctor implements Doctor {
 }
 
 class MockUsage extends Mock implements Usage {}
-
-class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
-
-  @override
-  String get pluginsPath => globals.fs.path.join('test', 'data', 'intellij', 'plugins');
-
-  @override
-  String get version => 'test.test.test';
-}
 
 class PassingValidator extends DoctorValidator {
   PassingValidator(String name) : super(name);
@@ -1180,18 +1024,6 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }
 }
 
-class FlutterValidatorDoctor extends Doctor {
-  FlutterValidatorDoctor(Logger logger) : super(logger: logger);
-
-  List<DoctorValidator> _validators;
-  @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      FlutterValidator(),
-    ];
-  }
-}
-
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
@@ -1207,7 +1039,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
@@ -1224,7 +1056,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockArtifacts extends Mock implements Artifacts {}
 class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
@@ -1233,5 +1064,6 @@ class MockDevice extends Mock implements Device {
     when(id).thenReturn('device-id');
     when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
     when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
   }
 }

@@ -40,9 +40,6 @@ class GradleUtils {
   /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
   String getExecutable(FlutterProject project) {
     final Directory androidDir = project.android.hostAppGradleRoot;
-    // Update the project if needed.
-    // TODO(egarciad): https://github.com/flutter/flutter/issues/40460
-    gradleUtils.migrateToR8(androidDir);
     gradleUtils.injectGradleWrapperIfNeeded(androidDir);
 
     final File gradle = androidDir.childFile(
@@ -62,37 +59,6 @@ class GradleUtils {
     return null;
   }
 
-  /// Migrates the Android's [directory] to R8.
-  /// https://developer.android.com/studio/build/shrink-code
-  @visibleForTesting
-  void migrateToR8(Directory directory) {
-    final File gradleProperties = directory.childFile('gradle.properties');
-    if (!gradleProperties.existsSync()) {
-      throwToolExit(
-        'Expected file ${gradleProperties.path}. '
-        'Please ensure that this file exists or that ${gradleProperties.dirname} can be read.'
-      );
-    }
-    final String propertiesContent = gradleProperties.readAsStringSync();
-    if (propertiesContent.contains('android.enableR8')) {
-      globals.printTrace('gradle.properties already sets `android.enableR8`');
-      return;
-    }
-    globals.printTrace('set `android.enableR8=true` in gradle.properties');
-    try {
-      if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
-        // Add a new line if the file doesn't end with a new line.
-        gradleProperties.writeAsStringSync('\n', mode: FileMode.append);
-      }
-      gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
-    } on FileSystemException {
-      throwToolExit(
-        'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
-        'Please update the file manually and try this command again.'
-      );
-    }
-  }
-
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
     globals.fsUtils.copyDirectorySync(
@@ -109,9 +75,11 @@ class GradleUtils {
       },
     );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    final File propertiesFile = directory.childFile(
-        globals.fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
+    final Directory propertiesDirectory = directory.childDirectory(
+        globals.fs.path.join('gradle', 'wrapper'));
+    final File propertiesFile = propertiesDirectory.childFile('gradle-wrapper.properties');
     if (!propertiesFile.existsSync()) {
+      propertiesDirectory.createSync(recursive: true);
       final String gradleVersion = getGradleVersionForAndroidPlugin(directory);
       propertiesFile.writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
@@ -124,9 +92,9 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
     }
   }
 }
-const String _defaultGradleVersion = '5.6.2';
+const String _defaultGradleVersion = '6.7';
 
-final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
+final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
 /// otherwise it returns a default version.
@@ -136,14 +104,17 @@ final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\
 String getGradleVersionForAndroidPlugin(Directory directory) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
+    globals.printTrace('$buildFile doesn\'t exist, assuming AGP version: $_defaultGradleVersion');
     return _defaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
+    globals.printTrace('$buildFile doesn\'t provide an AGP version, assuming AGP version: $_defaultGradleVersion');
     return _defaultGradleVersion;
   }
   final String androidPluginVersion = pluginMatches.first.group(1);
+  globals.printTrace('$buildFile provides AGP version: $androidPluginVersion');
   return getGradleVersionFor(androidPluginVersion);
 }
 
@@ -222,6 +193,9 @@ String getGradleVersionFor(String androidPluginVersion) {
   }
   if (_isWithinVersionRange(androidPluginVersion, min: '3.4.0', max: '3.5.0')) {
     return '5.6.2';
+  }
+  if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
+    return '6.7';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
   return '';

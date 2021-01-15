@@ -24,6 +24,7 @@ final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment:
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
   '-fembed-bitcode-marker',
+  '-miphoneos-version-min=8.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -35,6 +36,7 @@ const List<String> _kSharedConfig = <String>[
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
+  'path/to/sdk',
 ];
 
 void main() {
@@ -70,52 +72,28 @@ void main() {
 
   testUsingContext('DebugUniveralFramework creates expected binary with arm64 only arch', () async {
     environment.defines[kIosArchs] = 'arm64';
-    processManager.addCommands(<FakeCommand>[
-      // Create iphone stub.
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
+    environment.defines[kSdkRoot] = 'path/to/sdk';
+    processManager.addCommand(
       FakeCommand(command: <String>[
         'xcrun',
         'clang',
         '-x',
         'c',
-         // iphone only gets 64 bit arch based on kIosArchs
+        // iphone only gets 64 bit arch based on kIosArchs
         '-arch',
         'arm64',
-        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        fileSystem.path.absolute(fileSystem.path.join(
+            '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         ..._kSharedConfig,
-        '',
         '-o',
-        environment.buildDir.childFile('iphone_framework').path
+        environment.buildDir
+            .childDirectory('App.framework')
+            .childFile('App')
+            .path,
       ]),
-      // Create simulator stub.
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path']),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-x',
-        'c',
-        // Simulator only as x86_64 arch
-        '-arch',
-        'x86_64',
-        fileSystem.path.absolute(fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
-        ..._kSharedConfig,
-        '',
-        '-o',
-        environment.buildDir.childFile('simulator_framework').path
-      ]),
-      // Lipo stubs together.
-      FakeCommand(command: <String>[
-        'xcrun',
-        'lipo',
-        '-create',
-        environment.buildDir.childFile('iphone_framework').path,
-        environment.buildDir.childFile('simulator_framework').path,
-        '-output',
-        environment.buildDir.childDirectory('App.framework').childFile('App').path,
-      ]),
-    ]);
+    );
 
-    await const DebugUniveralFramework().build(environment);
+    await const DebugUniversalFramework().build(environment);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -203,7 +181,36 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('AotAssemblyRelease throws exception if asked to build for x86 target', () async {
+  testUsingContext('AotAssemblyRelease throws exception if asked to build for simulator', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+        kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        kBuildMode: 'release',
+        kIosArchs: 'x86_64',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+      .having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('release/profile builds are only supported for physical devices.'),
+      )
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => macPlatform,
+  });
+
+  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -219,15 +226,77 @@ void main() {
     environment.defines[kIosArchs] = 'x86_64';
 
     expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
-      .having(
-        (Exception exception) => exception.toString(),
-        'description',
-        contains('release/profile builds are only supported for physical devices.'),
-      )
+        .having(
+          (Exception exception) => exception.toString(),
+      'description',
+      contains('required define SdkRoot but it was not provided'),
+    )
     ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
+  });
+
+  group('copy engine Flutter.framework', () {
+    testWithoutContext('iphonesimulator', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+          outputDir.path,
+        ]),
+      );
+
+      await const DebugUnpackIOS().build(environment);
+    });
+
+    testWithoutContext('iphoneos', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('output');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          outputDir.path,
+        ]),
+      );
+
+      await const DebugUnpackIOS().build(environment);
+    });
   });
 }

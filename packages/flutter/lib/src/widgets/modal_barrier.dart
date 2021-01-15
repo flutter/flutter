@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -77,7 +76,7 @@ class ModalBarrier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
-    bool platformSupportsDismissingBarrier;
+    final bool platformSupportsDismissingBarrier;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -113,10 +112,8 @@ class ModalBarrier extends StatelessWidget {
               opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                  ),
+                child: color == null ? null : ColoredBox(
+                  color: color!,
                 ),
               ),
             ),
@@ -159,7 +156,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///
   ///  * [ModalRoute.barrierColor], which controls this property for the
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
-  Animation<Color> get color => listenable as Animation<Color>;
+  Animation<Color?> get color => listenable as Animation<Color?>;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   ///

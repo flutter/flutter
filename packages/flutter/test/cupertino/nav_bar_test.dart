@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -392,13 +390,13 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
-          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -417,13 +415,13 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
-          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
+          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -531,7 +529,7 @@ void main() {
     expect(find.text('Different title'), findsOneWidget);
 
     RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -550,7 +548,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -680,7 +678,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border.bottom;
+    final BorderSide side = decoration.border!.bottom;
     expect(side, isNotNull);
   });
 
@@ -708,7 +706,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border.bottom;
+    final BorderSide side = decoration.border!.bottom;
     expect(side, isNotNull);
     expect(side.color, const Color(0xFFAABBCC));
   });
@@ -757,7 +755,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide bottom = decoration.border.bottom;
+    final BorderSide bottom = decoration.border!.bottom;
     expect(bottom, isNotNull);
   });
 
@@ -863,10 +861,10 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide top = decoration.border.top;
+    final BorderSide top = decoration.border!.top;
     expect(top, isNotNull);
     expect(top, BorderSide.none);
-    final BorderSide bottom = decoration.border.bottom;
+    final BorderSide bottom = decoration.border!.bottom;
     expect(bottom, isNotNull);
     expect(bottom.color, const Color(0xFFAABBCC));
   });
@@ -1187,10 +1185,120 @@ void main() {
     expect(barItems2.length, greaterThan(0));
     expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
+    (WidgetTester tester) async {
+    const Text trailingText = Text('Bar Button');
+    const Text titleText = Text('Large Title');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                trailing: trailingText,
+                largeTitle: titleText,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder trailingTextFinder = find.byWidget(trailingText).first;
+    final Finder titleTextFinder = find.byWidget(titleText).first;
+
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    // Drag for overscroll
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+    await tester.pump();
+
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    expect(
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+      greaterThan(initialTrailingTextToLargeTitleOffset.dy.abs())
+    );
+
+    // Ensure overscroll retracts to original size after releasing gesture
+    await tester.pumpAndSettle();
+
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    expect(
+      finalTrailingTextToLargeTitleOffset.dy.abs(),
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
+    );
+  });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
+    (WidgetTester tester) async {
+    const Text trailingText = Text('Bar Button');
+    const Text titleText = Text('Large Title');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                trailing: trailingText,
+                largeTitle: titleText,
+                stretch: false,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder trailingTextFinder = find.byWidget(trailingText).first;
+    final Finder titleTextFinder = find.byWidget(titleText).first;
+
+    final Offset initialTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    // Drag for overscroll
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+    await tester.pump();
+
+    final Offset stretchedTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    expect(
+      stretchedTrailingTextToLargeTitleOffset.dy.abs(),
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
+    );
+
+    // Ensure overscroll is zero after releasing gesture
+    await tester.pumpAndSettle();
+
+    final Offset finalTrailingTextToLargeTitleOffset = tester.getTopLeft(trailingTextFinder) - tester.getTopLeft(titleTextFinder);
+
+    expect(
+      finalTrailingTextToLargeTitleOffset.dy.abs(),
+      initialTrailingTextToLargeTitleOffset.dy.abs(),
+    );
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({ this.color, this.index });
+  const _ExpectStyles({
+    required this.color,
+    required this.index
+  });
 
   final Color color;
   final int index;

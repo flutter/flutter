@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -236,16 +234,16 @@ void main() {
 
     // TODO(goderbauer): remove awkward workaround when accessing force-merged
     //   SemanticsData becomes easier, https://github.com/flutter/flutter/issues/25669
-    SemanticsData mergedChildData;
+    SemanticsData? mergedChildData;
     elevation10.visitChildren((SemanticsNode child) {
       expect(mergedChildData, isNull);
       mergedChildData = child.getSemanticsData();
       return true;
     });
 
-    expect(mergedChildData.thickness, 15.0);
-    expect(mergedChildData.elevation, 10.0);
-    expect(mergedChildData.label, 'abs. elevation 25.0\nabs. elevation 15.0');
+    expect(mergedChildData!.thickness, 15.0);
+    expect(mergedChildData!.elevation, 10.0);
+    expect(mergedChildData!.label, 'abs. elevation 25.0\nabs. elevation 15.0');
 
     semantics.dispose();
   });
@@ -291,16 +289,16 @@ void main() {
 
     // TODO(goderbauer): remove awkward workaround when accessing force-merged
     //   SemanticsData becomes easier, https://github.com/flutter/flutter/issues/25669
-    SemanticsData mergedChildData;
+    SemanticsData? mergedChildData;
     elevation10.visitChildren((SemanticsNode child) {
       expect(mergedChildData, isNull);
       mergedChildData = child.getSemanticsData();
       return true;
     });
 
-    expect(mergedChildData.thickness, 15.0);
-    expect(mergedChildData.elevation, 10.0);
-    expect(mergedChildData.label, 'abs. elevation 15.0\nabs. elevation 25.0');
+    expect(mergedChildData!.thickness, 15.0);
+    expect(mergedChildData!.elevation, 10.0);
+    expect(mergedChildData!.label, 'abs. elevation 15.0\nabs. elevation 25.0');
 
     semantics.dispose();
   });

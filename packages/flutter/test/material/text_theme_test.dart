@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -52,7 +50,7 @@ void main() {
   test('TextTheme merges properly in the presence of null fields.', () {
     const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.headline6.color, equals(partialTheme.headline6.color));
+    expect(fullTheme.headline6!.color, equals(partialTheme.headline6!.color));
 
     const TextTheme onlyHeadlineAndTitle = TextTheme(
       headline5: TextStyle(color: Color(0xcafefeed)),
@@ -64,9 +62,9 @@ void main() {
     );
     TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
     expect(merged.bodyText1, isNull);
-    expect(merged.bodyText2.color, equals(onlyBody1AndTitle.bodyText2.color));
-    expect(merged.headline5.color, equals(onlyHeadlineAndTitle.headline5.color));
-    expect(merged.headline6.color, equals(onlyBody1AndTitle.headline6.color));
+    expect(merged.bodyText2!.color, equals(onlyBody1AndTitle.bodyText2!.color));
+    expect(merged.headline5!.color, equals(onlyHeadlineAndTitle.headline5!.color));
+    expect(merged.headline6!.color, equals(onlyBody1AndTitle.headline6!.color));
 
     merged = onlyHeadlineAndTitle.merge(null);
     expect(merged, equals(onlyHeadlineAndTitle));
@@ -96,34 +94,34 @@ void main() {
       decorationStyle: decorationStyle,
     );
 
-    expect(theme.headline1.color, displayColor);
-    expect(theme.headline2.color, displayColor);
-    expect(theme.headline3.color, displayColor);
-    expect(theme.headline4.color, displayColor);
-    expect(theme.caption.color, displayColor);
-    expect(theme.headline5.color, bodyColor);
-    expect(theme.headline6.color, bodyColor);
-    expect(theme.subtitle1.color, bodyColor);
-    expect(theme.bodyText1.color, bodyColor);
-    expect(theme.bodyText2.color, bodyColor);
-    expect(theme.button.color, bodyColor);
-    expect(theme.subtitle2.color, bodyColor);
-    expect(theme.overline.color, bodyColor);
+    expect(theme.headline1!.color, displayColor);
+    expect(theme.headline2!.color, displayColor);
+    expect(theme.headline3!.color, displayColor);
+    expect(theme.headline4!.color, displayColor);
+    expect(theme.caption!.color, displayColor);
+    expect(theme.headline5!.color, bodyColor);
+    expect(theme.headline6!.color, bodyColor);
+    expect(theme.subtitle1!.color, bodyColor);
+    expect(theme.bodyText1!.color, bodyColor);
+    expect(theme.bodyText2!.color, bodyColor);
+    expect(theme.button!.color, bodyColor);
+    expect(theme.subtitle2!.color, bodyColor);
+    expect(theme.overline!.color, bodyColor);
 
     final List<TextStyle> themeStyles = <TextStyle>[
-      theme.headline1,
-      theme.headline2,
-      theme.headline3,
-      theme.headline4,
-      theme.caption,
-      theme.headline5,
-      theme.headline6,
-      theme.subtitle1,
-      theme.bodyText1,
-      theme.bodyText2,
-      theme.button,
-      theme.subtitle2,
-      theme.overline,
+      theme.headline1!,
+      theme.headline2!,
+      theme.headline3!,
+      theme.headline4!,
+      theme.caption!,
+      theme.headline5!,
+      theme.headline6!,
+      theme.subtitle1!,
+      theme.bodyText1!,
+      theme.bodyText2!,
+      theme.button!,
+      theme.subtitle2!,
+      theme.overline!,
     ];
     expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
     expect(themeStyles.every((TextStyle style) => style.decorationColor == decorationColor), true);
@@ -139,19 +137,19 @@ void main() {
       fontSizeDelta: 5.0,
     );
 
-    expect(sizeTheme.headline1.fontSize, baseTheme.headline1.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline2.fontSize, baseTheme.headline2.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline3.fontSize, baseTheme.headline3.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline4.fontSize, baseTheme.headline4.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.caption.fontSize, baseTheme.caption.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline5.fontSize, baseTheme.headline5.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline6.fontSize, baseTheme.headline6.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.subtitle1.fontSize, baseTheme.subtitle1.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.bodyText1.fontSize, baseTheme.bodyText1.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.bodyText2.fontSize, baseTheme.bodyText2.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.button.fontSize, baseTheme.button.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.subtitle2.fontSize, baseTheme.subtitle2.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.overline.fontSize, baseTheme.overline.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline1!.fontSize, baseTheme.headline1!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.headline2!.fontSize, baseTheme.headline2!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.headline3!.fontSize, baseTheme.headline3!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.headline4!.fontSize, baseTheme.headline4!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.caption!.fontSize, baseTheme.caption!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.headline5!.fontSize, baseTheme.headline5!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.headline6!.fontSize, baseTheme.headline6!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.subtitle1!.fontSize, baseTheme.subtitle1!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.bodyText1!.fontSize, baseTheme.bodyText1!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.bodyText2!.fontSize, baseTheme.bodyText2!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.button!.fontSize, baseTheme.button!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.subtitle2!.fontSize, baseTheme.subtitle2!.fontSize! * 2.0 + 5.0);
+    expect(sizeTheme.overline!.fontSize, baseTheme.overline!.fontSize! * 2.0 + 5.0);
   });
 
   test('TextTheme lerp with second parameter null', () {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -126,7 +125,7 @@ class TextSpan extends InlineSpan {
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///   late LongPressGestureRecognizer _longPressRecognizer;
   ///
   ///   @override
   ///   void initState() {

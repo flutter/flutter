@@ -175,9 +175,6 @@ class NoOpUsage implements Usage {
   }
 
   @override
-  bool get isFirstRun => false;
-
-  @override
   Stream<Map<String, Object>> get onSend => const Stream<Map<String, Object>>.empty();
 
   @override
@@ -710,9 +707,6 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  bool get isMaster => true;
-
-  @override
   String get repositoryUrl => null;
 
   @override
@@ -733,7 +727,8 @@ class TestFeatureFlags implements FeatureFlags {
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
-});
+    this.isExperimentalInvalidationStrategyEnabled = false,
+  });
 
   @override
   final bool isLinuxEnabled;
@@ -760,6 +755,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFuchsiaEnabled;
 
   @override
+  final bool isExperimentalInvalidationStrategyEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -778,73 +776,22 @@ class TestFeatureFlags implements FeatureFlags {
         return isIOSEnabled;
       case flutterFuchsiaFeature:
         return isFuchsiaEnabled;
+      case experimentalInvalidationStrategy:
+        return isExperimentalInvalidationStrategyEnabled;
     }
     return false;
   }
 }
 
-class DelegateLogger implements Logger {
-  DelegateLogger(this.delegate);
+class FakeStatusLogger extends DelegatingLogger {
+  FakeStatusLogger(Logger delegate) : super(delegate);
 
-  final Logger delegate;
   Status status;
-
-  @override
-  bool get quiet => delegate.quiet;
-
-  @override
-  set quiet(bool value) => delegate.quiet;
-
-  @override
-  bool get hasTerminal => delegate.hasTerminal;
-
-  @override
-  bool get isVerbose => delegate.isVerbose;
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    delegate.printError(
-      message,
-      stackTrace: stackTrace,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    delegate.printStatus(message,
-      emphasis: emphasis,
-      color: color,
-      indent: indent,
-      hangingIndent: hangingIndent,
-      wrap: wrap,
-    );
-  }
-
-  @override
-  void printTrace(String message) {
-    delegate.printTrace(message);
-  }
-
-  @override
-  void sendEvent(String name, [Map<String, dynamic> args]) {
-    delegate.sendEvent(name, args);
-  }
 
   @override
   Status startProgress(String message, {Duration timeout, String progressId, bool multilineOutput = false, int progressIndicatorPadding = kDefaultStatusPadding}) {
     return status;
   }
-
-  @override
-  bool get supportsColor => delegate.supportsColor;
-
-  @override
-  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.
@@ -950,5 +897,14 @@ class FakeCache implements Cache {
   }
 
   @override
-  void clearStampFiles() {}
+  void clearStampFiles() { }
+
+  @override
+  void checkLockAcquired() { }
+
+  @override
+  Future<void> lock() async { }
+
+  @override
+  void releaseLock() { }
 }

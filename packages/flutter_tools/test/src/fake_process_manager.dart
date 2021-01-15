@@ -118,18 +118,14 @@ class _FakeProcess implements Process {
   _FakeProcess(
     this._exitCode,
     Duration duration,
-    VoidCallback onRun,
     this.pid,
     this._stderr,
     this.stdin,
     this._stdout,
-    Completer<void> completer,
+    this._completer,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
-        if (onRun != null) {
-          onRun();
-        }
-        if (completer != null) {
-          return completer.future.then((void _) => _exitCode);
+        if (_completer != null) {
+          return _completer.future.then((void _) => _exitCode);
         }
         return _exitCode;
       }),
@@ -141,6 +137,7 @@ class _FakeProcess implements Process {
         : Stream<List<int>>.value(utf8.encode(_stdout));
 
   final int _exitCode;
+  final Completer<void> _completer;
 
   @override
   final Future<int> exitCode;
@@ -205,6 +202,8 @@ abstract class FakeProcessManager implements ProcessManager {
     commands.forEach(addCommand);
   }
 
+  final Map<int, _FakeProcess> _fakeRunningProcesses = <int, _FakeProcess>{};
+
   /// Whether this fake has more [FakeCommand]s that are expected to run.
   ///
   /// This is always `true` for [FakeProcessManager.any].
@@ -228,10 +227,12 @@ abstract class FakeProcessManager implements ProcessManager {
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    if (fakeCommand.onRun != null) {
+      fakeCommand.onRun();
+    }
     return _FakeProcess(
       fakeCommand.exitCode,
       fakeCommand.duration,
-      fakeCommand.onRun,
       _pid,
       fakeCommand.stderr,
       fakeCommand.stdin,
@@ -248,7 +249,16 @@ abstract class FakeProcessManager implements ProcessManager {
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     ProcessStartMode mode = ProcessStartMode.normal, // ignored
-  }) async => _runCommand(command.cast<String>(), workingDirectory, environment, systemEncoding);
+  }) {
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, systemEncoding);
+    if (process._completer != null) {
+      _fakeRunningProcesses[process.pid] = process;
+      process.exitCode.whenComplete(() {
+        _fakeRunningProcesses.remove(process.pid);
+      });
+    }
+    return Future<Process>.value(process);
+  }
 
   @override
   Future<ProcessResult> run(
@@ -294,8 +304,13 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    // Killing a fake process has no effect.
-    return false;
+    // Killing a fake process has no effect unless it has an attached completer.
+    final _FakeProcess fakeProcess = _fakeRunningProcesses[pid];
+    if (fakeProcess == null) {
+      return false;
+    }
+    fakeProcess._completer.complete();
+    return true;
   }
 }
 

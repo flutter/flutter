@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -39,33 +37,41 @@ class PopupMenuThemeData with Diagnosticable {
     this.shape,
     this.elevation,
     this.textStyle,
+    this.enableFeedback,
   });
 
   /// The background color of the popup menu.
-  final Color color;
+  final Color? color;
 
   /// The shape of the popup menu.
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// The elevation of the popup menu.
-  final double elevation;
+  final double? elevation;
 
   /// The text style of items in the popup menu.
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
+
+  /// If specified, defines the feedback property for [PopupMenuButton].
+  ///
+  /// If [PopupMenuButton.enableFeedback] is provided, [enableFeedback] is ignored.
+  final bool? enableFeedback;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
-    Color color,
-    ShapeBorder shape,
-    double elevation,
-    TextStyle textStyle,
+    Color? color,
+    ShapeBorder? shape,
+    double? elevation,
+    TextStyle? textStyle,
+    bool? enableFeedback,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
       shape: shape ?? this.shape,
       elevation: elevation ?? this.elevation,
       textStyle: textStyle ?? this.textStyle,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
     );
   }
 
@@ -74,7 +80,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static PopupMenuThemeData lerp(PopupMenuThemeData a, PopupMenuThemeData b, double t) {
+  static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null)
       return null;
@@ -83,6 +89,7 @@ class PopupMenuThemeData with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
+      enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
     );
   }
 
@@ -93,6 +100,7 @@ class PopupMenuThemeData with Diagnosticable {
       shape,
       elevation,
       textStyle,
+      enableFeedback,
     );
   }
 
@@ -106,7 +114,8 @@ class PopupMenuThemeData with Diagnosticable {
         && other.elevation == elevation
         && other.color == color
         && other.shape == shape
-        && other.textStyle == textStyle;
+        && other.textStyle == textStyle
+        && other.enableFeedback == enableFeedback;
   }
 
   @override
@@ -116,6 +125,7 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
   }
 }
 
@@ -130,9 +140,9 @@ class PopupMenuTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const PopupMenuTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant popup menu widgets.
@@ -148,14 +158,13 @@ class PopupMenuTheme extends InheritedTheme {
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
   static PopupMenuThemeData of(BuildContext context) {
-    final PopupMenuTheme popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
+    final PopupMenuTheme? popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final PopupMenuTheme ancestorTheme = context.findAncestorWidgetOfExactType<PopupMenuTheme>();
-    return identical(this, ancestorTheme) ? child : PopupMenuTheme(data: data, child: child);
+    return PopupMenuTheme(data: data, child: child);
   }
 
   @override

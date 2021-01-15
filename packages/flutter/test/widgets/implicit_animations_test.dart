@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -20,7 +18,7 @@ const Duration animationDuration = Duration(milliseconds:1000);
 const Duration additionalDelay = Duration(milliseconds:1);
 
 void main() {
-  MockOnEndFunction mockOnEndFunction;
+  late MockOnEndFunction mockOnEndFunction;
   const Key switchKey = Key('switchKey');
 
   setUp(() {
@@ -355,7 +353,7 @@ void main() {
   });
 }
 
-Widget wrap({Widget child}) {
+Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Material(
@@ -366,20 +364,17 @@ Widget wrap({Widget child}) {
 
 class TestAnimatedWidget extends StatefulWidget {
   const TestAnimatedWidget({
-    Key key,
+    Key? key,
     this.callback,
-    this.switchKey,
-    this.state,
+    required this.switchKey,
+    required this.state,
   }) : super(key: key);
-  @required
-  final VoidCallback callback;
-  @required
+  final VoidCallback? callback;
   final Key switchKey;
-  @required
   final State<StatefulWidget> state;
 
   @override
-  State<StatefulWidget> createState() => state;
+  State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
 }
 
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
@@ -407,7 +402,6 @@ abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
     );
   }
 }
-
 
 class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
   @override
@@ -553,7 +547,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       tween: Tween<double>(begin: 1, end: 2),
       duration: duration,
       onEnd: widget.callback,
-      builder: (BuildContext context, double size, Widget child) {
+      builder: (BuildContext context, double? size, Widget? child) {
         return Container(
           child: child,
           width: size,

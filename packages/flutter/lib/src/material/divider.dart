@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 
@@ -11,7 +9,7 @@ import 'divider_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
-// BuildContext context;
+// late BuildContext context;
 
 /// A thin horizontal line, with padding on either side.
 ///
@@ -49,15 +47,27 @@ import 'theme.dart';
 ///           ),
 ///         ),
 ///         const Divider(
-///           color: Colors.black,
 ///           height: 20,
 ///           thickness: 5,
 ///           indent: 20,
-///           endIndent: 0,
+///           endIndent: 20,
+///         ),
+///         // Subheader example from Material spec.
+///         // https://material.io/components/dividers#types
+///         Container(
+///           padding: const EdgeInsets.only(left: 20),
+///           child: Align(
+///             alignment: AlignmentDirectional.centerStart,
+///             child: Text(
+///               'Subheader',
+///               style: Theme.of(context).textTheme.caption,
+///               textAlign: TextAlign.start,
+///             ),
+///           ),
 ///         ),
 ///         Expanded(
 ///           child: Container(
-///             color: Colors.blue,
+///             color: Theme.of(context).colorScheme.primary,
 ///             child: const Center(
 ///               child: Text('Below'),
 ///             ),
@@ -80,7 +90,7 @@ class Divider extends StatelessWidget {
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const Divider({
-    Key key,
+    Key? key,
     this.height,
     this.thickness,
     this.indent,
@@ -100,7 +110,7 @@ class Divider extends StatelessWidget {
   ///
   /// If this is null, then the [DividerThemeData.space] is used. If that is
   /// also null, then this defaults to 16.0.
-  final double height;
+  final double? height;
 
   /// The thickness of the line drawn within the divider.
   ///
@@ -109,19 +119,19 @@ class Divider extends StatelessWidget {
   ///
   /// If this is null, then the [DividerThemeData.thickness] is used. If
   /// that is also null, then this defaults to 0.0.
-  final double thickness;
+  final double? thickness;
 
   /// The amount of empty space to the leading edge of the divider.
   ///
   /// If this is null, then the [DividerThemeData.indent] is used. If that is
   /// also null, then this defaults to 0.0.
-  final double indent;
+  final double? indent;
 
   /// The amount of empty space to the trailing edge of the divider.
   ///
   /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
   /// also null, then this defaults to 0.0.
-  final double endIndent;
+  final double? endIndent;
 
   /// The color to use when painting the line.
   ///
@@ -136,7 +146,7 @@ class Divider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  final Color color;
+  final Color? color;
 
   /// Computes the [BorderSide] that represents a divider.
   ///
@@ -167,8 +177,8 @@ class Divider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  static BorderSide createBorderSide(BuildContext context, { Color color, double width }) {
-    final Color effectiveColor = color
+  static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
+    final Color? effectiveColor = color
         ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
     final double effectiveWidth =  width
         ?? (context != null ? DividerTheme.of(context).thickness : null)
@@ -231,7 +241,7 @@ class VerticalDivider extends StatelessWidget {
   /// The [width], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const VerticalDivider({
-    Key key,
+    Key? key,
     this.width,
     this.thickness,
     this.indent,
@@ -250,7 +260,7 @@ class VerticalDivider extends StatelessWidget {
   ///
   /// If this is null, then the [DividerThemeData.space] is used. If that is
   /// also null, then this defaults to 16.0.
-  final double width;
+  final double? width;
 
   /// The thickness of the line drawn within the divider.
   ///
@@ -259,19 +269,19 @@ class VerticalDivider extends StatelessWidget {
   ///
   /// If this is null, then the [DividerThemeData.thickness] is used which
   /// defaults to 0.0.
-  final double thickness;
+  final double? thickness;
 
   /// The amount of empty space on top of the divider.
   ///
   /// If this is null, then the [DividerThemeData.indent] is used. If that is
   /// also null, then this defaults to 0.0.
-  final double indent;
+  final double? indent;
 
   /// The amount of empty space under the divider.
   ///
   /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
   /// also null, then this defaults to 0.0.
-  final double endIndent;
+  final double? endIndent;
 
   /// The color to use when painting the line.
   ///
@@ -286,7 +296,7 @@ class VerticalDivider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {

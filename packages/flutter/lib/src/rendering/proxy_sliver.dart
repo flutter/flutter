@@ -80,7 +80,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 }
@@ -177,7 +177,7 @@ class RenderSliverOpacity extends RenderProxySliver {
         offset,
         _alpha,
         super.paint,
-        oldLayer: layer as OpacityLayer,
+        oldLayer: layer as OpacityLayer?,
       );
     }
   }

@@ -5,10 +5,9 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/ios/migrations/ios_migrator.dart';
+import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -28,13 +27,13 @@ void main () {
 
     testWithoutContext('migrators succeed', () {
       final FakeIOSMigrator fakeIOSMigrator = FakeIOSMigrator(succeeds: true);
-      final IOSMigration migration = IOSMigration(<IOSMigrator>[fakeIOSMigrator]);
+      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeIOSMigrator]);
       expect(migration.run(), isTrue);
     });
 
     testWithoutContext('migrators fail', () {
       final FakeIOSMigrator fakeIOSMigrator = FakeIOSMigrator(succeeds: false);
-      final IOSMigration migration = IOSMigration(<IOSMigrator>[fakeIOSMigrator]);
+      final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeIOSMigrator]);
       expect(migration.run(), isFalse);
     });
 
@@ -46,18 +45,10 @@ void main () {
       MockXcode mockXcode;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         mockXcode = MockXcode();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
       });
@@ -99,8 +90,8 @@ void main () {
       });
 
       testWithoutContext('skips migrating script with embed', () {
-        const String contents = '''
-shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
+        const String contents = r'''
+shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
 			''';
         xcodeProjectInfoFile.writeAsStringSync(contents);
 
@@ -116,7 +107,7 @@ shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend
       });
 
       testWithoutContext('Xcode project is migrated', () {
-        xcodeProjectInfoFile.writeAsStringSync('''
+        xcodeProjectInfoFile.writeAsStringSync(r'''
 prefix 3B80C3941E831B6300D905FE
 3B80C3951E831B6300D905FE suffix
 741F496821356857001E2961
@@ -128,7 +119,7 @@ keep this 1
 741F496221355F47001E2961
 9740EEBA1CF902C7004384FC
 741F495E21355F27001E2961
-			shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
 keep this 2
 ''');
 
@@ -141,9 +132,9 @@ keep this 2
         expect(iosProjectMigration.migrate(), isTrue);
         verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
 
-        expect(xcodeProjectInfoFile.readAsStringSync(), '''
+        expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
-			shellScript = "/bin/sh "\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed_and_thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 keep this 2
 ''');
         expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
@@ -265,17 +256,9 @@ keep this 2
       File xcodeWorkspaceSharedSettings;
 
       setUp(() {
-        memoryFileSystem = MemoryFileSystem();
+        memoryFileSystem = MemoryFileSystem.test();
         xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeWorkspaceSharedSettings).thenReturn(xcodeWorkspaceSharedSettings);
       });
@@ -338,6 +321,85 @@ keep this 2
       });
     });
 
+    group('Xcode default build location', () {
+      MemoryFileSystem memoryFileSystem;
+      BufferLogger testLogger;
+      MockIosProject mockIosProject;
+      File xcodeProjectWorkspaceData;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        xcodeProjectWorkspaceData = memoryFileSystem.file('contents.xcworkspacedata');
+        testLogger = BufferLogger.test();
+        mockIosProject = MockIosProject();
+        when(mockIosProject.xcodeProjectWorkspaceData).thenReturn(xcodeProjectWorkspaceData);
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeProjectWorkspaceData.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode project workspace data not found, skipping build location migration.'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String contents = '''
+ <?xml version="1.0" encoding="UTF-8"?>
+ <Workspace
+    version = "1.0">
+    <FileRef
+      location = "self:">
+    </FileRef>
+ </Workspace>''';
+        xcodeProjectWorkspaceData.writeAsStringSync(contents);
+
+        final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeProjectWorkspaceData.existsSync(), isTrue);
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated', () {
+        const String contents = '''
+ <?xml version="1.0" encoding="UTF-8"?>
+ <Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Runner.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+ </Workspace>
+''';
+        xcodeProjectWorkspaceData.writeAsStringSync(contents);
+
+        final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeProjectWorkspaceData.readAsStringSync(), '''
+ <?xml version="1.0" encoding="UTF-8"?>
+ <Workspace
+   version = "1.0">
+   <FileRef
+      location = "self:">
+   </FileRef>
+ </Workspace>
+''');
+        expect(testLogger.statusText, contains('Upgrading contents.xcworkspacedata'));
+      });
+    });
+
     group('remove Runner project base configuration', () {
       MemoryFileSystem memoryFileSystem;
       BufferLogger testLogger;
@@ -347,15 +409,7 @@ keep this 2
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
       });
@@ -506,7 +560,7 @@ class MockIosProject extends Mock implements IosProject {}
 class MockXcode extends Mock implements Xcode {}
 class MockUsage extends Mock implements Usage {}
 
-class FakeIOSMigrator extends IOSMigrator {
+class FakeIOSMigrator extends ProjectMigrator {
   FakeIOSMigrator({@required this.succeeds})
     : super(null);
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -21,7 +19,7 @@ void main() {
         Color(0x44444444),
       ],
     );
-    final LinearGradient actual = LinearGradient.lerp(null, testGradient, 0.25);
+    final LinearGradient? actual = LinearGradient.lerp(null, testGradient, 0.25);
 
     expect(actual, const LinearGradient(
       begin: Alignment.bottomRight,
@@ -52,7 +50,7 @@ void main() {
       ],
     );
 
-    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
       begin: Alignment(0.0, -1.0),
       end: Alignment(-1.0, 0.0),
@@ -90,7 +88,7 @@ void main() {
       ],
     );
 
-    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
       begin: Alignment(0.0, -1.0),
       end: Alignment(-1.0, 0.0),
@@ -122,7 +120,7 @@ void main() {
       ],
     );
 
-    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
       colors: <Color>[
         Color(0x33333333),
@@ -161,7 +159,7 @@ void main() {
       ],
     );
 
-    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    final LinearGradient? actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),
@@ -189,7 +187,7 @@ void main() {
         ],
       ).toString(),
       equals(
-        'LinearGradient(topLeft, bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
       ),
     );
   });
@@ -291,7 +289,7 @@ void main() {
       ],
     );
 
-    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
       center: Alignment(0.0, -1.0),
       radius: 15.0,
@@ -332,9 +330,7 @@ void main() {
       ],
     );
 
-    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
-
-    expect(actual.focal, isNull);
+    final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
 
     expect(actual, const RadialGradient(
       center: Alignment(0.0, -1.0),
@@ -350,6 +346,8 @@ void main() {
         1.0,
       ],
     ));
+
+    expect(actual!.focal, isNull);
   });
 
   test('RadialGradient lerp test with unequal number of colors', () {
@@ -367,7 +365,7 @@ void main() {
       ],
     );
 
-    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
       colors: <Color>[
         Color(0x33333333),
@@ -406,7 +404,7 @@ void main() {
       ],
     );
 
-    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),
@@ -453,7 +451,7 @@ void main() {
       ],
     );
 
-    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    final RadialGradient? actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const RadialGradient(
       center: Alignment(0.0, -1.0),
       focal: Alignment(0.0, 0.0),
@@ -469,7 +467,7 @@ void main() {
       ],
     ));
 
-    final RadialGradient actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
+    final RadialGradient? actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
     expect(actual2, const RadialGradient(
       center: Alignment(0.0, -1.0),
       focal: Alignment(-0.5, 0.0),
@@ -506,7 +504,7 @@ void main() {
       ],
     );
 
-    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
       center: Alignment(0.0, -1.0),
       startAngle: math.pi / 4,
@@ -550,7 +548,7 @@ void main() {
       ],
     );
 
-    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
       center: Alignment(0.0, -1.0),
       startAngle: math.pi / 4,
@@ -583,7 +581,7 @@ void main() {
       ],
     );
 
-    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
       colors: <Color>[
         Color(0x33333333),
@@ -622,7 +620,7 @@ void main() {
       ],
     );
 
-    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    final SweepGradient? actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const SweepGradient(
       colors: <Color>[
         Color(0x3B3B3B3B),

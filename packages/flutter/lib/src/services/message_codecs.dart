@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -453,13 +452,13 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         return buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        final dynamic result = List<dynamic>.filled(length, null, growable: false);
+        final List<dynamic> result = List<dynamic>.filled(length, null, growable: false);
         for (int i = 0; i < length; i++)
           result[i] = readValue(buffer);
         return result;
       case _valueMap:
         final int length = readSize(buffer);
-        final dynamic result = <dynamic, dynamic>{};
+        final Map<dynamic, dynamic> result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++)
           result[readValue(buffer)] = readValue(buffer);
         return result;
@@ -579,7 +578,7 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorDetails = messageCodec.readValue(buffer);
     final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
-      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails, stacktrace: errorStacktrace);
+      throw PlatformException(code: errorCode, message: errorMessage as String?, details: errorDetails, stacktrace: errorStacktrace);
     else
       throw const FormatException('Invalid envelope');
   }

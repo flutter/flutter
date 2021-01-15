@@ -508,8 +508,18 @@ class ArchivePublisher {
   }
 
   /// Publish the archive to Google Storage.
-  Future<void> publishArchive() async {
+  ///
+  /// This method will throw if the target archive already exists on cloud
+  /// storage.
+  Future<void> publishArchive([bool forceUpload = false]) async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
+    if (!forceUpload) {
+      if (await _cloudPathExists(destGsPath)) {
+        throw PreparePackageException(
+          'File $destGsPath already exists on cloud storage!',
+        );
+      }
+    }
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
     await _updateMetadata();
@@ -596,6 +606,20 @@ class ArchivePublisher {
     );
   }
 
+  /// Determine if a file exists at a given [cloudPath].
+  Future<bool> _cloudPathExists(String cloudPath) async {
+    try {
+      await _runGsUtil(
+        <String>['stat', cloudPath],
+        failOk: false,
+      );
+    } on PreparePackageException {
+      // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
+      return false;
+    }
+    return true;
+  }
+
   Future<String> _cloudCopy(String src, String dest) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
@@ -665,6 +689,12 @@ Future<void> main(List<String> rawArguments) async {
         'directory: $baseUrl$releaseFolder',
   );
   argParser.addFlag(
+    'force',
+    abbr: 'f',
+    defaultsTo: false,
+    help: 'Overwrite a previously uploaded package.',
+  );
+  argParser.addFlag(
     'help',
     defaultsTo: false,
     negatable: false,
@@ -685,14 +715,14 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final String revision = parsedArguments['revision'] as String;
-  if (revision.isEmpty) {
+  if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if ((parsedArguments['branch'] as String).isEmpty) {
+  if (!parsedArguments.wasParsed('branch')) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
@@ -734,7 +764,7 @@ Future<void> main(List<String> rawArguments) async {
         version,
         outputFile,
       );
-      await publisher.publishArchive();
+      await publisher.publishArchive(parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;

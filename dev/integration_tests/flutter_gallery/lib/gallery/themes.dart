@@ -9,7 +9,7 @@ final ThemeData kDarkGalleryTheme = _buildDarkTheme();
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(
-    headline6: base.headline6.copyWith(
+    headline6: base.headline6!.copyWith(
       fontFamily: 'GoogleSans',
     ),
   );
@@ -21,7 +21,7 @@ ThemeData _buildDarkTheme() {
   final ColorScheme colorScheme = const ColorScheme.dark().copyWith(
     primary: primaryColor,
     secondary: secondaryColor,
-    onPrimary: secondaryColor,
+    onPrimary: Colors.white,
   );
   final ThemeData base = ThemeData(
     brightness: Brightness.dark,
@@ -30,7 +30,6 @@ ThemeData _buildDarkTheme() {
     primaryColor: primaryColor,
     primaryColorDark: const Color(0xFF0050a0),
     primaryColorLight: secondaryColor,
-    buttonColor: primaryColor,
     indicatorColor: Colors.white,
     toggleableActiveColor: const Color(0xFF6997DF),
     accentColor: secondaryColor,
@@ -38,10 +37,6 @@ ThemeData _buildDarkTheme() {
     scaffoldBackgroundColor: const Color(0xFF202124),
     backgroundColor: const Color(0xFF202124),
     errorColor: const Color(0xFFB00020),
-    buttonTheme: ButtonThemeData(
-      colorScheme: colorScheme,
-      textTheme: ButtonTextTheme.primary,
-    ),
   );
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),
@@ -62,7 +57,6 @@ ThemeData _buildLightTheme() {
     accentColorBrightness: Brightness.dark,
     colorScheme: colorScheme,
     primaryColor: primaryColor,
-    buttonColor: primaryColor,
     indicatorColor: Colors.white,
     toggleableActiveColor: const Color(0xFF1E88E5),
     splashColor: Colors.white24,
@@ -72,10 +66,6 @@ ThemeData _buildLightTheme() {
     scaffoldBackgroundColor: Colors.white,
     backgroundColor: Colors.white,
     errorColor: const Color(0xFFB00020),
-    buttonTheme: ButtonThemeData(
-      colorScheme: colorScheme,
-      textTheme: ButtonTextTheme.primary,
-    ),
   );
   return base.copyWith(
     textTheme: _buildTextTheme(base.textTheme),

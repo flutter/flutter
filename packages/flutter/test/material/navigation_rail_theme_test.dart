@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -271,7 +269,7 @@ TextStyle _selectedLabelStyle(WidgetTester tester) {
       of: find.text('Abc'),
       matching: find.byType(RichText),
     ),
-  ).text.style;
+  ).text.style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
@@ -280,7 +278,7 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
       of: find.text('Def'),
       matching: find.byType(RichText),
     ),
-  ).text.style;
+  ).text.style!;
 }
 
 Align _destinationsAlign(WidgetTester tester) {

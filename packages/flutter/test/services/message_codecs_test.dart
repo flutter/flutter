@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // This files contains message codec tests that are supported both on the Web
 // and in the VM. For VM-only tests see message_codecs_vm_test.dart.
 
@@ -18,26 +16,25 @@ import 'message_codecs_testing.dart';
 
 void main() {
   group('Binary codec', () {
-    const MessageCodec<ByteData> binary = BinaryCodec();
+    const MessageCodec<ByteData?> binary = BinaryCodec();
     test('should encode and decode simple messages', () {
-      checkEncodeDecode<ByteData>(binary, null);
-      checkEncodeDecode<ByteData>(binary, ByteData(0));
-      checkEncodeDecode<ByteData>(binary, ByteData(4)..setInt32(0, -7));
+      checkEncodeDecode<ByteData?>(binary, null);
+      checkEncodeDecode<ByteData?>(binary, ByteData(0));
+      checkEncodeDecode<ByteData?>(binary, ByteData(4)..setInt32(0, -7));
     });
   });
   group('String codec', () {
-    const MessageCodec<String> string = StringCodec();
+    const MessageCodec<String?> string = StringCodec();
     test('should encode and decode simple messages', () {
-      checkEncodeDecode<String>(string, null);
-      checkEncodeDecode<String>(string, '');
-      checkEncodeDecode<String>(string, 'hello');
-      checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
+      checkEncodeDecode<String?>(string, null);
+      checkEncodeDecode<String?>(string, '');
+      checkEncodeDecode<String?>(string, 'hello');
+      checkEncodeDecode<String?>(string, 'special chars >\u263A\u{1F602}<');
     });
     test('ByteData with offset', () {
-      const MessageCodec<String> string = StringCodec();
-      final ByteData helloWorldByteData = string.encodeMessage('hello world');
-      final ByteData helloByteData = string.encodeMessage('hello');
-
+      const MessageCodec<String?> string = StringCodec();
+      final ByteData helloWorldByteData = string.encodeMessage('hello world')!;
+      final ByteData helloByteData = string.encodeMessage('hello')!;
       final ByteData offsetByteData = ByteData.view(
         helloWorldByteData.buffer,
         helloByteData.lengthInBytes,
@@ -77,6 +74,25 @@ void main() {
           throwsA(predicate((PlatformException e) =>
               e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });
+
+    test('should allow null error message,', () {
+      final ByteData errorData = method.encodeErrorEnvelope(
+        code: 'errorCode',
+        message: null,
+        details: 'errorDetails',
+      );
+      expect(
+        () => method.decodeEnvelope(errorData),
+        throwsA(
+          predicate((PlatformException e) {
+            return e is PlatformException &&
+              e.code == 'errorCode' &&
+              e.message == null &&
+              e.details == 'errorDetails';
+          }),
+        ),
+      );
+    });
   });
   group('Json method codec', () {
     const JsonCodec json = JsonCodec();
@@ -97,7 +113,7 @@ void main() {
               e.details == 'errorDetails')));
     });
     test('should decode error envelope with native stacktrace.', () {
-      final ByteData errorData = stringCodec.encodeMessage(json
+      final ByteData? errorData = stringCodec.encodeMessage(json
           .encode(<dynamic>[
         'errorCode',
         'errorMessage',
@@ -105,7 +121,7 @@ void main() {
         'errorStacktrace'
       ]));
       expect(
-          () => jsonMethodCodec.decodeEnvelope(errorData),
+          () => jsonMethodCodec.decodeEnvelope(errorData!),
           throwsA(predicate((PlatformException e) =>
               e is PlatformException && e.stacktrace == 'errorStacktrace')));
     });

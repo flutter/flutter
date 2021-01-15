@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,7 +12,7 @@ import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
-// String _name;
+// late String _name;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
@@ -103,7 +102,7 @@ class DefaultTextStyle extends InheritedTheme {
         final DefaultTextStyle parent = DefaultTextStyle.of(context);
         return DefaultTextStyle(
           key: key,
-          style: parent.style!.merge(style),
+          style: parent.style.merge(style),
           textAlign: textAlign ?? parent.textAlign,
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
@@ -116,7 +115,7 @@ class DefaultTextStyle extends InheritedTheme {
   }
 
   /// The text style to apply.
-  final TextStyle? style;
+  final TextStyle style;
 
   /// How each line of text in the Text widget should be aligned horizontally.
   final TextAlign? textAlign;
@@ -181,8 +180,7 @@ class DefaultTextStyle extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DefaultTextStyle? defaultTextStyle = context.findAncestorWidgetOfExactType<DefaultTextStyle>();
-    return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
+    return DefaultTextStyle(
       style: style,
       textAlign: textAlign,
       softWrap: softWrap,
@@ -197,7 +195,7 @@ class DefaultTextStyle extends InheritedTheme {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    style?.debugFillProperties(properties);
+    style.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
@@ -266,8 +264,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DefaultTextHeightBehavior? defaultTextHeightBehavior = context.findAncestorWidgetOfExactType<DefaultTextHeightBehavior>();
-    return identical(this, defaultTextHeightBehavior) ? child : DefaultTextHeightBehavior(
+    return DefaultTextHeightBehavior(
       textHeightBehavior: textHeightBehavior,
       child: child,
     );
@@ -521,7 +518,7 @@ class Text extends StatelessWidget {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
     if (style == null || style!.inherit)
-      effectiveTextStyle = defaultTextStyle.style!.merge(style);
+      effectiveTextStyle = defaultTextStyle.style.merge(style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     Widget result = RichText(

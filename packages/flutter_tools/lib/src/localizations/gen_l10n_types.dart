@@ -104,7 +104,7 @@ const Set<String> _validNumberFormats = <String>{
 // The names of the NumberFormat factory constructors which have named
 // parameters rather than positional parameters.
 //
-// This helps the tool correctly generate number formmatting code correctly.
+// This helps the tool correctly generate number formatting code correctly.
 //
 // Example of code that uses named parameters:
 // final NumberFormat format = NumberFormat.compact(
@@ -176,7 +176,7 @@ class OptionalParameter {
 // Each placeholder can optionally specify a valid Dart type. If the type
 // is NumberFormat or DateFormat then a format which matches one of the
 // type's factory constructors can also be specified. In this example the
-// date placeholder is to be formated with DateFormat.yMMMMd:
+// date placeholder is to be formatted with DateFormat.yMMMMd:
 //
 // "helloWorldOn": "Hello World on {date}",
 // "@helloWorldOn": {
@@ -270,12 +270,12 @@ class Placeholder {
 // localized string to be shown for the template ARB file's locale.
 // The docs for the Placeholder explain how placeholder entries are defined.
 class Message {
-  Message(Map<String, dynamic> bundle, this.resourceId)
+  Message(Map<String, dynamic> bundle, this.resourceId, bool isResourceAttributeRequired)
     : assert(bundle != null),
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
-      description = _description(bundle, resourceId),
-      placeholders = _placeholders(bundle, resourceId),
+      description = _description(bundle, resourceId, isResourceAttributeRequired),
+      placeholders = _placeholders(bundle, resourceId, isResourceAttributeRequired),
       _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId));
 
   static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
@@ -312,25 +312,51 @@ class Message {
     return bundle[resourceId] as String;
   }
 
-  static Map<String, dynamic> _attributes(Map<String, dynamic> bundle, String resourceId) {
+  static Map<String, dynamic> _attributes(
+    Map<String, dynamic> bundle,
+    String resourceId,
+    bool isResourceAttributeRequired,
+  ) {
     final dynamic attributes = bundle['@$resourceId'];
-    if (attributes == null) {
-      throw L10nException(
-        'Resource attribute "@$resourceId" was not found. Please '
-        'ensure that each resource has a corresponding @resource.'
-      );
+    if (isResourceAttributeRequired) {
+      if (attributes == null) {
+        throw L10nException(
+          'Resource attribute "@$resourceId" was not found. Please '
+          'ensure that each resource has a corresponding @resource.'
+        );
+      }
     }
-    if (attributes is! Map<String, dynamic>) {
+
+    if (attributes != null && attributes is! Map<String, dynamic>) {
       throw L10nException(
         'The resource attribute "@$resourceId" is not a properly formatted Map. '
         'Ensure that it is a map with keys that are strings.'
       );
     }
+
+    final RegExpMatch pluralRegExp = _pluralRE.firstMatch(_value(bundle, resourceId));
+    final bool isPlural = pluralRegExp != null && pluralRegExp.groupCount == 1;
+    if (attributes == null && isPlural) {
+      throw L10nException(
+        'Resource attribute "@$resourceId" was not found. Please '
+        'ensure that plural resources have a corresponding @resource.'
+      );
+    }
+
     return attributes as Map<String, dynamic>;
   }
 
-  static String _description(Map<String, dynamic> bundle, String resourceId) {
-    final dynamic value = _attributes(bundle, resourceId)['description'];
+  static String _description(
+    Map<String, dynamic> bundle,
+    String resourceId,
+    bool isResourceAttributeRequired,
+  ) {
+    final Map<String, dynamic> resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    if (resourceAttributes == null) {
+      return null;
+    }
+
+    final dynamic value = resourceAttributes['description'];
     if (value == null) {
       return null;
     }
@@ -342,8 +368,16 @@ class Message {
     return value as String;
   }
 
-  static List<Placeholder> _placeholders(Map<String, dynamic> bundle, String resourceId) {
-    final dynamic value = _attributes(bundle, resourceId)['placeholders'];
+  static List<Placeholder> _placeholders(
+    Map<String, dynamic> bundle,
+    String resourceId,
+    bool isResourceAttributeRequired,
+  ) {
+    final Map<String, dynamic> resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    if (resourceAttributes == null) {
+      return <Placeholder>[];
+    }
+    final dynamic value = resourceAttributes['placeholders'];
     if (value == null) {
       return <Placeholder>[];
     }

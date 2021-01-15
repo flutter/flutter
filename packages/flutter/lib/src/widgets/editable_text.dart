@@ -8,7 +8,6 @@ import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -69,12 +68,21 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// text field. If you build a text field with a controller that already has
 /// [text], the text field will use that text as its initial value.
 ///
-/// The [text] or [selection] properties can be set from within a listener
-/// added to this controller. If both properties need to be changed then the
-/// controller's [value] should be set instead.
+/// The [value] (as well as [text] and [selection]) of this controller can be
+/// updated from within a listener added to this controller. Be aware of
+/// infinite loops since the listener will also be notified of the changes made
+/// from within itself. Modifying the composing region from within a listener
+/// can also have a bad interaction with some input methods. Gboard, for
+/// example, will try to restore the composing region of the text if it was
+/// modified programmatically, creating an infinite loop of communications
+/// between the framework and the input method. Consider using
+/// [TextInputFormatter]s instead for as-you-type text modification.
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// If both the [text] or [selection] properties need to be changed, set the
+/// controller's [value] instead.
+///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer
+/// needed. This will ensure we discard any resources used by the object.
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
@@ -154,7 +162,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
-  set text(String? newText) {
+  set text(String newText) {
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
@@ -214,23 +222,30 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; however, one should not also set [text]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
+  ///
+  /// If the new selection if of non-zero length, or is outside the composing
+  /// range, the composing composing range is cleared.
   set selection(TextSelection newSelection) {
     if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
-    value = value.copyWith(selection: newSelection, composing: TextRange.empty);
+    final TextRange newComposing =
+        newSelection.isCollapsed && _isSelectionWithinComposingRange(newSelection)
+            ? value.composing
+            : TextRange.empty;
+    value = value.copyWith(selection: newSelection, composing: newComposing);
   }
 
   /// Set the [value] to empty.
   ///
   /// After calling this function, [text] will be the empty string and the
-  /// selection will be invalid.
+  /// selection will be collapsed at zero offset.
   ///
   /// Calling this will notify all the listeners of this [TextEditingController]
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
-    value = TextEditingValue.empty;
+    value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
 
   /// Set the composing region to an empty range.
@@ -250,6 +265,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Check that the [selection] is inside of the bounds of [text].
   bool isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
+  }
+
+  /// Check that the [selection] is inside of the composing range.
+  bool _isSelectionWithinComposingRange(TextSelection selection) {
+    return selection.start >= value.composing.start && selection.end <= value.composing.end;
   }
 }
 
@@ -307,6 +327,19 @@ class ToolbarOptions {
 /// text it contains. It also provides scrolling, selection, and cursor
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
+///
+/// ## Handling User Input
+///
+/// Currently the user may change the text this widget contains via keyboard or
+/// the text selection menu. When the user inserted or deleted text, you will be
+/// notified of the change and get a chance to modify the new text value:
+///
+/// * The [inputFormatters] will be first applied to the user input.
+///
+/// * The [controller]'s [TextEditingController.value] will be updated with the
+///   formatted result, and the [controller]'s listeners will be notified.
+///
+/// * The [onChanged] callback, if specified, will be called last.
 ///
 /// ## Input Actions
 ///
@@ -585,13 +618,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.smartDashesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.smartQuotesType}
+  /// {@macro flutter.services.TextInputConfiguration.smartQuotesType}
   final SmartQuotesType smartQuotesType;
 
-  /// {@macro flutter.services.textInput.enableSuggestions}
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
@@ -850,6 +883,7 @@ class EditableText extends StatefulWidget {
   /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color? selectionColor;
 
+  /// {@template flutter.widgets.editableText.selectionControls}
   /// Optional delegate for building the text selection handles and toolbar.
   ///
   /// The [EditableText] widget used on its own will not trigger the display
@@ -864,6 +898,7 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
+  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -896,12 +931,7 @@ class EditableText extends StatefulWidget {
   /// current value each time the user inserts or deletes a character.
   ///
   /// ```dart
-  /// TextEditingController _controller;
-  ///
-  /// void initState() {
-  ///   super.initState();
-  ///   _controller = TextEditingController();
-  /// }
+  /// final TextEditingController _controller = TextEditingController();
   ///
   /// void dispose() {
   ///   _controller.dispose();
@@ -925,7 +955,7 @@ class EditableText extends StatefulWidget {
   ///               context: context,
   ///               builder: (BuildContext context) {
   ///                 return AlertDialog(
-  ///                   title: const Text('Thats correct!'),
+  ///                   title: const Text('That is correct!'),
   ///                   content: Text ('13 is the right answer.'),
   ///                   actions: <Widget>[
   ///                     TextButton(
@@ -944,6 +974,22 @@ class EditableText extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// ## Handling emojis and other complex characters
+  /// {@template flutter.widgets.EditableText.onChanged}
+  /// It's important to always use
+  /// [characters](https://pub.dev/packages/characters) when dealing with user
+  /// input text that may contain complex characters. This will ensure that
+  /// extended grapheme clusters and surrogate pairs are treated as single
+  /// characters, as they appear to the user.
+  ///
+  /// For example, when finding the length of some user input, use
+  /// `string.characters.length`. Do NOT use `string.length` or even
+  /// `string.runes.length`. For the complex character "👨‍👩‍👦", this
+  /// appears to the user as a single character, and `string.characters.length`
+  /// intuitively returns 1. On the other hand, `string.length` returns 8, and
+  /// `string.runes.length` returns 5!
   /// {@endtemplate}
   ///
   /// See also:
@@ -978,67 +1024,24 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   /// {@endtemplate}
-  ///
-  /// {@tool dartpad --template=stateful_widget_material}
-  /// When a non-completion action is pressed, such as "next" or "previous", it
-  /// is often desirable to move the focus to the next or previous field.  To do
-  /// this, handle it as in this example, by calling [FocusNode.nextFocus] in
-  /// the `onFieldSubmitted` callback of [TextFormField]. ([TextFormField] wraps
-  /// [EditableText] internally, and uses the value of `onFieldSubmitted` as its
-  /// [onSubmitted]).
-  ///
-  /// ```dart
-  /// FocusScopeNode _focusScopeNode = FocusScopeNode();
-  /// final _controller1 = TextEditingController();
-  /// final _controller2 = TextEditingController();
-  ///
-  /// void dispose() {
-  ///   _focusScopeNode.dispose();
-  ///   _controller1.dispose();
-  ///   _controller2.dispose();
-  ///   super.dispose();
-  /// }
-  ///
-  /// void _handleSubmitted(String value) {
-  ///   _focusScopeNode.nextFocus();
-  /// }
-  ///
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     body: FocusScope(
-  ///       node: _focusScopeNode,
-  ///       child: Column(
-  ///         mainAxisAlignment: MainAxisAlignment.center,
-  ///         children: <Widget>[
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller1,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///           Padding(
-  ///             padding: const EdgeInsets.all(8.0),
-  ///             child: TextFormField(
-  ///               textInputAction: TextInputAction.next,
-  ///               onFieldSubmitted: _handleSubmitted,
-  ///               controller: _controller2,
-  ///               decoration: InputDecoration(border: OutlineInputBorder()),
-  ///             ),
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   final ValueChanged<String>? onSubmitted;
 
   /// {@template flutter.widgets.editableText.onAppPrivateCommand}
-  /// Called when the result of an app private command is received.
+  /// This is used to receive a private command from the input method.
+  ///
+  /// Called when the result of [TextInputClient.performPrivateCommand] is
+  /// received.
+  ///
+  /// This can be used to provide domain-specific features that are only known
+  /// between certain input methods and their clients.
+  ///
+  /// See also:
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputConnection#performPrivateCommand(java.lang.String,%20android.os.Bundle)],
+  ///     which is the Android documentation for performPrivateCommand, used to
+  ///     send a command from the input method.
+  ///   * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand],
+  ///     which is the Android documentation for sendAppPrivateCommand, used to
+  ///     send a command to the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
 
@@ -1048,13 +1051,15 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final SelectionChangedCallback? onSelectionChanged;
 
-  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// {@macro flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
-  /// Formatters are run in the provided order when the text input changes.
+  /// Formatters are run in the provided order when the text input changes. When
+  /// this parameter changes, the new formatters will not be applied until the
+  /// next time the user inserts or deletes text.
   /// {@endtemplate}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -1109,10 +1114,10 @@ class EditableText extends StatefulWidget {
   /// animate on Android platforms.
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.editable.cursorOffset}
+  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.editable.paintCursorOnTop}
+  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1201,16 +1206,16 @@ class EditableText extends StatefulWidget {
   /// A list of strings that helps the autofill service identify the type of this
   /// text input.
   ///
-  /// When set to null or empty, the text input will not send any autofill related
-  /// information to the platform. As a result, it will not participate in
+  /// When set to null or empty, this text input will not send its autofill
+  /// information to the platform, preventing it from participating in
   /// autofills triggered by a different [AutofillClient], even if they're in the
-  /// same [AutofillScope]. Additionally, on Android and web, setting this to null
-  /// or empty will disable autofill for this text field.
+  /// same [AutofillScope]. Additionally, on Android and web, setting this to
+  /// null or empty will disable autofill for this text field.
   ///
   /// The minimum platform SDK version that supports Autofill is API level 26
   /// for Android, and iOS 10.0 for iOS.
   ///
-  /// ### iOS-specific Concerns:
+  /// ### Setting up iOS autofill:
   ///
   /// To provide the best user experience and ensure your app fully supports
   /// password autofill on iOS, follow these steps:
@@ -1222,11 +1227,52 @@ class EditableText extends StatefulWidget {
   ///   works only with [TextInputType.emailAddress]. Make sure the input field has a
   ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
   ///   with many autofill hints that are predefined on iOS.
+  ///
+  /// ### Troubleshooting Autofill
+  ///
+  /// Autofill service providers rely heavily on [autofillHints]. Make sure the
+  /// entries in [autofillHints] are supported by the autofill service currently
+  /// in use (the name of the service can typically be found in your mobile
+  /// device's system settings).
+  ///
+  /// #### Autofill UI refuses to show up when I tap on the text field
+  ///
+  /// Check the device's system settings and make sure autofill is turned on,
+  /// and there're available credentials stored in the autofill service.
+  ///
+  /// * iOS password autofill: Go to Settings -> Password, turn on "Autofill
+  ///   Passwords", and add new passwords for testing by pressing the top right
+  ///   "+" button. Use an arbitrary "website" if you don't have associated
+  ///   domains set up for your app. As long as there's at least one password
+  ///   stored, you should be able to see a key-shaped icon in the quick type
+  ///   bar on the software keyboard, when a password related field is focused.
+  ///
+  /// * iOS contact information autofill: iOS seems to pull contact info from
+  ///   the Apple ID currently associated with the device. Go to Settings ->
+  ///   Apple ID (usually the first entry, or "Sign in to your iPhone" if you
+  ///   haven't set up one on the device), and fill out the relevant fields. If
+  ///   you wish to test more contact info types, try adding them in Contacts ->
+  ///   My Card.
+  ///
+  /// * Android autofill: Go to Settings -> System -> Languages & input ->
+  ///   Autofill service. Enable the autofill service of your choice, and make
+  ///   sure there're available credentials associated with your app.
+  ///
+  /// #### I called `TextInput.finishAutofillContext` but the autofill save
+  /// prompt isn't showing
+  ///
+  /// * iOS: iOS may not show a prompt or any other visual indication when it
+  ///   saves user password. Go to Settings -> Password and check if your new
+  ///   password is saved. Neither saving password nor auto-generating strong
+  ///   password works without properly setting up associated domains in your
+  ///   app. To set up associated domains, follow the instructions in
+  ///   <https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app>.
+  ///
   /// {@endtemplate}
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -1241,7 +1287,7 @@ class EditableText extends StatefulWidget {
   /// the surrounding [RestorationScope] using the provided restoration ID.
   ///
   /// Persisting and restoring the content of the [EditableText] is the
-  /// responsibilility of the owner of the [controller], who may use a
+  /// responsibility of the owner of the [controller], who may use a
   /// [RestorableTextEditingController] for that purpose.
   ///
   /// See also:
@@ -1609,61 +1655,66 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _clipboardStatus?.removeListener(_onChangedClipboardStatus);
     _clipboardStatus?.dispose();
     super.dispose();
+    assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
 
   // TextInputClient implementation:
 
-  // _lastFormattedUnmodifiedTextEditingValue tracks the last value
-  // that the formatter ran on and is used to prevent double-formatting.
-  TextEditingValue? _lastFormattedUnmodifiedTextEditingValue;
-  // _lastFormattedValue tracks the last post-format value, so that it can be
-  // reused without rerunning the formatter when the input value is repeated.
-  TextEditingValue? _lastFormattedValue;
-  // _receivedRemoteTextEditingValue is the direct value last passed in
-  // updateEditingValue. This value does not get updated with the formatted
-  // version.
-  TextEditingValue? _receivedRemoteTextEditingValue;
+  /// The last known [TextEditingValue] of the platform text input plugin.
+  ///
+  /// This value is updated when the platform text input plugin sends a new
+  /// update via [updateEditingValue], or when [EditableText] calls
+  /// [TextInputConnection.setEditingState] to overwrite the platform text input
+  /// plugin's [TextEditingValue].
+  ///
+  /// Used in [_updateRemoteEditingValueIfNeeded] to determine whether the
+  /// remote value is outdated and needs updating.
+  TextEditingValue? _lastKnownRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
-  bool _updateEditingValueInProgress = false;
-
   @override
   void updateEditingValue(TextEditingValue value) {
-    _updateEditingValueInProgress = true;
+    // This method handles text editing state updates from the platform text
+    // input plugin. The [EditableText] may not have the focus or an open input
+    // connection, as autofill can update a disconnected [EditableText].
+
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
     if (!_shouldCreateInputConnection) {
-      _updateEditingValueInProgress = false;
       return;
     }
+
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
       value = _value.copyWith(selection: value.selection);
     }
-    _receivedRemoteTextEditingValue = value;
-    if (value.text != _value.text) {
-      hideToolbar();
-      _showCaretOnScreen();
-      _currentPromptRectRange = null;
-      if (widget.obscureText && value.text.length == _value.text.length + 1) {
-        _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
-        _obscureLatestCharIndex = _value.selection.baseOffset;
-      }
-    }
+    _lastKnownRemoteTextEditingValue = value;
 
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
       // Track at https://github.com/flutter/flutter/issues/65811
-      _updateEditingValueInProgress = false;
       return;
-    } else if (value.text == _value.text && value.composing == _value.composing && value.selection != _value.selection) {
+    }
+
+    if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, renderEditable!, SelectionChangedCause.keyboard);
+      _handleSelectionChanged(value.selection, renderEditable, SelectionChangedCause.keyboard);
     } else {
+      hideToolbar();
+      _currentPromptRectRange = null;
+
+      if (_hasInputConnection) {
+        _showCaretOnScreen();
+        if (widget.obscureText && value.text.length == _value.text.length + 1) {
+          _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
+          _obscureLatestCharIndex = _value.selection.baseOffset;
+        }
+      }
+
       _formatAndSetValue(value);
     }
 
@@ -1673,7 +1724,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _stopCursorTimer(resetCharTicks: false);
       _startCursorTimer();
     }
-    _updateEditingValueInProgress = false;
   }
 
   @override
@@ -1728,7 +1778,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is
   // on, we need this offset to correctly render and move the cursor.
-  Offset get _floatingCursorOffset => Offset(0, renderEditable!.preferredLineHeight / 2);
+  Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
@@ -1742,20 +1792,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable!.selection!.baseOffset);
-        _startCaretRect = renderEditable!.getLocalRectForCaret(currentTextPosition);
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
 
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
         _lastTextPosition = currentTextPosition;
-        renderEditable!.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
         break;
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
 
-        _lastBoundedOffset = renderEditable!.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-        _lastTextPosition = renderEditable!.getPositionForPoint(renderEditable!.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
-        renderEditable!.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
         break;
       case FloatingCursorDragState.End:
         // We skip animation if no update has happened.
@@ -1768,12 +1818,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onFloatingCursorResetTick() {
-    final Offset finalPosition = renderEditable!.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
+    final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController.isCompleted) {
-      renderEditable!.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable!.selection!.baseOffset)
+      renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
+      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), renderEditable!, SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), renderEditable, SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -1783,14 +1833,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double lerpX = ui.lerpDouble(_lastBoundedOffset!.dx, finalPosition.dx, lerpValue)!;
       final double lerpY = ui.lerpDouble(_lastBoundedOffset!.dy, finalPosition.dy, lerpValue)!;
 
-      renderEditable!.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition!, resetLerpValue: lerpValue);
+      renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition!, resetLerpValue: lerpValue);
     }
   }
 
   void _finalizeEditing(TextInputAction action, {required bool shouldUnfocus}) {
     // Take any actions necessary now that the user has completed editing.
     if (widget.onEditingComplete != null) {
-      widget.onEditingComplete!();
+      try {
+        widget.onEditingComplete!();
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onEditingComplete for $action'),
+        ));
+      }
     } else {
       // Default behavior if the developer did not provide an
       // onEditingComplete callback: Finalize editing and remove focus, or move
@@ -1822,23 +1881,52 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // Invoke optional callback with the user's submitted content.
-    if (widget.onSubmitted != null)
-      widget.onSubmitted!(_value.text);
+    try {
+      widget.onSubmitted?.call(_value.text);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while calling onSubmitted for $action'),
+      ));
+    }
+  }
+
+  int _batchEditDepth = 0;
+
+  /// Begins a new batch edit, within which new updates made to the text editing
+  /// value will not be sent to the platform text input plugin.
+  ///
+  /// Batch edits nest. When the outermost batch edit finishes, [endBatchEdit]
+  /// will attempt to send [currentTextEditingValue] to the text input plugin if
+  /// it detected a change.
+  void beginBatchEdit() {
+    _batchEditDepth += 1;
+  }
+
+  /// Ends the current batch edit started by the last call to [beginBatchEdit],
+  /// and send [currentTextEditingValue] to the text input plugin if needed.
+  ///
+  /// Throws an error in debug mode if this [EditableText] is not in a batch
+  /// edit.
+  void endBatchEdit() {
+    _batchEditDepth -= 1;
+    assert(
+      _batchEditDepth >= 0,
+      'Unbalanced call to endBatchEdit: beginBatchEdit must be called first.',
+    );
+    _updateRemoteEditingValueIfNeeded();
   }
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (!_hasInputConnection)
+    if (_batchEditDepth > 0 || !_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    // We should not update back the value notified by the remote(engine) in reverse, this is redundant.
-    // Unless we modify this value for some reason during processing, such as `TextInputFormatter`.
-    if (_updateEditingValueInProgress && localValue == _receivedRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue)
       return;
-    // In other cases, as long as the value of the [widget.controller.value] is modified,
-    // `setEditingState` should be called as we do not want to skip sending real changes
-    // to the engine.
-    // Also see https://github.com/flutter/flutter/issues/65059#issuecomment-690254379
     _textInputConnection!.setEditingState(localValue);
+    _lastKnownRemoteTextEditingValue = localValue;
   }
 
   TextEditingValue get _value => widget.controller.value;
@@ -1862,9 +1950,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_scrollController!.position.allowImplicitScrolling)
       return RevealedOffset(offset: _scrollController!.offset, rect: rect);
 
-    final Size editableSize = renderEditable!.size;
-    double additionalOffset;
-    Offset unitOffset;
+    final Size editableSize = renderEditable.size;
+    final double additionalOffset;
+    final Offset unitOffset;
 
     if (!_isMultiline) {
       additionalOffset = rect.width >= editableSize.width
@@ -1881,7 +1969,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect expandedRect = Rect.fromCenter(
         center: rect.center,
         width: rect.width,
-        height: math.max(rect.height, renderEditable!.preferredLineHeight),
+        height: math.max(rect.height, renderEditable.preferredLineHeight),
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
@@ -1902,7 +1990,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
-  bool get _hasInputConnection => _textInputConnection != null && _textInputConnection!.attached;
+  bool get _hasInputConnection => _textInputConnection?.attached ?? false;
   bool get _needsAutofill => widget.autofillHints?.isNotEmpty ?? false;
   bool get _shouldBeInAutofillContext => _needsAutofill && currentAutofillScope != null;
 
@@ -1912,7 +2000,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
-      _lastFormattedUnmodifiedTextEditingValue = localValue;
 
       // When _needsAutofill == true && currentAutofillScope == null, autofill
       // is allowed but saving the user input from the text field is
@@ -1927,6 +2014,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _createTextInputConfiguration(_isInAutofillContext || _needsAutofill));
       _textInputConnection!.show();
       _updateSizeAndTransform();
+      _updateComposingRectIfNeeded();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -1952,8 +2040,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection!.close();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
     }
   }
 
@@ -1971,8 +2058,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
     }
   }
@@ -2036,8 +2122,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
-      if (widget.onSelectionChanged != null)
-        widget.onSelectionChanged!(selection, cause);
+      try {
+        widget.onSelectionChanged?.call(selection, cause);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSelectionChanged for $cause'),
+        ));
+      }
+    }
+
+    // To keep the cursor from blinking while it moves, restart the timer here.
+    if (_cursorTimer != null) {
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
     }
   }
 
@@ -2071,7 +2171,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return;
       }
 
-      final double lineHeight = renderEditable!.preferredLineHeight;
+      final double lineHeight = renderEditable.preferredLineHeight;
 
       // Enlarge the target rect by scrollPadding to ensure that caret is not
       // positioned directly at the edge after scrolling.
@@ -2106,7 +2206,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         curve: _caretAnimationCurve,
       );
 
-      renderEditable!.showOnScreen(
+      renderEditable.showOnScreen(
         rect: caretPadding.inflateRect(targetOffset.rect),
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
@@ -2124,50 +2224,71 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
-  _WhitespaceDirectionalityFormatter? _whitespaceFormatter;
+  late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
   void _formatAndSetValue(TextEditingValue value) {
-    _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
+    // Only apply input formatters if the text has changed (including uncommited
+    // text in the composing region), or when the user committed the composing
+    // text.
+    // Gboard is very persistent in restoring the composing region. Applying
+    // input formatters on composing-region-only changes (except clearing the
+    // current composing region) is very infinite-loop-prone: the formatters
+    // will keep trying to modify the composing region while Gboard will keep
+    // trying to restore the original composing region.
+    final bool textChanged = _value.text != value.text
+                          || (!_value.composing.isCollapsed && value.composing.isCollapsed);
+    final bool selectionChanged = _value.selection != value.selection;
 
-    // Check if the new value is the same as the current local value, or is the same
-    // as the pre-formatting value of the previous pass (repeat call).
-    final bool textChanged = _value.text != value.text;
-    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+    if (textChanged) {
+      value = widget.inputFormatters?.fold<TextEditingValue>(
+        value,
+        (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+      ) ?? value;
 
-    // There's no need to format when starting to compose or when continuing
-    // an existing composition.
-    final bool isComposing = value.composing.isValid;
-    final bool isPreviouslyComposing = _lastFormattedUnmodifiedTextEditingValue?.composing.isValid ?? false;
-
-    if ((textChanged || (!isComposing && isPreviouslyComposing)) &&
-        widget.inputFormatters != null &&
-        widget.inputFormatters!.isNotEmpty) {
-      // Only format when the text has changed and there are available formatters.
-      // Pass through the formatter regardless of repeat status if the input value is
-      // different than the stored value.
-      for (final TextInputFormatter formatter in widget.inputFormatters!) {
-        value = formatter.formatEditUpdate(_value, value);
-      }
       // Always pass the text through the whitespace directionality formatter to
       // maintain expected behavior with carets on trailing whitespace.
-      value = _whitespaceFormatter!.formatEditUpdate(_value, value);
-      _lastFormattedValue = value;
+      // TODO(LongCatIsLooong): The if statement here is for retaining the
+      // previous behavior. The input formatter logic will be updated in an
+      // upcoming PR.
+      if (widget.inputFormatters?.isNotEmpty ?? false)
+        value = _whitespaceFormatter.formatEditUpdate(_value, value);
     }
 
-    // Setting _value here ensures the selection and composing region info is passed.
+    // Put all optional user callback invocations in a batch edit to prevent
+    // sending multiple `TextInput.updateEditingValue` messages.
+    beginBatchEdit();
     _value = value;
-    // Use the last formatted value when an identical repeat pass is detected.
-    if (isRepeat && textChanged && _lastFormattedValue != null) {
-      _value = _lastFormattedValue!;
+    if (textChanged) {
+      try {
+        widget.onChanged?.call(value.text);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onChanged'),
+        ));
+      }
     }
 
-    if (textChanged && widget.onChanged != null)
-      widget.onChanged!(value.text);
-    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
+    if (selectionChanged) {
+      try {
+        widget.onSelectionChanged?.call(value.selection, null);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onSelectionChanged'),
+        ));
+      }
+    }
+
+    endBatchEdit();
   }
 
   void _onCursorColorTick() {
-    renderEditable!.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
     _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
   }
 
@@ -2273,7 +2394,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreen();
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable!, null);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, null);
       }
     } else {
       WidgetsBinding.instance!.removeObserver(this);
@@ -2286,30 +2407,53 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
-      final Size size = renderEditable!.size;
-      final Matrix4 transform = renderEditable!.getTransformTo(null);
+      final Size size = renderEditable.size;
+      final Matrix4 transform = renderEditable.getTransformTo(null);
       _textInputConnection!.setEditableSizeAndTransform(size, transform);
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }
   }
 
+  // Sends the current composing rect to the iOS text input plugin via the text
+  // input channel. We need to keep sending the information even if no text is
+  // currently marked, as the information usually lags behind. The text input
+  // plugin needs to estimate the composing rect based on the latest caret rect,
+  // when the composing rect info didn't arrive in time.
+  void _updateComposingRectIfNeeded() {
+    final TextRange composingRange = _value.composing;
+    if (_hasInputConnection) {
+      assert(mounted);
+      Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
+      // Send the caret location instead if there's no marked text yet.
+      if (composingRect == null) {
+        assert(!composingRange.isValid || composingRange.isCollapsed);
+        final int offset = composingRange.isValid ? composingRange.start : 0;
+        composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
+      }
+      assert(composingRect != null);
+      _textInputConnection!.setComposingRect(composingRect);
+      SchedulerBinding.instance!
+          .addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
+    }
+  }
+
   TextDirection get _textDirection {
-    final TextDirection? result = widget.textDirection ?? Directionality.of(context);
+    final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
-    return result!;
+    return result;
   }
 
   /// The renderer for this widget's descendant.
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
-  RenderEditable? get renderEditable => _editableKey.currentContext!.findRenderObject() as RenderEditable?;
+  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
 
-  double get _devicePixelRatio => MediaQuery.of(context)?.devicePixelRatio ?? 1.0;
+  double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio;
 
   @override
   set textEditingValue(TextEditingValue value) {
@@ -2319,11 +2463,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void bringIntoView(TextPosition position) {
-    final Rect localRect = renderEditable!.getLocalRectForCaret(position);
+    final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _getOffsetToRevealCaret(localRect);
 
     _scrollController!.jumpTo(targetOffset.offset);
-    renderEditable!.showOnScreen(rect: targetOffset.rect);
+    renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
   /// Shows the selection toolbar at the location of the current cursor.
@@ -2645,7 +2789,7 @@ class _Editable extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
       textDirection: textDirection,
-      locale: locale ?? Localizations.localeOf(context, nullOk: true),
+      locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
       onSelectionChanged: onSelectionChanged,
@@ -2690,7 +2834,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign
       ..textDirection = textDirection
-      ..locale = locale ?? Localizations.localeOf(context, nullOk: true)
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged

@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-@TestOn('!chrome') // web does not support certain 64bit behavior
-
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -44,7 +40,7 @@ void main() {
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
       expect(read.getInt64(), equals(-9000000000000));
-    });
+    }, skip: kIsWeb);
     test('of 64-bit integer in big endian', () {
       final WriteBuffer write = WriteBuffer();
       write.putInt64(-9000000000000, endian: Endian.big);
@@ -52,7 +48,7 @@ void main() {
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
       expect(read.getInt64(endian: Endian.big), equals(-9000000000000));
-    });
+    }, skip: kIsWeb);
     test('of double', () {
       final WriteBuffer write = WriteBuffer();
       write.putFloat64(3.14);
@@ -90,7 +86,7 @@ void main() {
       final ReadBuffer read = ReadBuffer(written);
       read.getUint8();
       expect(read.getInt64List(3), equals(integers));
-    });
+    }, skip: kIsWeb);
     test('of double list when unaligned', () {
       final Float64List doubles = Float64List.fromList(<double>[3.14, double.nan]);
       final WriteBuffer write = WriteBuffer();

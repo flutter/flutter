@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
 
@@ -17,9 +17,10 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate, this.verbose = true});
+  CoverageCollector({this.libraryPredicate, this.verbose = true, @required this.packagesPath});
 
   final bool verbose;
+  final String packagesPath;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
@@ -66,7 +67,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
@@ -102,7 +103,7 @@ class CoverageCollector extends TestWatcher {
     _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.createHitmap(
       data['coverage'] as List<Map<String, dynamic>>,
-      packagesPath: globalPackagesPath,
+      packagesPath: packagesPath,
       checkIgnoredLines: true,
     ));
     _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
@@ -121,7 +122,7 @@ class CoverageCollector extends TestWatcher {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: packagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
         ? <String>[globals.fs.path.join(packagePath, 'lib')]
@@ -168,7 +169,7 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
-        final RunResult result = processUtils.runSync(<String>[
+        final RunResult result = globals.processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
@@ -279,7 +280,7 @@ void _buildCoverageMap(
       final List<int> hits = (coverage['hits'] as List<dynamic>).cast<int>();
       final List<int> misses = (coverage['misses'] as List<dynamic>).cast<int>();
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'] as List<dynamic>;
-      // The token positions can be null if the script has no coverable lines.
+      // The token positions can be null if the script has no lines that may be covered.
       if (tokenPositions == null) {
         continue;
       }

@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
+import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -19,40 +17,42 @@ import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 
-/// The [WebCompilationProxy] instance.
-WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
-
 Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
   BuildInfo buildInfo,
-  bool initializePlatform,
   bool csp,
   String serviceWorkerStrategy,
+  bool sourceMaps,
+  bool nativeNullAssertions,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-  await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
+  outputDirectory.createSync(recursive: true);
+
+  await injectPlugins(flutterProject, webPlatform: true);
+  final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
       projectDir: globals.fs.currentDirectory,
-      outputDir: globals.fs.directory(getWebBuildDirectory()),
+      outputDir: outputDirectory,
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
       defines: <String, String>{
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetFile: target,
-        kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        kSourceMapsEnabled: sourceMaps.toString(),
+        kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
@@ -86,26 +86,44 @@ Future<void> buildWeb(
   globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-/// An indirection on web compilation.
-///
-/// Avoids issues with syncing build_runner_core to other repos.
-class WebCompilationProxy {
-  const WebCompilationProxy();
-
-  /// Initialize the web compiler from the `projectDirectory`.
-  ///
-  /// Returns whether or not the build was successful.
-  ///
-  /// `release` controls whether we build the bundle for dartdevc or only
-  /// the entry points for dart2js to later take over.
-  Future<bool> initialize({
-    @required Directory projectDirectory,
-    @required String projectName,
-    String testOutputDir,
-    List<String> testFiles,
-    BuildMode mode,
-    bool initializePlatform,
-  }) async {
-    throw UnimplementedError();
-  }
+/// Web rendering backend mode.
+enum WebRendererMode {
+  /// Auto detects which rendering backend to use.
+  autoDetect,
+  /// Always uses canvaskit.
+  canvaskit,
+  /// Always uses html.
+  html,
 }
+
+/// The correct precompiled artifact to use for each build and render mode.
+const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, Artifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdk,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdk,
+    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdk,
+  },
+  WebRendererMode.html: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledSoundSdk,
+    NullSafetyMode.unsound: Artifact.webPrecompiledSdk,
+  },
+};
+
+/// The correct source map artifact to use for each build and render mode.
+const Map<WebRendererMode, Map<NullSafetyMode, Artifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, Artifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+    NullSafetyMode.unsound: Artifact.webPrecompiledCanvaskitSdkSourcemaps,
+  },
+  WebRendererMode.html: <NullSafetyMode, Artifact> {
+    NullSafetyMode.sound: Artifact.webPrecompiledSoundSdkSourcemaps,
+    NullSafetyMode.unsound: Artifact.webPrecompiledSdkSourcemaps,
+  },
+};

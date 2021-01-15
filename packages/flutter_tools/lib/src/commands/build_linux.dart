@@ -35,7 +35,7 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported.');
@@ -43,6 +43,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildLinux(
       flutterProject.linux,
       buildInfo,

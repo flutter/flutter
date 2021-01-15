@@ -7,13 +7,14 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../migrations/cmake_custom_command_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'visual_studio.dart';
@@ -36,7 +37,16 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
-  // Ensure that necessary emphemeral files are generated and up to date.
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+    CmakeCustomCommandMigration(windowsProject, globals.logger),
+  ];
+
+  final ProjectMigration migration = ProjectMigration(migrators);
+  if (!migration.run()) {
+    throwToolExit('Unable to migrate project files');
+  }
+
+  // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.parent);
 
@@ -56,7 +66,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
-    timeout: null,
   );
   try {
     await _runCmakeGeneration(cmakePath, buildDirectory, windowsProject.cmakeFile.parent);
@@ -80,11 +89,21 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       type: 'windows',
     );
     final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(getBuildDirectory()),'windows-code-size-analysis', 'json',
+      globals.fs
+        .directory(globals.fsUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), 'windows-code-size-analysis', 'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
     globals.printStatus(
       'A summary of your Windows bundle analysis can be found at: ${outputFile.path}',
+    );
+
+    // DevTools expects a file path relative to the .flutter-devtools/ dir.
+    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+    globals.printStatus(
+      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+      'flutter pub global activate devtools; flutter pub global run devtools '
+      '--appSizeBase=$relativeAppSizePath'
     );
   }
 }
@@ -95,7 +114,7 @@ Future<void> _runCmakeGeneration(String cmakePath, Directory buildDir, Directory
   await buildDir.create(recursive: true);
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '-S',
@@ -125,7 +144,7 @@ Future<void> _runBuild(String cmakePath, Directory buildDir, String buildModeNam
 
   int result;
   try {
-    result = await processUtils.stream(
+    result = await globals.processUtils.stream(
       <String>[
         cmakePath,
         '--build',

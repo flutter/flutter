@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -12,15 +10,15 @@ import 'package:flutter_test/flutter_test.dart';
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
-DismissDirection reportedDismissDirection;
+late DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
-Widget background;
+Widget? background;
 const double crossAxisEndOffset = 0.5;
 
 Widget buildTest({
-  double startToEndThreshold,
+  double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
-  Future<bool> Function(BuildContext context, DismissDirection direction) confirmDismiss,
+  Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -73,9 +71,9 @@ Widget buildTest({
   );
 }
 
-typedef DismissMethod = Future<void> Function(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
+typedef DismissMethod = Future<void> Function(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection });
 
-Future<void> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
+Future<void> dismissElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection }) async {
   Offset downLocation;
   Offset upLocation;
   switch (gestureDirection) {
@@ -101,8 +99,6 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { @required Axis
       downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
       upLocation = tester.getBottomLeft(finder);
       break;
-    default:
-      fail('unsupported gestureDirection');
   }
 
   final TestGesture gesture = await tester.startGesture(downLocation);
@@ -110,7 +106,7 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { @required Axis
   await gesture.up();
 }
 
-Future<void> flingElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
+Future<void> flingElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:
@@ -125,13 +121,11 @@ Future<void> flingElement(WidgetTester tester, Finder finder, { @required AxisDi
     case AxisDirection.down:
       delta = const Offset(0.0, 300.0);
       break;
-    default:
-      fail('unsupported gestureDirection');
   }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
 
-Future<void> flingElementFromZero(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
+Future<void> flingElementFromZero(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection }) async {
   // This is a special case where we drag in one direction, then fling back so
   // that at the point of release, we're at exactly the point at which we
   // started, but with velocity. This is needed to check a boundary condition
@@ -142,7 +136,7 @@ Future<void> flingElementFromZero(WidgetTester tester, Finder finder, { @require
 Future<void> dismissItem(
   WidgetTester tester,
   int item, {
-  @required AxisDirection gestureDirection,
+  required AxisDirection gestureDirection,
   DismissMethod mechanism = dismissElement,
 }) async {
   assert(gestureDirection != null);
@@ -161,7 +155,7 @@ Future<void> dismissItem(
 Future<void> checkFlingItemBeforeMovementEnd(
   WidgetTester tester,
   int item, {
-  @required AxisDirection gestureDirection,
+  required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
   assert(gestureDirection != null);
@@ -177,7 +171,7 @@ Future<void> checkFlingItemBeforeMovementEnd(
 Future<void> checkFlingItemAfterMovement(
   WidgetTester tester,
   int item, {
-  @required AxisDirection gestureDirection,
+  required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
   assert(gestureDirection != null);
@@ -190,7 +184,7 @@ Future<void> checkFlingItemAfterMovement(
   await tester.pump(const Duration(milliseconds: 300));
 }
 
-Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
+Future<void> rollbackElement(WidgetTester tester, Finder finder, { required AxisDirection gestureDirection, double initialOffsetFactor = 0.0 }) async {
   Offset delta;
   switch (gestureDirection) {
     case AxisDirection.left:
@@ -210,7 +204,7 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required Axi
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  const Test1215DismissibleWidget(this.text, { Key key }) : super(key: key);
+  const Test1215DismissibleWidget(this.text, { Key? key }) : super(key: key);
 
   final String text;
 
@@ -679,13 +673,13 @@ void main() {
   testWidgets('confirmDismiss returns values: true, false, null', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
-    DismissDirection confirmDismissDirection;
+    late DismissDirection confirmDismissDirection;
 
-    Widget buildFrame(bool confirmDismissValue) {
+    Widget buildFrame(bool? confirmDismissValue) {
       return buildTest(
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
-          return Future<bool>.value(confirmDismissValue);
+          return Future<bool?>.value(confirmDismissValue);
         }
       );
     }
@@ -797,5 +791,87 @@ void main() {
       '   remove the Dismissible widget from the application once that\n'
       '   handler has fired.\n',
     );
+  });
+
+  testWidgets('Dismissible.behavior should behave correctly during hit testing', (WidgetTester tester) async {
+    bool didReceivePointerDown = false;
+
+    Widget buildStack({required Widget child}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Listener(
+              onPointerDown: (_) {
+                didReceivePointerDown = true;
+              },
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+            child,
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildStack(
+        child: const Dismissible(
+          key: ValueKey<int>(1),
+          child: SizedBox(
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
+      return tester.pumpWidget(
+        buildStack(
+          child: Dismissible(
+            key: const ValueKey<int>(1),
+            behavior: behavior,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+    }
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.deferToChild);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.opaque);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isFalse);
+
+    didReceivePointerDown = false;
+    await pumpWidgetTree(HitTestBehavior.translucent);
+    await tester.tapAt(const Offset(10.0, 10.0));
+    expect(didReceivePointerDown, isTrue);
+  });
+
+  testWidgets('DismissDirection.none does not trigger dismiss', (WidgetTester tester) async {
+    dismissDirection = DismissDirection.none;
+
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.down);
+    expect(find.text('0'), findsOneWidget);
   });
 }

@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
-    Key key,
+    Key? key,
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
@@ -18,14 +16,14 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.elevation = 2,
   }) : super(key: key);
 
-  final Key firstPanelKey;
-  final Key secondPanelKey;
+  final Key? firstPanelKey;
+  final Key? secondPanelKey;
   final bool canTapOnHeader;
-  final Color dividerColor;
+  final Color? dividerColor;
   final int elevation;
 
   /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
-  final EdgeInsets expandedHeaderPadding;
+  final EdgeInsets? expandedHeaderPadding;
 
   /// Mirrors the default expanded header padding as its source constants are private.
   static EdgeInsets defaultExpandedHeaderPadding()
@@ -74,7 +72,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 }
 
 class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({ Key key, this.headerKey }) : super(key: key);
+  const ExpansionPanelListSemanticsTest({ Key? key, required this.headerKey }) : super(key: key);
 
   final Key headerKey;
 
@@ -118,8 +116,8 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
 
 void main() {
   testWidgets('ExpansionPanelList test', (WidgetTester tester) async {
-    int index;
-    bool isExpanded;
+    late int index;
+    late bool isExpanded;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1364,7 +1362,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
 
     // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
-    expect(decoration.border.top.color, dividerColor);
+    expect(decoration.border!.top.color, dividerColor);
   });
 
   testWidgets('ExpansionPanelList.radio respects DividerColor', (WidgetTester tester) async {
@@ -1397,7 +1395,7 @@ void main() {
     final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
 
     // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
-    expect(boxDecoration.border.top.color, dividerColor);
+    expect(boxDecoration.border!.top.color, dividerColor);
   });
 
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
@@ -1459,5 +1457,76 @@ void main() {
       'Invalid value for elevation. See the kElevationToShadow constant for'
       ' possible elevation values.'
     ));
+  });
+
+  testWidgets('ExpansionPanel.panelColor test', (WidgetTester tester) async {
+    const Color firstPanelColor = Colors.red;
+    const Color secondPanelColor = Colors.brown;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {},
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                backgroundColor: firstPanelColor,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+              ExpansionPanel(
+                backgroundColor: secondPanelColor,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const Text('B');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+
+    expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
+    expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
+  });
+
+  testWidgets('ExpansionPanelRadio.backgroundColor test', (WidgetTester tester) async {
+    const Color firstPanelColor = Colors.red;
+    const Color secondPanelColor = Colors.brown;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              backgroundColor: firstPanelColor,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const Text('A');
+              },
+              body: const SizedBox(height: 100.0),
+              value: 0,
+            ),
+            ExpansionPanelRadio(
+              backgroundColor: secondPanelColor,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const Text('B');
+              },
+              body: const SizedBox(height: 100.0),
+              value: 1,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+
+    expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
+    expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
 }

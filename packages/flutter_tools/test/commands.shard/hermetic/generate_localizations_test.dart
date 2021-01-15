@@ -5,33 +5,30 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
 
+import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
   testUsingContext('default l10n settings', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-    fileSystem.file('l10n.yaml').createSync();
-    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-    final String content = pubspecFile.readAsStringSync().replaceFirst(
-      '\nflutter:\n',
-      '\nflutter:\n  generate: true\n',
-    );
-    pubspecFile.writeAsStringSync(content);
-
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
+      logger: logger,
     );
     await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -45,6 +42,7 @@ void main() {
 
   testUsingContext('not using synthetic packages', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
     );
@@ -52,22 +50,17 @@ void main() {
       'app_en.arb',
     )..createSync(recursive: true);
 
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-    fileSystem.file('l10n.yaml').createSync();
-    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-    final String content = pubspecFile.readAsStringSync().replaceFirst(
-      '\nflutter:\n',
-      '\nflutter:\n  generate: true\n',
-    );
-    pubspecFile.writeAsStringSync(content);
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
+      logger: logger,
     );
     await createTestCommandRunner(command).run(<String>[
       'gen-l10n',
@@ -83,25 +76,21 @@ void main() {
 
   testUsingContext('throws error when arguments are invalid', () async {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''{
+    arbFile.writeAsStringSync('''
+{
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-    fileSystem.file('l10n.yaml').createSync();
-    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-    final String content = pubspecFile.readAsStringSync().replaceFirst(
-      '\nflutter:\n',
-      '\nflutter:\n  generate: true\n',
-    );
-    pubspecFile.writeAsStringSync(content);
     fileSystem.file('header.txt').writeAsStringSync('a header file');
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
+      logger: logger,
     );
     expect(
       () => createTestCommandRunner(command).run(<String>[
@@ -111,5 +100,35 @@ void main() {
       ]),
       throwsA(isA<ToolExit>()),
     );
+  });
+
+  testUsingContext('l10n yaml file takes precedence over command line arguments', () async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    fileSystem.file('l10n.yaml').createSync();
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    await createTestCommandRunner(command).run(<String>['gen-l10n']);
+
+    final FlutterCommandResult result = await command.runCommand();
+    expect(result.exitStatus, ExitStatus.success);
+    expect(logger.statusText, contains('Because l10n.yaml exists, the options defined there will be used instead.'));
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
   });
 }

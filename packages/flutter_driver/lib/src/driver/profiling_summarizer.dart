@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'percentile_utils.dart';
 import 'timeline.dart';
 
@@ -35,7 +37,7 @@ enum ProfileType {
 
 /// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
 ///
-/// A sample event (some fields have been omitted for brewity):
+/// A sample event (some fields have been omitted for brevity):
 /// ```
 ///     {
 ///      "category": "embedder",

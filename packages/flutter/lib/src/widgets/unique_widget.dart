@@ -28,13 +28,13 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
        super(key: key);
 
   @override
-  T createState();
+  T createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
 
   /// The state for the unique inflated instance of this widget.
   ///
   /// Might be null if the widget is not currently in the tree.
   T? get currentState {
-    final GlobalKey<T> globalKey = key as GlobalKey<T>;
+    final GlobalKey<T> globalKey = key! as GlobalKey<T>;
     return globalKey.currentState;
   }
 }

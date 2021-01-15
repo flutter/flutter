@@ -70,7 +70,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                     // This implementation rebuild the widget tree for every
                     // frame, and is intentionally designed of poor performance
                     // for benchmark purposes.
-                    return counter % 2 == 0
+                    return counter.isEven
                         ? Container(
                             // This key forces rebuilding the element
                             key: ValueKey<int>(widgetCounter + label),

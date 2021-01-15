@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'table.dart';
 
@@ -215,13 +216,16 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No MediaQuery widget found.'),
+        ErrorSummary('No MediaQuery widget ancestor found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
         context.describeWidget('The specific widget that could not find a MediaQuery ancestor was'),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'Typically, the MediaQuery widget is introduced by the MaterialApp or '
-          'WidgetsApp widget at the top of your application widget tree.'
+          'No MediaQuery ancestor could be found starting from the context '
+          'that was passed to MediaQuery.of(). This can happen because you '
+          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
+          '(those widgets introduce a MediaQuery), or it can happen if the '
+          'context you use comes from a widget above those widgets.'
         ),
       ]);
     }
@@ -248,7 +252,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 ///  * why: explain why the direction is needed, for example "to resolve
 ///    the 'alignment' argument". Should be an adverb phrase describing why.
 ///  * hint: explain why this might be happening, for example "The default
-///    value of the 'aligment' argument of the $runtimeType widget is an
+///    value of the 'alignment' argument of the $runtimeType widget is an
 ///    AlignmentDirectional value.". Should be a fully punctuated sentence.
 ///  * alternative: provide additional advice specific to the situation,
 ///    especially an alternative to providing a Directionality ancestor.
@@ -319,6 +323,44 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
     }
     return true;
   }());
+}
+
+/// Asserts that the given context has a [Localizations] ancestor that contains
+/// a [WidgetsLocalizations] delegate.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasWidgetsLocalizations(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasWidgetsLocalizations(BuildContext context) {
+  assert(() {
+    if (Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations) == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No WidgetsLocalizations found.'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require WidgetsLocalizations '
+          'to be provided by a Localizations widget ancestor.'
+        ),
+        ErrorDescription(
+          'The widgets library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
+        ),
+        ErrorHint(
+          'To introduce a WidgetsLocalizations, either use a '
+          'WidgetsApp at the root of your application to include them '
+          'automatically, or add a Localization widget with a '
+          'WidgetsLocalizations delegate.'
+        ),
+        ...context.describeMissingAncestor(expectedAncestorType: WidgetsLocalizations)
+      ]);
+    }
+    return true;
+  }());
+  return true;
 }
 
 /// Returns true if none of the widget library debug variables have been changed.

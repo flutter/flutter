@@ -85,8 +85,16 @@ class RenderImage extends RenderBox {
   ui.Image? get image => _image;
   ui.Image? _image;
   set image(ui.Image? value) {
-    if (value == _image)
+    if (value == _image) {
       return;
+    }
+    // If we get a clone of our image, it's the same underlying native data -
+    // dispose of the new clone and return early.
+    if (value != null && _image != null && value.isCloneOf(_image!)) {
+      value.dispose();
+      return;
+    }
+    _image?.dispose();
     _image = value;
     markNeedsPaint();
     if (_width == null || _height == null)
@@ -362,6 +370,11 @@ class RenderImage extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _sizeForConstraints(constraints);
+  }
 
   @override
   void performLayout() {

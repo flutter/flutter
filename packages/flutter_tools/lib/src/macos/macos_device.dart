@@ -5,8 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
@@ -21,18 +23,24 @@ class MacOSDevice extends DesktopDevice {
   MacOSDevice({
     @required ProcessManager processManager,
     @required Logger logger,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _operatingSystemUtils = operatingSystemUtils,
        super(
         'macos',
         platformType: PlatformType.macos,
         ephemeral: false,
         processManager: processManager,
         logger: logger,
+        fileSystem: fileSystem,
+        operatingSystemUtils: operatingSystemUtils,
       );
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool isSupported() => true;
@@ -40,8 +48,19 @@ class MacOSDevice extends DesktopDevice {
   @override
   String get name => 'macOS';
 
+  /// Returns [TargetPlatform.darwin_x64] even on macOS ARM devices.
+  ///
+  /// Build system, artifacts rely on Rosetta to translate to x86_64 on ARM.
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
+
+  @override
+  Future<String> get targetPlatformDisplayName async {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+      return 'darwin-arm64';
+    }
+    return super.targetPlatformDisplayName;
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -71,7 +90,7 @@ class MacOSDevice extends DesktopDevice {
   void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
-    // no general-purpose way of knowing when a process is far enoug along in
+    // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
     _processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
@@ -89,16 +108,22 @@ class MacOSDevices extends PollingDeviceDiscovery {
     @required MacOSWorkflow macOSWorkflow,
     @required ProcessManager processManager,
     @required Logger logger,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -112,7 +137,12 @@ class MacOSDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDevice(processManager: _processManager, logger: _logger),
+      MacOSDevice(
+        processManager: _processManager,
+        logger: _logger,
+        fileSystem: _fileSystem,
+        operatingSystemUtils: _operatingSystemUtils,
+      ),
     ];
   }
 

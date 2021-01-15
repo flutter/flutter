@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -79,6 +80,9 @@ Future<void> main() async {
           'Frameworks',
           'Flutter.framework',
         ));
+
+        checkDirectoryNotExists(path.join(outputFlutterFramework.path, 'Headers'));
+        checkDirectoryNotExists(path.join(outputFlutterFramework.path, 'Modules'));
         final File outputFlutterFrameworkBinary = File(path.join(
           outputFlutterFramework.path,
           'Flutter',
@@ -118,6 +122,12 @@ Future<void> main() async {
           <String>['embed_and_thin'],
           environment: <String, String>{
             'SOURCE_ROOT': flutterProject.iosPath,
+            'BUILT_PRODUCTS_DIR': path.join(
+              flutterProject.rootPath,
+              'build',
+              'ios',
+              'Release-iphoneos',
+            ),
             'TARGET_BUILD_DIR': buildPath,
             'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
             'VERBOSE_SCRIPT_LOGGING': '1',
@@ -165,6 +175,29 @@ Future<void> main() async {
         if (!await localNetworkUsageFound(outputAppPath)) {
           throw TaskResult.failure('Debug bundle is missing NSLocalNetworkUsageDescription');
         }
+
+        section('Clean build');
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('clean');
+        });
+
+        section('Archive');
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await flutter('build', options: <String>[
+            'xcarchive',
+          ]);
+        });
+
+        checkDirectoryExists(path.join(
+          flutterProject.rootPath,
+          'build',
+          'ios',
+          'archive',
+          'Runner.xcarchive',
+          'Products',
+        ));
       });
 
       return TaskResult.success(null);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,8 +39,8 @@ void main() {
   });
 
   test('ensure errors processing render objects are well formatted', () {
-    FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    late FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails = details;
     };
@@ -103,38 +101,38 @@ void main() {
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer);
+    _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipRRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer as ClipRRectLayer);
+    _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer as ClipRRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipPath reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer as ClipPathLayer);
+    _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer as ClipPathLayer?);
     });
   });
 
   test('PaintingContext.pushColorFilter reuses the layer', () {
-    _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer as ColorFilterLayer);
+    _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer as ColorFilterLayer?);
     });
   });
 
   test('PaintingContext.pushTransform reuses the layer', () {
-    _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer as TransformLayer);
+    _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer as TransformLayer?);
     });
   });
 
   test('PaintingContext.pushOpacity reuses the layer', () {
-    _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer);
+    _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+      return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
 }
@@ -154,7 +152,7 @@ void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback pai
   expect(box.paintedLayers[0], same(box.paintedLayers[1]));
 }
 
-typedef _LayerTestPaintCallback = Layer Function(PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer);
+typedef _LayerTestPaintCallback = Layer? Function(PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer);
 
 class _TestCustomLayerBox extends RenderBox {
   _TestCustomLayerBox(this.painter);
@@ -172,7 +170,7 @@ class _TestCustomLayerBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Layer paintedLayer = painter(super.paint, context, offset, layer);
+    final Layer paintedLayer = painter(super.paint, context, offset, layer)!;
     paintedLayers.add(paintedLayer);
     layer = paintedLayer as ContainerLayer;
   }
@@ -185,7 +183,10 @@ class TestRenderObject extends RenderObject {
   void debugAssertDoesMeetConstraints() { }
 
   @override
-  Rect get paintBounds => null;
+  Rect get paintBounds {
+    assert(false); // The test shouldn't call this.
+    return Rect.zero;
+  }
 
   @override
   void performLayout() { }
@@ -216,11 +217,17 @@ class TestThrowingRenderObject extends RenderObject {
   void debugAssertDoesMeetConstraints() { }
 
   @override
-  Rect get paintBounds => null;
+  Rect get paintBounds {
+    assert(false); // The test shouldn't call this.
+    return Rect.zero;
+  }
 
   @override
   void performResize() { }
 
   @override
-  Rect get semanticBounds => null;
+  Rect get semanticBounds {
+    assert(false); // The test shouldn't call this.
+    return Rect.zero;
+  }
 }

@@ -18,7 +18,7 @@ final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 void main() {
   for (final bool asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
-      final FileSystem fileSystem = MemoryFileSystem();
+      final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
@@ -39,7 +39,7 @@ void main() {
     });
 
     testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
-      final FileSystem fileSystem = MemoryFileSystem();
+      final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
@@ -60,9 +60,9 @@ void main() {
     });
 
     testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
-      final FileSystem fileSystem = MemoryFileSystem();
+      final FileSystem fileSystem = MemoryFileSystem.test();
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        fileSystem: MemoryFileSystem(),
+        fileSystem: MemoryFileSystem.test(),
         platform: FakePlatform(),
         logger: BufferLogger.test(),
       );
@@ -143,7 +143,8 @@ void main() {
         packageConfig: packageConfig,
       );
 
-      expect(invalidationResult.packageConfig, isNot(packageConfig));
+      // Initial package config is re-used.
+      expect(invalidationResult.packageConfig, packageConfig);
 
       fileSystem.file('.packages')
         .writeAsStringSync('foo:lib/\n');

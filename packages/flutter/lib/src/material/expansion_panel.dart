@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -76,10 +74,11 @@ class ExpansionPanel {
   ///
   /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
-    @required this.headerBuilder,
-    @required this.body,
+    required this.headerBuilder,
+    required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.backgroundColor,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -103,6 +102,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool canTapOnHeader;
 
+  /// Defines the background color of the panel.
+  ///
+  /// Defaults to [ThemeData.cardColor].
+  final Color? backgroundColor;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -121,15 +124,17 @@ class ExpansionPanelRadio extends ExpansionPanel {
   /// A unique [value] must be passed into the constructor. The
   /// [headerBuilder], [body], [value] must not be null.
   ExpansionPanelRadio({
-    @required this.value,
-    @required ExpansionPanelHeaderBuilder headerBuilder,
-    @required Widget body,
+    required this.value,
+    required ExpansionPanelHeaderBuilder headerBuilder,
+    required Widget body,
     bool canTapOnHeader = false,
+    Color? backgroundColor,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        backgroundColor: backgroundColor,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -151,8 +156,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
-///     this.expandedValue,
-///     this.headerValue,
+///     required this.expandedValue,
+///     required this.headerValue,
 ///     this.isExpanded = false,
 ///   });
 ///
@@ -226,7 +231,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// The [children] and [animationDuration] arguments must not be null.
   const ExpansionPanelList({
-    Key key,
+    Key? key,
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
@@ -255,9 +260,9 @@ class ExpansionPanelList extends StatefulWidget {
   /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
-  ///     this.id,
-  ///     this.expandedValue,
-  ///     this.headerValue,
+  ///     required this.id,
+  ///     required this.expandedValue,
+  ///     required this.headerValue,
   ///   });
   ///
   ///   int id;
@@ -316,7 +321,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ```
   /// {@end-tool}
   const ExpansionPanelList.radio({
-    Key key,
+    Key? key,
     this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
@@ -349,7 +354,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
   /// panels in a parent widget that may need to react to these changes.
-  final ExpansionPanelCallback expansionCallback;
+  final ExpansionPanelCallback? expansionCallback;
 
   /// The duration of the expansion animation.
   final Duration animationDuration;
@@ -360,7 +365,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// The value of the panel that initially begins open. (This value is
   /// only used when initializing with the [ExpansionPanelList.radio]
   /// constructor.)
-  final Object initialOpenPanelValue;
+  final Object? initialOpenPanelValue;
 
   /// The padding that surrounds the panel header when expanded.
   ///
@@ -372,7 +377,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
-  final Color dividerColor;
+  final Color? dividerColor;
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.
   ///
@@ -390,7 +395,7 @@ class ExpansionPanelList extends StatefulWidget {
 }
 
 class _ExpansionPanelListState extends State<ExpansionPanelList> {
-  ExpansionPanelRadio _currentOpenPanel;
+  ExpansionPanelRadio? _currentOpenPanel;
 
   @override
   void initState() {
@@ -439,7 +444,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   void _handlePressed(bool isExpanded, int index) {
     if (widget.expansionCallback != null)
-      widget.expansionCallback(index, isExpanded);
+      widget.expansionCallback!(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
@@ -451,7 +456,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value)
-          widget.expansionCallback(childIndex, false);
+          widget.expansionCallback!(childIndex, false);
       }
 
       setState(() {
@@ -460,7 +465,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     }
   }
 
-  ExpansionPanelRadio searchPanelByValue(List<ExpansionPanelRadio> panels, Object value)  {
+  ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
     for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value)
         return panel;
@@ -532,6 +537,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
+          color: child.backgroundColor,
           child: Column(
             children: <Widget>[
               header,

@@ -12,8 +12,20 @@ import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'adb.dart';
 import 'running_processes.dart';
+import 'task_result.dart';
 import 'utils.dart';
+
+/// Identifiers for devices that should never be rebooted.
+final Set<String> noRebootForbidList = <String>{
+  '822ef7958bba573829d85eef4df6cbdd86593730', // 32bit iPhone requires manual intervention on reboot.
+};
+
+/// The maximum number of test runs before a device must be rebooted.
+///
+/// This number was chosen arbitrarily.
+const int maxiumRuns = 30;
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -28,7 +40,7 @@ bool _isTaskRegistered = false;
 ///
 /// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
-Future<TaskResult> task(TaskFunction task) {
+Future<TaskResult> task(TaskFunction task) async {
   if (_isTaskRegistered)
     throw StateError('A task is already registered');
 
@@ -84,16 +96,23 @@ class _TaskRunner {
       final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toSet();
+      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
       beforeRunningDartInstances.forEach(print);
-
+      for (final RunningProcessInfo info in allProcesses) {
+        if (info.commandLine.contains('iproxy')) {
+          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+        }
+      }
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
+        '-v',
         '--enable-macos-desktop',
         '--enable-windows-desktop',
         '--enable-linux-desktop',
-        '--enable-web'
-      ]);
+        '--enable-web',
+        if (localEngine != null) ...<String>['--local-engine', localEngine],
+      ], canFail: true);
       if (configResult != 0) {
         print('Failed to enable configuration, tasks may not run.');
       }
@@ -122,7 +141,6 @@ class _TaskRunner {
           }
         }
       }
-
       _completer.complete(result);
       return result;
     } on TimeoutException catch (err, stackTrace) {
@@ -131,9 +149,39 @@ class _TaskRunner {
       print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      print('Cleaning up after task...');
+      await checkForRebootRequired();
       await forceQuitRunningProcesses();
       _closeKeepAlivePort();
+    }
+  }
+
+  Future<void> checkForRebootRequired() async {
+    print('Checking for reboot');
+    try {
+      final Device device = await devices.workingDevice;
+      if (noRebootForbidList.contains(device.deviceId)) {
+        return;
+      }
+      final File rebootFile = _rebootFile();
+      int runCount;
+      if (rebootFile.existsSync()) {
+        runCount = int.tryParse(rebootFile.readAsStringSync().trim());
+      } else {
+        runCount = 0;
+      }
+      if (runCount < maxiumRuns) {
+        rebootFile
+          ..createSync()
+          ..writeAsStringSync((runCount + 1).toString());
+        return;
+      }
+      rebootFile.deleteSync();
+      print('rebooting');
+      await device.reboot();
+    } on TimeoutException {
+      // Could not find device in order to reboot.
+    } on DeviceException {
+      // No attached device needed to reboot.
     }
   }
 
@@ -186,101 +234,12 @@ class _TaskRunner {
   }
 }
 
-/// A result of running a single task.
-class TaskResult {
-  /// Constructs a successful result.
-  TaskResult.success(this.data, {
-    this.benchmarkScoreKeys = const <String>[],
-    this.detailFiles,
-  })
-      : succeeded = true,
-        message = 'success' {
-    const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
-    if (benchmarkScoreKeys != null) {
-      for (final String key in benchmarkScoreKeys) {
-        if (!data.containsKey(key)) {
-          throw 'Invalid benchmark score key "$key". It does not exist in task '
-              'result data ${prettyJson.convert(data)}';
-        } else if (data[key] is! num) {
-          throw 'Invalid benchmark score for key "$key". It is expected to be a num '
-              'but was ${data[key].runtimeType}: ${prettyJson.convert(data[key])}';
-        }
-      }
-    }
+File _rebootFile() {
+  if (Platform.isLinux || Platform.isMacOS) {
+    return File(path.join(Platform.environment['HOME'], '.reboot-count'));
   }
-
-  /// Constructs a successful result using JSON data stored in a file.
-  factory TaskResult.successFromFile(File file,
-      {List<String> benchmarkScoreKeys}) {
-    return TaskResult.success(
-      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
-      benchmarkScoreKeys: benchmarkScoreKeys,
-    );
+  if (!Platform.isWindows) {
+    throw StateError('Unexpected platform ${Platform.operatingSystem}');
   }
-
-  /// Constructs an unsuccessful result.
-  TaskResult.failure(this.message)
-      : succeeded = false,
-        data = null,
-        detailFiles = null,
-        benchmarkScoreKeys = const <String>[];
-
-  /// Whether the task succeeded.
-  final bool succeeded;
-
-  /// Task-specific JSON data
-  final Map<String, dynamic> data;
-
-  /// Files containing detail on the run (e.g. timeline trace files)
-  final List<String> detailFiles;
-
-  /// Keys in [data] that store scores that will be submitted to Cocoon.
-  ///
-  /// Each key is also part of a benchmark's name tracked by Cocoon.
-  final List<String> benchmarkScoreKeys;
-
-  /// Whether the task failed.
-  bool get failed => !succeeded;
-
-  /// Explains the result in a human-readable format.
-  final String message;
-
-  /// Serializes this task result to JSON format.
-  ///
-  /// The JSON format is as follows:
-  ///
-  ///     {
-  ///       "success": true|false,
-  ///       "data": arbitrary JSON data valid only for successful results,
-  ///       "detailFiles": list of filenames containing detail on the run
-  ///       "benchmarkScoreKeys": [
-  ///         contains keys into "data" that represent benchmarks scores, which
-  ///         can be uploaded, for example. to golem, valid only for successful
-  ///         results
-  ///       ],
-  ///       "reason": failure reason string valid only for unsuccessful results
-  ///     }
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{
-      'success': succeeded,
-    };
-
-    if (succeeded) {
-      json['data'] = data;
-      if (detailFiles != null)
-        json['detailFiles'] = detailFiles;
-      json['benchmarkScoreKeys'] = benchmarkScoreKeys;
-    } else {
-      json['reason'] = message;
-    }
-
-    return json;
-  }
-
-  @override
-  String toString() => message;
-}
-
-class TaskResultCheckProcesses extends TaskResult {
-  TaskResultCheckProcesses() : super.success(null);
+  return File(path.join(Platform.environment['USERPROFILE'], '.reboot-count'));
 }

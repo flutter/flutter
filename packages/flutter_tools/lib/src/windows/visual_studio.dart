@@ -140,7 +140,7 @@ class VisualStudio {
     return _requiredComponents().values.toList();
   }
 
-  /// The consumer-facing version name of the minumum supported version.
+  /// The consumer-facing version name of the minimum supported version.
   ///
   /// E.g., for Visual Studio 2019 this returns "2019" rather than "16".
   String get minimumVersionDescription {
@@ -199,7 +199,7 @@ class VisualStudio {
   Map<String, String> _requiredComponents([int majorVersion]) {
     // The description of the C++ toolchain required by the template. The
     // component name is significantly different in different versions.
-    // When a new major version of VS is supported, its toochain description
+    // When a new major version of VS is supported, its toolchain description
     // should be added below. It should also be made the default, so that when
     // there is no installation, the message shows the string that will be
     // relevant for the most likely fresh install case).
@@ -228,7 +228,7 @@ class VisualStudio {
   /// The minimum supported major version.
   static const int _minimumSupportedVersion = 16;  // '16' is VS 2019.
 
-  /// vswhere argument to specificy the minimum version.
+  /// vswhere argument to specify the minimum version.
   static const String _vswhereMinVersionArgument = '-version';
 
   /// vswhere argument to allow prerelease versions.
@@ -304,7 +304,7 @@ class VisualStudio {
         }
       }
     } on ArgumentError {
-      // Thrown if vswhere doesnt' exist; ignore and return null below.
+      // Thrown if vswhere doesn't exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
     } on FormatException {

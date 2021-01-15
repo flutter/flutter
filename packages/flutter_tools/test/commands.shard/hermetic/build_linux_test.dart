@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -27,7 +26,8 @@ const String _kTestFlutterRoot = '/flutter';
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
-    'FLUTTER_ROOT': _kTestFlutterRoot
+    'FLUTTER_ROOT': _kTestFlutterRoot,
+    'HOME': '/',
   }
 );
 final Platform notLinuxPlatform = FakePlatform(
@@ -45,12 +45,12 @@ void main() {
 
   FileSystem fileSystem;
   ProcessManager processManager;
-  MockUsage usage;
+  Usage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = MockUsage();
+    usage = Usage.test();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -209,6 +209,57 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
+  testUsingContext('Linux build extracts errors from stdout', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+
+    // This contains a mix of routine build output and various types of errors
+    // (Dart error, compile error, link error), edited down for compactness.
+    const String stdout = r'''
+ninja: Entering directory `build/linux/release'
+[1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
+lib/main.dart:4:3: Error: Method not found: 'foo'.
+[2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
+/foo/linux/main.cc:6:2: error: expected ';' after class
+/foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
+/foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
+/foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
+[3/6] Building CXX object CMakeFiles/foo_bar.dir/flutter/generated_plugin_registrant.cc.o
+[4/6] Building CXX object CMakeFiles/foo_bar.dir/my_application.cc.o
+[5/6] Linking CXX executable intermediates_do_not_run/foo_bar
+main.cc:(.text+0x13): undefined reference to `Foo::bar()'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+''';
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release',
+        stdout: stdout,
+      ),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    // Just the warnings and errors should be surfaced.
+    expect(testLogger.errorText, r'''
+lib/main.dart:4:3: Error: Method not found: 'foo'.
+/foo/linux/main.cc:6:2: error: expected ';' after class
+/foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
+/foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
+/foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
   testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
@@ -280,6 +331,8 @@ void main() {
     ]);
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -311,17 +364,17 @@ void main() {
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
-      '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
-      '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
-      '  "TRACK_WIDGET_CREATION=\\"true\\""',
-      '  "TREE_SHAKE_ICONS=\\"true\\""',
-      '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
-      '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
-      '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
-      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
+      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_OBFUSCATION=true"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "SPLIT_DEBUG_INFO=foo/"',
+      '  "TRACK_WIDGET_CREATION=true"',
+      '  "TREE_SHAKE_ICONS=true"',
+      '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
+      '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+      '  "FLUTTER_TARGET=lib/other.dart"',
+      '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -381,14 +434,15 @@ set(BINARY_NAME "fizz_bar")
       ninjaCommand('release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''[
-{
-  "l": "dart:_internal",
-  "c": "SubListIterable",
-  "n": "[Optimized] skip",
-  "s": 2400
-}
-          ]''');
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
         fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
@@ -399,11 +453,16 @@ set(BINARY_NAME "fizz_bar")
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub', '--analyze-size']
+    // Capture Usage.test() events.
+    final StringBuffer buffer = await capturedConsolePrint(() =>
+      createTestCommandRunner(command).run(
+        const <String>['build', 'linux', '--no-pub', '--analyze-size']
+      )
     );
+
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-    verify(usage.sendEvent('code-size-analysis', 'linux')).called(1);
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -412,5 +471,3 @@ set(BINARY_NAME "fizz_bar")
     Usage: () => usage,
   });
 }
-
-class MockUsage extends Mock implements Usage {}

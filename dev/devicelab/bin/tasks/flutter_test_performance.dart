@@ -21,6 +21,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 // Matches the output of the "test" package, e.g.: "00:01 +1 loading foo"
@@ -36,10 +37,11 @@ enum TestStep {
   testPassed,
 }
 
-Future<int> runTest({bool coverage = false}) async {
+Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   final Stopwatch clock = Stopwatch()..start();
   final List<String> arguments = flutterCommandArgs('test', <String>[
     if (coverage) '--coverage',
+    if (noPub) '--no-pub',
     path.join('flutter_test', 'trivial_widget_test.dart'),
   ]);
   final Process analysis = await startProcess(
@@ -49,7 +51,8 @@ Future<int> runTest({bool coverage = false}) async {
   );
   int badLines = 0;
   TestStep step = TestStep.starting;
-  await for (final String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+
+  analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
@@ -81,11 +84,11 @@ Future<int> runTest({bool coverage = false}) async {
         }
       }
     }
-  }
-  await for (final String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  });
+  analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stderr: $entry');
     badLines += 1;
-  }
+  });
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0)
@@ -105,22 +108,22 @@ void main() {
     ));
     final String originalSource = await nodeSourceFile.readAsString();
     try {
-      await runTest(); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
-      final int withoutChange = await runTest(); // run test again with no change
+      await runTest(noPub: true); // first number is meaningless; could have had to build the tool, run pub get, have a cache, etc
+      final int withoutChange = await runTest(noPub: true); // run test again with no change
       await nodeSourceFile.writeAsString( // only change implementation
         originalSource
           .replaceAll('_owner', '_xyzzy')
       );
-      final int implementationChange = await runTest(); // run test again with implementation changed
+      final int implementationChange = await runTest(noPub: true); // run test again with implementation changed
       await nodeSourceFile.writeAsString( // change interface as well
         originalSource
           .replaceAll('_owner', '_xyzzy')
           .replaceAll('owner', '_owner')
           .replaceAll('_xyzzy', 'owner')
       );
-      final int interfaceChange = await runTest(); // run test again with interface changed
+      final int interfaceChange = await runTest(noPub: true); // run test again with interface changed
       // run test with coverage enabled.
-      final int withCoverage = await runTest(coverage: true);
+      final int withCoverage = await runTest(coverage: true, noPub: true);
       final Map<String, dynamic> data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,

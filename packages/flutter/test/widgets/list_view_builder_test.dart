@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -264,7 +262,7 @@ void main() {
   });
 
   testWidgets('ListView.separated', (WidgetTester tester) async {
-    Widget buildFrame({ int itemCount }) {
+    Widget buildFrame({ required int itemCount }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
@@ -309,7 +307,7 @@ void main() {
 
 
   testWidgets('ListView.separated uses correct semanticChildCount', (WidgetTester tester) async {
-    Widget buildFrame({int itemCount}) {
+    Widget buildFrame({ required int itemCount}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
@@ -353,6 +351,29 @@ void main() {
 
     await tester.pumpWidget(buildFrame(itemCount: 4));
     expect(scrollable().semanticChildCount, 4);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72292
+  testWidgets('ListView.builder and SingleChildScrollView can work well together', (WidgetTester tester) async {
+    Widget builder(int itemCount) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemExtent: 35,
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return const Text('I love Flutter.');
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder(1));
+    // Trigger relayout and garbage collect.
+    await tester.pumpWidget(builder(2));
   });
 }
 

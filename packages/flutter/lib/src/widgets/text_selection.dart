@@ -356,7 +356,7 @@ class TextSelectionOverlay {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
-  /// {@template flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// {@template flutter.widgets.TextSelectionOverlay.onSelectionHandleTapped}
   /// A callback that's invoked when a selection handle is tapped.
   ///
   /// Both regular taps and long presses invoke this callback, but a drag
@@ -567,27 +567,34 @@ class TextSelectionOverlay {
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
-    return FadeTransition(
-      opacity: _toolbarOpacity,
-      child: CompositedTransformFollower(
-        link: toolbarLayerLink,
-        showWhenUnlinked: false,
-        offset: -editingRegion.topLeft,
-        child: selectionControls!.buildToolbar(
-          context,
-          editingRegion,
-          renderObject.preferredLineHeight,
-          midpoint,
-          endpoints,
-          selectionDelegate!,
-          clipboardStatus!,
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _toolbarOpacity,
+        child: CompositedTransformFollower(
+          link: toolbarLayerLink,
+          showWhenUnlinked: false,
+          offset: -editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return selectionControls!.buildToolbar(
+                context,
+                editingRegion,
+                renderObject.preferredLineHeight,
+                midpoint,
+                endpoints,
+                selectionDelegate!,
+                clipboardStatus!,
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
-    TextPosition textPosition;
+    final TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
         textPosition = newSelection.base;
@@ -695,7 +702,7 @@ class _TextSelectionHandleOverlayState
       return;
     }
 
-    TextSelection newSelection;
+    final TextSelection newSelection;
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = TextSelection(
@@ -724,8 +731,8 @@ class _TextSelectionHandleOverlayState
 
   @override
   Widget build(BuildContext context) {
-    LayerLink layerLink;
-    TextSelectionHandleType type;
+    final LayerLink layerLink;
+    final TextSelectionHandleType type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
@@ -898,12 +905,12 @@ class TextSelectionGestureDetectorBuilder {
   /// The [State] of the [EditableText] for which the builder will provide a
   /// [TextSelectionGestureDetector].
   @protected
-  EditableTextState? get editableText => delegate.editableTextKey.currentState;
+  EditableTextState get editableText => delegate.editableTextKey.currentState!;
 
   /// The [RenderObject] of the [EditableText] for which the builder will
   /// provide a [TextSelectionGestureDetector].
   @protected
-  RenderEditable get renderEditable => editableText!.renderEditable!;
+  RenderEditable get renderEditable => editableText.renderEditable;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -922,8 +929,8 @@ class TextSelectionGestureDetectorBuilder {
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
-                              || kind == PointerDeviceKind.touch
-                              || kind == PointerDeviceKind.stylus;
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
   }
 
   /// Handler for [TextSelectionGestureDetector.onForcePressStart].
@@ -968,7 +975,7 @@ class TextSelectionGestureDetectorBuilder {
       cause: SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar)
-      editableText!.showToolbar();
+      editableText.showToolbar();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapUp].
@@ -1046,7 +1053,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
     if (shouldShowSelectionToolbar)
-      editableText!.showToolbar();
+      editableText.showToolbar();
   }
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
@@ -1063,7 +1070,7 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar)
-        editableText!.showToolbar();
+        editableText.showToolbar();
     }
   }
 
@@ -1077,6 +1084,13 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
+    if (!delegate.selectionEnabled)
+      return;
+    final PointerDeviceKind? kind = details.kind;
+    _shouldShowSelectionToolbar = kind == null
+      || kind == PointerDeviceKind.touch
+      || kind == PointerDeviceKind.stylus;
+
     renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
@@ -1094,6 +1108,8 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback./lib/src/material/text_field.dart
   @protected
   void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+    if (!delegate.selectionEnabled)
+      return;
     renderEditable.selectPositionAt(
       from: startDetails.globalPosition,
       to: updateDetails.globalPosition,
@@ -1511,7 +1527,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   Future<void> update() async {
     // iOS 14 added a notification that appears when an app accesses the
     // clipboard. To avoid the notification, don't access the clipboard on iOS,
-    // and instead always shown the paste button, even when the clipboard is
+    // and instead always show the paste button, even when the clipboard is
     // empty.
     // TODO(justinmc): Use the new iOS 14 clipboard API method hasStrings that
     // won't trigger the notification.

@@ -514,9 +514,14 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  void performResize() {
-    size = constraints.constrain(preferredSize);
+  void performLayout() {
+    super.performLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  Size computeSizeForNoChild(BoxConstraints constraints) {
+    return constraints.constrain(preferredSize);
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
@@ -837,6 +842,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.textField != null) {
       config.isTextField = properties.textField!;
+    }
+    if (properties.slider != null) {
+      config.isSlider = properties.slider!;
     }
     if (properties.readOnly != null) {
       config.isReadOnly = properties.readOnly!;

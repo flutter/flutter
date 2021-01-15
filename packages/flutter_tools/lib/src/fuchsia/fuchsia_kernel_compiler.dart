@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -38,7 +37,7 @@ class FuchsiaKernelCompiler {
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(kernelCompiler)) {
-      throwToolExit('Fuchisa kernel compiler not found at "$kernelCompiler"');
+      throwToolExit('Fuchsia kernel compiler not found at "$kernelCompiler"');
     }
     final String platformDill = globals.artifacts.getArtifactPath(
       Artifact.platformKernelDill,
@@ -46,7 +45,7 @@ class FuchsiaKernelCompiler {
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(platformDill)) {
-      throwToolExit('Fuchisa platform file not found at "$platformDill"');
+      throwToolExit('Fuchsia platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
       '--target', 'flutter_runner',
@@ -71,11 +70,10 @@ class FuchsiaKernelCompiler {
     ];
     final Status status = globals.logger.startProgress(
       'Building Fuchsia application...',
-      timeout: null,
     );
     int result;
     try {
-      result = await processUtils.stream(command, trace: true);
+      result = await globals.processUtils.stream(command, trace: true);
     } finally {
       status.cancel();
     }
@@ -116,13 +114,6 @@ class FuchsiaKernelCompiler {
       if (buildInfo.mode.isRelease) ...<String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
-      ],
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
-
-      // Use bytecode and drop the ast in JIT release mode.
-      if (buildInfo.isJitRelease) ...<String>[
-        '--gen-bytecode',
-        '--drop-ast',
       ],
 
       for (final String dartDefine in buildInfo.dartDefines)

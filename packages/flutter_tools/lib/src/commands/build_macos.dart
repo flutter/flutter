@@ -39,7 +39,7 @@ class BuildMacosCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit('"build macos" is not currently supported.');
@@ -47,6 +47,7 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildMacOS(
       flutterProject: flutterProject,
       buildInfo: buildInfo,

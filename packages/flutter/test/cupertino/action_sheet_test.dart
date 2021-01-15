@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
@@ -78,7 +76,7 @@ void main() {
     );
 
     Brightness brightness = Brightness.light;
-    StateSetter stateSetter;
+    late StateSetter stateSetter;
 
     TextStyle actionTextStyle(String text) {
       return tester.widget<DefaultTextStyle>(
@@ -115,7 +113,7 @@ void main() {
     await tester.pump();
 
     expect(
-      actionTextStyle('action').color.value,
+      actionTextStyle('action').color!.value,
       const Color.fromARGB(255, 0, 122, 255).value,
     );
 
@@ -123,7 +121,7 @@ void main() {
     await tester.pump();
 
     expect(
-      actionTextStyle('action').color.value,
+      actionTextStyle('action').color!.value,
       const Color.fromARGB(255, 10, 132, 255).value,
     );
   });
@@ -346,7 +344,7 @@ void main() {
 
   testWidgets('Content section is scrollable', (WidgetTester tester) async {
     final ScrollController messageScrollController = ScrollController();
-    double screenHeight;
+    late double screenHeight;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {

@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -42,7 +39,7 @@ void main() {
       ]
     ).build();
 
-    final int result = root.find<int>(Offset.zero);
+    final int result = root.find<int>(Offset.zero)!;
     expect(result, 3);
   });
 
@@ -348,9 +345,9 @@ void main() {
     );
 
     void expectOneAnnotation({
-      @required Offset globalPosition,
-      @required int value,
-      @required Offset localPosition,
+      required Offset globalPosition,
+      required int value,
+      required Offset localPosition,
     }) {
       expect(
         root.findAllAnnotations<int>(globalPosition).entries.toList(),
@@ -747,7 +744,7 @@ class _Layers {
 
   final ContainerLayer root;
   // Each element must be instance of Layer or _Layers.
-  final List<Object> children;
+  final List<Object>? children;
   bool _assigned = false;
 
   // Build the layer tree by calling each child's `build`, then append children
@@ -756,8 +753,8 @@ class _Layers {
     assert(!_assigned);
     _assigned = true;
     if (children != null) {
-      for (final Object child in children) {
-        Layer layer;
+      for (final Object child in children!) {
+        late Layer layer;
         if (child is Layer) {
           layer = child;
         } else if (child is _Layers) {
@@ -775,7 +772,7 @@ class _Layers {
 // This layer's [findAnnotation] can be controlled by the given arguments.
 class _TestAnnotatedLayer extends Layer {
   _TestAnnotatedLayer(this.value, {
-    @required this.opaque,
+    required this.opaque,
     this.offset = Offset.zero,
     this.size,
   });
@@ -801,10 +798,10 @@ class _TestAnnotatedLayer extends Layer {
   ///
   /// If [offset] is set, then the offset is applied to the size region before
   /// hit testing in [find].
-  final Size size;
+  final Size? size;
 
   @override
-  EngineLayer addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  EngineLayer? addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     return null;
   }
 
@@ -812,14 +809,14 @@ class _TestAnnotatedLayer extends Layer {
   // [offset] & [size]. If it is hit, it adds [value] to result and returns
   // [opaque]; otherwise it directly returns false.
   @override
-  bool findAnnotations<S>(
+  bool findAnnotations<S extends Object>(
     AnnotationResult<S> result,
     Offset localPosition, {
-    bool onlyFirst,
+    required bool onlyFirst,
   }) {
     if (S != int)
       return false;
-    if (size != null && !(offset & size).contains(localPosition))
+    if (size != null && !(offset & size!).contains(localPosition))
       return false;
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;

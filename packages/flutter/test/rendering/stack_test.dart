@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -32,7 +30,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData = green.parentData as StackParentData;
+    final StackParentData greenParentData = green.parentData! as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0
@@ -81,7 +79,7 @@ void main() {
           clipBehavior: clip,
       );
       { // Make sure that the child is positioned so the stack will consider it as overflowed.
-        final StackParentData parentData = child.parentData as StackParentData;
+        final StackParentData parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
       layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);

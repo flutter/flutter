@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,13 +56,13 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 6
+    await tester.tap(find.byType(TextButton)); // 6
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 7
+    await tester.tap(find.byType(TextButton)); // 7
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
@@ -82,7 +80,7 @@ void main() {
     expect(find.text('Page 4'), findsOneWidget);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsNothing);
-    await tester.tap(find.byType(FlatButton)); // 8
+    await tester.tap(find.byType(TextButton)); // 8
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 8'), findsNothing);
@@ -107,7 +105,7 @@ void main() {
     await tester.drag(find.byType(PageView62209), const Offset(800.0, 0.0));
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
-    await tester.tap(find.byType(FlatButton)); // 9
+    await tester.tap(find.byType(TextButton)); // 9
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 9'), findsNothing);
@@ -146,7 +144,7 @@ class _PageView62209State extends State<PageView62209> {
       body: Column(
         children: <Widget>[
           Expanded(child: Carousel62209(pages: _pages)),
-          FlatButton(
+          TextButton(
             child: const Text('ADD PAGE'),
             onPressed: () {
               setState(() {
@@ -167,7 +165,7 @@ class _PageView62209State extends State<PageView62209> {
 }
 
 class Carousel62209Page extends StatelessWidget {
-  const Carousel62209Page({this.number, Key key}) : super(key: key);
+  const Carousel62209Page({required this.number, Key? key}) : super(key: key);
 
   final int number;
 
@@ -178,7 +176,7 @@ class Carousel62209Page extends StatelessWidget {
 }
 
 class Carousel62209 extends StatefulWidget {
-  const Carousel62209({Key key, this.pages}) : super(key: key);
+  const Carousel62209({Key? key, required this.pages}) : super(key: key);
 
   final List<Carousel62209Page> pages;
 
@@ -188,11 +186,11 @@ class Carousel62209 extends StatefulWidget {
 
 class _Carousel62209State extends State<Carousel62209> {
   // page variables
-  PageController _pageController;
+  late PageController _pageController;
   int _currentPage = 0;
 
   // controls updates outside of user interaction
-  List<Carousel62209Page> _pages;
+  late List<Carousel62209Page> _pages;
   bool _jumpingToPage = false;
 
   @override
@@ -216,13 +214,13 @@ class _Carousel62209State extends State<Carousel62209> {
         _pages = widget.pages.toList();
       } else {
         _jumpingToPage = true;
-        SchedulerBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance!.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
               _pages = widget.pages.toList();
               _currentPage = newPage;
               _pageController.jumpToPage(_currentPage);
-              SchedulerBinding.instance.addPostFrameCallback((_) {
+              SchedulerBinding.instance!.addPostFrameCallback((_) {
                 _jumpingToPage = false;
               });
             });
@@ -240,7 +238,7 @@ class _Carousel62209State extends State<Carousel62209> {
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
-      final int page = _pageController.page.round();
+      final int page = _pageController.page!.round();
       if (!_jumpingToPage && _currentPage != page) {
         _currentPage = page;
       }

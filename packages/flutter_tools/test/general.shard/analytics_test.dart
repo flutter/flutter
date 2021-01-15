@@ -70,7 +70,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -94,7 +94,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -112,12 +112,12 @@ void main() {
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Config: () => mockFlutterConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -138,12 +138,12 @@ void main() {
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
       Config: () => mockFlutterConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -157,10 +157,9 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem = MemoryFileSystem.test();
       mockStdio = MockStdio();
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
       when(mockClock.now()).thenAnswer(
@@ -173,6 +172,7 @@ void main() {
       when(mockDoctor.diagnose(
         androidLicenses: false,
         verbose: false,
+        androidLicenseValidator: anyNamed('androidLicenseValidator')
       )).thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -197,7 +197,8 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false, androidLicenseValidator: anyNamed('androidLicenseValidator')))
+        .thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);

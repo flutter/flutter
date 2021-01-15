@@ -81,10 +81,10 @@ void main() {
       List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
+      Cache.flutterRoot = tempDir.absolute.path;
       final IdeConfigCommand command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
-        '--flutter-root=${tempDir.absolute.path}',
         'ide-config',
         ...args,
       ]);

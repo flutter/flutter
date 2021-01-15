@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+// ignore: must_be_immutable
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value, { this.image, this.scale = 1.0, this.debugLabel });
+  const TestImageInfo(this.value, { required this.image, this.scale = 1.0, this.debugLabel });
 
   @override
   final ui.Image image;
@@ -22,16 +19,49 @@ class TestImageInfo implements ImageInfo {
   final double scale;
 
   @override
-  final String debugLabel;
+  final String? debugLabel;
 
   final int value;
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'TestImageInfo')}($value)';
+
+  @override
+  TestImageInfo clone() {
+    return TestImageInfo(value, image: image.clone(), scale: scale, debugLabel: debugLabel);
+  }
+
+  @override
+  bool isCloneOf(ImageInfo other) {
+    assert(other != null);
+    return other.image.isCloneOf(image)
+        && scale == scale
+        && other.debugLabel == debugLabel;
+  }
+
+  @override
+  void dispose() {
+    image.dispose();
+  }
+
+  @override
+  int get hashCode => hashValues(value, image, scale, debugLabel);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is TestImageInfo
+        && other.value == value
+        && other.image.isCloneOf(image)
+        && other.scale == scale
+        && other.debugLabel == debugLabel;
+
+  }
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { this.image = const TestImage() })
+  const TestImageProvider(this.key, this.imageValue, { required this.image })
       : assert(image != null);
 
   final int key;
@@ -46,16 +76,16 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image))
+      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone()))
     );
   }
 
   @override
-  String toString() => '$runtimeType($key, $imageValue)';
+  String toString() => '${objectRuntimeType(this, 'TestImageProvider')}($key, $imageValue)';
 }
 
 class FailingTestImageProvider extends TestImageProvider {
-  const FailingTestImageProvider(int key, int imageValue, { ui.Image image }) : super(key, imageValue, image: image);
+  const FailingTestImageProvider(int key, int imageValue, { required ui.Image image }) : super(key, imageValue, image: image);
 
   @override
   ImageStreamCompleter load(int key, DecoderCallback decode) {
@@ -65,29 +95,13 @@ class FailingTestImageProvider extends TestImageProvider {
 
 Future<ImageInfo> extractOneFrame(ImageStream stream) {
   final Completer<ImageInfo> completer = Completer<ImageInfo>();
-  ImageStreamListener listener;
+  late ImageStreamListener listener;
   listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
     completer.complete(image);
     stream.removeListener(listener);
   });
   stream.addListener(listener);
   return completer.future;
-}
-
-class TestImage implements ui.Image {
-  const TestImage({this.height = 0, this.width = 0});
-  @override
-  final int height;
-  @override
-  final int width;
-
-  @override
-  void dispose() { }
-
-  @override
-  Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {
-    throw UnimplementedError();
-  }
 }
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
@@ -141,7 +155,7 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(TestImage image) {
+  void testSetImage(ui.Image image) {
     setImage(ImageInfo(image: image, scale: 1.0));
   }
 }

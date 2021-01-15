@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -44,10 +42,10 @@ class TextButtonThemeData with Diagnosticable {
   /// [TextButton.defaultStyleOf].
   ///
   /// If [style] is null, then this theme doesn't override anything.
-  final ButtonStyle style;
+  final ButtonStyle? style;
 
   /// Linearly interpolate between two text button themes.
-  static TextButtonThemeData lerp(TextButtonThemeData a, TextButtonThemeData b, double t) {
+  static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
     assert (t != null);
     if (a == null && b == null)
       return null;
@@ -93,9 +91,9 @@ class TextButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const TextButtonTheme({
-    Key key,
-    @required this.data,
-    Widget child,
+    Key? key,
+    required this.data,
+    required Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
   /// The configuration of this theme.
@@ -112,14 +110,13 @@ class TextButtonTheme extends InheritedTheme {
   /// TextButtonTheme theme = TextButtonTheme.of(context);
   /// ```
   static TextButtonThemeData of(BuildContext context) {
-    final TextButtonTheme buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
+    final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TextButtonTheme ancestorTheme = context.findAncestorWidgetOfExactType<TextButtonTheme>();
-    return identical(this, ancestorTheme) ? child : TextButtonTheme(data: data, child: child);
+    return TextButtonTheme(data: data, child: child);
   }
 
   @override

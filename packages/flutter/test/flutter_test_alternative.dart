@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // Defines a 'package:test' shim.
 // TODO(ianh): Remove this file once https://github.com/dart-lang/matcher/issues/98 is fixed
 
@@ -12,6 +10,7 @@ import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ign
 
 export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 export 'package:test_api/fake.dart'; // ignore: deprecated_member_use
+export 'package:flutter_test/flutter_test.dart' show createTestImage;
 
 /// A matcher that compares the type of the actual value to the type argument T.
 test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();

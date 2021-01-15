@@ -279,7 +279,7 @@ class VelocityTracker {
 /// estimating the velocity are both cheap.
 ///
 /// To obtain a velocity, call [getVelocity] or [getVelocityEstimate]. The
-/// esimated velocity is typically used as the initial flinging velocity of a
+/// estimated velocity is typically used as the initial flinging velocity of a
 /// `Scrollable`, when its drag gesture ends.
 ///
 /// See also:

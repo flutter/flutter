@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,9 +12,6 @@ import 'constants.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
 const Duration _kToggleDuration = Duration(milliseconds: 200);
-
-// Radius of the radial reaction over time.
-final Animatable<double> _kRadialReactionRadiusTween = Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
@@ -32,15 +27,18 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// The [activeColor], and [inactiveColor] arguments must not be
   /// null. The [value] can only be null if tristate is true.
   RenderToggleable({
-    @required bool value,
+    required bool? value,
     bool tristate = false,
-    @required Color activeColor,
-    @required Color inactiveColor,
-    Color hoverColor,
-    Color focusColor,
-    ValueChanged<bool> onChanged,
-    BoxConstraints additionalConstraints,
-    @required TickerProvider vsync,
+    required Color activeColor,
+    required Color inactiveColor,
+    Color? hoverColor,
+    Color? focusColor,
+    Color? reactionColor,
+    Color? inactiveReactionColor,
+    required double splashRadius,
+    ValueChanged<bool?>? onChanged,
+    required BoxConstraints additionalConstraints,
+    required TickerProvider vsync,
     bool hasFocus = false,
     bool hovering = false,
   }) : assert(tristate != null),
@@ -54,6 +52,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _inactiveColor = inactiveColor,
        _hoverColor = hoverColor ?? activeColor.withAlpha(kRadialReactionAlpha),
        _focusColor = focusColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       _reactionColor = reactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       _inactiveReactionColor = inactiveReactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       _splashRadius = splashRadius,
        _onChanged = onChanged,
        _hasFocus = hasFocus,
        _hovering = hovering,
@@ -110,7 +111,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// animation reaches either 0.0 or 1.0.
   @protected
   AnimationController get positionController => _positionController;
-  AnimationController _positionController;
+  late AnimationController _positionController;
 
   /// The visual value of the control.
   ///
@@ -121,7 +122,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).
   CurvedAnimation get position => _position;
-  CurvedAnimation _position;
+  late CurvedAnimation _position;
 
   /// Used by subclasses to control the radial reaction animation.
   ///
@@ -132,8 +133,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// reaction.
   @protected
   AnimationController get reactionController => _reactionController;
-  AnimationController _reactionController;
-  Animation<double> _reaction;
+  late AnimationController _reactionController;
+  late Animation<double> _reaction;
 
   /// Used by subclasses to control the radial reaction's opacity animation for
   /// [hasFocus] changes.
@@ -146,8 +147,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// reaction.
   @protected
   AnimationController get reactionFocusFadeController => _reactionFocusFadeController;
-  AnimationController _reactionFocusFadeController;
-  Animation<double> _reactionFocusFade;
+  late AnimationController _reactionFocusFadeController;
+  late Animation<double> _reactionFocusFade;
 
   /// Used by subclasses to control the radial reaction's opacity animation for
   /// [hovering] changes.
@@ -160,8 +161,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// reaction.
   @protected
   AnimationController get reactionHoverFadeController => _reactionHoverFadeController;
-  AnimationController _reactionHoverFadeController;
-  Animation<double> _reactionHoverFade;
+  late AnimationController _reactionHoverFadeController;
+  late Animation<double> _reactionHoverFade;
 
   /// True if this toggleable has the input focus.
   bool get hasFocus => _hasFocus;
@@ -216,9 +217,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// When the value changes, this object starts the [positionController] and
   /// [position] animations to animate the visual appearance of the control to
   /// the new value.
-  bool get value => _value;
-  bool _value;
-  set value(bool value) {
+  bool? get value => _value;
+  bool? _value;
+  set value(bool? value) {
     assert(tristate || value != null);
     if (value == _value)
       return;
@@ -228,14 +229,12 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
     if (tristate) {
-      switch (_positionController.status) {
-        case AnimationStatus.forward:
-        case AnimationStatus.completed:
-          _positionController.reverse();
-          break;
-        default:
-          _positionController.forward();
-      }
+      if (value == null)
+        _positionController.value = 0.0;
+      if (value != false)
+        _positionController.forward();
+      else
+        _positionController.reverse();
     } else {
       if (value == true)
         _positionController.forward();
@@ -317,19 +316,47 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  /// The color that should be used for the reaction when drawn.
+  /// The color that should be used for the reaction when the toggleable is
+  /// active.
   ///
   /// Used when the toggleable needs to change the reaction color/transparency
-  /// that is displayed when the toggleable is toggled by a tap.
+  /// that is displayed when the toggleable is active and tapped.
   ///
   /// Defaults to the [activeColor] at alpha [kRadialReactionAlpha].
-  Color get reactionColor => _reactionColor;
-  Color _reactionColor;
-  set reactionColor(Color value) {
+  Color? get reactionColor => _reactionColor;
+  Color? _reactionColor;
+  set reactionColor(Color? value) {
     assert(value != null);
     if (value == _reactionColor)
       return;
     _reactionColor = value;
+    markNeedsPaint();
+  }
+
+  /// The color that should be used for the reaction when the toggleable is
+  /// inactive.
+  ///
+  /// Used when the toggleable needs to change the reaction color/transparency
+  /// that is displayed when the toggleable is inactive and tapped.
+  ///
+  /// Defaults to the [activeColor] at alpha [kRadialReactionAlpha].
+  Color? get inactiveReactionColor => _inactiveReactionColor;
+  Color? _inactiveReactionColor;
+  set inactiveReactionColor(Color? value) {
+    assert(value != null);
+    if (value == _inactiveReactionColor)
+      return;
+    _inactiveReactionColor = value;
+    markNeedsPaint();
+  }
+
+  /// The splash radius for the radial reaction.
+  double get splashRadius => _splashRadius;
+  double _splashRadius;
+  set splashRadius(double value) {
+    if (value == _splashRadius)
+      return;
+    _splashRadius = value;
     markNeedsPaint();
   }
 
@@ -342,9 +369,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// callback is non-null. If the callback is null, then the control is
   /// disabled, and non-interactive. A disabled checkbox, for example, is
   /// displayed using a grey color and its value cannot be changed.
-  ValueChanged<bool> get onChanged => _onChanged;
-  ValueChanged<bool> _onChanged;
-  set onChanged(ValueChanged<bool> value) {
+  ValueChanged<bool?>? get onChanged => _onChanged;
+  ValueChanged<bool?>? _onChanged;
+  set onChanged(ValueChanged<bool?>? value) {
     if (value == _onChanged)
       return;
     final bool wasInteractive = isInteractive;
@@ -363,8 +390,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// grey color and its value cannot be changed.
   bool get isInteractive => onChanged != null;
 
-  TapGestureRecognizer _tap;
-  Offset _downPosition;
+  late TapGestureRecognizer _tap;
+  Offset? _downPosition;
 
   @override
   void attach(PipelineOwner owner) {
@@ -410,13 +437,13 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       return;
     switch (value) {
       case false:
-        onChanged(true);
+        onChanged!(true);
         break;
       case true:
-        onChanged(tristate ? null : false);
+        onChanged!(tristate ? null : false);
         break;
-      default: // case null:
-        onChanged(false);
+      case null:
+        onChanged!(false);
         break;
     }
     sendSemanticsEvent(const TapSemanticEvent());
@@ -454,14 +481,22 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (!_reaction.isDismissed || !_reactionFocusFade.isDismissed || !_reactionHoverFade.isDismissed) {
       final Paint reactionPaint = Paint()
         ..color = Color.lerp(
-          Color.lerp(activeColor.withAlpha(kRadialReactionAlpha), hoverColor, _reactionHoverFade.value),
+          Color.lerp(
+            Color.lerp(inactiveReactionColor, reactionColor, _position.value),
+            hoverColor,
+            _reactionHoverFade.value,
+          ),
           focusColor,
           _reactionFocusFade.value,
-        );
-      final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value);
+        )!;
+      final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value)!;
+      final Animatable<double> radialReactionRadiusTween = Tween<double>(
+        begin: 0.0,
+        end: splashRadius,
+      );
       final double reactionRadius = hasFocus || hovering
-          ? kRadialReactionRadius
-          : _kRadialReactionRadiusTween.evaluate(_reaction);
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(_reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
       }

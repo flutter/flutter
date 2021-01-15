@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
@@ -28,6 +29,10 @@ Future<void> main() async {
             'ios_app_with_extensions')),
         projectDir,
       );
+
+      // For some reason devicelab machines have really old spec snapshots.
+      // TODO(jmagman): Remove this if this test is moved to a machine that installs CocoaPods on every run.
+      await eval('pod', <String>['repo', 'update', '--verbose']);
 
       section('Create release build');
 

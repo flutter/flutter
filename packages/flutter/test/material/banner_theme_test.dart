@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,7 +68,7 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.color, const Color(0xffffffff));
     // Default value for ThemeData.typography is Typography.material2014()
-    expect(content.text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().black.bodyText2));
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2));
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
@@ -185,7 +183,7 @@ Finder _containerFinder() {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(_textFinder(text)).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(_textFinder(text)).renderObject! as RenderParagraph;
 }
 
 Finder _textFinder(String text) {

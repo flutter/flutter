@@ -26,7 +26,7 @@ void main() {
   MemoryFileSystem fs;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
@@ -187,6 +187,10 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String randomSeed,
     @override List<String> extraFrontEndOptions,
     bool nullAssertions = false,
+    BuildInfo buildInfo,
+    String reporter,
+    String timeout,
+    List<String> additionalArguments,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

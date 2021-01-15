@@ -4,6 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 
 /// A fake implementation of the [DeviceLogReader].
@@ -38,5 +42,24 @@ class FakeDeviceLogReader extends DeviceLogReader {
   Future<void> dispose() async {
     _lineQueue.clear();
     await _linesController.close();
+  }
+}
+
+/// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
+class FakeDyldEnvironmentArtifact extends ArtifactSet {
+  FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
+  @override
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': '/path/to/libraries'
+  };
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) => Future<bool>.value(true);
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
   }
 }

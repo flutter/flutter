@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -89,7 +87,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, false);
-
 
     await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0); // vertical fling
     await tester.pump();
@@ -227,12 +224,39 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 50.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     expect(refreshCalled, false);
+  });
+
+  testWidgets('RefreshIndicator - just enough', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 100.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
   });
 
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
@@ -360,35 +384,6 @@ void main() {
     expect(completed2, true);
   });
 
-  testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
-    refreshCalled = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: RefreshIndicator(
-          onRefresh: () {
-            refreshCalled = true;
-            return null; // Missing a returned Future value here, should cause framework to throw.
-          },
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-              return SizedBox(
-                height: 200.0,
-                child: Text(item),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(refreshCalled, true);
-    expect(tester.takeException(), isFlutterError);
-  });
-
   testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
@@ -458,31 +453,6 @@ void main() {
     expect(layoutCount, 1);
   });
 
-  testWidgets('strokeWidth cannot be null in RefreshIndicator', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-          MaterialApp(
-            home: RefreshIndicator(
-              onRefresh: () async {},
-              strokeWidth: null,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(
-                    height: 200.0,
-                    child: Text(item),
-                  );
-                }).toList(),
-              ),
-            ),
-          )
-      );
-    } on AssertionError catch(_) {
-      return;
-    }
-    fail('The assertion was not thrown when strokeWidth was null');
-  });
-
   testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
@@ -529,5 +499,182 @@ void main() {
         tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
         4.0,
     );
+  });
+
+  testWidgets('Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
+  });
+
+  testWidgets('Bottom RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          onRefresh: holdRefresh,
+          child: ListView(
+            reverse: true,
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/71936
+  testWidgets('RefreshIndicator(anywhere mode) should not be shown when overscroll occurs due to inertia', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 2000.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+
+    // Release finger before reach the edge.
+    await tester.fling(find.text('X'), const Offset(0.0, 99.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Bottom RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            reverse: true,
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 200.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(50.0);
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 }

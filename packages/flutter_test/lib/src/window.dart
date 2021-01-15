@@ -3,18 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data' show ByteData;
-import 'dart:ui' hide window;
+import 'dart:ui' as ui hide window;
 
-import 'package:meta/meta.dart';
-
-/// [Window] that wraps another [Window] and allows faking of some properties
-/// for testing purposes.
+/// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
+/// allows faking of some properties for testing purposes.
 ///
 /// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
-/// properties of a [Window]. [TestWindow] facilitates the faking of these
-/// properties by overriding the properties of a real [Window] with desired fake
-/// values. The binding used within tests, [TestWidgetsFlutterBinding], contains
-/// a [TestWindow] that is used by all tests.
+/// properties of a [SingletonFlutterWindow]. [TestWindow] facilitates the
+/// faking of these properties by overriding the properties of a real
+/// [SingletonFlutterWindow] with desired fake values. The binding used within
+/// tests, [TestWidgetsFlutterBinding], contains a [TestWindow] that is used by
+/// all tests.
 ///
 /// ## Sample Code
 ///
@@ -38,154 +37,155 @@ import 'package:meta/meta.dart';
 /// therefore any fake values defined in one test will not persist
 /// to the next.
 ///
-/// If a test needs to override a real [Window] property and then later
-/// return to using the real [Window] property, [TestWindow] provides
-/// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
+/// If a test needs to override a real [SingletonFlutterWindow] property and
+/// then later return to using the real [SingletonFlutterWindow] property,
+/// [TestWindow] provides methods to clear each individual test value, e.g.,
+/// [clearLocaleTestValue()].
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues()].
-class TestWindow implements Window {
-  /// Constructs a [TestWindow] that defers all behavior to the given [Window]
-  /// unless explicitly overridden for test purposes.
+class TestWindow implements ui.SingletonFlutterWindow {
+  /// Constructs a [TestWindow] that defers all behavior to the given
+  /// [dart:ui.SingletonFlutterWindow] unless explicitly overridden for test purposes.
   TestWindow({
-    @required Window window,
+    required ui.SingletonFlutterWindow window,
   }) : _window = window;
 
-  /// The [Window] that is wrapped by this [TestWindow].
-  final Window _window;
+  /// The [dart:ui.SingletonFlutterWindow] that is wrapped by this [TestWindow].
+  final ui.SingletonFlutterWindow _window;
 
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
-  double _devicePixelRatio;
+  double? _devicePixelRatio;
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
   /// instead.
   set devicePixelRatioTestValue(double devicePixelRatio) {
     _devicePixelRatio = devicePixelRatio;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test device pixel ratio and returns to using the real
   /// device pixel ratio.
   void clearDevicePixelRatioTestValue() {
     _devicePixelRatio = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
-  Size _physicalSizeTestValue;
+  ui.Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
+  ui.Size? _physicalSizeTestValue;
   /// Hides the real physical size and reports the given [physicalSizeTestValue]
   /// instead.
-  set physicalSizeTestValue (Size physicalSizeTestValue) {
+  set physicalSizeTestValue (ui.Size physicalSizeTestValue) {
     _physicalSizeTestValue = physicalSizeTestValue;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test physical size and returns to using the real
   /// physical size.
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
-  WindowPadding _viewInsetsTestValue;
+  ui.WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
+  ui.WindowPadding? _viewInsetsTestValue;
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
   /// instead.
-  set viewInsetsTestValue(WindowPadding viewInsetsTestValue) {
+  set viewInsetsTestValue(ui.WindowPadding viewInsetsTestValue) {
     _viewInsetsTestValue = viewInsetsTestValue;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test view insets and returns to using the real view
   /// insets.
   void clearViewInsetsTestValue() {
     _viewInsetsTestValue = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
-  WindowPadding _viewPaddingTestValue;
+  ui.WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
+  ui.WindowPadding? _viewPaddingTestValue;
   /// Hides the real view padding and reports the given [paddingTestValue]
   /// instead.
-  set viewPaddingTestValue(WindowPadding viewPaddingTestValue) {
+  set viewPaddingTestValue(ui.WindowPadding viewPaddingTestValue) {
     _viewPaddingTestValue = viewPaddingTestValue;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test view padding and returns to using the real
   /// viewPadding.
   void clearViewPaddingTestValue() {
     _viewPaddingTestValue = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  WindowPadding get padding => _paddingTestValue ?? _window.padding;
-  WindowPadding _paddingTestValue;
+  ui.WindowPadding get padding => _paddingTestValue ?? _window.padding;
+  ui.WindowPadding? _paddingTestValue;
   /// Hides the real padding and reports the given [paddingTestValue] instead.
-  set paddingTestValue(WindowPadding paddingTestValue) {
+  set paddingTestValue(ui.WindowPadding paddingTestValue) {
     _paddingTestValue = paddingTestValue;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test padding and returns to using the real padding.
   void clearPaddingTestValue() {
     _paddingTestValue = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
-  WindowPadding _systemGestureInsetsTestValue;
+  ui.WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
+  ui.WindowPadding? _systemGestureInsetsTestValue;
   /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
-  set systemGestureInsetsTestValue(WindowPadding systemGestureInsetsTestValue) {
+  set systemGestureInsetsTestValue(ui.WindowPadding systemGestureInsetsTestValue) {
     _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
   /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
   void clearSystemGestureInsetsTestValue() {
     _systemGestureInsetsTestValue = null;
-    onMetricsChanged();
+    onMetricsChanged?.call();
   }
 
   @override
-  VoidCallback get onMetricsChanged => _window.onMetricsChanged;
+  ui.VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
   @override
-  set onMetricsChanged(VoidCallback callback) {
-    _window.onMetricsChanged = callback;
+  set onMetricsChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onMetricsChanged = callback;
   }
 
   @override
-  Locale get locale => _localeTestValue ?? _window.locale;
-  Locale _localeTestValue;
+  ui.Locale get locale => _localeTestValue ?? platformDispatcher.locale;
+  ui.Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  set localeTestValue(Locale localeTestValue) {
+  set localeTestValue(ui.Locale localeTestValue) {
     _localeTestValue = localeTestValue;
-    onLocaleChanged();
+    onLocaleChanged?.call();
   }
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
     _localeTestValue = null;
-    onLocaleChanged();
+    onLocaleChanged?.call();
   }
 
   @override
-  List<Locale> get locales => _localesTestValue ?? _window.locales;
-  List<Locale> _localesTestValue;
+  List<ui.Locale> get locales => _localesTestValue ?? platformDispatcher.locales;
+  List<ui.Locale>? _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  set localesTestValue(List<Locale> localesTestValue) {
+  set localesTestValue(List<ui.Locale> localesTestValue) {
     _localesTestValue = localesTestValue;
-    onLocaleChanged();
+    onLocaleChanged?.call();
   }
   /// Deletes any existing test locales and returns to using the real locales.
   void clearLocalesTestValue() {
     _localesTestValue = null;
-    onLocaleChanged();
+    onLocaleChanged?.call();
   }
 
   @override
-  VoidCallback get onLocaleChanged => _window.onLocaleChanged;
+  ui.VoidCallback? get onLocaleChanged => platformDispatcher.onLocaleChanged;
   @override
-  set onLocaleChanged(VoidCallback callback) {
-    _window.onLocaleChanged = callback;
+  set onLocaleChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onLocaleChanged = callback;
   }
 
   @override
@@ -197,46 +197,46 @@ class TestWindow implements Window {
   }
 
   @override
-  double get textScaleFactor => _textScaleFactorTestValue ?? _window.textScaleFactor;
-  double _textScaleFactorTestValue;
+  double get textScaleFactor => _textScaleFactorTestValue ?? platformDispatcher.textScaleFactor;
+  double? _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
   set textScaleFactorTestValue(double textScaleFactorTestValue) {
     _textScaleFactorTestValue = textScaleFactorTestValue;
-    onTextScaleFactorChanged();
+    onTextScaleFactorChanged?.call();
   }
   /// Deletes any existing test text scale factor and returns to using the real
   /// text scale factor.
   void clearTextScaleFactorTestValue() {
     _textScaleFactorTestValue = null;
-    onTextScaleFactorChanged();
+    onTextScaleFactorChanged?.call();
   }
 
   @override
-  Brightness get platformBrightness => _platformBrightnessTestValue ?? _window.platformBrightness;
-  Brightness _platformBrightnessTestValue;
+  ui.Brightness get platformBrightness => _platformBrightnessTestValue ?? platformDispatcher.platformBrightness;
+  ui.Brightness? _platformBrightnessTestValue;
   @override
-  VoidCallback get onPlatformBrightnessChanged => _window.onPlatformBrightnessChanged;
+  ui.VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
   @override
-  set onPlatformBrightnessChanged(VoidCallback callback) {
-    _window.onPlatformBrightnessChanged = callback;
+  set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onPlatformBrightnessChanged = callback;
   }
   /// Hides the real text scale factor and reports the given
   /// [platformBrightnessTestValue] instead.
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
+  set platformBrightnessTestValue(ui.Brightness platformBrightnessTestValue) {
     _platformBrightnessTestValue = platformBrightnessTestValue;
-    onPlatformBrightnessChanged();
+    onPlatformBrightnessChanged?.call();
   }
   /// Deletes any existing test platform brightness and returns to using the
   /// real platform brightness.
   void clearPlatformBrightnessTestValue() {
     _platformBrightnessTestValue = null;
-    onPlatformBrightnessChanged();
+    onPlatformBrightnessChanged?.call();
   }
 
   @override
-  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _window.alwaysUse24HourFormat;
-  bool _alwaysUse24HourFormatTestValue;
+  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? platformDispatcher.alwaysUse24HourFormat;
+  bool? _alwaysUse24HourFormatTestValue;
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
@@ -249,43 +249,43 @@ class TestWindow implements Window {
   }
 
   @override
-  VoidCallback get onTextScaleFactorChanged => _window.onTextScaleFactorChanged;
+  ui.VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
   @override
-  set onTextScaleFactorChanged(VoidCallback callback) {
-    _window.onTextScaleFactorChanged = callback;
+  set onTextScaleFactorChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onTextScaleFactorChanged = callback;
   }
 
   @override
-  FrameCallback get onBeginFrame => _window.onBeginFrame;
+  ui.FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
   @override
-  set onBeginFrame(FrameCallback callback) {
-    _window.onBeginFrame = callback;
+  set onBeginFrame(ui.FrameCallback? callback) {
+    platformDispatcher.onBeginFrame = callback;
   }
 
   @override
-  VoidCallback get onDrawFrame => _window.onDrawFrame;
+  ui.VoidCallback? get onDrawFrame => platformDispatcher.onDrawFrame;
   @override
-  set onDrawFrame(VoidCallback callback) {
-    _window.onDrawFrame = callback;
+  set onDrawFrame(ui.VoidCallback? callback) {
+    platformDispatcher.onDrawFrame = callback;
   }
 
   @override
-  TimingsCallback get onReportTimings => _window.onReportTimings;
+  ui.TimingsCallback? get onReportTimings => platformDispatcher.onReportTimings;
   @override
-  set onReportTimings(TimingsCallback callback) {
-    _window.onReportTimings = callback;
+  set onReportTimings(ui.TimingsCallback? callback) {
+    platformDispatcher.onReportTimings = callback;
   }
 
   @override
-  PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;
+  ui.PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
   @override
-  set onPointerDataPacket(PointerDataPacketCallback callback) {
-    _window.onPointerDataPacket = callback;
+  set onPointerDataPacket(ui.PointerDataPacketCallback? callback) {
+    platformDispatcher.onPointerDataPacket = callback;
   }
 
   @override
-  String get defaultRouteName => _defaultRouteNameTestValue ?? _window.defaultRouteName;
-  String _defaultRouteNameTestValue;
+  String get defaultRouteName => _defaultRouteNameTestValue ?? platformDispatcher.defaultRouteName;
+  String? _defaultRouteNameTestValue;
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
   set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
@@ -299,96 +299,99 @@ class TestWindow implements Window {
 
   @override
   void scheduleFrame() {
-    _window.scheduleFrame();
+    platformDispatcher.scheduleFrame();
   }
 
   @override
-  void render(Scene scene) {
+  void render(ui.Scene scene) {
     _window.render(scene);
   }
 
   @override
-  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _window.semanticsEnabled;
-  bool _semanticsEnabledTestValue;
+  bool get semanticsEnabled => _semanticsEnabledTestValue ?? platformDispatcher.semanticsEnabled;
+  bool? _semanticsEnabledTestValue;
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
-    onSemanticsEnabledChanged();
+    onSemanticsEnabledChanged?.call();
   }
   /// Deletes any existing test semantics enabled and returns to using the real
   /// semantics enabled.
   void clearSemanticsEnabledTestValue() {
     _semanticsEnabledTestValue = null;
-    onSemanticsEnabledChanged();
+    onSemanticsEnabledChanged?.call();
   }
 
   @override
-  VoidCallback get onSemanticsEnabledChanged => _window.onSemanticsEnabledChanged;
+  ui.VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
   @override
-  set onSemanticsEnabledChanged(VoidCallback callback) {
-    _window.onSemanticsEnabledChanged = callback;
+  set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onSemanticsEnabledChanged = callback;
   }
 
   @override
-  SemanticsActionCallback get onSemanticsAction => _window.onSemanticsAction;
+  ui.SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
   @override
-  set onSemanticsAction(SemanticsActionCallback callback) {
-    _window.onSemanticsAction = callback;
+  set onSemanticsAction(ui.SemanticsActionCallback? callback) {
+    platformDispatcher.onSemanticsAction = callback;
   }
 
   @override
-  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _window.accessibilityFeatures;
-  AccessibilityFeatures _accessibilityFeaturesTestValue;
+  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? platformDispatcher.accessibilityFeatures;
+  ui.AccessibilityFeatures? _accessibilityFeaturesTestValue;
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
+  set accessibilityFeaturesTestValue(ui.AccessibilityFeatures accessibilityFeaturesTestValue) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
-    onAccessibilityFeaturesChanged();
+    onAccessibilityFeaturesChanged?.call();
   }
   /// Deletes any existing test accessibility features and returns to using the
   /// real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
     _accessibilityFeaturesTestValue = null;
-    onAccessibilityFeaturesChanged();
+    onAccessibilityFeaturesChanged?.call();
   }
 
   @override
-  VoidCallback get onAccessibilityFeaturesChanged => _window.onAccessibilityFeaturesChanged;
+  ui.VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
   @override
-  set onAccessibilityFeaturesChanged(VoidCallback callback) {
-    _window.onAccessibilityFeaturesChanged = callback;
+  set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onAccessibilityFeaturesChanged = callback;
   }
 
   @override
-  void updateSemantics(SemanticsUpdate update) {
-    _window.updateSemantics(update);
+  void updateSemantics(ui.SemanticsUpdate update) {
+    platformDispatcher.updateSemantics(update);
   }
 
   @override
   void setIsolateDebugName(String name) {
-    _window.setIsolateDebugName(name);
+    platformDispatcher.setIsolateDebugName(name);
   }
 
   @override
   void sendPlatformMessage(
     String name,
-    ByteData data,
-    PlatformMessageResponseCallback callback,
+    ByteData? data,
+    ui.PlatformMessageResponseCallback? callback,
   ) {
-    _window.sendPlatformMessage(name, data, callback);
+    platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
   @override
-  PlatformMessageCallback get onPlatformMessage => _window.onPlatformMessage;
+  ui.PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
   @override
-  set onPlatformMessage(PlatformMessageCallback callback) {
-    _window.onPlatformMessage = callback;
+  set onPlatformMessage(ui.PlatformMessageCallback? callback) {
+    platformDispatcher.onPlatformMessage = callback;
   }
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => _window.platformDispatcher;
 
   /// Delete any test value properties that have been set on this [TestWindow]
-  /// and return to reporting the real [Window] values for all [Window]
-  /// properties.
+  /// and return to reporting the real [SingletonFlutterWindow] values for all
+  /// [SingletonFlutterWindow] properties.
   ///
   /// If desired, clearing of properties can be done on an individual basis,
   /// e.g., [clearLocaleTestValue()].
