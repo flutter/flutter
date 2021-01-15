@@ -33,7 +33,8 @@ void main() {
         .childDirectory('.dart_tool')
         .childFile('package_config.json')
         .readAsStringSync());
-    final dynamic collection = jsonContent['packages'].firstWhere((dynamic e) => e.name == 'collection');
+    final dynamic collection = jsonContent['packages']
+        .firstWhere((dynamic e) => e['name'] == 'collection');
     expect(
       Uri.parse(collection['rootUri'] as String).isAbsolute,
       isTrue,
