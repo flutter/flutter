@@ -1292,6 +1292,46 @@ void main() {
       initialTrailingTextToLargeTitleOffset.dy.abs(),
     );
   });
+
+  testWidgets('Null NavigationBar border transition', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/71389
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Page 1'),
+            border: null,
+          ),
+          child: Placeholder(),
+        ),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: Text('Page 2'),
+              border: null,
+            ),
+            child: Placeholder(),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
