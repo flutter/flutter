@@ -565,6 +565,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible without the fade animation. This requires that a [ScrollController]
 /// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
+/// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
+/// the nearest scrollView and shows the corresponding scrollbar thumb by default.
+/// Set [notificationPredicate] to something else for more complicated behaviors.
+///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
@@ -765,8 +769,9 @@ class RawScrollbar extends StatefulWidget {
   /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
   ///
-  /// By default, checks whether `notification.depth == 0`. Set it to something
-  /// else for more complicated layouts.
+  /// By default, checks whether `notification.depth == 0`. That means if the
+  /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
+  /// nearest scrollView and shows the corresponding scrollbar thumb.
   final ScrollNotificationPredicate notificationPredicate;
 
   @override
