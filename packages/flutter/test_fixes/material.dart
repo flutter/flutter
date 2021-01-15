@@ -26,4 +26,12 @@ void main() {
   buildContext.ancestorStateOfType(TypeMatcher<targetType>());
   buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
   buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const TextFormField textFormField = TextFormField(autovalidate: true);
+  const TextFormField textFormField = TextFormField(autovalidate: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidate: true);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidate: false);
 }
