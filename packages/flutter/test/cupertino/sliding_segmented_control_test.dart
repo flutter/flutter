@@ -797,8 +797,8 @@ void main() {
     expect(currentThumbScale(tester), 1);
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center,
-      // We're using a critically damped spring so the value of the animation
-      // controller will never reach 1.
+      // We're using a critically damped spring so expect the value of the
+      // animation controller to not be 1.
       offsetMoreOrLessEquals(tester.getCenter(find.text('Child 2')), epsilon: 0.01),
     );
 
@@ -847,6 +847,62 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(currentThumbScale(tester), moreOrLessEquals(1, epsilon: 0.01));
+  });
+
+  testWidgets(
+    'Thumb does not go out of bounds in animation',
+    (WidgetTester tester) async {
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1', maxLines: 1),
+        1: Text('wiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiide Child 2', maxLines: 1),
+        2: SizedBox(height: 400),
+      };
+
+      await tester.pumpWidget(boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ));
+
+      final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+
+      // Starts animating towards 1.
+      setState!(() { groupValue = 1; });
+      await tester.pump(const Duration(milliseconds: 10));
+
+      const Map<int, Widget> newChildren = <int, Widget>{
+        0: Text('C1', maxLines: 1),
+        1: Text('C2', maxLines: 1),
+      };
+
+      // Now let the segments shrink.
+      await tester.pumpWidget(boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: newChildren,
+            groupValue: 1,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ));
+
+      final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester) as RenderBox;
+      final Offset segmentedControlOrigin = renderSegmentedControl.localToGlobal(Offset.zero);
+
+      // Expect the segmented control to be much narrower.
+      expect(segmentedControlOrigin.dx, greaterThan(initialThumbRect.left));
+
+      final Rect thumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+      expect(initialThumbRect.size.height, 400);
+      expect(thumbRect.size.height, lessThan(100));
+      // The new thumbRect should fit in the segmentedControl. The -1 and the +1
+      // are to account for the thumb's vertical EdgeInsets.
+      expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
+      expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1, greaterThanOrEqualTo(thumbRect.right));
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {

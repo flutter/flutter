@@ -532,9 +532,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
-    // paint method will create a new tween to drive the animation with. A
-    // caveat: the current thumb will be painted at the same location twice
-    // before and after the new animation starts.
+    // paint method will create a new tween to drive the animation with.
+    // TODO(LongCatIsLooong): the current thumb will be painted at the same
+    // location twice before and after the new animation starts.
     thumbController.animateWith(_kThumbSpringAnimationSimulation);
     thumbAnimatable = null;
   }
@@ -974,6 +974,34 @@ class _RenderSegmentedControl<T> extends RenderBox
     size = _computeOverallSizeFromChildSize(childSize, constraints);
   }
 
+  // This method is used to convert the original unscaled thumb rect painted in
+  // the previous frame, to a Rect that is within the valid boundary defined by
+  // the the child segments.
+  //
+  // The overall size does not include that of the thumb. That is, if the thumb
+  // is located at the first or the last segment, the thumb can get cut off if
+  // one of the values in _kThumbInsets is positive.
+  Rect? moveThumbRectInBound(Rect? thumbRect, List<RenderBox> children) {
+    assert(hasSize);
+    assert(children.length >= 2);
+    if (thumbRect == null)
+      return null;
+
+    final Offset firstChildOffset = (children.first.parentData! as _SegmentedControlContainerBoxParentData).offset;
+    final double leftMost = firstChildOffset.dx;
+    final double rightMost = (children.last.parentData! as _SegmentedControlContainerBoxParentData).offset.dx + children.last.size.width;
+    assert(rightMost > leftMost);
+
+    // Ignore the horizontal position and the height of `thumbRect`, and
+    // calcuates them from `children`.
+    return Rect.fromLTRB(
+      math.max(thumbRect.left, leftMost - _kThumbInsets.left),
+      firstChildOffset.dy - _kThumbInsets.top,
+      math.min(thumbRect.right, rightMost + _kThumbInsets.right),
+      firstChildOffset.dy + children.first.size.height + _kThumbInsets.bottom,
+    );
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final List<RenderBox> children = getChildrenAsList();
@@ -996,13 +1024,13 @@ class _RenderSegmentedControl<T> extends RenderBox
         final Animatable<Rect?>? thumbTween = state.thumbAnimatable;
         if (thumbTween == null) {
           // This is the first frame of the animation.
-          // TODO(LongCatIsLooong): `currentThumbRect` can be outside of the
-          // bounding box of the render object.
-          state.thumbAnimatable = RectTween(begin: currentThumbRect ?? newThumbRect, end: newThumbRect);
+          final Rect startingRect = moveThumbRectInBound(currentThumbRect, children) ?? newThumbRect;
+          state.thumbAnimatable = RectTween(begin: startingRect, end: newThumbRect);
         } else if (newThumbRect != thumbTween.transform(1)) {
           // The thumbTween of the running sliding animation needs updating,
           // without restarting the animation.
-          state.thumbAnimatable = RectTween(begin: currentThumbRect ?? newThumbRect, end: newThumbRect)
+          final Rect startingRect = moveThumbRectInBound(currentThumbRect, children) ?? newThumbRect;
+          state.thumbAnimatable = RectTween(begin: startingRect, end: newThumbRect)
             .chain(CurveTween(curve: Interval(state.thumbController.value, 1)));
         }
       } else {
