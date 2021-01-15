@@ -598,7 +598,7 @@ class TextSelectionOverlay {
                 endpoints,
                 selectionDelegate!,
                 clipboardStatus!,
-                renderObject.lastTapDownPosition,
+                renderObject.lastSecondaryTapDownPosition,
               );
             },
           ),
@@ -908,6 +908,21 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
+  /// Returns true iff lastTapDownPosition was on selection.
+  bool get _lastSecondaryTapWasOnSelection {
+    assert(renderEditable.lastSecondaryTapDownPosition != null);
+    if (renderEditable.selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      renderEditable.lastSecondaryTapDownPosition!,
+    );
+
+    return renderEditable.selection!.base.offset <= textPosition.offset
+        && renderEditable.selection!.extent.offset >= textPosition.offset;
+  }
+
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
@@ -1070,28 +1085,13 @@ class TextSelectionGestureDetectorBuilder {
       editableText.showToolbar();
   }
 
-  /// Returns true iff lastTapDownPosition was on selection.
-  bool get _lastTapWasOnSelection {
-    assert(renderEditable.lastTapDownPosition != null);
-    if (renderEditable.selection == null) {
-      return false;
-    }
-
-    final TextPosition textPosition = renderEditable.getPositionForPoint(
-      renderEditable.lastTapDownPosition!,
-    );
-
-    return renderEditable.selection!.base.offset <= textPosition.offset
-        && renderEditable.selection!.extent.offset >= textPosition.offset;
-  }
-
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
   ///
   /// By default, selects the word if possible and shows the toolbar.
   @protected
   void onSecondaryTap() {
     if (delegate.selectionEnabled) {
-      if (!_lastTapWasOnSelection) {
+      if (!_lastSecondaryTapWasOnSelection) {
         renderEditable.selectWord(cause: SelectionChangedCause.tap);
       }
       if (shouldShowSelectionToolbar) {
@@ -1110,7 +1110,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
-    renderEditable.handleTapDown(details);
+    renderEditable.handleSecondaryTapDown(details);
     _shouldShowSelectionToolbar = true;
   }
 

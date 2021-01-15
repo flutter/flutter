@@ -1783,9 +1783,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   Offset? _lastTapDownPosition;
+  Offset? _lastSecondaryTapDownPosition;
 
-  /// The position of the most recent tap down event on this text input.
-  Offset? get lastTapDownPosition => _lastTapDownPosition;
+  /// The position of the most recent secondary tap down event on this text
+  /// input.
+  Offset? get lastSecondaryTapDownPosition => _lastSecondaryTapDownPosition;
 
   /// Tracks the position of a secondary tap event.
   ///
@@ -1793,6 +1795,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// position of a secondary tap.
   void handleSecondaryTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition;
+    _lastSecondaryTapDownPosition = details.globalPosition;
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
