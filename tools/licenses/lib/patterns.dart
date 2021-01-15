@@ -85,6 +85,7 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   RegExp(r'^ *For more info read ([^ ]+)$', caseSensitive: false),
   RegExp(r'^(?:Google )?Author\(?s?\)?: .+', caseSensitive: false),
   RegExp(r'^Written by .+', caseSensitive: false),
+  RegExp(r'^Originally written by .+', caseSensitive: false),
   RegExp(r'^Based on$', caseSensitive: false),
   RegExp(r"^based on (?:code in )?['`][^'`]+['`]$", caseSensitive: false),
   RegExp(r'^Based on .+, written by .+, [0-9]+\.$', caseSensitive: false),

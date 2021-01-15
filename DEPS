@@ -21,6 +21,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
+  'flutter_git': 'https://flutter.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
   'skia_git': 'https://skia.googlesource.com',
@@ -92,6 +93,7 @@ gclient_gn_args = [
 # If you need to add a new host, contact chrome infrastructure team.
 allowed_hosts = [
   'chromium.googlesource.com',
+  'flutter.googlesource.com',
   'fuchsia.googlesource.com',
   'github.com',
   'skia.googlesource.com',
@@ -350,7 +352,7 @@ deps = {
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
 
   'src/third_party/freetype2':
-   Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'edab12c07ac05d1185616688f338b1ad15936796',
+   Var('flutter_git') + '/third_party/freetype2' + '@' + '1f03c1b2d7f2ae832a4fbe9d12bd96c3c15bbece',
 
   'src/third_party/root_certificates':
    Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
