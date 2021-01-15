@@ -258,10 +258,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      // Should be 1 instead of 2, but integration_test is always included.
-      // https://github.com/flutter/flutter/issues/56591
       expect(await getCommand.usageValues,
-          containsPair(CustomDimensions.commandPackagesNumberPlugins, '2'));
+          containsPair(CustomDimensions.commandPackagesNumberPlugins, '1'));
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,

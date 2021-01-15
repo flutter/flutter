@@ -2389,6 +2389,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
+  final GlobalKey _currentBottomSheetKey = GlobalKey();
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
@@ -2421,7 +2422,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
             child: DraggableScrollableActuator(
-              child: widget.bottomSheet!,
+              child: StatefulBuilder(
+                key: _currentBottomSheetKey,
+                builder: (BuildContext context, StateSetter setState) => widget.bottomSheet!,
+              ),
             ),
           );
         },
@@ -2443,6 +2447,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         return true;
       }());
     }
+  }
+
+  void _updatePersistentBottomSheet() {
+    _currentBottomSheetKey.currentState!.setState(() {});
   }
 
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
@@ -2774,8 +2782,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         }
         return true;
       }());
-      _closeCurrentBottomSheet();
-      _maybeBuildPersistentBottomSheet();
+      if (widget.bottomSheet == null) {
+        _closeCurrentBottomSheet();
+      } else if (widget.bottomSheet != null && oldWidget.bottomSheet == null) {
+        _maybeBuildPersistentBottomSheet();
+      } else {
+        _updatePersistentBottomSheet();
+      }
     }
     super.didUpdateWidget(oldWidget);
   }
