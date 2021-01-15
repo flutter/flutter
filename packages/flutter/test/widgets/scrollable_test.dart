@@ -91,6 +91,76 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('ensureVisible does not move PageViews when there are objects between pageView and target object', (WidgetTester tester) async {
+    final PageController controller = PageController();
+    int count = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          children: List<Widget>.generate(3, (int index) {
+            return Row(
+              children: <Widget>[
+                Container(
+                  width: 400,
+                  color: Colors.red,
+                ),
+                Expanded(
+                  child: Container(
+                    color: Colors.green,
+                    width: double.infinity,
+                    height: 50,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        key: Key(index.toString()),
+                        color: Colors.yellow,
+                        height: 50,
+                        width: 200,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+
+    controller.position.addListener(() {
+      count++;
+    });
+
+    final Finder targetOfPage0 = find.byKey(const Key('0'));
+    final Finder targetOfPage1 = find.byKey(const Key('1'));
+
+    expect(targetOfPage0, findsOneWidget);
+    expect(targetOfPage1, findsNothing);
+
+    // `ensureVisible` should not trigger any scrolling or page changing of pageView.
+    await tester.ensureVisible(targetOfPage0);
+    await tester.pumpAndSettle();
+    expect(count, 0);
+    expect(targetOfPage0, findsOneWidget);
+    expect(targetOfPage1, findsNothing);
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(count, 1); // Trigger by `controller.jumpToPage(1)`
+    expect(targetOfPage0, findsNothing);
+    expect(targetOfPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetOfPage1);
+    await tester.pumpAndSettle();
+    expect(count, 1);
+    expect(targetOfPage0, findsNothing);
+    expect(targetOfPage1, findsOneWidget);
+  });
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
