@@ -37,12 +37,6 @@
          "flaky": false
       },
       {
-         "name": "Linux animated_placeholder_perf",
-         "repo": "flutter",
-         "task_name": "linux_animated_placeholder_perf",
-         "flaky": true
-      },
-      {
          "name": "Linux backdrop_filter_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_backdrop_filter_perf__e2e_summary",
