@@ -2602,8 +2602,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
-        Duration? enterDuration,
-        Duration? exitDuration,
+    AnimationController? transitionAnimationController,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2618,7 +2617,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = BottomSheet.createAnimationController(this, enterDuration: enterDuration, exitDuration: exitDuration)..forward();
+    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
