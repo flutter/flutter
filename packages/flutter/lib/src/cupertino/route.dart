@@ -1136,10 +1136,10 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// {@tool sample --template=freeform}
 ///
-/// This sample demonstrates how to create a restorable Material dialog. This is
+/// This sample demonstrates how to create a restorable Cupertino dialog. This is
 /// accomplished by enabling state restoration by specifying
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
-/// push [CupertinoDialogRoute] when the button is tapped.
+/// push [CupertinoDialogRoute] when the [CupertinoButton] is tapped.
 ///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
