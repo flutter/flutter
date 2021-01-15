@@ -587,21 +587,15 @@ void main() {
     });
 
     testWidgets('can catch multiple framework errors', (WidgetTester tester) async {
-      int exceptions = 0;
-      final String result = await tester.wrapExceptions(() async {
+      final List<FlutterErrorDetails> errors = await tester.wrapExceptions(() async {
         for (int j = 0; j < 3; j += 1) {
           await tester.runAsync<String>(() async {
             throw ArgumentError('foo');
           });
         }
-        return '123';
-      }, onError: (FlutterErrorDetails details) {
-        expect(details.exception, isArgumentError);
-        expect((details.exception as ArgumentError).message, 'foo');
-        exceptions++;
       });
-      expect(result, '123');
-      expect(exceptions, 3);
+
+      expect(errors.length, 3);
 
       await tester.runAsync<String>(() async {
         throw StateError('bar');
@@ -611,7 +605,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isStateError);
       expect((exception as StateError).message, 'bar');
-      expect(exceptions, 3);
+      expect(errors.length, 3);
     });
 
     testWidgets('disallows re-entry', (WidgetTester tester) async {

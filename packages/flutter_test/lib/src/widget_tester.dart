@@ -905,13 +905,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.takeException();
   }
 
-  /// Intercepts errors reported by the framework until [callback] finishes.
+  /// Returns a list of errors reported by the framework after [callback]
+  //  completes.
   ///
   /// See [TestWidgetsFlutterBinding.wrapExceptions] for details.
-  Future<T> wrapExceptions<T>(FutureOr<T> Function() callback, {
-    required FlutterExceptionHandler onError,
-  }) {
-    return binding.wrapExceptions(callback, onError: onError);
+  Future<List<FlutterErrorDetails>> wrapExceptions<T>(
+    FutureOr<T> Function() callback,
+  ) {
+    return binding.wrapExceptions(callback);
   }
 
   /// Acts as if the application went idle.

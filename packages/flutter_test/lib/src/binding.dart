@@ -540,11 +540,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _focusedEditable = null;
   }
 
-  /// Intercepts errors reported by the framework until [callback] finishes.
+  /// Returns a list of errors reported by the framework after [callback]
+  /// completes.
   ///
-  /// When the framework encounters an error [onError] is called with the
-  /// details of the exception. Errors thrown by the framework while this method
-  /// is running will not be reported to the console or be available to
+  /// When the framework encounters an error, the details of that error are
+  /// appended to the returned list. Errors thrown by the framework while this
+  /// method is running will not be reported to the console or be available to
   /// [takeException].
   ///
   /// {@tool snippet}
@@ -552,8 +553,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// ```dart
   /// testWidgets('Check if Row overflows', (WidgetTester tester) async {
-  ///   FlutterErrorDetails? firstError;
-  ///   await tester.wrapExceptions(() async {
+  ///   final errors = await tester.wrapExceptions(() async {
   ///     await tester.pumpWidget(
   ///       Row(
   ///         textDirection: TextDirection.ltr,
@@ -562,10 +562,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///         ],
   ///       ),
   ///     );
-  ///   }, onError: (FlutterErrorDetails details) {
-  ///     firstError ??= details;
   ///   });
-  ///   expect(firstError.toString(), contains('A RenderFlex overflowed by'));
+  ///   expect(errors.first.toString(), contains('A RenderFlex overflowed by'));
   /// });
   /// ```
   /// {@end-tool}
@@ -573,19 +571,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// See also:
   ///   * [takeException], a similar method that returns a single expected
   ///     exception.
-  Future<T> wrapExceptions<T>(FutureOr<T> Function() callback, {
-    required FlutterExceptionHandler onError,
-  }) async {
-    assert(_wrapExceptionHandler == null,
-      'wrapExceptions called while another handler was still in use, '
+  Future<List<FlutterErrorDetails>> wrapExceptions(
+    FutureOr<void> Function() callback,
+  ) async {
+    assert(_wrappedExceptionDetails == null,
+      'wrapExceptions called while another callback was still running, '
       'this can occur if wrapExceptions is called recursively, or if a previous '
       'call was not awaited.'
     );
-    _wrapExceptionHandler = onError;
+    _wrappedExceptionDetails = <FlutterErrorDetails>[];
     try {
-      return await callback();
+      await callback();
+      return _wrappedExceptionDetails!;
     } finally {
-      _wrapExceptionHandler = null;
+      _wrappedExceptionDetails = null;
     }
   }
 
@@ -600,6 +599,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// thrown, they are both dumped to the console and then the second is
   /// rethrown from the exception handler. This will likely result in the
   /// framework entering a highly unstable state and everything collapsing.
+  ///
+  /// It's safe to call this when there's no pending exception; it will return
+  /// null in that case.
   ///
   /// {@tool snippet}
   /// This example tests if a widget's builder throws an assertion error.
@@ -620,9 +622,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// });
   /// ```
   /// {@end-tool}
-  ///
-  /// It's safe to call this when there's no pending exception; it will return
-  /// null in that case.
   dynamic takeException() {
     assert(inTest);
     final dynamic result = _pendingExceptionDetails?.exception;
@@ -632,7 +631,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler? _oldExceptionHandler;
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
-  FlutterExceptionHandler? _wrapExceptionHandler;
+  List<FlutterErrorDetails>? _wrappedExceptionDetails;
 
   static const TextStyle _messageStyle = TextStyle(
     color: Color(0xFF917FFF),
@@ -728,8 +727,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
-      if (_wrapExceptionHandler != null) {
-        _wrapExceptionHandler!(details);
+      if (_wrappedExceptionDetails != null) {
+        _wrappedExceptionDetails!.add(details);
       } else if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {
