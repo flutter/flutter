@@ -953,8 +953,8 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// ### State Restoration in Dialogs
 ///
 /// Using this method with not enable state restoration for the dialog. In order
-/// to enable state restoration for a dialog, use `Navigator.restorablePush`
-/// or `Navigator.restorablePushNamed` with `DialogRoute`.
+/// to enable state restoration for a dialog, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [DialogRoute].
 ///
 /// For more information about state restoration, see [RestorationManager].
 ///
@@ -1080,6 +1080,9 @@ Future<T?> showDialog<T>({
 /// A dialog route with Material entrance and exit animations,
 /// modal barrier color, and modal barrier behavior (dialog is dismissible
 /// with a tap on the barrier).
+///
+/// Normally, [showDialog] is used to display a Material dialog. This route
+/// is exposed primary for state restoration support if it is needed.
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
