@@ -363,4 +363,28 @@ void main() {
       ),
     );
   });
+
+  testWidgets('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  const Clip clipBehavior = Clip.none;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          initialItemCount: 2,
+          clipBehavior: clipBehavior,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(
+              height: 100.0,
+              child: Center(
+                child: Text('item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
+  });
 }
