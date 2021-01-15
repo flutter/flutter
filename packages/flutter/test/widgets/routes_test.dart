@@ -1748,6 +1748,36 @@ void main() {
     expect(parentRoute, isNotNull);
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
+
+  testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: _RestorableDialogTestWidget(),
+      ),
+    );
+
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(AlertDialog), findsOneWidget);
+  });
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {
@@ -1950,4 +1980,37 @@ Widget buildNavigator({
       ),
     ),
   );
+}
+
+class _RestorableDialogTestWidget extends StatefulWidget {
+  @override
+  _RestorableDialogTestWidgetState createState() => _RestorableDialogTestWidgetState();
+}
+
+class _RestorableDialogTestWidgetState extends State<_RestorableDialogTestWidget> {
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+    return RawDialogRoute<void>(
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) {
+        return const AlertDialog(title: Text('Alert!'));
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: OutlineButton(
+          onPressed: () {
+            Navigator.of(context).restorablePush(_dialogBuilder);
+          },
+          child: const Text('X'),
+        ),
+      ),
+    );
+  }
 }
