@@ -208,6 +208,7 @@ List<String> _xcodeBuildSettingsLines({
       if (localEngineName.endsWith('_arm')) {
         arch = 'armv7';
       } else if (localEngineName.contains('_sim')) {
+        // Apple Silicon ARM simulators not yet supported.
         arch = 'x86_64';
       } else {
         arch = 'arm64';
