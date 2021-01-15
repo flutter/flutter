@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:web_socket_channel/io.dart';
+import 'package:stream_channel/stream_channel.dart';
 
 import '../common/logging.dart';
 
@@ -78,7 +78,7 @@ Future<json_rpc.Peer> _waitAndConnect(
     json_rpc.Peer peer;
     try {
       socket = await WebSocket.connect(uri.toString()).timeout(timeout);
-      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
+      peer = json_rpc.Peer(_IOWebSocketChannel(socket).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
       return peer;
     } on HttpException catch (e) {
       // This is a fine warning as this most likely means the port is stale.
@@ -314,4 +314,16 @@ class IsolateRef {
 
   /// The parent [DartVm] on which this Isolate lives.
   final DartVm dartVm;
+}
+
+class _IOWebSocketChannel extends StreamChannelMixin<dynamic> {
+  _IOWebSocketChannel(this._socket);
+
+  final WebSocket _socket;
+
+  @override
+  StreamSink<dynamic> get sink => _socket;
+
+  @override
+  Stream<dynamic> get stream => _socket;
 }
