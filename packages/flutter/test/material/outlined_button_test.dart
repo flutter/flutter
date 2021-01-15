@@ -52,6 +52,9 @@ void main() {
     expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
 
+    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center);
+
     final Offset center = tester.getCenter(find.byType(OutlinedButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
@@ -1211,22 +1214,6 @@ void main() {
       ),
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
-  });
-
-  testWidgets('Text does not overflow in OutlinedButton label', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.forbidden,
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.add),
-            label: const Text('this is a very long text used to check whether an overflow occurs or not'),
-            onPressed: () {},
-          ),
-        ),
-      ),
-    );
   });
 }
 

@@ -221,6 +221,12 @@ class FlutterProject {
     } on YamlException catch (e) {
       logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       logger.printError('$e');
+    } on FormatException catch (e) {
+      logger.printError('Error detected while parsing pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
+    } on FileSystemException catch (e) {
+      logger.printError('Error detected while reading pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
@@ -446,6 +452,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
+  File get xcodeProjectWorkspaceData =>
+    xcodeProject
+    .childDirectory('project.xcworkspace')
+    .childFile('contents.xcworkspacedata');
+
   @override
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
 
@@ -651,11 +662,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug, EnvironmentType.physical);
+      // Use release mode so host project can link on bitcode variant.
+      _copyEngineArtifactToProject(BuildMode.release, EnvironmentType.physical);
     }
   }
 
-  void copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
+  void _copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
     // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something

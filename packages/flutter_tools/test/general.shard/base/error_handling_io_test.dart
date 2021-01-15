@@ -76,6 +76,8 @@ void setupWriteMocks({
   when(mockFile.openSync(
     mode: anyNamed('mode'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockFile.createSync(recursive: anyNamed('recursive')))
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void setupReadMocks({
@@ -173,6 +175,7 @@ void main() {
     const int kDeviceFull = 112;
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
+    const int kFatalDeviceHardwareError =  483;
     MockFileSystem mockFileSystem;
     ErrorHandlingFileSystem fs;
 
@@ -229,6 +232,8 @@ void main() {
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -268,6 +273,31 @@ void main() {
       expect(() => file.writeAsBytesSync(<int>[0]),
              throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when the device driver has a fatal error', () async {
+      setupWriteMocks(
+        mockFileSystem: mockFileSystem,
+        fs: fs,
+        errorCode: kFatalDeviceHardwareError,
+      );
+
+      final File file = fs.file('file');
+
+      const String expectedMessage = 'There is a problem with the device driver '
+        'that this file or directory is stored on';
+      expect(() async => await file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => await file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
              throwsToolExit(message: expectedMessage));
     });
 
@@ -365,6 +395,8 @@ void main() {
       expect(() => file.writeAsStringSync(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
              throwsToolExit(message: expectedMessage));
     });
 
