@@ -286,18 +286,21 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    String target = findProjectRoot();
+    List<String> rest = argResults.rest;
+    String target;
+    if (rest.length == 1 &&
+        (rest[0].contains('/') ||
+            rest[0].contains(r'\'))) {
+      // HACK: Supporting flutter specific behavior where you can pass a
+      //       folder to the command.
+      target = findProjectRoot(rest[0]);
+      rest = <String>[];
+    } else {
+      target = findProjectRoot();
+    }
     if (target == null) {
-      // HACK: Supporting old flutter specific behavior
-      if (argResults.rest.length == 1) {
-        target = findProjectRoot(argResults.rest[0]);
-      }
-      if (target == null) {
-        throwToolExit(
-          'Expected to find project root in '
-          'current working directory.'
-        );
-      }
+      throwToolExit('Expected to find project root in '
+          'current working directory.');
     }
     final FlutterProject flutterProject = FlutterProject.fromPath(target);
 
@@ -320,7 +323,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
       );
     }
 
-    final List<String> subArgs = argResults.rest.toList()
+    final List<String> subArgs = rest.toList()
       ..removeWhere((String arg) => arg == '--');
     await pub.interactively(
       <String>[name, ...subArgs],
