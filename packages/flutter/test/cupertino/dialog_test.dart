@@ -1175,6 +1175,40 @@ void main() {
       matchesGoldenFile('dialog_test.cupertino.default.png'),
     );
   });
+
+  testWidgets('showCupertinoDialog - custom barrierLabel', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: CupertinoButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    barrierLabel: 'Custom label',
+                    builder: (BuildContext context) {
+                      return const CupertinoDialog(
+                        child: Text('Content'),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      label: 'Custom label',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    )));
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {

@@ -1135,6 +1135,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
+  String? barrierLabel,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
@@ -1146,7 +1147,7 @@ Future<T?> showCupertinoDialog<T>({
     builder: builder,
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: CupertinoLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel: barrierLabel,
     barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
     settings: routeSettings,
   ));

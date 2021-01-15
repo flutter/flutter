@@ -1109,6 +1109,11 @@ Future<T?> showDialog<T>({
 ///
 /// The `settings` argument define the settings for this route. See
 /// [RouteSettings] for details.
+///
+/// See also:
+///  * [showDialog], which is the primary way to display a DialogRoute.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible

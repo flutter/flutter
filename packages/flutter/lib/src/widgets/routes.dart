@@ -1745,13 +1745,37 @@ abstract class RouteAware {
 }
 
 /// A general dialog route which allows for customization of the dialog popup.
+///
+/// Normally, [showGeneralDialog] is used to display a dialog. This route
+/// is exposed primary for state restoration support if it is needed.
+///
+/// This function takes a `pageBuilder`, which typically builds a dialog.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything below the dialog. If `null`, the default
+/// color `Colors.black54` is used.
+///
+/// The `settings` argument define the settings for this route. See
+/// [RouteSettings] for details.
+///
+/// See also:
+///  * [showGeneralDialog], which is the primary way to display a RawDialogRoute.
+///  * [showDialog], which is the primary way to display a DialogRoute.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
   RawDialogRoute({
     required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
-    String? barrierLabel,
     Color? barrierColor = const Color(0x80000000),
+    String? barrierLabel,
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
