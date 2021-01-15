@@ -1126,6 +1126,90 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// ### State Restoration in Dialogs
+///
+/// Using this method with not enable state restoration for the dialog. In order
+/// to enable state restoration for a dialog, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [CupertinoDialogRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable Material dialog. This is
+/// accomplished by enabling state restoration by specifying
+/// `CupertinoApp.restorationScopeId` and using `Navigator.restorablePush` to
+/// push `CupertinoDialogRoute` when the button is tapped.
+///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoApp(
+///       restorationScopeId: 'app',
+///       home: MyHomePage(title: 'Restorable Routes Demo'),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatefulWidget {
+///   MyHomePage({this.title});
+///
+///   final String title;
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> {
+///   static Route _dialogBuilder(BuildContext context, Object arguments) {
+///     return CupertinoDialogRoute(
+///       context: context,
+///       builder: (BuildContext context) {
+///         return CupertinoAlertDialog(
+///           title: Text('Alert'),
+///           content: Text('My alert message'),
+///           actions: [
+///             CupertinoDialogAction(
+///               child: Text('OK'),
+///             ),
+///             CupertinoDialogAction(
+///               isDefaultAction: true,
+///               child: Text('Exit'),
+///             ),
+///           ],
+///         );
+///       },
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     home: CupertinoPageScaffold(
+///       navigationBar: CupertinoNavigationBar(
+///         middle: const Text('Home'),
+///       ),
+///       child: Center(child: CupertinoButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_dialogBuilder);
+///         },
+///         child: Text('Open Dialog'),
+///       )),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], an iOS-style alert dialog.
@@ -1154,6 +1238,42 @@ Future<T?> showCupertinoDialog<T>({
 }
 
 /// A dialog route that shows an iOS-style dialog.
+///
+/// Normally, [showCupertinoDialog] is used to display a Cupertino dialog.
+/// This route is exposed primary for state restoration support if it is needed.
+///
+/// This function takes a `builder` which typically builds a [Dialog] widget.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `context` argument is used to look up
+/// [CupertinoLocalizations.modalBarrierDismissLabel], which provides the
+/// modal with a localized accessibility label that will be used for the
+/// modal's barrier. However, a custom `barrierLabel` can be passed in as well.
+///
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything below the dialog. If `null`, the default
+/// color `Colors.black54` is used.
+///
+/// The `useSafeArea` argument is used to indicate if the dialog should only
+/// display in 'safe' areas of the screen not used by the operating system
+/// (see [SafeArea] for more details). It is `true` by default, which means
+/// the dialog will not overlap operating system areas. If it is set to `false`
+/// the dialog will only be constrained by the screen size. It can not be `null`.
+///
+/// The `settings` argument define the settings for this route. See
+/// [RouteSettings] for details.
+///
+/// See also:
+///  * [showCupertinoDialog], which is the primary way to display
+///     an iOS-style dialog.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
+///  * [showDialog], which displays a Material dialog.
 class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({

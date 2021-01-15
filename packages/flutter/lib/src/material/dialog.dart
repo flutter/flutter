@@ -1091,8 +1091,9 @@ Future<T?> showDialog<T>({
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up
-/// `MaterialLocalizations.modalBarrierDismissLabel`, which is the default
-/// modal accessibility label that will be used for the modal's barrier.
+/// [MaterialLocalizations.modalBarrierDismissLabel], which provides the
+/// modal with a localized accessibility label that will be used for the
+/// modal's barrier. However, a custom `barrierLabel` can be passed in as well.
 ///
 /// The `barrierDismissible` argument is used to indicate whether tapping on the
 /// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
