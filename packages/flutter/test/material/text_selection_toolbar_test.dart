@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../widgets/text.dart' show textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
