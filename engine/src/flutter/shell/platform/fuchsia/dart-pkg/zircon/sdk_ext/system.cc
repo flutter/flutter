@@ -488,6 +488,7 @@ uint64_t System::ClockGet(uint32_t clock_id) {
   V(System, VmoRead)               \
   V(System, VmoWrite)              \
   V(System, VmoMap)                \
+  V(System, ClockGetMonotonic)     \
   V(System, ClockGet)
 
 // clang-format: on
