@@ -772,12 +772,14 @@ class RawScrollbar extends StatefulWidget {
   /// Cannot be null, defaults to [Duration.zero].
   final Duration pressDuration;
 
+  /// {@template flutter.widgets.Scrollbar.notificationPredicate}
   /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
   ///
   /// By default, checks whether `notification.depth == 0`. That means if the
   /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
   /// nearest scrollView and shows the corresponding scrollbar thumb.
+  /// {@endtemplate}
   final ScrollNotificationPredicate notificationPredicate;
 
   @override
