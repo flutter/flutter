@@ -19,11 +19,14 @@ const double _kToolbarScreenPadding = 8.0;
 // These values were measured from a screenshot of TextEdit on MacOS 10.15.7 on
 // a Macbook Pro.
 const double _kToolbarWidth = 222.0;
-const Color _kToolbarBorderColor = Color(0xFF505152);
 const Radius _kToolbarBorderRadius = Radius.circular(4.0);
 
 // These values were measured from a screenshot of TextEdit on MacOS 10.16 on a
 // Macbook Pro.
+const CupertinoDynamicColor _kToolbarBorderColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFBBBBBB),
+  darkColor: Color(0xFF505152),
+);
 const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xffECE8E6),
   darkColor: Color(0xff302928),
@@ -272,7 +275,7 @@ class _CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       decoration: BoxDecoration(
         color: _kToolbarBackgroundColor.resolveFrom(context),
         border: Border.all(
-          color: _kToolbarBorderColor,
+          color: _kToolbarBorderColor.resolveFrom(context),
         ),
         borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
       ),
