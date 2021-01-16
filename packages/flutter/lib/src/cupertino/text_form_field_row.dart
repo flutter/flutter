@@ -2,17 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'form_row.dart';
 import 'text_field.dart';
-import 'theme.dart';
-
-// Examples can assume:
-// // @dart = 2.9
 
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].
@@ -64,18 +59,18 @@ import 'theme.dart';
 /// ```dart
 /// CupertinoTextFormFieldRow(
 ///   prefix: Text('Username'),
-///   onSaved: (String value) {
+///   onSaved: (String? value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
 ///   },
-///   validator: (String value) {
-///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   validator: (String? value) {
+///     return (value != null && value.contains('@')) ? 'Do not use the @ char.' : null;
 ///   },
 /// )
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how to move the focus to the next field when the user
 /// presses the SPACE key.
 ///
@@ -90,7 +85,7 @@ import 'theme.dart';
 ///       child: Form(
 ///         autovalidateMode: AutovalidateMode.always,
 ///         onChanged: () {
-///           Form.of(primaryFocus.context).save();
+///           Form.of(primaryFocus!.context!)?.save();
 ///         },
 ///         child: CupertinoFormSection.insetGrouped(
 ///           header: Text('SECTION 1'),
@@ -99,7 +94,7 @@ import 'theme.dart';
 ///               prefix: Text('Enter text'),
 ///               placeholder: 'Enter text',
 ///               validator: (value) {
-///                 if (value.isEmpty) {
+///                 if (value == null || value.isEmpty) {
 ///                   return 'Please enter a value';
 ///                 }
 ///                 return null;

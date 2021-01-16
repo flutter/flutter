@@ -140,6 +140,53 @@ void main() {
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
       });
 
+      testWithoutContext('isSimctlInstalled is true when simctl list succeeds', () {
+        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+            ],
+          ),
+        );
+        final Xcode xcode = Xcode(
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: MemoryFileSystem.test(),
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        );
+
+        expect(xcode.isSimctlInstalled, isTrue);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      });
+
+      testWithoutContext('isSimctlInstalled is true when simctl list fails', () {
+        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+            ],
+            exitCode: 1,
+          ),
+        );
+        final Xcode xcode = Xcode(
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: MemoryFileSystem.test(),
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+        );
+
+        expect(xcode.isSimctlInstalled, isFalse);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      });
+
       group('macOS', () {
         Xcode xcode;
         FakePlatform platform;
@@ -174,13 +221,13 @@ void main() {
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
-          expect(xcode.isVersionSatisfactory, isFalse);
+          expect(xcode.isRequiredVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
           when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-          expect(xcode.isVersionSatisfactory, isFalse);
+          expect(xcode.isRequiredVersionSatisfactory, isFalse);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
@@ -189,7 +236,7 @@ void main() {
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
-          expect(xcode.isVersionSatisfactory, isTrue);
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
@@ -198,7 +245,7 @@ void main() {
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
-          expect(xcode.isVersionSatisfactory, isTrue);
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
@@ -207,7 +254,7 @@ void main() {
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
-          expect(xcode.isVersionSatisfactory, isTrue);
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
@@ -216,7 +263,58 @@ void main() {
           when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
           when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
 
-          expect(xcode.isVersionSatisfactory, isTrue);
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is false when version is less than minimum', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+          when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isFalse);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is false when xcodebuild tools are not installed', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isFalse);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is true when version meets minimum', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
+          when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isTrue);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is true when major version exceeds minimum', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(13);
+          when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isTrue);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is true when minor version exceeds minimum', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
+          when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isTrue);
+        });
+
+        testWithoutContext('isRecommendedVersionSatisfactory is true when patch version exceeds minimum', () {
+          when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+          when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
+          when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+          when(mockXcodeProjectInterpreter.patchVersion).thenReturn(2);
+
+          expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {

@@ -907,6 +907,84 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
     });
+
+    testWidgets('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      double? initialScale;
+      double? scale;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: GestureDetector(
+                onTapUp: (TapUpDetails details) {},
+                child: InteractiveViewer(
+                  onInteractionUpdate: (ScaleUpdateDetails details) {
+                    initialScale ??= details.scale;
+                    scale = details.scale;
+                  },
+                  transformationController: transformationController,
+                  child: Container(width: 200.0, height: 200.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(initialScale, null);
+      expect(scale, null);
+
+      // Pinch to zoom isn't immediately detected for a small amount of
+      // movement due to the GestureDetector.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
+      Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
+      TestGesture gesture = await tester.createGesture();
+      TestGesture gesture2 = await tester.createGesture();
+      addTearDown(gesture.removePointer);
+      addTearDown(gesture2.removePointer);
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value, equals(Matrix4.identity()));
+      expect(initialScale, null);
+      expect(scale, null);
+
+      // Pinch to zoom for a larger amount is detected. It starts smoothly at
+      // 1.0 despite the fact that the gesture has already moved a bit.
+      scaleEnd1 = Offset(childInterior.dx - 38.0, childInterior.dy);
+      scaleEnd2 = Offset(childInterior.dx + 48.0, childInterior.dy);
+      gesture = await tester.createGesture();
+      gesture2 = await tester.createGesture();
+      addTearDown(gesture.removePointer);
+      addTearDown(gesture2.removePointer);
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(initialScale, 1.0);
+      expect(scale, greaterThan(1.0));
+      expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
+    });
   });
 
   group('getNearestPointOnLine', () {

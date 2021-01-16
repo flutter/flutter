@@ -53,6 +53,7 @@ abstract class FlutterTestRunner {
     @required BuildInfo buildInfo,
     String reporter,
     String timeout,
+    List<String> additionalArguments,
   });
 }
 
@@ -89,6 +90,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     @required BuildInfo buildInfo,
     String reporter,
     String timeout,
+    List<String> additionalArguments,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -201,6 +203,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       icudtlPath: icudtlPath,
       nullAssertions: nullAssertions,
       buildInfo: buildInfo,
+      additionalArguments: additionalArguments,
     );
 
     // Call package:test's main method in the appropriate directory.

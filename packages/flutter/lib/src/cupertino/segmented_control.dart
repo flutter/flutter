@@ -5,14 +5,10 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
-
-// Examples can assume:
-// // @dart = 2.9
 
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
@@ -141,7 +137,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   late int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {

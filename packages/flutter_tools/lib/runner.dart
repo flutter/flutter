@@ -5,10 +5,11 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
-import 'package:http/http.dart' as http;
 
+import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
@@ -131,19 +132,23 @@ Future<int> _handleToolError(
 
     // Report to both [Usage] and [CrashReportSender].
     globals.flutterUsage.sendException(error);
-    final CrashReportSender crashReportSender = CrashReportSender(
-      client: http.Client(),
-      usage: globals.flutterUsage,
-      platform: globals.platform,
-      logger: globals.logger,
-      operatingSystemUtils: globals.os,
-    );
-    await crashReportSender.sendReport(
-      error: error,
-      stackTrace: stackTrace,
-      getFlutterVersion: getFlutterVersion,
-      command: args.join(' '),
-    );
+    await asyncGuard(() async {
+      final CrashReportSender crashReportSender = CrashReportSender(
+        client: http.Client(),
+        usage: globals.flutterUsage,
+        platform: globals.platform,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+      );
+      await crashReportSender.sendReport(
+        error: error,
+        stackTrace: stackTrace,
+        getFlutterVersion: getFlutterVersion,
+        command: args.join(' '),
+      );
+    }, onError: (dynamic error) {
+      globals.printError('Error sending crash report: $error');
+    });
 
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 

@@ -222,7 +222,7 @@ class FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool disableDds = false,
-    bool allowExistingDdsInstance = false,
+    @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
@@ -236,10 +236,10 @@ class FlutterDevice {
       bool existingDds = false;
       vm_service.VmService service;
       if (!disableDds) {
-        void handleError(Exception e) {
+        void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
           if (!completer.isCompleted) {
-            completer.completeError('failed to connect to $observatoryUri');
+            completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
         // This first try block is meant to catch errors that occur during DDS startup
@@ -252,16 +252,16 @@ class FlutterDevice {
             ipv6,
             disableServiceAuthCodes,
           );
-        } on dds.DartDevelopmentServiceException catch (e) {
+        } on dds.DartDevelopmentServiceException catch (e, st) {
           if (!allowExistingDdsInstance ||
               (e.errorCode != dds.DartDevelopmentServiceException.existingDdsInstanceError)) {
-            handleError(e);
+            handleError(e, st);
             return;
           } else {
             existingDds = true;
           }
-        } on Exception catch (e) {
-          handleError(e);
+        } on Exception catch (e, st) {
+          handleError(e, st);
           return;
         }
       }
@@ -774,7 +774,7 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  DevtoolsLauncher _devtoolsLauncher;
+  DevtoolsLauncher _devToolsLauncher;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -926,7 +926,7 @@ abstract class ResidentRunner {
   }
 
   @protected
-  void writeVmserviceFile() {
+  void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
         final String address = flutterDevices.first.vmService.wsAddress.toString();
@@ -941,7 +941,7 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    await shutdownDevtools();
+    await shutdownDevTools();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -949,7 +949,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> detach() async {
-    await shutdownDevtools();
+    await shutdownDevTools();
     await stopEchoingDeviceLog();
     await preExit();
     await shutdownDartDevelopmentService();
@@ -1217,7 +1217,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
-    bool allowExistingDdsInstance,
+    @required bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1250,22 +1250,29 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<bool> launchDevTools({bool openInBrowser = false}) async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    assert(supportsServiceProtocol);
-    _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    unawaited(_devtoolsLauncher.launch(
-      flutterDevices.first.vmService.httpAddress,
-      openInBrowser: openInBrowser,
-    ));
-    return true;
+  DevToolsServerAddress activeDevToolsServer() {
+    _devToolsLauncher ??= DevtoolsLauncher.instance;
+    return _devToolsLauncher.activeDevToolsServer;
   }
 
-  Future<void> shutdownDevtools() async {
-    await _devtoolsLauncher?.close();
-    _devtoolsLauncher = null;
+  Future<void> serveDevToolsGracefully({
+    Uri devToolsServerAddress
+  }) async {
+    if (!supportsServiceProtocol) {
+      return;
+    }
+
+    _devToolsLauncher ??= DevtoolsLauncher.instance;
+    if (devToolsServerAddress != null) {
+      _devToolsLauncher.devToolsUri = devToolsServerAddress;
+    } else {
+      await _devToolsLauncher.serve();
+    }
+  }
+
+  Future<void> shutdownDevTools() async {
+    await _devToolsLauncher?.close();
+    _devToolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1551,8 +1558,6 @@ class TerminalHandler {
         return residentRunner.debugDumpRenderTree();
       case 'U':
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
-      case 'v':
-        return residentRunner.launchDevTools(openInBrowser: true);
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1645,16 +1650,25 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
+  Uri devToolsUri;
+
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
-  Future<void> launch(Uri vmServiceUri, {bool openInBrowser = false});
+  Future<void> launch(Uri vmServiceUri);
 
   /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve({bool openInBrowser = false});
+  Future<DevToolsServerAddress> serve();
 
   Future<void> close();
 
   static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
+
+  DevToolsServerAddress get activeDevToolsServer {
+    if (devToolsUri == null) {
+      return null;
+    }
+    return DevToolsServerAddress(devToolsUri.host, devToolsUri.port);
+  }
 }
 
 class DevToolsServerAddress {
@@ -1662,4 +1676,11 @@ class DevToolsServerAddress {
 
   final String host;
   final int port;
+
+  Uri get uri {
+    if (host == null || port == null) {
+      return null;
+    }
+    return Uri(scheme: 'http', host: host, port: port);
+  }
 }

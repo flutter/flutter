@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -11,9 +9,6 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'text_field.dart';
-
-// Examples can assume:
-// // @dart = 2.9
 
 /// A [CupertinoTextField] that mimics the look and behavior of UIKit's
 /// `UISearchTextField`.
@@ -35,7 +30,7 @@ import 'text_field.dart';
 /// }
 ///
 /// class _MyPrefilledSearchState extends State<MyPrefilledSearch> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {

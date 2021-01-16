@@ -260,9 +260,6 @@ class CrashingUsage implements Usage {
   }
 
   @override
-  bool get isFirstRun => _impl.isFirstRun;
-
-  @override
   bool get suppressAnalytics => _impl.suppressAnalytics;
 
   @override
