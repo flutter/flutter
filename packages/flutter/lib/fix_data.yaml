@@ -11,6 +11,168 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'autovalidate'
+      inClass: 'Form'
+    changes:
+      - kind: 'rename'
+        newName: 'autovalidateMode'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Form'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'autovalidate'
+      inClass: 'FormField'
+    changes:
+      - kind: 'rename'
+        newName: 'autovalidateMode'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'FormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextFormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: 'Migrate to autovalidateMode'
+    date: 2020-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'DropdownButtonFormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutoValidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
   # Changes made in https://github.com/flutter/flutter/pull/48547
   - title: 'Renamed to headline1'
     date: 2020-01-24
