@@ -136,7 +136,7 @@ class CheckboxThemeData with Diagnosticable {
       materialTapTargetSize: t < 0.5 ? a?.materialTapTargetSize : b?.materialTapTargetSize,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t) as OutlinedBorder?,
-      //side: BorderSide.lerp(a?.side, b?.side, t),
+      side: _lerpSides(a?.side, b?.side, t),
     );
   }
 
@@ -197,6 +197,13 @@ class CheckboxThemeData with Diagnosticable {
     if (a == null && b == null)
       return null;
     return _LerpProperties<T>(a, b, t, lerpFunction);
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments
+  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+    if (a == null && b == null)
+      return null;
+    return BorderSide.lerp(a!, b!, t);
   }
 }
 

@@ -700,12 +700,13 @@ class _RenderCheckbox extends RenderToggleable {
     if (_oldValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final Rect outer = _outerRectAt(origin, t);
+      final Path emptyCheckboxPath = shape.copyWith(side: side).getOuterPath(outer);
       final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
         _drawBorder(canvas, outer, t, paint);
       } else {
-        canvas.drawPath(shape.copyWith(side: side).getOuterPath(outer), paint);
+        canvas.drawPath(emptyCheckboxPath, paint);
 
         final double tShrink = (t - 0.5) * 2.0;
         if (_oldValue == null || value == null)
