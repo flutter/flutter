@@ -683,6 +683,8 @@ if (is_win) {
     default_warning_flags += [
       "-Wno-implicit-int-float-conversion",
       "-Wno-c99-designator",
+      # Needed for compiling Skia with clang-12
+      "-Wno-psabi",
     ]
     if (!is_fuchsia) {
       default_warning_flags += [
@@ -703,11 +705,6 @@ if (is_win) {
   if (allow_deprecated_api_calls) {
     default_warning_flags += [ "-Wno-deprecated-declarations" ]
   }
-
-  default_warning_flags += [
-    # Needed for compiling Skia with clang-12
-    "-Wno-psabi",
-  ]
 }
 
 # chromium_code ---------------------------------------------------------------
