@@ -806,7 +806,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/66444
-  testWidgets("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+  testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey outerKey = GlobalKey();
