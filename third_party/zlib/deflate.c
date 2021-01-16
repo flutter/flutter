@@ -60,6 +60,11 @@
 #include "crc32_simd.h"
 #endif
 
+#ifdef FASTEST
+/* See http://crbug.com/1113596 */
+#error "FASTEST is not supported in Chromium's zlib."
+#endif
+
 const char deflate_copyright[] =
    " deflate 1.2.11 Copyright 1995-2017 Jean-loup Gailly and Mark Adler ";
 /*
@@ -304,10 +309,9 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     s->w_size = 1 << s->w_bits;
     s->w_mask = s->w_size - 1;
 
-    if (x86_cpu_enable_simd) {
+    s->hash_bits = memLevel + 7;
+    if ((x86_cpu_enable_simd || arm_cpu_enable_crc32) && s->hash_bits < 15) {
         s->hash_bits = 15;
-    } else {
-        s->hash_bits = memLevel + 7;
     }
 
     s->hash_size = 1 << s->hash_bits;
@@ -317,6 +321,9 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
     s->window = (Bytef *) ZALLOC(strm,
                                  s->w_size + window_padding,
                                  2*sizeof(Byte));
+    /* Avoid use of unitialized values in the window, see crbug.com/1137613 and
+     * crbug.com/1144420 */
+    zmemzero(s->window, (s->w_size + window_padding) * (2 * sizeof(Byte)));
     s->prev   = (Posf *)  ZALLOC(strm, s->w_size, sizeof(Pos));
     /* Avoid use of uninitialized value, see:
      * https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=11360
@@ -1346,7 +1353,16 @@ local uInt longest_match(s, cur_match)
          * necessary to put more guard bytes at the end of the window, or
          * to check more often for insufficient lookahead.
          */
-        Assert(scan[2] == match[2], "scan[2]?");
+        if (!x86_cpu_enable_simd && !arm_cpu_enable_crc32) {
+          Assert(scan[2] == match[2], "scan[2]?");
+        } else {
+          /* When using CRC hashing, scan[2] and match[2] may mismatch, but in
+           * that case at least one of the other hashed bytes will mismatch
+           * also. Bytes 0 and 1 were already checked above, and we know there
+           * are at least four bytes to check otherwise the mismatch would have
+           * been found by the scan_end comparison above, so: */
+          Assert(scan[2] == match[2] || scan[3] != match[3], "scan[2]??");
+        }
         scan++, match++;
         do {
         } while (*(ushf*)(scan+=2) == *(ushf*)(match+=2) &&
@@ -1377,7 +1393,16 @@ local uInt longest_match(s, cur_match)
          * the hash keys are equal and that HASH_BITS >= 8.
          */
         scan += 2, match++;
-        Assert(*scan == *match, "match[2]?");
+        if (!x86_cpu_enable_simd && !arm_cpu_enable_crc32) {
+          Assert(*scan == *match, "match[2]?");
+        } else {
+          /* When using CRC hashing, scan[2] and match[2] may mismatch, but in
+           * that case at least one of the other hashed bytes will mismatch
+           * also. Bytes 0 and 1 were already checked above, and we know there
+           * are at least four bytes to check otherwise the mismatch would have
+           * been found by the scan_end comparison above, so: */
+          Assert(*scan == *match || scan[1] != match[1], "match[2]??");
+        }
 
         /* We check for insufficient lookahead only every 8th comparison;
          * the 256th check will be made at strstart+258.
@@ -2038,7 +2063,13 @@ local block_state deflate_slow(s, flush)
             uInt max_insert = s->strstart + s->lookahead - MIN_MATCH;
             /* Do not insert strings in hash table beyond this. */
 
-            check_match(s, s->strstart-1, s->prev_match, s->prev_length);
+            if (s->prev_match == -1) {
+                /* The window has slid one byte past the previous match,
+                 * so the first byte cannot be compared. */
+                check_match(s, s->strstart, s->prev_match+1, s->prev_length-1);
+            } else {
+                check_match(s, s->strstart-1, s->prev_match, s->prev_length);
+            }
 
             _tr_tally_dist(s, s->strstart -1 - s->prev_match,
                            s->prev_length - MIN_MATCH, bflush);

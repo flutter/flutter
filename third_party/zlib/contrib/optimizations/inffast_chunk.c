@@ -276,7 +276,7 @@ unsigned start;         /* inflate()'s starting value for strm->avail_out */
                            the main copy is near the end.
                           */
                         out = chunkunroll_relaxed(out, &dist, &len);
-                        out = chunkcopy_safe(out, out - dist, len, limit);
+                        out = chunkcopy_safe_ugly(out, dist, len, limit);
                     } else {
                         /* from points to window, so there is no risk of
                            overlapping pointers requiring memset-like behaviour

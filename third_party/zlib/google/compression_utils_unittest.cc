@@ -54,13 +54,9 @@ TEST(CompressionUtilsTest, GzipUncompression) {
   EXPECT_EQ(golden_data, uncompressed_data);
 }
 
-TEST(CompressionUtilsTest, GzipUncompressionFromStringPieceToString) {
-  base::StringPiece compressed_data(
-      reinterpret_cast<const char*>(kCompressedData),
-      base::size(kCompressedData));
-
+TEST(CompressionUtilsTest, GzipUncompressionFromSpanToString) {
   std::string uncompressed_data;
-  EXPECT_TRUE(GzipUncompress(compressed_data, &uncompressed_data));
+  EXPECT_TRUE(GzipUncompress(kCompressedData, &uncompressed_data));
 
   std::string golden_data(reinterpret_cast<const char*>(kData),
                           base::size(kData));

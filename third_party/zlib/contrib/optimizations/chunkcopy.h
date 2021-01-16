@@ -112,6 +112,10 @@ static inline unsigned char FAR* chunkcopy_core_safe(
   Assert(out + len <= limit, "chunk copy exceeds safety limit");
   if ((limit - out) < (ptrdiff_t)CHUNKCOPY_CHUNK_SIZE) {
     const unsigned char FAR* Z_RESTRICT rfrom = from;
+    Assert((uintptr_t)out - (uintptr_t)from >= len,
+           "invalid restrict in chunkcopy_core_safe");
+    Assert((uintptr_t)from - (uintptr_t)out >= len,
+           "invalid restrict in chunkcopy_core_safe");
     if (len & 8) {
       Z_BUILTIN_MEMCPY(out, rfrom, 8);
       out += 8;
@@ -338,6 +342,10 @@ static inline unsigned char FAR* chunkcopy_relaxed(
     unsigned char FAR* Z_RESTRICT out,
     const unsigned char FAR* Z_RESTRICT from,
     unsigned len) {
+  Assert((uintptr_t)out - (uintptr_t)from >= len,
+         "invalid restrict in chunkcopy_relaxed");
+  Assert((uintptr_t)from - (uintptr_t)out >= len,
+         "invalid restrict in chunkcopy_relaxed");
   return chunkcopy_core(out, from, len);
 }
 
@@ -360,6 +368,11 @@ static inline unsigned char FAR* chunkcopy_safe(
     unsigned len,
     unsigned char FAR* limit) {
   Assert(out + len <= limit, "chunk copy exceeds safety limit");
+  Assert((uintptr_t)out - (uintptr_t)from >= len,
+         "invalid restrict in chunkcopy_safe");
+  Assert((uintptr_t)from - (uintptr_t)out >= len,
+         "invalid restrict in chunkcopy_safe");
+
   return chunkcopy_core_safe(out, from, len, limit);
 }
 
@@ -404,6 +417,26 @@ static inline unsigned char FAR* chunkcopy_lapped_safe(
     return out;
   }
   return chunkcopy_lapped_relaxed(out, dist, len);
+}
+
+/* TODO(cavalcanti): see crbug.com/1110083. */
+static inline unsigned char FAR* chunkcopy_safe_ugly(unsigned char FAR* out,
+                                                     unsigned dist,
+                                                     unsigned len,
+                                                     unsigned char FAR* limit) {
+#if defined(__GNUC__) && !defined(__clang__)
+  /* Speed is the same as using chunkcopy_safe
+     w/ GCC on ARM (tested gcc 6.3 and 7.5) and avoids
+     undefined behavior.
+  */
+  return chunkcopy_core_safe(out, out - dist, len, limit);
+#elif defined(__clang__) && defined(ARMV8_OS_ANDROID) && !defined(__aarch64__)
+  /* Seems to perform better on 32bit (i.e. Android). */
+  return chunkcopy_core_safe(out, out - dist, len, limit);
+#else
+  /* Seems to perform better on 64bit. */
+  return chunkcopy_lapped_safe(out, dist, len, limit);
+#endif
 }
 
 /*
