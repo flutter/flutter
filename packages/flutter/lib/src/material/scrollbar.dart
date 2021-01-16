@@ -153,6 +153,7 @@ class _MaterialScrollbar extends RawScrollbar {
     this.hoverThickness,
     double? thickness,
     Radius? radius,
+    ScrollNotificationPredicate? notificationPredicate,
   }) : super(
          key: key,
          child: child,
@@ -163,6 +164,7 @@ class _MaterialScrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
+         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
   final bool? showTrackOnHover;
