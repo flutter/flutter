@@ -374,6 +374,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => MockStdio()..stdout.terminalColumns = 80,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
