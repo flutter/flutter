@@ -327,10 +327,6 @@ def to_gn_args(args):
 
     gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
 
-    # Overrides whether Boring SSL is compiled with system as. Only meaningful
-    # on Android.
-    gn_args['bssl_use_clang_integrated_as'] = True
-
     return gn_args
 
 def parse_args(args):
