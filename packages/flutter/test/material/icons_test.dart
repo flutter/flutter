@@ -77,7 +77,7 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 // Loads the cached material icon font.
