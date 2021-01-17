@@ -1147,6 +1147,8 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 }
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
+///
+/// This is a no-op if the android SDK is not available.
 class AndroidMavenArtifacts extends ArtifactSet {
   AndroidMavenArtifacts(this.cache, {
     @required Platform platform,
@@ -1163,6 +1165,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
+    if (globals.androidSdk == null) {
+      return;
+    }
     final Directory tempDir = cache.getRoot().createTempSync(
       'flutter_gradle_wrapper.',
     );

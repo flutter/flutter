@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_devicelab/tasks/hot_mode_tests.dart';
+import 'dart:async';
+
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
-  await task(createHotModeTest());
+  deviceOperatingSystem = DeviceOperatingSystem.android;
+  await task(createFullscreenTextfieldPerfE2ETest());
 }
