@@ -127,6 +127,8 @@ abstract class Pub {
     List<String> arguments, {
     String directory,
     @required io.Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
   });
 }
 
@@ -324,6 +326,8 @@ class _DefaultPub implements Pub {
     List<String> arguments, {
     String directory,
     @required io.Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
   }) async {
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
@@ -356,6 +360,23 @@ class _DefaultPub implements Pub {
     final int code = await process.exitCode;
     if (code != 0) {
       throwToolExit('pub finished with exit code $code', exitCode: code);
+    }
+
+    if (touchesPackageConfig) {
+      final File packageConfigFile = _fileSystem.file(
+        _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+      final Directory generatedDirectory = _fileSystem.directory(
+        _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
+      final File lastVersion = _fileSystem.file(
+        _fileSystem.path.join(directory, '.dart_tool', 'version'));
+      final File currentVersion = _fileSystem.file(
+        _fileSystem.path.join(Cache.flutterRoot, 'version'));
+        lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+      await _updatePackageConfig(
+        packageConfigFile,
+        generatedDirectory,
+        generateSyntheticPackage,
+      );
     }
   }
 

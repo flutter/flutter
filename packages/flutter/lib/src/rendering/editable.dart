@@ -1950,33 +1950,26 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
-    } else if (text?.text != null
-        && _isWhitespace(text!.text!.codeUnitAt(position.offset))
+    // On Android try to select the previous word instead only if the text is read only.
+    } else if (text?.toPlainText() != null
+        && _isWhitespace(text!.toPlainText().codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
+      final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          int startIndex = position.offset - 1;
-          while (startIndex > 0
-              && (_isWhitespace(text!.text!.codeUnitAt(startIndex))
-              || text!.text! == '\u200e' || text!.text! == '\u200f')) {
-            startIndex--;
-          }
-          if (startIndex > 0) {
-            final TextPosition positionBeforeSpace = TextPosition(
-              offset: startIndex,
-              affinity: position.affinity,
-            );
-            final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
-              positionBeforeSpace,
-            );
-            startIndex = wordBeforeSpace.start;
-          }
           return TextSelection(
-            baseOffset: startIndex,
+            baseOffset: previousWord!.start,
             extentOffset: position.offset,
           );
         case TargetPlatform.android:
+          if (readOnly) {
+            return TextSelection(
+              baseOffset: previousWord!.start,
+              extentOffset: position.offset,
+            );
+          }
+          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -1984,6 +1977,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           break;
       }
     }
+
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 

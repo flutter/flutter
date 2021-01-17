@@ -101,7 +101,7 @@ void main() {
         }
       );
       mockXcode = MockXcode();
-      when(mockXcode.isVersionSatisfactory).thenReturn(true);
+      when(mockXcode.isRequiredVersionSatisfactory).thenReturn(true);
       when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
