@@ -1,4 +1,4 @@
-Signature: 6f4e629b6bf07ec5d811a0fbaf8db162
+Signature: 325d73d02dad0648e30e32b2786cb63e
 
 UNUSED LICENSES:
 
@@ -23787,6 +23787,8 @@ FILE: ../../../third_party/zlib/patches/0002-uninitializedcheck.patch
 FILE: ../../../third_party/zlib/patches/0003-uninitializedjump.patch
 FILE: ../../../third_party/zlib/patches/0004-fix-uwp.patch
 FILE: ../../../third_party/zlib/patches/0005-infcover-gtest.patch
+FILE: ../../../third_party/zlib/patches/0006-fix-check_match.patch
+FILE: ../../../third_party/zlib/patches/0007-zero-init-deflate-window.patch
 FILE: ../../../third_party/zlib/trees.h
 ----------------------------------------------------------------------------------------------------
 version 1.2.11, January 15th, 2017
