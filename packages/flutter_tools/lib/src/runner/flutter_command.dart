@@ -476,6 +476,7 @@ abstract class FlutterCommand extends Command<void> {
             'and double.fromEnvironment constructors.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
       valueHelp: 'foo=bar',
+      splitCommas: false,
     );
   }
 
