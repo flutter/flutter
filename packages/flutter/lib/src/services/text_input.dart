@@ -876,18 +876,6 @@ abstract class TextInputClient {
 /// over the [SystemChannels.textInput] method channel. See [SystemChannels.textInput]
 /// for more details about the method channel messages.
 ///
-/// ### Connect to a different input source
-///
-/// The default [TextInputConnection] can be replaced by setting a custom
-/// [TextInputSource] with [TextInput.setSource]. The text input source is used
-/// to create [TextInputConnection] instances whenever a [TextInputClient] is
-/// attached.
-///
-/// A custom implementation of the [TextInputConnection] interface can override
-/// the default method channel connection, and delegate text input calls from the
-/// framework (i.e. the attached [TextInputClient]), for example, to an in-app
-/// virtual keyboard on platforms that don't have one provided by the system.
-///
 /// See also:
 ///
 ///  * [TextInput.attach], a method used to establish a [TextInputConnection]
@@ -1572,6 +1560,8 @@ class TextInput {
 /// instances that are used to communicate with the currently attached
 /// [TextInputClient].
 ///
+/// ### Default text input source
+///
 /// The default text input source, available via [TextInput.defaultSource],
 /// creates [TextInputConnection] instances that communicate with the platform
 /// text input plugin over the [SystemChannels.textInput] method channel. See
@@ -1580,40 +1570,154 @@ class TextInput {
 ///
 /// ### Custom text input sources
 ///
-/// A custom text input source can delegate text input calls from the framework
-/// (i.e. the attached [TextInputClient]), for example, to an in-app virtual
-/// keyboard on platforms that don't have one provided by the system.
+/// A custom text input source overrides the system-provided text input control.
+/// Implement the [TextInputSource] interface to create [TextInputConnection]
+/// instances that delegate text input calls from the framework to a custom text
+/// input control. The currently attached [TextInputClient] is used to send text
+/// input to the framework.
+///
+/// The following example illustrates a virtual keyboard skeleton that acts as
+/// an input source with three key buttons: A, B and C.
+///
+/// ```dart
+/// class VirtualKeyboardState extends State<VirtualKeyboard> implements TextInputSource {
+///   // The currently attached client.
+///   TextInputClient? _client;
+///   // The current text input state.
+///   String _text = '';
+///   TextSelection _selection = TextSelection.collapsed(offset: 0);
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     // Set the virtual keyboard as the current text input source.
+///     TextInput.setSource(this);
+///   }
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     // Restore the default text input source.
+///     TextInput.setSource(TextInput.defaultSource);
+///   }
+///
+///   // Handle a virtual key button press.
+///   void _handleKeyPress(String key) {
+///     // Insert text, replacing the current selection if any.
+///     _text = _text.replaceRange(_selection.start, _selection.end, key);
+///     _selection = TextSelection.collapsed(offset: _selection.start + key.length);
+///
+///     // Request the attached client to update accordingly.
+///     _client?.updateEditingValue(
+///       TextEditingValue(text: _text, selection: _selection),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return FocusScope(
+///       canRequestFocus: false,
+///       child: Row(
+///         children: [
+///           for (final key in ['A', 'B', 'C'])
+///             ElevatedButton(
+///               child: Text(key),
+///               onPressed: _client != null ? () => _handleKeyPress(key) : null,
+///             ),
+///         ],
+///       ),
+///     );
+///   }
+///
+///   @override
+///   TextInputConnection attach(TextInputClient client) {
+///     setState(() => _client = client);
+///
+///     return VirtualKeyboardConnection(
+///       client,
+///       onEditingValueSet: (TextEditingValue value) {
+///         // Sync internal state with client's changes.
+///         _text = value.text;
+///         _selection = value.selection;
+///       },
+///     );
+///   }
+///
+///   @override
+///   void detach(TextInputClient client) {
+///     setState(() => _client = null);
+///   }
+///
+///   // ...
+/// }
+///
+/// class VirtualKeyboardConnection extends TextInputConnection {
+///   ValueChanged<TextEditingValue> _onEditingValueSet;
+///
+///   VirtualKeyboardConnection(
+///     TextInputClient client, {
+///     required ValueChanged<TextEditingValue> onEditingValueSet,
+///   })   : _onEditingValueSet = onEditingValueSet,
+///         super(client);
+///
+///   @override
+///   void setEditingState(TextEditingValue value) {
+///     _onEditingValueSet(value);
+///   }
+///
+///   // ...
+/// }
+/// ```
+///
+/// Notice that the above example is shows only relevant parts of a minimal
+/// text input source and connection implementation. Both [TextInputSource] and
+/// [TextInputConnection] have additional methods that have been left out to
+/// keep the example short and easy to read.
 ///
 /// See also:
 ///
-///  * [TextInput.setSource], a method for setting the desired text input source.
+///  * [TextInput.setSource], a method for setting the current text input source.
+///  * [TextInputConnection], an interface to handle text input calls from the framework.
+///  * [TextInputClient], an interface to provide text input responses back to the framwork.
 abstract class TextInputSource {
-  /// TODO(jpnurmi)
+  /// Allocates resources for the text input source.
+  ///
+  /// The framework calls this method when the current input source is changed.
   void init();
 
-  /// TODO(jpnurmi)
+  /// Cleans up resources allocated by the input source.
+  ///
+  /// The framework calls this method when the current input source is changed.
   void cleanup();
 
   /// Attaches the current [TextInputClient] and creates a [TextInputConnection]
-  /// used to interact with the text input control.
+  /// for interacting with the text input control.
   ///
-  /// This method is called by the framework when a [client] should be attached.
+  /// This method is called by the framework when a [client] is attached.
   ///
   /// See also:
   ///
-  ///  * [TextInput.attach]
+  ///  * [TextInput.attach], a method that delegates the [attach] call to
+  ///    the current input source.
   TextInputConnection attach(TextInputClient client);
 
   /// Detaches the current [TextInputClient] from the text input control.
   ///
-  /// This method is called by the framework when a [client] should be detached.
+  /// This method is called by the framework when a [client] is detached.
   ///
   /// See also:
   ///
-  ///  * [TextInput.attach]
+  ///  * [TextInput.detach], a method that delegates the [detach] call to
+  ///    the current input source.
   void detach(TextInputClient client);
 
-  /// TODO(jpnurmi)
+  /// Finishes the current autofill context, and potentially saves the user
+  /// input for future use if `shouldSave` is true.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.finishAutofillContext], a method that delegates the
+  ///    [finishAutofillContext] call to the current input source.
   void finishAutofillContext({bool shouldSave = true});
 }
 
