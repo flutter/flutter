@@ -857,10 +857,11 @@ abstract class TextInputClient {
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
 
-  /// Framework notified of a text input [source] that has been updated.
+  /// The framework calls this method to notify that the text input [source] has
+  /// been updated.
   ///
-  /// [TextInputClient] should re-attach itself if it wants to show the text
-  /// input control from the new text input source.
+  /// The currently attached [TextInputClient] should re-attach itself if it
+  /// wants to accept input from the new [source].
   ///
   /// See also:
   ///
@@ -894,7 +895,7 @@ abstract class TextInputClient {
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
 ///  * [TextInput.setSource], used to register a text input source for creating
-///    creating [TextInputConnection] instances.
+///    [TextInputConnection] instances.
 abstract class TextInputConnection {
   /// Creates a connection for a [TextInputClient].
   TextInputConnection(this._client)
@@ -1330,8 +1331,10 @@ class TextInput {
     }());
   }
 
-  /// Sets the [TextInputSource] used to attach and detach text input clients.
-  /// The text input source is responsible for creating [TextInputConnection]
+  /// Sets the [TextInputSource] for [TextInputClient]s to attach to, when
+  /// [attach] is called.
+  ///
+  /// The text input [source] is responsible for creating [TextInputConnection]
   /// instances that are used to communicate with the currently attached
   /// [TextInputClient].
   ///
@@ -1346,6 +1349,8 @@ class TextInput {
   ///
   ///  * [TextInput.defaultSource], the default text input source instance.
   static void setSource(TextInputSource source) {
+    if (_instance._currentSource == source)
+      return;
     _instance._currentSource.cleanup();
     _instance._currentSource = source..init();
     final TextInputClient? client = _instance._currentConnection?._client;
@@ -1563,7 +1568,7 @@ class TextInput {
 
 /// An interface for attaching and detaching [TextInputClient].
 ///
-/// [TextInputSource] creates is responsible for creating [TextInputConnection]
+/// [TextInputSource] is responsible for creating [TextInputConnection]
 /// instances that are used to communicate with the currently attached
 /// [TextInputClient].
 ///
