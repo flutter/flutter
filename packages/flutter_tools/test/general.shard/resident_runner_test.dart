@@ -197,6 +197,7 @@ void main() {
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
       getSkSLMethod: anyNamed('getSkSLMethod'),
+      allowExistingDdsInstance: anyNamed('allowExistingDdsInstance'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any))
       .thenAnswer((Invocation invocation) async {
@@ -2815,7 +2816,7 @@ void main() {
       observatoryUris: Stream<Uri>.value(testUri),
     );
 
-    await flutterDevice.connect();
+    await flutterDevice.connect(allowExistingDdsInstance: true);
     verify(mockLogReader.connectedVMService = mockVMService);
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
