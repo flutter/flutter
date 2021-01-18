@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
 import 'card.dart';
@@ -344,6 +344,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     pageTo(((_rowCount - 1) / widget.rowsPerPage).floor() * widget.rowsPerPage);
   }
 
+  bool _isNextPageUnavailable() => !_rowCountApproximate &&
+      (_firstRowIndex + widget.rowsPerPage >= _rowCount);
+
   final GlobalKey _tableKey = GlobalKey();
 
   @override
@@ -444,15 +447,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext,
+        onPressed: _isNextPageUnavailable() ? null : _handleNext,
       ),
       if (widget.showFirstLastButtons)
         IconButton(
           icon: const Icon(Icons.skip_next),
           padding: EdgeInsets.zero,
           tooltip: localizations.lastPageTooltip,
-          onPressed: (!_rowCountApproximate &&
-              (_firstRowIndex + widget.rowsPerPage >= _rowCount))
+          onPressed: _isNextPageUnavailable()
               ? null
               : _handleLast,
         ),
