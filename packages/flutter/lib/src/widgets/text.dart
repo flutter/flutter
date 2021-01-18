@@ -519,8 +519,20 @@ class Text extends StatelessWidget {
     TextStyle? effectiveTextStyle = style;
     if (style == null || style!.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
-    if (MediaQuery.boldTextOverride(context))
-      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
+    if (MediaQuery.boldTextOverride(context)) {
+      List<FontWeight> weights = FontWeight.values;
+      FontWeight? weight = effectiveTextStyle!.fontWeight;
+
+      int index = weights.indexOf(weight);
+      if (index == -1) {
+        weight = FontWeight.bold;
+      } else {
+        index = min(weights.length - 1, index + 1);
+        weight = FontWeight.values.elementAt(index);
+      }
+
+      effectiveTextStyle = effectiveTextStyle!.merge(TextStyle(fontWeight: weight))
+    }
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
