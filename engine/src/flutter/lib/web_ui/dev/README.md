@@ -7,7 +7,7 @@
 `felt` supports multiple commands as follows:
 
 1. **`felt check-licenses`**: Checks that all Dart and JS source code files contain the correct license headers.
-2. **`felt test`**: Runs all or some tests depending on the passed arguments.
+2. **`felt test`**: Runs all or some tests depending on the passed arguments. It supports a watch mode for convenience.
 3. **`felt build`**: Builds the engine locally so it can be used by Flutter apps. It also supports a watch mode for more convenience.
 
 You could also run `felt help` or `felt help <command>` to get more information about the available commands and arguments.
@@ -41,6 +41,18 @@ To run all tests on Chrome. This will run both integration tests and the unit te
 
 ```
 felt test
+```
+
+To run a specific test:
+
+```
+felt test test/engine/util_test.dart
+```
+
+To enable watch mode so that the test re-runs on every change:
+
+```
+felt test --watch test/engine/util_test.dart
 ```
 
 To run unit tests only:
