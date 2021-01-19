@@ -4,6 +4,8 @@
 
 package io.flutter.util;
 
+import androidx.annotation.Nullable;
+
 /**
  * Static convenience methods that help a method or constructor check whether it was invoked
  * correctly (that is, whether its <i>preconditions</i> were met).
@@ -23,5 +25,31 @@ public final class Preconditions {
       throw new NullPointerException();
     }
     return reference;
+  }
+
+  /**
+   * Ensures the truth of an expression involving the state of the calling instance.
+   *
+   * @param expression a boolean expression that must be checked to be true
+   * @throws IllegalStateException if {@code expression} is false
+   */
+  public static void checkState(boolean expression) {
+    if (!expression) {
+      throw new IllegalStateException();
+    }
+  }
+
+  /**
+   * Ensures the truth of an expression involving the state of the calling instance.
+   *
+   * @param expression a boolean expression that must be checked to be true
+   * @param errorMessage the exception message to use if the check fails; will be converted to a
+   *     string using {@link String#valueOf(Object)}
+   * @throws IllegalStateException if {@code expression} is false
+   */
+  public static void checkState(boolean expression, @Nullable Object errorMessage) {
+    if (!expression) {
+      throw new IllegalStateException(String.valueOf(errorMessage));
+    }
   }
 }

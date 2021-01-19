@@ -56,9 +56,4 @@ class BogusFontText extends Scenario {
       },
     );
   }
-
-  @override
-  void onDrawFrame() {
-    // Just draw once since the content never changes.
-  }
 }

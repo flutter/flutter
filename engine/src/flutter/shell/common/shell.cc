@@ -475,12 +475,12 @@ Shell::~Shell() {
 }
 
 std::unique_ptr<Shell> Shell::Spawn(
-    Settings settings,
+    RunConfiguration run_configuration,
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
   std::unique_ptr<Shell> result(Shell::Create(
-      task_runners_, PlatformData{}, settings,
+      task_runners_, PlatformData{}, GetSettings(),
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer, vm_,
       [engine = this->engine_.get()](
@@ -498,10 +498,8 @@ std::unique_ptr<Shell> Shell::Spawn(
                              /*settings=*/settings,
                              /*animator=*/std::move(animator));
       }));
-  RunConfiguration configuration =
-      RunConfiguration::InferFromSettings(settings);
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
-  result->RunEngine(std::move(configuration));
+  result->RunEngine(std::move(run_configuration));
   return result;
 }
 

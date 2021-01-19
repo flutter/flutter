@@ -4,6 +4,7 @@
 .*.sw?
 .DS_Store
 .ccls-cache
+.cache
 .classpath
 .clangd/
 .cproject

@@ -968,8 +968,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                                       project:_dartProject.get()
                                        allowHeadlessExecution:_allowHeadlessExecution];
 
-  flutter::Settings settings = _shell->GetSettings();
-  SetEntryPoint(&settings, entrypoint, libraryURI);
+  flutter::RunConfiguration configuration =
+      [_dartProject.get() runConfigurationForEntrypoint:entrypoint libraryOrNil:libraryURI];
 
   fml::WeakPtr<flutter::PlatformView> platform_view = _shell->GetPlatformView();
   FML_DCHECK(platform_view);
@@ -992,7 +992,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   std::unique_ptr<flutter::Shell> shell =
-      _shell->Spawn(std::move(settings), on_create_platform_view, on_create_rasterizer);
+      _shell->Spawn(std::move(configuration), on_create_platform_view, on_create_rasterizer);
 
   result->_threadHost = _threadHost;
   result->_profiler = _profiler;

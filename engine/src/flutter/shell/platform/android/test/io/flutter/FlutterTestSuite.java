@@ -13,6 +13,7 @@ import io.flutter.embedding.android.FlutterFragmentTest;
 import io.flutter.embedding.android.FlutterViewTest;
 import io.flutter.embedding.engine.FlutterEngineCacheTest;
 import io.flutter.embedding.engine.FlutterEngineConnectionRegistryTest;
+import io.flutter.embedding.engine.FlutterEngineGroupComponentTest;
 import io.flutter.embedding.engine.FlutterJNITest;
 import io.flutter.embedding.engine.LocalizationPluginTest;
 import io.flutter.embedding.engine.RenderingComponentTest;
@@ -59,6 +60,7 @@ import test.io.flutter.embedding.engine.PluginComponentTest;
   FlutterAndroidComponentTest.class,
   FlutterEngineCacheTest.class,
   FlutterEngineConnectionRegistryTest.class,
+  FlutterEngineGroupComponentTest.class,
   FlutterEngineTest.class,
   FlutterFragmentActivityTest.class,
   FlutterFragmentTest.class,

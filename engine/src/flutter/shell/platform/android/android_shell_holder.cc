@@ -9,15 +9,21 @@
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <memory>
+#include <optional>
 
 #include <sstream>
 #include <string>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/run_configuration.h"
+#include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
 namespace flutter {
@@ -33,15 +39,16 @@ AndroidShellHolder::AndroidShellHolder(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     bool is_background_view)
     : settings_(std::move(settings)), jni_facade_(jni_facade) {
-  static size_t shell_count = 1;
-  auto thread_label = std::to_string(shell_count++);
+  static size_t thread_host_count = 1;
+  auto thread_label = std::to_string(thread_host_count++);
 
+  thread_host_ = std::make_shared<ThreadHost>();
   if (is_background_view) {
-    thread_host_ = {thread_label, ThreadHost::Type::UI};
+    *thread_host_ = {thread_label, ThreadHost::Type::UI};
   } else {
-    thread_host_ = {thread_label, ThreadHost::Type::UI |
-                                      ThreadHost::Type::RASTER |
-                                      ThreadHost::Type::IO};
+    *thread_host_ = {thread_label, ThreadHost::Type::UI |
+                                       ThreadHost::Type::RASTER |
+                                       ThreadHost::Type::IO};
   }
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
@@ -64,8 +71,8 @@ AndroidShellHolder::AndroidShellHolder(
           );
         }
         weak_platform_view = platform_view_android->GetWeakPtr();
-        shell.OnDisplayUpdates(DisplayUpdateType::kStartup,
-                               {Display(jni_facade->GetDisplayRefreshRate())});
+        auto display = Display(jni_facade->GetDisplayRefreshRate());
+        shell.OnDisplayUpdates(DisplayUpdateType::kStartup, {display});
         return platform_view_android;
       };
 
@@ -82,14 +89,14 @@ AndroidShellHolder::AndroidShellHolder(
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
   if (is_background_view) {
-    auto single_task_runner = thread_host_.ui_thread->GetTaskRunner();
+    auto single_task_runner = thread_host_->ui_thread->GetTaskRunner();
     raster_runner = single_task_runner;
     ui_runner = single_task_runner;
     io_runner = single_task_runner;
   } else {
-    raster_runner = thread_host_.raster_thread->GetTaskRunner();
-    ui_runner = thread_host_.ui_thread->GetTaskRunner();
-    io_runner = thread_host_.io_thread->GetTaskRunner();
+    raster_runner = thread_host_->raster_thread->GetTaskRunner();
+    ui_runner = thread_host_->ui_thread->GetTaskRunner();
+    io_runner = thread_host_->io_thread->GetTaskRunner();
   }
 
   flutter::TaskRunners task_runners(thread_label,     // label
@@ -129,9 +136,28 @@ AndroidShellHolder::AndroidShellHolder(
   is_valid_ = shell_ != nullptr;
 }
 
+AndroidShellHolder::AndroidShellHolder(
+    const Settings& settings,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    const std::shared_ptr<ThreadHost>& thread_host,
+    std::unique_ptr<Shell> shell,
+    const fml::WeakPtr<PlatformViewAndroid>& platform_view)
+    : settings_(std::move(settings)),
+      jni_facade_(jni_facade),
+      platform_view_(platform_view),
+      thread_host_(thread_host),
+      shell_(std::move(shell)) {
+  FML_DCHECK(jni_facade);
+  FML_DCHECK(shell_);
+  FML_DCHECK(shell_->IsSetup());
+  FML_DCHECK(platform_view_);
+  FML_DCHECK(thread_host_);
+  is_valid_ = shell_ != nullptr;
+}
+
 AndroidShellHolder::~AndroidShellHolder() {
   shell_.reset();
-  thread_host_.Reset();
+  thread_host_->Reset();
 }
 
 bool AndroidShellHolder::IsValid() const {
@@ -142,12 +168,82 @@ const flutter::Settings& AndroidShellHolder::GetSettings() const {
   return settings_;
 }
 
-void AndroidShellHolder::Launch(RunConfiguration config) {
+std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const std::string& entrypoint,
+    const std::string& libraryUrl) const {
+  FML_DCHECK(shell_ && shell_->IsSetup())
+      << "A new Shell can only be spawned "
+         "if the current Shell is properly constructed";
+
+  // Pull out the new PlatformViewAndroid from the new Shell to feed to it to
+  // the new AndroidShellHolder.
+  //
+  // It's a weak pointer because it's owned by the Shell (which we're also)
+  // making below. And the AndroidShellHolder then owns the Shell.
+  fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
+
+  // Take out the old AndroidContext to reuse inside the PlatformViewAndroid
+  // of the new Shell.
+  PlatformViewAndroid* android_platform_view = platform_view_.get();
+  // There's some indirection with platform_view_ being a weak pointer but
+  // we just checked that the shell_ exists above and a valid shell is the
+  // owner of the platform view so this weak pointer always exists.
+  FML_DCHECK(android_platform_view);
+  std::shared_ptr<flutter::AndroidContext> android_context =
+      android_platform_view->GetAndroidContext();
+  FML_DCHECK(android_context);
+
+  // This is a synchronous call, so the captures don't have race checks.
+  Shell::CreateCallback<PlatformView> on_create_platform_view =
+      [&jni_facade, android_context, &weak_platform_view](Shell& shell) {
+        std::unique_ptr<PlatformViewAndroid> platform_view_android;
+        platform_view_android = std::make_unique<PlatformViewAndroid>(
+            shell,                   // delegate
+            shell.GetTaskRunners(),  // task runners
+            jni_facade,              // JNI interop
+            android_context          // Android context
+        );
+        weak_platform_view = platform_view_android->GetWeakPtr();
+        auto display = Display(jni_facade->GetDisplayRefreshRate());
+        shell.OnDisplayUpdates(DisplayUpdateType::kStartup, {display});
+        return platform_view_android;
+      };
+
+  Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
+    return std::make_unique<Rasterizer>(shell);
+  };
+
+  // TODO(xster): could be worth tracing this to investigate whether
+  // the IsolateConfiguration could be cached somewhere.
+  auto config = BuildRunConfiguration(asset_manager_, entrypoint, libraryUrl);
+  if (!config) {
+    // If the RunConfiguration was null, the kernel blob wasn't readable.
+    // Fail the whole thing.
+    return nullptr;
+  }
+
+  std::unique_ptr<flutter::Shell> shell = shell_->Spawn(
+      std::move(config.value()), on_create_platform_view, on_create_rasterizer);
+
+  return std::unique_ptr<AndroidShellHolder>(
+      new AndroidShellHolder(GetSettings(), jni_facade, thread_host_,
+                             std::move(shell), weak_platform_view));
+}
+
+void AndroidShellHolder::Launch(std::shared_ptr<AssetManager> asset_manager,
+                                const std::string& entrypoint,
+                                const std::string& libraryUrl) {
   if (!IsValid()) {
     return;
   }
 
-  shell_->RunEngine(std::move(config));
+  asset_manager_ = asset_manager;
+  auto config = BuildRunConfiguration(asset_manager, entrypoint, libraryUrl);
+  if (!config) {
+    return;
+  }
+  shell_->RunEngine(std::move(config.value()));
 }
 
 Rasterizer::Screenshot AndroidShellHolder::Screenshot(
@@ -167,5 +263,38 @@ fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
 void AndroidShellHolder::NotifyLowMemoryWarning() {
   FML_DCHECK(shell_);
   shell_->NotifyLowMemoryWarning();
+}
+
+std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
+    std::shared_ptr<flutter::AssetManager> asset_manager,
+    const std::string& entrypoint,
+    const std::string& libraryUrl) const {
+  std::unique_ptr<IsolateConfiguration> isolate_configuration;
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
+  } else {
+    std::unique_ptr<fml::Mapping> kernel_blob =
+        fml::FileMapping::CreateReadOnly(
+            GetSettings().application_kernel_asset);
+    if (!kernel_blob) {
+      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
+      return std::nullopt;
+    }
+    isolate_configuration =
+        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
+  }
+
+  RunConfiguration config(std::move(isolate_configuration),
+                          std::move(asset_manager));
+
+  {
+    if ((entrypoint.size() > 0) && (libraryUrl.size() > 0)) {
+      config.SetEntrypointAndLibrary(std::move(entrypoint),
+                                     std::move(libraryUrl));
+    } else if (entrypoint.size() > 0) {
+      config.SetEntrypoint(std::move(entrypoint));
+    }
+  }
+  return config;
 }
 }  // namespace flutter

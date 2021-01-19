@@ -165,5 +165,10 @@ public class FlutterNativeView implements BinaryMessenger {
       }
       mPluginRegistry.onPreEngineRestart();
     }
+
+    public void onEngineWillDestroy() {
+      // The old embedding doesn't actually have a FlutterEngine. It interacts with the JNI
+      // directly.
+    }
   }
 }
