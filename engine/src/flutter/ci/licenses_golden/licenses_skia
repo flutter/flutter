@@ -1,4 +1,4 @@
-Signature: 0b680937f7c59a23d1174d0f5d64b729
+Signature: 0073a800595f6cecd572d7d4b775d1ac
 
 UNUSED LICENSES:
 
@@ -3873,6 +3873,7 @@ FILE: ../../../third_party/skia/gm/animated_image_orientation.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_1139750.cpp
 FILE: ../../../third_party/skia/gm/crbug_1156804.cpp
+FILE: ../../../third_party/skia/gm/crbug_1162942.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
 FILE: ../../../third_party/skia/gm/encode_color_types.cpp
 FILE: ../../../third_party/skia/gm/userfont.cpp
