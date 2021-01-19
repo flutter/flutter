@@ -50,7 +50,17 @@ FlutterRendererConfig GetRendererConfig() {
     }
     return host->view()->SwapBuffers();
   };
-  config.open_gl.fbo_callback = [](void* user_data) -> uint32_t { return 0; };
+  config.open_gl.fbo_reset_after_present = true;
+  config.open_gl.fbo_with_frame_info_callback =
+      [](void* user_data, const FlutterFrameInfo* info) -> uint32_t {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (host->view()) {
+      return host->view()->GetFrameBufferId(info->size.width,
+                                            info->size.height);
+    } else {
+      return kWindowFrameBufferID;
+    }
+  };
   config.open_gl.gl_proc_resolver = [](void* user_data,
                                        const char* what) -> void* {
     return reinterpret_cast<void*>(eglGetProcAddress(what));

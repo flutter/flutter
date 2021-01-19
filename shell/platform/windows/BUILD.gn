@@ -102,6 +102,8 @@ source_set("flutter_windows_source") {
       "win32_window_proc_delegate_manager.cc",
       "win32_window_proc_delegate_manager.h",
     ]
+
+    libs = [ "dwmapi.lib" ]
   }
 
   configs += [
