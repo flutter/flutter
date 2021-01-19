@@ -500,6 +500,18 @@ std::unique_ptr<Shell> Shell::Spawn(
       }));
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
+
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr(),
+       spawn_rasterizer = result->rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->BlockThreadMerging();
+        }
+        if (spawn_rasterizer) {
+          spawn_rasterizer->BlockThreadMerging();
+        }
+      });
+
   return result;
 }
 
