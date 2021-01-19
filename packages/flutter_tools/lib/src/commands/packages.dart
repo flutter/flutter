@@ -76,6 +76,8 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner.executableName} pub $name [<target directory>]';
   }
 
+  /// The pub packages usage values are incorrect since these are calculated/sent
+  /// before pub get completes. This needs to be performed after dependency resolution.
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
@@ -85,9 +87,14 @@ class PackagesGetCommand extends FlutterCommand {
       return usageValues;
     }
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync();
+    // Do not send plugin analytics if pub has not run before.
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packagesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
     if (hasPlugins) {
-      final List<Plugin> plugins = await findPlugins(rootProject);
+      // Do not fail pub get if package config files are invalid before pub has
+      // had a chance to run.
+      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
     } else {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
