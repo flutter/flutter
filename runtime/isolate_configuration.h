@@ -54,7 +54,7 @@ class IsolateConfiguration {
   ///                            using the legacy settings fields that specify
   ///                            the asset by name instead of a mappings
   ///                            callback.
-  /// @param[in]  io_worker      An optional IO worker. Specify `nullptr` is a
+  /// @param[in]  io_worker      An optional IO worker. Specify `nullptr` if a
   ///                            worker should not be used or one is not
   ///                            available.
   ///
