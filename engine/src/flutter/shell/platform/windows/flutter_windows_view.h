@@ -8,6 +8,7 @@
 #include <windowsx.h>
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,9 @@
 #include "flutter/shell/platform/windows/window_state.h"
 
 namespace flutter {
+
+// ID for the window frame buffer.
+inline constexpr uint32_t kWindowFrameBufferID = 0;
 
 // An OS-windowing neutral abstration for flutter
 // view that works with win32 hwnds and Windows::UI::Composition visuals.
@@ -57,7 +61,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine();
 
-  // Callbacks for clearing context, settings context and swapping buffers.
+  // Callbacks for clearing context, settings context and swapping buffers,
+  // these are typically called on an engine-controlled (non-platform) thread.
   bool ClearContext();
   bool MakeCurrent();
   bool MakeResourceCurrent();
@@ -66,8 +71,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Send initial bounds to embedder.  Must occur after engine has initialized.
   void SendInitialBounds();
 
+  // Returns the frame buffer id for the engine to render to.
+  uint32_t GetFrameBufferId(size_t width, size_t height);
+
   // |WindowBindingHandlerDelegate|
-  void OnWindowSizeChanged(size_t width, size_t height) const override;
+  void OnWindowSizeChanged(size_t width, size_t height) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerMove(double x, double y) override;
@@ -113,6 +121,19 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
     // The currently pressed buttons, as represented in FlutterPointerEvent.
     uint64_t buttons = 0;
+  };
+
+  // States a resize event can be in.
+  enum class ResizeState {
+    // When a resize event has started but is in progress.
+    kResizeStarted,
+    // After a resize event starts and the framework has been notified to
+    // generate a frame for the right size.
+    kFrameGenerated,
+    // Default state for when no resize is in progress. Also used to indicate
+    // that during a resize event, a frame with the right size has been rendered
+    // and the buffers have been swapped.
+    kDone,
   };
 
   // Sends a window metrics update to the Flutter engine using current window
@@ -206,6 +227,23 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Currently configured WindowBindingHandler for view.
   std::unique_ptr<flutter::WindowBindingHandler> binding_handler_;
+
+  // Resize events are synchronized using this mutex and the corresponding
+  // condition variable.
+  std::mutex resize_mutex_;
+  std::condition_variable resize_cv_;
+
+  // Indicates the state of a window resize event. Platform thread will be
+  // blocked while this is not done. Guarded by resize_mutex_.
+  ResizeState resize_status_ = ResizeState::kDone;
+
+  // Target for the window width. Valid when resize_pending_ is set. Guarded by
+  // resize_mutex_.
+  size_t resize_target_width_ = 0;
+
+  // Target for the window width. Valid when resize_pending_ is set. Guarded by
+  // resize_mutex_.
+  size_t resize_target_height_ = 0;
 };
 
 }  // namespace flutter
