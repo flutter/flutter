@@ -243,7 +243,7 @@ def to_gn_args(args):
       gn_args['goma_dir'] = None
 
     if gn_args['use_goma']:
-      if args.xcode_symlinks:
+      if args.xcode_symlinks or os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS', '0') == '1':
         gn_args['create_xcode_symlinks'] = True
 
     # Enable Metal on iOS builds.
@@ -369,7 +369,8 @@ def parse_args(args):
   parser.add_argument('--no-goma', dest='goma', action='store_false')
   parser.add_argument('--xcode-symlinks', action='store_true', help='Set to true for builds targetting macOS or iOS ' +
       'when using goma. If set, symlinks to the Xcode provided sysroot and SDKs will be created in a generated ' +
-      'folder, which will avoid potential backend errors in Fuchsia RBE.')
+      'folder, which will avoid potential backend errors in Fuchsia RBE. Instead of specifying the flag on each invocation ' +
+      'the FLUTTER_GOMA_CREATE_XCODE_SYMLINKS environment variable may be set to 1 to achieve the same effect.')
   parser.add_argument('--no-xcode-symlinks', dest='xcode_symlinks', default=False, action='store_false')
   parser.add_argument('--depot-tools', default='~/depot_tools', type=str,
                       help='Depot tools provides an alternative location for gomacc in ' +
