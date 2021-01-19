@@ -142,6 +142,24 @@ void main() {
     await forwarder.unforward(ForwardedPort(456, 23));
   });
 
+  testWithoutContext('failures to unforward port due to multiple emulators do not throw', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['adb', '-s', '192.168.56.101:5555', 'forward', '--remove', 'tcp:456'],
+        stderr: 'error: more than one device/emulator',
+        exitCode: 1,
+      )
+    ]);
+    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+      adbPath: 'adb',
+      deviceId: '192.168.56.101:5555',
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+
+    await forwarder.unforward(ForwardedPort(456, 23));
+  });
+
   testWithoutContext('failures to unforward port throw exception if stderr is not recognized', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(

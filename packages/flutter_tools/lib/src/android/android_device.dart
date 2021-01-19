@@ -1311,8 +1311,9 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
     );
     // The port may have already been unforwarded, for example if there
     // are multiple attach process already connected.
-    if (runResult.exitCode == 0 || runResult
-      .stderr.contains("listener '$tcpLine' not found")) {
+    if (runResult.exitCode == 0 ||
+      runResult.stderr.contains("listener '$tcpLine' not found") ||
+      runResult.stderr.contains('error: more than one device/emulator')) {
       return;
     }
     runResult.throwException('Process exited abnormally:\n$runResult');
