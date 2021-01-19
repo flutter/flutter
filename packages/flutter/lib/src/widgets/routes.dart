@@ -1901,6 +1901,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [RawDialogRoute] when the button is tapped.
 ///
+/// {@template flutter.widgets.showGeneralDialog}
 /// To test this out on Android:
 ///   1. Turn on "Don't keep activities", which destroys the Android activity
 ///      as soon as the user leaves it. This option should become available
@@ -1909,6 +1910,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///   3. Tap the button to open the dialog.
 ///   4. Background the Flutter app, then return to it, noting that the dialog
 ///      remains open.
+/// {@endtemplate}
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
