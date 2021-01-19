@@ -18,7 +18,8 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterAppDelegateTest
 
-- (void)testLaunchUrl {
+// TODO(dnfield): https://github.com/flutter/flutter/issues/74267
+- (void)skip_testLaunchUrl {
   FlutterAppDelegate* appDelegate = [[FlutterAppDelegate alloc] init];
   FlutterViewController* viewController = OCMClassMock([FlutterViewController class]);
   FlutterEngine* engine = OCMClassMock([FlutterEngine class]);
