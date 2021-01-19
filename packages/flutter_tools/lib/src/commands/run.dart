@@ -614,6 +614,7 @@ class RunCommand extends RunCommandBase {
             ..setupTerminal()
             ..registerSignalHandlers();
         }
+        runner.maybeCallDevToolsUriServiceExtension();
       }
     ));
 

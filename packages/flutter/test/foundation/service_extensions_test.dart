@@ -758,4 +758,17 @@ void main() {
 
     expect(brightnessValue, 'Brightness.light');
   });
+
+  test('Service extensions - activeDevToolsServerAddress', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9101'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9101');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9102'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9102');
+  });
 }

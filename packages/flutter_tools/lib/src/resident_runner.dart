@@ -1270,6 +1270,18 @@ abstract class ResidentRunner {
     }
   }
 
+  void maybeCallDevToolsUriServiceExtension() {
+    _devToolsLauncher ??= DevtoolsLauncher.instance;
+    if (_devToolsLauncher.activeDevToolsServer != null) {
+      unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
+        'ext.flutter.activeDevToolsServerAddress',
+        params: <String, dynamic>{
+          'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
+        },
+      ));
+    }
+  }
+
   Future<void> shutdownDevTools() async {
     await _devToolsLauncher?.close();
     _devToolsLauncher = null;

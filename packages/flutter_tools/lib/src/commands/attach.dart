@@ -359,6 +359,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           )
             ..setupTerminal()
             ..registerSignalHandlers();
+          runner.maybeCallDevToolsUriServiceExtension();
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,

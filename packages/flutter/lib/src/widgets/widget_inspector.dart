@@ -1385,6 +1385,47 @@ mixin WidgetInspectorService {
     return false;
   }
 
+  /// Returns a DevTools uri linking to a specific element on the inspector page.
+  Future<String?> devToolsInspectorUriForElement(Object? object) async {
+    assert(activeDevToolsServerAddress != null);
+    final developer.ServiceProtocolInfo serviceInfo =
+    await developer.Service.getInfo();
+    final Uri? vmServiceUri = serviceInfo.serverUri;
+    if (vmServiceUri != null) {
+      final String? inspectorRef = toId(object, _consoleObjectGroup);
+      if (inspectorRef != null) {
+        return devToolsInspectorUri(vmServiceUri, inspectorRef);
+      }
+    }
+    return null;
+  }
+
+  /// Returns the DevTools inspector uri for the given vm service connection and
+  /// inspector reference.
+  @visibleForTesting
+  String devToolsInspectorUri(Uri vmServiceUri, String inspectorRef) {
+    final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
+      queryParameters: <String, dynamic>{
+        'uri': '$vmServiceUri',
+        'inspectorRef': inspectorRef,
+      },
+    );
+
+    // We cannot add the '/#/inspector' path by means of
+    // [Uri.replace(path: '/#/inspector')] because the '#' character will be
+    // encoded when we try to print the url as a string. DevTools will not
+    // load properly if this character is encoded in the url.
+    // Related: https://github.com/flutter/devtools/issues/2475.
+    final String devToolsInspectorUri = uri.toString();
+    final int startQueryParamIndex = devToolsInspectorUri.indexOf('?');
+    // The query parameter character '?' should be present because we manually
+    // added query parameters above.
+    assert(startQueryParamIndex != -1);
+    return '${devToolsInspectorUri.substring(0, startQueryParamIndex)}'
+        '/#/inspector'
+        '${devToolsInspectorUri.substring(startQueryParamIndex)}';
+  }
+
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
   /// root of thee tree to the [Element] or [RenderObject] matching `id`.
   ///
