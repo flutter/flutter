@@ -34,6 +34,32 @@ void main() {
       tempDir?.deleteSync(recursive: true);
     }
   }, timeout: const Timeout(Duration(minutes: 1)));
+
+  /// Verifies that `dart migrate` will run successfully on the module template
+  /// used by `flutter create --template=plugin`.
+  testWithoutContext('dart migrate succeeds on plugin template', () async {
+    Directory tempDir;
+    try {
+      tempDir = await _createProject(tempDir, <String>['--template=plugin']);
+      await _migrate(tempDir);
+      await _analyze(tempDir);
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
+
+  /// Verifies that `dart migrate` will run successfully on the module template
+  /// used by `flutter create --template=package`.
+  testWithoutContext('dart migrate succeeds on package template', () async {
+    Directory tempDir;
+    try {
+      tempDir = await _createProject(tempDir, <String>['--template=package']);
+      await _migrate(tempDir);
+      await _analyze(tempDir);
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
 }
 
 Future<Directory> _createProject(Directory tempDir, [List<String> extraAgs]) async {
