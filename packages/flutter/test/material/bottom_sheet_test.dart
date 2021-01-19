@@ -726,6 +726,115 @@ void main() {
 
     expect(retrievedRouteSettings, routeSettings);
   });
+
+  testWidgets('Verify showModalBottomSheet use AnimationController if provided.',
+          (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    transitionAnimationController: AnimationController(
+                        vsync: const TestVSync(),
+                        duration: const Duration(seconds: 2),
+                        reverseDuration: const Duration(seconds: 2)),
+                    builder: (BuildContext context) {
+                      return Container(
+                        child: const Text('BottomSheet'),
+                      );
+                    },
+                  );
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget,
+                ),
+              );
+            }
+        ),
+      ),
+    ));
+
+    expect(find.text('BottomSheet'), findsNothing);
+
+    await tester.tap(find.byKey(tapTarget)); //Opening Animation will starts after tapping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Tapping above the bottom sheet to dismiss it.
+    await tester.tapAt(const Offset(20.0, 20.0)); //Closing Animation will starts after taping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Verify persistence BottomSheet use AnimationController if provided.',
+          (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    const Key tapTargetToClose = Key('tap-target-to-close');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showBottomSheet<void>(
+                    context: context,
+                    transitionAnimationController: AnimationController(
+                        vsync: const TestVSync(),
+                        duration: const Duration(seconds: 2),
+                        reverseDuration: const Duration(seconds: 2)),
+                    builder: (BuildContext context) {
+                      return Container(
+                        child: MaterialButton(
+                          child: const Text('BottomSheet'),
+                          onPressed: () => Navigator.pop(context),
+                          key: tapTargetToClose,
+                        ),
+                      );
+                    },
+                  );
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  height: 100.0,
+                  width: 100.0,
+                  key: tapTarget,
+                ),
+              );
+            }
+        ),
+      ),
+    ));
+
+    expect(find.text('BottomSheet'), findsNothing);
+
+    await tester.tap(find.byKey(tapTarget)); //Opening Animation will starts after tapping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Tapping button on the bottom sheet to dismiss it.
+    await tester.tap(find.byKey(tapTargetToClose)); //Closing Animation will starts after taping
+    await tester.pump();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.text('BottomSheet'), findsNothing);
+  });
 }
 
 class _TestPage extends StatelessWidget {
