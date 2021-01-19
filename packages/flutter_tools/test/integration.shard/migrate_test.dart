@@ -8,10 +8,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-/// Verifies that `dart migrate` will run successfuly on the default `flutter create`
+/// Verifies that `dart migrate` will run successfully on the default `flutter create`
 /// template.
 void main() {
-  testWithoutContext('dart migrate succeedes on flutter create template', () async {
+  testWithoutContext('dart migrate succeeds on flutter create template', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
 
