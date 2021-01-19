@@ -37,6 +37,22 @@ void main() {
         );
       });
 
+      testWithoutContext('invalid utf8 throws a tool exit', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final FlutterProjectFactory projectFactory = FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+        );
+        fileSystem.file('pubspec.yaml').writeAsBytesSync(<int>[0xFFFE]);
+
+        /// Technically this should throw a FileSystemException but this is
+        /// currently a bug in package:file.
+        expect(
+          () => projectFactory.fromDirectory(fileSystem.currentDirectory),
+          throwsToolExit(),
+        );
+      });
+
       _testInMemory('fails on invalid pubspec.yaml', () async {
         final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')

@@ -652,11 +652,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     );
 
     return Semantics(
-      onTap: () {
-        if (!_controller.selection.isValid)
-          _controller.selection = TextSelection.collapsed(offset: _controller.text.length);
-        _effectiveFocusNode.requestFocus();
-      },
       onLongPress: () {
         _effectiveFocusNode.requestFocus();
       },

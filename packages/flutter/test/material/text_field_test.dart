@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import 'feedback_tester.dart';
@@ -1134,7 +1133,7 @@ void main() {
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
 
-    expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
+    expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('text field build empty toolbar when no options available', (WidgetTester tester) async {
@@ -3934,6 +3933,27 @@ void main() {
             child: TextField(
               maxLength: 10,
               enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Readonly text field does not have tap action', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLength: 10,
+              readOnly: true,
             ),
           ),
         ),
@@ -8695,7 +8715,7 @@ void main() {
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    Widget textFieldBuilder({FloatingLabelBehavior behavior = FloatingLabelBehavior.auto, }) {
+    Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
       return MaterialApp(
         theme: ThemeData(
           inputDecorationTheme: InputDecorationTheme(

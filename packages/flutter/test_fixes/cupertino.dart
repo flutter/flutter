@@ -27,4 +27,19 @@ void main() {
   buildContext.ancestorStateOfType(TypeMatcher<targetType>());
   buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
   buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(overflow: Overflow.visible);
+  const Stack stack = Stack(overflow: Overflow.clip);
+  final behavior = stack.overflow;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidate: true);
+  const Form form = Form(autovalidate: false);
+  final autoMode = form.autovalidate;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidate: true);
+  const FormField formField = FormField(autovalidate: false);
+  final autoMode = formField.autovalidate;
 }
