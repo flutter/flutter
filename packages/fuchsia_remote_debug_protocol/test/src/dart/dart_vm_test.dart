@@ -30,7 +30,7 @@ void main() {
     });
 
     test('disconnect closes peer', () async {
-      final MockVmService service = MockVmService();;
+      final MockVmService service = MockVmService();
       Future<vms.VmService> mockServiceFunction(
         Uri uri, {
         Duration timeout,
