@@ -1669,8 +1669,8 @@ class TextInput {
 /// }
 /// ```
 ///
-/// Notice that the above example is shows only relevant parts of a minimal
-/// text input source and connection implementation. Both [TextInputSource] and
+/// Notice that the above example shows only relevant parts of a minimal text
+/// input source and connection implementation. Both [TextInputSource] and
 /// [TextInputConnection] have additional methods that have been left out to
 /// keep the example short and easy to read.
 ///
@@ -1685,7 +1685,7 @@ abstract class TextInputSource {
   /// The framework calls this method when the current input source is changed.
   void init();
 
-  /// Cleans up resources allocated by the input source.
+  /// Cleans up resources allocated by the text input source.
   ///
   /// The framework calls this method when the current input source is changed.
   void cleanup();
