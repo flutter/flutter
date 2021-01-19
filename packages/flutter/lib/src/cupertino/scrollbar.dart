@@ -61,6 +61,7 @@ class CupertinoScrollbar extends RawScrollbar {
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
+    ScrollNotificationPredicate? notificationPredicate,
   }) : assert(thickness != null),
        assert(thickness < double.infinity),
        assert(thicknessWhileDragging != null),
@@ -77,6 +78,7 @@ class CupertinoScrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
+         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].

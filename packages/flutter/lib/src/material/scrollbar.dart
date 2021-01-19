@@ -69,6 +69,7 @@ class Scrollbar extends StatefulWidget {
     this.hoverThickness,
     this.thickness,
     this.radius,
+    this.notificationPredicate,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -111,6 +112,9 @@ class Scrollbar extends StatefulWidget {
   /// default [Radius.circular] of 8.0 pixels.
   final Radius? radius;
 
+  /// {@macro flutter.widgets.Scrollbar.notificationPredicate}
+  final ScrollNotificationPredicate? notificationPredicate;
+
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
@@ -129,6 +133,7 @@ class _ScrollbarState extends State<Scrollbar> {
         radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
         radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: widget.controller,
+        notificationPredicate: widget.notificationPredicate,
       );
     }
     return _MaterialScrollbar(
@@ -139,6 +144,7 @@ class _ScrollbarState extends State<Scrollbar> {
       hoverThickness: widget.hoverThickness,
       thickness: widget.thickness,
       radius: widget.radius,
+      notificationPredicate: widget.notificationPredicate,
     );
   }
 }
@@ -153,6 +159,7 @@ class _MaterialScrollbar extends RawScrollbar {
     this.hoverThickness,
     double? thickness,
     Radius? radius,
+    ScrollNotificationPredicate? notificationPredicate,
   }) : super(
          key: key,
          child: child,
@@ -163,6 +170,7 @@ class _MaterialScrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
+         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
   final bool? showTrackOnHover;
