@@ -16,6 +16,15 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class TestSamplingClock implements SamplingClock {
+  TestSamplingClock(this._clock);
+
+  @override DateTime now() => _clock.now();
+  @override Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
+}
+
 void main() {
   final TestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
   testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
@@ -81,39 +90,38 @@ void main() {
       ),
     );
 
-    await withClock(binding.clock, () async {
-      GestureBinding.instance!.resamplingEnabled = true;
-      const Duration kSamplingOffset = Duration(milliseconds: -5);
-      GestureBinding.instance!.samplingOffset = kSamplingOffset;
-      ui.window.onPointerDataPacket!(packet);
-      expect(events.length, 0);
+    GestureBinding.instance!.resamplingEnabled = true;
+    const Duration kSamplingOffset = Duration(milliseconds: -5);
+    GestureBinding.instance!.samplingOffset = kSamplingOffset;
+    GestureBinding.instance!.debugSamplingClock = TestSamplingClock(binding.clock);
+    ui.window.onPointerDataPacket!(packet);
+    expect(events.length, 0);
 
-      requestFrame();
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(events.length, 1);
-      expect(events[0], isA<PointerDownEvent>());
-      expect(events[0].timeStamp, currentTestFrameTime() + kSamplingOffset);
-      expect(events[0].position, Offset(7.5 / ui.window.devicePixelRatio, 0.0));
+    requestFrame();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(events.length, 1);
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[0].timeStamp, currentTestFrameTime() + kSamplingOffset);
+    expect(events[0].position, Offset(7.5 / ui.window.devicePixelRatio, 0.0));
 
-      // Now the system time is epoch + 20ms
-      requestFrame();
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(events.length, 2);
-      expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
-      expect(events[1], isA<PointerMoveEvent>());
-      expect(events[1].position, Offset(22.5 / ui.window.devicePixelRatio, 0.0));
-      expect(events[1].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
+    // Now the system time is epoch + 20ms
+    requestFrame();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(events.length, 2);
+    expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
+    expect(events[1], isA<PointerMoveEvent>());
+    expect(events[1].position, Offset(22.5 / ui.window.devicePixelRatio, 0.0));
+    expect(events[1].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
 
-      // Now the system time is epoch + 30ms
-      requestFrame();
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(events.length, 4);
-      expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
-      expect(events[2], isA<PointerMoveEvent>());
-      expect(events[2].position, Offset(37.5 / ui.window.devicePixelRatio, 0.0));
-      expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
-      expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
-      expect(events[3], isA<PointerUpEvent>());
-    });
+    // Now the system time is epoch + 30ms
+    requestFrame();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(events.length, 4);
+    expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
+    expect(events[2], isA<PointerMoveEvent>());
+    expect(events[2].position, Offset(37.5 / ui.window.devicePixelRatio, 0.0));
+    expect(events[2].delta, Offset(15.0 / ui.window.devicePixelRatio, 0.0));
+    expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
+    expect(events[3], isA<PointerUpEvent>());
   });
 }

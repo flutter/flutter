@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
-import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -21,6 +20,15 @@ import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
 
 typedef _HandleSampleTimeChangedCallback = void Function();
+
+/// Class that implements clock used for sampling.
+class SamplingClock {
+  /// Returns current time.
+  DateTime now() => DateTime.now();
+
+  /// Returns a new stopwatch that uses the current time as reported by `this`.
+  Stopwatch stopwatch() => Stopwatch();
+}
 
 // Class that handles resampling of touch events for multiple pointer
 // devices.
@@ -42,7 +50,7 @@ class _Resampler {
   Duration _frameTime = Duration.zero;
 
   // Time since `_frameTime` was updated.
-  Stopwatch _frameTimeAge = clock.stopwatch()..start();
+  Stopwatch _frameTimeAge = Stopwatch();
 
   // Last sample time and time stamp of last event.
   //
@@ -59,8 +67,8 @@ class _Resampler {
   // Interval used for sampling.
   final Duration _samplingInterval;
 
-  // Timer used to schedule sampling.
-  Timer? _sampleTimer;
+  // Timer used to schedule resampling.
+  Timer? _timer;
 
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
@@ -86,7 +94,8 @@ class _Resampler {
   //
   // `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
-  void sample(Duration samplingOffset) {
+  // `samplingClock` is the clock used to determine frame time age.
+  void sample(Duration samplingOffset, SamplingClock clock) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
 
@@ -95,6 +104,11 @@ class _Resampler {
     if (_frameTime == Duration.zero) {
       _frameTime = Duration(milliseconds: clock.now().millisecondsSinceEpoch);
       _frameTimeAge = clock.stopwatch()..start();
+    }
+
+    // Schedule periodic resampling if `_timer` is not already active.
+    if (_timer?.isActive == false) {
+       _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
     }
 
     // Calculate the effective frame time by taking the number
@@ -132,7 +146,7 @@ class _Resampler {
 
     // Early out if another call to `sample` isn't needed.
     if (_resamplers.isEmpty) {
-      _sampleTimer?.cancel();
+      _timer!.cancel();
       return;
     }
 
@@ -149,15 +163,13 @@ class _Resampler {
         // never adjusted or scaled like `currentFrameTimeStamp`.
         _frameTime = scheduler.currentSystemFrameTimeStamp;
         _frameTimeAge.reset();
-        // Trigger a sample time change.
+        // Reset timer to match phase of latest frame callback.
+        _timer?.cancel();
+        _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
+        // Trigger an immediate sample time change.
         _onSampleTimeChanged();
       });
     }
-
-    // Schedule a sample callback if another call to `sample` is needed.
-    // This provides periodic samples based on the last `_frameTime`
-    // until another frame callback is received.
-    _scheduleSampleCallback();
   }
 
   // Stop all resampling and dispatched any queued events.
@@ -167,11 +179,6 @@ class _Resampler {
     }
     _resamplers.clear();
     _frameTime = Duration.zero;
-  }
-
-  void _scheduleSampleCallback() {
-    _sampleTimer?.cancel();
-    _sampleTimer = Timer(_samplingInterval, _onSampleTimeChanged);
   }
 
   void _onSampleTimeChanged() {
@@ -321,7 +328,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset);
+      _resampler.sample(samplingOffset, _samplingClock);
       return;
     }
 
@@ -452,12 +459,22 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset);
+        _resampler.sample(samplingOffset, _samplingClock);
       }
       else {
         _resampler.stop();
       }
     }
+  }
+
+  SamplingClock get _samplingClock {
+    SamplingClock value = SamplingClock();
+    assert(() {
+      if (debugSamplingClock != null)
+        value = debugSamplingClock!;
+      return true;
+    }());
+    return value;
   }
 
   // Resampler used to filter incoming pointer events when resampling
@@ -486,6 +503,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// Non-negative [samplingOffset] is allowed but will effectively
   /// disable resampling.
   Duration samplingOffset = _defaultSamplingOffset;
+
+  /// Overrides the sampling clock for debugging and testing.
+  ///
+  /// This value is ignored in non-debug builds.
+  SamplingClock? debugSamplingClock;
 }
 
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture

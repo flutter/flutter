@@ -16,7 +16,7 @@ typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
   HandleEventCallback? callback;
-  FrameCallback? frameCallback;
+  FrameCallback? postFrameCallback;
   Duration? frameTime;
 
   @override
@@ -33,10 +33,19 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
-    frameCallback = callback;
+  int addPostFrameCallback(FrameCallback callback) {
+    postFrameCallback = callback;
     return 0;
   }
+}
+
+class TestSamplingClock implements SamplingClock {
+  TestSamplingClock(this._clock);
+
+  @override DateTime now() => _clock.now();
+  @override Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
 }
 
 TestGestureFlutterBinding? _binding;
@@ -377,6 +386,7 @@ void main() {
 
       GestureBinding.instance!.resamplingEnabled = true;
       GestureBinding.instance!.samplingOffset = samplingOffset;
+      GestureBinding.instance!.debugSamplingClock = TestSamplingClock(clock);
 
       final List<PointerEvent> events = <PointerEvent>[];
       _binding!.callback = events.add;
@@ -387,8 +397,8 @@ void main() {
       expect(events.length, 0);
 
       // Frame callback should have been requested.
-      FrameCallback? callback = _binding!.frameCallback;
-      _binding!.frameCallback = null;
+      FrameCallback? callback = _binding!.postFrameCallback;
+      _binding!.postFrameCallback = null;
       expect(callback, isNotNull);
 
       _binding!.frameTime = epoch + const Duration(milliseconds: 15);
@@ -401,8 +411,8 @@ void main() {
       expect(events[0].position, Offset(0.0 / ui.window.devicePixelRatio, 0.0));
 
       // Second frame callback should have been requested.
-      callback = _binding!.frameCallback;
-      _binding!.frameCallback = null;
+      callback = _binding!.postFrameCallback;
+      _binding!.postFrameCallback = null;
       expect(callback, isNotNull);
 
       _binding!.frameTime = epoch + const Duration(milliseconds: 25);
