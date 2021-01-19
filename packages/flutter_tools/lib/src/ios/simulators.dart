@@ -73,7 +73,6 @@ class IOSSimulatorUtils {
         name: device.name,
         simControl: _simControl,
         simulatorCategory: device.category,
-        xcode: _xcode,
       );
     }).toList();
   }
@@ -309,9 +308,7 @@ class IOSSimulator extends Device {
       this.name,
       this.simulatorCategory,
       @required SimControl simControl,
-      @required Xcode xcode,
     }) : _simControl = simControl,
-         _xcode = xcode,
          super(
            id,
            category: Category.mobile,
@@ -325,7 +322,6 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
-  final Xcode _xcode;
 
   @override
   DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
@@ -610,12 +606,8 @@ class IOSSimulator extends Device {
     }
   }
 
-  bool get _xcodeVersionSupportsScreenshot {
-    return _xcode.majorVersion > 8 || (_xcode.majorVersion == 8 && _xcode.minorVersion >= 2);
-  }
-
   @override
-  bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
+  bool get supportsScreenshot => true;
 
   @override
   Future<void> takeScreenshot(File outputFile) {

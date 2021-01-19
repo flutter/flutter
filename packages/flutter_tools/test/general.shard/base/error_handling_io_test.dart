@@ -76,6 +76,8 @@ void setupWriteMocks({
   when(mockFile.openSync(
     mode: anyNamed('mode'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
+  when(mockFile.createSync(recursive: anyNamed('recursive')))
+    .thenThrow(FileSystemException('', '', OSError('', errorCode)));
 }
 
 void setupReadMocks({
@@ -230,6 +232,8 @@ void main() {
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -292,6 +296,8 @@ void main() {
       expect(() => file.writeAsStringSync(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
              throwsToolExit(message: expectedMessage));
     });
 
@@ -389,6 +395,8 @@ void main() {
       expect(() => file.writeAsStringSync(''),
              throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
              throwsToolExit(message: expectedMessage));
     });
 

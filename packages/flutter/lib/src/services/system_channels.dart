@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -319,29 +318,30 @@ class SystemChannels {
     StandardMethodCodec(),
   );
 
-  /// A [MethodChannel] for installing and managing dynamic features.
+  /// A [MethodChannel] for installing and managing deferred components.
   ///
   /// The following outgoing methods are defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `installDynamicFeature`: Requests that a dynamic feature identified by
+  ///  * `installDeferredComponent`: Requests that a deferred component identified by
   ///    the provided loadingUnitId or moduleName be downloaded and installed.
   ///    Providing a loadingUnitId with null moduleName will install a dynamic
   ///    feature module that includes the desired loading unit. If a moduleName
-  ///    is provided, then the dynamic feature with the moduleName will be installed.
+  ///    is provided, then the deferred component with the moduleName will be installed.
   ///    This method returns a future that will not be completed until the
   ///    feature is fully installed and ready to use. When an error occurs, the
   ///    future will complete an error. Calling `loadLibrary()` on a deferred
   ///    imported library is equivalent to calling this method with a
   ///    loadingUnitId and null moduleName.
-  ///  * `getDynamicFeatureInstallState`: Gets the current installation state of
-  ///    the dynamic feature identified by the loadingUnitId or moduleName.
-  ///    This method returns a string that represents the state. Depending on
-  ///    the implementation, this string may vary, but the default Google Play
-  ///    Store implementation beings in the "Requested" state before transitioning
-  ///    into the "Downloading" and finally the "Installed" state.
-  static const MethodChannel dynamicfeature = OptionalMethodChannel(
-    'flutter/dynamicfeature',
+  ///  * `uninstallDeferredComponent`:  Requests that a deferred component identified by
+  ///    the provided loadingUnitId or moduleName be uninstalled. Since
+  ///    uninstallation typically requires significant disk i/o, this method only
+  ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
+  ///    assets and files) may occur at a later time. However, once uninstallation
+  ///    is requested, the deferred component should not be used anymore until
+  ///    `installDeferredComponent` or `loadLibrary` is called again.
+  static const MethodChannel deferredComponent = OptionalMethodChannel(
+    'flutter/deferredcomponent',
     StandardMethodCodec(),
   );
 }

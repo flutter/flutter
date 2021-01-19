@@ -92,7 +92,6 @@ void main() {
           '-quiet',
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
-        'BUILD_DIR=/build/ios',
         '-sdk', 'iphoneos',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',

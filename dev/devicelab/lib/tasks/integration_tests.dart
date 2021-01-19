@@ -131,7 +131,7 @@ TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example',
+    '--dart-define=test.valueA=Example,A',
     '--dart-define=test.valueB=Value',
     ],
   );
