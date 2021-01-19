@@ -2314,8 +2314,8 @@ void main() {
     expect(find.byType(SnackBar), findsOneWidget);
     // The floating action button helps us identify which Scaffold has the
     // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
-    // Should be above it. If the inner Scaffold had the SnackBAr, it would be
-    // overlapped with the FAB.
+    // Should be above it. If the inner Scaffold had the SnackBar, it would be
+    // overlapping the FAB.
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('snack_bar.scaffold.nested.png'),
