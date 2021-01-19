@@ -1139,7 +1139,8 @@ Future<void> refreshPluginsList(
   bool macOSPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
   // TODO(franciscojma): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);

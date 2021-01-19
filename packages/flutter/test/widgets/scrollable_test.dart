@@ -1206,6 +1206,47 @@ void main() {
     expect(outerController.position.pixels, 0.0);
     expect(innerController.position.pixels, 0.0);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/71949
+  testWidgets('Zero offset pointer scroll should not trigger an assertion.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget build(double height) {
+      return MaterialApp(
+        home: Scaffold(
+            body: SizedBox(
+              width: double.infinity,
+              height: height,
+              child: SingleChildScrollView(
+                controller: controller,
+                child: const SizedBox(
+                  width: double.infinity,
+                  height: 300.0,
+                ),
+              ),
+            )
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(200.0));
+    expect(controller.position.pixels, 0.0);
+
+    controller.jumpTo(100.0);
+    expect(controller.position.pixels, 100.0);
+
+    // Make the outer constraints larger that the scrollable widget is no longer able to scroll.
+    await tester.pumpWidget(build(300.0));
+    expect(controller.position.pixels, 100.0);
+    expect(controller.position.maxScrollExtent, 0.0);
+
+    // Hover over the scroll view and create a zero offset pointer scroll.
+    final Offset scrollable = tester.getCenter(find.byType(SingleChildScrollView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    testPointer.hover(scrollable);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 0.0)));
+
+    expect(tester.takeException(), null);
+  });
 }
 
 // ignore: must_be_immutable

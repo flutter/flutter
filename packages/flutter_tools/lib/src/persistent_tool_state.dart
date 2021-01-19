@@ -52,6 +52,9 @@ abstract class PersistentToolState {
 
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
+
+  /// The last time the the DevTools package was activated from pub.
+  DateTime lastDevToolsActivationTime;
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -85,6 +88,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.stable: 'last-active-stable-version'
   };
   static const String _kBotKey = 'is-bot';
+  static const String _kLastDevToolsActivationTimeKey = 'last-devtools-activation-time';
   static const String _kLicenseHash = 'license-hash';
 
   final Config _config;
@@ -131,4 +135,14 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   @override
   set isRunningOnBot(bool value) => _config.setValue(_kBotKey, value);
+
+  @override
+  DateTime get lastDevToolsActivationTime {
+    final String value = _config.getValue(_kLastDevToolsActivationTimeKey) as String;
+    return value != null ? DateTime.parse(value) : null;
+  }
+
+  @override
+  set lastDevToolsActivationTime(DateTime time) =>
+      _config.setValue(_kLastDevToolsActivationTimeKey, time.toString());
 }

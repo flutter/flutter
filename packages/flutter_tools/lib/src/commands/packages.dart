@@ -20,7 +20,10 @@ import '../runner/flutter_command.dart';
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(PackagesGetCommand('upgrade', true));
+    //addSubcommand(PackagesGetCommand('upgrade', true));
+    addSubcommand(PackagesInteractiveGetCommand('upgrade', 'Upgrade the current package\'s dependencies to latest versions.'));
+    addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
+    addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
@@ -29,6 +32,8 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
     addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
+    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
+    addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
     addSubcommand(PackagesPassthroughCommand());
@@ -250,6 +255,85 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     await pub.interactively(argResults.rest, stdio: globals.stdio);
+    return FlutterCommandResult.success();
+  }
+}
+
+class PackagesInteractiveGetCommand extends FlutterCommand {
+  PackagesInteractiveGetCommand(this._commandName, this._description) {
+    requiresPubspecYaml();
+  }
+
+  @override
+  ArgParser argParser = ArgParser.allowAnything();
+
+  final String _commandName;
+  final String _description;
+
+  @override
+  String get name => _commandName;
+
+  @override
+  String get description {
+    return '$_description.\n'
+           'This runs the "pub" tool in a Flutter context.';
+  }
+
+  @override
+  String get invocation {
+    return '${runner.executableName} pub $_commandName [<arguments...>]';
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    List<String> rest = argResults.rest;
+    String target;
+    if (rest.length == 1 &&
+        (rest[0].contains('/') ||
+            rest[0].contains(r'\'))) {
+      // HACK: Supporting flutter specific behavior where you can pass a
+      //       folder to the command.
+      target = findProjectRoot(rest[0]);
+      rest = <String>[];
+    } else {
+      target = findProjectRoot();
+    }
+    if (target == null) {
+      throwToolExit('Expected to find project root in '
+          'current working directory.');
+    }
+    final FlutterProject flutterProject = FlutterProject.fromPath(target);
+
+    if (flutterProject.manifest.generateSyntheticPackage) {
+      final Environment environment = Environment(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        projectDir: flutterProject.directory,
+      );
+
+      await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+      );
+    }
+
+    final List<String> subArgs = rest.toList()
+      ..removeWhere((String arg) => arg == '--');
+    await pub.interactively(
+      <String>[name, ...subArgs],
+      directory: target,
+      stdio: globals.stdio,
+      touchesPackageConfig: true,
+      generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
+    );
+
+    await flutterProject.regeneratePlatformSpecificTooling();
     return FlutterCommandResult.success();
   }
 }

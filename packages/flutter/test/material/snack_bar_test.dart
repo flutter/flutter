@@ -742,6 +742,7 @@ void main() {
       applyElevationOverlayColor: false,
       pageTransitionsTheme: pageTransitionTheme,
       appBarTheme: const AppBarTheme(color: Colors.black),
+      scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
@@ -2264,5 +2265,30 @@ void main() {
     expect(exceptions.length, 1);
     final AssertionError error = exceptions.first as AssertionError;
     expect(error.message, contains('Only one API should be used to manage SnackBars.'));
+  });
+
+  testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        bottomSheet: SizedBox(
+          width: 200,
+          height: 50,
+          child: ColoredBox(
+            color: Colors.pink,
+          ),
+        ),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      content: const Text('I love Flutter!'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
   });
 }

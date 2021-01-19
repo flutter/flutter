@@ -2083,4 +2083,113 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
+
+  testWidgets('colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
+
+    late ThemeData theme;
+    Widget buildFrame({
+      bool enabled = true,
+      bool selected = false,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                theme = Theme.of(context);
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  leading: TestText('leading', key: leadingKey),
+                  title: const TestText('title'),
+                  trailing: TestText('trailing', key: trailingKey),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+
+    await tester.pumpWidget(buildFrame());
+    // Enabled color should be default bodyText2 color.
+    expect(textColor(leadingKey), theme.textTheme.bodyText2!.color);
+    expect(textColor(trailingKey), theme.textTheme.bodyText2!.color);
+
+    await tester.pumpWidget(buildFrame(selected: true));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Selected color should be ThemeData.primaryColor by default.
+    expect(textColor(leadingKey), theme.primaryColor);
+    expect(textColor(trailingKey), theme.primaryColor);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Disabled color should be ThemeData.disabledColor by default.
+    expect(textColor(leadingKey), theme.disabledColor);
+    expect(textColor(trailingKey), theme.disabledColor);
+  });
+
+  testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
+
+    const Color selectedColor = Colors.orange;
+    const Color defaultColor = Colors.black;
+
+    late ThemeData theme;
+    Widget buildFrame({
+      bool enabled = true,
+      bool selected = false,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ListTileTheme(
+              selectedColor: selectedColor,
+              textColor: defaultColor,
+              child: Builder(
+                builder: (BuildContext context) {
+                  theme = Theme.of(context);
+                  return ListTile(
+                    enabled: enabled,
+                    selected: selected,
+                    leading: TestText('leading', key: leadingKey),
+                    title: const TestText('title'),
+                    trailing: TestText('trailing', key: trailingKey),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+
+    await tester.pumpWidget(buildFrame());
+    // Enabled color should use ListTileTheme.textColor.
+    expect(textColor(leadingKey), defaultColor);
+    expect(textColor(trailingKey), defaultColor);
+
+    await tester.pumpWidget(buildFrame(selected: true));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Selected color should use ListTileTheme.selectedColor.
+    expect(textColor(leadingKey), selectedColor);
+    expect(textColor(trailingKey), selectedColor);
+
+    await tester.pumpWidget(buildFrame(enabled: false));
+    // Wait for text color to animate.
+    await tester.pumpAndSettle();
+    // Disabled color should be ThemeData.disabledColor.
+    expect(textColor(leadingKey), theme.disabledColor);
+    expect(textColor(trailingKey), theme.disabledColor);
+  });
 }
