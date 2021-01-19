@@ -11,6 +11,33 @@
 version: 1
 transforms:
 
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: 'Replace with CupertinoPopupSurface'
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoPopupSurface'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: 'Replace with CupertinoAlertDialog'
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoAlertDialog'
+      - kind: 'renameParameter'
+        oldName: 'child'
+        newName: 'content'
+
   # Changes made in https://github.com/flutter/flutter/pull/61648
   - title: 'Migrate to autovalidateMode'
     date: 2020-09-02
