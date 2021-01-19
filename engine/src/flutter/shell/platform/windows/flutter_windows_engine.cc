@@ -62,6 +62,16 @@ FlutterRendererConfig GetRendererConfig() {
     }
     return host->view()->MakeResourceCurrent();
   };
+  config.open_gl.gl_external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterOpenGLTexture* texture) -> bool {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (!host->texture_registrar()) {
+      return false;
+    }
+    return host->texture_registrar()->PopulateTexture(texture_id, width, height,
+                                                      texture);
+  };
   return config;
 }
 
@@ -122,6 +132,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   messenger_wrapper_ = std::make_unique<BinaryMessengerImpl>(messenger_.get());
   message_dispatcher_ =
       std::make_unique<IncomingMessageDispatcher>(messenger_.get());
+  texture_registrar_ = std::make_unique<FlutterWindowsTextureRegistrar>(this);
 #ifndef WINUWP
   window_proc_delegate_manager_ =
       std::make_unique<Win32WindowProcDelegateManager>();
@@ -183,7 +194,8 @@ bool FlutterWindowsEngine::RunWithEntrypoint(const char* entrypoint) {
   platform_task_runner.post_task_callback = [](FlutterTask task,
                                                uint64_t target_time_nanos,
                                                void* user_data) -> void {
-    static_cast<TaskRunner*>(user_data)->PostTask(task, target_time_nanos);
+    static_cast<TaskRunner*>(user_data)->PostFlutterTask(task,
+                                                         target_time_nanos);
   };
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
@@ -354,6 +366,22 @@ void FlutterWindowsEngine::SendSystemSettings() {
   // https://github.com/flutter/flutter/issues/54612
   settings.AddMember("platformBrightness", "light", allocator);
   settings_channel_->Send(settings);
+}
+
+bool FlutterWindowsEngine::RegisterExternalTexture(int64_t texture_id) {
+  return (embedder_api_.RegisterExternalTexture(engine_, texture_id) ==
+          kSuccess);
+}
+
+bool FlutterWindowsEngine::UnregisterExternalTexture(int64_t texture_id) {
+  return (embedder_api_.UnregisterExternalTexture(engine_, texture_id) ==
+          kSuccess);
+}
+
+bool FlutterWindowsEngine::MarkExternalTextureFrameAvailable(
+    int64_t texture_id) {
+  return (embedder_api_.MarkExternalTextureFrameAvailable(
+              engine_, texture_id) == kSuccess);
 }
 
 }  // namespace flutter

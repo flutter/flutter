@@ -64,6 +64,22 @@ class StubFlutterApi {
   virtual void MessengerSetCallback(const char* channel,
                                     FlutterDesktopMessageCallback callback,
                                     void* user_data) {}
+
+  // Called for FlutterDesktopRegisterExternalTexture.
+  virtual int64_t TextureRegistrarRegisterExternalTexture(
+      const FlutterDesktopTextureInfo* info) {
+    return -1;
+  }
+
+  // Called for FlutterDesktopUnregisterExternalTexture.
+  virtual bool TextureRegistrarUnregisterExternalTexture(int64_t texture_id) {
+    return false;
+  }
+
+  // Called for FlutterDesktopMarkExternalTextureFrameAvailable.
+  virtual bool TextureRegistrarMarkTextureFrameAvailable(int64_t texture_id) {
+    return false;
+  }
 };
 
 // A test helper that owns a stub implementation, making it the test stub for

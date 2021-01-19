@@ -35,7 +35,7 @@ bool TaskRunnerWin32::RunsTasksOnCurrentThread() const {
 std::chrono::nanoseconds TaskRunnerWin32::ProcessTasks() {
   const TaskTimePoint now = TaskTimePoint::clock::now();
 
-  std::vector<FlutterTask> expired_tasks;
+  std::vector<Task> expired_tasks;
 
   // Process expired tasks.
   {
@@ -52,7 +52,7 @@ std::chrono::nanoseconds TaskRunnerWin32::ProcessTasks() {
       // because we are still holding onto the task queue mutex. We don't want
       // other threads to block on posting tasks onto this thread till we are
       // done processing expired tasks.
-      expired_tasks.push_back(task_queue_.top().task);
+      expired_tasks.push_back(task_queue_.top());
 
       // Remove the tasks from the delayed tasks queue.
       task_queue_.pop();
@@ -63,7 +63,10 @@ std::chrono::nanoseconds TaskRunnerWin32::ProcessTasks() {
   {
     // Flushing tasks here without holing onto the task queue mutex.
     for (const auto& task : expired_tasks) {
-      on_task_expired_(&task);
+      if (auto flutter_task = std::get_if<FlutterTask>(&task.variant)) {
+        on_task_expired_(flutter_task);
+      } else if (auto closure = std::get_if<TaskClosure>(&task.variant))
+        (*closure)();
     }
   }
 
@@ -84,15 +87,25 @@ TaskRunnerWin32::TaskTimePoint TaskRunnerWin32::TimePointFromFlutterTime(
   return now + std::chrono::nanoseconds(flutter_duration);
 }
 
-void TaskRunnerWin32::PostTask(FlutterTask flutter_task,
-                               uint64_t flutter_target_time_nanos) {
+void TaskRunnerWin32::PostFlutterTask(FlutterTask flutter_task,
+                                      uint64_t flutter_target_time_nanos) {
+  Task task;
+  task.fire_time = TimePointFromFlutterTime(flutter_target_time_nanos);
+  task.variant = flutter_task;
+  EnqueueTask(std::move(task));
+}
+
+void TaskRunnerWin32::PostTask(TaskClosure closure) {
+  Task task;
+  task.fire_time = TaskTimePoint::clock::now();
+  task.variant = std::move(closure);
+  EnqueueTask(std::move(task));
+}
+
+void TaskRunnerWin32::EnqueueTask(Task task) {
   static std::atomic_uint64_t sGlobalTaskOrder(0);
 
-  Task task;
   task.order = ++sGlobalTaskOrder;
-  task.fire_time = TimePointFromFlutterTime(flutter_target_time_nanos);
-  task.task = flutter_task;
-
   {
     std::lock_guard<std::mutex> lock(task_queue_mutex_);
     task_queue_.push(task);

@@ -894,6 +894,7 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_codec_serializer.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/texture_registrar.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_call_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_result_functions_unittests.cc
@@ -902,6 +903,8 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/plugin_registrar
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_codec.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_message_codec_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_method_codec_unittests.cc
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/texture_registrar_impl.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/texture_registrar_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches.cc
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches.h
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches_unittests.cc
@@ -1441,6 +1444,8 @@ FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/plu
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/plugin_registrar_windows_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.cc
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.h
+FILE: ../../../flutter/shell/platform/windows/external_texture_gl.cc
+FILE: ../../../flutter/shell/platform/windows/external_texture_gl.h
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle.h
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle_unittests.cc
@@ -1448,6 +1453,9 @@ FILE: ../../../flutter/shell/platform/windows/flutter_windows.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.cc
+FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar.h
+FILE: ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_view.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_win32.cc

@@ -214,4 +214,15 @@ TEST(PluginRegistrarTest, ManagerRemovesOnDestruction) {
             nullptr);
 }
 
+// Tests that the texture registrar getter returns a non-null TextureRegistrar
+TEST(PluginRegistrarTest, TextureRegistrarNotNull) {
+  auto dummy_registrar_handle =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+  PluginRegistrar registrar(dummy_registrar_handle);
+
+  TextureRegistrar* texture_registrar = registrar.texture_registrar();
+
+  ASSERT_NE(texture_registrar, nullptr);
+}
+
 }  // namespace flutter

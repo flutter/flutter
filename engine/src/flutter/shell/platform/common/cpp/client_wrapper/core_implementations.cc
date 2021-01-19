@@ -15,9 +15,11 @@
 
 #include <cassert>
 #include <iostream>
+#include <variant>
 
 #include "binary_messenger_impl.h"
 #include "include/flutter/engine_method_result.h"
+#include "texture_registrar_impl.h"
 
 namespace flutter {
 
@@ -145,5 +147,45 @@ void ReplyManager::SendResponseData(const std::vector<uint8_t>* data) {
 }
 
 }  // namespace internal
+
+// ========== texture_registrar_impl.h ==========
+
+TextureRegistrarImpl::TextureRegistrarImpl(
+    FlutterDesktopTextureRegistrarRef texture_registrar_ref)
+    : texture_registrar_ref_(texture_registrar_ref) {}
+
+TextureRegistrarImpl::~TextureRegistrarImpl() = default;
+
+int64_t TextureRegistrarImpl::RegisterTexture(TextureVariant* texture) {
+  if (auto pixel_buffer_texture = std::get_if<PixelBufferTexture>(texture)) {
+    FlutterDesktopTextureInfo info = {};
+    info.type = kFlutterDesktopPixelBufferTexture;
+    info.pixel_buffer_config.user_data = pixel_buffer_texture;
+    info.pixel_buffer_config.callback =
+        [](size_t width, size_t height,
+           void* user_data) -> const FlutterDesktopPixelBuffer* {
+      auto texture = static_cast<PixelBufferTexture*>(user_data);
+      auto buffer = texture->CopyPixelBuffer(width, height);
+      return buffer;
+    };
+
+    int64_t texture_id = FlutterDesktopTextureRegistrarRegisterExternalTexture(
+        texture_registrar_ref_, &info);
+    return texture_id;
+  }
+
+  std::cerr << "Attempting to register unknown texture variant." << std::endl;
+  return -1;
+}  // namespace flutter
+
+bool TextureRegistrarImpl::MarkTextureFrameAvailable(int64_t texture_id) {
+  return FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable(
+      texture_registrar_ref_, texture_id);
+}
+
+bool TextureRegistrarImpl::UnregisterTexture(int64_t texture_id) {
+  return FlutterDesktopTextureRegistrarUnregisterExternalTexture(
+      texture_registrar_ref_, texture_id);
+}
 
 }  // namespace flutter

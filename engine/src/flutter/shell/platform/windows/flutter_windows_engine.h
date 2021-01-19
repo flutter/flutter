@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
+#include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/window_state.h"
@@ -80,6 +81,10 @@ class FlutterWindowsEngine {
 
   TaskRunner* task_runner() { return task_runner_.get(); }
 
+  FlutterWindowsTextureRegistrar* texture_registrar() {
+    return texture_registrar_.get();
+  }
+
 #ifndef WINUWP
   Win32WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -112,6 +117,16 @@ class FlutterWindowsEngine {
 
   // Informs the engine that the system font list has changed.
   void ReloadSystemFonts();
+
+  // Attempts to register the texture with the given |texture_id|.
+  bool RegisterExternalTexture(int64_t texture_id);
+
+  // Attempts to unregister the texture with the given |texture_id|.
+  bool UnregisterExternalTexture(int64_t texture_id);
+
+  // Notifies the engine about a new frame being available for the
+  // given |texture_id|.
+  bool MarkExternalTextureFrameAvailable(int64_t texture_id);
 
  private:
   // Allows swapping out embedder_api_ calls in tests.
@@ -150,6 +165,9 @@ class FlutterWindowsEngine {
 
   // The plugin registrar handle given to API clients.
   std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar_;
+
+  // The texture registrar.
+  std::unique_ptr<FlutterWindowsTextureRegistrar> texture_registrar_;
 
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> settings_channel_;

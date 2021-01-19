@@ -31,14 +31,21 @@ bool TaskRunnerWinUwp::RunsTasksOnCurrentThread() const {
   return GetCurrentThreadId() == main_thread_id_;
 }
 
-void TaskRunnerWinUwp::PostTask(FlutterTask flutter_task,
-                                uint64_t flutter_target_time_nanos) {
+void TaskRunnerWinUwp::PostFlutterTask(FlutterTask flutter_task,
+                                       uint64_t flutter_target_time_nanos) {
   // TODO: Handle the target time. See
   // https://github.com/flutter/flutter/issues/70890.
 
   dispatcher_.RunAsync(
       winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,
       [this, flutter_task]() { on_task_expired_(&flutter_task); });
+}
+
+void TaskRunnerWinUwp::PostTask(TaskClosure task) {
+  // TODO: Handle the target time. See PostFlutterTask()
+
+  dispatcher_.RunAsync(winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,
+                       [task]() { task() });
 }
 
 }  // namespace flutter
