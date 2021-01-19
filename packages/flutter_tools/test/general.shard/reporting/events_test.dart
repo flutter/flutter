@@ -96,6 +96,26 @@ void main() {
     })).called(1);
     verifyNever(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: anyNamed('label')));
   });
+
+  testWithoutContext('a null language version is treated as unmigrated', () {
+    final Usage usage = MockUsage();
+    final PackageConfig packageConfig = PackageConfig(<Package>[
+      Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: null),
+    ]);
+
+    NullSafetyAnalysisEvent(
+      packageConfig,
+      NullSafetyMode.sound,
+      'something-unrelated',
+      usage,
+    ).send();
+
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
+    verify(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+      'cd49': '0', 'cd50': '1',
+    })).called(1);
+    verifyNever(usage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: anyNamed('label')));
+  });
 }
 
 class FakeGroupedValidator extends GroupedValidator {

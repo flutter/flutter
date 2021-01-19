@@ -22,6 +22,7 @@ void main() {
     });
 
     tearDown(() {
+      TextInput.reset();
       TextInputConnection.debugResetId();
       TextInput.setChannel(SystemChannels.textInput);
     });
@@ -73,6 +74,65 @@ void main() {
               'composingExtent': -1,
             }),
       ]);
+    });
+
+    test('text input client is requested to hide on detach', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      TextInput.attach(client, client.configuration);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+
+      TextInput.detach(client);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From detach
+        const MethodCall('TextInput.clearClient'),
+      ]);
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      await binding.runAsync(() async {});
+      await expectLater(fakeTextChannel.outgoingCalls.length, 3);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From detach
+        const MethodCall('TextInput.clearClient'),
+        // From hide
+        const MethodCall('TextInput.hide'),
+      ]);
+    });
+
+    test('old client is detached when a new client is attached',() {
+      final FakeTextInputClient client1 = FakeTextInputClient(const TextEditingValue(text: '1'));
+      final TextInputConnection connection1 = TextInput.attach(client1, client1.configuration);
+      expect(connection1.attached, isTrue);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client1.configuration.toJson()]),
+      ]);
+
+      final FakeTextInputClient client2 = FakeTextInputClient(const TextEditingValue(text: '1'));
+      final TextInputConnection connection2 = TextInput.attach(client2, client2.configuration);
+      expect(connection2.attached, isTrue);
+      expect(connection1.attached, isFalse);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client1.configuration.toJson()]),
+        // From internal detach
+        const MethodCall('TextInput.clearClient'),
+        // From second attach
+        MethodCall('TextInput.setClient', <dynamic>[2, client1.configuration.toJson()]),
+      ]);
+    });
+
+    test('text input connection is reset', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(client, client.configuration);
+      expect(connection.attached, isTrue);
+
+      TextInput.reset();
+      expect(connection.attached, isFalse);
     });
   });
 

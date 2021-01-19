@@ -860,20 +860,21 @@ abstract class TextInputClient {
 
 /// An interface for interacting with a text input control.
 ///
+/// [TextInputConnection] communicates with the platform text input plugin
+/// over the [SystemChannels.textInput] method channel. See [SystemChannels.textInput]
+/// for more details about the method channel messages.
+///
 /// See also:
 ///
 ///  * [TextInput.attach], a method used to establish a [TextInputConnection]
 ///    between the system's text input and a [TextInputClient].
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
-class TextInputConnection {
-  TextInputConnection._(this._client)
+abstract class TextInputConnection {
+  /// Creates a connection for a [TextInputClient].
+  TextInputConnection(this._client)
       : assert(_client != null),
         _id = _nextId++;
-
-  Size? _cachedSize;
-  Matrix4? _cachedTransform;
-  Rect? _cachedRect;
 
   static int _nextId = 1;
   final int _id;
@@ -897,10 +898,18 @@ class TextInputConnection {
   bool get attached => TextInput._instance._currentConnection == this;
 
   /// Requests that the text input control become visible.
-  void show() {
-    assert(attached);
-    TextInput._instance._show();
-  }
+  void show();
+
+  /// Requests that the text input control is hidden.
+  ///
+  /// This method is called by the framework when the text input control should
+  /// hide.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInput.detach], a method to stop interacting with the text
+  ///    input control.
+  void hide();
 
   /// Requests the system autofill UI to appear.
   ///
@@ -910,24 +919,23 @@ class TextInputConnection {
   /// See also:
   ///
   ///  * [EditableText], a [TextInputClient] that calls this method when focused.
-  void requestAutofill() {
-    assert(attached);
-    TextInput._instance._requestAutofill();
-  }
+  void requestAutofill();
+
+  /// This method actually notifies the embedding of the client. It is utilized
+  /// by [TextInput.attach] and for the `TextInputClient.requestExistingInputState`
+  /// method.
+  void setClient(TextInputConfiguration configuration);
+
+  /// Clears the embedding of the client.
+  void clearClient();
 
   /// Requests that the text input control update itself according to the new
   /// [TextInputConfiguration].
-  void updateConfig(TextInputConfiguration configuration) {
-    assert(attached);
-    TextInput._instance._updateConfig(configuration);
-  }
+  void updateConfig(TextInputConfiguration configuration);
 
   /// Requests that the text input control change its internal state to match
   /// the given state.
-  void setEditingState(TextEditingValue value) {
-    assert(attached);
-    TextInput._instance._setEditingState(value);
-  }
+  void setEditingState(TextEditingValue value);
 
   /// Send the size and transform of the editable text to engine.
   ///
@@ -938,19 +946,7 @@ class TextInputConnection {
   ///
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].
-  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
-      _cachedSize = editableBoxSize;
-      _cachedTransform = transform;
-      TextInput._instance._setEditableSizeAndTransform(
-        <String, dynamic>{
-          'width': editableBoxSize.width,
-          'height': editableBoxSize.height,
-          'transform': transform.storage,
-        },
-      );
-    }
-  }
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform);
 
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
@@ -959,21 +955,7 @@ class TextInputConnection {
   /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
   ///
   /// The information is currently only used on iOS, for positioning the IME bar.
-  void setComposingRect(Rect rect) {
-    assert(rect != null);
-    if (rect == _cachedRect)
-      return;
-    _cachedRect = rect;
-    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
-    TextInput._instance._setComposingTextRect(
-      <String, dynamic>{
-        'width': validRect.width,
-        'height': validRect.height,
-        'x': validRect.left,
-        'y': validRect.top,
-      },
-    );
-  }
+  void setComposingRect(Rect rect);
 
   /// Send text styling information.
   ///
@@ -986,10 +968,142 @@ class TextInputConnection {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+  });
+
+  /// Stop interacting with the text input control.
+  ///
+  /// After calling this method, the text input control might disappear if no
+  /// other client attaches to it within this animation frame.
+  @Deprecated(
+    'Use TextInput.detach instead. '
+    'This feature was deprecated after v1.26.0-1.0.pre.'
+  )
+  void close() {
+    TextInput.detach(_client);
+    assert(!attached);
+  }
+
+  /// Platform sent a notification informing the connection is closed.
+  ///
+  /// [TextInputConnection] should clean current client connection.
+  @Deprecated(
+    'Use TextInput.reset instead. '
+    'This feature was deprecated after v1.26.0-1.0.pre.'
+  )
+  void connectionClosedReceived() {
+    TextInput.reset();
+    assert(!attached);
+  }
+}
+
+// A MethodChannel-based TextInputConnection implementation.
+class _TextInputChannelConnection extends TextInputConnection {
+  _TextInputChannelConnection(TextInputClient client, this._channel)
+      : super(client);
+
+  Size? _cachedSize;
+  Matrix4? _cachedTransform;
+  Rect? _cachedRect;
+
+  final MethodChannel _channel;
+
+  @override
+  void show() {
+    assert(attached);
+    _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  @override
+  void hide() {
+    _channel.invokeMethod<void>('TextInput.hide');
+  }
+
+  @override
+  void requestAutofill() {
+    assert(attached);
+    _channel.invokeMethod<void>('TextInput.requestAutofill');
+  }
+
+  @override
+  void setClient(TextInputConfiguration configuration) {
+    assert(_client != null);
+    assert(configuration != null);
+    _channel.invokeMethod<void>(
+      'TextInput.setClient',
+      <dynamic>[_id, configuration.toJson()],
+    );
+  }
+
+  @override
+  void clearClient() {
+    _channel.invokeMethod<void>('TextInput.clearClient');
+  }
+
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    assert(attached);
+    assert(configuration != null);
+    _channel.invokeMethod<void>(
+      'TextInput.updateConfig',
+      configuration.toJson(),
+    );
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+    assert(attached);
+    assert(value != null);
+    _channel.invokeMethod<void>(
+      'TextInput.setEditingState',
+      value.toJSON(),
+    );
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
+      _cachedSize = editableBoxSize;
+      _cachedTransform = transform;
+      _channel.invokeMethod<void>(
+        'TextInput.setEditableSizeAndTransform',
+        <String, dynamic>{
+          'width': editableBoxSize.width,
+          'height': editableBoxSize.height,
+          'transform': transform.storage,
+        },
+      );
+    }
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    assert(rect != null);
+    if (rect == _cachedRect)
+      return;
+    _cachedRect = rect;
+    final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
+    _channel.invokeMethod<void>(
+      'TextInput.setMarkedTextRect',
+      <String, dynamic>{
+        'width': validRect.width,
+        'height': validRect.height,
+        'x': validRect.left,
+        'y': validRect.top,
+      },
+    );
+  }
+
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
   }) {
     assert(attached);
-
-    TextInput._instance._setStyle(
+    _channel.invokeMethod<void>(
+      'TextInput.setStyle',
       <String, dynamic>{
         'fontFamily': fontFamily,
         'fontSize': fontSize,
@@ -1000,23 +1114,68 @@ class TextInputConnection {
     );
   }
 
-  /// Stop interacting with the text input control.
-  ///
-  /// After calling this method, the text input control might disappear if no
-  /// other client attaches to it within this animation frame.
-  void close() {
-    if (attached) {
-      TextInput._instance._clearClient();
-    }
-    assert(!attached);
-  }
+  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    final String method = methodCall.method;
 
-  /// Platform sent a notification informing the connection is closed.
-  ///
-  /// [TextInputConnection] should clean current client connection.
-  void connectionClosedReceived() {
-    TextInput._instance._currentConnection = null;
-    assert(!attached);
+    // The requestExistingInputState request needs to be handled regardless of
+    // the client ID, as long as we have a _currentConnection.
+    if (method == 'TextInputClient.requestExistingInputState') {
+      assert(_client != null);
+      setClient(TextInput._instance._currentConfiguration);
+      final TextEditingValue? editingValue = _client.currentTextEditingValue;
+      if (editingValue != null) {
+        setEditingState(editingValue);
+      }
+      return;
+    }
+
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      assert(_client != null);
+      final AutofillScope? scope = _client.currentAutofillScope;
+      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
+      }
+
+      return;
+    }
+
+    final int clientId = args[0] as int;
+    // The incoming message was for a different client.
+    if (clientId != _id)
+      return;
+    switch (method) {
+      case 'TextInputClient.updateEditingState':
+        _client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        break;
+      case 'TextInputClient.performAction':
+        _client.performAction(_toTextInputAction(args[1] as String));
+        break;
+      case 'TextInputClient.performPrivateCommand':
+        _client.performPrivateCommand(args[1]['action'] as String,
+          args[1]['data'] as Map<String, dynamic>);
+        break;
+      case 'TextInputClient.updateFloatingCursor':
+        _client.updateFloatingCursor(_toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        ));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _client.connectionClosed();
+        TextInput.reset();
+        break;
+      case 'TextInputClient.showAutocorrectionPromptRect':
+        _client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      default:
+        throw MissingPluginException();
+    }
   }
 }
 
@@ -1129,8 +1288,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
 ///    wants to take user input from the keyboard.
 class TextInput {
   TextInput._() {
-    _channel = SystemChannels.textInput;
-    _channel.setMethodCallHandler(_handleTextInputInvocation);
+    _currentSource.init();
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -1142,7 +1300,7 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel = newChannel..setMethodCallHandler(_instance._handleTextInputInvocation);
+      _TextInputSource.setChannel(newChannel);
       return true;
     }());
   }
@@ -1183,28 +1341,23 @@ class TextInput {
   /// the text input control.
   ///
   /// A client that no longer wishes to interact with the text input control
-  /// should call [TextInputConnection.close] on the returned
-  /// [TextInputConnection].
+  /// should call [TextInput.detach].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
     assert(client != null);
     assert(configuration != null);
-    final TextInputConnection connection = TextInputConnection._(client);
+    _instance._detach();
+    final TextInputConnection connection = _instance._currentSource.attach(client);
     _instance._attach(connection, configuration);
     return connection;
   }
 
-  /// This method actually notifies the embedding of the client. It is utilized
-  /// by [attach] and by [_handleTextInputInvocation] for the
-  /// `TextInputClient.requestExistingInputState` method.
+  // This method actually notifies the embedding of the client.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    _channel.invokeMethod<void>(
-      'TextInput.setClient',
-      <dynamic>[ connection._id, configuration.toJson() ],
-    );
+    connection.setClient(configuration);
     _currentConnection = connection;
     _currentConfiguration = configuration;
   }
@@ -1231,80 +1384,13 @@ class TextInput {
     return true;
   }
 
-  late MethodChannel _channel;
-
+  final _TextInputSource _currentSource = _TextInputSource();
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
-    final String method = methodCall.method;
-
-    // The requestExistingInputState request needs to be handled regardless of
-    // the client ID, as long as we have a _currentConnection.
-    if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection!._client != null);
-      _attach(_currentConnection!, _currentConfiguration);
-      final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
-      if (editingValue != null) {
-        _setEditingState(editingValue);
-      }
-      return;
-    }
-
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
-
-    if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final TextInputClient client = _currentConnection!._client;
-      assert(client != null);
-      final AutofillScope? scope = client.currentAutofillScope;
-      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
-      for (final String tag in editingValue.keys) {
-        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
-          editingValue[tag] as Map<String, dynamic>,
-        );
-        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
-      }
-
-      return;
-    }
-
-    final int client = args[0] as int;
-    // The incoming message was for a different client.
-    if (client != _currentConnection!._id)
-      return;
-    switch (method) {
-      case 'TextInputClient.updateEditingState':
-        _currentConnection!._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
-        break;
-      case 'TextInputClient.performAction':
-        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
-        break;
-      case 'TextInputClient.performPrivateCommand':
-        _currentConnection!._client.performPrivateCommand(
-          args[1]['action'] as String, args[1]['data'] as Map<String, dynamic>);
-        break;
-      case 'TextInputClient.updateFloatingCursor':
-        _currentConnection!._client.updateFloatingCursor(_toTextPoint(
-          _toTextCursorAction(args[1] as String),
-          args[2] as Map<String, dynamic>,
-        ));
-        break;
-      case 'TextInputClient.onConnectionClosed':
-        _currentConnection!._client.connectionClosed();
-        break;
-      case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
-        break;
-      default:
-        throw MissingPluginException();
-    }
-  }
-
   bool _hidePending = false;
 
-  void _scheduleHide() {
+  void _scheduleHide(TextInputConnection connection) {
     if (_hidePending)
       return;
     _hidePending = true;
@@ -1315,59 +1401,50 @@ class TextInput {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        _channel.invokeMethod<void>('TextInput.hide');
+        connection.hide();
     });
   }
 
-  void _clearClient() {
-    _channel.invokeMethod<void>('TextInput.clearClient');
+  /// Stop interacting with the text input control.
+  ///
+  /// A client that no longer wishes to interact with the text input control
+  /// should call this method.
+  ///
+  /// After calling this method, the text input control might be requested to
+  /// hide if no other client attaches to it within this animation frame.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputConnection.hide], a method called when the text input control
+  ///    actually should hide.
+  static void detach(TextInputClient client) {
+    assert(client != null);
+    if (client != _instance._currentConnection?._client)
+      return;
+    _instance._detach();
+  }
+
+  void _detach() {
+    if (_currentConnection == null)
+      return;
+    _currentConnection!.clearClient();
+    _scheduleHide(_currentConnection!);
+    _currentSource.detach(_currentConnection!._client);
     _currentConnection = null;
-    _scheduleHide();
   }
 
-  void _updateConfig(TextInputConfiguration configuration) {
-    assert(configuration != null);
-    _channel.invokeMethod<void>(
-      'TextInput.updateConfig',
-      configuration.toJson(),
-    );
-  }
-
-  void _setEditingState(TextEditingValue value) {
-    assert(value != null);
-    _channel.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    );
-  }
-
-  void _show() {
-    _channel.invokeMethod<void>('TextInput.show');
-  }
-
-  void _requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill');
-  }
-
-  void _setEditableSizeAndTransform(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setEditableSizeAndTransform',
-      args,
-    );
-  }
-
-  void _setComposingTextRect(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setMarkedTextRect',
-      args,
-    );
-  }
-
-  void _setStyle(Map<String, dynamic> args) {
-    _channel.invokeMethod<void>(
-      'TextInput.setStyle',
-      args,
-    );
+  /// Resets the current text input connection.
+  ///
+  /// This function should be called to reset the current text input connection
+  /// in case the platform sent a notification informing the connection is
+  /// closed.
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputClient.connectionClosed], a method called to notify the
+  ///    current text input client when the connection is closed.
+  static void reset() {
+    _instance._currentConnection = null;
   }
 
   /// Finishes the current autofill context, and potentially saves the user
@@ -1420,9 +1497,42 @@ class TextInput {
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
-    TextInput._instance._channel.invokeMethod<void>(
+    _instance._currentSource.finishAutofillContext(shouldSave: shouldSave);
+  }
+}
+
+class _TextInputSource {
+  static MethodChannel? _channel;
+
+  static void setChannel(MethodChannel newChannel) {
+    _channel = newChannel..setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  void init() {
+    _channel ??= SystemChannels.textInput;
+    _channel!.setMethodCallHandler(_handleTextInputInvocation);
+  }
+
+  void cleanup() {
+    _channel!.setMethodCallHandler((MethodCall methodCall) async {});
+  }
+
+  TextInputConnection attach(TextInputClient client) {
+    return _TextInputChannelConnection(client, _channel!);
+  }
+
+  void detach(TextInputClient client) {}
+
+  void finishAutofillContext({bool shouldSave = true}) {
+    _channel!.invokeMethod<void>(
       'TextInput.finishAutofillContext',
-      shouldSave ,
+      shouldSave,
     );
+  }
+
+  static Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+    final TextInputConnection? connection = TextInput._instance._currentConnection;
+    if (connection is _TextInputChannelConnection)
+      return connection._handleTextInputInvocation(methodCall);
   }
 }
