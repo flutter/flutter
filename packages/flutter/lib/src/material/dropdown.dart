@@ -1471,7 +1471,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     FormFieldSetter<T>? onSaved,
     FormFieldValidator<T>? validator,
     @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
+      'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )

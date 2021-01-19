@@ -157,6 +157,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  fullscreen_textfield_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of large textfields with complex paragraph on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   color_filter_and_fade_perf__timeline_summary:
     description: >
       Measures the runtime performance of color filter with fade on Android.
@@ -488,12 +494,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  smoke_catalina_start_up_ios:
-    description: >
-      A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac-catalina/ios"]
-
   smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
@@ -503,12 +503,6 @@ tasks:
   smoke_catalina_start_up:
     description: >
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
-    stage: devicelab
-    required_agent_capabilities: ["mac-catalina/android"]
-
-  smoke_catalina_hot_mode_dev_cycle__benchmark:
-    description: >
-      A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
 
