@@ -24,6 +24,7 @@ core_cpp_client_wrapper_includes =
                     "include/flutter/standard_codec_serializer.h",
                     "include/flutter/standard_message_codec.h",
                     "include/flutter/standard_method_codec.h",
+                    "include/flutter/texture_registrar.h",
                   ],
                   "abspath")
 
@@ -34,6 +35,7 @@ core_cpp_client_wrapper_internal_headers =
     get_path_info([
                     "binary_messenger_impl.h",
                     "byte_buffer_streams.h",
+                    "texture_registrar_impl.h",
                   ],
                   "abspath")
 

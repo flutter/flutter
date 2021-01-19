@@ -13,6 +13,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <variant>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/task_runner.h"
@@ -36,17 +37,21 @@ class TaskRunnerWin32 : public TaskRunner {
   bool RunsTasksOnCurrentThread() const override;
 
   // |TaskRunner|
-  void PostTask(FlutterTask flutter_task,
-                uint64_t flutter_target_time_nanos) override;
+  void PostFlutterTask(FlutterTask flutter_task,
+                       uint64_t flutter_target_time_nanos) override;
+
+  // |TaskRunner|
+  void PostTask(TaskClosure task) override;
 
   std::chrono::nanoseconds ProcessTasks();
 
  private:
-  using TaskTimePoint = std::chrono::steady_clock::time_point;
+  typedef std::variant<FlutterTask, TaskClosure> TaskVariant;
+
   struct Task {
     uint64_t order;
     TaskTimePoint fire_time;
-    FlutterTask task;
+    TaskVariant variant;
 
     struct Comparer {
       bool operator()(const Task& a, const Task& b) {
@@ -57,6 +62,9 @@ class TaskRunnerWin32 : public TaskRunner {
       }
     };
   };
+
+  // Enqueues the given task.
+  void EnqueueTask(Task task);
 
   // Returns a TaskTimePoint computed from the given target time from Flutter.
   TaskTimePoint TimePointFromFlutterTime(

@@ -34,8 +34,11 @@ class TaskRunnerWinUwp : public TaskRunner {
   bool RunsTasksOnCurrentThread() const override;
 
   // |TaskRunner|
-  void PostTask(FlutterTask flutter_task,
-                uint64_t flutter_target_time_nanos) override;
+  void PostFlutterTask(FlutterTask flutter_task,
+                       uint64_t flutter_target_time_nanos) override;
+
+  // |TaskRunner|
+  void PostTask(TaskClosure task) override;
 
  private:
   DWORD main_thread_id_;

@@ -127,6 +127,12 @@ FlutterDesktopMessengerRef FlutterDesktopEngineGetMessenger(
   return reinterpret_cast<FlutterDesktopMessengerRef>(2);
 }
 
+FlutterDesktopTextureRegistrarRef FlutterDesktopEngineGetTextureRegistrar(
+    FlutterDesktopEngineRef engine) {
+  // The stub ignores this, so just return an arbitrary non-zero value.
+  return reinterpret_cast<FlutterDesktopTextureRegistrarRef>(3);
+}
+
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef controller) {
   if (s_stub_implementation) {
     return s_stub_implementation->ViewGetHWND();
