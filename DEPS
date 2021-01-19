@@ -502,7 +502,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/${{platform}}',
-        'version': 'git_revision:25abd1994ed209c1bf4139946a42e36a42143a85'
+        'version': 'git_revision:7d48eff8ba172216fca3649a3c452de4c7c16c00' 
       }
     ],
     'condition': 'host_os == "mac" or host_os == "linux"',
