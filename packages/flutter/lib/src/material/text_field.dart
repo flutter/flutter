@@ -1282,7 +1282,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             return Semantics(
               maxValueLength: semanticsMaxValueLength,
               currentValueLength: _currentLength,
-              onTap: () {
+              onTap: widget.readOnly ? null : () {
                 if (!_effectiveController.selection.isValid)
                   _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
                 _requestKeyboard();

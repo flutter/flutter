@@ -15,6 +15,7 @@ export 'src/services/autofill.dart';
 export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
+export 'src/services/deferred_component.dart';
 export 'src/services/font_loader.dart';
 export 'src/services/haptic_feedback.dart';
 export 'src/services/keyboard_key.dart';

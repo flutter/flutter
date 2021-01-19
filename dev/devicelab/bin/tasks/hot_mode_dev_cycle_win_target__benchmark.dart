@@ -6,5 +6,5 @@ import 'package:flutter_devicelab/tasks/hot_mode_tests.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
-  await task(createHotModeTest());
+  await task(createHotModeTest(deviceIdOverride: 'windows'));
 }
