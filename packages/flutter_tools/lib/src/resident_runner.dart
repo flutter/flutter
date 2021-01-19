@@ -1273,12 +1273,16 @@ abstract class ResidentRunner {
   void maybeCallDevToolsUriServiceExtension() {
     _devToolsLauncher ??= DevtoolsLauncher.instance;
     if (_devToolsLauncher.activeDevToolsServer != null) {
-      unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
-        'ext.flutter.activeDevToolsServerAddress',
-        params: <String, dynamic>{
-          'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
-        },
-      ));
+      try {
+        unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
+          'ext.flutter.activeDevToolsServerAddress',
+          params: <String, dynamic>{
+            'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
+          },
+        ));
+      } on Exception catch (e) {
+        globals.printError(e.toString());
+      }
     }
   }
 
