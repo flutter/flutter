@@ -27,6 +27,11 @@ void main() {
   buildContext.findRootAncestorStateOfType<targetType>();
   buildContext.findAncestorRenderObjectOfType<targetType>();
 
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  final behavior = stack.clipBehavior;
+
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidateMode: AutoValidateMode.always);
   const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
