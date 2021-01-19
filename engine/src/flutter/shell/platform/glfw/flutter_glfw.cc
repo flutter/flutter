@@ -1072,3 +1072,30 @@ void FlutterDesktopMessengerSetCallback(FlutterDesktopMessengerRef messenger,
   messenger->engine->message_dispatcher->SetMessageCallback(channel, callback,
                                                             user_data);
 }
+
+FlutterDesktopTextureRegistrarRef FlutterDesktopRegistrarGetTextureRegistrar(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  std::cerr << "GLFW Texture support is not implemented yet." << std::endl;
+  return nullptr;
+}
+
+int64_t FlutterDesktopTextureRegistrarRegisterExternalTexture(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    const FlutterDesktopTextureInfo* texture_info) {
+  std::cerr << "GLFW Texture support is not implemented yet." << std::endl;
+  return -1;
+}
+
+bool FlutterDesktopTextureRegistrarUnregisterExternalTexture(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    int64_t texture_id) {
+  std::cerr << "GLFW Texture support is not implemented yet." << std::endl;
+  return false;
+}
+
+bool FlutterDesktopTextureRegistrarMarkExternalTextureFrameAvailable(
+    FlutterDesktopTextureRegistrarRef texture_registrar,
+    int64_t texture_id) {
+  std::cerr << "GLFW Texture support is not implemented yet." << std::endl;
+  return false;
+}
