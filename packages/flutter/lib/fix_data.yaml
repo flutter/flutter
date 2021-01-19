@@ -365,7 +365,7 @@ transforms:
   - title: 'Migrate to clipBehavior'
     date: 2020-09-22
     element:
-      uris: [ 'widgets.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       field: 'overflow'
       inClass: 'Stack'
     changes:
@@ -376,7 +376,7 @@ transforms:
   - title: 'Migrate to clipBehavior'
     date: 2020-09-22
     element:
-      uris: [ 'widgets.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'Stack'
     oneOf:
