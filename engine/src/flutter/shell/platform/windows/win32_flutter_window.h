@@ -74,6 +74,9 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void UpdateFlutterCursor(const std::string& cursor_name) override;
 
+  // |FlutterWindowBindingHandler|
+  void OnWindowResized() override;
+
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
