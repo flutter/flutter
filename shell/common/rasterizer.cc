@@ -466,6 +466,17 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
         raster_status == RasterStatus::kSkipAndRetry) {
       return raster_status;
     }
+    if (shared_engine_block_thread_merging_ && raster_thread_merger_ &&
+        raster_thread_merger_->IsMerged()) {
+      // TODO(73620): Remove when platform views are accounted for.
+      FML_LOG(ERROR)
+          << "Error: Thread merging not implemented for engines with shared "
+             "components.\n\n"
+             "This is likely a result of using platform views with enigne "
+             "groups.  See "
+             "https://github.com/flutter/flutter/issues/73620.";
+      fml::KillProcess();
+    }
     if (external_view_embedder_ &&
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
