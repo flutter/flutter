@@ -27,6 +27,24 @@ void main() {
   buildContext.findRootAncestorStateOfType<targetType>();
   buildContext.findAncestorRenderObjectOfType<targetType>();
 
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutoValidateMode.always);
+  const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.always);
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.disabled);
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.always);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.disabled);
+
   // Changes made in https://github.com/flutter/flutter/pull/48547
   var TextTheme textTheme = TextTheme(
     headline1: displayStyle4,

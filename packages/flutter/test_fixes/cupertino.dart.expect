@@ -27,4 +27,14 @@ void main() {
   buildContext.findAncestorStateOfType<targetType>();
   buildContext.findRootAncestorStateOfType<targetType>();
   buildContext.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutoValidateMode.always);
+  const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = formField.autovalidateMode;
 }
