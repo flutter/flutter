@@ -155,16 +155,12 @@ bool _shouldRunWindows() {
 Future<void> _validateEngineHash() async {
   final String overrideFlag = Platform.environment['FLUTTER_SKIP_ENGINE_CHECK']
       ?? 'false';
-  // TODO(karlklose): remove the bot name check once the 3H builder recipe uses
-  //                  FLUTTER_SKIP_ENGINE_CHECK.
-  final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-  if (luciBotId.startsWith('luci-dart-') || overrideFlag.toLowerCase() == 'true') {
+  if (overrideFlag.toLowerCase() == 'true') {
     // The Dart HHH bots intentionally modify the local artifact cache
     // and then use this script to run Flutter's test suites.
     // Because the artifacts have been changed, this particular test will return
     // a false positive and should be skipped.
-    print('${yellow}Skipping Flutter Engine Version Validation for swarming '
-          'bot $luciBotId.');
+    print('${yellow}Skipping Flutter Engine Version Validation');
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
