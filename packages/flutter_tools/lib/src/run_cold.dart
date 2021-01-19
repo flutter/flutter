@@ -73,7 +73,9 @@ class ColdRunner extends ResidentRunner {
     if (debuggingOptions.debuggingEnabled) {
       try {
         await Future.wait(<Future<void>>[
-          connectToServiceProtocol(),
+          connectToServiceProtocol(
+            allowExistingDdsInstance: false,
+          ),
           serveDevToolsGracefully(
             devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           ),

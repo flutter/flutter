@@ -37,12 +37,6 @@
          "flaky": false
       },
       {
-         "name": "Linux animated_placeholder_perf",
-         "repo": "flutter",
-         "task_name": "linux_animated_placeholder_perf",
-         "flaky": true
-      },
-      {
          "name": "Linux backdrop_filter_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_backdrop_filter_perf__e2e_summary",
@@ -265,6 +259,12 @@
          "flaky": false
       },
       {
+        "name": "Linux gradle_desugar_classes_test",
+        "repo": "flutter",
+        "task_name": "linux_gradle_desugar_classes_test",
+        "flaky": false
+      },
+      {
          "name": "Linux gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "linux_gradle_non_android_plugin_test",
@@ -335,12 +335,6 @@
          "repo": "flutter",
          "task_name": "linux_multi_widget_construction_perf__e2e_summary",
          "flaky": false
-      },
-      {
-         "name": "Linux multi_widget_construction_perf__timeline_summary",
-         "repo": "flutter",
-         "task_name": "linux_multi_widget_construction_perf__timeline_summary",
-         "flaky": true
       },
       {
          "name": "Linux new_gallery__crane_perf",
