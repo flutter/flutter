@@ -1128,7 +1128,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///
 /// ### State Restoration in Dialogs
 ///
-/// Using this method with not enable state restoration for the dialog. In order
+/// Using this method will not enable state restoration for the dialog. In order
 /// to enable state restoration for a dialog, use [Navigator.restorablePush]
 /// or [Navigator.restorablePushNamed] with [CupertinoDialogRoute].
 ///
@@ -1155,21 +1155,12 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///   Widget build(BuildContext context) {
 ///     return CupertinoApp(
 ///       restorationScopeId: 'app',
-///       home: MyHomePage(title: 'Restorable Routes Demo'),
+///       home: MyHomePage(),
 ///     );
 ///   }
 /// }
 ///
-/// class MyHomePage extends StatefulWidget {
-///   MyHomePage({this.title});
-///
-///   final String title;
-///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
+/// class MyHomePage extends StatelessWidget {
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return CupertinoDialogRoute<void>(
 ///       context: context,
@@ -1234,8 +1225,9 @@ Future<T?> showCupertinoDialog<T>({
 
 /// A dialog route that shows an iOS-style dialog.
 ///
-/// Normally, [showCupertinoDialog] is used to display a Cupertino dialog.
-/// This route is exposed primary for state restoration support if it is needed.
+/// It is used internally by [showCupertinoDialog] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showCupertinoDialog] for a state restoration app example.
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
@@ -1259,7 +1251,8 @@ Future<T?> showCupertinoDialog<T>({
 /// [RouteSettings] for details.
 ///
 /// See also:
-///  * [showCupertinoDialog], which is the primary way to display
+///
+///  * [showCupertinoDialog], which is a way to display
 ///     an iOS-style dialog.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showDialog], which displays a Material dialog.

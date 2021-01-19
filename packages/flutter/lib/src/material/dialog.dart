@@ -965,7 +965,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [DialogRoute] when the button is tapped.
 ///
-/// To test this out:
+/// To test this out on Android:
 ///   1. Turn on "Don't keep activities", which destroys the Android activity
 ///      as soon as the user leaves it. This option should become available
 ///      when Developer options are turned on for the device.
@@ -989,21 +989,12 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///     return MaterialApp(
 ///       restorationScopeId: 'app',
 ///       title: 'Restorable Routes Demo',
-///       home: MyHomePage(title: 'Restorable Routes Demo'),
+///       home: MyHomePage(),
 ///     );
 ///   }
 /// }
 ///
-/// class MyHomePage extends StatefulWidget {
-///   MyHomePage({this.title});
-///
-///   final String title;
-///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
+/// class MyHomePage extends StatelessWidget {
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return DialogRoute<void>(
 ///       context: context,
@@ -1078,8 +1069,9 @@ Future<T?> showDialog<T>({
 /// modal barrier color, and modal barrier behavior (dialog is dismissible
 /// with a tap on the barrier).
 ///
-/// Normally, [showDialog] is used to display a Material dialog. This route
-/// is exposed primary for state restoration support if it is needed.
+/// It is used internally by [showDialog] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showDialog] for a state restoration app example.
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
@@ -1109,7 +1101,8 @@ Future<T?> showDialog<T>({
 /// [RouteSettings] for details.
 ///
 /// See also:
-///  * [showDialog], which is the primary way to display a DialogRoute.
+///
+///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class DialogRoute<T> extends RawDialogRoute<T> {
@@ -1129,10 +1122,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
-           Widget dialog = pageChild;
-           if (themes != null) {
-             dialog = themes.wrap(pageChild);
-           }
+           Widget dialog = themes?.wrap(pageChild) ?? pageChild;
            if (useSafeArea) {
              dialog = SafeArea(child: dialog);
            }

@@ -1746,8 +1746,9 @@ abstract class RouteAware {
 
 /// A general dialog route which allows for customization of the dialog popup.
 ///
-/// Normally, [showGeneralDialog] is used to display a dialog. This route
-/// is exposed primary for state restoration support if it is needed.
+/// It is used internally by [showGeneralDialog] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showGeneralDialog] for a state restoration app example.
 ///
 /// This function takes a `pageBuilder`, which typically builds a dialog.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
@@ -1766,8 +1767,9 @@ abstract class RouteAware {
 /// [RouteSettings] for details.
 ///
 /// See also:
-///  * [showGeneralDialog], which is the primary way to display a RawDialogRoute.
-///  * [showDialog], which is the primary way to display a DialogRoute.
+///
+///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
+///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
@@ -1883,7 +1885,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///
 /// ### State Restoration in Dialogs
 ///
-/// Using this method with not enable state restoration for the dialog. In order
+/// Using this method will not enable state restoration for the dialog. In order
 /// to enable state restoration for a dialog, use [Navigator.restorablePush]
 /// or [Navigator.restorablePushNamed] with [RawDialogRoute].
 ///
@@ -1896,7 +1898,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [RawDialogRoute] when the button is tapped.
 ///
-/// To test this out:
+/// To test this out on Android:
 ///   1. Turn on "Don't keep activities", which destroys the Android activity
 ///      as soon as the user leaves it. This option should become available
 ///      when Developer options are turned on for the device.
@@ -1924,16 +1926,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///   }
 /// }
 ///
-/// class MyHomePage extends StatefulWidget {
-///   MyHomePage({this.title});
-///
-///   final String title;
-///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
+/// class MyHomePage extends StatelessWidget {
 ///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
 ///     return RawDialogRoute<void>(
 ///       pageBuilder: (
