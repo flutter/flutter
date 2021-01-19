@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
@@ -113,6 +114,12 @@ public class FlutterEngine {
 
           platformViewsController.onPreEngineRestart();
           restorationChannel.clearData();
+        }
+
+        @Override
+        public void onEngineWillDestroy() {
+          // This inner implementation doesn't do anything since FlutterEngine sent this
+          // notification in the first place. It's meant for external listeners.
         }
       };
 
@@ -304,15 +311,23 @@ public class FlutterEngine {
     if (flutterLoader == null) {
       flutterLoader = FlutterInjector.instance().flutterLoader();
     }
-    flutterLoader.startInitialization(context.getApplicationContext());
-    flutterLoader.ensureInitializationComplete(context, dartVmArgs);
+
+    if (!flutterJNI.isAttached()) {
+      flutterLoader.startInitialization(context.getApplicationContext());
+      flutterLoader.ensureInitializationComplete(context, dartVmArgs);
+    }
 
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
     flutterJNI.setDeferredComponentManager(FlutterInjector.instance().deferredComponentManager());
 
-    attachToJni();
+    // It should typically be a fresh, unattached JNI. But on a spawned engine, the JNI instance
+    // is already attached to a native shell. In that case, the Java FlutterEngine is created around
+    // an existing shell.
+    if (!flutterJNI.isAttached()) {
+      attachToJni();
+    }
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
     // possible.
@@ -342,6 +357,36 @@ public class FlutterEngine {
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean isAttachedToJni() {
     return flutterJNI.isAttached();
+  }
+
+  /**
+   * Create a second {@link FlutterEngine} based on this current one by sharing as much resources
+   * together as possible to minimize startup latency and memory cost.
+   *
+   * @param context is a Context used to create the {@link FlutterEngine}. Could be the same Context
+   *     as the current engine or a different one. Generally, only an application Context is needed
+   *     for the {@link FlutterEngine} and its dependencies.
+   * @param dartEntrypoint specifies the {@link DartEntrypoint} the new engine should run. It
+   *     doesn't need to be the same entrypoint as the current engine but must be built in the same
+   *     AOT or snapshot.
+   * @return a new {@link FlutterEngine}.
+   */
+  @NonNull
+  /*package*/ FlutterEngine spawn(
+      @NonNull Context context, @NonNull DartEntrypoint dartEntrypoint) {
+    if (!isAttachedToJni()) {
+      throw new IllegalStateException(
+          "Spawn can only be called on a fully constructed FlutterEngine");
+    }
+
+    FlutterJNI newFlutterJNI =
+        flutterJNI.spawn(
+            dartEntrypoint.dartEntrypointFunctionName, dartEntrypoint.dartEntrypointLibrary);
+    return new FlutterEngine(
+        context, // Context.
+        null, // FlutterLoader. A null value passed here causes the constructor to get it from the
+        // FlutterInjector.
+        newFlutterJNI); // FlutterJNI.
   }
 
   /**
@@ -382,6 +427,9 @@ public class FlutterEngine {
    */
   public void destroy() {
     Log.v(TAG, "Destroying.");
+    for (EngineLifecycleListener listener : engineLifecycleListeners) {
+      listener.onEngineWillDestroy();
+    }
     // The order that these things are destroyed is important.
     pluginRegistry.destroy();
     platformViewsController.onDetachedFromJNI();
@@ -567,5 +615,11 @@ public class FlutterEngine {
   public interface EngineLifecycleListener {
     /** Lifecycle callback invoked before a hot restart of the Flutter engine. */
     void onPreEngineRestart();
+    /**
+     * Lifecycle callback invoked before the Flutter engine is destroyed.
+     *
+     * <p>For the duration of the call, the Flutter engine is still valid.
+     */
+    void onEngineWillDestroy();
   }
 }

@@ -12,3 +12,4 @@
 /build
 /captures
 .externalNativeBuild
+.cache

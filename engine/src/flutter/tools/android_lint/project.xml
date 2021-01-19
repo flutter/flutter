@@ -25,6 +25,9 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineCache.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineGroup.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterShellArgs.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SettingsChannel.java" />
@@ -36,7 +39,6 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SystemChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LifecycleChannel.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java" />

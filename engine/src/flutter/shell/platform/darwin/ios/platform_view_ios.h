@@ -93,7 +93,7 @@ class PlatformViewIOS final : public PlatformView {
   // |PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 
-  /** Acessor for the `IOSContext` associated with the platform view. */
+  /** Accessor for the `IOSContext` associated with the platform view. */
   const std::shared_ptr<IOSContext>& GetIosContext() { return ios_context_; }
 
  private:

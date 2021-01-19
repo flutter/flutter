@@ -7,6 +7,7 @@
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
 #include <jni.h>
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -59,6 +60,8 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_texture_wrapper_class = nullptr;
 
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
+
 // Called By Native
 
 static jmethodID g_flutter_callback_info_constructor = nullptr;
@@ -73,6 +76,12 @@ jobject CreateFlutterCallbackInformation(
                         env->NewStringUTF(callbackClassName.c_str()),
                         env->NewStringUTF(callbackLibraryPath.c_str()));
 }
+
+static jfieldID g_jni_shell_holder_field = nullptr;
+
+static jmethodID g_jni_constructor = nullptr;
+
+static jmethodID g_long_constructor = nullptr;
 
 static jmethodID g_handle_platform_message_method = nullptr;
 
@@ -145,6 +154,55 @@ static void DestroyJNI(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   delete ANDROID_SHELL_HOLDER;
 }
 
+// Signature is similar to RunBundleAndSnapshotFromLibrary but it can't change
+// the bundle path or asset manager since we can only spawn with the same
+// AOT.
+//
+// The shell_holder instance must be a pointer address to the current
+// AndroidShellHolder whose Shell will be used to spawn a new Shell.
+//
+// This creates a Java Long that points to the newly created
+// AndroidShellHolder's raw pointer, connects that Long to a newly created
+// FlutterJNI instance, then returns the FlutterJNI instance.
+static jobject SpawnJNI(JNIEnv* env,
+                        jobject jcaller,
+                        jlong shell_holder,
+                        jstring jEntrypoint,
+                        jstring jLibraryUrl) {
+  jobject jni = env->NewObject(g_flutter_jni_class->obj(), g_jni_constructor);
+  if (jni == nullptr) {
+    FML_LOG(ERROR) << "Could not create a FlutterJNI instance";
+    return nullptr;
+  }
+
+  fml::jni::JavaObjectWeakGlobalRef java_jni(env, jni);
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
+      std::make_shared<PlatformViewAndroidJNIImpl>(java_jni);
+
+  auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
+  auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
+
+  auto spawned_shell_holder =
+      ANDROID_SHELL_HOLDER->Spawn(jni_facade, entrypoint, libraryUrl);
+
+  if (spawned_shell_holder == nullptr || !spawned_shell_holder->IsValid()) {
+    FML_LOG(ERROR) << "Could not spawn Shell";
+    return nullptr;
+  }
+
+  jobject javaLong = env->CallStaticObjectMethod(
+      g_java_long_class->obj(), g_long_constructor,
+      reinterpret_cast<jlong>(spawned_shell_holder.release()));
+  if (javaLong == nullptr) {
+    FML_LOG(ERROR) << "Could not create a Long instance";
+    return nullptr;
+  }
+
+  env->SetObjectField(jni, g_jni_shell_holder_field, javaLong);
+
+  return jni;
+}
+
 static void SurfaceCreated(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
@@ -200,37 +258,10 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
       fml::jni::JavaStringToString(env, jBundlePath))  // apk asset dir
   );
 
-  std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
-  } else {
-    std::unique_ptr<fml::Mapping> kernel_blob =
-        fml::FileMapping::CreateReadOnly(
-            ANDROID_SHELL_HOLDER->GetSettings().application_kernel_asset);
-    if (!kernel_blob) {
-      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
-      return;
-    }
-    isolate_configuration =
-        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
-  }
+  auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
+  auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
 
-  RunConfiguration config(std::move(isolate_configuration),
-                          std::move(asset_manager));
-
-  {
-    auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
-    auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
-
-    if ((entrypoint.size() > 0) && (libraryUrl.size() > 0)) {
-      config.SetEntrypointAndLibrary(std::move(entrypoint),
-                                     std::move(libraryUrl));
-    } else if (entrypoint.size() > 0) {
-      config.SetEntrypoint(std::move(entrypoint));
-    }
-  }
-
-  ANDROID_SHELL_HOLDER->Launch(std::move(config));
+  ANDROID_SHELL_HOLDER->Launch(asset_manager, entrypoint, libraryUrl);
 }
 
 static jobject LookupCallbackInformation(JNIEnv* env,
@@ -600,6 +631,12 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&DestroyJNI),
       },
       {
+          .name = "nativeSpawn",
+          .signature = "(JLjava/lang/String;Ljava/lang/String;)Lio/flutter/"
+                       "embedding/engine/FlutterJNI;",
+          .fnPtr = reinterpret_cast<void*>(&SpawnJNI),
+      },
+      {
           .name = "nativeRunBundleAndSnapshotFromLibrary",
           .signature = "(JLjava/lang/String;Ljava/lang/String;"
                        "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
@@ -763,6 +800,29 @@ bool RegisterApi(JNIEnv* env) {
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
                            fml::size(flutter_jni_methods)) != 0) {
     FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterJNI";
+    return false;
+  }
+
+  g_jni_shell_holder_field = env->GetFieldID(
+      g_flutter_jni_class->obj(), "nativeShellHolderId", "Ljava/lang/Long;");
+
+  if (g_jni_shell_holder_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's nativeShellHolderId field";
+    return false;
+  }
+
+  g_jni_constructor =
+      env->GetMethodID(g_flutter_jni_class->obj(), "<init>", "()V");
+
+  if (g_jni_constructor == nullptr) {
+    FML_LOG(ERROR) << "Could not locate FlutterJNI's constructor";
+    return false;
+  }
+
+  g_long_constructor = env->GetStaticMethodID(g_java_long_class->obj(),
+                                              "valueOf", "(J)Ljava/lang/Long;");
+  if (g_long_constructor == nullptr) {
+    FML_LOG(ERROR) << "Could not locate Long's constructor";
     return false;
   }
 
@@ -1014,6 +1074,13 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   if (g_request_dart_deferred_library_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate requestDartDeferredLibrary method";
+    return false;
+  }
+
+  g_java_long_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("java/lang/Long"));
+  if (g_java_long_class->is_null()) {
+    FML_LOG(ERROR) << "Could not locate java.lang.Long class";
     return false;
   }
 
