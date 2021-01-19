@@ -73,44 +73,28 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child!.getMinIntrinsicWidth(height);
-    final BoxConstraints constraints = height.isInfinite
-      ? const BoxConstraints()
-      : BoxConstraints.tightFor(height: height);
-    final Size sizeForNoChild = computeSizeForNoChild(constraints);
-    return sizeForNoChild.width.isFinite ? sizeForNoChild.width : 0;
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
       return child!.getMaxIntrinsicWidth(height);
-    final BoxConstraints constraints = height.isInfinite
-      ? const BoxConstraints()
-      : BoxConstraints.tightFor(height: height);
-    final Size sizeForNoChild = computeSizeForNoChild(constraints);
-    return sizeForNoChild.width.isFinite ? sizeForNoChild.width : 0;
+    return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
       return child!.getMinIntrinsicHeight(width);
-    final BoxConstraints constraints = width.isInfinite
-      ? const BoxConstraints()
-      : BoxConstraints.tightFor(width: width);
-    final Size sizeForNoChild = computeSizeForNoChild(constraints);
-    return sizeForNoChild.height.isFinite ? sizeForNoChild.height : 0;
+    return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
       return child!.getMaxIntrinsicHeight(width);
-    final BoxConstraints constraints = width.isInfinite
-      ? const BoxConstraints()
-      : BoxConstraints.tightFor(width: width);
-    final Size sizeForNoChild = computeSizeForNoChild(constraints);
-    return sizeForNoChild.height.isFinite ? sizeForNoChild.height : 0;
+    return 0.0;
   }
 
   @override
