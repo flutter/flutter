@@ -1421,8 +1421,6 @@ abstract class ResidentRunner {
       // do nothing
     }
     vmService.onExtensionEvent.listen((vm_service.Event event) {
-      print('extensionEvent: ');
-      print(event.json);
       if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
         completer.complete();
       }
