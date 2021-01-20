@@ -51,7 +51,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   }
 
   BrowserHistory? _browserHistory;
-
+  bool _usingRouter = false;
   Future<void> _useSingleEntryBrowserHistory() async {
     if (_browserHistory is SingleEntryBrowserHistory) {
       return;
@@ -61,6 +61,15 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     _browserHistory = SingleEntryBrowserHistory(urlStrategy: strategy);
   }
 
+  Future<void> _useMultiEntryBrowserHistory() async {
+    if (_browserHistory is MultiEntriesBrowserHistory) {
+      return;
+    }
+    final UrlStrategy? strategy = _browserHistory?.urlStrategy;
+    await _browserHistory?.tearDown();
+    _browserHistory = MultiEntriesBrowserHistory(urlStrategy: strategy);
+  }
+
   @visibleForTesting
   Future<void> debugInitializeHistory(
     UrlStrategy? strategy, {
@@ -68,7 +77,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   }) async {
     // Prevent any further customization of URL strategy.
     _isUrlStrategySet = true;
-
+    _usingRouter = false;
     await _browserHistory?.tearDown();
     if (useSingle) {
       _browserHistory = SingleEntryBrowserHistory(urlStrategy: strategy);
@@ -95,11 +104,22 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
     switch (decoded.method) {
       case 'routeUpdated':
-        await _useSingleEntryBrowserHistory();
-        browserHistory.setRouteName(arguments['routeName']);
+        if (!_usingRouter) {
+          await _useSingleEntryBrowserHistory();
+          browserHistory.setRouteName(arguments['routeName']);
+        } else {
+          assert(
+            false,
+            'Receives old navigator update in a router application. '
+            'This can happen if you use non-router versions of MaterialApp/'
+            'CupertinoApp/WidgetsApp together with the router versions of them.'
+          );
+          return false;
+        }
         return true;
       case 'routeInformationUpdated':
-        assert(browserHistory is MultiEntriesBrowserHistory);
+        await _useMultiEntryBrowserHistory();
+        _usingRouter = true;
         browserHistory.setRouteName(
           arguments['location'],
           state: arguments['state'],
