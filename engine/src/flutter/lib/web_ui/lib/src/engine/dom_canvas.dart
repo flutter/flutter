@@ -252,11 +252,14 @@ html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
   sb.write(
       '<svg viewBox="0 0 $width $height" width="${width}px" height="${height}px">');
   sb.write('<path ');
+  final ui.Color color = paint.color ?? const ui.Color(0xFF000000);
   if (paint.style == ui.PaintingStyle.stroke) {
-    sb.write('stroke="${colorToCssString(paint.color)}" ');
+    sb.write('stroke="${colorToCssString(color)}" ');
     sb.write('stroke-width="${paint.strokeWidth}" ');
   } else if (paint.color != null) {
-    sb.write('fill="${colorToCssString(paint.color)}" ');
+    sb.write('fill="${colorToCssString(color)}" ');
+  } else {
+    sb.write('fill="#000000" ');
   }
   if (path.fillType == ui.PathFillType.evenOdd) {
     sb.write('fill-rule="evenodd" ');

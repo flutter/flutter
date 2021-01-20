@@ -927,8 +927,8 @@ class ContextStateHandle {
       fillStyle = colorString;
       strokeStyle = colorString;
     } else {
-      fillStyle = '';
-      strokeStyle = '';
+      fillStyle = '#000000';
+      strokeStyle = '#000000';
     }
 
     final ui.MaskFilter? maskFilter = paint.maskFilter;
