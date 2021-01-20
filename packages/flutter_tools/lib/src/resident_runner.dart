@@ -242,6 +242,20 @@ class FlutterDevice {
             completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
+        // First check if the VM service is actually listening on observatoryUri as
+        // this may not be the case when scraping logcat for URIs. If this URI is
+        // from an old application instance, we shouldn't try and start DDS.
+        try {
+          service = await connectToVmService(observatoryUri);
+          service.dispose();
+        } on Exception catch (exception) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+          return;
+        }
+
         // This first try block is meant to catch errors that occur during DDS startup
         // (e.g., failure to bind to a port, failure to connect to the VM service,
         // attaching to a VM service with existing clients, etc.).

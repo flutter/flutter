@@ -74,6 +74,26 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => fileSystem,
   });
+
+  testUsingContext('pub get skips example directory if it dooes not contain a pubspec.yaml', () async {
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
+
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    await commandRunner.run(<String>['get']);
+
+    expect(await command.usageValues, <CustomDimensions, Object>{
+      CustomDimensions.commandPackagesNumberPlugins: '0',
+      CustomDimensions.commandPackagesProjectModule: 'false',
+      CustomDimensions.commandPackagesAndroidEmbeddingVersion: 'v1'
+    });
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
 }
 
 class FakePub extends Fake implements Pub {
