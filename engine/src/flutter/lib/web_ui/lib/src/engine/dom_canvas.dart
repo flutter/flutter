@@ -135,6 +135,17 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 }
 
+/// Converts a shadow color specified by the framework to the color that should
+/// actually be applied when rendering the element.
+///
+/// Returns a color for box-shadow based on blur filter at sigma.
+ui.Color blurColor(ui.Color color, double sigma) {
+  final double strength = math.min(
+      math.sqrt(sigma) / (math.pi * 2.0), 1.0);
+  final int reducedAlpha = ((1.0 - strength) * color.alpha).round();
+  return ui.Color((reducedAlpha & 0xff) << 24 | (color.value & 0x00ffffff));
+}
+
 html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, String tagName,
     Matrix4 transform) {
   assert(paint.shader == null);
@@ -175,11 +186,20 @@ html.HtmlElement _buildDrawRectElement(ui.Rect rect, SurfacePaintData paint, Str
     ..transformOrigin = '0 0 0'
     ..transform = effectiveTransform;
 
-  final String cssColor =
-  paint.color == null ? '#000000' : colorToCssString(paint.color)!;
+  String cssColor =
+      paint.color == null ? '#000000' : colorToCssString(paint.color)!;
 
   if (paint.maskFilter != null) {
-    style.filter = 'blur(${paint.maskFilter!.webOnlySigma}px)';
+    final double sigma = paint.maskFilter!.webOnlySigma;
+    if (browserEngine == BrowserEngine.webkit && !isStroke) {
+      // A bug in webkit leaves artifacts when this element is animated
+      // with filter: blur, we use boxShadow instead.
+      style.boxShadow = '0px 0px ${sigma * 2.0}px $cssColor';
+      cssColor = colorToCssString(
+          blurColor(paint.color ?? const ui.Color(0xFF000000), sigma))!;
+    } else {
+      style.filter = 'blur(${sigma}px)';
+    }
   }
 
   if (isStroke) {
