@@ -226,13 +226,15 @@ void testMain() {
       expect(count, 2);
     });
 
-    test('prevents default when "Tab" is pressed', () {
+    test('prevents default when key is handled by the framework', () {
       Keyboard.initialize();
 
       int count = 0;
       ui.window.onPlatformMessage = (String channel, ByteData data,
           ui.PlatformMessageResponseCallback callback) {
         count += 1;
+        ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true});
+        callback(response);
       };
 
       final html.KeyboardEvent event = dispatchKeyboardEvent(
@@ -242,6 +244,29 @@ void testMain() {
       );
 
       expect(event.defaultPrevented, isTrue);
+      expect(count, 1);
+
+      Keyboard.instance.dispose();
+    });
+
+    test("Doesn't prevent default when key is not handled by the framework", () {
+      Keyboard.initialize();
+
+      int count = 0;
+      ui.window.onPlatformMessage = (String channel, ByteData data,
+          ui.PlatformMessageResponseCallback callback) {
+        count += 1;
+        ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': false});
+        callback(response);
+      };
+
+      final html.KeyboardEvent event = dispatchKeyboardEvent(
+        'keydown',
+        key: 'Tab',
+        code: 'Tab',
+      );
+
+      expect(event.defaultPrevented, isFalse);
       expect(count, 1);
 
       Keyboard.instance.dispose();
@@ -278,6 +303,8 @@ void testMain() {
       ui.window.onPlatformMessage = (String channel, ByteData data,
           ui.PlatformMessageResponseCallback callback) {
         count += 1;
+        ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true});
+        callback(response);
       };
 
       useTextEditingElement((html.Element element) {
