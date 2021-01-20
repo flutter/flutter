@@ -512,6 +512,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       <String>[
         'attach',
          ...getLocalEngineArguments(),
+        '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
         '-d',

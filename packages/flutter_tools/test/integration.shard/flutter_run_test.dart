@@ -62,16 +62,11 @@ void main() {
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
     await _flutter.resume();
-
-    // Poll with a delay to avoid any timing issues.
-    for (int i = 10; i < 10; i++) {
-      final Response response = await _flutter.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
-      if (response.json['value'] == '') {
-        await Future<void>.delayed(const Duration(seconds: 1));
-      } else {
-        expect(response.json['value'], equals('http://127.0.0.1:9110'));
-        break;
-      }
-    }
+    await pollForServiceExtensionValue(
+      testDriver: _flutter,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      expectedValue: 'http://127.0.0.1:9110',
+    );
   });
 }
