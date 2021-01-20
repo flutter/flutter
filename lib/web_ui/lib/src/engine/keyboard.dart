@@ -80,11 +80,6 @@ class Keyboard {
     }
 
     final html.KeyboardEvent keyboardEvent = event;
-
-    if (_shouldPreventDefault(event)) {
-      event.preventDefault();
-    }
-
     final String timerKey = keyboardEvent.code!;
 
     // Don't handle synthesizing a keyup event for modifier keys
@@ -132,16 +127,17 @@ class Keyboard {
     };
 
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage('flutter/keyevent',
-        _messageCodec.encodeMessage(eventData), _noopCallback);
-  }
-
-  bool _shouldPreventDefault(html.KeyboardEvent event) {
-    switch (event.key) {
-      case 'Tab':
-        return true;
-      default:
-        return false;
-    }
+      _messageCodec.encodeMessage(eventData), (ByteData? data) {
+        if (data == null) {
+          return;
+        }
+        final Map<String, dynamic> jsonResponse = _messageCodec.decodeMessage(data);
+        if (jsonResponse['handled'] as bool) {
+          // If the framework handled it, then don't propagate it any further.
+          event.preventDefault();
+        }
+      },
+    );
   }
 
   void _synthesizeKeyup(html.KeyboardEvent event) {
