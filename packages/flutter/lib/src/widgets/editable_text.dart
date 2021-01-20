@@ -8,7 +8,6 @@ import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -2039,7 +2038,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _closeInputConnectionIfNeeded() {
     if (_hasInputConnection) {
-      _textInputConnection!.close();
+      TextInput.detach(this);
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
     }
@@ -2057,7 +2056,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void connectionClosed() {
     if (_hasInputConnection) {
-      _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(TextInputAction.done, shouldUnfocus: true);

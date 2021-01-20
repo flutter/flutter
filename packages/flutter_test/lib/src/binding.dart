@@ -181,7 +181,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
-    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
   @override
@@ -286,14 +285,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// used for `flutter run` and for [e2e](https://pub.dev/packages/e2e)), it is
   /// equivalent as [Future.delayed].
   Future<void> delayed(Duration duration);
-
-  /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
-  ///
-  /// This can be used to enable additional checks. For example,
-  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
-  /// always run with aggressive intrinsic sizing tests enabled.
-  @protected
-  bool get checkIntrinsicSizes => false;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
@@ -782,6 +773,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Future<void> _runTestBody(Future<void> testBody(), VoidCallback invariantTester) async {
     assert(inTest);
+    // So that we can assert that it remains the same after the test finishes.
+    _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
@@ -814,6 +807,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  late bool _beforeTestCheckIntrinsicSizes;
+
   void _verifyInvariants() {
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
@@ -831,7 +826,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
-      debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
+      debugCheckIntrinsicSizesOverride: _beforeTestCheckIntrinsicSizes,
     ));
     assert(debugAssertAllWidgetVarsUnset(
       'The value of a widget debug variable was changed by the test.',
@@ -943,9 +938,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   bool get disableShadows => true;
-
-  @override
-  bool get checkIntrinsicSizes => true;
 
   /// The value of [defaultTestTimeout] can be set to `None` to enable debugging flutter tests where
   /// we would not want to timeout the test. This is expected to be used by test tooling which

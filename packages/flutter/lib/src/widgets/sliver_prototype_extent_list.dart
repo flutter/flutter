@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
 

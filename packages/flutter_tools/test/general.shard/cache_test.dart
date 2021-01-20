@@ -5,7 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
@@ -244,7 +244,7 @@ void main() {
 
   testWithoutContext('flattenNameSubdirs', () {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://api.flutter.dev/foo/bar'), MemoryFileSystem.test()), 'api.flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
   });
 
@@ -653,24 +653,23 @@ void main() {
 
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
-    MockProcessManager processManager;
     Cache cache;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      processManager = MockProcessManager();
       cache = Cache.test(
         fileSystem: memoryFileSystem,
         processManager: FakeProcessManager.any(),
       );
     });
 
-    testWithoutContext('development artifact', () async {
+    testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
-    testUsingContext('update', () async {
+    testUsingContext('AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present', () async {
+      Cache.flutterRoot = '';
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
@@ -678,16 +677,28 @@ void main() {
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      when(processManager.run(any, environment: captureAnyNamed('environment')))
-        .thenAnswer((Invocation invocation) {
-          final List<String> args = invocation.positionalArguments[0] as List<String>;
-          expect(args.length, 6);
-          expect(args[1], '-b');
-          expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
-          expect(args[5], 'resolveDependencies');
-          expect(invocation.namedArguments[#environment], gradleEnvironment);
-          return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
-        });
+      await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
+
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
+          '-b',
+          'packages/flutter_tools/gradle/resolve_dependencies.gradle',
+          '--project-cache-dir',
+          'cache/bin/cache/flutter_gradle_wrapper.rand0',
+          'resolveDependencies',
+        ])
+      ]),
+      AndroidSdk: () => FakeAndroidSdk()
+    });
+
+    testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
       await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
 
@@ -695,7 +706,8 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+      AndroidSdk: () => null // Android SDK was not located.
     });
   });
 }
@@ -782,3 +794,4 @@ class FakeCache extends Cache {
     return stampFile;
   }
 }
+class FakeAndroidSdk extends Fake implements AndroidSdk {}

@@ -2787,7 +2787,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         ),
 ///       ),
 ///       Text('Flutter logo is offstage: $_offstage'),
-///       RaisedButton(
+///       ElevatedButton(
 ///         child: Text('Toggle Offstage Value'),
 ///         onPressed: () {
 ///           setState(() {
@@ -2796,7 +2796,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         },
 ///       ),
 ///       if (_offstage)
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: Text('Get Flutter Logo size'),
 ///           onPressed: () {
 ///             ScaffoldMessenger.of(context).showSnackBar(
