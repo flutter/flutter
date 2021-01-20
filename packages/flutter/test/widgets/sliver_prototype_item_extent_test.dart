@@ -139,7 +139,7 @@ void main() {
   });
 
   testWidgets('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/67117.
+    // Regression test for https://github.com/flutter/flutter/issues/67117
     // This test ensures that the SliverPrototypeExtentList does not cause an
     // assertion error when calculating the paint transform of its prototypeItem.
     // The paint transform of the prototypeItem should be zero, since it is not visible.

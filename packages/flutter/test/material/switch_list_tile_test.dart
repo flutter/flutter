@@ -359,15 +359,15 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
-    const Color tileColor = Color(0xffff0000);
+    final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: SwitchListTile(
             value: false,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             tileColor: tileColor,
           ),
         ),
@@ -378,15 +378,15 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
-    const Color selectedTileColor = Color(0xff000000);
+    final Color selectedTileColor = Colors.black;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: SwitchListTile(
             value: false,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
           ),

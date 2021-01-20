@@ -1450,10 +1450,10 @@ void main() {
   });
 
   testWidgets('ListTile shape is painted correctly', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/63877.
-    const Color tileColor = Color(0xffff0000);
+    // Regression test for https://github.com/flutter/flutter/issues/63877
     const ShapeBorder rectShape = RoundedRectangleBorder();
     const ShapeBorder stadiumShape = StadiumBorder();
+    final Color tileColor = Colors.red.shade500;
 
     Widget buildListTile(ShapeBorder shape) {
       return MaterialApp(
@@ -1599,8 +1599,8 @@ void main() {
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color tileColor = Color(0xff00ff00);
-    const Color selectedTileColor = Color(0xffff0000);
+    final Color tileColor = Colors.green.shade500;
+    final Color selectedTileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1636,8 +1636,8 @@ void main() {
   });
 
   testWidgets('ListTile shows Material ripple effects on top of tileColor', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/73616.
-    const Color tileColor = Color(0xffff0000);
+    // Regression test for https://github.com/flutter/flutter/issues/73616
+    final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1742,8 +1742,8 @@ void main() {
 
   testWidgets('ListTileTheme\'s tileColor & selectedTileColor are overridden by ListTile properties', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color tileColor = Color(0xff00ff00);
-    const Color selectedTileColor = Color(0xffff0000);
+    final Color tileColor = Colors.green.shade500;
+    final Color selectedTileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       MaterialApp(
