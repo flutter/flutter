@@ -7,8 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:git/git.dart';
-import 'package:metrics_center/flutter.dart';
-import 'package:metrics_center/google_benchmark.dart';
+import 'package:metrics_center/metrics_center.dart';
 
 Future<String> _getGitRevision() async {
   final GitDir gitDir = await GitDir.fromExisting('../../');
