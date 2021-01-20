@@ -454,6 +454,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
+    this.forceSubmitOnFocusLost = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -465,6 +466,7 @@ class TextInputConfiguration {
     this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       assert(forceSubmitOnFocusLost != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -485,6 +487,13 @@ class TextInputConfiguration {
   ///
   /// Defaults to false.
   final bool obscureText;
+
+  // In Flutter for Web, the onSubmitted callback is not triggered by default
+  // when the user clicks away from the TextField.
+  // If the user clicks on an area other than the input field itself, then
+  // force the input field to lose focus. The connection will close and the
+  // onSubmitted callback on the TextField will be invoked.
+  final bool forceSubmitOnFocusLost;
 
   /// Whether to enable autocorrection.
   ///
@@ -593,6 +602,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
+      'forceSubmitOnFocusLost': forceSubmitOnFocusLost,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),
