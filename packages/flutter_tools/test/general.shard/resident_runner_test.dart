@@ -2889,6 +2889,16 @@ void main() {
     if (!caught) {
       fail('Expected a StateError to be thrown.');
     }
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
   }));
 
   testUsingContext('nextPlatform moves through expected platforms', () {
