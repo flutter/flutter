@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dds/src/rpc_error_codes.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
