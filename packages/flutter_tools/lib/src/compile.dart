@@ -241,7 +241,6 @@ class KernelCompiler {
       sdkRoot,
       '--target=$targetModel',
       '--no-print-incremental-dependencies',
-      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ...buildModeOptions(buildMode, dartDefines),
@@ -660,7 +659,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/59902
       '--experimental-emit-debug-metadata',
-      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[

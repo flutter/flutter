@@ -128,6 +128,9 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
 
+  /// The option name for a custom DevTools server address.
+  static const String kDevToolsServerAddress = 'devtools-server-address';
+
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
@@ -322,6 +325,13 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
+  void addDevToolsOptions() {
+    argParser.addOption(kDevToolsServerAddress,
+      help: 'When this value is provided, the Flutter tool will not spin up a '
+          'new DevTools server instance, but instead will use the one provided '
+          'at this address.');
+  }
+
   void addDdsOptions({@required bool verboseHelp}) {
     argParser.addOption('dds-port',
       help: 'When this value is provided, the Dart Development Service (DDS) will be '
@@ -363,6 +373,16 @@ abstract class FlutterCommand extends Command<void> {
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
+  }
+
+  Uri get devToolsServerAddress {
+    if (argResults.wasParsed(kDevToolsServerAddress)) {
+      final Uri uri = Uri.tryParse(stringArg(kDevToolsServerAddress));
+      if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
+        return uri;
+      }
+    }
+    return null;
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -456,12 +476,13 @@ abstract class FlutterCommand extends Command<void> {
             'and double.fromEnvironment constructors.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
       valueHelp: 'foo=bar',
+      splitCommas: false,
     );
   }
 
   void usesWebRendererOption() {
     argParser.addOption('web-renderer',
-      defaultsTo: 'html',
+      defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web. Possible values are:\n'
             'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
@@ -486,6 +507,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
+
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
 
   Duration get deviceDiscoveryTimeout {
     if (_deviceDiscoveryTimeout == null
@@ -658,7 +682,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cached-ness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.',
+      hide: hide,
     );
   }
 
@@ -671,6 +696,20 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+      hide: hide,
+    );
+  }
+
+  void addNativeNullAssertions({ bool hide = false }) {
+    argParser.addFlag('native-null-assertions',
+      defaultsTo: true,
+      hide: hide,
+      help: 'Enables additional runtime null checks in web applications to ensure '
+        'the correct nullability of native (such as in dart:html) and external '
+        '(such as with JS interop) types. This is enabled by default but only takes '
+        'effect in sound mode. To report an issue with a null assertion failure in '
+        'dart:html or the other dart web libraries, please file a bug at '
+        'https://github.com/dart-lang/sdk/issues/labels/web-libraries .'
     );
   }
 
@@ -884,7 +923,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer')) {
       dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 
@@ -1099,6 +1138,9 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
@@ -1113,6 +1155,16 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return await runCommand();
+  }
+
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    NullSafetyAnalysisEvent(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    ).send();
   }
 
   /// The set of development artifacts required for this command.

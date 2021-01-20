@@ -29,6 +29,9 @@ void main() {
     await flutter.test(coverage: true);
     await flutter.done;
 
-    expect(tempDir.childDirectory('coverage').childFile('lcov.info'), exists);
+    final File lcovFile = tempDir.childDirectory('coverage').childFile('lcov.info');
+
+    expect(lcovFile, exists);
+    expect(lcovFile.readAsStringSync(), contains('main.dart')); // either 'SF:lib/main.dart or SF:lib\\main.dart
   });
 }

@@ -5,7 +5,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show Offset;
 
 import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/foundation.dart';

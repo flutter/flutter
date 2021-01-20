@@ -78,7 +78,7 @@ enum StretchMode {
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return;
+///               return Future.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(

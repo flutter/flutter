@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -113,10 +112,8 @@ class ModalBarrier extends StatelessWidget {
               opaque: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
-                child: color == null ? null : DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: color,
-                  ),
+                child: color == null ? null : ColoredBox(
+                  color: color!,
                 ),
               ),
             ),

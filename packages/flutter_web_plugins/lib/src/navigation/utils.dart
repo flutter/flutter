@@ -4,7 +4,6 @@
 
 import 'dart:html';
 
-// TODO(mdebbar): Use the `URI` class instead?
 final AnchorElement _urlParsingNode = AnchorElement();
 
 /// Extracts the pathname part of a full [url].

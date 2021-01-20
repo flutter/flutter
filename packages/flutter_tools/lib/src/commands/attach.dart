@@ -101,6 +101,7 @@ class AttachCommand extends FlutterCommand {
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
+    addDevToolsOptions();
     usesDeviceTimeoutOption();
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -318,7 +319,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         try {
           app = await daemon.appDomain.launch(
             runner,
-            runner.attach,
+            ({Completer<DebugConnectionInfo> connectionInfoCompleter,
+              Completer<void> appStartedCompleter}) {
+              return runner.attach(
+                connectionInfoCompleter: connectionInfoCompleter,
+                appStartedCompleter: appStartedCompleter,
+                allowExistingDdsInstance: true,
+              );
+            },
             device,
             null,
             true,
@@ -354,6 +362,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,
+          allowExistingDdsInstance: true,
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);
@@ -397,7 +406,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(buildInfo, disableDds: boolArg('disable-dds'));
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      disableDds: boolArg('disable-dds'),
+      devToolsServerAddress: devToolsServerAddress,
+    );
 
     return buildInfo.isDebug
       ? hotRunnerFactory.build(
