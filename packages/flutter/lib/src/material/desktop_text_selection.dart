@@ -76,7 +76,7 @@ class _DesktopTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that loosely follows Material design conventions.
-final TextSelectionControls materialDesktopTextSelectionControls =
+final TextSelectionControls desktopTextSelectionControls =
     _DesktopTextSelectionControls();
 
 // Generates the child that's passed into DesktopTextSelectionToolbar.

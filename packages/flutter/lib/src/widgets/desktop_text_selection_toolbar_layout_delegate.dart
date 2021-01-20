@@ -10,7 +10,10 @@ import 'package:flutter/rendering.dart';
 ///
 /// See also:
 ///
-///   * [CupertinoDesktopTextSelectionToolbar], which uses this to position itself.
+///   * [desktopTextSelectionControls], which uses this to position
+///     itself.
+///   * [cupertinoDesktopTextSelectionControls], which uses this to position
+///     itself.
 ///   * [TextSelectionToolbarLayoutDelegate], which does a similar layout for
 ///     the mobile text selection toolbars.
 class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
