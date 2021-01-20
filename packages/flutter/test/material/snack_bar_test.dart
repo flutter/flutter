@@ -2300,8 +2300,8 @@ void main() {
       ),
     ));
 
-    final ScaffoldMessengerState scaffoldMessengerState = tester.state(
-        find.byType(ScaffoldMessenger)
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
     );
     scaffoldMessengerState.showSnackBar(SnackBar(
       content: const Text('ScaffoldMessenger'),
@@ -2312,9 +2312,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsOneWidget);
-    // The floating action button helps us identify which Scaffold has the
+    // The FloatingActionButton helps us identify which Scaffold has the
     // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
-    // Should be above it. If the inner Scaffold had the SnackBar, it would be
+    // should be above it. If the inner Scaffold had the SnackBar, it would be
     // overlapping the FAB.
     await expectLater(
       find.byType(MaterialApp),

@@ -392,9 +392,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   // SnackBar in the root Scaffold of the nested set.
   bool _isRoot(ScaffoldState scaffold) {
     final ScaffoldState? parent = scaffold.context.findAncestorStateOfType<ScaffoldState>();
-    if (parent != null && _scaffolds.contains(parent))
-      return false;
-    return true;
+    return parent == null || !_scaffolds.contains(parent);
   }
 
   /// Removes the current [SnackBar] (if any) immediately from registered
