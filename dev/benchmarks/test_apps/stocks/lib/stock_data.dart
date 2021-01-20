@@ -68,9 +68,8 @@ class StockData extends ChangeNotifier {
   static const int _chunkCount = 30;
   int _nextChunk = 0;
 
-  String _urlToFetch(int chunk) {
-    return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
-  }
+  Uri _urlToFetch(int chunk) => Uri.https(
+      'domokit.github.io', 'examples/stocks/data/stock_data_$chunk.json');
 
   http.Client _httpClient;
 
