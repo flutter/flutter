@@ -454,6 +454,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
+    this.forceCloseConnectionOnBlur = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -465,6 +466,7 @@ class TextInputConfiguration {
     this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       assert(forceCloseConnectionOnBlur != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
@@ -485,6 +487,22 @@ class TextInputConfiguration {
   ///
   /// Defaults to false.
   final bool obscureText;
+
+  /// Previously, Flutter for Web behaved like a web page. If user clicked on an
+  /// area other than the input field itself, the input field was blurred, thus
+  /// the connection was closed.
+  /// This behavior was changed for Desktop Browsers.
+  /// https://github.com/flutter/engine/pull/18743
+  ///
+  /// Now only, pressing enter or tab changes the focus of the input fields.
+  ///
+  /// This created a regression for applications that relied on the old behavior
+  /// https://github.com/flutter/flutter/issues/64245
+  ///
+  /// This flag provides a workaround to the regression allowing developers to
+  /// optionally force the connection to close on blur, as suggested in the comments
+  /// https://github.com/flutter/flutter/issues/64245#issuecomment-681815149
+  final bool forceCloseConnectionOnBlur;
 
   /// Whether to enable autocorrection.
   ///
@@ -593,6 +611,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
+      'forceCloseConnectionOnBlur': forceCloseConnectionOnBlur,
       'autocorrect': autocorrect,
       'smartDashesType': smartDashesType.index.toString(),
       'smartQuotesType': smartQuotesType.index.toString(),

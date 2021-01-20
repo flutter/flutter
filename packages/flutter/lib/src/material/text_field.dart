@@ -348,6 +348,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
+    this.forceCloseConnectionOnBlur = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -531,6 +532,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
+
+  /// {@macro flutter.widgets.editableText.forceCloseConnectionOnBlur}
+  final bool forceCloseConnectionOnBlur;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
@@ -1190,6 +1194,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           autofocus: widget.autofocus,
           obscuringCharacter: widget.obscuringCharacter,
           obscureText: widget.obscureText,
+          forceCloseConnectionOnBlur: widget.forceCloseConnectionOnBlur,
           autocorrect: widget.autocorrect,
           smartDashesType: widget.smartDashesType,
           smartQuotesType: widget.smartQuotesType,

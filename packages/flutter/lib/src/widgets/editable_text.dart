@@ -418,6 +418,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
+    this.forceCloseConnectionOnBlur = false,
     this.autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
@@ -554,6 +555,9 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
   final bool obscureText;
+
+  /// {@macro flutter.services.TextInputConfiguration.forceCloseConnectionOnBlur}
+  final bool forceCloseConnectionOnBlur;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior? textHeightBehavior;
@@ -2514,6 +2518,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
+      forceCloseConnectionOnBlur: widget.forceCloseConnectionOnBlur,
       autocorrect: widget.autocorrect,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
