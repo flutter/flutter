@@ -172,7 +172,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<DevToolsServerAddress> serve() async {
-    await launch(null);
+    if (activeDevToolsServer == null) {
+      await launch(null);
+    }
     return activeDevToolsServer;
   }
 
