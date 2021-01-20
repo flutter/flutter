@@ -12,7 +12,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
-import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme.dart';
@@ -110,7 +109,7 @@ class ListTileTheme extends InheritedTheme {
   final bool dense;
 
   /// {@template flutter.material.ListTileTheme.shape}
-  /// If specified, [shape] defines the [ListTile]'s shape.
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
   /// {@endtemplate}
   final ShapeBorder? shape;
 
@@ -839,12 +838,13 @@ class ListTile extends StatelessWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// The tile's shape.
+  /// The shape of the tile's [InkWell].
   ///
-  /// Defines the tile's [InkWell.customBorder] and [Ink.decoration] shape.
+  /// Defines the tile's [InkWell.customBorder].
   ///
-  /// If this property is null then [ListTileTheme.shape] is used.
-  /// If that's null then a rectangular [Border] will be used.
+  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
+  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
+  /// with a circular corner radius of 4.0.
   final ShapeBorder? shape;
 
   /// The tile's internal padding.
@@ -1183,11 +1183,8 @@ class ListTile extends StatelessWidget {
       child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: Ink(
-          decoration: ShapeDecoration(
-            shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(tileTheme),
-          ),
+        child: ColoredBox(
+          color: _tileBackgroundColor(tileTheme),
           child: SafeArea(
             top: false,
             bottom: false,
