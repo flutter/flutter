@@ -1028,6 +1028,8 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
+  ///
+  /// This may be null if the device is running in release mode.
   vm_service.VmService connectedVMService;
 
   @override

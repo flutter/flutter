@@ -72,6 +72,7 @@ class ColdRunner extends ResidentRunner {
     if (!debuggingEnabled) {
       appStartedCompleter?.complete();
       for (final FlutterDevice device in flutterDevices) {
+        await device.initLogReader();
         globals.printTrace('Connected to ${device.device.name}');
       }
       if (stayResident && !traceStartup) {

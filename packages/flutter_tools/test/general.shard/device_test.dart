@@ -513,6 +513,10 @@ void main() {
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '', nullAssertions: true)), '--null_assertions');
     expect(computeDartVmFlags(DebuggingOptions.enabled(BuildInfo.debug, dartFlags: '--foo', nullAssertions: true)), '--foo,--null_assertions');
   });
+
+  testWithoutContext('initLogReader attaches vm service when non null', () {
+
+  });
 }
 
 class TestDeviceManager extends DeviceManager {

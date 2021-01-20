@@ -234,6 +234,73 @@ void main() {
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
 
+  testUsingContext('ResidentRunner can run device successfully in profile mode and attach log reader', () => testbed.run(() async {
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      target: 'main.dart',
+    );
+    when(mockFlutterDevice.runCold(
+      coldRunner: anyNamed('coldRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    final Future<int> result = residentRunner.run(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    );
+
+    expect(await result, 0);
+
+    verify(mockFlutterDevice.initLogReader()).called(1);
+
+    expect(onConnectionInfo.isCompleted, true);
+    expect(onAppStart.isCompleted, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }), overrides: <Type, Generator>{
+    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  });
+
+  testUsingContext('ResidentRunner can run device successfully in release mode and attach log reader', () => testbed.run(() async {
+    residentRunner = ColdRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+      target: 'main.dart',
+    );
+    when(mockFlutterDevice.runCold(
+      coldRunner: anyNamed('coldRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    fakeVmServiceHost = null;
+    final Completer<void> onAppStart = Completer<void>.sync();
+    final Future<int> result = residentRunner.run(
+      appStartedCompleter: onAppStart,
+    );
+
+    expect(await result, 0);
+
+    verify(mockFlutterDevice.initLogReader()).called(1);
+
+    expect(onAppStart.isCompleted, true);
+  }), overrides: <Type, Generator>{
+    DevtoolsLauncher: () => mockDevtoolsLauncher,
+  });
+
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
