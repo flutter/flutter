@@ -727,36 +727,36 @@ void main() {
     expect(retrievedRouteSettings, routeSettings);
   });
 
-  testWidgets('Verify showModalBottomSheet use AnimationController if provided.',
-          (WidgetTester tester) async {
+  testWidgets('Verify showModalBottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    transitionAnimationController: AnimationController(
-                        vsync: const TestVSync(),
-                        duration: const Duration(seconds: 2),
-                        reverseDuration: const Duration(seconds: 2)),
-                    builder: (BuildContext context) {
-                      return Container(
-                        child: const Text('BottomSheet'),
-                      );
-                    },
-                  );
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  height: 100.0,
-                  width: 100.0,
-                  key: tapTarget,
-                ),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  transitionAnimationController: AnimationController(
+                    vsync: const TestVSync(),
+                    duration: const Duration(seconds: 2),
+                    reverseDuration: const Duration(seconds: 2)
+                  ),
+                  builder: (BuildContext context) {
+                    return Container(
+                      child: const Text('BottomSheet'),
+                    );
+                  },
+                );
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
         ),
       ),
     ));
@@ -779,41 +779,41 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgets('Verify persistence BottomSheet use AnimationController if provided.',
-          (WidgetTester tester) async {
+  testWidgets('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  showBottomSheet<void>(
-                    context: context,
-                    transitionAnimationController: AnimationController(
-                        vsync: const TestVSync(),
-                        duration: const Duration(seconds: 2),
-                        reverseDuration: const Duration(seconds: 2)),
-                    builder: (BuildContext context) {
-                      return Container(
-                        child: MaterialButton(
-                          child: const Text('BottomSheet'),
-                          onPressed: () => Navigator.pop(context),
-                          key: tapTargetToClose,
-                        ),
-                      );
-                    },
-                  );
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  height: 100.0,
-                  width: 100.0,
-                  key: tapTarget,
-                ),
-              );
-            }
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                showBottomSheet<void>(
+                  context: context,
+                  transitionAnimationController: AnimationController(
+                    vsync: const TestVSync(),
+                    duration: const Duration(seconds: 2),
+                    reverseDuration: const Duration(seconds: 2)
+                  ),
+                  builder: (BuildContext context) {
+                    return Container(
+                      child: MaterialButton(
+                        child: const Text('BottomSheet'),
+                        onPressed: () => Navigator.pop(context),
+                        key: tapTargetToClose,
+                      ),
+                    );
+                  },
+                );
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
         ),
       ),
     ));

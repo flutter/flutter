@@ -591,8 +591,6 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
 ///
-/// The [transitionAnimationController] is an optional parameter.
-///
 /// The [transitionAnimationController] controls the bottom sheet's entrance and
 /// exit animations if provided.
 ///
