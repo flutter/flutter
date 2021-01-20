@@ -689,7 +689,7 @@ void main() {
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
-    final Color selectedTileColor = Colors.black;
+    final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
       wrap(
