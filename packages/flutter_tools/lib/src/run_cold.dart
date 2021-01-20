@@ -69,66 +69,23 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
-    // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
-      try {
-        await Future.wait(<Future<void>>[
-          connectToServiceProtocol(
-            allowExistingDdsInstance: false,
-          ),
-          serveDevToolsGracefully(
-            devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          ),
-        ]);
-      } on String catch (message) {
-        globals.printError(message);
-        appFailedToStart();
-        return 2;
+    if (!debuggingEnabled) {
+      appStartedCompleter?.complete();
+      for (final FlutterDevice device in flutterDevices) {
+        globals.printTrace('Connected to ${device.device.name}');
       }
-    }
-
-    if (flutterDevices.first.observatoryUris != null) {
-      // For now, only support one debugger connection.
-      connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.vmService.httpAddress,
-        wsUri: flutterDevices.first.vmService.wsAddress,
-      ));
-    }
-
-    globals.printTrace('Application running.');
-
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
+      if (stayResident && !traceStartup) {
+        return waitForAppToFinish();
       }
-      await device.initLogReader();
-      globals.printTrace('Connected to ${device.device.name}');
+      await cleanupAtFinish();
+      return 0;
+    } else {
+      return attach(
+        connectionInfoCompleter: connectionInfoCompleter,
+        appStartedCompleter: appStartedCompleter,
+        allowExistingDdsInstance: false,
+      );
     }
-
-    if (traceStartup) {
-      // Only trace startup for the first device.
-      final FlutterDevice device = flutterDevices.first;
-      if (device.vmService != null) {
-        globals.printStatus('Tracing startup on ${device.device.name}.');
-        await downloadStartupTrace(
-          device.vmService,
-          awaitFirstFrame: awaitFirstFrameWhenTracing,
-          logger: globals.logger,
-          output: globals.fs.directory(getBuildDirectory()),
-        );
-      }
-      appFinished();
-    }
-
-    appStartedCompleter?.complete();
-
-    writeVmServiceFile();
-
-    if (stayResident && !traceStartup) {
-      return waitForAppToFinish();
-    }
-    await cleanupAtFinish();
-    return 0;
   }
 
   @override
@@ -152,6 +109,31 @@ class ColdRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
+
+    if (traceStartup) {
+      // Only trace startup for the first device.
+      final FlutterDevice device = flutterDevices.first;
+      if (device.vmService != null) {
+        globals.printStatus('Tracing startup on ${device.device.name}.');
+        await downloadStartupTrace(
+          device.vmService,
+          awaitFirstFrame: awaitFirstFrameWhenTracing,
+          logger: globals.logger,
+          output: globals.fs.directory(getBuildDirectory()),
+        );
+      }
+      appFinished();
+      return 0;
+    }
+
+    if (flutterDevices.first.observatoryUris != null) {
+      // For now, only support one debugger connection.
+      connectionInfoCompleter?.complete(DebugConnectionInfo(
+        httpUri: flutterDevices.first.vmService.httpAddress,
+        wsUri: flutterDevices.first.vmService.wsAddress,
+      ));
+    }
+
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
@@ -161,6 +143,7 @@ class ColdRunner extends ResidentRunner {
         globals.printTrace('Connected to $view.');
       }
     }
+    writeVmServiceFile();
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
