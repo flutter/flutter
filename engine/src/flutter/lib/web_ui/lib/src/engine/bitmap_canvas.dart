@@ -950,7 +950,7 @@ class BitmapCanvas extends EngineCanvas {
     } else {
       _drawPointsPaint.style = ui.PaintingStyle.fill;
     }
-    _drawPointsPaint.color = paint.color;
+    _drawPointsPaint.color = paint.color ?? const ui.Color(0xFF000000);
     _drawPointsPaint.maskFilter = paint.maskFilter;
 
     final double dpr = ui.window.devicePixelRatio;
