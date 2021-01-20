@@ -1308,8 +1308,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// See also:
   ///
-  ///  * [DebugCreator], which [Widget]s backed by [RenderObject]s use for this
-  ///    field.
+  ///  * [DebugCreator], which the [widgets] library uses as values for this field.
   Object? debugCreator;
 
   void _debugReportException(String method, Object exception, StackTrace stack) {
