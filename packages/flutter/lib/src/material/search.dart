@@ -104,7 +104,7 @@ abstract class SearchDelegate<T> {
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
-  ///     String hintText,
+  ///     required String hintText,
   ///   }) : super(
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,

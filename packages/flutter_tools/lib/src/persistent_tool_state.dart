@@ -47,8 +47,14 @@ abstract class PersistentToolState {
   /// Update the last active version for a given [channel].
   void updateLastActiveVersion(String fullGitHash, Channel channel);
 
+  /// Return the hash of the last active license terms.
+  String lastActiveLicenseTerms;
+
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
+
+  /// The last time the the DevTools package was activated from pub.
+  DateTime lastDevToolsActivationTime;
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -82,6 +88,8 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.stable: 'last-active-stable-version'
   };
   static const String _kBotKey = 'is-bot';
+  static const String _kLastDevToolsActivationTimeKey = 'last-devtools-activation-time';
+  static const String _kLicenseHash = 'license-hash';
 
   final Config _config;
 
@@ -109,6 +117,15 @@ class _DefaultPersistentToolState implements PersistentToolState {
     _config.setValue(versionKey, fullGitHash);
   }
 
+  @override
+  String get lastActiveLicenseTerms => _config.getValue(_kLicenseHash) as String;
+
+  @override
+  set lastActiveLicenseTerms(String value) {
+    assert(value != null);
+    _config.setValue(_kLicenseHash, value);
+  }
+
   String _versionKeyFor(Channel channel) {
     return _lastActiveVersionKeys[channel];
   }
@@ -118,4 +135,14 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   @override
   set isRunningOnBot(bool value) => _config.setValue(_kBotKey, value);
+
+  @override
+  DateTime get lastDevToolsActivationTime {
+    final String value = _config.getValue(_kLastDevToolsActivationTimeKey) as String;
+    return value != null ? DateTime.parse(value) : null;
+  }
+
+  @override
+  set lastDevToolsActivationTime(DateTime time) =>
+      _config.setValue(_kLastDevToolsActivationTimeKey, time.toString());
 }

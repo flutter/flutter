@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/foundation.dart';
 
 import 'object.dart';
@@ -54,20 +53,20 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment,
-///     TextDirection textDirection,
-///     RenderBox child,
+///     AlignmentGeometry alignment = Alignment.center,
+///     TextDirection? textDirection,
+///     RenderBox? child,
 ///   }) : super.mixin(alignment, textDirection, child);
 ///
-///   Rect _containerRect;
-///   Rect _childRect;
+///   late Rect _containerRect;
+///   late Rect _childRect;
 ///
 ///   @override
 ///   void performLayout() {
 ///     // ...
-///     final BoxParentData childParentData = child.parentData;
+///     final BoxParentData childParentData = child!.parentData! as BoxParentData;
 ///     _containerRect = Offset.zero & size;
-///     _childRect = childParentData.offset & child.size;
+///     _childRect = childParentData.offset & child!.size;
 ///   }
 ///
 ///   @override

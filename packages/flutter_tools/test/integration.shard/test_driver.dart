@@ -179,7 +179,10 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     await resume().timeout(defaultTimeout)
-        .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
+        .catchError((Object e) {
+          _debugPrint('Ignoring failure to resume during shutdown');
+          return null;
+        });
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid, io.ProcessSignal.sigterm);

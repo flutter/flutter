@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -194,14 +193,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///     1: Text('Child 2'),
   ///   };
   ///
-  ///   int currentValue;
+  ///   int? currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Container(
   ///       child: CupertinoSlidingSegmentedControl<int>(
   ///         children: children,
-  ///         onValueChanged: (int newValue) {
+  ///         onValueChanged: (int? newValue) {
   ///           setState(() {
   ///             currentValue = newValue;
   ///           });

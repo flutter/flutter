@@ -181,21 +181,21 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('AotAssemblyRelease throws exception if asked to build for x86 target', () async {
+  testUsingContext('AotAssemblyRelease throws exception if asked to build for simulator', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
-        kSdkRoot: 'path/to/sdk',
+        kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+        kBuildMode: 'release',
+        kIosArchs: 'x86_64',
       },
       processManager: processManager,
       artifacts: artifacts,
       logger: logger,
       fileSystem: fileSystem,
     );
-    environment.defines[kBuildMode] = 'release';
-    environment.defines[kIosArchs] = 'x86_64';
 
     expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
       .having(

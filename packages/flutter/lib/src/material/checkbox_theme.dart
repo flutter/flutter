@@ -64,14 +64,9 @@ class CheckboxThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final MaterialStateProperty<Color?>? checkColor;
 
-  /// The color for the checkbox's [Material].
+  /// {@macro flutter.material.checkbox.overlayColor}
   ///
-  /// Resolves in the following states:
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///
-  /// If specified, overrides the default value of [Checkbox.focusColor] and
-  /// [Checkbox.hoverColor].
+  /// If specified, overrides the default value of [Checkbox.overlayColor].
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.checkbox.splashRadius}

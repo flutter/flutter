@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -39,7 +40,6 @@ void main() {
       clock = MockClock();
       mockProcessInfo = MockProcessInfo();
 
-      when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
@@ -290,6 +290,48 @@ void main() {
       expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
     });
 
+    testUsingContext('devToolsServerAddress returns parsed uri', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      await createTestCommandRunner(command).run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'http://127.0.0.1:9105',
+      ]);
+      expect(command.devToolsServerAddress.toString(), equals('http://127.0.0.1:9105'));
+    });
+
+    testUsingContext('devToolsServerAddress returns null for bad input', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'hello-world',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '127.0.0.1:9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
@@ -485,6 +527,47 @@ void main() {
         );
       }
     });
+
+    testUsingContext('reports null safety analytics when reportNullSafety is true', () async {
+      globals.fs.file('lib/main.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// @dart=2.12');
+      globals.fs.file('pubspec.yaml')
+        .writeAsStringSync('name: example\n');
+      globals.fs.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ],
+  "generated": "2020-12-02T19:30:53.862346Z",
+  "generator": "pub",
+  "generatorVersion": "2.12.0-76.0.dev"
+}
+ ''');
+      final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['test']);
+
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
+        'cd49': '1', 'cd50': '1',
+      })).called(1);
+      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+    }, overrides: <Type, Generator>{
+      Pub: () => FakePub(),
+      Usage: () => MockitoUsage(),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
@@ -541,6 +624,32 @@ class FakeTargetCommand extends FlutterCommand {
   String get name => 'test';
 }
 
+class FakeReportingNullSafetyCommand extends FlutterCommand {
+  FakeReportingNullSafetyCommand() {
+    argParser.addFlag('debug');
+    argParser.addFlag('release');
+    argParser.addFlag('jit-release');
+    argParser.addFlag('profile');
+  }
+
+  @override
+  String get description => 'test';
+
+  @override
+  String get name => 'test';
+
+  @override
+  bool get shouldRunPub => true;
+
+  @override
+  bool get reportNullSafety => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
 class MockVersion extends Mock implements FlutterVersion {}
 class MockProcessInfo extends Mock implements ProcessInfo {}
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
@@ -568,4 +677,18 @@ class FakeSignals implements Signals {
 
   @override
   Stream<Object> get errors => delegate.errors;
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async { }
 }
