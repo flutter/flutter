@@ -652,7 +652,7 @@ void main() {
 
     // Finish the previous gesture arena.
     tester.async.elapse(const Duration(milliseconds: 300));
-    expect(tapCount, 1); // The first tap should not trigger onTap callback though it win the arena.
+    expect(tapCount, 1); // The first tap should not trigger onTap callback though it wins the arena.
 
     tap.dispose();
     doubleTap.dispose();
