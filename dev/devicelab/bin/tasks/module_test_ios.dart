@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -292,6 +293,8 @@ Future<void> main() async {
       section('Run platform unit tests');
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
         simulatorDeviceId = deviceId;
+
+        final String resultBundlePath = path.join(hostAgent.dumpDirectory.path, 'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}');
         return inDirectory(objectiveCHostApp, () =>
           exec(
             'xcodebuild',
@@ -304,6 +307,8 @@ Future<void> main() async {
               'Debug',
               '-destination',
               'id=$deviceId',
+              '-resultBundlePath',
+              resultBundlePath,
               'test',
               'CODE_SIGNING_ALLOWED=NO',
               'CODE_SIGNING_REQUIRED=NO',
