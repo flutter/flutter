@@ -14,7 +14,7 @@
       "fuchsia.ui.input.ImeService",
       "fuchsia.ui.policy.Presenter",
       "fuchsia.ui.scenic.Scenic",
-      "fuchsia.wlan.service.Wlan"
+      "fuchsia.wlan.product.deprecatedclient.DeprecatedClient"
     ]
   }
 }
