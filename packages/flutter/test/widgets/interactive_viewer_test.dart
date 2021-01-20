@@ -985,6 +985,49 @@ void main() {
       expect(scale, greaterThan(1.0));
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
+
+    testWidgets('Check if ClipRect is present in the tree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                clipBehavior: Clip.none,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(ClipRect),
+        findsNothing,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(ClipRect),
+        findsOneWidget,
+      );
+    });
   });
 
   group('getNearestPointOnLine', () {
