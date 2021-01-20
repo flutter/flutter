@@ -11,6 +11,29 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      field: 'resizeToAvoidBottomPadding'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'resizeToAvoidBottomPadding'
+        newName: 'resizeToAvoidBottomInset'
+
   # Change made in https://github.com/flutter/flutter/pull/20649
   # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
   - title: 'Replace with CupertinoPopupSurface'
