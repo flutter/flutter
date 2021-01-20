@@ -159,45 +159,78 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter for desktop on macOS',
+  name: 'Flutter beta support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
+  extraHelpText: flutterNext ?
+      'The stable channel provides a snapshot of the beta support. '
+      'For up-to-date beta support, switch to the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter for desktop on Linux',
+  name: 'Flutter beta support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
+  extraHelpText: flutterNext ?
+      'The stable channel provides a snapshot of the beta support. '
+      'For up-to-date beta support, switch to the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter for desktop on Windows',
+  name: 'Flutter beta support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
+  extraHelpText: flutterNext ?
+      'The stable channel provides a snapshot of the beta support. '
+      'For up-to-date beta support, switch to the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
   dev: FeatureChannelSetting(
     available: true,
+    enabledByDefault: false,
+  ),
+  beta: FeatureChannelSetting(
+    available: flutterNext,
+    enabledByDefault: false,
+  ),
+  stable: FeatureChannelSetting(
+    available: flutterNext,
     enabledByDefault: false,
   ),
 );
@@ -318,6 +351,7 @@ class Feature {
     @required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.dev = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
@@ -353,6 +387,11 @@ class Feature {
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String configSetting;
 
+  /// Additional text to add to the end of the help message.
+  ///
+  /// If not provided, defaults to `null` meaning there is no additional text.
+  final String extraHelpText;
+
   /// A help message for the `flutter config` command, or null if unsupported.
   String generateHelpMessage() {
     if (configSetting == null) {
@@ -374,6 +413,9 @@ class Feature {
       final String prefix = (channels.toList()
         ..removeLast()).join(', ');
       buffer.write('the $prefix, and ${channels.last} channels.');
+    }
+    if (extraHelpText != null) {
+      buffer.write(' $extraHelpText');
     }
     return buffer.toString();
   }
