@@ -214,7 +214,14 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
   if verbose_dart_snapshot:
     RunCmd(snapshot_command, cwd=buildroot_dir)
   else:
-    subprocess.check_output(snapshot_command, cwd=buildroot_dir)
+    try:
+      subprocess.check_output(snapshot_command, cwd=buildroot_dir)
+    except subprocess.CalledProcessError as error:
+      # CalledProcessError's string doesn't print the output. Print it before
+      # the crash for easier inspection.
+      print('Error occurred from the subprocess, with the output:')
+      print(error.output)
+      raise
   assert os.path.exists(kernel_file_output)
 
 
