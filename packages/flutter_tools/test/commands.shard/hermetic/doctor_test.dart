@@ -223,7 +223,6 @@ void main() {
 
     setUp(() {
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
     });
 
     testUsingContext('contains installed', () async {

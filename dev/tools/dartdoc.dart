@@ -24,8 +24,8 @@ const String kPlatformIntegrationPackageName = 'platform_integration';
 /// documentation to `//dev/docs/doc/api/`.
 ///
 /// This script also updates the index.html file so that it can be placed
-/// at the root of docs.flutter.io. We are keeping the files inside of
-/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// at the root of api.flutter.dev. We are keeping the files inside of
+/// api.flutter.dev/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 ///
 /// This will only work on UNIX systems, not Windows. It requires that 'git' be
@@ -303,7 +303,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
     '{SITE_URL}',
-    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+    branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
   );
   Directory(path.dirname(metadataPath)).create(recursive: true);
   File(metadataPath).writeAsStringSync(metadata);
@@ -468,6 +468,10 @@ List<Directory> findPackages() {
       if (entity is! Directory)
         return false;
       final File pubspec = File('${entity.path}/pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        print("Unexpected package '${entity.path}' found in packages directory");
+        return false;
+      }
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })

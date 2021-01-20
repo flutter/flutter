@@ -2164,6 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
+        textDirection: decoration!.hintTextDirection,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
@@ -2509,6 +2510,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintTextDirection,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2518,7 +2520,7 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
@@ -2564,8 +2566,9 @@ class InputDecoration {
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true,
-    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.floatingLabelBehavior,
     this.hintStyle,
+    this.hintTextDirection,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2687,6 +2690,12 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
 
+  /// The direction to use for the [hintText].
+  ///
+  /// If null, defaults to a value derived from [Directionality] for the
+  /// input field and the current context.
+  final TextDirection? hintTextDirection;
+
   /// The maximum number of lines the [hintText] can occupy.
   ///
   /// Defaults to the value of [TextField.maxLines] attribute.
@@ -2752,9 +2761,9 @@ class InputDecoration {
   ///
   /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
-  ///
-  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
+  ///
+  /// If null, [InputDecorationTheme.floatingLabelBehavior] will be used.
   final FloatingLabelBehavior? floatingLabelBehavior;
 
   /// Whether the [InputDecorator.child] is part of a dense form (i.e., uses less vertical
@@ -2837,6 +2846,7 @@ class InputDecoration {
   /// 48px.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3306,6 +3316,7 @@ class InputDecoration {
     int? helperMaxLines,
     String? hintText,
     TextStyle? hintStyle,
+    TextDirection? hintTextDirection,
     int? hintMaxLines,
     String? errorText,
     TextStyle? errorStyle,
@@ -3351,6 +3362,7 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3439,6 +3451,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
+        && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3487,6 +3500,7 @@ class InputDecoration {
       helperMaxLines,
       hintText,
       hintStyle,
+      hintTextDirection,
       hintMaxLines,
       errorText,
       errorStyle,
@@ -3700,6 +3714,8 @@ class InputDecorationTheme with Diagnosticable {
   final bool hasFloatingPlaceholder;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  ///
+  /// Defaults to [FloatingLabelBehavior.auto].
   final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses

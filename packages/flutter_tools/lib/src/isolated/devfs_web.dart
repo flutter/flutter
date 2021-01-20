@@ -605,6 +605,7 @@ class WebDevFS implements DevFS {
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
     @required this.nullAssertions,
+    @required this.nativeNullAssertions,
     @required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
@@ -621,6 +622,7 @@ class WebDevFS implements DevFS {
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
   final bool nullAssertions;
+  final bool nativeNullAssertions;
   final int _port;
   final NullSafetyMode nullSafetyMode;
 
@@ -705,9 +707,9 @@ class WebDevFS implements DevFS {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', '');
+      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
     } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', '');
+      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
     }
     return _baseUri;
   }
@@ -779,6 +781,7 @@ class WebDevFS implements DevFS {
         generateMainModule(
           entrypoint: entrypoint,
           nullAssertions: nullAssertions,
+          nativeNullAssertions: nativeNullAssertions,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to

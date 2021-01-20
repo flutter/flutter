@@ -285,13 +285,6 @@ void main() {
       verify(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
     });
 
-    testWithoutContext('v - launchDevTools', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-      await terminalHandler.processTerminalInput('v');
-
-      verify(mockResidentRunner.launchDevTools()).called(1);
-    });
-
     testWithoutContext('w,W - debugDumpApp with service protocol', () async {
       await terminalHandler.processTerminalInput('w');
       await terminalHandler.processTerminalInput('W');
@@ -353,5 +346,6 @@ class TestRunner extends Mock implements ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool allowExistingDdsInstance = false,
   }) async => null;
 }

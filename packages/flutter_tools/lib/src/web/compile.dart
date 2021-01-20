@@ -24,6 +24,7 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
+  bool nativeNullAssertions,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -51,6 +52,7 @@ Future<void> buildWeb(
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kSourceMapsEnabled: sourceMaps.toString(),
+        kNativeNullAssertions: nativeNullAssertions.toString(),
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)

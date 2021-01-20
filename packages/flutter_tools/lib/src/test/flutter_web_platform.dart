@@ -224,6 +224,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String generatedFile = _fileSystem.path.split(leadingPath).join('_') + '.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
         nullAssertions: nullAssertions,
+        nativeNullAssertions: true,
         bootstrapModule: _fileSystem.path.basename(leadingPath) + '.dart.bootstrap',
         entrypoint: '/' + generatedFile
        ), headers: <String, String>{
@@ -617,7 +618,7 @@ class BrowserManager {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((dynamic error, StackTrace stackTrace) {
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));
@@ -629,7 +630,7 @@ class BrowserManager {
     }).catchError((dynamic error, StackTrace stackTrace) {
       chrome.close();
       if (completer.isCompleted) {
-        return;
+        return null;
       }
       completer.completeError(error, stackTrace);
     }));

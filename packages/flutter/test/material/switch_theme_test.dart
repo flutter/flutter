@@ -356,6 +356,69 @@ void main() {
         ..circle(color: selectedThumbColor),
     );
   });
+
+  testWidgets('Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      return null;
+    }
+    const double splashRadius = 24.0;
+
+    Widget buildSwitch({required bool active}) {
+      return MaterialApp(
+        theme: ThemeData(
+          switchTheme: SwitchThemeData(
+            overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+            splashRadius: splashRadius,
+          ),
+        ),
+        home: Scaffold(
+          body: Switch(
+            value: active,
+            onChanged: (_) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(active: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      _getSwitchMaterial(tester),
+      paints
+        ..rrect()
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(active: true));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      _getSwitchMaterial(tester),
+      paints
+        ..rrect()
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
+      reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
+    );
+  });
 }
 
 Future<void> _pointGestureToSwitch(WidgetTester tester) async {

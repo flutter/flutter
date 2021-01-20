@@ -32,6 +32,7 @@ class TestCommand extends FlutterCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
+    usesWebRendererOption();
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -251,7 +252,8 @@ class TestCommand extends FlutterCommand {
         verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
         // TODO(jonahwilliams): file bug for incorrect URI handling on windows
-        packagesPath: globals.fs.path.absolute('.packages'),
+        packagesPath: globals.fs.file(buildInfo.packagesPath)
+          .parent.parent.childFile('.packages').path
       );
     }
 

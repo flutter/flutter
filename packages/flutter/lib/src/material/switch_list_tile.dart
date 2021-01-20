@@ -17,6 +17,8 @@ enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=0igIjvtEWNU}
+///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the switch. Tapping and dragging the [Switch] also triggers the [onChanged]
 /// callback.
@@ -98,10 +100,10 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LinkedLabelSwitch extends StatelessWidget {
 ///   const LinkedLabelSwitch({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -178,16 +180,14 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart preamble
 /// class LabeledSwitch extends StatelessWidget {
 ///   const LabeledSwitch({
-///     this.label,
-///     this.padding,
-///     this.groupValue,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
-///   final bool groupValue;
 ///   final bool value;
 ///   final Function onChanged;
 ///

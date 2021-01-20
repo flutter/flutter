@@ -140,10 +140,10 @@ translations, they're keywords that help define an app's text theme
 and time picker layout respectively.
 
 The value of `timeOfDayFormat` defines how a time picker displayed by
-[showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
+[showTimePicker()](https://api.flutter.dev/flutter/material/showTimePicker.html)
 formats and lays out its time controls. The value of `timeOfDayFormat`
 must be a string that matches one of the formats defined by
-<https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html>.
+<https://api.flutter.dev/flutter/material/TimeOfDayFormat-class.html>.
 It is converted to an enum value because the `material_en.arb` file
 has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
@@ -152,7 +152,7 @@ The value of `scriptCategory` is based on the
 section in the Material spec. The Material theme uses the
 `scriptCategory` value to lookup a localized version of the default
 `TextTheme`, see
-[Typography.geometryThemeFor](https://docs.flutter.io/flutter/material/Typography/geometryThemeFor.html).
+[Typography.geometryThemeFor](https://api.flutter.dev/flutter/material/Typography/geometryThemeFor.html).
 
 
 ### 'generated_*_localizations.dart': all of the localizations as a Map
