@@ -37,12 +37,6 @@
          "flaky": false
       },
       {
-         "name": "Linux animated_placeholder_perf",
-         "repo": "flutter",
-         "task_name": "linux_animated_placeholder_perf",
-         "flaky": false
-      },
-      {
          "name": "Linux backdrop_filter_perf__e2e_summary",
          "repo": "flutter",
          "task_name": "linux_backdrop_filter_perf__e2e_summary",
@@ -148,19 +142,19 @@
          "name": "Linux firebase_abstract_method_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_abstract_method_smoke_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux firebase_android_embedding_v2_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_android_embedding_v2_smoke_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux firebase_release_smoke_test",
          "repo": "flutter",
          "task_name": "linux_firebase_release_smoke_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux flutter_gallery__back_button_memory",
@@ -265,6 +259,12 @@
          "flaky": false
       },
       {
+        "name": "Linux gradle_desugar_classes_test",
+        "repo": "flutter",
+        "task_name": "linux_gradle_desugar_classes_test",
+        "flaky": false
+      },
+      {
          "name": "Linux gradle_non_android_plugin_test",
          "repo": "flutter",
          "task_name": "linux_gradle_non_android_plugin_test",
@@ -337,12 +337,6 @@
          "flaky": false
       },
       {
-         "name": "Linux multi_widget_construction_perf__timeline_summary",
-         "repo": "flutter",
-         "task_name": "linux_multi_widget_construction_perf__timeline_summary",
-         "flaky": false
-      },
-      {
          "name": "Linux new_gallery__crane_perf",
          "repo": "flutter",
          "task_name": "linux_new_gallery__crane_perf",
@@ -394,7 +388,7 @@
          "name": "Linux web_tool_tests",
          "repo": "flutter",
          "task_name": "linux_web_tool_tests",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux web_benchmarks_canvaskit",
@@ -472,7 +466,7 @@
          "name": "Mac build_gallery",
          "repo": "flutter",
          "task_name": "mac_build_gallery",
-         "flaky": false
+         "flaky": true
       },
       {
          "name": "Mac customer_testing",

@@ -311,6 +311,11 @@ In order to run your $application, type:
   \$ cd $relativeAppPath
   \$ flutter run
 
+To enable null safety, type:
+
+  \$ cd $relativeAppPath
+  \$ dart migrate --apply-changes
+
 Your $application code is in $relativeAppMain.
 ''');
     }

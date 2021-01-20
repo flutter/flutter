@@ -299,8 +299,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
   }, overrides: <Type, Generator>{
@@ -366,8 +364,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
     return _runFlutterTest(projectDir);
@@ -2337,6 +2333,25 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: () => logger,
+  });
+
+  testUsingContext('flutter create prints note about null safety', () async {
+    await _createProject(
+      projectDir,
+      <String>[],
+      <String>[],
+    );
+    expect(logger.statusText, contains('dart migrate --apply-changes'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
     Logger: () => logger,
   });
 }

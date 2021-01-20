@@ -49,25 +49,32 @@
          "name":"Linux firebase_abstract_method_smoke_test",
          "repo":"flutter",
          "task_name":"linux_firebase_abstract_method_smoke_test",
-         "enabled":false
+         "enabled":true
       },
       {
          "name":"Linux firebase_android_embedding_v2_smoke_test",
          "repo":"flutter",
          "task_name":"linux_firebase_android_embedding_v2_smoke_test",
-         "enabled":false
+         "enabled":true
       },
       {
          "name":"Linux firebase_release_smoke_test",
          "repo":"flutter",
          "task_name":"linux_firebase_release_smoke_test",
-         "enabled":false
+         "enabled":true
       },
       {
          "name":"Linux fuchsia_precache",
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
          "enabled":true
+      },
+      {
+        "name":"Linux gradle_desugar_classes_test",
+        "repo":"flutter",
+        "task_name":"linux_gradle_desugar_classes_test",
+        "enabled":true,
+        "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Linux gradle_non_android_plugin_test",
@@ -217,7 +224,7 @@
          "name":"Mac build_gallery",
          "repo":"flutter",
          "task_name":"mac_build_gallery",
-         "enabled":true
+         "enabled":false
       },
       {
          "name":"Mac framework_tests",

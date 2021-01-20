@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -1588,6 +1589,25 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
+
+  testWidgets('Readonly text field does not have tap action', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            maxLength: 10,
+            readOnly: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+
+    semantics.dispose();
+  });
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor',
