@@ -11,7 +11,7 @@
       "name": "kernel",
       "rootUri": "../../../../third_party/dart/pkg/kernel",
       "packageUri": "lib",
-      "languageVersion": "2.12"
+      "languageVersion": "2.6"
     },
     {
       "name": "meta",
