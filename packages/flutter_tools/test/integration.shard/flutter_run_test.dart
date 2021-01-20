@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -52,5 +53,15 @@ void main() {
     final File pidFile = tempDir.childFile('test.pid');
     await _flutter.run(pidFile: pidFile);
     expect(pidFile.existsSync(), isTrue);
+  });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutter.run(
+      withDebugger: true,
+      machine: false,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    final Response response = await _flutter.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
+    expect(response.json['value'], equals('http://127.0.0.1:9110'));
   });
 }

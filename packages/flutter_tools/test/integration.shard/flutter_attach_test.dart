@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:file/file.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -71,5 +72,16 @@ void main() {
     );
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.hotReload();
+  });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
+      machine: false,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    final Response response = await _flutterAttach.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
+    expect(response.json['value'], equals('http://127.0.0.1:9110'));
   });
 }

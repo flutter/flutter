@@ -96,7 +96,7 @@ void main() {
     });
 
     testWithoutContext('ext.flutter.brightnessOverride can toggle window brightness', () async {
-      final Isolate isolate = await waitForExtension(vmService);
+      final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.brightnessOverride');
       final Response response = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,

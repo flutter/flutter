@@ -169,6 +169,19 @@ abstract class FlutterTestDriver {
     }
   }
 
+  Future<Response> callServiceExtension(
+    String extension, {
+    Map<String, dynamic> args = const <String, dynamic>{},
+  }) async {
+    final VmService vmService = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
+    final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.activeDevToolsServerAddress');
+    return await vmService.callServiceExtension(
+      extension,
+      isolateId: isolate.id,
+      args: args,
+    );
+  }
+
   Future<int> quit() => _killGracefully();
 
   Future<int> _killGracefully() async {
@@ -493,18 +506,21 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool pauseOnExceptions = false,
     File pidFile,
     bool singleWidgetReloads = false,
+    bool machine = true,
+    List<String> additionalCommandArgs,
   }) async {
     await _setupProcess(
       <String>[
         'attach',
          ...getLocalEngineArguments(),
-        '--machine',
+        if (machine) '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
         '-d',
         'flutter-tester',
         '--debug-port',
         '$port',
+        ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
@@ -825,7 +841,7 @@ class SourcePosition {
   final int column;
 }
 
-Future<Isolate> waitForExtension(VmService vmService) async {
+Future<Isolate> waitForExtension(VmService vmService, String extension) async {
   final Completer<void> completer = Completer<void>();
   await vmService.streamListen(EventStreams.kExtension);
   vmService.onExtensionEvent.listen((Event event) {
@@ -835,7 +851,7 @@ Future<Isolate> waitForExtension(VmService vmService) async {
   });
   final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
   final Isolate isolate = await vmService.getIsolate(isolateRef.id);
-  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
+  if (isolate.extensionRPCs.contains(extension)) {
     return isolate;
   }
   await completer.future;
