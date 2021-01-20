@@ -120,7 +120,7 @@ void main() {
     expect(address.port, 9100);
   });
 
-  testWithoutContext('DevtoolsLauncher does launch a new DevTools instance if one is already active', () async {
+  testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
     final Completer<void> completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       pubExecutable: 'pub',
