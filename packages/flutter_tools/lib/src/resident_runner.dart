@@ -1284,9 +1284,14 @@ abstract class ResidentRunner {
     }
   }
 
-  void maybeCallDevToolsUriServiceExtension() {
+  Future<void> maybeCallDevToolsUriServiceExtension() async {
     _devToolsLauncher ??= DevtoolsLauncher.instance;
     if (_devToolsLauncher.activeDevToolsServer != null) {
+
+      await Future.wait(<Future<vm_service.Isolate>>[
+        for (final FlutterDevice device in flutterDevices)
+          waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress'),
+      ]);
       try {
         unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
           'ext.flutter.activeDevToolsServerAddress',
@@ -1407,6 +1412,30 @@ abstract class ResidentRunner {
 
   // Clears the screen.
   void clearScreen() => globals.logger.clear();
+
+  Future<vm_service.Isolate> waitForExtension(vm_service.VmService vmService, String extension) async {
+    final Completer<void> completer = Completer<void>();
+    try {
+      await vmService.streamListen(vm_service.EventStreams.kExtension);
+    } on Exception {
+      // do nothing
+    }
+    vmService.onExtensionEvent.listen((vm_service.Event event) {
+      print('extensionEvent: ');
+      print(event.json);
+      if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
+        completer.complete();
+      }
+    });
+    final vm_service.IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
+    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
+    if (isolate.extensionRPCs.contains(extension)) {
+      return isolate;
+    }
+    await completer.future;
+    return isolate;
+  }
+
 }
 
 class OperationResult {

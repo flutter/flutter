@@ -75,13 +75,38 @@ void main() {
   });
 
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {
-    await _flutterRun.run(withDebugger: true);
+    await _flutterRun.run(
+      startPaused: true,
+      withDebugger: true,
+    );
+    await _flutterRun.resume();
+
+    // Poll with a delay to avoid any timing issues.
+    for (int i = 10; i < 10; i++) {
+      final Response response = await _flutterRun.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
+      if (response.json['value'] == '') {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      } else {
+        expect(response.json['value'], equals('http://127.0.0.1:9100'));
+        break;
+      }
+    }
+
+    // Attach with a different DevTools server address.
     await _flutterAttach.attach(
       _flutterRun.vmServicePort,
-      machine: false,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
-    final Response response = await _flutterAttach.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
-    expect(response.json['value'], equals('http://127.0.0.1:9110'));
+
+    // Poll with a delay to avoid any timing issues.
+    for (int i = 10; i < 10; i++) {
+      final Response response = await _flutterAttach.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
+      if (response.json['value'] == '') {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      } else {
+        expect(response.json['value'], equals('http://127.0.0.1:9110'));
+        break;
+      }
+    }
   });
 }

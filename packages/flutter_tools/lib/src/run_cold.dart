@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -120,6 +121,10 @@ class ColdRunner extends ResidentRunner {
       appFinished();
     }
 
+    if (debuggingEnabled) {
+      unawaited(maybeCallDevToolsUriServiceExtension());
+    }
+
     appStartedCompleter?.complete();
 
     writeVmServiceFile();
@@ -161,6 +166,9 @@ class ColdRunner extends ResidentRunner {
         globals.printTrace('Connected to $view.');
       }
     }
+
+    unawaited(maybeCallDevToolsUriServiceExtension());
+
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();

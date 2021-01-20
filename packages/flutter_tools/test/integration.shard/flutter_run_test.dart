@@ -57,11 +57,21 @@ void main() {
 
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {
     await _flutter.run(
+      startPaused: true,
       withDebugger: true,
-      machine: false,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
-    final Response response = await _flutter.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
-    expect(response.json['value'], equals('http://127.0.0.1:9110'));
+    await _flutter.resume();
+
+    // Poll with a delay to avoid any timing issues.
+    for (int i = 10; i < 10; i++) {
+      final Response response = await _flutter.callServiceExtension('ext.flutter.activeDevToolsServerAddress');
+      if (response.json['value'] == '') {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      } else {
+        expect(response.json['value'], equals('http://127.0.0.1:9110'));
+        break;
+      }
+    }
   });
 }

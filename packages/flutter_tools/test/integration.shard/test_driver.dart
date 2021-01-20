@@ -506,14 +506,12 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool pauseOnExceptions = false,
     File pidFile,
     bool singleWidgetReloads = false,
-    bool machine = true,
     List<String> additionalCommandArgs,
   }) async {
     await _setupProcess(
       <String>[
         'attach',
          ...getLocalEngineArguments(),
-        if (machine) '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
         '-d',
