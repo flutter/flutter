@@ -1449,7 +1449,6 @@ class Scaffold extends StatefulWidget {
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
@@ -1725,18 +1724,6 @@ class Scaffold extends StatefulWidget {
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget? bottomSheet;
-
-  /// This flag is deprecated, please use [resizeToAvoidBottomInset]
-  /// instead.
-  ///
-  /// Originally the name referred [MediaQueryData.padding]. Now it refers
-  /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
-  /// should be clearer to readers.
-  @Deprecated(
-    'Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears. '
-    'This feature was deprecated after v1.1.9.'
-  )
-  final bool? resizeToAvoidBottomPadding;
 
   /// If true the [body] and the scaffold's floating widgets should size
   /// themselves to avoid the onscreen keyboard whose height is defined by the
@@ -2730,9 +2717,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   late _ScaffoldGeometryNotifier _geometryNotifier;
 
-  // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
   bool get _resizeToAvoidBottomInset {
-    return widget.resizeToAvoidBottomInset ?? widget.resizeToAvoidBottomPadding ?? true;
+    return widget.resizeToAvoidBottomInset ?? true;
   }
 
   @override

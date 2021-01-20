@@ -1028,13 +1028,13 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
-      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
     ]
   );
   await _runWebReleaseTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
-      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
     ]
   );
