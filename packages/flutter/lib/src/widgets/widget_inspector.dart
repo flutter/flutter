@@ -711,7 +711,11 @@ mixin WidgetInspectorService {
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
+
   }
+
+  /// Information about the service protocol for the running application.
+  developer.ServiceProtocolInfo? serviceInfo;
 
   static bool _debugServiceExtensionsRegistered = false;
 
@@ -975,7 +979,9 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  Future<void> initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) async {
+    serviceInfo = await developer.Service.getInfo();
+
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -1386,11 +1392,9 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
-  Future<String?> devToolsInspectorUriForElement(Object? object) async {
+  String? devToolsInspectorUriForElement(Object? object) {
     assert(activeDevToolsServerAddress != null);
-    final developer.ServiceProtocolInfo serviceInfo =
-    await developer.Service.getInfo();
-    final Uri? vmServiceUri = serviceInfo.serverUri;
+    final Uri? vmServiceUri = serviceInfo?.serverUri;
     if (vmServiceUri != null) {
       final String? inspectorRef = toId(object, _consoleObjectGroup);
       if (inspectorRef != null) {
@@ -2918,15 +2922,28 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
-      nodes.add(
+
+      DiagnosticsNode? devToolsDiagnostic;
+      if (activeDevToolsServerAddress != null && WidgetInspectorService.instance.serviceInfo != null) {
+        final String? devToolsInspectorUri =
+            WidgetInspectorService.instance.devToolsInspectorUriForElement(target);
+        if (devToolsInspectorUri != null) {
+          devToolsDiagnostic = DiagnosticsNode.message(
+            'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+          );
+        }
+      }
+
+      nodes.addAll(<DiagnosticsNode>[
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
           children: <DiagnosticsNode>[
             ErrorDescription('${target.widget.toStringShort()} ${_describeCreationLocation(target)}'),
           ],
         ),
-      );
-      nodes.add(ErrorSpacer());
+        ErrorSpacer(),
+        if (devToolsDiagnostic != null) ...<DiagnosticsNode>[devToolsDiagnostic, ErrorSpacer()],
+      ]);
       return false;
     }
     return true;

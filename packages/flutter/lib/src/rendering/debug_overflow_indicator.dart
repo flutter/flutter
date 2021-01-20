@@ -6,8 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/widget_inspector.dart';
 
 import 'object.dart';
 import 'stack.dart';
@@ -203,20 +201,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   Future<void> _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) async {
     overflowHints ??= <DiagnosticsNode>[];
 
-    DiagnosticsNode? devToolsDiagnostic;
-    if (activeDevToolsServerAddress != null) {
-      final Element? element = debugCreator != null
-          ? (debugCreator! as DebugCreator).element
-          : null;
-      if (element != null) {
-        final String? devToolsInspectorUri =
-            await WidgetInspectorService.instance.devToolsInspectorUriForElement(element);
-        devToolsDiagnostic = DiagnosticsNode.message(
-          '\nTo inspect this widget in Flutter DevTools, visit $devToolsInspectorUri',
-        );
-      }
-    }
-
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
         'The edge of the $runtimeType that is '
@@ -264,8 +248,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
           if (debugCreator != null)
             yield DiagnosticsDebugCreator(debugCreator!);
           yield* overflowHints!;
-          if (devToolsDiagnostic != null)
-            yield* <DiagnosticsNode>[devToolsDiagnostic, DiagnosticsNode.message('══' * (FlutterError.wrapWidth ~/ 2))];
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
