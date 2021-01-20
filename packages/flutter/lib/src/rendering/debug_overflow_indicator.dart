@@ -211,7 +211,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       if (element != null) {
         final String? devToolsInspectorUri =
             await WidgetInspectorService.instance.devToolsInspectorUriForElement(element);
-        devToolsDiagnostic = ErrorDescription(
+        devToolsDiagnostic = DiagnosticsNode.message(
           '\nTo inspect this widget in Flutter DevTools, visit $devToolsInspectorUri',
         );
       }
@@ -265,7 +265,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
             yield DiagnosticsDebugCreator(debugCreator!);
           yield* overflowHints!;
           if (devToolsDiagnostic != null)
-            yield* [devToolsDiagnostic, DiagnosticsNode.message('══' * (FlutterError.wrapWidth ~/ 2))];
+            yield* <DiagnosticsNode>[devToolsDiagnostic, DiagnosticsNode.message('══' * (FlutterError.wrapWidth ~/ 2))];
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
