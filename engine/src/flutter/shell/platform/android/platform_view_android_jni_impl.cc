@@ -1539,9 +1539,8 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
     return true;
   }
 
-  env->CallObjectMethod(java_object.obj(),
-                        g_request_dart_deferred_library_method,
-                        loading_unit_id);
+  env->CallVoidMethod(java_object.obj(), g_request_dart_deferred_library_method,
+                      loading_unit_id);
 
   FML_CHECK(CheckException(env));
   return true;
