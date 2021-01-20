@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../matchers.dart';
 import 'common.dart';
 import 'test_data.dart';
 
@@ -47,6 +48,7 @@ void testMain() {
     _toSkMatrixFromFloat32Tests();
     _toSkRectTests();
     _skVerticesTests();
+    _paragraphTests();
     group('SkPath', () {
       _pathTests();
     });
@@ -1227,5 +1229,112 @@ void _textStyleTests() {
       expect(toSkPlaceholderAlignment(placeholderAlignment).value,
           placeholderAlignment.index);
     }
+  });
+}
+
+void _paragraphTests() {
+  // This test is just a kitchen sink that blasts CanvasKit with all paragraph
+  // properties all at once, making sure CanvasKit doesn't choke on anything.
+  // In particular, this tests that our JS bindings are correct, such as that
+  // arguments are of acceptable types and passed in the correct order.
+  test('SkParagraph API kitchensink', () {
+    final SkParagraphStyleProperties props = SkParagraphStyleProperties();
+    props.textAlign = canvasKit.TextAlign.Center;
+    props.textDirection = canvasKit.TextDirection.RTL;
+    props.heightMultiplier = 3;
+    props.textHeightBehavior = ui.TextHeightBehavior().encode();
+    props.maxLines = 4;
+    props.ellipsis = '___';
+    props.textStyle = SkTextStyleProperties()
+      ..backgroundColor = Float32List.fromList(<double>[1, 2, 3, 4])
+      ..color = Float32List.fromList(<double>[5, 6, 7, 8])
+      ..foregroundColor = Float32List.fromList(<double>[9, 10, 11, 12])
+      ..decoration = 0x2
+      ..decorationThickness = 2.0
+      ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
+      ..decorationStyle = canvasKit.DecorationStyle.Dotted
+      ..textBaseline = canvasKit.TextBaseline.Ideographic
+      ..fontSize = 24
+      ..letterSpacing = 5
+      ..wordSpacing = 10
+      ..heightMultiplier = 2.5
+      ..locale = 'en_CA'
+      ..fontFamilies = <String>['Roboto', 'serif']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Upright
+        ..weight = canvasKit.FontWeight.Normal)
+      ..shadows = <SkTextShadow>[]
+      ..fontFeatures = <SkFontFeature>[
+        SkFontFeature()
+          ..name = 'pnum'
+          ..value = 1,
+        SkFontFeature()
+          ..name = 'tnum'
+          ..value = 1,
+      ];
+    props.strutStyle = SkStrutStyleProperties()
+      ..fontFamilies = <String>['Roboto', 'Noto']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Italic
+        ..weight = canvasKit.FontWeight.Bold)
+      ..fontSize = 23
+      ..heightMultiplier = 5
+      ..leading = 6
+      ..strutEnabled = true
+      ..forceStrutHeight = false;
+
+    final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
+    final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.Make(
+      paragraphStyle,
+      skiaFontCollection.skFontMgr,
+    );
+
+    builder.addText('Hello');
+    builder.addPlaceholder(
+      50,
+      25,
+      canvasKit.PlaceholderAlignment.Middle,
+      canvasKit.TextBaseline.Ideographic,
+      4.0,
+    );
+    builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()
+      ..fontSize = 12));
+    builder.addText('World');
+    builder.pop();
+    builder.pushPaintStyle(canvasKit.TextStyle(SkTextStyleProperties()
+      ..fontSize = 12), SkPaint(), SkPaint());
+    builder.addText('!');
+    builder.pop();
+    final SkParagraph paragraph = builder.build();
+    paragraph.layout(55);
+    expect(paragraph.getAlphabeticBaseline(), within<double>(distance: 0.5, from: 22));
+    expect(paragraph.didExceedMaxLines(), false);
+    expect(paragraph.getHeight(), 28);
+    expect(paragraph.getIdeographicBaseline(), within<double>(distance: 0.5, from: 28));
+    expect(paragraph.getLongestLine(), 50);
+    expect(paragraph.getMaxIntrinsicWidth(), 50);
+    expect(paragraph.getMinIntrinsicWidth(), 0);
+    expect(paragraph.getMaxWidth(), 55);
+    expect(paragraph.getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max), <double>[]);
+    expect(paragraph.getRectsForPlaceholders(), hasLength(1));
+    expect(paragraph.getGlyphPositionAtCoordinate(5, 5).affinity, canvasKit.Affinity.Downstream);
+
+    // "Hello"
+    for (int i = 0; i < 5; i++) {
+      expect(paragraph.getWordBoundary(i).start, 0);
+      expect(paragraph.getWordBoundary(i).end, 5);
+    }
+    // Placeholder
+    expect(paragraph.getWordBoundary(5).start, 5);
+    expect(paragraph.getWordBoundary(5).end, 6);
+    // "World"
+    for (int i = 6; i < 11; i++) {
+      expect(paragraph.getWordBoundary(i).start, 6);
+      expect(paragraph.getWordBoundary(i).end, 11);
+    }
+    // "!"
+    expect(paragraph.getWordBoundary(11).start, 11);
+    expect(paragraph.getWordBoundary(11).end, 12);
+    paragraph.delete();
   });
 }

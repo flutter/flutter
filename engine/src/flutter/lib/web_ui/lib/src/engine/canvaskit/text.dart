@@ -629,7 +629,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
     _placeholderCount++;
     _placeholderScales.add(scale);
-    SkPlaceholderStyleProperties placeholderStyle = toSkPlaceholderStyle(
+    final _CkParagraphPlaceholder placeholderStyle = toSkPlaceholderStyle(
       width * scale,
       height * scale,
       alignment,
@@ -639,24 +639,31 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     _addPlaceholder(placeholderStyle);
   }
 
-  void _addPlaceholder(SkPlaceholderStyleProperties placeholderStyle) {
+  void _addPlaceholder(_CkParagraphPlaceholder placeholderStyle) {
     _commands.add(_ParagraphCommand.addPlaceholder(placeholderStyle));
-    _paragraphBuilder.addPlaceholder(placeholderStyle);
+    _paragraphBuilder.addPlaceholder(
+      placeholderStyle.width,
+      placeholderStyle.height,
+      placeholderStyle.alignment,
+      placeholderStyle.baseline,
+      placeholderStyle.offset,
+    );
   }
 
-  static SkPlaceholderStyleProperties toSkPlaceholderStyle(
+  static _CkParagraphPlaceholder toSkPlaceholderStyle(
     double width,
     double height,
     ui.PlaceholderAlignment alignment,
     double baselineOffset,
     ui.TextBaseline baseline,
   ) {
-    final properties = SkPlaceholderStyleProperties();
-    properties.width = width;
-    properties.height = height;
-    properties.alignment = toSkPlaceholderAlignment(alignment);
-    properties.offset = baselineOffset;
-    properties.baseline = toSkTextBaseline(baseline);
+    final properties = _CkParagraphPlaceholder(
+      width: width,
+      height: height,
+      alignment: toSkPlaceholderAlignment(alignment),
+      offset: baselineOffset,
+      baseline: toSkTextBaseline(baseline),
+    );
     return properties;
   }
 
@@ -722,11 +729,27 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   }
 }
 
+class _CkParagraphPlaceholder {
+  _CkParagraphPlaceholder({
+    required this.width,
+    required this.height,
+    required this.alignment,
+    required this.baseline,
+    required this.offset,
+  });
+
+  final double width;
+  final double height;
+  final SkPlaceholderAlignment alignment;
+  final SkTextBaseline baseline;
+  final double offset;
+}
+
 class _ParagraphCommand {
   final _ParagraphCommandType type;
   final String? text;
   final CkTextStyle? style;
-  final SkPlaceholderStyleProperties? placeholderStyle;
+  final _CkParagraphPlaceholder? placeholderStyle;
 
   const _ParagraphCommand._(
     this.type,
@@ -745,7 +768,7 @@ class _ParagraphCommand {
       : this._(_ParagraphCommandType.pushStyle, null, style, null);
 
   const _ParagraphCommand.addPlaceholder(
-      SkPlaceholderStyleProperties placeholderStyle)
+      _CkParagraphPlaceholder placeholderStyle)
       : this._(
             _ParagraphCommandType.addPlaceholder, null, null, placeholderStyle);
 }
