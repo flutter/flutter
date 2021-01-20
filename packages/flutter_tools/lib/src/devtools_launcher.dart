@@ -53,9 +53,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       try {
         const String pubHostedUrlKey = 'PUB_HOSTED_URL';
         if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(_platform.environment[pubHostedUrlKey]);
+          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
         } else {
-          await http.head('https://pub.dev');
+          await http.head(Uri.https('pub.dev', ''));
         }
       } on Exception {
         offline = true;
