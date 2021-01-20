@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
@@ -67,6 +68,64 @@ void testMain() {
     // After a navigation platform message, [window.defaultRouteName] should
     // reset to "/".
     expect(window.defaultRouteName, '/');
+  });
+
+  test('should throw when using nav1 and nav2 together',
+      () async {
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    // Receive nav1 update first.
+    Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeUpdated',
+        <String, dynamic>{'routeName': '/bar'},
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory is SingleEntryBrowserHistory, true);
+    expect(window.browserHistory.urlStrategy.getPath(), '/bar');
+
+    // We can still receive nav2 update.
+    callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'location': '/baz',
+          'state': null,
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
+    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
+
+    // Throws assertion error if it receives nav1 update after nav2 update.
+    AssertionError caughtAssertion;
+    await window.handleNavigationMessage(
+      JSONMethodCodec().encodeMethodCall(MethodCall(
+        'routeUpdated',
+        <String, dynamic>{'routeName': '/foo'},
+      ))
+    ).catchError((Object e) {
+      caughtAssertion = e as AssertionError;
+    });
+
+    expect(
+      caughtAssertion.message,
+      'Receives old navigator update in a router application. This can '
+      'happen if you use non-router versions of '
+      'MaterialApp/CupertinoApp/WidgetsApp together with the router versions of them.'
+    );
+    // The history does not change.
+    expect(window.browserHistory is MultiEntriesBrowserHistory, true);
+    expect(window.browserHistory.urlStrategy.getPath(), '/baz');
   });
 
   test('can disable location strategy', () async {
