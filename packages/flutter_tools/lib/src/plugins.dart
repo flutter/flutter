@@ -345,7 +345,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project) async {
+Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final String packagesFile = globals.fs.path.join(
     project.directory.path,
@@ -354,6 +354,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
+    throwOnError: throwOnError,
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');

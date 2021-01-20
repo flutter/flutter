@@ -2335,6 +2335,25 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
     Logger: () => logger,
   });
+
+  testUsingContext('flutter create prints note about null safety', () async {
+    await _createProject(
+      projectDir,
+      <String>[],
+      <String>[],
+    );
+    expect(logger.statusText, contains('dart migrate --apply-changes'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(
