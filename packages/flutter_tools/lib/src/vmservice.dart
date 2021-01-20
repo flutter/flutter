@@ -34,7 +34,8 @@ typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
 
-/// The error codes for the JSON-RPC standard.
+/// The error codes for the JSON-RPC standard, including VM service specific
+/// error codes.
 ///
 /// See also: https://www.jsonrpc.org/specification#error_object
 abstract class RPCErrorCodes {
@@ -49,6 +50,11 @@ abstract class RPCErrorCodes {
 
   /// Application specific error codes.
   static const int kServerError = -32000;
+
+  /// Non-standard JSON-RPC error codes:
+
+  /// The VM service or extension service has disappeared.
+  static const int kServiceDisappeared = 112;
 }
 
 /// A function that reacts to the invocation of the 'reloadSources' service.
@@ -718,8 +724,10 @@ extension FlutterVmService on vm_service.VmService {
       );
       return response.json;
     } on vm_service.RPCError catch (err) {
-      // If an application is not using the framework
-      if (err.code == RPCErrorCodes.kMethodNotFound) {
+      // If an application is not using the framework or the VM service
+      // disappears while handling a request, return null.
+      if ((err.code == RPCErrorCodes.kMethodNotFound)
+          || (err.code == RPCErrorCodes.kServiceDisappeared)) {
         return null;
       }
       rethrow;
