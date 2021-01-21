@@ -982,9 +982,11 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
-    developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
-      _serviceInfo = info;
-    });
+    if (!kIsWeb) {
+      developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
+        _serviceInfo = info;
+      });
+    }
 
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
