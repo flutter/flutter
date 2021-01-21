@@ -38,8 +38,16 @@ void IOSSurfaceGL::UpdateStorageSizeIfNecessary() {
 std::unique_ptr<Surface> IOSSurfaceGL::CreateGPUSurface(GrDirectContext* gr_context) {
   if (gr_context) {
     return std::make_unique<GPUSurfaceGL>(sk_ref_sp(gr_context), this, true);
+  } else {
+    IOSContextGL* gl_context = CastToGLContext(GetContext());
+    sk_sp<GrDirectContext> context = gl_context->GetMainContext();
+    if (!context) {
+      context = GPUSurfaceGL::MakeGLContext(this);
+      gl_context->SetMainContext(context);
+    }
+
+    return std::make_unique<GPUSurfaceGL>(context, this, true);
   }
-  return std::make_unique<GPUSurfaceGL>(this, true);
 }
 
 // |GPUSurfaceGLDelegate|
