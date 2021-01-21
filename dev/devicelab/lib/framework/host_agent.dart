@@ -38,8 +38,10 @@ abstract class HostAgent {
       final String directoryPath = _platform.environment['FLUTTER_LOGS_DIR'];
       if (directoryPath == null) {
         _dumpDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_test_logs.');
+        print('Created tmp dump directory ${_dumpDirectory.path}');
       } else {
         _dumpDirectory = _fileSystem.directory(directoryPath)..createSync(recursive: true);
+        print('Found FLUTTER_LOGS_DIR dump directory ${_dumpDirectory.path}');
       }
     }
     return _dumpDirectory;
