@@ -68,8 +68,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
       std::nullopt,                        // dart entrypoint library
-      std::move(isolate_configuration),    // isolate configuration
-      nullptr                              // Volatile path tracker
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
@@ -172,8 +171,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
       std::nullopt,                        // dart entrypoint library
-      std::move(isolate_configuration),    // isolate configuration
-      nullptr                              // Volatile path tracker
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
@@ -431,8 +429,7 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
       std::nullopt,                        // dart entrypoint library
-      std::move(isolate_configuration),    // isolate configuration
-      nullptr                              // Volatile path tracker
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
@@ -532,8 +529,7 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
       settings.isolate_shutdown_callback,  // isolate shutdown callback
       "main",                              // dart entrypoint
       std::nullopt,                        // dart entrypoint library
-      std::move(isolate_configuration),    // isolate configuration
-      nullptr                              // volatile path tracker
+      std::move(isolate_configuration)     // isolate configuration
   );
   auto root_isolate = weak_isolate.lock();
   ASSERT_TRUE(root_isolate);
