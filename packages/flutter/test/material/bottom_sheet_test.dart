@@ -771,7 +771,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Tapping above the bottom sheet to dismiss it.
-    await tester.tapAt(const Offset(20.0, 20.0)); //Closing Animation will starts after taping
+    await tester.tapAt(const Offset(20.0, 20.0)); // Closing animation will start after tapping
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
