@@ -84,19 +84,19 @@ void main() {
 
     testWithoutContext('flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on macOS. '
+      'Enable or disable beta-quality support for desktop on macOS. '
       'This setting will take effect on the master and dev channels.');
     });
 
     testWithoutContext('flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on Linux. '
+      'Enable or disable beta-quality support for desktop on Linux. '
       'This setting will take effect on the master and dev channels.');
     });
 
     testWithoutContext('flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on Windows. '
+      'Enable or disable beta-quality support for desktop on Windows. '
       'This setting will take effect on the master and dev channels.');
     });
 
@@ -244,9 +244,9 @@ void main() {
       expect(featureFlags.isMacOSEnabled, false);
     });
 
-    testWithoutContext('fflutter macos desktop not enabled with config on beta', () {
+    testWithoutContext('flutter macos desktop not enabled with config on beta', () {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when<bool>(mockFlutterConfig.getValue('flutter-desktop-macos') as bool).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-macos-desktop') as bool).thenReturn(true);
 
       expect(featureFlags.isMacOSEnabled, false);
     });
@@ -266,7 +266,7 @@ void main() {
 
     testWithoutContext('flutter macos desktop not enabled with config on stable', () {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when<bool>(mockFlutterConfig.getValue('flutter-desktop-macos') as bool).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-macos-desktop') as bool).thenReturn(true);
 
       expect(featureFlags.isMacOSEnabled, false);
     });
@@ -325,7 +325,7 @@ void main() {
       expect(featureFlags.isLinuxEnabled, false);
     });
 
-    testWithoutContext('fflutter linux desktop not enabled with config on beta', () {
+    testWithoutContext('flutter linux desktop not enabled with config on beta', () {
       when(mockFlutterVerion.channel).thenReturn('beta');
       when<bool>(mockFlutterConfig.getValue('enable-linux-desktop') as bool).thenReturn(true);
 
@@ -406,7 +406,7 @@ void main() {
       expect(featureFlags.isWindowsEnabled, false);
     });
 
-    testWithoutContext('fflutter windows desktop not enabled with config on beta', () {
+    testWithoutContext('flutter windows desktop not enabled with config on beta', () {
       when(mockFlutterVerion.channel).thenReturn('beta');
       when<bool>(mockFlutterConfig.getValue('enable-windows-desktop') as bool).thenReturn(true);
 
