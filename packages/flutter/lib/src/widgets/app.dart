@@ -25,6 +25,7 @@ import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_actions.dart';
 import 'text_editing_shortcuts.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -1625,11 +1626,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
         debugLabel: '<Default WidgetsApp Shortcuts>',
         child: TextEditingShortcuts(
-          child: Actions(
-            actions: widget.actions ?? <Type, Action<Intent>>{
-              ...WidgetsApp.defaultActions,
-              ...textEditingActionsMap,
-            },
+          child: TextEditingActions(
+            additionalActions: widget.actions ?? WidgetsApp.defaultActions,
             child: FocusTraversalGroup(
               policy: ReadingOrderTraversalPolicy(),
               child: _MediaQueryFromWindow(
