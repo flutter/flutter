@@ -794,7 +794,7 @@ void main() {
         await drag.up();
         await tester.pumpAndSettle();
         expect(getListWidth(), kDraggingListWidth);
-      }, skip: true); // TODO(goderbauer): list shrinks to 3 * itemhight when item is dragged.
+      });
 
       testWidgets('Horizontal drop area golden', (WidgetTester tester) async {
         final Widget reorderableListView = ReorderableListView(

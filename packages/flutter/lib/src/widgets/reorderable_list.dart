@@ -740,7 +740,12 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   Widget _itemBuilder(BuildContext context, int index) {
     if (_dragInfo != null && index >= widget.itemCount) {
-      return SizedBox(height: _dragInfo!.itemExtent);
+      switch (_scrollDirection) {
+        case Axis.horizontal:
+          return SizedBox(width: _dragInfo!.itemExtent);
+        case Axis.vertical:
+          return SizedBox(height: _dragInfo!.itemExtent);
+      }
     }
     final Widget child = widget.itemBuilder(context, index);
     final OverlayState overlay = Overlay.of(context)!;
