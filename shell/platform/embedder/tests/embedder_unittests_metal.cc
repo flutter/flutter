@@ -29,7 +29,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithMetal) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetMetalRendererConfig(SkISize::Make(800, 600));
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -45,7 +45,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithMetal) {
 
   // TODO (https://github.com/flutter/flutter/issues/73590): re-enable once
   // we are able to figure out why this fails on the bots.
-  // ASSERT_TRUE(ImageMatchesFixture("gradient_metal.png", renderered_scene));
+  // ASSERT_TRUE(ImageMatchesFixture("gradient_metal.png", rendered_scene));
 }
 
 }  // namespace testing

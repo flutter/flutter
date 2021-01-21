@@ -40,7 +40,7 @@ bool EmbedderTestCompositorSoftware::UpdateOffscrenComposition(
   for (size_t i = 0; i < layers_count; ++i) {
     const auto* layer = layers[i];
 
-    sk_sp<SkImage> platform_renderered_contents;
+    sk_sp<SkImage> platform_rendered_contents;
 
     sk_sp<SkImage> layer_image;
     SkIPoint canvas_offset = SkIPoint::Make(0, 0);
