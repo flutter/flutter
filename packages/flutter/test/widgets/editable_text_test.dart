@@ -7133,8 +7133,8 @@ class _AccentColorTextEditingController extends TextEditingController {
   _AccentColorTextEditingController(String text) : super(text: text);
 
   @override
-  TextSpan buildTextSpan({TextStyle? style, required bool withComposing, required BuildContext context}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     final Color color = Theme.of(context).accentColor;
-    return super.buildTextSpan(style: TextStyle(color: color), withComposing: withComposing, context: context);
+    return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
 }
