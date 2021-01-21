@@ -699,7 +699,7 @@ Future<T?> showModalBottomSheet<T>({
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
 ///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior], [transitionAnimationController]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
 /// persistent bottom sheets.
 ///
