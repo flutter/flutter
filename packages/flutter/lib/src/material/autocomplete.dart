@@ -61,8 +61,35 @@ import 'text_form_field.dart';
 /// ```
 ///
 /// ```dart
+/// class User {
+///   const User({
+///     this.email,
+///     this.name,
+///   });
+///
+///   final String email;
+///   final String name;
+///
+///   @override
+///   String toString() {
+///     return '$name, $email';
+///   }
+///
+///   @override
+///   bool operator ==(Object other) {
+///     if (other.runtimeType != runtimeType)
+///       return false;
+///     return other is User
+///         && other.name == name
+///         && other.email == email;
+///   }
+///
+///   @override
+///   int get hashCode => hashValues(email, name);
+/// }
+///
 /// class AutocompleteBasicUserExample extends StatelessWidget {
-///   AutocompleteBasicUserExample({Key key}) : super(key: key);
+///   AutocompleteBasicUserExample({Key? key}) : super(key: key);
 ///
 ///   static final List<User> _userOptions = <User>[
 ///     User(name: 'Alice', email: 'alice@example.com'),
@@ -77,7 +104,7 @@ import 'text_form_field.dart';
 ///     return Autocomplete<User>(
 ///       displayStringForOption: _displayStringForOption,
 ///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         if (textEditingValue.text == null || textEditingValue.text == '') {
+///         if (textEditingValue.text == '') {
 ///           return const Iterable<User>.empty();
 ///         }
 ///         return _userOptions.where((User option) {
