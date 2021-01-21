@@ -8,6 +8,10 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:googleapis_auth/auth.dart';
+import 'package:googleapis_auth/auth_io.dart';
+import 'package:http/http.dart';
+
 /// Common format of a metric data point.
 class MetricPoint extends Equatable {
   MetricPoint(
@@ -42,6 +46,23 @@ class MetricPoint extends Equatable {
   List<Object> get props => <Object>[value, tags];
 }
 
+/// Interface to write [MetricPoint].
+abstract class MetricDestination {
+  /// Insert new data points or modify old ones with matching id.
+  Future<void> update(List<MetricPoint> points);
+}
+
+/// Create `AuthClient` in case we only have an access token without the full
+/// credentials json. It's currently the case for Chrmoium LUCI bots.
+AuthClient authClientFromAccessToken(String token, List<String> scopes) {
+  final DateTime anHourLater = DateTime.now().add(const Duration(hours: 1));
+  final AccessToken accessToken =
+      AccessToken('Bearer', token, anHourLater.toUtc());
+  final AccessCredentials accessCredentials =
+      AccessCredentials(accessToken, null, scopes);
+  return authenticatedClient(Client(), accessCredentials);
+}
+
 /// Some common tag keys
 const String kGithubRepoKey = 'gitRepo';
 const String kGitRevisionKey = 'gitRevision';
@@ -52,3 +73,6 @@ const String kSubResultKey = 'subResult';
 /// Known github repo
 const String kFlutterFrameworkRepo = 'flutter/flutter';
 const String kFlutterEngineRepo = 'flutter/engine';
+
+/// The key for the GCP project id in the credentials json.
+const String kProjectId = 'project_id';
