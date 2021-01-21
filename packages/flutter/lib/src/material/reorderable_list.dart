@@ -143,6 +143,58 @@ class ReorderableListView extends StatefulWidget {
   /// this parameter false and wrap each list item, or a widget within
   /// each list item, with [ReorderableDragStartListener] or
   /// [ReorderableDelayedDragStartListener].
+  ///
+  /// The following sample specifies `buildDefaultDragHandles: false`, and
+  /// uses a [Card] at the leading edge of each item for the item's drag handle.
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// ```dart
+  /// final List<int> items = List<int>.generate(50, (int index) => index);
+  ///
+  /// Widget build(BuildContext context){
+  ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  ///   final oddItemColor = colorScheme.primary.withOpacity(0.05);
+  ///   final evenItemColor = colorScheme.primary.withOpacity(0.15);
+  ///
+  ///   return ReorderableListView(
+  ///     buildDefaultDragHandles: false,
+  ///     children: <Widget>[
+  ///       for (int index = 0; index < items.length; index++)
+  ///         Container(
+  ///           key: Key('$index'),
+  ///           color: items[index].isOdd ? oddItemColor : evenItemColor,
+  ///           child: Row(
+  ///             children: <Widget>[
+  ///               Container(
+  ///                 width: 64,
+  ///                 height: 64,
+  ///                 padding: const EdgeInsets.all(8),
+  ///                 child: ReorderableDragStartListener(
+  ///                   index: index,
+  ///                   child: Card(
+  ///                     color: colorScheme.primary,
+  ///                     elevation: 2,
+  ///                   ),
+  ///                 ),
+  ///               ),
+  ///               Text('Item ${items[index]}'),
+  ///             ],
+  ///           ),
+  ///         ),
+  ///     ],
+  ///     onReorder: (oldIndex, newIndex) {
+  ///       setState(() {
+  ///         if (oldIndex < newIndex) {
+  ///           newIndex -= 1;
+  ///         }
+  ///         final int item = items.removeAt(oldIndex);
+  ///         items.insert(newIndex, item);
+  ///       });
+  ///     },
+  ///   );
+  /// }
+  /// ```
   final bool buildDefaultDragHandles;
 
   @override
