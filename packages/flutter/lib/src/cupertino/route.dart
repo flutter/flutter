@@ -1140,6 +1140,8 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [CupertinoDialogRoute] when the [CupertinoButton] is tapped.
 ///
+/// {@macro flutter.widgets.RestorationManager}
+///
 /// ```dart imports
 /// import 'package:flutter/cupertino.dart';
 /// ```

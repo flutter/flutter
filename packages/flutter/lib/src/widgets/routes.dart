@@ -1901,6 +1901,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [RawDialogRoute] when the button is tapped.
 ///
+/// {@macro flutter.widgets.RestorationManager}
+///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
 /// ```
