@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
-import 'list_tile.dart';
 import 'material.dart';
 import 'text_form_field.dart';
 
@@ -241,7 +240,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                   onSelected(option);
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(displayStringForOption(option)),
                 ),
               );
