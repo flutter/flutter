@@ -1171,7 +1171,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1186,7 +1186,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
             kSuccess);
 
   ASSERT_TRUE(ImageMatchesFixture("scene_without_custom_compositor.png",
-                                  renderered_scene));
+                                  rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
@@ -1202,7 +1202,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1219,7 +1219,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
             kSuccess);
 
   ASSERT_TRUE(ImageMatchesFixture(
-      "scene_without_custom_compositor_with_xform.png", renderered_scene));
+      "scene_without_custom_compositor_with_xform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
@@ -1230,7 +1230,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1244,7 +1244,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
@@ -1262,7 +1262,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(surface_size);
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1277,7 +1277,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
@@ -1291,7 +1291,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   builder.SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1305,7 +1305,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
@@ -1327,7 +1327,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   builder.SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1342,7 +1342,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
@@ -1433,7 +1433,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
         return surface->makeImageSnapshot();
       });
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1447,7 +1447,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
@@ -1546,7 +1546,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
         return surface->makeImageSnapshot();
       });
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1561,7 +1561,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, VerifyB141980393) {
@@ -1811,7 +1811,7 @@ TEST_F(EmbedderTest,
 
   fml::CountDownLatch latch(1);
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1884,7 +1884,7 @@ TEST_F(EmbedderTest,
 
   latch.Wait();
 
-  ASSERT_TRUE(ImageMatchesFixture("dpr_noxform.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("dpr_noxform.png", rendered_scene));
 }
 
 TEST_F(
@@ -1905,7 +1905,7 @@ TEST_F(
 
   context.SetRootSurfaceTransformation(root_surface_transformation);
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
   fml::CountDownLatch latch(1);
 
   context.GetCompositor().SetNextPresentCallback(
@@ -1979,7 +1979,7 @@ TEST_F(
 
   latch.Wait();
 
-  ASSERT_TRUE(ImageMatchesFixture("dpr_xform.png", renderered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("dpr_xform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest,

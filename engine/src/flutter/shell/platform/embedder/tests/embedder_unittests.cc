@@ -948,7 +948,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  auto renderered_scene = context.GetNextSceneImage();
+  auto rendered_scene = context.GetNextSceneImage();
 
   latch.Wait();
 
@@ -957,8 +957,8 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
 #if !defined(OS_LINUX)
   GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
 #endif  // OS_LINUX
-  ASSERT_TRUE(ImageMatchesFixture("verifyb143464703_soft_noxform.png",
-                                  renderered_scene));
+  ASSERT_TRUE(
+      ImageMatchesFixture("verifyb143464703_soft_noxform.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanSendLowMemoryNotification) {
