@@ -478,6 +478,12 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _scrollDirection = axisDirectionToAxis(Scrollable.of(context)!.axisDirection);
   }
 
+  @override
+  void dispose() {
+    _dragInfo?.dispose();
+    super.dispose();
+  }
+
   /// Initiate the dragging of the item at [index] that was started with
   /// the pointer down [event].
   ///
@@ -577,7 +583,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   void _dropCompleted() {
     final int fromIndex = _dragItem!.index;
     final int toIndex = _insertIndex!;
-    widget.onReorder.call(fromIndex, toIndex);
+    if (fromIndex != toIndex) {
+      widget.onReorder.call(fromIndex, toIndex);
+    }
     _dragReset();
   }
 
@@ -617,16 +625,31 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       if (item == gapItem || !item.mounted)
         continue;
 
-      if (item.inStartHalf(proxyItemStart)) {
+      final Rect geometry = item.targetGeometry();
+      final double itemStart = _scrollDirection == Axis.vertical ? geometry.top : geometry.left;
+      final double itemExtent = _scrollDirection == Axis.vertical ? geometry.height : geometry.width;
+      final double itemEnd = itemStart + itemExtent;
+      final double itemMiddle = itemStart + itemExtent / 2;
+
+      if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
         // The start of the proxy is in the beginning half of the item, so
-        // we should swap the item with the gap
+        // we should swap the item with the gap and we are done looking for
+        // the new index.
         newIndex = item.index;
         break;
-      } else if (item.inEndHalf(proxyItemEnd)) {
+
+      } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
         // The end of the proxy is in the ending half of the item, so
-        // we should swap the item with the gap.
+        // we should swap the item with the gap and we are done looking for
+        // the new index.
         newIndex = item.index + 1;
         break;
+
+      } else
+        if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
+        newIndex = item.index + 1;
+      } else if (proxyItemEnd < itemStart && newIndex > item.index) {
+        newIndex = item.index;
       }
     }
 
@@ -836,21 +859,10 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     _update();
   }
 
-  bool inStartHalf(double position) {
+  Rect targetGeometry() {
     final RenderBox itemRenderBox = context.findRenderObject()! as RenderBox;
-    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero);
-    final double itemStart = _offsetExtent(itemPosition + _targetOffset, _listState._scrollDirection);
-    final double itemMiddle = itemStart + _sizeExtent(itemRenderBox.size, _listState._scrollDirection) / 2;
-    return itemStart <= position && position <= itemMiddle;
-  }
-
-  bool inEndHalf(double position) {
-    final RenderBox itemRenderBox = context.findRenderObject()! as RenderBox;
-    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero);
-    final double itemExtent = _sizeExtent(itemRenderBox.size, _listState._scrollDirection);
-    final double itemEnd = _offsetExtent(itemPosition + _targetOffset, _listState._scrollDirection) + itemExtent;
-    final double itemMiddle = itemEnd - _sizeExtent(itemRenderBox.size, _listState._scrollDirection) / 2;
-    return itemMiddle <= position && position <= itemEnd;
+    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero) + _targetOffset;
+    return itemPosition & itemRenderBox.size;
   }
 
   void _update() {
@@ -1013,14 +1025,7 @@ class _DragInfo extends Drag {
     _proxyAnimation = AnimationController(
       vsync: tickerProvider,
       duration: const Duration(milliseconds: 250),
-      reverseDuration: const Duration(milliseconds: 250),
-    )
-      ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.dismissed && _dropped) {
-          _dropCompleted();
-        }
-      })
-      ..forward();
+    )..forward();
   }
 
   @override
@@ -1033,7 +1038,20 @@ class _DragInfo extends Drag {
   @override
   void end(DragEndDetails details) {
     _dropped = true;
-    _proxyAnimation?.reverse();
+    if (_proxyAnimation != null) {
+      _proxyAnimation!.stop();
+      _proxyAnimation!.dispose();
+    }
+    _proxyAnimation = AnimationController(
+      vsync: tickerProvider,
+      duration: const Duration(milliseconds: 250),
+    );
+    _proxyAnimation!.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+        _dropCompleted();
+      }
+    });
+    _proxyAnimation!.forward();
     onEnd?.call(this);
   }
 
