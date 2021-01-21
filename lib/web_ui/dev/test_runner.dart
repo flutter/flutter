@@ -234,7 +234,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   Future<bool> runIntegrationTests() async {
     // Parse additional arguments specific for integration testing.
     IntegrationTestsArgumentParser.instance.parseOptions(argResults);
-    if(!_testPreparationReady) {
+    if (!_testPreparationReady) {
       await _prepare();
     }
     return IntegrationTestsManager(
@@ -522,9 +522,12 @@ class TestCommand extends Command<bool> with ArgUtils {
       }
 
       // All files under test/golden_tests are considered golden tests.
-      final bool isUnderGoldenTestsDirectory = path.split(testFilePath.relativeToWebUi).contains('golden_tests');
+      final bool isUnderGoldenTestsDirectory =
+          path.split(testFilePath.relativeToWebUi).contains('golden_tests');
       // Any file whose name ends with "_golden_test.dart" is run as a golden test.
-      final bool isGoldenTestFile = path.basename(testFilePath.relativeToWebUi).endsWith('_golden_test.dart');
+      final bool isGoldenTestFile = path
+          .basename(testFilePath.relativeToWebUi)
+          .endsWith('_golden_test.dart');
       if (isUnderGoldenTestsDirectory || isGoldenTestFile) {
         screenshotTestFiles.add(testFilePath);
       } else {
@@ -767,7 +770,11 @@ class TestCommand extends Command<bool> with ArgUtils {
   }
 }
 
-const List<String> _kTestFonts = <String>['ahem.ttf', 'Roboto-Regular.ttf'];
+const List<String> _kTestFonts = <String>[
+  'ahem.ttf',
+  'Roboto-Regular.ttf',
+  'NotoNaskhArabic-Regular.ttf',
+];
 
 void _copyTestFontsIntoWebUi() {
   final String fontsPath = path.join(
