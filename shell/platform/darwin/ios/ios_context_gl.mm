@@ -7,6 +7,7 @@
 #import <OpenGLES/EAGL.h>
 
 #include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 
@@ -24,7 +25,11 @@ IOSContextGL::IOSContextGL() {
   }
 }
 
-IOSContextGL::~IOSContextGL() = default;
+IOSContextGL::~IOSContextGL() {
+  if (main_context_) {
+    main_context_->releaseResourcesAndAbandonContext();
+  }
+}
 
 std::unique_ptr<IOSRenderTargetGL> IOSContextGL::CreateRenderTarget(
     fml::scoped_nsobject<CAEAGLLayer> layer) {
@@ -45,12 +50,11 @@ sk_sp<GrDirectContext> IOSContextGL::CreateResourceContext() {
 
 // |IOSContext|
 sk_sp<GrDirectContext> IOSContextGL::GetMainContext() const {
-  /// TODO(73744): Currently the GPUSurfaceGL creates the main context for
-  /// OpenGL.  With Metal the IOSContextMetal creates the main context and is
-  /// shared across surfaces.  We should refactor the OpenGL Context/Surfaces to
-  /// behave like the Metal equivalents.  Until then engines in the same group
-  /// will have a heavier memory cost if they are using OpenGL.
-  return nullptr;
+  return main_context_;
+}
+
+void IOSContextGL::SetMainContext(const sk_sp<GrDirectContext>& main_context) {
+  main_context_ = main_context;
 }
 
 // |IOSContext|
