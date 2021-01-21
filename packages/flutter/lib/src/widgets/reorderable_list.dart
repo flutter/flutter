@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'overlay.dart';
@@ -279,7 +280,7 @@ class ReorderableList extends StatefulWidget {
 /// ...
 /// listKey.currentState.cancelReorder();
 /// ```
-class ReorderableListState extends State<ReorderableList> with TickerProviderStateMixin<ReorderableList> {
+class ReorderableListState extends State<ReorderableList> {
   final GlobalKey<SliverReorderableListState> _sliverReorderableListKey = GlobalKey();
 
   /// Initiate the dragging of the item at [index] that was started with
@@ -348,7 +349,7 @@ class ReorderableListState extends State<ReorderableList> with TickerProviderSta
 /// These will take care of recognizing the start of a drag gesture and call
 /// the list state's start item drag method.
 ///
-/// This widget's [SliverReorderableListState] can be used manually start a item
+/// This widget's [SliverReorderableListState] can be used to manually start an item
 /// reorder, or cancel a current drag. To refer to the
 /// [SliverReorderableListState] either provide a [GlobalKey] or use the static
 /// [SliverReorderableList.of] method from an item's build method.
@@ -363,7 +364,7 @@ class SliverReorderableList extends StatefulWidget {
   /// Creates a sliver list that allows the user to interactively reorder its
   /// items.
   ///
-  /// [itemCount] must be greater than or equal to zero.
+  /// The [itemCount] must be greater than or equal to zero.
   const SliverReorderableList({
     Key? key,
     required this.itemBuilder,
@@ -474,8 +475,7 @@ class SliverReorderableList extends StatefulWidget {
 /// refer to their [SliverReorderableList] with the static
 /// [SliverReorderableList.of] method.
 class SliverReorderableListState extends State<SliverReorderableList> with TickerProviderStateMixin {
-
-  Axis _scrollDirection = Axis.vertical;
+  late Axis _scrollDirection;
 
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
 
@@ -751,6 +751,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasOverlay(context));
     return SliverList(
       delegate: _createDelegate(),
     );
@@ -758,7 +759,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 }
 
 class _ReorderableItem extends StatefulWidget {
-
   const _ReorderableItem({
     required Key key,
     required this.index,
@@ -775,7 +775,6 @@ class _ReorderableItem extends StatefulWidget {
 }
 
 class _ReorderableItemState extends State<_ReorderableItem> {
-
   late SliverReorderableListState _listState;
 
   Offset _startOffset = Offset.zero;
@@ -916,7 +915,6 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 ///  * [ReorderableListView], a material design list that allows the user to
 ///    reorder its items.
 class ReorderableDragStartListener extends StatelessWidget {
-
   /// Creates a listener for an drag immediately following a pointer down
   /// event over the given child widget.
   ///
@@ -1011,7 +1009,6 @@ typedef _DragItemUpdate = void Function(_DragInfo item, Offset position, Offset 
 typedef _DragItemCallback = void Function(_DragInfo item);
 
 class _DragInfo extends Drag {
-
   _DragInfo({
     required this.item,
     Offset initialPosition = Offset.zero,

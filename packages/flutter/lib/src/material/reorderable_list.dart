@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/rendering.dart';
@@ -57,9 +56,7 @@ import 'material_localizations.dart';
 /// ```
 ///
 ///{@end-tool}
-///
 class ReorderableListView extends StatefulWidget {
-
   /// Creates a reorderable list.
   ReorderableListView({
     Key? key,
@@ -130,14 +127,73 @@ class ReorderableListView extends StatefulWidget {
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
+  // This entry contains the scrolling list itself.
+  late OverlayEntry _listOverlayEntry;
 
+  @override
+  void initState() {
+    super.initState();
+    _listOverlayEntry = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) {
+        return _ReorderableListContent(
+          header: widget.header,
+          children: widget.children,
+          scrollController: widget.scrollController,
+          scrollDirection: widget.scrollDirection,
+          padding: widget.padding,
+          onReorder: widget.onReorder,
+          reverse: widget.reverse,
+        );
+      }
+    );
+  }
+
+  @override
+  void didUpdateWidget(ReorderableListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _listOverlayEntry.markNeedsBuild();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    return Overlay(
+      initialEntries: <OverlayEntry>[
+        _listOverlayEntry
+      ],
+    );
+  }
+}
+
+class _ReorderableListContent extends StatefulWidget {
+  const _ReorderableListContent({
+    required this.header,
+    required this.children,
+    required this.scrollController,
+    required this.scrollDirection,
+    required this.padding,
+    required this.onReorder,
+    required this.reverse,
+  });
+
+  final Widget? header;
+  final List<Widget> children;
+  final ScrollController? scrollController;
+  final Axis scrollDirection;
+  final EdgeInsets? padding;
+  final ReorderCallback onReorder;
+  final bool reverse;
+
+  @override
+  __ReorderableListContentState createState() => __ReorderableListContentState();
+}
+
+class __ReorderableListContentState extends State<_ReorderableListContent> {
   Widget _wrapWithSemantics(Widget child, int index) {
-
     void reorder(int startIndex, int endIndex) {
-      setState(() {
-        if (startIndex != endIndex)
-          widget.onReorder(startIndex, endIndex);
-      });
+      if (startIndex != endIndex)
+        widget.onReorder(startIndex, endIndex);
     }
 
     // First, determine which semantics actions apply.
@@ -195,10 +251,11 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     final Widget item = widget.children[index];
     assert(item.key != null);
 
+    // TODO(goderbauer): The semantics stuff should probably happen inside the ReorderableDelayedDragStartListener.
     return ReorderableDelayedDragStartListener(
-      key: _ReorderableListViewChildGlobalKey(item.key!, this),
-      child: _wrapWithSemantics(item, index),
-      index: index
+        key: _ReorderableListViewChildGlobalKey(item.key!, this),
+        child: _wrapWithSemantics(item, index),
+        index: index
     );
   }
 
@@ -219,8 +276,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-
     // If there is a header we can't just apply the padding to the list,
     // so we wrap the CustomScrollView in the padding for the top, left and right
     // and only add the padding from the bottom to the sliver list (or the equivalent
@@ -258,7 +313,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           SliverPadding(
             padding: listPadding,
             sliver: SliverReorderableList(
-              // key: _sliverReorderableListKey,
               itemBuilder: _itemBuilder,
               itemCount: widget.children.length,
               onReorder: widget.onReorder,
@@ -278,12 +332,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 // of the objects used to generate widgets.
 @optionalTypeArgs
 class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
-
   const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
   final Key subKey;
-
-  final _ReorderableListViewState state;
+  final State state;
 
   @override
   bool operator ==(Object other) {
