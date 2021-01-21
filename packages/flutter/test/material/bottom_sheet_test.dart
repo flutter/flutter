@@ -828,7 +828,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Tapping button on the bottom sheet to dismiss it.
-    await tester.tap(find.byKey(tapTargetToClose)); //Closing Animation will starts after taping
+    await tester.tap(find.byKey(tapTargetToClose)); // Closing animation will start after tapping
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
