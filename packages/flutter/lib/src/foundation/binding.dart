@@ -245,6 +245,15 @@ abstract class BindingBase {
           };
         },
       );
+
+      registerStringServiceExtension(
+        name: 'activeDevToolsServerAddress',
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
+        },
+      );
+
       return true;
     }());
     assert(() {
