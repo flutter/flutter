@@ -12,8 +12,6 @@
 
 @interface DisplayLinkManager : NSObject
 
-- (instancetype)init;
-
 //------------------------------------------------------------------------------
 /// @brief      The display refresh rate used for reporting purposes. The engine does not care
 ///             about this for frame scheduling. It is only used by tools for instrumentation. The
@@ -23,7 +21,7 @@
 ///
 /// @return     The refresh rate in frames per second.
 ///
-- (double)displayRefreshRate;
++ (double)displayRefreshRate;
 
 @end
 
