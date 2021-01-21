@@ -7,7 +7,6 @@
 
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/rrect.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
 #include "third_party/tonic/typed_data/typed_list.h"
@@ -37,7 +36,7 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   static fml::RefPtr<CanvasPath> CreateFrom(Dart_Handle path_handle,
                                             const SkPath& src) {
     fml::RefPtr<CanvasPath> path = CanvasPath::Create(path_handle);
-    path->tracked_path_->path = src;
+    path->path_ = src;
     return path;
   }
 
@@ -109,24 +108,16 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   bool op(CanvasPath* path1, CanvasPath* path2, int operation);
   void clone(Dart_Handle path_handle);
 
-  const SkPath& path() const { return tracked_path_->path; }
+  const SkPath& path() const { return path_; }
 
   size_t GetAllocationSize() const override;
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  virtual void ReleaseDartWrappableReference() const override;
-
  private:
   CanvasPath();
 
-  std::shared_ptr<VolatilePathTracker> path_tracker_;
-  std::shared_ptr<VolatilePathTracker::TrackedPath> tracked_path_;
-
-  // Must be called whenever the path is created or mutated.
-  void resetVolatility();
-
-  SkPath& mutable_path() { return tracked_path_->path; }
+  SkPath path_;
 };
 
 }  // namespace flutter
