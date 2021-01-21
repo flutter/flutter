@@ -101,6 +101,106 @@ enum HeroFlightDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows a `Hero` with List item along with Icon: here we will be using a
+/// rectangle widget for icon. Icon widget in list item at first page , with Hero
+/// widget in list and Enlarged icon to display on Second Page.
+///
+/// Navigator.of(context).push() is needed to navigate to second page from
+/// first page using the SAME tag Making sure both widgets have same tag. Hero
+/// transitions use the same tag to identify the start and destination widgets.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    return HeroAnimationRecipe(title: 'Hero Animation');
+///  }
+/// 
+///  class HeroAnimationRecipe extends StatefulWidget {
+///    HeroAnimationRecipe({Key key, this.title}) : super(key: key);
+///    final String title;
+///
+///    @override
+///    _HeroAnimationRecipeState createState() => _HeroAnimationRecipeState();
+///  }
+///
+///  class _HeroAnimationRecipeState extends State<HeroAnimationRecipe> {
+///
+///    Widget _blueIconRectangle() {
+///     return Container(
+///       width: 50,
+///       height: 50,
+///       color: Colors.blue,
+///      );
+///    }
+///
+///    Widget _blueDetailRectangle() {
+///     return Container(
+///      width: 200,
+///       height: 200,
+///       color: Colors.blue,
+///     );
+///    }
+///
+///    @override
+///    Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///       ),
+///       body: buildDemoWidget(context),
+///     );
+///    }
+///
+///    Widget buildDemoWidget(BuildContext context) {
+///      return Center(
+///        child: Column(
+///          crossAxisAlignment: CrossAxisAlignment.start,
+///          children: <Widget>[
+///            SizedBox(
+///              height: 20.0,
+///            ),
+///            ListTile(
+///             leading: GestureDetector(
+///               child: Hero(
+///                 tag: 'hero-rectangle',
+///                 child: _blueIconRectangle(),
+///               ),
+///               onTap: () => _gotoDetailsPage(context),
+///             ),
+///             title: Text('Tap on the icon to view hero animation transition.'),
+///            ),
+///          ],
+///        ),
+///      );
+///    }
+///
+///    void _gotoDetailsPage(BuildContext context) {
+///      Navigator.of(context).push(MaterialPageRoute(
+///        builder: (ctx) => Scaffold(
+///          appBar: AppBar(
+///            title: Text('second Page'),
+///          ),
+///          body: Center(
+///            child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                Hero(
+///                  tag: 'hero-rectangle',
+///                  child: _blueDetailRectangle(),
+///                ),
+///                Text(
+///                   'This is where you can see details about the list item tapped at previous page.',
+///                ),
+///              ],
+///            ),
+///          ),
+///        ),
+///      ));
+///    }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for
