@@ -711,11 +711,13 @@ mixin WidgetInspectorService {
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
-
   }
 
-  /// Information about the service protocol for the running application.
-  developer.ServiceProtocolInfo? serviceInfo;
+  /// Information about the VM service protocol for the running application.
+  ///
+  /// This information is necessary to provide Flutter DevTools deep links in
+  /// error messages.
+  developer.ServiceProtocolInfo? _serviceInfo;
 
   static bool _debugServiceExtensionsRegistered = false;
 
@@ -980,7 +982,9 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   Future<void> initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) async {
-    serviceInfo = await developer.Service.getInfo();
+    developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
+      _serviceInfo = info;
+    });
 
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
@@ -1393,12 +1397,13 @@ mixin WidgetInspectorService {
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
   String? _devToolsInspectorUriForElement(Object? object) {
-    assert(activeDevToolsServerAddress != null);
-    final Uri? vmServiceUri = serviceInfo?.serverUri;
-    if (vmServiceUri != null) {
-      final String? inspectorRef = toId(object, _consoleObjectGroup);
-      if (inspectorRef != null) {
-        return devToolsInspectorUri(vmServiceUri, inspectorRef);
+    if (activeDevToolsServerAddress != null && _serviceInfo != null) {
+      final Uri? vmServiceUri = _serviceInfo!.serverUri;
+      if (vmServiceUri != null) {
+        final String? inspectorRef = toId(object, _consoleObjectGroup);
+        if (inspectorRef != null) {
+          return devToolsInspectorUri(vmServiceUri, inspectorRef);
+        }
       }
     }
     return null;
@@ -2924,14 +2929,12 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     if (debugIsLocalCreationLocation(target)) {
 
       DiagnosticsNode? devToolsDiagnostic;
-      if (activeDevToolsServerAddress != null && WidgetInspectorService.instance.serviceInfo != null) {
-        final String? devToolsInspectorUri =
-            WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
-        if (devToolsInspectorUri != null) {
-          devToolsDiagnostic = DiagnosticsNode.message(
-            'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
-          );
-        }
+      final String? devToolsInspectorUri =
+          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+      if (devToolsInspectorUri != null) {
+        devToolsDiagnostic = DiagnosticsNode.message(
+          'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+        );
       }
 
       nodes.addAll(<DiagnosticsNode>[

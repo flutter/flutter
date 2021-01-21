@@ -198,9 +198,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  Future<void> _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) async {
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
     overflowHints ??= <DiagnosticsNode>[];
-
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
         'The edge of the $runtimeType that is '
