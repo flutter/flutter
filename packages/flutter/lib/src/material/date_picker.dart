@@ -293,6 +293,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   late DatePickerEntryMode _entryMode;
   late DateTime _selectedDate;
+  late DateTime _resetDate;
   late bool _autoValidate;
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -302,6 +303,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     super.initState();
     _entryMode = widget.initialEntryMode;
     _selectedDate = widget.initialDate;
+    _resetDate = widget.initialDate;
     _autoValidate = false;
   }
 
@@ -339,6 +341,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   void _handleDateChanged(DateTime date) {
     setState(() => _selectedDate = date);
   }
+
+  void _handleResetDate() {
+    setState(() => _selectedDate = _resetDate);
+  } 
 
   Size _dialogSize(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
@@ -406,6 +412,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final Widget picker;
     final IconData entryModeIcon;
     final String entryModeTooltip;
+    final IconData resetIcon = Icons.refresh;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         picker = CalendarDatePicker(
@@ -467,6 +474,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       icon: entryModeIcon,
       iconTooltip: entryModeTooltip,
       onIconPressed: _handleEntryModeToggle,
+      resetIcon: resetIcon,
+      onResetIconPressed: _handleResetDate,
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
@@ -545,6 +554,8 @@ class _DatePickerHeader extends StatelessWidget {
     required this.icon,
     required this.iconTooltip,
     required this.onIconPressed,
+    required this.resetIcon,
+    required this.onResetIconPressed
   }) : assert(helpText != null),
        assert(orientation != null),
        assert(isShort != null),
@@ -594,6 +605,13 @@ class _DatePickerHeader extends StatelessWidget {
   ///
   /// The picker will use this to toggle between entry modes.
   final VoidCallback onIconPressed;
+  
+  /// The available icons are described in [Icons].
+  final IconData resetIcon;
+
+  /// Callback when the user taps the icon in the header.
+  final VoidCallback onResetIconPressed;
+
 
   @override
   Widget build(BuildContext context) {
@@ -629,6 +647,11 @@ class _DatePickerHeader extends StatelessWidget {
       tooltip: iconTooltip,
       onPressed: onIconPressed,
     );
+    final IconButton resetIconButton = IconButton(
+      icon: Icon(resetIcon),
+      color: onPrimarySurfaceColor,
+      onPressed: onResetIconPressed,
+    );
 
     switch (orientation) {
       case Orientation.portrait:
@@ -650,6 +673,7 @@ class _DatePickerHeader extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Expanded(child: title),
+                      resetIconButton,
                       icon,
                     ],
                   ),
@@ -681,6 +705,12 @@ class _DatePickerHeader extends StatelessWidget {
                     ),
                     child: title,
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                  ),
+                  child: resetIconButton,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -1021,6 +1051,10 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     setState(() => _selectedEnd = date);
   }
 
+  void _handleResetDate() {
+    setState(() {});
+  }
+
   bool get _hasSelectedDateRange => _selectedStart != null && _selectedEnd != null;
 
   @override
@@ -1065,6 +1099,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           selectedStartDate: _selectedStart,
           selectedEndDate: _selectedEnd,
           currentDate: widget.currentDate,
+          resetIcon: Icons.refresh,
+          onResetIconPressed: _handleResetDate,
           picker: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait
@@ -2270,6 +2306,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.confirmText,
     required this.cancelText,
     required this.helpText,
+    required this.resetIcon,
+    required this.onResetIconPressed,
   }) : super(key: key);
 
   final DateTime? selectedStartDate;
@@ -2282,6 +2320,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? confirmText;
   final String? cancelText;
   final String? helpText;
+  final IconData resetIcon;
+  final VoidCallback onResetIconPressed;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -2326,6 +2366,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       icon: Icons.calendar_today,
       iconTooltip: localizations.calendarModeButtonLabel,
       onIconPressed: onToggleEntryMode,
+      resetIcon: resetIcon,
+      onResetIconPressed: onResetIconPressed,
     );
 
     final Widget actions = Container(
