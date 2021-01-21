@@ -255,7 +255,7 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -4329,8 +4329,6 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
-      TargetPlatform.linux,
-      TargetPlatform.windows,
     }),
   );
 
@@ -4367,8 +4365,49 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
-      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets('The Select All calls on selection changed with a mouse on windows and linux', (WidgetTester tester) async {
+    const String string = 'abc def ghi';
+    TextSelection? newSelection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SelectableText(
+            string,
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+              expect(newSelection, isNull);
+              newSelection = selection;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Right-click on the 'e' in 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    final TestGesture gesture = await tester.startGesture(
+      ePos,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(newSelection!.baseOffset, 4);
+    expect(newSelection!.extentOffset, 7);
+    newSelection = null;
+
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    expect(newSelection!.baseOffset, 0);
+    expect(newSelection!.extentOffset, 11);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.windows,
+      TargetPlatform.linux,
     }),
   );
 
