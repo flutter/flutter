@@ -587,7 +587,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
 ///
-/// The optional [backgroundColor], [elevation], [shape], [clipBehavior], [transitionAnimationController]
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior] and [transitionAnimationController]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
 ///
