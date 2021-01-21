@@ -600,8 +600,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         final RenderBox itemRenderBox =  _items[_insertIndex!]!.context.findRenderObject()! as RenderBox;
         _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero);
       } else {
-        // Inserting into the last spot on the list, so grab the second to last and move down by the gap
-        final RenderBox itemRenderBox =  _items[_insertIndex! - 1]!.context.findRenderObject()! as RenderBox;
+        // Inserting into the last spot on the list. If it's the only spot, put
+        // it back where it was. Otherwise, grab the second to last and move
+        // down by the gap.
+        final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
+        final RenderBox itemRenderBox =  _items[itemIndex]!.context.findRenderObject()! as RenderBox;
         _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(_dragInfo!.itemExtent, _scrollDirection);
       }
     });
