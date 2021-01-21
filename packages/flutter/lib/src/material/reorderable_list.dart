@@ -186,10 +186,10 @@ class _ReorderableListContent extends StatefulWidget {
   final bool reverse;
 
   @override
-  __ReorderableListContentState createState() => __ReorderableListContentState();
+  _ReorderableListContentState createState() => _ReorderableListContentState();
 }
 
-class __ReorderableListContentState extends State<_ReorderableListContent> {
+class _ReorderableListContentState extends State<_ReorderableListContent> {
   Widget _wrapWithSemantics(Widget child, int index) {
     void reorder(int startIndex, int endIndex) {
       if (startIndex != endIndex)
