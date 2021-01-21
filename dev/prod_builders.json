@@ -628,7 +628,7 @@
          "name": "Mac_android microbenchmarks",
          "repo": "flutter",
          "task_name": "mac_android_microbenchmarks",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac_android new_gallery__transition_perf",
