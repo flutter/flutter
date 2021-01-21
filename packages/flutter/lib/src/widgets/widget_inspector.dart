@@ -981,7 +981,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  Future<void> initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) async {
+  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
       _serviceInfo = info;
     });
