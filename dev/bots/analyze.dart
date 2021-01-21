@@ -123,6 +123,8 @@ Future<void> run(List<String> arguments) async {
   } finally {
     outDir.deleteSync(recursive: true);
   }
+  // TODO(fujino): https://github.com/flutter/flutter/issues/74431
+  exitWithError(<String>['Tree was manually closed for https://github.com/flutter/flutter/issues/74431']);
 }
 
 
