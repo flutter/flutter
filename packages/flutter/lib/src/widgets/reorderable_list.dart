@@ -61,6 +61,10 @@ import 'transitions.dart';
 ///    reorder its items.
 typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
+/// Signature for the builder callback used to decorate the dragging item in
+/// [ReorderableList] and [SliverReorderableList].
+typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Animation<double> animation);
+
 /// A scrolling container that allows the user to interactively reorder the
 /// list items.
 ///
@@ -98,6 +102,7 @@ class ReorderableList extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount = 0,
     required this.onReorder,
+    this.proxyDecorator,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
@@ -127,6 +132,10 @@ class ReorderableList extends StatefulWidget {
   /// to a new location in the list and the application should update the order
   /// of the items.
   final ReorderCallback onReorder;
+
+  /// A callback that allows the app to add an animated decoration around
+  /// an item when it is being dragged.
+  final ReorderItemProxyDecorator? proxyDecorator;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -319,6 +328,7 @@ class ReorderableListState extends State<ReorderableList> with TickerProviderSta
             itemBuilder: widget.itemBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            proxyDecorator: widget.proxyDecorator,
           ),
         ),
       ],
@@ -359,6 +369,7 @@ class SliverReorderableList extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount = 0,
     required this.onReorder,
+    this.proxyDecorator,
   }) : assert(itemCount >= 0),
        super(key: key);
 
@@ -381,6 +392,10 @@ class SliverReorderableList extends StatefulWidget {
   /// to a new location in the list and the application should update the order
   /// of the items.
   final ReorderCallback onReorder;
+
+  /// A callback that allows the app to add an animated decoration around
+  /// an item when it is being dragged.
+  final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -470,6 +485,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   _ReorderableItemState? _dragItem;
   _DragInfo? _dragInfo;
   int? _insertIndex;
+  Offset? _finalDropPosition;
   MultiDragGestureRecognizer<MultiDragPointerState>? _recognizer;
 
   @override
@@ -546,6 +562,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       onCancel: _dragCancel,
       onEnd: _dragEnd,
       onDropCompleted: _dropCompleted,
+      proxyDecorator: widget.proxyDecorator,
       tickerProvider: this,
     );
 
@@ -577,7 +594,17 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _dragEnd(_DragInfo item) {
-    setState(() {});
+    setState(() {
+      if (_insertIndex! < widget.itemCount - 1) {
+        // Find the location of the item we want to insert before
+        final RenderBox itemRenderBox =  _items[_insertIndex!]!.context.findRenderObject()! as RenderBox;
+        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero);
+      } else {
+        // Inserting into the last spot on the list, so grab the second to last and move down by the gap
+        final RenderBox itemRenderBox =  _items[_insertIndex! - 1]!.context.findRenderObject()! as RenderBox;
+        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(_dragInfo!.itemExtent, _scrollDirection);
+      }
+    });
   }
 
   void _dropCompleted() {
@@ -601,6 +628,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         _recognizer?.dispose();
         _recognizer = null;
         _overlayEntry?.remove();
+        _overlayEntry = null;
+        _finalDropPosition = null;
       }
     });
   }
@@ -991,6 +1020,7 @@ class _DragInfo extends Drag {
     this.onEnd,
     this.onCancel,
     this.onDropCompleted,
+    this.proxyDecorator,
     required this.tickerProvider,
   }) {
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
@@ -1007,6 +1037,7 @@ class _DragInfo extends Drag {
   final _DragItemCallback? onEnd;
   final _DragItemCallback? onCancel;
   final VoidCallback? onDropCompleted;
+  final ReorderItemProxyDecorator? proxyDecorator;
   final TickerProvider tickerProvider;
 
   late Offset dragPosition;
@@ -1015,7 +1046,6 @@ class _DragInfo extends Drag {
   late double itemExtent;
   ScrollableState? scrollable;
   AnimationController? _proxyAnimation;
-  bool _dropped = false;
 
   void dispose() {
     _proxyAnimation?.dispose();
@@ -1025,7 +1055,13 @@ class _DragInfo extends Drag {
     _proxyAnimation = AnimationController(
       vsync: tickerProvider,
       duration: const Duration(milliseconds: 250),
-    )..forward();
+    )
+    ..addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed) {
+        _dropCompleted();
+      }
+    })
+    ..forward();
   }
 
   @override
@@ -1037,21 +1073,7 @@ class _DragInfo extends Drag {
 
   @override
   void end(DragEndDetails details) {
-    _dropped = true;
-    if (_proxyAnimation != null) {
-      _proxyAnimation!.stop();
-      _proxyAnimation!.dispose();
-    }
-    _proxyAnimation = AnimationController(
-      vsync: tickerProvider,
-      duration: const Duration(milliseconds: 250),
-    );
-    _proxyAnimation!.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
-        _dropCompleted();
-      }
-    });
-    _proxyAnimation!.forward();
+    _proxyAnimation!.reverse();
     onEnd?.call(this);
   }
 
@@ -1069,20 +1091,22 @@ class _DragInfo extends Drag {
   }
 
   Widget createProxy(BuildContext context) {
-    final OverlayState overlay = Overlay.of(context)!;
-    final RenderBox overlayBox = overlay.context.findRenderObject()! as RenderBox;
-    final Offset overlayOrigin = overlayBox.localToGlobal(Offset.zero);
-
     return item.widget.capturedThemes.wrap(
       _DragItemProxy(
         item: item,
         size: itemSize,
         animation: _proxyAnimation!,
-        dropping: _dropped,
-        position: dragPosition - dragOffset - overlayOrigin,
+        position: dragPosition - dragOffset - _overlayOrigin(context),
+        proxyDecorator: proxyDecorator,
       )
     );
   }
+}
+
+Offset _overlayOrigin(BuildContext context) {
+  final OverlayState overlay = Overlay.of(context)!;
+  final RenderBox overlayBox = overlay.context.findRenderObject()! as RenderBox;
+  return overlayBox.localToGlobal(Offset.zero);
 }
 
 class _DragItemProxy extends StatelessWidget {
@@ -1092,45 +1116,40 @@ class _DragItemProxy extends StatelessWidget {
     required this.position,
     required this.size,
     required this.animation,
-    required this.dropping,
+    required this.proxyDecorator,
   }) : super(key: key);
 
   final _ReorderableItemState item;
   final Offset position;
   final Size size;
   final AnimationController animation;
-  final bool dropping;
+  final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
   Widget build(BuildContext context) {
+    final Widget child = item.widget.child;
+    final Widget proxyChild = proxyDecorator?.call(child, item.index, animation.view) ?? child;
+    final Offset overlayOrigin = _overlayOrigin(context);
+
     return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
-          // final double elevation = lerpDouble(0.0, 8.0, Curves.easeInOut.transform(animation.value))!;
-          final Offset effectivePosition = position;
-          // if (dropping && item.mounted) {
-          //   final _ReorderableListState reorderableState = _ReorderableListState.of(context)!;
-          //   final Offset itemPosition = reorderableState._itemTargetPosition(item);
-          //   effectivePosition = Offset.lerp(position, itemPosition, Curves.easeOut.transform(1 - animation.value))!;
-          // }
-          return Positioned(
-            // child: Container(
-            //   alignment: Alignment.topLeft,
-            //   constraints: constraints,
-            //   child: Material(
-            //     elevation: elevation,
-            //     child: item.buildProxy(context),
-            //   ),
-            // ),
+          Offset effectivePosition = position;
+          final Offset? dropPosition = item._listState._finalDropPosition;
+          if (dropPosition != null) {
+            effectivePosition = Offset.lerp(dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
+          }
+        return Positioned(
             child: SizedBox(
               width: size.width,
               height: size.height,
-              child: item.widget.child,
+              child: child,
             ),
             left: effectivePosition.dx,
             top: effectivePosition.dy,
           );
-        }
+        },
+        child: proxyChild,
     );
   }
 }

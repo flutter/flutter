@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'material.dart';
 import 'material_localizations.dart';
 
 /// A list whose items the user can interactively reorder by dragging.
@@ -199,6 +202,21 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     );
   }
 
+  Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 6, animValue)!;
+          return Material(
+          child: child,
+          elevation: elevation,
+        );
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -244,6 +262,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
               itemBuilder: _itemBuilder,
               itemCount: widget.children.length,
               onReorder: widget.onReorder,
+              proxyDecorator: _proxyDecorator,
             ),
           ),
         ],
