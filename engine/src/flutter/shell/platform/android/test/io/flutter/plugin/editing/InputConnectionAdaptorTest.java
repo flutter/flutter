@@ -1033,7 +1033,7 @@ public class InputConnectionAdaptorTest {
   public void testSendKeyEvent_sendSoftKeyEvents() {
     ListenableEditingState editable = sampleEditable(5, 5);
     AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
-    when(mockKeyProcessor.isCurrentEvent(any())).thenReturn(true);
+    when(mockKeyProcessor.isPendingEvent(any())).thenReturn(true);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable, mockKeyProcessor);
 
     KeyEvent shiftKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT);
@@ -1047,7 +1047,7 @@ public class InputConnectionAdaptorTest {
   public void testSendKeyEvent_sendHardwareKeyEvents() {
     ListenableEditingState editable = sampleEditable(5, 5);
     AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
-    when(mockKeyProcessor.isCurrentEvent(any())).thenReturn(false);
+    when(mockKeyProcessor.isPendingEvent(any())).thenReturn(false);
     when(mockKeyProcessor.onKeyEvent(any())).thenReturn(true);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable, mockKeyProcessor);
 
