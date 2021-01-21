@@ -40,7 +40,10 @@ const bool _autoDetect =
 const bool _useSkia =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
-// If set to true, forces CPU-only rendering (i.e. no WebGL).
+/// If set to true, forces CPU-only rendering (i.e. no WebGL).
+///
+/// This is mainly used for testing or for apps that want to ensure they
+/// run on devices which don't support WebGL.
 const bool canvasKitForceCpuOnly = bool.fromEnvironment(
     'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
     defaultValue: false);
