@@ -155,7 +155,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (void)textureFrameAvailable:(int64_t)textureID {
   BOOL success = [_flutterEngine markTextureFrameAvailable:textureID];
-  if (success) {
+  if (!success) {
     NSLog(@"Unable to mark texture with id %lld as available.", textureID);
   }
 }
