@@ -1191,8 +1191,13 @@ void main() {
                     context: context,
                     barrierLabel: 'Custom label',
                     builder: (BuildContext context) {
-                      return const CupertinoDialog(
-                        child: Text('Content'),
+                      return const CupertinoAlertDialog(
+                        title: Text('Title'),
+                        content: Text('Content'),
+                        actions: <Widget>[
+                          CupertinoDialogAction(child: Text('Yes')),
+                          CupertinoDialogAction(child: Text('No')),
+                        ],
                       );
                     },
                   );
@@ -1210,7 +1215,7 @@ void main() {
     )));
   });
 
-  testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
+  testWidgets('CupertinoAlertDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
