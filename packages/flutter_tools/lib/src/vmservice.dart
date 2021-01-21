@@ -424,7 +424,7 @@ extension FlutterVmService on vm_service.VmService {
   }) async {
     try {
       return await callMethod(method, isolateId: isolateId, args: args);
-    } on vm_service.RPCError catch(e) {
+    } on vm_service.RPCError catch (e) {
       // If the service disappears mid-request the tool is unable to recover
       // and should begin to shutdown due to the service connection closing.
       // Swallow the exception here and let the shutdown logic elsewhere deal
@@ -464,6 +464,9 @@ extension FlutterVmService on vm_service.VmService {
         'viewId': viewId,
       },
     );
+    if (response == null) {
+      return null;
+    }
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
@@ -767,6 +770,9 @@ extension FlutterVmService on vm_service.VmService {
       final vm_service.Response response = await callMethodWrapper(
         kListViewsMethod,
       );
+      if (response == null) {
+        return null;
+      }
       final List<Object> rawViews = response.json['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[
         for (final Object rawView in rawViews)
