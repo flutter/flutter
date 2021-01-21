@@ -1420,12 +1420,14 @@ abstract class ResidentRunner {
     } on Exception {
       // do nothing
     }
-    vmService.onExtensionEvent.listen((vm_service.Event event) {
+    StreamSubscription<vm_service.Event> extensionStream;
+    extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
       if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
         // The 'Flutter.FrameworkInitialization' event is sent on hot restart
         // as well, so make sure we don't try to complete this twice.
         if (!completer.isCompleted) {
           completer.complete();
+          extensionStream.cancel();
         }
       }
     });
