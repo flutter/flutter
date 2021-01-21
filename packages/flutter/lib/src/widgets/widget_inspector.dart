@@ -1392,7 +1392,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
-  String? devToolsInspectorUriForElement(Object? object) {
+  String? _devToolsInspectorUriForElement(Object? object) {
     assert(activeDevToolsServerAddress != null);
     final Uri? vmServiceUri = serviceInfo?.serverUri;
     if (vmServiceUri != null) {
@@ -2926,7 +2926,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
       DiagnosticsNode? devToolsDiagnostic;
       if (activeDevToolsServerAddress != null && WidgetInspectorService.instance.serviceInfo != null) {
         final String? devToolsInspectorUri =
-            WidgetInspectorService.instance.devToolsInspectorUriForElement(target);
+            WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
         if (devToolsInspectorUri != null) {
           devToolsDiagnostic = DiagnosticsNode.message(
             'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
