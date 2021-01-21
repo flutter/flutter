@@ -40,6 +40,6 @@ void main() {
         );
       }
     });
-  }, skip: platform.isWindows, // Flaky on Windows: https://github.com/flutter/flutter/issues/74052
+  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/74052
   );
 }

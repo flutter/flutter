@@ -6239,8 +6239,8 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
 /// A wrapper class for the [Element] that is the creator of a [RenderObject].
 ///
-/// Attaching a [DebugCreator] attach the [RenderObject] will lead to better error
-/// message.
+/// Setting a [DebugCreator] as [RenderObject.debugCreator] will lead to better
+/// error messages.
 class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
   DebugCreator(this.element);
