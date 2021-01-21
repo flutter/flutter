@@ -8,8 +8,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
 /// A list whose items the user can interactively reorder by dragging.
 ///
@@ -67,6 +69,7 @@ class ReorderableListView extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
+    this.buildDefaultDragHandles = true,
   }) : assert(scrollDirection != null),
        assert(onReorder != null),
        assert(children != null),
@@ -122,6 +125,21 @@ class ReorderableListView extends StatefulWidget {
   /// into a new position.
   final ReorderCallback onReorder;
 
+  /// If true: on desktop platforms, a drag handle is stacked over the
+  /// center of each item's trailing edge; on mobile platforms, a long
+  /// press anywhere on the item starts a drag.
+  ///
+  /// The default desktop drag handle is just an [Icons.drag_handle]
+  /// wrapped by a [ReorderableDragStartListener]. On mobile
+  /// platforms, the entire item is wrapped with a
+  /// [ReorderableDelayedDragStartListener].
+  ///
+  /// To change the appearance or the layout of the drag handles, make
+  /// this parameter false and wrap each list item, or a widget within
+  /// each list item, with [ReorderableDragStartListener] or
+  /// [ReorderableDelayedDragStartListener].
+  final bool buildDefaultDragHandles;
+
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
@@ -144,6 +162,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           padding: widget.padding,
           onReorder: widget.onReorder,
           reverse: widget.reverse,
+          buildDefaultDragHandles: widget.buildDefaultDragHandles,
         );
       }
     );
@@ -175,6 +194,7 @@ class _ReorderableListContent extends StatefulWidget {
     required this.padding,
     required this.onReorder,
     required this.reverse,
+    required this.buildDefaultDragHandles,
   });
 
   final Widget? header;
@@ -184,6 +204,7 @@ class _ReorderableListContent extends StatefulWidget {
   final EdgeInsets? padding;
   final ReorderCallback onReorder;
   final bool reverse;
+  final bool buildDefaultDragHandles;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -252,10 +273,48 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     assert(item.key != null);
 
     // TODO(goderbauer): The semantics stuff should probably happen inside the ReorderableDelayedDragStartListener.
-    return ReorderableDelayedDragStartListener(
-        key: _ReorderableListViewChildGlobalKey(item.key!, this),
-        child: _wrapWithSemantics(item, index),
-        index: index
+    final Widget itemWithSemantics = _wrapWithSemantics(item, index);
+    final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
+
+    if (widget.buildDefaultDragHandles) {
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        case TargetPlatform.macOS:
+          return Stack(
+            key: itemGlobalKey,
+            children: <Widget>[
+              itemWithSemantics,
+              Positioned.directional(
+                textDirection: Directionality.of(context),
+                top: 0,
+                bottom: 0,
+                end: 8,
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: const Icon(Icons.drag_handle),
+                  ),
+                ),
+              ),
+            ],
+          );
+
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+          return ReorderableDelayedDragStartListener(
+            key: itemGlobalKey,
+            index: index,
+            child: itemWithSemantics,
+          );
+      }
+    }
+
+    return KeyedSubtree(
+        key: itemGlobalKey,
+        child: itemWithSemantics,
     );
   }
 
