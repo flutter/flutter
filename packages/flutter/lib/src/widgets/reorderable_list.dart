@@ -605,7 +605,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         // down by the gap.
         final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
         final RenderBox itemRenderBox =  _items[itemIndex]!.context.findRenderObject()! as RenderBox;
-        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(_dragInfo!.itemExtent, _scrollDirection);
+        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(item.itemExtent, _scrollDirection);
       }
     });
   }
