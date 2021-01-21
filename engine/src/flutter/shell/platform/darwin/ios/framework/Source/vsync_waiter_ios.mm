@@ -91,26 +91,16 @@ void VsyncWaiterIOS::AwaitVSync() {
 
 @end
 
-@implementation DisplayLinkManager {
-  fml::scoped_nsobject<CADisplayLink> display_link_;
-}
+@implementation DisplayLinkManager
 
-- (instancetype)init {
-  self = [super init];
-
-  if (self) {
-    display_link_ = fml::scoped_nsobject<CADisplayLink> {
-      [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain]
-    };
-    display_link_.get().paused = YES;
-  }
-
-  return self;
-}
-
-- (double)displayRefreshRate {
++ (double)displayRefreshRate {
   if (@available(iOS 10.3, *)) {
-    auto preferredFPS = display_link_.get().preferredFramesPerSecond;  // iOS 10.0
+    fml::scoped_nsobject<CADisplayLink> display_link = fml::scoped_nsobject<CADisplayLink> {
+      [[CADisplayLink displayLinkWithTarget:[[DisplayLinkManager new] autorelease]
+                                   selector:@selector(onDisplayLink:)] retain]
+    };
+    display_link.get().paused = YES;
+    auto preferredFPS = display_link.get().preferredFramesPerSecond;  // iOS 10.0
 
     // From Docs:
     // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
@@ -129,12 +119,6 @@ void VsyncWaiterIOS::AwaitVSync() {
 
 - (void)onDisplayLink:(CADisplayLink*)link {
   // no-op.
-}
-
-- (void)dealloc {
-  [display_link_.get() invalidate];
-
-  [super dealloc];
 }
 
 @end
