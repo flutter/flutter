@@ -90,18 +90,26 @@ class AttachCommand extends FlutterCommand {
               'This parameter is case-insensitive.',
       )..addOption(
         'pid-file',
-        help: 'Specify a file to write the process id to. '
+        help: 'Specify a file to write the process ID to. '
               'You can send SIGUSR1 to trigger a hot reload '
-              'and SIGUSR2 to trigger a hot restart.',
+              'and SIGUSR2 to trigger a hot restart. '
+              'The file is created when the signal handlers '
+              'are hooked and deleted when they are removed.',
+      )..addFlag(
+        'report-ready',
+        help: 'Print "ready" to the console after handling a keyboard command.\n'
+              'This is primarily useful for tests and other automation, but consider '
+              'using --machine instead.',
+        hide: !verboseHelp,
       )..addOption(
         'project-root',
         hide: !verboseHelp,
-        help: 'Normally used only in run target',
+        help: 'Normally used only in run target.',
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
-              'and progress in machine friendly format.',
+              'and progress in machine-friendly format.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
@@ -199,8 +207,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   @override
   Future<FlutterCommandResult> runCommand() async {
     await _validateArguments();
-
-    writePidFile(stringArg('pid-file'));
 
     final Device device = await findTargetDevice();
 
@@ -362,9 +368,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: globals.logger,
             terminal: globals.terminal,
             signals: globals.signals,
+            processInfo: processInfo,
+            reportReady: boolArg('report-ready'),
+            pidFile: stringArg('pid-file'),
           )
-            ..setupTerminal()
-            ..registerSignalHandlers();
+            ..registerSignalHandlers()
+            ..setupTerminal();
         }));
         result = await runner.attach(
           appStartedCompleter: onAppStart,

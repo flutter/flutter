@@ -177,7 +177,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> close() async {
-    devToolsUrl = null;
+    if (devToolsUrl != null) {
+      devToolsUrl = null;
+    }
     if (_devToolsProcess != null) {
       _devToolsProcess.kill();
       await _devToolsProcess.exitCode;

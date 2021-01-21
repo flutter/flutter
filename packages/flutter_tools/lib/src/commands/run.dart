@@ -289,11 +289,18 @@ class RunCommand extends RunCommandBase {
         help: 'Stay resident after launching the application. Not available with "--trace-startup".',
       )
       ..addOption('pid-file',
-        help: 'Specify a file to write the process id to. '
+        help: 'Specify a file to write the process ID to. '
               'You can send SIGUSR1 to trigger a hot reload '
-              'and SIGUSR2 to trigger a hot restart.',
-      )
-      ..addFlag('benchmark',
+              'and SIGUSR2 to trigger a hot restart. '
+              'The file is created when the signal handlers '
+              'are hooked and deleted when they are removed.',
+      )..addFlag(
+        'report-ready',
+        help: 'Print "ready" to the console after handling a keyboard command.\n'
+              'This is primarily useful for tests and other automation, but consider '
+              'using --machine instead.',
+        hide: !verboseHelp,
+      )..addFlag('benchmark',
         negatable: false,
         hide: !verboseHelp,
         help: 'Enable a benchmarking mode. This will run the given application, '
@@ -514,8 +521,6 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String applicationBinaryPath = stringArg('use-application-binary');
 
-    writePidFile(stringArg('pid-file'));
-
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
@@ -620,34 +625,39 @@ class RunCommand extends RunCommandBase {
     //
     // Do not add more operations to the future.
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+
+    TerminalHandler handler;
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
       (_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
-          TerminalHandler(
+          handler = TerminalHandler(
             runner,
             logger: globals.logger,
             terminal: globals.terminal,
             signals: globals.signals,
+            processInfo: processInfo,
+            reportReady: boolArg('report-ready'),
+            pidFile: stringArg('pid-file'),
           )
-            ..setupTerminal()
-            ..registerSignalHandlers();
+            ..registerSignalHandlers()
+            ..setupTerminal();
         }
       }
     ));
-
     try {
       final int result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
         route: route,
       );
+      handler?.stop();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
       }
-    } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared) {
+    } on RPCError catch (error) {
+      if (error.code == RPCErrorCodes.kServiceDisappeared) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;

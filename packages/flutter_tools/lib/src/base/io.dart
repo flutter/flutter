@@ -52,6 +52,7 @@ import 'package:meta/meta.dart';
 import '../globals.dart' as globals;
 import 'async_guard.dart';
 import 'context.dart';
+import 'file_system.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -364,34 +365,60 @@ class Stdio {
   Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 
-// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
-void writePidFile(String pidFile) {
-  if (pidFile != null) {
-    // Write our pid to the file.
-    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
-  }
-}
-
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo() => _DefaultProcessInfo();
+  factory ProcessInfo() => _DefaultProcessInfo(globals.fs);
+  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
 
   static ProcessInfo get instance => context.get<ProcessInfo>();
 
   int get currentRss;
 
   int get maxRss;
+
+  File writePidFile(String pidFile);
 }
 
 ProcessInfo get processInfo => ProcessInfo.instance;
 
 /// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
 class _DefaultProcessInfo implements ProcessInfo {
+  _DefaultProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
   @override
   int get currentRss => io.ProcessInfo.currentRss;
 
   @override
   int get maxRss => io.ProcessInfo.maxRss;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync(io.pid.toString());
+  }
+}
+
+/// The test version of [ProcessInfo].
+class _TestProcessInfo implements ProcessInfo {
+  _TestProcessInfo(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  @override
+  int currentRss = 1000;
+
+  @override
+  int maxRss = 2000;
+
+  @override
+  File writePidFile(String pidFile) {
+    assert(pidFile != null);
+    return _fileSystem.file(pidFile)
+      ..writeAsStringSync('12345');
+  }
 }
 
 /// The return type for [listNetworkInterfaces].
