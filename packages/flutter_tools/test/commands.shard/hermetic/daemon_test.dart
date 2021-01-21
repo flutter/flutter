@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
@@ -19,6 +20,7 @@ import 'package:fake_async/fake_async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+import '../../src/testbed.dart';
 
 void main() {
   Daemon daemon;
@@ -55,6 +57,30 @@ void main() {
       expect(response['result'], isA<String>());
       await responses.close();
       await commands.close();
+    });
+
+    testUsingContext('daemon.getSupportedPlatforms command should succeed', () async {
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
+      daemon = Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      // Use the flutter_gallery project which has a known set of supported platforms.
+      final String projectPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'flutter_gallery');
+
+      commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.getSupportedPlatforms', 'params': <String, Object>{'projectRoot': projectPath}});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+
+      expect(response['id'], 0);
+      expect(response['result'], isNotEmpty);
+      expect(response['result']['platforms'], <String>{'macos'});
+      await responses.close();
+      await commands.close();
+    }, overrides: <Type, Generator>{
+      // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
+      FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
@@ -443,7 +469,7 @@ void main() {
     });
 
     testWithoutContext('does not run any operations concurrently', () async {
-      // Crete a function thats slow, but throws if another instance of the
+      // Crete a function that's slow, but throws if another instance of the
       // function is running.
       bool isRunning = false;
       Future<int> f(int ret) async {

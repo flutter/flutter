@@ -30,6 +30,6 @@ class GithubHelper {
 
   static final GithubHelper _singleton = GithubHelper._internal();
 
-  final GitHub _github = GitHub();
+  final GitHub _github = GitHub(auth: findAuthenticationFromEnvironment());
   final Map<String, DateTime> _commitDateTimeCache = <String, DateTime>{};
 }

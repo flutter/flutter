@@ -36,7 +36,13 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> interactively(List<String> arguments, {String directory, @required Stdio stdio,}) {
+  Future<void> interactively(
+    List<String> arguments, {
+    String directory,
+    @required Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
+  }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 }
