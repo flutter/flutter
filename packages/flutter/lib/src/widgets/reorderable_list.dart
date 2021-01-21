@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
-import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -645,29 +644,30 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     if (!_autoScrolling && _dragInfo != null && _dragInfo!.scrollable != null) {
       final ScrollPosition position = _dragInfo!.scrollable!.position;
       double? newOffset;
-      const int duration = 14; // in ms
+      const Duration duration = Duration(milliseconds: 14);
       const double step = 1.0;
-      const double overdragMax = 20.0;
-      const double overdragCoef = 10;
+      const double overDragMax = 20.0;
+      const double overDragCoef = 10;
 
-      final MediaQueryData mediaQuery = MediaQuery.of(context);
-      final double start = _scrollDirection == Axis.vertical ? mediaQuery.padding.top : mediaQuery.padding.left;
-      final double end = position.viewportDimension - (_scrollDirection == Axis.vertical ? mediaQuery.padding.bottom : mediaQuery.padding.right);
+      final RenderBox scrollRenderBox = _dragInfo!.scrollable!.context.findRenderObject()! as RenderBox;
+      final Offset scrollOrigin = scrollRenderBox.localToGlobal(Offset.zero);
+      final double scrollStart = _offsetExtent(scrollOrigin, _scrollDirection);
+      final double scrollEnd = scrollStart + _sizeExtent(scrollRenderBox.size, _scrollDirection);
 
       final double dragStart = _offsetExtent(_dragInfo!.dragPosition, _scrollDirection);
       final double dragEnd = dragStart + _dragInfo!.itemExtent;
-      if (dragStart < start && position.pixels > position.minScrollExtent) {
-        final double overdrag = max(start - dragStart, overdragMax);
-        newOffset = max(position.minScrollExtent, position.pixels - step * overdrag / overdragCoef);
-      } else if (dragEnd > end && position.pixels < position.maxScrollExtent) {
-        final double overdrag = max(dragEnd - end, overdragMax);
-        newOffset = min(position.maxScrollExtent, position.pixels + step * overdrag / overdragCoef);
+      if (dragStart < scrollStart && position.pixels > position.minScrollExtent) {
+        final double overDrag = max(scrollStart - dragStart, overDragMax);
+        newOffset = max(position.minScrollExtent, position.pixels - step * overDrag / overDragCoef);
+      } else if (dragEnd > scrollEnd && position.pixels < position.maxScrollExtent) {
+        final double overDrag = max(dragEnd - scrollEnd, overDragMax);
+        newOffset = min(position.maxScrollExtent, position.pixels + step * overDrag / overDragCoef);
       }
 
       if (newOffset != null && (newOffset - position.pixels).abs() >= 1.0) {
         _autoScrolling = true;
         await position.animateTo(newOffset,
-            duration: const Duration(milliseconds: duration),
+            duration: duration,
             curve: Curves.linear
         );
         _autoScrolling = false;
