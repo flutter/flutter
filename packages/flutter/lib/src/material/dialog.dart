@@ -952,7 +952,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// ### State Restoration in Dialogs
 ///
-/// Using this method with not enable state restoration for the dialog. In order
+/// Using this method will not enable state restoration for the dialog. In order
 /// to enable state restoration for a dialog, use [Navigator.restorablePush]
 /// or [Navigator.restorablePushNamed] with [DialogRoute].
 ///
@@ -965,7 +965,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// [MaterialApp.restorationScopeId] and using [Navigator.restorablePush] to
 /// push [DialogRoute] when the button is tapped.
 ///
-/// {@macro flutter.widgets.showGeneralDialog}
+/// {@macro flutter.widgets.RestorationManager}
 ///
 /// ```dart imports
 /// import 'package:flutter/material.dart';
@@ -999,7 +999,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: Center(
-///         child: OutlineButton(
+///         child: OutlinedButton(
 ///           onPressed: () {
 ///             Navigator.of(context).restorablePush(_dialogBuilder);
 ///           },

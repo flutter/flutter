@@ -1916,7 +1916,7 @@ class _RestorableDialogTestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: OutlineButton(
+        child: OutlinedButton(
           onPressed: () {
             Navigator.of(context).restorablePush(_materialDialogBuilder);
           },
