@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
@@ -145,8 +146,7 @@ keep this 2
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
         when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.majorVersion).thenReturn(11);
-        when(mockXcode.minorVersion).thenReturn(4);
+        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
@@ -164,8 +164,7 @@ keep this 2
       9705A1C71CF904A300538480 /* Flutter.framework in Embed Frameworks */,
 ''');
         when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.majorVersion).thenReturn(11);
-        when(mockXcode.minorVersion).thenReturn(4);
+        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
@@ -198,8 +197,7 @@ keep this 2
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
         when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.majorVersion).thenReturn(11);
-        when(mockXcode.minorVersion).thenReturn(3);
+        when(mockXcode.currentVersion).thenReturn(Version(11, 3, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
@@ -217,8 +215,7 @@ keep this 2
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
         when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.majorVersion).thenReturn(11);
-        when(mockXcode.minorVersion).thenReturn(4);
+        when(mockXcode.currentVersion).thenReturn(Version(11, 4, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,
@@ -235,8 +232,7 @@ keep this 2
         746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
         when(mockXcode.isInstalled).thenReturn(true);
-        when(mockXcode.majorVersion).thenReturn(12);
-        when(mockXcode.minorVersion).thenReturn(0);
+        when(mockXcode.currentVersion).thenReturn(Version(12, 0, 0));
 
         final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
           mockIosProject,

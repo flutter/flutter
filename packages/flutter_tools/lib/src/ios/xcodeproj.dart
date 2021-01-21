@@ -191,7 +191,9 @@ List<String> _xcodeBuildSettingsLines({
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+
+    final String localEngineName = globals.fs.path.basename(engineOutPath);
+    xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -202,7 +204,15 @@ List<String> _xcodeBuildSettingsLines({
     //
     // Skip this step for macOS builds.
     if (!useMacOSConfig) {
-      final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+      String arch;
+      if (localEngineName.endsWith('_arm')) {
+        arch = 'armv7';
+      } else if (localEngineName.contains('_sim')) {
+        // Apple Silicon ARM simulators not yet supported.
+        arch = 'x86_64';
+      } else {
+        arch = 'arm64';
+      }
       xcodeBuildSettings.add('ARCHS=$arch');
     }
   }
