@@ -199,7 +199,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
-    this.hitTestBehavior,
+    this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -353,8 +353,8 @@ class Draggable<T extends Object> extends StatefulWidget {
 
   /// How to behave during hit test.
   ///
-  /// If null, defaults to [HitTestBehavior.deferToChild].
-  final HitTestBehavior? hitTestBehavior;
+  /// Defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior hitTestBehavior;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -534,7 +534,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
-      behavior: widget.hitTestBehavior ?? HitTestBehavior.deferToChild,
+      behavior: widget.hitTestBehavior,
       onPointerDown: canDrag ? _routePointer : null,
       child: showChild ? widget.child : widget.childWhenDragging,
     );
@@ -612,7 +612,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
-    this.hitTestBehavior,
+    this.hitTestBehavior = HitTestBehavior.translucent,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -652,7 +652,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// How to behave during hit testing.
   ///
   /// Defaults to [HitTestBehavior.translucent].
-  final HitTestBehavior? hitTestBehavior;
+  final HitTestBehavior hitTestBehavior;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -729,7 +729,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     assert(widget.builder != null);
     return MetaData(
       metaData: this,
-      behavior: widget.hitTestBehavior ?? HitTestBehavior.translucent,
+      behavior: widget.hitTestBehavior,
       child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
     );
   }
