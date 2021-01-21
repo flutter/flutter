@@ -1945,7 +1945,8 @@ abstract class RenderBox extends RenderObject {
         if (RenderObject.debugActiveLayout != null) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
+              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent) ||
+                RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback,
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
             'otherwise, the only object that is allowed to read RenderBox.size '
