@@ -299,7 +299,7 @@ class InputConnectionAdaptor extends BaseInputConnection
     // already know about (i.e. when events arrive here from a soft keyboard and
     // not a hardware keyboard), to avoid a loop.
     if (keyProcessor != null
-        && !keyProcessor.isCurrentEvent(event)
+        && !keyProcessor.isPendingEvent(event)
         && keyProcessor.onKeyEvent(event)) {
       return true;
     }

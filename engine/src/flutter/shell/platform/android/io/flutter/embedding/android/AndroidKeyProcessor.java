@@ -14,6 +14,7 @@ import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 
 /**
  * A class to process key events from Android, passing them to the framework as messages using
@@ -93,11 +94,11 @@ public class AndroidKeyProcessor {
       // case the theory is wrong.
       return false;
     }
-    if (eventResponder.isHeadEvent(keyEvent)) {
-      // If the keyEvent is at the head of the queue of pending events we've seen,
-      // and has the same id, then we know that this is a re-dispatched keyEvent, and
-      // we shouldn't respond to it, but we should remove it from tracking now.
-      eventResponder.removeHeadEvent();
+    if (isPendingEvent(keyEvent)) {
+      // If the keyEvent is in the queue of pending events we've seen, and has
+      // the same id, then we know that this is a re-dispatched keyEvent, and we
+      // shouldn't respond to it, but we should remove it from tracking now.
+      eventResponder.removePendingEvent(keyEvent);
       return false;
     }
 
@@ -122,8 +123,8 @@ public class AndroidKeyProcessor {
    * @param event the event to check for being the current event.
    * @return
    */
-  public boolean isCurrentEvent(@NonNull KeyEvent event) {
-    return eventResponder.isHeadEvent(event);
+  public boolean isPendingEvent(@NonNull KeyEvent event) {
+    return eventResponder.findPendingEvent(event) != null;
   }
 
   /**
@@ -199,27 +200,19 @@ public class AndroidKeyProcessor {
     }
 
     /** Removes the first pending event from the cache of pending events. */
-    private KeyEvent removeHeadEvent() {
-      return pendingEvents.removeFirst();
+    private void removePendingEvent(KeyEvent event) {
+      pendingEvents.remove(event);
     }
 
-    private KeyEvent checkIsHeadEvent(KeyEvent event) {
-      if (pendingEvents.size() == 0) {
-        throw new AssertionError(
-            "Event response received when no events are in the queue. Received event " + event);
+    private KeyEvent findPendingEvent(KeyEvent event) {
+      Iterator<KeyEvent> iter = pendingEvents.iterator();
+      while (iter.hasNext()) {
+        KeyEvent item = iter.next();
+        if (item == event) {
+          return item;
+        }
       }
-      if (pendingEvents.getFirst() != event) {
-        throw new AssertionError(
-            "Event response received out of order. Should have seen event "
-                + pendingEvents.getFirst()
-                + " first. Instead, received "
-                + event);
-      }
-      return pendingEvents.getFirst();
-    }
-
-    private boolean isHeadEvent(KeyEvent event) {
-      return pendingEvents.size() > 0 && pendingEvents.getFirst() == event;
+      return null;
     }
 
     /**
@@ -229,7 +222,7 @@ public class AndroidKeyProcessor {
      */
     @Override
     public void onKeyEventHandled(KeyEvent event) {
-      removeHeadEvent();
+      removePendingEvent(event);
     }
 
     /**
@@ -240,7 +233,7 @@ public class AndroidKeyProcessor {
      */
     @Override
     public void onKeyEventNotHandled(KeyEvent event) {
-      redispatchKeyEvent(checkIsHeadEvent(event));
+      redispatchKeyEvent(findPendingEvent(event));
     }
 
     /** Adds an Android key event to the event responder to wait for a response. */
@@ -269,7 +262,7 @@ public class AndroidKeyProcessor {
           && textInputPlugin.getLastInputConnection() != null
           && textInputPlugin.getLastInputConnection().sendKeyEvent(event)) {
         // The event was handled, so we can remove it from the queue.
-        removeHeadEvent();
+        removePendingEvent(event);
         return;
       }
 
