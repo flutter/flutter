@@ -4,15 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'text_form_field.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
-///
-/// See also:
-///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
-///    contains more detailed examples.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic Autocomplete widget using the
@@ -63,8 +60,8 @@ import 'text_form_field.dart';
 /// ```dart
 /// class User {
 ///   const User({
-///     this.email,
-///     this.name,
+///     required this.email,
+///     required this.name,
 ///   });
 ///
 ///   final String email;
@@ -119,7 +116,12 @@ import 'text_form_field.dart';
 /// }
 /// ```
 /// {@end-tool}
-class Autocomplete<T extends Object> extends StatefulWidget {
+///
+/// See also:
+///
+///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
+///    contains more detailed examples.
+class Autocomplete<T extends Object> extends StatelessWidget {
   /// Creates an instance of [Autocomplete].
   const Autocomplete({
     Key? key,
@@ -162,24 +164,19 @@ class Autocomplete<T extends Object> extends StatefulWidget {
   }
 
   @override
-  _AutocompleteState<T> createState() => _AutocompleteState<T>();
-}
-
-class _AutocompleteState<T extends Object> extends State<Autocomplete<T>> {
-  @override
   Widget build(BuildContext context) {
     return RawAutocomplete<T>(
-      displayStringForOption: widget.displayStringForOption,
-      fieldViewBuilder: widget.fieldViewBuilder,
-      optionsBuilder: widget.optionsBuilder,
-      optionsViewBuilder: widget.optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+      displayStringForOption: displayStringForOption,
+      fieldViewBuilder: fieldViewBuilder,
+      optionsBuilder: optionsBuilder,
+      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
-          displayStringForOption: widget.displayStringForOption,
+          displayStringForOption: displayStringForOption,
           onSelected: onSelected,
           options: options,
         );
       },
-      onSelected: widget.onSelected,
+      onSelected: onSelected,
     );
   }
 }
@@ -235,16 +232,17 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
         child: Container(
           height: 200.0,
           child: ListView.builder(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(0.0),
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);
-              return GestureDetector(
+              return InkWell(
                 onTap: () {
                   onSelected(option);
                 },
-                child: ListTile(
-                  title: Text(displayStringForOption(option)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(displayStringForOption(option)),
                 ),
               );
             },

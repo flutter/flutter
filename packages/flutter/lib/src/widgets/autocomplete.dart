@@ -16,6 +16,7 @@ import 'overlay.dart';
 /// entered so far.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
 typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
 
@@ -23,6 +24,7 @@ typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(Text
 /// that the user has selected an option.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.onSelected], which is of this type.
 typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 
@@ -31,6 +33,7 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 /// selects an option.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
 typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
@@ -42,6 +45,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 /// contains the input [TextField] or [TextFormField].
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
@@ -54,6 +58,7 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 /// a string which can be displayed in the widget's options menu.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
@@ -68,10 +73,6 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// {@endtemplate}
 ///
 /// This is a core framework widget with very basic UI.
-///
-/// See also:
-///  * [Autocomplete], which is a Material-styled implementation that is based
-/// on RawAutocomplete.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
@@ -424,6 +425,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [Autocomplete], which is a Material-styled implementation that is based
+/// on RawAutocomplete.
 class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
