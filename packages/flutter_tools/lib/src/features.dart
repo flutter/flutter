@@ -159,12 +159,11 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter beta support for desktop on macOS',
+  name: 'beta-quality support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
   extraHelpText: flutterNext ?
-      'The stable channel provides a snapshot of the beta support. '
-      'For up-to-date beta support, switch to the beta channel.' : null,
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -185,12 +184,11 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter beta support for desktop on Linux',
+  name: 'beta-quality support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
   extraHelpText: flutterNext ?
-      'The stable channel provides a snapshot of the beta support. '
-      'For up-to-date beta support, switch to the beta channel.' : null,
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -211,12 +209,11 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter beta support for desktop on Windows',
+  name: 'beta-quality support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
   extraHelpText: flutterNext ?
-      'The stable channel provides a snapshot of the beta support. '
-      'For up-to-date beta support, switch to the beta channel.' : null,
+      'Newer beta versions are available on the beta channel.' : null,
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,

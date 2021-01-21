@@ -84,19 +84,19 @@ void main() {
 
     testWithoutContext('flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter beta support for desktop on macOS. '
+      'Enable or disable beta-quality support for desktop on macOS. '
       'This setting will take effect on the master and dev channels.');
     });
 
     testWithoutContext('flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter beta support for desktop on Linux. '
+      'Enable or disable beta-quality support for desktop on Linux. '
       'This setting will take effect on the master and dev channels.');
     });
 
     testWithoutContext('flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter beta support for desktop on Windows. '
+      'Enable or disable beta-quality support for desktop on Windows. '
       'This setting will take effect on the master and dev channels.');
     });
 
