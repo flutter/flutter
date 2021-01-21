@@ -1053,13 +1053,17 @@ class _DragInfo extends Drag {
   }
 
   Widget createProxy(BuildContext context) {
+    final OverlayState overlay = Overlay.of(context)!;
+    final RenderBox overlayBox = overlay.context.findRenderObject()! as RenderBox;
+    final Offset overlayOrigin = overlayBox.localToGlobal(Offset.zero);
+
     return item.widget.capturedThemes.wrap(
       _DragItemProxy(
         item: item,
         size: itemSize,
         animation: _proxyAnimation!,
         dropping: _dropped,
-        position: dragPosition - dragOffset,
+        position: dragPosition - dragOffset - overlayOrigin,
       )
     );
   }
