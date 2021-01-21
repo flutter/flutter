@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
@@ -687,10 +688,12 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       return SizedBox(height: _dragInfo!.itemExtent);
     }
     final Widget child = widget.itemBuilder(context, index);
+    final OverlayState overlay = Overlay.of(context)!;
     return _ReorderableItem(
       key: _ReorderableItemGlobalKey(child.key!, index, this),
       index: index,
       child: child,
+      capturedThemes: InheritedTheme.capture(from: context, to: overlay.context),
     );
   }
 
@@ -708,10 +711,12 @@ class _ReorderableItem extends StatefulWidget {
     required Key key,
     required this.index,
     required this.child,
+    required this.capturedThemes,
   }) : super(key: key);
 
   final int index;
   final Widget child;
+  final CapturedThemes capturedThemes;
 
   @override
   _ReorderableItemState createState() => _ReorderableItemState();
@@ -1048,12 +1053,14 @@ class _DragInfo extends Drag {
   }
 
   Widget createProxy(BuildContext context) {
-    return _DragItemProxy(
-      item: item,
-      size: itemSize,
-      animation: _proxyAnimation!,
-      dropping: _dropped,
-      position: dragPosition - dragOffset,
+    return item.widget.capturedThemes.wrap(
+      _DragItemProxy(
+        item: item,
+        size: itemSize,
+        animation: _proxyAnimation!,
+        dropping: _dropped,
+        position: dragPosition - dragOffset,
+      )
     );
   }
 }
