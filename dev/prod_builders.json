@@ -460,7 +460,7 @@
          "name": "Mac_android android_semantics_integration_test",
          "repo": "flutter",
          "task_name": "mac_android_android_semantics_integration_test",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac_android backdrop_filter_perf__timeline_summary",
@@ -586,7 +586,7 @@
          "name": "Mac_android hot_mode_dev_cycle__benchmark",
          "repo": "flutter",
          "task_name": "mac_android_hot_mode_dev_cycle__benchmark",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac_android hybrid_android_views_integration_test",
