@@ -709,7 +709,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       final double scrollStart = _offsetExtent(scrollOrigin, _scrollDirection);
       final double scrollEnd = scrollStart + _sizeExtent(scrollRenderBox.size, _scrollDirection);
 
-      final double dragStart = _offsetExtent(_dragInfo!.dragPosition, _scrollDirection);
+      final double dragStart = _offsetExtent(_dragInfo!.dragPosition - _dragInfo!.dragOffset, _scrollDirection);
       final double dragEnd = dragStart + _dragInfo!.itemExtent;
       if (dragStart < scrollStart && position.pixels > position.minScrollExtent) {
         final double overDrag = max(scrollStart - dragStart, overDragMax);
