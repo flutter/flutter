@@ -1215,7 +1215,7 @@ void main() {
     )));
   });
 
-  testWidgets('CupertinoAlertDialog is state restorable', (WidgetTester tester) async {
+  testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
