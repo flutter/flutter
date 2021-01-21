@@ -19,7 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 class TestSamplingClock implements SamplingClock {
   TestSamplingClock(this._clock);
 
-  @override DateTime now() => _clock.now();
+  @override
+  DateTime now() => _clock.now();
   @override Stopwatch stopwatch() => _clock.stopwatch();
 
   final Clock _clock;
