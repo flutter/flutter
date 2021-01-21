@@ -50,8 +50,8 @@ import 'theme.dart';
 /// Otherwise, the [actions] will be placed below the [content]. Use
 /// [forceActionsBelow] to override this behavior.
 ///
-/// If the [actions] placed below the [content], they will be laid out in a row
-/// unless there isn't sufficient room to display, in which case they are laid out
+/// If the [actions] placed below the [content], they will be laid out in a row.
+/// If there isn't sufficient room to display everything, they are laid out
 /// in a column instead.
 ///
 /// The [actions] and [content] must be provided. An optional leading widget
