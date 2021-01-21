@@ -56,8 +56,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
     std::string entrypoint,
     const std::vector<std::string>& args,
     const std::string& fixtures_path,
-    fml::WeakPtr<IOManager> io_manager,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    fml::WeakPtr<IOManager> io_manager) {
   FML_CHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (!vm_ref) {
@@ -127,8 +126,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
           settings.isolate_shutdown_callback,  // isolate shutdown callback
           entrypoint,                          // entrypoint
           std::nullopt,                        // library
-          std::move(isolate_configuration),    // isolate configuration
-          std::move(volatile_path_tracker)     // volatile path tracker
+          std::move(isolate_configuration)     // isolate configuration
           )
           .lock();
 
@@ -148,15 +146,14 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     std::string entrypoint,
     const std::vector<std::string>& args,
     const std::string& fixtures_path,
-    fml::WeakPtr<IOManager> io_manager,
-    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+    fml::WeakPtr<IOManager> io_manager) {
   std::unique_ptr<AutoIsolateShutdown> result;
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetUITaskRunner(), fml::MakeCopyable([&]() mutable {
         result = RunDartCodeInIsolateOnUITaskRunner(
             vm_ref, settings, task_runners, entrypoint, args, fixtures_path,
-            io_manager, std::move(volatile_path_tracker));
+            io_manager);
         latch.Signal();
       }));
   latch.Wait();

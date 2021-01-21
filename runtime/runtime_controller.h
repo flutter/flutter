@@ -15,7 +15,6 @@
 #include "flutter/lib/ui/io_manager.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/dart_vm.h"
@@ -111,8 +110,6 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @param[in]  persistent_isolate_data     Unstructured persistent read-only
   ///                                         data that the root isolate can
   ///                                         access in a synchronous manner.
-  /// @param[in]  volatile_path_tracker       Cache for tracking path
-  ///                                         volatility.
   ///
   RuntimeController(
       RuntimeDelegate& client,
@@ -130,8 +127,7 @@ class RuntimeController : public PlatformConfigurationClient {
       const PlatformData& platform_data,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
-      std::shared_ptr<const fml::Mapping> persistent_isolate_data,
-      std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+      std::shared_ptr<const fml::Mapping> persistent_isolate_data);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a RuntimeController that shares as many resources as
@@ -614,7 +610,6 @@ class RuntimeController : public PlatformConfigurationClient {
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
-  std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
 
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
