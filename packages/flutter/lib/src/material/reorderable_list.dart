@@ -31,25 +31,30 @@ import 'theme.dart';
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ```dart
-/// List<String> _list = List.generate(5, (i) => "${i}");
+/// final List<int> items = List<int>.generate(50, (int index) => index);
 ///
 /// Widget build(BuildContext context){
+///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
+///   final oddItemColor = colorScheme.primary.withOpacity(0.05);
+///   final evenItemColor = colorScheme.primary.withOpacity(0.15);
+///
 ///   return ReorderableListView(
-///     padding : const EdgeInsets.symmetric(horizontal:40),
-///     children:[
-///       for(var i=0 ; i<_list.length ; i++)
+///     padding: const EdgeInsets.symmetric(horizontal: 40),
+///     children: <Widget>[
+///       for (int index = 0; index < items.length; index++)
 ///         ListTile(
-///              key:Key('$i'),
-///              title: Text(_list[i]),
+///           key: Key('$index'),
+///           tileColor: items[index].isOdd ? oddItemColor : evenItemColor,
+///           title: Text('Item ${items[index]}'),
 ///         ),
 ///     ],
-///     onReorder: (oldIndex, newIndex){
-///       setState((){
-///         if(oldIndex < newIndex){
-///           newIndex-=1;
+///     onReorder: (int oldIndex, int newIndex) {
+///       setState(() {
+///         if (oldIndex < newIndex) {
+///           newIndex -= 1;
 ///         }
-///         final element = _list.removeAt(oldIndex);
-///         _list.insert(newIndex, element);
+///         final int item = items.removeAt(oldIndex);
+///         items.insert(newIndex, item);
 ///       });
 ///     },
 ///   );
@@ -313,8 +318,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     }
 
     return KeyedSubtree(
-        key: itemGlobalKey,
-        child: itemWithSemantics,
+      key: itemGlobalKey,
+      child: itemWithSemantics,
     );
   }
 
