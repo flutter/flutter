@@ -1422,7 +1422,11 @@ abstract class ResidentRunner {
     }
     vmService.onExtensionEvent.listen((vm_service.Event event) {
       if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-        completer.complete();
+        // The 'Flutter.FrameworkInitialization' event is sent on hot restart
+        // as well, so make sure we don't try to complete this twice.
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
       }
     });
     final vm_service.IsolateRef isolateRef = (await vmService.getVM()).isolates.first;

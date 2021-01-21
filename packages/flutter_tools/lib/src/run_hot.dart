@@ -634,6 +634,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
+      unawaited(maybeCallDevToolsUriServiceExtension());
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
