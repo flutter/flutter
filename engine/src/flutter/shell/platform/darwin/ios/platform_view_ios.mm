@@ -148,7 +148,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
                       "has no ViewController.";
     return nullptr;
   }
-  return ios_surface_->CreateGPUSurface();
+  return ios_surface_->CreateGPUSurface(ios_context_->GetMainContext().get());
 }
 
 // |PlatformView|
