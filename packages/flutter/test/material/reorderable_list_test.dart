@@ -371,7 +371,7 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: SizedBox(
-                height: 200,
+                height: 150,
                 child: ReorderableListView(
                   scrollController: customController,
                   onReorder: (int oldIndex, int newIndex) { },
@@ -418,8 +418,11 @@ void main() {
         // First 20.0 px always ignored, so scroll offset is only
         // shifted by 80.0.
         // Final offset: 40.0 + 80.0 = 120.0
+        // The total distance available to scroll is 300.0 - 150.0 = 150.0, or
+        // height of the ReorderableListView minus height of the SizedBox. Since
+        // The final offset is less than this, it's not limited.
         expect(customController.offset, 120.0);
-      }, skip: true); // TODO(darrenaustin): not sure why this doesn't work with the new implementation
+      });
 
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
         final Widget reorderableList = ReorderableListView(
