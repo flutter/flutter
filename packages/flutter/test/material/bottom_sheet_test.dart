@@ -820,7 +820,7 @@ void main() {
 
     expect(find.text('BottomSheet'), findsNothing);
 
-    await tester.tap(find.byKey(tapTarget)); //Opening Animation will starts after tapping
+    await tester.tap(find.byKey(tapTarget)); // Opening animation will start after tapping
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
