@@ -112,7 +112,7 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }), skip: kIsWeb);
 
   testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
