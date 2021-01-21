@@ -19,16 +19,6 @@ import 'material_localizations.dart';
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 
-/// The type for a Function that builds a toolbar's container with the given
-/// child.
-///
-/// See also:
-///
-///   * [TextSelectionToolbar.toolbarBuilder], which is of this type.
-///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is similar, but
-///     for a Cupertino-style toolbar.
-typedef ToolbarBuilder = Widget Function(BuildContext context, Widget child);
-
 /// A fully-functional Material-style text selection toolbar.
 ///
 /// Tries to position itself above [anchorAbove], but if it doesn't fit, then

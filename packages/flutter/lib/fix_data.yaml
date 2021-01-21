@@ -11,6 +11,56 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      field: 'resizeToAvoidBottomPadding'
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'rename'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Changes made in https://github.com/flutter/flutter/pull/26259
+  - title: 'Rename to resizeToAvoidBottomInset'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Scaffold'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'resizeToAvoidBottomPadding'
+        newName: 'resizeToAvoidBottomInset'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: 'Replace with CupertinoPopupSurface'
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoPopupSurface'
+
+  # Change made in https://github.com/flutter/flutter/pull/20649
+  # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+  - title: 'Replace with CupertinoAlertDialog'
+    date: 2021-01-07
+    bulkApply: false
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoDialog'
+    changes:
+      - kind: 'rename'
+        newName: 'CupertinoAlertDialog'
+      - kind: 'renameParameter'
+        oldName: 'child'
+        newName: 'content'
+
   # Changes made in https://github.com/flutter/flutter/pull/61648
   - title: 'Migrate to autovalidateMode'
     date: 2020-09-02
@@ -365,7 +415,7 @@ transforms:
   - title: 'Migrate to clipBehavior'
     date: 2020-09-22
     element:
-      uris: [ 'widgets.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       field: 'overflow'
       inClass: 'Stack'
     changes:
@@ -376,7 +426,7 @@ transforms:
   - title: 'Migrate to clipBehavior'
     date: 2020-09-22
     element:
-      uris: [ 'widgets.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'Stack'
     oneOf:

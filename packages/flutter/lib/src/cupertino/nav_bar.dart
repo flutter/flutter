@@ -130,21 +130,6 @@ Widget _wrapWithBackground({
   );
 }
 
-// This exists to support backward compatibility with arguments like
-// `actionsForegroundColor`. CupertinoThemes can be used to support these
-// scenarios now. To support `actionsForegroundColor`, the nav bar rewraps
-// its children with a CupertinoTheme.
-Widget _wrapActiveColor(Color? color, BuildContext context, Widget child) {
-  if (color == null) {
-    return child;
-  }
-
-  return CupertinoTheme(
-    data: CupertinoTheme.of(context).copyWith(primaryColor: color),
-    child: child,
-  );
-}
-
 // Whether the current route supports nav bar hero transitions from or to.
 bool _isTransitionable(BuildContext context) {
   final ModalRoute<dynamic>? route = ModalRoute.of(context);
@@ -244,7 +229,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
@@ -372,21 +356,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Border? border;
 
-  /// {@template flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
-  /// Default color used for text and icons of the [leading] and [trailing]
-  /// widgets in the navigation bar.
-  ///
-  /// Defaults to the `primaryColor` of the [CupertinoTheme] when null.
-  /// {@endtemplate}
-  ///
-  /// The default color for text in the [middle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@template flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   /// Whether to transition between navigation bars.
   ///
@@ -486,44 +455,35 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ),
     );
 
-    final Color? actionsForegroundColor = CupertinoDynamicColor.maybeResolve(
-      widget.actionsForegroundColor,
-      context,
-    );
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
       // Lint ignore to maintain backward compatibility.
-      return _wrapActiveColor(actionsForegroundColor, context, navBar);
+      return navBar;
     }
 
-    return _wrapActiveColor(
-      // Lint ignore to maintain backward compatibility.
-      actionsForegroundColor,
-      context,
-      Builder(
-        // Get the context that might have a possibly changed CupertinoTheme.
-        builder: (BuildContext context) {
-          return Hero(
-            tag: widget.heroTag == _defaultHeroTag
-                ? _HeroTag(Navigator.of(context))
-                : widget.heroTag,
-            createRectTween: _linearTranslateWithLargestRectSizeTween,
-            placeholderBuilder: _navBarHeroLaunchPadBuilder,
-            flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
-            transitionOnUserGestures: true,
-            child: _TransitionableNavigationBar(
-              componentsKeys: keys,
-              backgroundColor: backgroundColor,
-              backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
-              titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-              largeTitleTextStyle: null,
-              border: widget.border,
-              hasUserMiddle: widget.middle != null,
-              largeExpanded: false,
-              child: navBar,
-            ),
-          );
-        },
-      ),
+    return Builder(
+      // Get the context that might have a possibly changed CupertinoTheme.
+      builder: (BuildContext context) {
+        return Hero(
+          tag: widget.heroTag == _defaultHeroTag
+              ? _HeroTag(Navigator.of(context))
+              : widget.heroTag,
+          createRectTween: _linearTranslateWithLargestRectSizeTween,
+          placeholderBuilder: _navBarHeroLaunchPadBuilder,
+          flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+          transitionOnUserGestures: true,
+          child: _TransitionableNavigationBar(
+            componentsKeys: keys,
+            backgroundColor: backgroundColor,
+            backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+            titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+            largeTitleTextStyle: null,
+            border: widget.border,
+            hasUserMiddle: widget.middle != null,
+            largeExpanded: false,
+            child: navBar,
+          ),
+        );
+      },
     );
   }
 }
@@ -604,7 +564,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.backgroundColor,
     this.brightness,
     this.padding,
-    this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = true,
@@ -686,16 +645,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.border}
   final Border? border;
 
-  /// {@macro flutter.cupertino.CupertinoNavigationBar.actionsForegroundColor}
-  ///
-  /// The default color for text in the [largeTitle] slot is always black, as per
-  /// iOS standard design.
-  @Deprecated(
-    'Use CupertinoTheme and primaryColor to propagate color. '
-    'This feature was deprecated after v1.1.2.'
-  )
-  final Color? actionsForegroundColor;
-
   /// {@macro flutter.cupertino.CupertinoNavigationBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
@@ -730,10 +679,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = CupertinoDynamicColor.maybeResolve(widget.actionsForegroundColor, context)
-                                      ?? CupertinoTheme.of(context).primaryColor;
-
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -748,29 +693,24 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       large: true,
     );
 
-    return _wrapActiveColor(
-      // Lint ignore to maintain backward compatibility.
-      actionsForegroundColor,
-      context,
-      MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
-        child: SliverPersistentHeader(
-          pinned: true, // iOS navigation bars are always pinned.
-          delegate: _LargeTitleNavigationBarSliverDelegate(
-            keys: keys,
-            components: components,
-            userMiddle: widget.middle,
-            backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
-            brightness: widget.brightness,
-            border: widget.border,
-            padding: widget.padding,
-            actionsForegroundColor: actionsForegroundColor,
-            transitionBetweenRoutes: widget.transitionBetweenRoutes,
-            heroTag: widget.heroTag,
-            persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-            alwaysShowMiddle: widget.middle != null,
-            stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
-          ),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: SliverPersistentHeader(
+        pinned: true, // iOS navigation bars are always pinned.
+        delegate: _LargeTitleNavigationBarSliverDelegate(
+          keys: keys,
+          components: components,
+          userMiddle: widget.middle,
+          backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
+          brightness: widget.brightness,
+          border: widget.border,
+          padding: widget.padding,
+          actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
+          transitionBetweenRoutes: widget.transitionBetweenRoutes,
+          heroTag: widget.heroTag,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          alwaysShowMiddle: widget.middle != null,
+          stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
       ),
     );

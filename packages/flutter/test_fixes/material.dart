@@ -5,6 +5,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
+
+  // Changes made in https://github.com/flutter/flutter/pull/26259
+  const Scaffold scaffold = Scaffold(resizeToAvoidBottomPadding: true);
+  final bool resize = scaffold.resizeToAvoidBottomPadding;
+
   // Change made in https://github.com/flutter/flutter/pull/15303
   showDialog(child: Text('Fix me.'));
 
@@ -26,6 +31,11 @@ void main() {
   buildContext.ancestorStateOfType(TypeMatcher<targetType>());
   buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
   buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(overflow: Overflow.visible);
+  const Stack stack = Stack(overflow: Overflow.clip);
+  final behavior = stack.overflow;
 
   // Changes made in https://github.com/flutter/flutter/pull/61648
   const Form form = Form(autovalidate: true);
