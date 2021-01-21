@@ -770,10 +770,8 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     if (_dragging) {
       return const SizedBox();
     }
-
-    final double translation = _offsetExtent(offset, _listState._scrollDirection);
     return Transform(
-      transform: Matrix4.translationValues(0.0, translation, 0.0),
+      transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
       child: widget.child,
     );
   }
@@ -984,8 +982,8 @@ class _DragInfo extends Drag {
     required this.tickerProvider,
   }) {
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
-    dragPosition = _restrictAxis(initialPosition, scrollDirection);
-    dragOffset = _restrictAxis(itemRenderBox.globalToLocal(initialPosition), scrollDirection);
+    dragPosition = initialPosition;
+    dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
     itemExtent = _sizeExtent(itemSize, scrollDirection);
     scrollable = Scrollable.of(item.context);
