@@ -270,8 +270,8 @@ class Dialog extends StatelessWidget {
 ///     ),
 ///   );
 /// }
+///
 /// ```
-/// 
 /// {@end-tool}
 ///
 /// See also:
