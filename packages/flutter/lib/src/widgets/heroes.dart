@@ -101,7 +101,7 @@ enum HeroFlightDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This sample shows a `Hero` with List item along with Icon: here we will be using a
 /// rectangle widget for icon. Icon widget in list item at first page , with Hero
 /// widget in list and Enlarged icon to display on Second Page.
@@ -115,6 +115,7 @@ enum HeroFlightDirection {
 ///    return HeroAnimationRecipe();
 ///  }
 ///
+/// ```dart preamble
 ///  class HeroAnimationRecipe extends StatefulWidget {
 ///
 ///    @override
@@ -196,6 +197,8 @@ enum HeroFlightDirection {
 ///      ));
 ///    }
 /// }
+/// ```
+/// 
 /// ```
 /// {@end-tool}
 ///
