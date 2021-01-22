@@ -475,8 +475,6 @@ class SliverReorderableList extends StatefulWidget {
 /// refer to their [SliverReorderableList] with the static
 /// [SliverReorderableList.of] method.
 class SliverReorderableListState extends State<SliverReorderableList> with TickerProviderStateMixin {
-  late Axis _scrollDirection;
-
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
 
   bool _reorderingDrag = false;
@@ -488,10 +486,16 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Offset? _finalDropPosition;
   MultiDragGestureRecognizer<MultiDragPointerState>? _recognizer;
 
+  late ScrollableState _scrollable;
+  Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
+  bool get _reverse =>
+    _scrollable.axisDirection == AxisDirection.up ||
+    _scrollable.axisDirection == AxisDirection.left;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _scrollDirection = axisDirectionToAxis(Scrollable.of(context)!.axisDirection);
+    _scrollable = Scrollable.of(context)!;
   }
 
   @override
@@ -587,7 +591,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     for (final _ReorderableItemState childItem in _items.values) {
       if (childItem == item || !childItem.mounted)
         continue;
-      childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false);
+      childItem.updateForGap(_insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
   }
@@ -616,7 +620,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         // down by the gap.
         final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
         final RenderBox itemRenderBox =  _items[itemIndex]!.context.findRenderObject()! as RenderBox;
-        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(item.itemExtent, _scrollDirection);
+        if (_reverse) {
+          _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) - _extentOffset(item.itemExtent, _scrollDirection);
+        } else {
+          _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(item.itemExtent, _scrollDirection);
+        }
       }
     });
   }
@@ -663,6 +671,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     final double proxyItemStart = _offsetExtent(_dragInfo!.dragPosition - _dragInfo!.dragOffset, _scrollDirection);
     final double proxyItemEnd = proxyItemStart + gapExtent;
 
+    // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
       if (item == gapItem || !item.mounted)
@@ -674,25 +683,46 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       final double itemEnd = itemStart + itemExtent;
       final double itemMiddle = itemStart + itemExtent / 2;
 
-      if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
-        // The start of the proxy is in the beginning half of the item, so
-        // we should swap the item with the gap and we are done looking for
-        // the new index.
-        newIndex = item.index;
-        break;
+      if (_reverse) {
+        if (itemEnd >= proxyItemEnd && proxyItemEnd >= itemMiddle) {
+          // The start of the proxy is in the beginning half of the item, so
+          // we should swap the item with the gap and we are done looking for
+          // the new index.
+          newIndex = item.index;
+          break;
 
-      } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
-        // The end of the proxy is in the ending half of the item, so
-        // we should swap the item with the gap and we are done looking for
-        // the new index.
-        newIndex = item.index + 1;
-        break;
+        } else if (itemMiddle >= proxyItemStart && proxyItemStart >= itemStart) {
+          // The end of the proxy is in the ending half of the item, so
+          // we should swap the item with the gap and we are done looking for
+          // the new index.
+          newIndex = item.index + 1;
+          break;
 
-      } else
-        if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
-        newIndex = item.index + 1;
-      } else if (proxyItemEnd < itemStart && newIndex > item.index) {
-        newIndex = item.index;
+        } else if (itemStart > proxyItemEnd && newIndex < (item.index + 1)) {
+          newIndex = item.index + 1;
+        } else if (proxyItemStart > itemEnd && newIndex > item.index) {
+          newIndex = item.index;
+        }
+      } else {
+        if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
+          // The start of the proxy is in the beginning half of the item, so
+          // we should swap the item with the gap and we are done looking for
+          // the new index.
+          newIndex = item.index;
+          break;
+
+        } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
+          // The end of the proxy is in the ending half of the item, so
+          // we should swap the item with the gap and we are done looking for
+          // the new index.
+          newIndex = item.index + 1;
+          break;
+
+        } else if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
+          newIndex = item.index + 1;
+        } else if (proxyItemEnd < itemStart && newIndex > item.index) {
+          newIndex = item.index;
+        }
       }
     }
 
@@ -701,7 +731,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       for (final _ReorderableItemState item in _items.values) {
         if (item == gapItem || !item.mounted)
           continue;
-        item.updateForGap(newIndex, gapExtent, true);
+        item.updateForGap(newIndex, gapExtent, true, _reverse);
       }
     }
   }
@@ -720,14 +750,25 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       final double scrollStart = _offsetExtent(scrollOrigin, _scrollDirection);
       final double scrollEnd = scrollStart + _sizeExtent(scrollRenderBox.size, _scrollDirection);
 
-      final double dragStart = _offsetExtent(_dragInfo!.dragPosition - _dragInfo!.dragOffset, _scrollDirection);
-      final double dragEnd = dragStart + _dragInfo!.itemExtent;
-      if (dragStart < scrollStart && position.pixels > position.minScrollExtent) {
-        final double overDrag = max(scrollStart - dragStart, overDragMax);
-        newOffset = max(position.minScrollExtent, position.pixels - step * overDrag / overDragCoef);
-      } else if (dragEnd > scrollEnd && position.pixels < position.maxScrollExtent) {
-        final double overDrag = max(dragEnd - scrollEnd, overDragMax);
-        newOffset = min(position.maxScrollExtent, position.pixels + step * overDrag / overDragCoef);
+      final double proxyStart = _offsetExtent(_dragInfo!.dragPosition - _dragInfo!.dragOffset, _scrollDirection);
+      final double proxyEnd = proxyStart + _dragInfo!.itemExtent;
+
+      if (_reverse) {
+        if (proxyEnd > scrollEnd && position.pixels > position.minScrollExtent) {
+          final double overDrag = max(proxyEnd - scrollEnd, overDragMax);
+          newOffset = max(position.minScrollExtent, position.pixels - step * overDrag / overDragCoef);
+        } else if (proxyStart < scrollStart && position.pixels < position.maxScrollExtent) {
+          final double overDrag = max(scrollStart - proxyStart, overDragMax);
+          newOffset = min(position.maxScrollExtent, position.pixels + step * overDrag / overDragCoef);
+        }
+      } else {
+        if (proxyStart < scrollStart && position.pixels > position.minScrollExtent) {
+          final double overDrag = max(scrollStart - proxyStart, overDragMax);
+          newOffset = max(position.minScrollExtent, position.pixels - step * overDrag / overDragCoef);
+        } else if (proxyEnd > scrollEnd && position.pixels < position.maxScrollExtent) {
+          final double overDrag = max(proxyEnd - scrollEnd, overDragMax);
+          newOffset = min(position.maxScrollExtent, position.pixels + step * overDrag / overDragCoef);
+        }
       }
 
       if (newOffset != null && (newOffset - position.pixels).abs() >= 1.0) {
@@ -855,15 +896,15 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 
   Offset get offset {
     if (_offsetAnimation != null) {
-      final double animValue = Curves.easeIn.transform(_offsetAnimation!.value);
-      return (_targetOffset - _startOffset) * animValue + _startOffset;
+      final double animValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+      return Offset.lerp(_startOffset, _targetOffset, animValue)!;
     }
     return _targetOffset;
   }
 
-  void updateForGap(int gapIndex, double gapExtent, bool animate) {
+  void updateForGap(int gapIndex, double gapExtent, bool animate, bool reverse) {
     final Offset newTargetOffset = (gapIndex <= index)
-        ? _extentOffset(gapExtent, _listState._scrollDirection)
+        ? _extentOffset(reverse ? -gapExtent : gapExtent, _listState._scrollDirection)
         : Offset.zero;
     if (newTargetOffset != _targetOffset) {
       _targetOffset = newTargetOffset;
