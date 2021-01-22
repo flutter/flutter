@@ -1398,22 +1398,43 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
-  DevToolsInspectorDeepLink? _devToolsInspectorDeepLink(Element element) {
+  String? _devToolsInspectorUriForElement(Element element) {
     if (activeDevToolsServerAddress != null && _serviceInfo != null) {
       final Uri? vmServiceUri = _serviceInfo!.serverUri;
       if (vmServiceUri != null) {
         final String? inspectorRef = toId(element, _consoleObjectGroup);
         if (inspectorRef != null) {
-          final String _serviceUri = vmServiceUri.toString();
-          return DevToolsInspectorDeepLink(
-            activeDevToolsServerAddress!,
-            _serviceUri,
-            inspectorRef,
-          );
+          return devToolsInspectorUri(vmServiceUri, inspectorRef);
         }
       }
     }
     return null;
+  }
+
+  /// Returns the DevTools inspector uri for the given vm service connection and
+  /// inspector reference.
+  @visibleForTesting
+  String devToolsInspectorUri(Uri vmServiceUri, String inspectorRef) {
+    final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
+      queryParameters: <String, dynamic>{
+        'uri': '$vmServiceUri',
+        'inspectorRef': inspectorRef,
+      },
+    );
+
+    // We cannot add the '/#/inspector' path by means of
+    // [Uri.replace(path: '/#/inspector')] because the '#' character will be
+    // encoded when we try to print the url as a string. DevTools will not
+    // load properly if this character is encoded in the url.
+    // Related: https://github.com/flutter/devtools/issues/2475.
+    final String devToolsInspectorUri = uri.toString();
+    final int startQueryParamIndex = devToolsInspectorUri.indexOf('?');
+    // The query parameter character '?' should be present because we manually
+    // added query parameters above.
+    assert(startQueryParamIndex != -1);
+    return '${devToolsInspectorUri.substring(0, startQueryParamIndex)}'
+        '/#/inspector'
+        '${devToolsInspectorUri.substring(startQueryParamIndex)}';
   }
 
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
@@ -2910,14 +2931,12 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     if (debugIsLocalCreationLocation(target)) {
 
       DiagnosticsNode? devToolsDiagnostic;
-      final DevToolsInspectorDeepLink? inspectorDeepLink =
-          WidgetInspectorService.instance._devToolsInspectorDeepLink(target);
-      if (inspectorDeepLink != null) {
+      final String? devToolsInspectorUri =
+          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+      if (devToolsInspectorUri != null) {
         devToolsDiagnostic = DevToolsDeepLinkProperty(
-          'To inspect this widget in Flutter DevTools, visit: ${inspectorDeepLink.fullUri}',
-          inspectorDeepLink.fullUri,
-          screenId: DevToolsInspectorDeepLink.inspectorScreenId,
-          objectId: inspectorDeepLink.inspectorRef,
+          'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+          devToolsInspectorUri,
         );
       }
 
@@ -2943,15 +2962,11 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 
 /// Debugging message for DevTools deep links.
 ///
-/// This property encloses it [value] as a Map<String, String> object. This map
-/// is composed of the following information:
+/// The [value] for this property is a string representation of the Flutter
+/// DevTools url.
 ///
-/// `url` is the String representation of the deep link to DevTools.
-/// `screenId` is an optional id specifying the Flutter DevTools screen that this
-/// diagnostic pertains to.
-/// `objectId` is an optional id specifying the data object in Flutter DevTools
-/// that this diagnostic pertains to.
-class DevToolsDeepLinkProperty extends DiagnosticsProperty<Map<String, String>> {
+/// Properties `description` and `url` must not be null.
+class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
   /// Creates a diagnostics property that displays a deep link to Flutter DevTools.
   ///
   /// The [value] of this property will return a map of data for the Flutter
@@ -2959,94 +2974,10 @@ class DevToolsDeepLinkProperty extends DiagnosticsProperty<Map<String, String>> 
   /// and the `objectId` in Flutter DevTools that this diagnostic references.
   ///
   /// The `description` and `url` arguments must not be null.
-  DevToolsDeepLinkProperty(
-    String description,
-    String url, {
-    String? screenId,
-    String? objectId,
-  }) : assert(description != null),
-    assert(url != null),
-    super(
-    '',
-    <String, String>{
-      'url': url,
-      if (screenId != null) 'screenId': screenId,
-      if (objectId != null) 'objectId': objectId,
-    },
-    description: description,
-    level: DiagnosticLevel.info,
-  );
-
-  @override
-  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    json['value'] = value;
-    return json;
-  }
-}
-
-/// An object representation of a uri that deep links to a specific object in
-/// the Flutter DevTools Inspector.
-class DevToolsInspectorDeepLink {
-  /// Creates an object to represent a deep link to the Flutter DevTools inspector.
-  ///
-  /// The [devToolsUri] is the address for the active DevTools server. The
-  /// [vmServiceUri] is the address for the running VM service for this Flutter
-  /// application, and the [inspectorRef] is the id for the widget in the inspector
-  /// that this deep link points to.
-  DevToolsInspectorDeepLink(
-    this.devToolsUri,
-    this.vmServiceUri,
-    this.inspectorRef,
-  );
-
-  /// The screen id for the inspector in Flutter DevTools.
-  static const String inspectorScreenId = 'inspector';
-
-  /// The address for the active DevTools server.
-  final String devToolsUri;
-
-  /// The address for the running VM service for this Flutter application.
-  final String vmServiceUri;
-
-  /// The id for the widget in inspector that this deep link points to.
-  final String inspectorRef;
-
-  String? _fullUri;
-
-  /// The full uri for the Flutter DevTools deep link.
-  String get fullUri => _fullUri ??= generateFullUri();
-
-  @visibleForTesting
-  /// Generates the deep link uri from [devToolsUri], [vmServiceUri], and [inspectorRef]
-  /// in a format that the Flutter DevTools application accepts.
-  String generateFullUri() {
-    final Uri uri = Uri.parse(devToolsUri).replace(
-      queryParameters: <String, dynamic>{
-        'uri': vmServiceUri,
-        if (inspectorRef != null) 'inspectorRef': inspectorRef,
-      },
-    );
-
-    // We cannot add the '/#/inspector' path by means of
-    // [Uri.replace(path: '/#/inspector')] because the '#' character will be
-    // encoded when we try to print the url as a string. DevTools will not
-    // load properly if this character is encoded in the url.
-    // Related: https://github.com/flutter/devtools/issues/2475.
-    final String devToolsInspectorUri = uri.toString();
-    final int startQueryParamIndex = devToolsInspectorUri.indexOf('?');
-    // The query parameter character '?' should be present because we manually
-    // added query parameters above.
-    assert(startQueryParamIndex != -1);
-    return _fullUri = '${devToolsInspectorUri.substring(0, startQueryParamIndex)}'
-        '/#/$inspectorScreenId'
-        '${devToolsInspectorUri.substring(startQueryParamIndex)}';
-  }
-
-  @override
-  String toString() {
-    return fullUri;
-  }
+  DevToolsDeepLinkProperty(String description, String url)
+    : assert(description != null),
+      assert(url != null),
+      super('', url, description: description, level: DiagnosticLevel.info);
 }
 
 /// Returns if an object is user created.
