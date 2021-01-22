@@ -266,7 +266,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
            children: <Widget>[
              icon,
              const SizedBox(width: 8.0),
-             Flexible(child: label),
+             label,
            ],
          ),
        );

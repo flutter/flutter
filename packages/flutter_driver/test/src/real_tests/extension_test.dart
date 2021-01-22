@@ -48,7 +48,7 @@ void main() {
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      driverExtension.call(const WaitUntilNoTransientCallbacks().serialize())
+      driverExtension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -68,7 +68,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      driverExtension.call(const WaitUntilNoTransientCallbacks().serialize())
+      driverExtension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -1137,7 +1137,7 @@ void main() {
 
     testWidgets('returns immediately when frame is synced', (
         WidgetTester tester) async {
-      driverExtension.call(const WaitUntilNoPendingFrame().serialize())
+      driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -1158,7 +1158,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      driverExtension.call(const WaitUntilNoPendingFrame().serialize())
+      driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -1182,7 +1182,7 @@ void main() {
         'waits until no pending scheduled frame', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      driverExtension.call(const WaitUntilNoPendingFrame().serialize())
+      driverExtension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
