@@ -85,7 +85,7 @@ void main() {
 
     // Select a option. The options hide and the field updates to show the
     // selection.
-    await tester.tap(find.byType(ListTile).first);
+    await tester.tap(find.byType(InkWell).first);
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
@@ -141,7 +141,7 @@ void main() {
 
     // Select a option. The options hide and the field updates to show the
     // selection.
-    await tester.tap(find.byType(ListTile).first);
+    await tester.tap(find.byType(InkWell).first);
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
@@ -193,7 +193,7 @@ void main() {
 
     // Select a option. The options hide and the field updates to show the
     // selection. The text in the field is given by displayStringForOption.
-    await tester.tap(find.byType(ListTile).first);
+    await tester.tap(find.byType(InkWell).first);
     await tester.pump();
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
