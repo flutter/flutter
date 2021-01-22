@@ -247,7 +247,10 @@ class FlutterDevice {
         // from an old application instance, we shouldn't try and start DDS.
         try {
           service = await connectToVmService(observatoryUri);
-          service.dispose();
+          // TODO(dnfield): Remove ignore once internal repo is up to date
+          // https://github.com/flutter/flutter/issues/74518
+          // ignore: await_only_futures
+          await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
           if (!completer.isCompleted && !_isListeningForObservatoryUri) {

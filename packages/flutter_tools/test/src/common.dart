@@ -301,7 +301,7 @@ class FakeVmServiceHost {
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
-        _vmService.dispose();
+        unawaited(_vmService.dispose());
         expect(_requests, isEmpty);
         return;
       }
