@@ -75,6 +75,7 @@ class ReorderableListView extends StatefulWidget {
     this.padding,
     this.reverse = false,
     this.buildDefaultDragHandles = true,
+    this.proxyDecorator,
   }) : assert(scrollDirection != null),
        assert(onReorder != null),
        assert(children != null),
@@ -197,6 +198,13 @@ class ReorderableListView extends StatefulWidget {
   /// ```
   final bool buildDefaultDragHandles;
 
+  /// A callback that allows the app to add an animated decoration around
+  /// an item when it is being dragged.
+  ///
+  /// The this is null, a default decoration of a Material widget with
+  /// an animated elevation will be used.
+  final ReorderItemProxyDecorator? proxyDecorator;
+
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
@@ -220,6 +228,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           onReorder: widget.onReorder,
           reverse: widget.reverse,
           buildDefaultDragHandles: widget.buildDefaultDragHandles,
+          proxyDecorator: widget.proxyDecorator,
         );
       }
     );
@@ -252,6 +261,7 @@ class _ReorderableListContent extends StatefulWidget {
     required this.onReorder,
     required this.reverse,
     required this.buildDefaultDragHandles,
+    required this.proxyDecorator,
   });
 
   final Widget? header;
@@ -262,6 +272,7 @@ class _ReorderableListContent extends StatefulWidget {
   final ReorderCallback onReorder;
   final bool reverse;
   final bool buildDefaultDragHandles;
+  final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -329,7 +340,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     final Widget item = widget.children[index];
     assert(item.key != null);
 
-    // TODO(goderbauer): The semantics stuff should probably happen inside the ReorderableDelayedDragStartListener.
+    // TODO(goderbauer): The semantics stuff should probably happen inside
+    //   _ReorderableItem so the widget versions can have them as well.
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
@@ -381,7 +393,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
       builder: (BuildContext context, Widget? child) {
         final double animValue = Curves.easeInOut.transform(animation.value);
         final double elevation = lerpDouble(0, 6, animValue)!;
-          return Material(
+        return Material(
           child: child,
           elevation: elevation,
         );
@@ -395,7 +407,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     // If there is a header we can't just apply the padding to the list,
     // so we wrap the CustomScrollView in the padding for the top, left and right
     // and only add the padding from the bottom to the sliver list (or the equivalent
-    // for horizontal scrolling).
+    // for other axis directions).
     final EdgeInsets padding = widget.padding ?? const EdgeInsets.all(0);
     late EdgeInsets outerPadding;
     late EdgeInsets listPadding;
@@ -432,7 +444,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
               itemBuilder: _itemBuilder,
               itemCount: widget.children.length,
               onReorder: widget.onReorder,
-              proxyDecorator: _proxyDecorator,
+              proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
             ),
           ),
         ],
