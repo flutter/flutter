@@ -1417,14 +1417,6 @@ int get prNumber {
   return -1;
 }
 
-Future<String> _getAuthors() async {
-  final String author = await runAndGetStdout(
-    'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
-    workingDirectory: flutterRoot,
-  ).first;
-  return author;
-}
-
 String get ciUrl {
   switch (ciProvider) {
     case CiProviders.cirrus:
