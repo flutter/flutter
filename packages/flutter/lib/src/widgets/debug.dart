@@ -382,7 +382,7 @@ bool debugCheckHasOverlay(BuildContext context) {
         ErrorDescription(
           '${context.widget.runtimeType} widgets require an Overlay '
           'widget ancestor.\n'
-          'An overlay lets widgets float on top of other eidget children.'
+          'An overlay lets widgets float on top of other widget children.'
         ),
         ErrorHint(
           'To introduce an Overlay widget, you can either directly '
