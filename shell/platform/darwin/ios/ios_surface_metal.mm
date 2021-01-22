@@ -40,10 +40,10 @@ void IOSSurfaceMetal::UpdateStorageSizeIfNecessary() {
 }
 
 // |IOSSurface|
-std::unique_ptr<Surface> IOSSurfaceMetal::CreateGPUSurface(GrDirectContext* /* unused */) {
-  auto metal_context = CastToMetalContext(GetContext());
-  return std::make_unique<GPUSurfaceMetal>(this,                            // layer
-                                           metal_context->GetMainContext()  // context
+std::unique_ptr<Surface> IOSSurfaceMetal::CreateGPUSurface(GrDirectContext* context) {
+  FML_DCHECK(context);
+  return std::make_unique<GPUSurfaceMetal>(this,               // layer
+                                           sk_ref_sp(context)  // context
   );
 }
 
