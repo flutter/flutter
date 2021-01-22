@@ -19,7 +19,7 @@ void main() {
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
         builder: (BuildContext context, String? value, Widget? child) {
-          ++rebuildCount;
+          rebuildCount += 1;
 
           if (value == null)
             return const Placeholder();
