@@ -136,6 +136,22 @@ TEST_F(DartIsolateTest, SpawnIsolate) {
   auto spawn = weak_spawn.lock();
   ASSERT_TRUE(spawn);
   ASSERT_EQ(spawn->GetPhase(), DartIsolate::Phase::Running);
+
+  // TODO(74520): Remove conditional once isolate groups are supported by JIT.
+  if (DartVM::IsRunningPrecompiledCode()) {
+    Dart_IsolateGroup isolate_group;
+    {
+      auto isolate_scope = tonic::DartIsolateScope(root_isolate->isolate());
+      isolate_group = Dart_CurrentIsolateGroup();
+    }
+    {
+      auto isolate_scope = tonic::DartIsolateScope(root_isolate->isolate());
+      Dart_IsolateGroup spawn_isolate_group = Dart_CurrentIsolateGroup();
+      ASSERT_TRUE(isolate_group != nullptr);
+      ASSERT_EQ(isolate_group, spawn_isolate_group);
+    }
+  }
+
   ASSERT_TRUE(spawn->Shutdown());
   ASSERT_TRUE(root_isolate->Shutdown());
 }
