@@ -20,8 +20,6 @@ namespace flutter {
 
 class GPUSurfaceGL : public Surface {
  public:
-  static sk_sp<GrDirectContext> MakeGLContext(GPUSurfaceGLDelegate* delegate);
-
   GPUSurfaceGL(GPUSurfaceGLDelegate* delegate, bool render_to_surface);
 
   // Creates a new GL surface reusing an existing GrDirectContext.
@@ -55,13 +53,13 @@ class GPUSurfaceGL : public Surface {
   sk_sp<GrDirectContext> context_;
   sk_sp<SkSurface> onscreen_surface_;
   /// FBO backing the current `onscreen_surface_`.
-  uint32_t fbo_id_ = 0;
-  bool context_owner_ = false;
+  uint32_t fbo_id_;
+  bool context_owner_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface. This is a
   // hack to make avoid allocating resources for the root surface when an
   // external view embedder is present.
-  const bool render_to_surface_ = true;
+  const bool render_to_surface_;
   bool valid_ = false;
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGL> weak_factory_;
 
