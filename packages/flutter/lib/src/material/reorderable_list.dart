@@ -196,6 +196,7 @@ class ReorderableListView extends StatefulWidget {
   ///   );
   /// }
   /// ```
+  ///{@end-tool}
   final bool buildDefaultDragHandles;
 
   /// A callback that allows the app to add an animated decoration around
