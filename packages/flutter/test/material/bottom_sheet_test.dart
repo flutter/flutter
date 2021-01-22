@@ -834,6 +834,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('BottomSheet'), findsNothing);
+  });
 
   testWidgets('showModalBottomSheet should move along on-screen keyboard',
           (WidgetTester tester) async {
