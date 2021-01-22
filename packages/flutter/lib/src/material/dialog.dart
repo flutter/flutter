@@ -219,82 +219,59 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
-///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ```dart
-/// void main() => runApp(MyApp());
-///
-/// class MyApp extends StatefulWidget {
-///   @override
-///   _MyAppState createState() => _MyAppState();
-/// }
-///
-/// class _MyAppState extends State<MyApp> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       title: 'AlertDialog Demo',
-///       home: MyHomePage(),
-///     );
-///   }
-/// }
-///
-/// class MyHomePage extends StatelessWidget {
-///   @override
-///   Widget build(BuildContext context) {
-///     Future<void> _showMyDialog() async {
-///       return showDialog<String>(
-///         context: context,
-///         builder: (BuildContext context) => AlertDialog(
-///           title: const Text('AlertDialog tilte'),
-///           content: const Text(
-///             'AlertDialog description',
+/// @override
+/// Widget build(BuildContext context) {
+///   Future<void> _showMyDialog() async {
+///     return showDialog<String>(
+///       context: context,
+///       builder: (BuildContext context) => AlertDialog(
+///         title: const Text('AlertDialog tilte'),
+///         content: const Text(
+///           'AlertDialog description',
+///         ),
+///         actions: <Widget>[
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'Cancel'),
+///             child: const Text('Cancel'),
 ///           ),
-///           actions: <Widget>[
-///             TextButton(
-///               onPressed: () => Navigator.pop(context, 'Cancel'),
-///               child: const Text('Cancel'),
-///             ),
-///             TextButton(
-///               onPressed: () => Navigator.pop(context, 'OK'),
-///               child: const Text('OK'),
-///             ),
-///           ],
-///         ),
-///       ).then(
-///         (returnVal) {
-///           if (returnVal != null) {
-///             ScaffoldMessenger.of(context).showSnackBar(
-///               SnackBar(
-///                 duration: Duration(seconds: 2),
-///                 content: Text('You clicked: $returnVal'),
-///                 action: SnackBarAction(label: 'OK', onPressed: () {}),
-///               ),
-///             );
-///           }
-///         },
-///       );
-///     }
-///
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text('AlertDialog Demo'),
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'OK'),
+///             child: const Text('OK'),
+///           ),
+///         ],
 ///       ),
-///       body: Center(
-///         child: TextButton(
-///           onPressed: _showMyDialog,
-///           child: Text('Show Dialog'),
-///         ),
-///       ),
+///     ).then(
+///       (returnVal) {
+///         if (returnVal != null) {
+///           ScaffoldMessenger.of(context).showSnackBar(
+///             SnackBar(
+///               duration: Duration(seconds: 2),
+///               content: Text('You clicked: $returnVal'),
+///               action: SnackBarAction(label: 'OK', onPressed: () {}),
+///             ),
+///           );
+///         }
+///       },
 ///     );
 ///   }
-/// }
 ///
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('AlertDialog Demo'),
+///     ),
+///     body: Center(
+///       child: TextButton(
+///         onPressed: _showMyDialog,
+///         child: Text('Show Dialog'),
+///       ),
+///     ),
+///   );
+/// }
 /// ```
+/// 
 /// {@end-tool}
 ///
 /// See also:
