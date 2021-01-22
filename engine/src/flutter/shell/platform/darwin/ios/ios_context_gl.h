@@ -25,10 +25,15 @@ class IOSContextGL final : public IOSContext {
 
   std::unique_ptr<IOSRenderTargetGL> CreateRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer);
 
-  void SetMainContext(const sk_sp<GrDirectContext>& main_context);
+ private:
+  fml::scoped_nsobject<EAGLContext> context_;
+  fml::scoped_nsobject<EAGLContext> resource_context_;
 
   // |IOSContext|
   sk_sp<GrDirectContext> CreateResourceContext() override;
+
+  // |IOSContext|
+  sk_sp<GrDirectContext> GetMainContext() const override;
 
   // |IOSContext|
   std::unique_ptr<GLContextResult> MakeCurrent() override;
@@ -37,14 +42,6 @@ class IOSContextGL final : public IOSContext {
   std::unique_ptr<Texture> CreateExternalTexture(
       int64_t texture_id,
       fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
-
-  // |IOSContext|
-  sk_sp<GrDirectContext> GetMainContext() const override;
-
- private:
-  fml::scoped_nsobject<EAGLContext> context_;
-  fml::scoped_nsobject<EAGLContext> resource_context_;
-  sk_sp<GrDirectContext> main_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextGL);
 };
