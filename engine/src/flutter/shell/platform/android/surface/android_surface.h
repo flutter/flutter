@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_H_
 
+#include <memory>
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
@@ -35,6 +36,11 @@ class AndroidSurface {
   virtual bool ResourceContextClearCurrent() = 0;
 
   virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
+
+ protected:
+  explicit AndroidSurface(
+      const std::shared_ptr<AndroidContext>& android_context);
+  std::shared_ptr<AndroidContext> android_context_;
 };
 
 class AndroidSurfaceFactory {

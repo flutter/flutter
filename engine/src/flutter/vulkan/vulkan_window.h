@@ -31,7 +31,20 @@ class VulkanBackbuffer;
 
 class VulkanWindow {
  public:
+  //------------------------------------------------------------------------------
+  /// @brief      Construct a VulkanWindow. Let it implicitly create a
+  ///             GrDirectContext.
+  ///
   VulkanWindow(fml::RefPtr<VulkanProcTable> proc_table,
+               std::unique_ptr<VulkanNativeSurface> native_surface,
+               bool render_to_surface);
+
+  //------------------------------------------------------------------------------
+  /// @brief      Construct a VulkanWindow. Let reuse an existing
+  ///             GrDirectContext built by another VulkanWindow.
+  ///
+  VulkanWindow(const sk_sp<GrDirectContext>& context,
+               fml::RefPtr<VulkanProcTable> proc_table,
                std::unique_ptr<VulkanNativeSurface> native_surface,
                bool render_to_surface);
 

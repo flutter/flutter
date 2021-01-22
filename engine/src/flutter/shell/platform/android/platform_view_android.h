@@ -25,7 +25,7 @@ namespace flutter {
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
-  AndroidSurfaceFactoryImpl(const AndroidContext& context,
+  AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
                             std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidSurfaceFactoryImpl() override;
@@ -33,7 +33,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
   std::unique_ptr<AndroidSurface> CreateSurface() override;
 
  private:
-  const AndroidContext& android_context_;
+  const std::shared_ptr<AndroidContext>& android_context_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
 };
 
@@ -171,7 +171,7 @@ class PlatformViewAndroid final : public PlatformView {
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   std::shared_ptr<AndroidSurfaceFactoryImpl> MakeSurfaceFactory(
-      const AndroidContext& android_context,
+      const std::shared_ptr<AndroidContext>& android_context,
       const PlatformViewAndroidJNI& jni_facade);
 
   std::unique_ptr<AndroidSurface> MakeSurface(

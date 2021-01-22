@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
 #include "flutter/flow/embedded_views.h"
@@ -278,13 +279,14 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRect__ChangedParams) {
 
 TEST(AndroidExternalViewEmbedder, SubmitFrame) {
   auto jni_mock = std::make_shared<JNIMock>();
-  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
   auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto frame_size = SkISize::Make(1000, 1000);
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      [gr_context, window, frame_size]() {
+      [&android_context, gr_context, window, frame_size]() {
         auto surface_frame_1 = std::make_unique<SurfaceFrame>(
             SkSurface::MakeNull(1000, 1000), false,
             [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
@@ -302,7 +304,8 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
             .WillOnce(Return(ByMove(std::move(surface_frame_1))))
             .WillOnce(Return(ByMove(std::move(surface_frame_2))));
 
-        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+        auto android_surface_mock =
+            std::make_unique<AndroidSurfaceMock>(android_context);
         EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
 
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
@@ -313,7 +316,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrame) {
         return android_surface_mock;
       });
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
-      android_context, jni_mock, surface_factory);
+      *android_context, jni_mock, surface_factory);
 
   auto raster_thread_merger =
       GetThreadMergerFromPlatformThread(/*merged=*/true);
@@ -496,11 +499,13 @@ TEST(AndroidExternalViewEmbedder, DoesNotCallJNIPlatformThreadOnlyMethods) {
 TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
   auto jni_mock = std::make_shared<JNIMock>();
 
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
   auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto frame_size = SkISize::Make(1000, 1000);
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      [gr_context, window, frame_size]() {
+      [&android_context, gr_context, window, frame_size]() {
         auto surface_frame_1 = std::make_unique<SurfaceFrame>(
             SkSurface::MakeNull(1000, 1000), false,
             [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
@@ -511,7 +516,8 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
         EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
             .WillOnce(Return(ByMove(std::move(surface_frame_1))));
 
-        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+        auto android_surface_mock =
+            std::make_unique<AndroidSurfaceMock>(android_context);
         EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
 
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
@@ -522,9 +528,8 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
         return android_surface_mock;
       });
 
-  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
-      android_context, jni_mock, surface_factory);
+      *android_context, jni_mock, surface_factory);
   auto raster_thread_merger = GetThreadMergerFromPlatformThread();
 
   // ------------------ First frame ------------------ //
@@ -575,13 +580,14 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
 
 TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
   auto jni_mock = std::make_shared<JNIMock>();
-  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
+  auto android_context =
+      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
 
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
   auto gr_context = GrDirectContext::MakeMock(nullptr);
   auto frame_size = SkISize::Make(1000, 1000);
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      [gr_context, window, frame_size]() {
+      [&android_context, gr_context, window, frame_size]() {
         auto surface_frame_1 = std::make_unique<SurfaceFrame>(
             SkSurface::MakeNull(1000, 1000), false,
             [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
@@ -592,7 +598,8 @@ TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
         EXPECT_CALL(*surface_mock, AcquireFrame(frame_size))
             .WillOnce(Return(ByMove(std::move(surface_frame_1))));
 
-        auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
+        auto android_surface_mock =
+            std::make_unique<AndroidSurfaceMock>(android_context);
         EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
 
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
@@ -604,7 +611,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
       });
 
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
-      android_context, jni_mock, surface_factory);
+      *android_context, jni_mock, surface_factory);
 
   // ------------------ First frame ------------------ //
   {

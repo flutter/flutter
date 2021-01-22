@@ -20,7 +20,7 @@ namespace flutter {
 class AndroidSurfaceVulkan : public AndroidSurface,
                              public GPUSurfaceVulkanDelegate {
  public:
-  AndroidSurfaceVulkan(const AndroidContext& android_context,
+  AndroidSurfaceVulkan(const std::shared_ptr<AndroidContext>& android_context,
                        std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidSurfaceVulkan() override;

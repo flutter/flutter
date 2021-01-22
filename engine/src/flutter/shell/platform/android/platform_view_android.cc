@@ -29,14 +29,14 @@
 namespace flutter {
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
-    const AndroidContext& context,
+    const std::shared_ptr<AndroidContext>& context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : android_context_(context), jni_facade_(jni_facade) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
-  switch (android_context_.RenderingApi()) {
+  switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kSoftware:
       return std::make_unique<AndroidSurfaceSoftware>(android_context_,
                                                       jni_facade_);
@@ -68,13 +68,13 @@ PlatformViewAndroid::PlatformViewAndroid(
 #if SHELL_ENABLE_VULKAN
     android_context_ =
         std::make_shared<AndroidContext>(AndroidRenderingAPI::kVulkan);
-#else  // SHELL_ENABLE_VULKAN
+#else   // SHELL_ENABLE_VULKAN
     android_context_ = std::make_unique<AndroidContextGL>(
         AndroidRenderingAPI::kOpenGLES,
         fml::MakeRefCounted<AndroidEnvironmentGL>());
 #endif  // SHELL_ENABLE_VULKAN
   }
-  surface_factory_ = MakeSurfaceFactory(*android_context_, *jni_facade_);
+  surface_factory_ = MakeSurfaceFactory(android_context_, *jni_facade_);
   android_surface_ = MakeSurface(surface_factory_);
 }
 
@@ -87,7 +87,7 @@ PlatformViewAndroid::PlatformViewAndroid(
       jni_facade_(jni_facade),
       android_context_(android_context),
       platform_view_android_delegate_(jni_facade) {
-  surface_factory_ = MakeSurfaceFactory(*android_context_, *jni_facade_);
+  surface_factory_ = MakeSurfaceFactory(android_context_, *jni_facade_);
   android_surface_ = MakeSurface(surface_factory_);
 }
 
@@ -103,9 +103,9 @@ PlatformViewAndroid::~PlatformViewAndroid() = default;
 
 std::shared_ptr<AndroidSurfaceFactoryImpl>
 PlatformViewAndroid::MakeSurfaceFactory(
-    const AndroidContext& android_context,
+    const std::shared_ptr<AndroidContext>& android_context,
     const PlatformViewAndroidJNI& jni_facade) {
-  FML_CHECK(android_context.IsValid())
+  FML_CHECK(android_context->IsValid())
       << "Could not create surface from invalid Android context.";
 
   return std::make_shared<AndroidSurfaceFactoryImpl>(android_context,
@@ -317,7 +317,8 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   if (!android_surface_) {
     return nullptr;
   }
-  return android_surface_->CreateGPUSurface();
+  return android_surface_->CreateGPUSurface(
+      android_context_->GetMainSkiaContext().get());
 }
 
 // |PlatformView|
