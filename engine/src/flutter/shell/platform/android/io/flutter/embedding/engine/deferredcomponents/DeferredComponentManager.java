@@ -22,10 +22,11 @@ import io.flutter.embedding.engine.systemchannels.DeferredComponentChannel;
  * This call retrieves a unique identifier called the loading unit id, which is assigned by
  * gen_snapshot during compilation. The loading unit id is passed down through the engine and
  * invokes installDeferredComponent. Once the feature module is downloaded, loadAssets and
- * loadDartLibrary should be invoked. loadDartLibrary should find shared library .so files for the
- * engine to open and pass the .so path to FlutterJNI.loadDartDeferredLibrary. loadAssets should
- * typically ensure the new assets are available to the engine's asset manager by passing an updated
- * Android AssetManager to the engine via FlutterJNI.updateAssetManager.
+ * loadDartLibrary should be invoked. loadDartLibrary should pass the file name of the shared
+ * library .so file to FlutterJNI.loadDartDeferredLibrary for the engine to dlopen, or if the file
+ * is not in LD_LIBRARY_PATH, it should find the shared library .so file and pass the full path.
+ * loadAssets should typically ensure the new assets are available to the engine's asset manager by
+ * passing an updated Android AssetManager to the engine via FlutterJNI.updateAssetManager.
  *
  * <p>The loadAssets and loadDartLibrary methods are separated out because they may also be called
  * manually via platform channel messages. A full installDeferredComponent implementation should
@@ -182,14 +183,10 @@ public interface DeferredComponentManager {
    * Load the .so shared library file into the Dart VM.
    *
    * <p>When the download of a deferred component module completes, this method should be called to
-   * find the path .so library file. The path(s) should then be passed to
-   * FlutterJNI.loadDartDeferredLibrary to be dlopen-ed and loaded into the Dart VM.
-   *
-   * <p>Specifically, APKs distributed by Android's app bundle format may vary by device and API
-   * number, so FlutterJNI's loadDartDeferredLibrary accepts a list of search paths with can include
-   * paths within APKs that have not been unpacked using the
-   * `path/to/apk.apk!path/inside/apk/lib.so` format. Each search path will be attempted in order
-   * until a shared library is found. This allows for the developer to avoid unpacking the apk zip.
+   * find the .so library file. The filenames, or path if it's not in LD_LIBRARY_PATH, should then
+   * be passed to FlutterJNI.loadDartDeferredLibrary to be dlopen-ed and loaded into the Dart VM.
+   * The .so files in the lib/[abi] directory are already in LD_LIBRARY_PATH and in this case you
+   * only need to pass the file name.
    *
    * <p>Upon successful load of the Dart library, the Dart future from the originating loadLibary()
    * call completes and developers are able to use symbols and assets from the feature module.

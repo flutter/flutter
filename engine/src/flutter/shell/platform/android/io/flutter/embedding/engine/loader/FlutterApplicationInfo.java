@@ -11,13 +11,13 @@ public final class FlutterApplicationInfo {
   private static final String DEFAULT_ISOLATE_SNAPSHOT_DATA = "isolate_snapshot_data";
   private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
 
-  final String aotSharedLibraryName;
-  final String vmSnapshotData;
-  final String isolateSnapshotData;
-  final String flutterAssetsDir;
-  final String domainNetworkPolicy;
-  final String nativeLibraryDir;
-  final boolean clearTextPermitted;
+  public final String aotSharedLibraryName;
+  public final String vmSnapshotData;
+  public final String isolateSnapshotData;
+  public final String flutterAssetsDir;
+  public final String domainNetworkPolicy;
+  public final String nativeLibraryDir;
+  public final boolean clearTextPermitted;
 
   public FlutterApplicationInfo(
       String aotSharedLibraryName,
