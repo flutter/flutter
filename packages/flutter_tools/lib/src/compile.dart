@@ -207,6 +207,7 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    Directory buildDir,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -233,6 +234,16 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
+
+    // TODO(egarciad): Set this to true after inspecting the pubspec.yaml.
+    const bool shouldCreateDartPluginRegistrant = true;
+
+    if (shouldCreateDartPluginRegistrant) {
+      final File newMainDart = buildDir.childFile('main.generated.dart');
+      generateMainDartWithPluginRegistrant(mainUri, newMainDart);
+      mainUri = newMainDart.path;
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -299,6 +310,29 @@ class KernelCompiler {
       return _stdoutHandler.compilerOutput.future;
     }
     return null;
+  }
+
+  bool generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) {
+    try {
+    newMainDart.writeAsStringSync('''
+import '$currentMainUri' as entrypoint;
+
+// The plugin registrant is called by dart:ui.
+@pragma('vm:entry-point')
+void _registerPlugins() {
+  // TODO(egarciad): Call each plugin's main class registerWith();
+  print('_registerPlugins is called');
+}
+
+void main() {
+  entrypoint.main();
+}
+''');
+    return true;
+    } on FileSystemException catch (error) {
+      throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
+      return false;
+    }
   }
 }
 
