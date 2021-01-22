@@ -139,6 +139,7 @@ class OutlinedButton extends ButtonStyleButton {
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
     bool? enableFeedback,
+    AlignmentGeometry? alignment,
   }) {
     final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
@@ -166,6 +167,7 @@ class OutlinedButton extends ButtonStyleButton {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
+      alignment: alignment,
     );
   }
 
@@ -217,6 +219,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -249,6 +252,7 @@ class OutlinedButton extends ButtonStyleButton {
       tapTargetSize: theme.materialTapTargetSize,
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
+      alignment: Alignment.center,
     );
   }
 
@@ -345,7 +349,7 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[icon, SizedBox(width: gap), Flexible(child: label)],
+      children: <Widget>[icon, SizedBox(width: gap), label],
     );
   }
 }

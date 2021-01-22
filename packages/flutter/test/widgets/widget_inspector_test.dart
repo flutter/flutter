@@ -2825,6 +2825,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
+    test('devToolsInspectorUri test', () {
+      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      expect(
+        WidgetInspectorService.instance.devToolsInspectorUri(
+          Uri.parse('http://127.0.0.1:55269/798ay5al_FM=/'),
+          'inspector-0',
+        ),
+        equals('http://127.0.0.1:9100/#/inspector?uri=http%3A%2F%2F127.0.0.1%3A55269%2F798ay5al_FM%3D%2F&inspectorRef=inspector-0'),
+      );
+    });
   }
 }
 

@@ -1664,6 +1664,7 @@ const Map<int, LogicalKeyboardKey> kGtkToLogicalKey = <int, LogicalKeyboardKey>{
   65508: LogicalKeyboardKey.controlRight,
   65506: LogicalKeyboardKey.shiftRight,
   65514: LogicalKeyboardKey.altRight,
+  65027: LogicalKeyboardKey.altRight,
   65512: LogicalKeyboardKey.metaRight,
   269025026: LogicalKeyboardKey.brightnessUp,
   269025027: LogicalKeyboardKey.brightnessDown,

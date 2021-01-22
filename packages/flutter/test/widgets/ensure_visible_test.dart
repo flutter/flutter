@@ -446,7 +446,6 @@ void main() {
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
     });
 
-    // TODO(abarth): Unskip this test. See https://github.com/flutter/flutter/issues/7919
     testWidgets('ListView ensureVisible negative child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<void> prepare(double offset) async {
@@ -503,7 +502,7 @@ void main() {
       Scrollable.ensureVisible(findContext(2));
       await tester.pump();
       expect(getOffset(), equals(-400.0));
-    }, skip: true); // https://github.com/flutter/flutter/issues/7919
+    });
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));

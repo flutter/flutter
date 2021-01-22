@@ -73,8 +73,16 @@ end
 
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_additional_macos_build_settings(target)
-  print target.platform_name
   return unless target.platform_name == :osx
+
+  # [target.deployment_target] is a [String] formatted as "10.8".
+  deployment_target_major, deployment_target_minor = target.deployment_target.match(/(\d+).?(\d*)/).captures
+
+  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.9).
+  # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+  inherit_deployment_target = !target.deployment_target.blank? &&
+    (deployment_target_major.to_i < 10) ||
+    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 9)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -89,6 +97,10 @@ def flutter_additional_macos_build_settings(target)
 
     # ARM not yet supported https://github.com/flutter/flutter/issues/69221
     build_configuration.build_settings['EXCLUDED_ARCHS'] = 'arm64'
+
+    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
+    # If the pod only supports a higher version, do not delete to correctly produce an error.
+    build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target
   end
 end
 
