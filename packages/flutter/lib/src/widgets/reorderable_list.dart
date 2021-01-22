@@ -495,6 +495,14 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   @override
+  void didUpdateWidget(covariant SliverReorderableList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.itemCount != oldWidget.itemCount) {
+      cancelReorder();
+    }
+  }
+
+  @override
   void dispose() {
     _dragInfo?.dispose();
     super.dispose();
@@ -545,8 +553,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     _items[item.index] = item;
   }
 
-  void _unregisterItem(int index) {
-    _items.remove(index);
+  void _unregisterItem(int index, _ReorderableItemState item) {
+    final _ReorderableItemState? currentItem = _items[index];
+    if (currentItem == item) {
+      _items.remove(index);
+    }
   }
 
   Drag? _dragStart(Offset position) {
@@ -819,7 +830,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   void didUpdateWidget(covariant _ReorderableItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.key != widget.key || oldWidget.index != widget.index) {
-      _listState._unregisterItem(oldWidget.index);
+      _listState._unregisterItem(oldWidget.index, this);
       _listState._registerItem(this);
     }
   }
@@ -837,7 +848,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 
   @override
   void deactivate() {
-    _listState._unregisterItem(widget.index);
+    _listState._unregisterItem(index, this);
     super.deactivate();
   }
 
