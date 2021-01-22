@@ -2825,15 +2825,40 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
-    test('devToolsInspectorUri test', () {
-      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+    test('DevToolsInspectorDeepLink test', () {
+      final DevToolsInspectorDeepLink uri = DevToolsInspectorDeepLink(
+        'http://127.0.0.1:9100',
+        'http://127.0.0.1:55269/798ay5al_FM=/',
+        'inspector-0',
+      );
+      expect(uri.devToolsUri, equals('http://127.0.0.1:9100'));
+      expect(uri.vmServiceUri, equals('http://127.0.0.1:55269/798ay5al_FM=/'));
+      expect(uri.inspectorRef, equals('inspector-0'));
       expect(
-        WidgetInspectorService.instance.devToolsInspectorUri(
-          Uri.parse('http://127.0.0.1:55269/798ay5al_FM=/'),
-          'inspector-0',
-        ),
+        uri.fullUri,
         equals('http://127.0.0.1:9100/#/inspector?uri=http%3A%2F%2F127.0.0.1%3A55269%2F798ay5al_FM%3D%2F&inspectorRef=inspector-0'),
       );
+      expect(
+        uri.toString(),
+        equals('http://127.0.0.1:9100/#/inspector?uri=http%3A%2F%2F127.0.0.1%3A55269%2F798ay5al_FM%3D%2F&inspectorRef=inspector-0'),
+      );
+    });
+
+    test('DevToolsDeepLinkDiagnosticsNode test', () {
+      final DevToolsDeepLinkProperty node =
+      DevToolsDeepLinkProperty(
+        'description of the deep link',
+        'the-deep-link',
+        screenId: 'test-screen',
+        objectId: 'test-object-id',
+      );
+      expect(node.toString(), equals('description of the deep link'));
+      expect(node.name, isEmpty);
+      expect(node.value, equals(<String, String>{
+        'url': 'the-deep-link',
+        'screenId': 'test-screen',
+        'objectId': 'test-object-id',
+      }));
     });
   }
 }

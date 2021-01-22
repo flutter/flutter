@@ -1801,19 +1801,6 @@ class MessageProperty extends DiagnosticsProperty<void> {
        super(name, null, description: message, style: style, level: level);
 }
 
-/// Debugging message for DevTools deep links.
-class DevToolsDeepLinkDiagnosticsNode extends StringProperty {
-  /// Create a diagnostics property that displays a deep link to DevTools.
-  ///
-  /// [value] will return the String representation of the DevTools url.
-  ///
-  /// The [description] and [value] arguments must not be null.
-  DevToolsDeepLinkDiagnosticsNode(String description, String value) :
-      assert(description != null),
-      assert(value != null),
-      super('', value, description: description, level: DiagnosticLevel.info);
-}
-
 /// Property which encloses its string [value] in quotes.
 ///
 /// See also:
@@ -2721,14 +2708,14 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is Diagnosticable || value is DiagnosticsNode)
+    if (v is Diagnosticable || v is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
       // JSON.stringify replaces infinity and NaN with null.
       json['value'] = v.isFinite ? v :  v.toString();
-    if (value is String || value is bool || value == null)
-      json['value'] = value;
+    if (v is String || v is bool || v is Map || v == null)
+      json['value'] = v;
     return json;
   }
 
