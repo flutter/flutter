@@ -312,7 +312,7 @@ class KernelCompiler {
     return null;
   }
 
-  bool generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) {
+  void generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) {
     try {
     newMainDart.writeAsStringSync('''
 import '$currentMainUri' as entrypoint;
@@ -328,10 +328,8 @@ void main() {
   entrypoint.main();
 }
 ''');
-    return true;
     } on FileSystemException catch (error) {
       throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
-      return false;
     }
   }
 }
