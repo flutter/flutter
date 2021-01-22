@@ -182,6 +182,21 @@ class DomRenderer {
     }
   }
 
+  static void setClipPath(html.Element element, String? value) {
+    if (browserEngine == BrowserEngine.webkit) {
+      if (value == null) {
+        element.style.removeProperty('-webkit-clip-path');
+      } else {
+        element.style.setProperty('-webkit-clip-path', value);
+      }
+    }
+    if (value == null) {
+      element.style.removeProperty('clip-path');
+    } else {
+      element.style.setProperty('clip-path', value);
+    }
+  }
+
   static void setElementTransform(html.Element element, String transformValue) {
     js_util.setProperty(
         js_util.getProperty(element, 'style'), 'transform', transformValue);
