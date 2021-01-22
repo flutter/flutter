@@ -359,6 +359,7 @@ FILE: ../../../flutter/lib/ui/painting/path.cc
 FILE: ../../../flutter/lib/ui/painting/path.h
 FILE: ../../../flutter/lib/ui/painting/path_measure.cc
 FILE: ../../../flutter/lib/ui/painting/path_measure.h
+FILE: ../../../flutter/lib/ui/painting/path_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/picture.cc
 FILE: ../../../flutter/lib/ui/painting/picture.h
 FILE: ../../../flutter/lib/ui/painting/picture_recorder.cc
@@ -402,6 +403,8 @@ FILE: ../../../flutter/lib/ui/ui.dart
 FILE: ../../../flutter/lib/ui/ui_benchmarks.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.h
+FILE: ../../../flutter/lib/ui/volatile_path_tracker.cc
+FILE: ../../../flutter/lib/ui/volatile_path_tracker.h
 FILE: ../../../flutter/lib/ui/window.dart
 FILE: ../../../flutter/lib/ui/window/platform_configuration.cc
 FILE: ../../../flutter/lib/ui/window/platform_configuration.h

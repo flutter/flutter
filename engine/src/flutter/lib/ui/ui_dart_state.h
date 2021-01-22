@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
+#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/tonic/dart_microtask_queue.h"
@@ -58,6 +59,8 @@ class UIDartState : public tonic::DartState {
   fml::WeakPtr<IOManager> GetIOManager() const;
 
   fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
+
+  std::shared_ptr<VolatilePathTracker> GetVolatilePathTracker() const;
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
@@ -102,6 +105,7 @@ class UIDartState : public tonic::DartState {
               UnhandledExceptionCallback unhandled_exception_callback,
               std::shared_ptr<IsolateNameServer> isolate_name_server,
               bool is_root_isolate_,
+              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
               bool enable_skparagraph);
 
   ~UIDartState() override;
@@ -124,6 +128,7 @@ class UIDartState : public tonic::DartState {
   fml::WeakPtr<IOManager> io_manager_;
   fml::RefPtr<SkiaUnrefQueue> skia_unref_queue_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
+  std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
   const std::string advisory_script_uri_;
   const std::string advisory_script_entrypoint_;
   const std::string logger_prefix_;

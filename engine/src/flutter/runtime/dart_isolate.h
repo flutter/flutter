@@ -233,6 +233,7 @@ class DartIsolate : public UIDartState {
       std::optional<std::string> dart_entrypoint,
       std::optional<std::string> dart_entrypoint_library,
       std::unique_ptr<IsolateConfiguration> isolate_configration,
+      std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
       const DartIsolate* spawning_isolate = nullptr);
 
   //----------------------------------------------------------------------------
@@ -463,6 +464,7 @@ class DartIsolate : public UIDartState {
       Flags flags,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
+      std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
       const DartIsolate* spawning_isolate = nullptr);
 
   DartIsolate(const Settings& settings,
@@ -474,7 +476,8 @@ class DartIsolate : public UIDartState {
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
               std::string advisory_script_entrypoint,
-              bool is_root_isolate);
+              bool is_root_isolate,
+              std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
 
   [[nodiscard]] bool Initialize(Dart_Isolate isolate);
 
