@@ -135,7 +135,7 @@ class DataRow {
   /// and its checkbox is disabled.
   ///
   /// If a [DataCell] in the row has its [DataCell.onTap] callback defined,
-  /// That callback behavior overrides the gesture behavior of the row for
+  /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final ValueChanged<bool?>? onSelectChanged;
 
