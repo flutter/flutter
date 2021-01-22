@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../widgets/text.dart' show textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
 const double _kArrowScreenPadding = 26.0;
@@ -26,6 +26,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(

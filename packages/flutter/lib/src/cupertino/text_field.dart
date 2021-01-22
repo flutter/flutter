@@ -4,12 +4,14 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -1064,7 +1066,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
+
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        textSelectionControls ??= cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        break;
+    }
+
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[

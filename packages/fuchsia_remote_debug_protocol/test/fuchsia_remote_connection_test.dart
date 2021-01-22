@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:mockito/mockito.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:vm_service/vm_service.dart' as vms;
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 
@@ -12,7 +12,7 @@ import 'common.dart';
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
     List<MockPortForwarder> forwardedPorts;
-    List<MockPeer> mockPeerConnections;
+    List<MockVmService> mockVmServices;
     List<Uri> uriConnections;
 
     setUp(() {
@@ -59,22 +59,22 @@ void main() {
       ];
 
       forwardedPorts = <MockPortForwarder>[];
-      mockPeerConnections = <MockPeer>[];
+      mockVmServices = <MockVmService>[];
       uriConnections = <Uri>[];
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        return Future<json_rpc.Peer>(() async {
-          final MockPeer mp = MockPeer();
-          mockPeerConnections.add(mp);
+        return Future<vms.VmService>(() async {
+          final MockVmService service = MockVmService();
+          mockVmServices.add(service);
           uriConnections.add(uri);
-          when(mp.sendRequest(any, any))
+          when(service.callMethod('_flutter.listViews'))
               // The local ports match the desired indices for now, so get the
               // canned response from the URI port.
-              .thenAnswer((_) => Future<Map<String, dynamic>>(
-                  () => flutterViewCannedResponses[uri.port]));
-          return mp;
+              .thenAnswer((_) => Future<vms.Response>(
+                  () => vms.Response.parse(flutterViewCannedResponses[uri.port])));
+          return service;
         });
       }
 
@@ -315,4 +315,4 @@ class MockSshCommandRunner extends Mock implements SshCommandRunner {}
 
 class MockPortForwarder extends Mock implements PortForwarder {}
 
-class MockPeer extends Mock implements json_rpc.Peer {}
+class MockVmService extends Mock implements vms.VmService {}
