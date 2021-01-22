@@ -891,6 +891,19 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
+  testUsingContext('printHelp without details shows hot restart help message', () async {
+    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentWebRunner.printHelp(details: false);
+
+    expect(testLogger.statusText, contains('To hot restart changes'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Pub: () => MockPub(),
+    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
+  });
+
   testUsingContext('debugDumpApp', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
