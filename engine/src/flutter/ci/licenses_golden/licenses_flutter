@@ -870,6 +870,9 @@ FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.cc
 FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
+FILE: ../../../flutter/shell/platform/common/cpp/accessibility_bridge.cc
+FILE: ../../../flutter/shell/platform/common/cpp/accessibility_bridge.h
+FILE: ../../../flutter/shell/platform/common/cpp/accessibility_bridge_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/basic_message_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/binary_messenger_impl.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_buffer_streams.h
@@ -911,6 +914,9 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/texture_registra
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches.cc
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches.h
 FILE: ../../../flutter/shell/platform/common/cpp/engine_switches_unittests.cc
+FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate.cc
+FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate.h
+FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/incoming_message_dispatcher.cc
 FILE: ../../../flutter/shell/platform/common/cpp/incoming_message_dispatcher.h
 FILE: ../../../flutter/shell/platform/common/cpp/json_message_codec.cc
@@ -926,6 +932,8 @@ FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_export.h
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_messenger.h
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_plugin_registrar.h
 FILE: ../../../flutter/shell/platform/common/cpp/public/flutter_texture_registrar.h
+FILE: ../../../flutter/shell/platform/common/cpp/test_accessibility_bridge.cc
+FILE: ../../../flutter/shell/platform/common/cpp/test_accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/cpp/text_input_model_unittests.cc

@@ -68,6 +68,26 @@ source_set("common_cpp_switches") {
   ]
 }
 
+source_set("common_cpp_accessibility") {
+  public = [
+    "accessibility_bridge.h",
+    "flutter_platform_node_delegate.h",
+  ]
+
+  sources = [
+    "accessibility_bridge.cc",
+    "flutter_platform_node_delegate.cc",
+  ]
+
+  public_configs =
+      [ "//flutter/third_party/accessibility:accessibility_config" ]
+
+  public_deps = [
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/third_party/accessibility",
+  ]
+}
+
 source_set("common_cpp") {
   public = [
     "incoming_message_dispatcher.h",
@@ -155,6 +175,18 @@ if (enable_unittests) {
       "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
       "//flutter/testing",
     ]
+
+    # The accessibility bridge only supports MacOS for now.
+    if (is_mac) {
+      sources += [
+        "accessibility_bridge_unittests.cc",
+        "flutter_platform_node_delegate_unittests.cc",
+        "test_accessibility_bridge.cc",
+        "test_accessibility_bridge.h",
+      ]
+
+      deps += [ ":common_cpp_accessibility" ]
+    }
 
     public_configs = [ "//flutter:config" ]
   }
