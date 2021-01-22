@@ -2976,6 +2976,13 @@ class DevToolsDeepLinkProperty extends DiagnosticsProperty<Map<String, String>> 
     description: description,
     level: DiagnosticLevel.info,
   );
+
+  @override
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
+    json['value'] = value;
+    return json;
+  }
 }
 
 /// An object representation of a uri that deep links to a specific object in

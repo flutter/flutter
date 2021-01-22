@@ -2708,14 +2708,14 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (v is Diagnosticable || v is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
       // JSON.stringify replaces infinity and NaN with null.
       json['value'] = v.isFinite ? v :  v.toString();
-    if (v is String || v is bool || v is Map || v == null)
-      json['value'] = v;
+    if (value is String || value is bool || v == null)
+      json['value'] = value;
     return json;
   }
 
