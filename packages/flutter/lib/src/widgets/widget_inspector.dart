@@ -2934,8 +2934,9 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
       final String? devToolsInspectorUri =
           WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
       if (devToolsInspectorUri != null) {
-        devToolsDiagnostic = DiagnosticsNode.message(
+        devToolsDiagnostic = DevToolsDeepLinkDiagnosticsNode(
           'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+          devToolsInspectorUri,
         );
       }
 

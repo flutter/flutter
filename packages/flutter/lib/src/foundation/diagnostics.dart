@@ -1801,6 +1801,17 @@ class MessageProperty extends DiagnosticsProperty<void> {
        super(name, null, description: message, style: style, level: level);
 }
 
+/// Debugging message for DevTools deep links.
+class DevToolsDeepLinkDiagnosticsNode extends StringProperty {
+  /// Create a diagnostics property that displays a deep link to DevTools.
+  ///
+  /// [value] will return the String representation of the DevTools url.
+  ///
+  /// The [description] and [value] arguments must not be null.
+  DevToolsDeepLinkDiagnosticsNode(String description, String value) :
+      super('', value, description: description, level: DiagnosticLevel.info);
+}
+
 /// Property which encloses its string [value] in quotes.
 ///
 /// See also:
