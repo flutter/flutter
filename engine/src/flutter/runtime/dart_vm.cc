@@ -64,9 +64,10 @@ static const char* kDartLanguageArgs[] = {
     // clang-format on
 };
 
-static const char* kDartPrecompilationArgs[] = {
-    "--precompilation",
-};
+// TODO(74520): Remove flag once isolate group work is completed (or add it to
+//              JIT mode).
+static const char* kDartPrecompilationArgs[] = {"--precompilation",
+                                                "--enable-isolate-groups"};
 
 FML_ALLOW_UNUSED_TYPE
 static const char* kDartWriteProtectCodeArgs[] = {

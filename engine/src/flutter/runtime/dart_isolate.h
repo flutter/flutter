@@ -517,15 +517,18 @@ class DartIsolate : public UIDartState {
       Dart_IsolateFlags* flags,
       char** error);
 
+  typedef std::function<Dart_Isolate(std::shared_ptr<DartIsolateGroupData>*,
+                                     std::shared_ptr<DartIsolate>*,
+                                     Dart_IsolateFlags*,
+                                     char**)>
+      IsolateMaker;
+
   static Dart_Isolate CreateDartIsolateGroup(
       std::unique_ptr<std::shared_ptr<DartIsolateGroupData>> isolate_group_data,
       std::unique_ptr<std::shared_ptr<DartIsolate>> isolate_data,
       Dart_IsolateFlags* flags,
       char** error,
-      std::function<Dart_Isolate(std::shared_ptr<DartIsolateGroupData>*,
-                                 std::shared_ptr<DartIsolate>*,
-                                 Dart_IsolateFlags*,
-                                 char**)> make_isolate);
+      const IsolateMaker& make_isolate);
 
   static bool InitializeIsolate(std::shared_ptr<DartIsolate> embedder_isolate,
                                 Dart_Isolate isolate,
