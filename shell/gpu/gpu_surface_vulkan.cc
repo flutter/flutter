@@ -12,7 +12,20 @@ GPUSurfaceVulkan::GPUSurfaceVulkan(
     GPUSurfaceVulkanDelegate* delegate,
     std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
     bool render_to_surface)
-    : window_(delegate->vk(), std::move(native_surface), render_to_surface),
+    : GPUSurfaceVulkan(/*context=*/nullptr,
+                       delegate,
+                       std::move(native_surface),
+                       render_to_surface) {}
+
+GPUSurfaceVulkan::GPUSurfaceVulkan(
+    const sk_sp<GrDirectContext>& context,
+    GPUSurfaceVulkanDelegate* delegate,
+    std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
+    bool render_to_surface)
+    : window_(context,
+              delegate->vk(),
+              std::move(native_surface),
+              render_to_surface),
       render_to_surface_(render_to_surface),
       weak_factory_(this) {}
 

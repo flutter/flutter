@@ -21,7 +21,16 @@ namespace vulkan {
 VulkanWindow::VulkanWindow(fml::RefPtr<VulkanProcTable> proc_table,
                            std::unique_ptr<VulkanNativeSurface> native_surface,
                            bool render_to_surface)
-    : valid_(false), vk(std::move(proc_table)) {
+    : VulkanWindow(/*context/*/ nullptr,
+                   proc_table,
+                   std::move(native_surface),
+                   render_to_surface) {}
+
+VulkanWindow::VulkanWindow(const sk_sp<GrDirectContext>& context,
+                           fml::RefPtr<VulkanProcTable> proc_table,
+                           std::unique_ptr<VulkanNativeSurface> native_surface,
+                           bool render_to_surface)
+    : valid_(false), vk(std::move(proc_table)), skia_gr_context_(context) {
   if (!vk || !vk->HasAcquiredMandatoryProcAddresses()) {
     FML_DLOG(INFO) << "Proc table has not acquired mandatory proc addresses.";
     return;
@@ -78,7 +87,7 @@ VulkanWindow::VulkanWindow(fml::RefPtr<VulkanProcTable> proc_table,
 
   // Create the Skia GrDirectContext.
 
-  if (!CreateSkiaGrContext()) {
+  if (!skia_gr_context_ && !CreateSkiaGrContext()) {
     FML_DLOG(INFO) << "Could not create Skia context.";
     return;
   }

@@ -21,7 +21,7 @@ namespace flutter {
 class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
                                public AndroidSurface {
  public:
-  AndroidSurfaceGL(const AndroidContext& android_context,
+  AndroidSurfaceGL(const std::shared_ptr<AndroidContext>& android_context,
                    std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   ~AndroidSurfaceGL() override;
@@ -64,11 +64,15 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   sk_sp<const GrGLInterface> GetGLInterface() const override;
 
  private:
-  const AndroidContextGL& android_context_;
-
   fml::RefPtr<AndroidNativeWindow> native_window_;
   std::unique_ptr<AndroidEGLSurface> onscreen_surface_;
   std::unique_ptr<AndroidEGLSurface> offscreen_surface_;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Takes the super class AndroidSurface's AndroidContext and
+  ///             return a raw pointer to an AndroidContextGL.
+  ///
+  AndroidContextGL* GLContextPtr() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
