@@ -51,7 +51,8 @@ std::unique_ptr<Engine> CreateEngine(
     std::unique_ptr<Animator> animator,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate) {
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+    std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
   return std::make_unique<Engine>(delegate,             //
                                   dispatcher_maker,     //
                                   vm,                   //
@@ -62,7 +63,8 @@ std::unique_ptr<Engine> CreateEngine(
                                   std::move(animator),  //
                                   io_manager,           //
                                   unref_queue,          //
-                                  snapshot_delegate);
+                                  snapshot_delegate,    //
+                                  volatile_path_tracker);
 }
 }  // namespace
 
@@ -80,8 +82,11 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     return nullptr;
   }
 
-  auto shell =
-      std::unique_ptr<Shell>(new Shell(std::move(vm), task_runners, settings));
+  auto shell = std::unique_ptr<Shell>(
+      new Shell(std::move(vm), task_runners, settings,
+                std::make_shared<VolatilePathTracker>(
+                    task_runners.GetUITaskRunner(),
+                    !settings.skia_deterministic_rendering_on_cpu)));
 
   // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
@@ -177,17 +182,18 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                                    std::move(vsync_waiter));
 
         engine_promise.set_value(
-            on_create_engine(*shell,                        //
-                             dispatcher_maker,              //
-                             *shell->GetDartVM(),           //
-                             std::move(isolate_snapshot),   //
-                             task_runners,                  //
-                             platform_data,                 //
-                             shell->GetSettings(),          //
-                             std::move(animator),           //
-                             weak_io_manager_future.get(),  //
-                             unref_queue_future.get(),      //
-                             snapshot_delegate_future.get()));
+            on_create_engine(*shell,                          //
+                             dispatcher_maker,                //
+                             *shell->GetDartVM(),             //
+                             std::move(isolate_snapshot),     //
+                             task_runners,                    //
+                             platform_data,                   //
+                             shell->GetSettings(),            //
+                             std::move(animator),             //
+                             weak_io_manager_future.get(),    //
+                             unref_queue_future.get(),        //
+                             snapshot_delegate_future.get(),  //
+                             shell->volatile_path_tracker_));
       }));
 
   if (!shell->Setup(std::move(platform_view),  //
@@ -349,11 +355,15 @@ std::unique_ptr<Shell> Shell::Create(
   return shell;
 }
 
-Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
+Shell::Shell(DartVMRef vm,
+             TaskRunners task_runners,
+             Settings settings,
+             std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch()),
+      volatile_path_tracker_(std::move(volatile_path_tracker)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
@@ -481,7 +491,8 @@ std::unique_ptr<Shell> Shell::Spawn(
           Settings settings, std::unique_ptr<Animator> animator,
           fml::WeakPtr<IOManager> io_manager,
           fml::RefPtr<SkiaUnrefQueue> unref_queue,
-          fml::WeakPtr<SnapshotDelegate> snapshot_delegate) {
+          fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+          std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
         return engine->Spawn(/*delegate=*/delegate,
                              /*dispatcher_maker=*/dispatcher_maker,
                              /*settings=*/settings,
@@ -1088,6 +1099,7 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
 
   if (engine_) {
     engine_->NotifyIdle(deadline);
+    volatile_path_tracker_->OnFrame();
   }
 }
 
