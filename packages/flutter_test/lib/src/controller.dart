@@ -825,6 +825,72 @@ abstract class WidgetController {
     return box.size;
   }
 
+  Future<bool> sendKeyPress(
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical, {
+    String? character,
+    Duration timeStamp = Duration.zero,
+  }) async {
+    final bool handled = await sendKeyDown(
+      physical,
+      logical,
+      character: character,
+      timeStamp: timeStamp,
+      synthesized: false,
+    );
+    await sendKeyUp(
+      physical,
+      logical,
+      timeStamp: timeStamp,
+      synthesized: false,
+    );
+    return handled;
+  }
+
+  Future<bool> sendKeyDown(
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical, {
+    String? character,
+    Duration timeStamp = Duration.zero,
+    bool synthesized = false,
+  }) async {
+    return binding.handleKeyEvent(KeyDownEvent(
+      physical: physical,
+      logical: logical,
+      character: character,
+      timeStamp: timeStamp,
+      synthesized: synthesized,
+    ));
+  }
+
+  Future<bool> sendKeyRepeat(
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical, {
+    String? character,
+    Duration timeStamp = Duration.zero,
+  }) async {
+    return binding.handleKeyEvent(KeyRepeatEvent(
+      physical: physical,
+      logical: logical,
+      character: character,
+      timeStamp: timeStamp,
+    ));
+  }
+
+  Future<bool> sendKeyUp(
+    PhysicalKeyboardKey physical,
+    LogicalKeyboardKey logical, {
+    Duration timeStamp = Duration.zero,
+    bool synthesized = false,
+  }) async {
+    return binding.handleKeyEvent(KeyUpEvent(
+      physical: physical,
+      logical: logical,
+      timeStamp: timeStamp,
+      synthesized: synthesized,
+    ));
+  }
+
   /// Simulates sending physical key down and up events through the system channel.
   ///
   /// This only simulates key events coming from a physical keyboard, not from a

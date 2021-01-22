@@ -13,14 +13,15 @@ import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'hardware_keyboard.dart';
 import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
 import 'raw_keyboard.dart';
 import 'restoration.dart';
 import 'system_channels.dart';
 
 class _ServiceHardwareKeyboard extends HardwareKeyboard {
-  void handleKeyData(ui.KeyData keyData) {
+  bool handleKeyEvent(KeyEvent event) {
     receivingKeyData = true;
-    dispatchKeyEvent(_eventFromData(keyData));
+    return dispatchKeyEvent(event);
   }
 
   void handleRawEvent(RawKeyEvent rawEvent) {
@@ -30,39 +31,6 @@ class _ServiceHardwareKeyboard extends HardwareKeyboard {
       dispatchKeyEvent(_eventFromRawEvent(rawEvent));
   }
 
-  static KeyEvent _eventFromData(ui.KeyData keyData) {
-    final PhysicalKeyboardKey physicalKey =
-        PhysicalKeyboardKey.findKeyByCode(keyData.physical) ??
-            PhysicalKeyboardKey(keyData.physical);
-    final LogicalKeyboardKey logicalKey =
-        LogicalKeyboardKey.findKeyByKeyId(keyData.logical) ??
-            LogicalKeyboardKey(keyData.logical);
-    final Duration timeStamp = keyData.timeStamp;
-    switch (keyData.change) {
-      case ui.KeyChange.down:
-        return KeyDownEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          character: keyData.character,
-          synthesized: keyData.synthesized,
-        );
-      case ui.KeyChange.up:
-        return KeyUpEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          synthesized: keyData.synthesized,
-        );
-      case ui.KeyChange.repeat:
-        return KeyRepeatEvent(
-          physical: physicalKey,
-          logical: logicalKey,
-          timeStamp: timeStamp,
-          character: keyData.character,
-        );
-    }
-  }
 
   static KeyEvent _eventFromRawEvent(RawKeyEvent rawEvent) {
     final LogicalKeyboardKey logical = rawEvent.logicalKey;
@@ -91,6 +59,40 @@ class _ServiceHardwareKeyboard extends HardwareKeyboard {
   }
 }
 
+KeyEvent _keyEventFromData(ui.KeyData keyData) {
+  final PhysicalKeyboardKey physicalKey =
+      PhysicalKeyboardKey.findKeyByCode(keyData.physical) ??
+          PhysicalKeyboardKey(keyData.physical);
+  final LogicalKeyboardKey logicalKey =
+      LogicalKeyboardKey.findKeyByKeyId(keyData.logical) ??
+          LogicalKeyboardKey(keyData.logical);
+  final Duration timeStamp = keyData.timeStamp;
+  switch (keyData.change) {
+    case ui.KeyChange.down:
+      return KeyDownEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        character: keyData.character,
+        synthesized: keyData.synthesized,
+      );
+    case ui.KeyChange.up:
+      return KeyUpEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        synthesized: keyData.synthesized,
+      );
+    case ui.KeyChange.repeat:
+      return KeyRepeatEvent(
+        physical: physicalKey,
+        logical: logicalKey,
+        timeStamp: timeStamp,
+        character: keyData.character,
+      );
+  }
+}
+
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
@@ -106,7 +108,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     _hardwareKeyboard = _ServiceHardwareKeyboard();
-    window.onKeyData = _hardwareKeyboard.handleKeyData;
+    window.onKeyData = _handleKeyData;
     RawKeyboard.instance.addListener(_hardwareKeyboard.handleRawEvent);
     initLicenses();
     SystemChannels.system.setMessageHandler(
@@ -121,6 +123,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard;
   late _ServiceHardwareKeyboard _hardwareKeyboard;
+
+  bool _handleKeyData(ui.KeyData keyData) {
+    return handleKeyEvent(_keyEventFromData(keyData));
+  }
+
+  /// Dispatch an event to the targets found by a hit test on its position.
+  bool handleKeyEvent(KeyEvent event) {
+    return _hardwareKeyboard.handleKeyEvent(event);
+  }
 
   /// The default instance of [BinaryMessenger].
   ///

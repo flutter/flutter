@@ -7,7 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_ios.dart';
@@ -593,7 +593,7 @@ class RawKeyboard {
   ///
   /// See also:
   ///
-  ///  * [Focus.onKey], a [Focus] callback attribute that will be given key
+  ///  * [Focus.onKeyEvent], a [Focus] callback attribute that will be given key
   ///    events distributed by the [FocusManager] based on the current primary
   ///    focus.
   ///  * [addListener], to add passive key event listeners that do not stop event

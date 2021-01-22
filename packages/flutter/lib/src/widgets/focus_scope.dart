@@ -281,6 +281,7 @@ class Focus extends StatefulWidget {
     this.autofocus = false,
     this.onFocusChange,
     this.onKey,
+    this.onKeyEvent,
     this.debugLabel,
     this.canRequestFocus,
     this.descendantsAreFocusable = true,
@@ -311,6 +312,9 @@ class Focus extends StatefulWidget {
 
   /// Handler for keys pressed when this object or one of its children has
   /// focus.
+  /// 
+  /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
+  /// future. Prefer [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -323,6 +327,21 @@ class Focus extends StatefulWidget {
   /// [EditableText], or [CupertinoTextField] instead, which do support these
   /// things.
   final FocusOnKeyCallback? onKey;
+
+  /// Handler for keys pressed when this object or one of its children has
+  /// focus.
+  ///
+  /// Key events are first given to the [FocusNode] that has primary focus, and
+  /// if its [onKeyEvent] method return false, then they are given to each
+  /// ancestor node up the focus hierarchy in turn. If an event reaches the root
+  /// of the hierarchy, it is discarded.
+  ///
+  /// This is not the way to get text input in the manner of a text field: it
+  /// leaves out support for input method editors, and doesn't support soft
+  /// keyboards in general. For text input, consider [TextField],
+  /// [EditableText], or [CupertinoTextField] instead, which do support these
+  /// things.
+  final FocusOnKeyEventCallback? onKeyEvent;
 
   /// Handler called when the focus changes.
   ///
@@ -912,6 +931,7 @@ class FocusScope extends Focus {
     bool? canRequestFocus,
     bool? skipTraversal,
     FocusOnKeyCallback? onKey,
+    FocusOnKeyEventCallback? onKeyEvent,
     String? debugLabel,
   })  : assert(child != null),
         assert(autofocus != null),
@@ -924,6 +944,7 @@ class FocusScope extends Focus {
           canRequestFocus: canRequestFocus,
           skipTraversal: skipTraversal,
           onKey: onKey,
+          onKeyEvent: onKeyEvent,
           debugLabel: debugLabel,
         );
 
