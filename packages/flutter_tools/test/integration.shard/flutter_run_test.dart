@@ -53,4 +53,19 @@ void main() {
     await _flutter.run(pidFile: pidFile);
     expect(pidFile.existsSync(), isTrue);
   });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutter.run(
+      startPaused: true,
+      withDebugger: true,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    await _flutter.resume();
+    await pollForServiceExtensionValue(
+      testDriver: _flutter,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      expectedValue: 'http://127.0.0.1:9110',
+    );
+  });
 }

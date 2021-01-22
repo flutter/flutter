@@ -9,6 +9,16 @@ void main() {
   const CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
   themeData.copyWith(brightness: Brightness.light);
 
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.inheritFromElement(ancestor);
+  element.inheritFromWidgetOfExactType(targetType);
+  element.ancestorInheritedElementForWidgetOfExactType(targetType);
+  element.ancestorWidgetOfExactType(targetType);
+  element.ancestorStateOfType(TypeMatcher<targetType>());
+  element.rootAncestorStateOfType(TypeMatcher<targetType>());
+  element.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
   // Changes made in https://github.com/flutter/flutter/pull/45941
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrameReport();
@@ -27,4 +37,19 @@ void main() {
   buildContext.ancestorStateOfType(TypeMatcher<targetType>());
   buildContext.rootAncestorStateOfType(TypeMatcher<targetType>());
   buildContext.ancestorRenderObjectOfType(TypeMatcher<targetType>());
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(overflow: Overflow.visible);
+  const Stack stack = Stack(overflow: Overflow.clip);
+  final behavior = stack.overflow;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidate: true);
+  const Form form = Form(autovalidate: false);
+  final autoMode = form.autovalidate;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidate: true);
+  const FormField formField = FormField(autovalidate: false);
+  final autoMode = formField.autovalidate;
 }

@@ -89,6 +89,32 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// is always ready to go on the platform thread when the operating system needs
 /// it.
 ///
+/// ## State Restoration on iOS
+///
+/// To enable state restoration on iOS, a restoration identifier has to be
+/// assigned to the [FlutterViewController](https://api.flutter.dev/objcdoc/Classes/FlutterViewController.html).
+/// If the standard embedding (produced by `flutter create`) is used, this can
+/// be accomplished with the following steps:
+///
+///  1. In the app's directory, open `ios/Runner.xcodeproj` with Xcode.
+///  2. Select `Main.storyboard` under `Runner/Runner` in the Project Navigator
+///     on the left.
+///  3. Select the `Flutter View Controller` under
+///     `Flutter View Controller Scene` in the view hierarchy.
+///  4. Navigate to the Identity Inspector in the panel on the right.
+///  5. Enter a unique restoration ID in the provided field.
+///  6. Save the project.
+///
+/// ## Development with hot restart and hot reload
+///
+/// Changes applied to your app with hot reload and hot restart are not
+/// persisted on the device. They are lost when the app is fully terminated and
+/// restarted, e.g. by the operating system. Therefore, your app may not restore
+/// correctly during development if you have made changes and applied them with
+/// hot restart or hot reload. To test state restoration, always make sure to
+/// fully re-compile your application (e.g. by re-executing `flutter run`) after
+/// making a change.
+///
 /// See also:
 ///
 ///  * [ServicesBinding.restorationManager], which holds the singleton instance

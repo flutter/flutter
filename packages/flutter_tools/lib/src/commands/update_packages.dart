@@ -66,6 +66,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'url_launcher': '6.0.0-nullsafety.1',
   'connectivity': '3.0.0-nullsafety.1',
   'device_info': '2.0.0-nullsafety.1',
+  'camera': '0.6.4+5',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
