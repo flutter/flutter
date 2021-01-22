@@ -17,6 +17,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'globals.dart' as globals;
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -311,26 +312,26 @@ class KernelCompiler {
     }
     return null;
   }
+}
 
-  void generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) {
-    try {
-    newMainDart.writeAsStringSync('''
+void generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) {
+  try {
+  newMainDart.writeAsStringSync('''
 import '$currentMainUri' as entrypoint;
 
 // The plugin registrant is called by dart:ui.
 @pragma('vm:entry-point')
 void _registerPlugins() {
   // TODO(egarciad): Call each plugin's main class registerWith();
-  print('_registerPlugins is called');
+  print('_registerPlugins is called!');
 }
 
 void main() {
   entrypoint.main();
 }
 ''');
-    } on FileSystemException catch (error) {
-      throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
-    }
+  } on FileSystemException catch (error) {
+    throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
   }
 }
 
@@ -608,6 +609,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
     assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
+    }
+
+    // TODO(egarciad): Set this to true after inspecting the pubspec.yaml.
+    const bool shouldCreateDartPluginRegistrant = true;
+
+    if (shouldCreateDartPluginRegistrant) {
+      final Directory buildDir = globals.fs.directory(mainUri.path).parent;
+      final File newMainDart = buildDir.childFile('main.generated.dart');
+      generateMainDartWithPluginRegistrant(packageConfig.toPackageUri(mainUri).toString(), newMainDart);
+      mainUri = newMainDart.uri;
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
