@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('ReorderableList, drag and drop, fixed height items', (WidgetTester tester) async {
+  testWidgets('SliverReorderableList, drag and drop, fixed height items', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(8, (int index) => index);
 
     Future<void> pressDragRelease(Offset start, Offset delta) async {
@@ -74,7 +74,7 @@ void main() {
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 
-  testWidgets('ReorderableList, items inherit DefaultTextStyle, IconTheme', (WidgetTester tester) async {
+  testWidgets('SliverReorderableList, items inherit DefaultTextStyle, IconTheme', (WidgetTester tester) async {
     const Color textColor = Color(0xffffffff);
     const Color iconColor = Color(0xff0000ff);
 
