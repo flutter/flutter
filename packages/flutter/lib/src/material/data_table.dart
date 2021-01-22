@@ -1037,7 +1037,8 @@ class DataTable extends StatelessWidget {
 /// [Table], and put the other contents of the cell inside it.)
 ///
 /// See also:
-///  * [DataTable], which makes use of TableRowInkWell when
+///
+///  * [DataTable], which makes use of [TableRowInkWell] when
 ///    [DataRow.onSelectChanged] is defined and [DataCell.onTap]
 ///    is not.
 class TableRowInkWell extends InkResponse {
