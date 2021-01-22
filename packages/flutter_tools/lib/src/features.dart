@@ -306,7 +306,7 @@ const Feature singleWidgetReload = Feature(
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: true,
+    available: false,
     enabledByDefault: false,
   ),
 );
@@ -329,7 +329,7 @@ const Feature experimentalInvalidationStrategy = Feature(
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: true,
+    available: false,
     enabledByDefault: false,
   ),
 );
