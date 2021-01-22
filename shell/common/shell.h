@@ -27,6 +27,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
+#include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/service_protocol.h"
@@ -108,7 +109,8 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<Animator> animator,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate)>
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+      std::shared_ptr<VolatilePathTracker> volatile_path_tracker)>
       EngineCreateCallback;
 
   //----------------------------------------------------------------------------
@@ -410,6 +412,7 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<Rasterizer> rasterizer_;       // on raster task runner
   std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
   std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
+  std::shared_ptr<VolatilePathTracker> volatile_path_tracker_;
 
   fml::WeakPtr<Engine> weak_engine_;  // to be shared across threads
   fml::TaskRunnerAffineWeakPtr<Rasterizer>
@@ -461,7 +464,10 @@ class Shell final : public PlatformView::Delegate,
 
   sk_sp<GrDirectContext> shared_resource_context_;
 
-  Shell(DartVMRef vm, TaskRunners task_runners, Settings settings);
+  Shell(DartVMRef vm,
+        TaskRunners task_runners,
+        Settings settings,
+        std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
