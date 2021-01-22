@@ -1092,17 +1092,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       for (int indexInOld = 0; indexInOld < oldChildCount; indexInOld += 1) {
         final PersistedSurface? oldChild = oldChildren[indexInOld];
         final bool childAlreadyClaimed = oldChild == null;
-        // After https://github.com/dart-lang/language/issues/1274 is
-        // implemented, `oldChild` will be promoted to non-nullable on the RHS
-        // of the `||`, so we won't need to null check it (and it will cause a
-        // build failure to try to do so).  Until then, we need to null check it
-        // in such a way that won't cause a build failure once the feature is
-        // implemented.  We can do that by casting to `dynamic`, and then
-        // relying on the call to `canUpdateAsMatch` implicitly downcasting to
-        // PersistentSurface.
-        // TODO(paulberry): remove this workaround once the feature is
-        // implemented.
-        if (childAlreadyClaimed || !newChild.canUpdateAsMatch(oldChild as dynamic)) {
+        if (childAlreadyClaimed || !newChild.canUpdateAsMatch(oldChild)) {
           continue;
         }
         allMatches.add(_PersistedSurfaceMatch(
