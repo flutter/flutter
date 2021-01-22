@@ -417,6 +417,25 @@ extension FlutterVmService on vm_service.VmService {
 
   Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
 
+  Future<vm_service.Response> callMethodWrapper(
+    String method, {
+    String isolateId,
+    Map<String, dynamic> args
+  }) async {
+    try {
+      return await callMethod(method, isolateId: isolateId, args: args);
+    } on vm_service.RPCError catch (e) {
+      // If the service disappears mid-request the tool is unable to recover
+      // and should begin to shutdown due to the service connection closing.
+      // Swallow the exception here and let the shutdown logic elsewhere deal
+      // with cleaning up.
+      if (e.code == RPCErrorCodes.kServiceDisappeared) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
     @required Uri assetsDirectory,
@@ -424,7 +443,7 @@ extension FlutterVmService on vm_service.VmService {
     @required String uiIsolateId,
   }) async {
     assert(assetsDirectory != null);
-    await callMethod(kSetAssetBundlePathMethod,
+    await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, dynamic>{
         'viewId': viewId,
@@ -439,12 +458,15 @@ extension FlutterVmService on vm_service.VmService {
   Future<Map<String, Object>> getSkSLs({
     @required String viewId,
   }) async {
-    final vm_service.Response response = await callMethod(
+    final vm_service.Response response = await callMethodWrapper(
       kGetSkSLsMethod,
       args: <String, String>{
         'viewId': viewId,
       },
     );
+    if (response == null) {
+      return null;
+    }
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
@@ -454,7 +476,7 @@ extension FlutterVmService on vm_service.VmService {
   Future<void> flushUIThreadTasks({
     @required String uiIsolateId,
   }) async {
-    await callMethod(
+    await callMethodWrapper(
       kFlushUIThreadTasksMethod,
       args: <String, String>{
         'isolateId': uiIsolateId,
@@ -480,7 +502,7 @@ extension FlutterVmService on vm_service.VmService {
     final Future<void> onRunnable = onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
-    await callMethod(
+    await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
         'viewId': viewId,
@@ -745,9 +767,12 @@ extension FlutterVmService on vm_service.VmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
-      final vm_service.Response response = await callMethod(
+      final vm_service.Response response = await callMethodWrapper(
         kListViewsMethod,
       );
+      if (response == null) {
+        return null;
+      }
       final List<Object> rawViews = response.json['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[
         for (final Object rawView in rawViews)
