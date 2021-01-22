@@ -1942,19 +1942,19 @@ abstract class RenderBox extends RenderObject {
       final Size? _size = this._size;
       if (_size is _DebugSize) {
         assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
-          assert(
-            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent) ||
-                RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback,
-            'RenderBox.size accessed beyond the scope of resize, layout, or '
-            'permitted parent access. RenderBox can always access its own size, '
-            'otherwise, the only object that is allowed to read RenderBox.size '
-            'is its parent, if they have said they will. It you hit this assert '
-            'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            'that child\'s layout().'
-          );
-        }
+        if (RenderObject.debugActiveLayout != null &&
+          !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
+            assert(
+              debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
+                (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
+              'RenderBox.size accessed beyond the scope of resize, layout, or '
+              'permitted parent access. RenderBox can always access its own size, '
+              'otherwise, the only object that is allowed to read RenderBox.size '
+              'is its parent, if they have said they will. It you hit this assert '
+              'trying to access a child\'s size, pass "parentUsesSize: true" to '
+              'that child\'s layout().'
+            );
+          }
         assert(_size == this._size);
       }
       return true;
