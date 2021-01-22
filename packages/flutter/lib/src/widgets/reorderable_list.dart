@@ -759,6 +759,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       }
     }
     final Widget child = widget.itemBuilder(context, index);
+    assert(child.key != null, 'All list items must have a key');
     final OverlayState overlay = Overlay.of(context)!;
     return _ReorderableItem(
       key: _ReorderableItemGlobalKey(child.key!, index, this),
