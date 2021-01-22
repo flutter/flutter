@@ -114,6 +114,7 @@ enum HeroFlightDirection {
 ///  Widget build(BuildContext context) {
 ///    return HeroAnimationRecipe();
 ///  }
+/// ```
 ///
 /// ```dart preamble
 ///  class HeroAnimationRecipe extends StatefulWidget {
@@ -197,8 +198,7 @@ enum HeroFlightDirection {
 ///      ));
 ///    }
 /// }
-/// ```
-/// 
+///
 /// ```
 /// {@end-tool}
 ///
