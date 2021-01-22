@@ -9,7 +9,11 @@ namespace flutter {
 AndroidContext::AndroidContext(AndroidRenderingAPI rendering_api)
     : rendering_api_(rendering_api) {}
 
-AndroidContext::~AndroidContext() = default;
+AndroidContext::~AndroidContext() {
+  if (main_context_) {
+    main_context_->releaseResourcesAndAbandonContext();
+  }
+};
 
 AndroidRenderingAPI AndroidContext::RenderingApi() const {
   return rendering_api_;
@@ -17,6 +21,15 @@ AndroidRenderingAPI AndroidContext::RenderingApi() const {
 
 bool AndroidContext::IsValid() const {
   return true;
+}
+
+void AndroidContext::SetMainSkiaContext(
+    const sk_sp<GrDirectContext>& main_context) {
+  main_context_ = main_context;
+}
+
+sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {
+  return main_context_;
 }
 
 }  // namespace flutter
