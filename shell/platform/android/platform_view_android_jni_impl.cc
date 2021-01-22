@@ -567,23 +567,19 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
                                     jobject obj,
                                     jlong shell_holder,
                                     jint jLoadingUnitId,
-                                    jobjectArray jSearchPaths) {
+                                    jstring jSharedLibraryName) {
   // Convert java->c++
   intptr_t loading_unit_id = static_cast<intptr_t>(jLoadingUnitId);
-  std::vector<std::string> search_paths =
-      fml::jni::StringArrayToVector(env, jSearchPaths);
+  std::string sharedLibraryName =
+      fml::jni::JavaStringToString(env, jSharedLibraryName);
 
   // Use dlopen here to directly check if handle is nullptr before creating a
   // NativeLibrary.
-  void* handle = nullptr;
-  while (handle == nullptr && !search_paths.empty()) {
-    std::string path = search_paths.back();
-    handle = ::dlopen(path.c_str(), RTLD_NOW);
-    search_paths.pop_back();
-  }
+  void* handle = ::dlopen(sharedLibraryName.c_str(), RTLD_NOW);
   if (handle == nullptr) {
     LoadLoadingUnitFailure(loading_unit_id,
-                           "No lib .so found for provided search paths.", true);
+                           "Shared library not found for the provided name.",
+                           true);
     return;
   }
   fml::RefPtr<fml::NativeLibrary> native_lib =
@@ -781,7 +777,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeLoadDartDeferredLibrary",
-          .signature = "(JI[Ljava/lang/String;)V",
+          .signature = "(JILjava/lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&LoadDartDeferredLibrary),
       },
       {
