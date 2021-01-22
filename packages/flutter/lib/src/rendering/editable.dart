@@ -715,20 +715,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       if (lineModifier) {
         if (upArrow) {
           // Extend the selection to the beginning of the field.
-          final int upperOffset = math.max(
+          final int upperOffset = math.max(0, math.max(
             newSelection.baseOffset,
             newSelection.extentOffset,
-          );
+          ));
           newSelection = TextSelection(
             baseOffset: shift ? upperOffset : 0,
             extentOffset: 0,
           );
         } else {
           // Extend the selection to the end of the field.
-          final int lowerOffset = math.min(
+          final int lowerOffset = math.max(0, math.min(
             newSelection.baseOffset,
             newSelection.extentOffset,
-          );
+          ));
           newSelection = TextSelection(
             baseOffset: shift ? lowerOffset : _plainText.length,
             extentOffset: _plainText.length,
