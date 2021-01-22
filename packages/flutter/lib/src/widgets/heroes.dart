@@ -114,7 +114,7 @@ enum HeroFlightDirection {
 ///  Widget build(BuildContext context) {
 ///    return HeroAnimationRecipe(title: 'Hero Animation');
 ///  }
-/// 
+///
 ///  class HeroAnimationRecipe extends StatefulWidget {
 ///    HeroAnimationRecipe({Key key, this.title}) : super(key: key);
 ///    final String title;
