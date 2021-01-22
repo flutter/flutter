@@ -1809,6 +1809,8 @@ class DevToolsDeepLinkDiagnosticsNode extends StringProperty {
   ///
   /// The [description] and [value] arguments must not be null.
   DevToolsDeepLinkDiagnosticsNode(String description, String value) :
+      assert(description != null),
+      assert(value != null),
       super('', value, description: description, level: DiagnosticLevel.info);
 }
 

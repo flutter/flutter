@@ -1922,6 +1922,15 @@ void main() {
     validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object?>);
   });
 
+  test('DevToolsDeepLinkDiagnosticsNode test', () {
+    final DevToolsDeepLinkDiagnosticsNode node =
+      DevToolsDeepLinkDiagnosticsNode('description value', 'the-value');
+    expect(node.toString(), equals('description value'));
+    expect(node.name, isEmpty);
+    expect(node.value, equals('the-value'));
+    validateNodeJsonSerialization(node);
+  });
+
   test('error message style wrap test', () {
     // This tests wrapping of properties with styles typical for error messages.
     DiagnosticsNode createTreeWithWrappingNodes({
