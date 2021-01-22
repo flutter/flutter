@@ -736,9 +736,11 @@ class SimpleDialog extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
+    this.clipBehavior = Clip.none,
     this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -803,6 +805,9 @@ class SimpleDialog extends StatelessWidget {
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String? semanticLabel;
+
+  /// {@macro flutter.material.dialog.clipBehavior}
+  final Clip clipBehavior;
 
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
@@ -890,6 +895,7 @@ class SimpleDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
     );
