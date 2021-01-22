@@ -352,6 +352,29 @@ void main() {
     await tester.pumpWidget(buildFrame(itemCount: 4));
     expect(scrollable().semanticChildCount, 4);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72292
+  testWidgets('ListView.builder and SingleChildScrollView can work well together', (WidgetTester tester) async {
+    Widget builder(int itemCount) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemExtent: 35,
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) {
+              return const Text('I love Flutter.');
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder(1));
+    // Trigger relayout and garbage collect.
+    await tester.pumpWidget(builder(2));
+  });
 }
 
 void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {

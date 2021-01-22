@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required, visibleForTesting;
+import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
@@ -34,7 +34,8 @@ typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
 
-/// The error codes for the JSON-RPC standard.
+/// The error codes for the JSON-RPC standard, including VM service specific
+/// error codes.
 ///
 /// See also: https://www.jsonrpc.org/specification#error_object
 abstract class RPCErrorCodes {
@@ -49,6 +50,11 @@ abstract class RPCErrorCodes {
 
   /// Application specific error codes.
   static const int kServerError = -32000;
+
+  /// Non-standard JSON-RPC error codes:
+
+  /// The VM service or extension service has disappeared.
+  static const int kServiceDisappeared = 112;
 }
 
 /// A function that reacts to the invocation of the 'reloadSources' service.
@@ -152,13 +158,17 @@ final Expando<Uri> _httpAddressExpando = Expando<Uri>();
 
 final Expando<Uri> _wsAddressExpando = Expando<Uri>();
 
-@visibleForTesting
 void setHttpAddress(Uri uri, vm_service.VmService vmService) {
+  if(vmService == null) {
+    return;
+  }
   _httpAddressExpando[vmService] = uri;
 }
 
-@visibleForTesting
 void setWsAddress(Uri uri, vm_service.VmService vmService) {
+  if(vmService == null) {
+    return;
+  }
   _wsAddressExpando[vmService] = uri;
 }
 
@@ -407,6 +417,25 @@ extension FlutterVmService on vm_service.VmService {
 
   Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
 
+  Future<vm_service.Response> callMethodWrapper(
+    String method, {
+    String isolateId,
+    Map<String, dynamic> args
+  }) async {
+    try {
+      return await callMethod(method, isolateId: isolateId, args: args);
+    } on vm_service.RPCError catch (e) {
+      // If the service disappears mid-request the tool is unable to recover
+      // and should begin to shutdown due to the service connection closing.
+      // Swallow the exception here and let the shutdown logic elsewhere deal
+      // with cleaning up.
+      if (e.code == RPCErrorCodes.kServiceDisappeared) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
     @required Uri assetsDirectory,
@@ -414,7 +443,7 @@ extension FlutterVmService on vm_service.VmService {
     @required String uiIsolateId,
   }) async {
     assert(assetsDirectory != null);
-    await callMethod(kSetAssetBundlePathMethod,
+    await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, dynamic>{
         'viewId': viewId,
@@ -429,12 +458,15 @@ extension FlutterVmService on vm_service.VmService {
   Future<Map<String, Object>> getSkSLs({
     @required String viewId,
   }) async {
-    final vm_service.Response response = await callMethod(
+    final vm_service.Response response = await callMethodWrapper(
       kGetSkSLsMethod,
       args: <String, String>{
         'viewId': viewId,
       },
     );
+    if (response == null) {
+      return null;
+    }
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
@@ -444,7 +476,7 @@ extension FlutterVmService on vm_service.VmService {
   Future<void> flushUIThreadTasks({
     @required String uiIsolateId,
   }) async {
-    await callMethod(
+    await callMethodWrapper(
       kFlushUIThreadTasksMethod,
       args: <String, String>{
         'isolateId': uiIsolateId,
@@ -470,7 +502,7 @@ extension FlutterVmService on vm_service.VmService {
     final Future<void> onRunnable = onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
-    await callMethod(
+    await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
         'viewId': viewId,
@@ -714,8 +746,10 @@ extension FlutterVmService on vm_service.VmService {
       );
       return response.json;
     } on vm_service.RPCError catch (err) {
-      // If an application is not using the framework
-      if (err.code == RPCErrorCodes.kMethodNotFound) {
+      // If an application is not using the framework or the VM service
+      // disappears while handling a request, return null.
+      if ((err.code == RPCErrorCodes.kMethodNotFound)
+          || (err.code == RPCErrorCodes.kServiceDisappeared)) {
         return null;
       }
       rethrow;
@@ -733,9 +767,12 @@ extension FlutterVmService on vm_service.VmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
-      final vm_service.Response response = await callMethod(
+      final vm_service.Response response = await callMethodWrapper(
         kListViewsMethod,
       );
+      if (response == null) {
+        return null;
+      }
       final List<Object> rawViews = response.json['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[
         for (final Object rawView in rawViews)

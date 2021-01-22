@@ -6,7 +6,6 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';

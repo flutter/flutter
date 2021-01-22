@@ -676,6 +676,34 @@ class VerboseLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
+class PrefixedErrorLogger extends DelegatingLogger {
+  PrefixedErrorLogger(Logger parent) : super(parent);
+
+  @override
+  void printError(
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    if (message?.trim()?.isNotEmpty == true) {
+      message = 'ERROR: $message';
+    }
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+}
+
 enum _LogType { error, status, trace }
 
 typedef SlowWarningCallback = String Function();

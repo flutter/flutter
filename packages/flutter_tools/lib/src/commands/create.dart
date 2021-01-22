@@ -92,8 +92,8 @@ class CreateCommand extends CreateBase {
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
+        ? 'api.flutter.dev'
+        : 'master-api.flutter.dev';
 
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -310,6 +310,11 @@ In order to run your $application, type:
 
   \$ cd $relativeAppPath
   \$ flutter run
+
+To enable null safety, type:
+
+  \$ cd $relativeAppPath
+  \$ dart migrate --apply-changes
 
 Your $application code is in $relativeAppMain.
 ''');

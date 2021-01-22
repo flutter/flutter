@@ -15,6 +15,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
+import 'license_collector.dart';
 import 'project.dart';
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -224,7 +225,8 @@ class ManifestAssetBundle implements AssetBundle {
       primary: true,
     );
 
-    // Add fonts and assets from packages.
+    // Add fonts, assets, and licenses from packages.
+    final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
       if (packageUri != null && packageUri.scheme == 'file') {
@@ -237,6 +239,14 @@ class ManifestAssetBundle implements AssetBundle {
         if (packageFlutterManifest == null) {
           continue;
         }
+        // Collect any additional licenses from each package.
+        final List<File> licenseFiles = <File>[];
+        for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
+          final String absoluteLicensePath = _fileSystem.path.fromUri(package.root.resolve(relativeLicensePath));
+          licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+        }
+        additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
+
         // Skip the app itself
         if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
@@ -319,7 +329,12 @@ class ManifestAssetBundle implements AssetBundle {
 
     final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
-    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig);
+    final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
+    if (licenseResult.errorMessages.isNotEmpty) {
+      licenseResult.errorMessages.forEach(_logger.printError);
+      return 1;
+    }
+
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
@@ -719,108 +734,6 @@ class _Asset {
         ^ relativeUri.hashCode
         ^ entryUri.hashCode;
   }
-}
-
-/// Processes dependencies into a string representing the NOTICES file.
-///
-/// Reads the NOTICES or LICENSE file from each package in the .packages file,
-/// splitting each one into each component license so that it can be de-duped
-/// if possible. If the NOTICES file exists, it is preferred over the LICENSE
-/// file.
-///
-/// Individual licenses inside each LICENSE file should be separated by 80
-/// hyphens on their own on a line.
-///
-/// If a LICENSE or NOTICES file contains more than one component license,
-/// then each component license must start with the names of the packages to
-/// which the component license applies, with each package name on its own line
-/// and the list of package names separated from the actual license text by a
-/// blank line. The packages need not match the names of the pub package. For
-/// example, a package might itself contain code from multiple third-party
-/// sources, and might need to include a license for each one.
-class LicenseCollector {
-  LicenseCollector({
-    @required FileSystem fileSystem
-  }) : _fileSystem = fileSystem;
-
-  final FileSystem _fileSystem;
-
-  /// The expected separator for multiple licenses.
-  static final String licenseSeparator = '\n' + ('-' * 80) + '\n';
-
-  /// Obtain licenses from the `packageMap` into a single result.
-  LicenseResult obtainLicenses(
-    PackageConfig packageConfig,
-  ) {
-    final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
-    final Set<String> allPackages = <String>{};
-    final List<File> dependencies = <File>[];
-
-    for (final Package package in packageConfig.packages) {
-      final Uri packageUri = package.packageUriRoot;
-      if (packageUri == null || packageUri.scheme != 'file') {
-        continue;
-      }
-      // First check for NOTICES, then fallback to LICENSE
-      File file = _fileSystem.file(packageUri.resolve('../NOTICES'));
-      if (!file.existsSync()) {
-        file = _fileSystem.file(packageUri.resolve('../LICENSE'));
-      }
-      if (!file.existsSync()) {
-        continue;
-      }
-
-      dependencies.add(file);
-      final List<String> rawLicenses = file
-        .readAsStringSync()
-        .split(licenseSeparator);
-      for (final String rawLicense in rawLicenses) {
-        List<String> packageNames;
-        String licenseText;
-        if (rawLicenses.length > 1) {
-          final int split = rawLicense.indexOf('\n\n');
-          if (split >= 0) {
-            packageNames = rawLicense.substring(0, split).split('\n');
-            licenseText = rawLicense.substring(split + 2);
-          }
-        }
-        if (licenseText == null) {
-          packageNames = <String>[package.name];
-          licenseText = rawLicense;
-        }
-        packageLicenses.putIfAbsent(licenseText, () => <String>{})
-          .addAll(packageNames);
-        allPackages.addAll(packageNames);
-      }
-    }
-    final List<String> combinedLicensesList = packageLicenses.keys
-      .map<String>((String license) {
-        final List<String> packageNames = packageLicenses[license].toList()
-          ..sort();
-        return packageNames.join('\n') + '\n\n' + license;
-      }).toList();
-    combinedLicensesList.sort();
-    final String combinedLicenses = combinedLicensesList.join(licenseSeparator);
-
-    return LicenseResult(
-      combinedLicenses: combinedLicenses,
-      dependencies: dependencies,
-    );
-  }
-}
-
-/// The result of processing licenses with a [LicenseCollector].
-class LicenseResult {
-  const LicenseResult({
-    @required this.combinedLicenses,
-    @required this.dependencies,
-  });
-
-  /// The raw text of the consumed licenses.
-  final String combinedLicenses;
-
-  /// Each license file that was consumed as input.
-  final List<File> dependencies;
 }
 
 // Given an assets directory like this:

@@ -399,20 +399,30 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  ///  * [changedExternalState], which is called when the [Navigator] rebuilds.
+  ///  * [changedExternalState], which is called when the [Navigator] has
+  ///    updated in some manner that might affect the routes.
   @protected
   @mustCallSuper
   void changedInternalState() { }
 
-  /// Called whenever the [Navigator] has its widget rebuilt, to indicate that
-  /// the route may wish to rebuild as well.
+  /// Called whenever the [Navigator] has updated in some manner that might
+  /// affect routes, to indicate that the route may wish to rebuild as well.
   ///
-  /// This is called by the [Navigator] whenever the [NavigatorState]'s
-  /// [State.widget] changes, for example because the [MaterialApp] has been rebuilt.
-  /// This ensures that routes that directly refer to the state of the widget
-  /// that built the [MaterialApp] will be notified when that widget rebuilds,
-  /// since it would otherwise be difficult to notify the routes that state they
-  /// depend on may have changed.
+  /// This is called by the [Navigator] whenever the
+  /// [NavigatorState]'s [State.widget] changes (as in [State.didUpdateWidget]),
+  /// for example because the [MaterialApp] has been rebuilt. This
+  /// ensures that routes that directly refer to the state of the
+  /// widget that built the [MaterialApp] will be notified when that
+  /// widget rebuilds, since it would otherwise be difficult to notify
+  /// the routes that state they depend on may have changed.
+  ///
+  /// It is also called whenever the [Navigator]'s dependencies change
+  /// (as in [State.didChangeDependencies]). This allows routes to use the
+  /// [Navigator]'s context ([NavigatorState.context]), for example in
+  /// [ModalRoute.barrierColor], and update accordingly.
+  ///
+  /// The [ModalRoute] subclass overrides this to force the barrier
+  /// overlay to rebuild.
   ///
   /// See also:
   ///
@@ -454,10 +464,7 @@ abstract class Route<T> {
     return currentRouteEntry.route == this;
   }
 
-  /// Whether this route is the bottom-most route on the navigator.
-  ///
-  /// If this is true, then [Navigator.canPop] will return false if this route's
-  /// [willHandlePopInternally] returns false.
+  /// Whether this route is the bottom-most active route on the navigator.
   ///
   /// If [isFirst] and [isCurrent] are both true then this is the only route on
   /// the navigator (and [isActive] will also be true).
@@ -471,6 +478,20 @@ abstract class Route<T> {
     if (currentRouteEntry == null)
       return false;
     return currentRouteEntry.route == this;
+  }
+
+  /// Whether there is at least one active route underneath this route.
+  @protected
+  bool get hasActiveRouteBelow {
+    if (_navigator == null)
+      return false;
+    for (final _RouteEntry entry in _navigator!._history) {
+      if (entry.route == this)
+        return false;
+      if (_RouteEntry.isPresentPredicate(entry))
+        return true;
+    }
+    return false;
   }
 
   /// Whether this route is on the navigator.
@@ -3310,10 +3331,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void initState() {
     super.initState();
-    assert(
-      widget.pages.isEmpty || widget.onPopPage != null,
-      'The Navigator.onPopPage must be provided to use the Navigator.pages API',
-    );
+    assert((){
+      if (widget.pages != const <Page<dynamic>>[]) {
+        // This navigator uses page API.
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        } else if (widget.onPopPage == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.onPopPage must be provided to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+      }
+      return true;
+    }());
     for (final NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
@@ -3388,6 +3434,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
 
+    assert(
+      _history.isNotEmpty,
+      'All routes returned by onGenerateInitialRoutes are not restorable. '
+      'Please make sure that all routes returned by onGenerateInitialRoutes '
+      'have their RouteSettings defined with names that are defined in the '
+      'app\'s routes table.',
+    );
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     _flushHistoryUpdates();
@@ -3410,6 +3463,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.of(context));
+    for (final _RouteEntry entry in _history)
+      entry.route.changedExternalState();
   }
 
   void _updateHeroController(HeroController? newHeroController) {
@@ -3473,10 +3528,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(
-      widget.pages.isEmpty || widget.onPopPage != null,
-      'The Navigator.onPopPage must be provided to use the Navigator.pages API',
-    );
+    assert((){
+      if (widget.pages != const <Page<dynamic>>[]) {
+        // This navigator uses page API.
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        } else if (widget.onPopPage == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.onPopPage must be provided to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+      }
+      return true;
+    }());
     if (oldWidget.observers != widget.observers) {
       for (final NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;
@@ -3487,10 +3567,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages && !restorePending) {
-      assert(
-        widget.pages.isNotEmpty,
-        'To use the Navigator.pages, there must be at least one page in the list.'
-      );
+      assert((){
+        if (widget.pages.isEmpty) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'The Navigator.pages must not be empty to use the '
+                'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+        return true;
+      }());
       _updatePages();
     }
 

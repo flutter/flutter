@@ -3014,7 +3014,7 @@ class InputDecoration {
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///

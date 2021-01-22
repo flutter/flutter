@@ -312,6 +312,27 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: kGetSkSLsMethod, args: <String, Object>{
+          'viewId': '1234',
+        }, errorCode: RPCErrorCodes.kServiceDisappeared),
+        const FakeVmServiceRequest(method: kListViewsMethod, errorCode: RPCErrorCodes.kServiceDisappeared),
+      ]
+    );
+
+    final Map<String, Object> skSLs = await fakeVmServiceHost.vmService.getSkSLs(
+      viewId: '1234',
+    );
+    expect(skSLs, null);
+
+    final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
+    expect(views, null);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

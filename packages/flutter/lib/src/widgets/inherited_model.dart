@@ -4,8 +4,6 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// An [InheritedWidget] that's intended to be used as the base class for
