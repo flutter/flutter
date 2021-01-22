@@ -247,6 +247,14 @@ abstract class BindingBase {
       );
 
       registerStringServiceExtension(
+        name: 'connectedVmServiceUri',
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
+      );
+
+      registerStringServiceExtension(
         name: 'activeDevToolsServerAddress',
         getter: () async => activeDevToolsServerAddress ?? '',
         setter: (String serverAddress) async {
