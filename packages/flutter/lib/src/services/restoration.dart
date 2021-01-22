@@ -123,11 +123,12 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 ///      as soon as the user leaves it. This option should become available
 ///      when Developer Options are turned on for the device.
 ///   2. Run the code sample on an Android device.
-///   3. Tap the button to open the dialog.
-///   4. Background the Flutter app, then return to it, noting that the dialog
-///      remains open.
+///   3. Create some in-memory state in the app on the phone,
+///      e.g. by navigating to a different screen.
+///   4. Background the Flutter app, then return to it. It will restart
+///      and restore its state.
 ///
-/// To state restoration on iOS:
+/// To test state restoration on iOS:
 ///   1. Open `ios/Runner.xcworkspace/` in Xcode.
 ///   2. (iOS 14+ only): Switch to build in profile or release mode, as
 ///      launching an app from the home screen is not supported in debug

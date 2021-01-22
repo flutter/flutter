@@ -1243,7 +1243,7 @@ void main() {
 
     await tester.restoreFrom(restorationData);
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
