@@ -2859,6 +2859,24 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         'screenId': 'test-screen',
         'objectId': 'test-object-id',
       }));
+      expect(
+        node.toJsonMap(const DiagnosticsSerializationDelegate()),
+        equals(<String, dynamic>{
+          'description': 'description of the deep link',
+          'type': 'DevToolsDeepLinkProperty',
+          'name': '',
+          'style': 'singleLine',
+          'allowNameWrap': true,
+          'missingIfNull': false,
+          'propertyType': 'Map<String, String>',
+          'defaultLevel': 'info',
+          'value': {
+            'url': 'the-deep-link',
+            'screenId': 'test-screen',
+            'objectId': 'test-object-id'
+          }
+        }),
+      );
     });
   }
 }
