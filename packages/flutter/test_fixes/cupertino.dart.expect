@@ -9,6 +9,16 @@ void main() {
   const CupertinoTextThemeData themeData = CupertinoTextThemeData();
   themeData.copyWith();
 
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.dependOnInheritedElement(ancestor);
+  element.dependOnInheritedWidgetOfExactType<targetType>();
+  element.getElementForInheritedWidgetOfExactType<targetType>();
+  element.findAncestorWidgetOfExactType<targetType>();
+  element.findAncestorStateOfType<targetType>();
+  element.findRootAncestorStateOfType<targetType>();
+  element.findAncestorRenderObjectOfType<targetType>();
+
   // Changes made in https://github.com/flutter/flutter/pull/45941
   final WidgetsBinding binding = WidgetsBinding.instance!;
   binding.deferFirstFrame();

@@ -68,6 +68,12 @@ enum _ScaffoldSlot {
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
 ///
+/// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
+/// ScaffoldMessenger will only present a [SnackBar] to the root Scaffold of
+/// the subtree of Scaffolds. In order to show SnackBars in the inner, nested
+/// Scaffolds, set a new scope for your SnackBars by instantiating a new
+/// ScaffoldMessenger in between the levels of nesting.
+///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// Here is an example of showing a [SnackBar] when the user presses a button.
@@ -377,8 +383,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   void _updateScaffolds() {
     for (final ScaffoldState scaffold in _scaffolds) {
-      scaffold._updateSnackBar();
+      if (_isRoot(scaffold))
+        scaffold._updateSnackBar();
     }
+  }
+
+  // Nested Scaffolds are handled by the ScaffoldMessenger by only presenting a
+  // SnackBar in the root Scaffold of the nested set.
+  bool _isRoot(ScaffoldState scaffold) {
+    final ScaffoldState? parent = scaffold.context.findAncestorStateOfType<ScaffoldState>();
+    return parent == null || !_scaffolds.contains(parent);
   }
 
   /// Removes the current [SnackBar] (if any) immediately from registered

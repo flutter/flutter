@@ -72,4 +72,30 @@ void main() {
     await _flutterAttach.attach(_flutterRun.vmServicePort);
     await _flutterAttach.hotReload();
   });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutterRun.run(
+      startPaused: true,
+      withDebugger: true,
+    );
+    await _flutterRun.resume();
+    await pollForServiceExtensionValue(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      expectedValue: 'http://127.0.0.1:9100',
+    );
+
+    // Attach with a different DevTools server address.
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    await pollForServiceExtensionValue(
+      testDriver: _flutterAttach,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      expectedValue: 'http://127.0.0.1:9110',
+    );
+  });
 }
