@@ -19,6 +19,7 @@ export 'src/services/font_loader.dart';
 export 'src/services/haptic_feedback.dart';
 export 'src/services/hardware_keyboard.dart';
 export 'src/services/keyboard_key.dart';
+export 'src/services/keyboard_keys.dart';
 export 'src/services/keyboard_maps.dart';
 export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';

@@ -5,7 +5,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
+import 'keyboard_keys.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
