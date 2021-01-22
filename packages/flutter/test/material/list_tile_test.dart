@@ -1710,8 +1710,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: ListTileTheme(
-            tileColor: const Color(0xff00ff00),
-            selectedTileColor: const Color(0xffff0000),
+            tileColor: Colors.green.shade500,
+            selectedTileColor: Colors.red.shade500,
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
