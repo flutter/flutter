@@ -112,12 +112,10 @@ enum HeroFlightDirection {
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    return HeroAnimationRecipe(title: 'Hero Animation');
+///    return HeroAnimationRecipe();
 ///  }
 ///
 ///  class HeroAnimationRecipe extends StatefulWidget {
-///    HeroAnimationRecipe({Key key, this.title}) : super(key: key);
-///    final String title;
 ///
 ///    @override
 ///    _HeroAnimationRecipeState createState() => _HeroAnimationRecipeState();
@@ -145,7 +143,7 @@ enum HeroFlightDirection {
 ///    Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text(widget.title),
+///         title: Text('Hero Animation'),
 ///       ),
 ///       body: buildDemoWidget(context),
 ///     );
