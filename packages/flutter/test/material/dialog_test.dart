@@ -172,6 +172,24 @@ void main() {
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
+   testWidgets('Custom simpleDialog clipBehavior', (WidgetTester tester) async {
+    const SimpleDialog dialog = SimpleDialog(
+      title: Text('Simple Dialog'),
+      clipBehavior: Clip.antiAlias,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = tester.widget<Material>(
+      find.descendant(of: find.byType(SimpleDialog),
+      matching: find.byType(Material),
+      ),
+    );
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
