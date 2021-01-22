@@ -1110,19 +1110,21 @@ public class FlutterJNI {
    * @param loadingUnitId The loadingUnitId is assigned during compile time by gen_snapshot and is
    *     automatically retrieved when loadLibrary() is called on a dart deferred library. This is
    *     used to identify which Dart deferred library the resolved correspond to.
-   * @param sharedLibraryName File name of the .so file to be loaded, or if the file is not already
-   *     in LD_LIBRARY_PATH, the full path to the file. The .so files in the lib/[abi] directory are
-   *     already in LD_LIBRARY_PATH and in this case you only need to pass the file name.
+   * @param searchPaths An array of paths in which to look for valid dart shared libraries. This
+   *     supports paths within zipped apks as long as the apks are not compressed using the
+   *     `path/to/apk.apk!path/inside/apk/lib.so` format. Paths will be tried first to last and ends
+   *     when a library is sucessfully found. When the found library is invalid, no additional paths
+   *     will be attempted.
    */
   @UiThread
-  public void loadDartDeferredLibrary(int loadingUnitId, @NonNull String sharedLibraryName) {
+  public void loadDartDeferredLibrary(int loadingUnitId, @NonNull String[] searchPaths) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeLoadDartDeferredLibrary(nativeShellHolderId, loadingUnitId, sharedLibraryName);
+    nativeLoadDartDeferredLibrary(nativeShellHolderId, loadingUnitId, searchPaths);
   }
 
   private native void nativeLoadDartDeferredLibrary(
-      long nativeShellHolderId, int loadingUnitId, @NonNull String sharedLibraryName);
+      long nativeShellHolderId, int loadingUnitId, @NonNull String[] searchPaths);
 
   /**
    * Adds the specified AssetManager as an APKAssetResolver in the Flutter Engine's AssetManager.
