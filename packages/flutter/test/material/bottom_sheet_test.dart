@@ -726,6 +726,41 @@ void main() {
 
     expect(retrievedRouteSettings, routeSettings);
   });
+
+  testWidgets('showModalBottomSheet should move along on-screen keyboard',
+          (WidgetTester tester) async {
+    late BuildContext savedContext;
+
+    // Show a keyboard (simulate by space at the bottom of the screen).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200)),
+          child: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return Container();
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(tester.getBottomLeft(find.text('BottomSheet')).dy, 600);
+  });
 }
 
 class _TestPage extends StatelessWidget {
