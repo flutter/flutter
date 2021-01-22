@@ -737,10 +737,11 @@ void main() {
               onTap: () {
                 showModalBottomSheet<void>(
                   context: context,
+                  // The default duration and reverseDuration is 1 second
                   transitionAnimationController: AnimationController(
                     vsync: const TestVSync(),
                     duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2)
+                    reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
                     return Container(
@@ -763,11 +764,11 @@ void main() {
 
     expect(find.text('BottomSheet'), findsNothing);
 
-    await tester.tap(find.byKey(tapTarget)); //Opening Animation will starts after tapping
+    await tester.tap(find.byKey(tapTarget)); // Opening animation will start after tapping
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 2000));
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Tapping above the bottom sheet to dismiss it.
@@ -775,7 +776,12 @@ void main() {
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 2000));
+    // The bottom sheet should still be present at the very end of the animation.
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    // The bottom sheet should not be showing any longer.
     expect(find.text('BottomSheet'), findsNothing);
   });
 
@@ -790,10 +796,11 @@ void main() {
               onTap: () {
                 showBottomSheet<void>(
                   context: context,
+                  // The default duration and reverseDuration is 1 second
                   transitionAnimationController: AnimationController(
                     vsync: const TestVSync(),
                     duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2)
+                    reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
                     return Container(
@@ -824,7 +831,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 2000));
     expect(find.text('BottomSheet'), findsOneWidget);
 
     // Tapping button on the bottom sheet to dismiss it.
@@ -832,7 +839,12 @@ void main() {
     await tester.pump();
 
     expect(find.text('BottomSheet'), findsOneWidget);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 2000));
+    // The bottom sheet should still be present at the very end of the animation.
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    // The bottom sheet should not be showing any longer.
     expect(find.text('BottomSheet'), findsNothing);
   });
 }
