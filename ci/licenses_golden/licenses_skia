@@ -1,4 +1,4 @@
-Signature: 11111a59c83f474af5b3f0723bb41032
+Signature: 951e347e73b26c4ca35483bd1e5054f7
 
 UNUSED LICENSES:
 
@@ -7255,6 +7255,10 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC.
