@@ -791,7 +791,10 @@ extension FlutterVmService on vm_service.VmService {
     return getIsolate(isolateId)
       .catchError((dynamic error, StackTrace stackTrace) {
         return null;
-      }, test: (dynamic error) => error is vm_service.SentinelException);
+      }, test: (dynamic error) {
+        return (error is vm_service.SentinelException) ||
+          (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared);
+      });
   }
 
   /// Create a new development file system on the device.

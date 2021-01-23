@@ -333,6 +333,23 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'getIsolate', args: <String, Object>{
+          'isolateId': 'isolate/123',
+        }, errorCode: RPCErrorCodes.kServiceDisappeared),
+      ]
+    );
+
+    final vm_service.Isolate isolate = await fakeVmServiceHost.vmService.getIsolateOrNull(
+      'isolate/123',
+    );
+    expect(isolate, null);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
