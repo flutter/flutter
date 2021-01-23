@@ -64,6 +64,16 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 
 /// Signature for the builder callback used to decorate the dragging item in
 /// [ReorderableList] and [SliverReorderableList].
+///
+/// The [child] will be the item that is being dragged, and [index] is the
+/// position of the item in the list.
+///
+/// The [animation] will be driven from 0 to 1.0 while the item is being picked
+/// up during a drag operation, and reversed from 1.0 to 0 when the item is
+/// dropped. This can be used to animate properties of the proxy like an
+/// elevation or border.
+///
+/// The returned value will typically be the [child] wrapped in other widgets.
 typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Animation<double> animation);
 
 /// A scrolling container that allows the user to interactively reorder the
@@ -75,14 +85,13 @@ typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Ani
 /// It is up to the application to wrap each child (or an internal part of the
 /// child such as a drag handle) with a drag listener that will recognize
 /// the start of an item drag and then start the reorder by calling
-/// [ReorderableListState.startItemDragReorder].
+/// [ReorderableListState.startItemDragReorder]. This is most easily achieved
+/// by wrapping each child in a [ReorderableDragStartListener] or a
+/// [ReorderableDelayedDragStartListener]. These will take care of recognizing
+/// the start of a drag gesture and call the list state's
+/// [ReorderableListState.startDrag] method.
 ///
-/// This is most easily achieved by wrapping each child in a
-/// [ReorderableDragStartListener] or a [ReorderableDelayedDragStartListener].
-/// These will take care of recognizing the start of a drag gesture and call
-/// the list state's start item drag method.
-///
-/// This widget's [ReorderableListState] can be used manually start a item
+/// This widget's [ReorderableListState] can be used to manually start an item
 /// reorder, or cancel a current drag. To refer to the
 /// [ReorderableListState] either provide a [GlobalKey] or use the static
 /// [ReorderableList.of] method from an item's build method.
@@ -97,11 +106,11 @@ class ReorderableList extends StatefulWidget {
   /// Creates a scrolling container that allows the user to interactively
   /// reorder the list items.
   ///
-  /// [itemCount] must be greater than or equal to zero.
+  /// The [itemCount] must be greater than or equal to zero.
   const ReorderableList({
     Key? key,
     required this.itemBuilder,
-    this.itemCount = 0,
+    required this.itemCount,
     required this.onReorder,
     this.proxyDecorator,
     this.scrollDirection = Axis.vertical,
@@ -119,8 +128,8 @@ class ReorderableList extends StatefulWidget {
   /// List items are only built when they're scrolled into view.
   ///
   /// The [IndexedWidgetBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will equal to zero
-  /// and less than [itemCount]. All items in the list should have a
+  /// position in the list. The value of the index parameter will be between
+  /// zero and one less than [itemCount]. All items in the list must have a
   /// unique [Key], and should have some kind of listener to start the drag
   /// (usually a [ReorderableDragStartListener] or
   /// [ReorderableDelayedDragStartListener]).
@@ -138,7 +147,7 @@ class ReorderableList extends StatefulWidget {
   /// an item when it is being dragged.
   final ReorderItemProxyDecorator? proxyDecorator;
 
-  /// The axis along which the scroll view scrolls.
+  /// The axis along which the list of items scrolls.
   ///
   /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
@@ -157,8 +166,7 @@ class ReorderableList extends StatefulWidget {
   /// Defaults to false.
   final bool reverse;
 
-  /// An object that can be used to control the position to which this scroll
-  /// view is scrolled.
+  /// An object that can be used to control the scroll view's scroll offset.
   ///
   /// Must be null if [primary] is true.
   ///
@@ -211,11 +219,11 @@ class ReorderableList extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// This method is typically used by [ReorderableList] item widgets that insert
-  /// or remove items in response to user input.
+  /// This method is typically used by [ReorderableList] item widgets that
+  /// insert or remove items in response to user input.
   ///
-  /// If no [ReorderableList] surrounds the context given, then this function will
-  /// assert in debug mode and throw an exception in release mode.
+  /// If no [ReorderableList] surrounds the given context, then this function
+  /// will assert in debug mode and throw an exception in release mode.
   ///
   /// See also:
   ///
@@ -288,6 +296,8 @@ class ReorderableListState extends State<ReorderableList> {
   ///
   /// The given [recognizer] will be used to recognize and start the drag
   /// item tracking and lead to either an item reorder, or a cancelled drag.
+  /// The list will take ownership of the returned recognizer and will dispose
+  /// it when it is no longer needed.
   ///
   /// Most applications will not use this directly, but will wrap the item
   /// (or part of the item, like a drag handle) in either a
@@ -342,15 +352,14 @@ class ReorderableListState extends State<ReorderableList> {
 /// It is up to the application to wrap each child (or an internal part of the
 /// child) with a drag listener that will recognize the start of an item drag
 /// and then start the reorder by calling
-/// [SliverReorderableListState.startItemDragReorder].
-///
-/// This is most easily achieved by wrapping each child in a
-/// [ReorderableDragStartListener] or a [ReorderableDelayedDragStartListener].
-/// These will take care of recognizing the start of a drag gesture and call
-/// the list state's start item drag method.
+/// [SliverReorderableListState.startItemDragReorder]. This is most easily
+/// achieved by wrapping each child in a [ReorderableDragStartListener] or
+/// a [ReorderableDelayedDragStartListener]. These will take care of
+/// recognizing the start of a drag gesture and call the list state's start
+/// item drag method.
 ///
 /// This widget's [SliverReorderableListState] can be used to manually start an item
-/// reorder, or cancel a current drag. To refer to the
+/// reorder, or cancel a current drag that's already underway. To refer to the
 /// [SliverReorderableListState] either provide a [GlobalKey] or use the static
 /// [SliverReorderableList.of] method from an item's build method.
 ///
@@ -368,7 +377,7 @@ class SliverReorderableList extends StatefulWidget {
   const SliverReorderableList({
     Key? key,
     required this.itemBuilder,
-    this.itemCount = 0,
+    required this.itemCount,
     required this.onReorder,
     this.proxyDecorator,
   }) : assert(itemCount >= 0),
@@ -379,8 +388,8 @@ class SliverReorderableList extends StatefulWidget {
   /// List items are only built when they're scrolled into view.
   ///
   /// The [IndexedWidgetBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will equal to zero
-  /// and less than [itemCount]. All items in the list should have a
+  /// position in the list. The value of the index parameter will be between
+  /// zero and one less than [itemCount]. All items in the list should have a
   /// unique [Key], and should have some kind of listener to start the drag
   /// (usually a [ReorderableDragStartListener] or
   /// [ReorderableDelayedDragStartListener]).
@@ -475,6 +484,8 @@ class SliverReorderableList extends StatefulWidget {
 /// refer to their [SliverReorderableList] with the static
 /// [SliverReorderableList.of] method.
 class SliverReorderableListState extends State<SliverReorderableList> with TickerProviderStateMixin {
+  // Map of index -> child state used manage where the dragging item will need
+  // to be inserted.
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
 
   bool _reorderingDrag = false;
@@ -521,7 +532,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   /// Most applications will not use this directly, but will wrap the item
   /// (or part of the item, like a drag handle) in either a
   /// [ReorderableDragStartListener] or [ReorderableDelayedDragStartListener]
-  /// which call this for the application.
+  /// which call this method when they detect the gesture that triggers a drag
+  /// start.
   void startItemDragReorder({
     required int index,
     required PointerDownEvent event,
@@ -537,8 +549,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         _recognizer = recognizer
           ..onStart = _dragStart
           ..addPointer(event);
+      } else {
+        // TODO(darrenaustin): Can we handle this better, maybe scroll to the item?
+        throw Exception('Attempting to start a drag on a non-visible item');
       }
-      // TODO(darrenaustin): What to do if they ask to drag an item we haven't seen?
     });
   }
 
@@ -547,6 +561,9 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   /// This should be called before any major changes to the item list
   /// occur so that any item drags will not get confused by
   /// changes to the underlying list.
+  ///
+  /// If a drag operation is in progress, this will immediately reset
+  /// the list to back to its pre-drag state.
   ///
   /// If no drag is active, this will do nothing.
   void cancelReorder() {
@@ -565,6 +582,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   Drag? _dragStart(Offset position) {
+    assert(_reorderingDrag == false);
     final _ReorderableItemState item = _dragItem!;
 
     _insertIndex = item.index;
@@ -582,6 +600,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     );
 
     final OverlayState overlay = Overlay.of(context)!;
+    assert(_overlayEntry == null);
     _overlayEntry = OverlayEntry(builder: _dragInfo!.createProxy);
     overlay.insert(_overlayEntry!);
 
@@ -600,7 +619,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     setState(() {
       _overlayEntry?.markNeedsBuild();
       _dragUpdateItems();
-      _autoScroll();
+      _autoScrollIfNecessary();
     });
   }
 
@@ -612,18 +631,16 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     setState(() {
       if (_insertIndex! < widget.itemCount - 1) {
         // Find the location of the item we want to insert before
-        final RenderBox itemRenderBox =  _items[_insertIndex!]!.context.findRenderObject()! as RenderBox;
-        _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero);
+        _finalDropPosition = _itemOffsetAt(_insertIndex!);
       } else {
         // Inserting into the last spot on the list. If it's the only spot, put
         // it back where it was. Otherwise, grab the second to last and move
         // down by the gap.
         final int itemIndex = _items.length > 1 ? _insertIndex! - 1 : _insertIndex!;
-        final RenderBox itemRenderBox =  _items[itemIndex]!.context.findRenderObject()! as RenderBox;
         if (_reverse) {
-          _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) - _extentOffset(item.itemExtent, _scrollDirection);
+          _finalDropPosition = _itemOffsetAt(itemIndex) - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
-          _finalDropPosition = itemRenderBox.localToGlobal(Offset.zero) + _extentOffset(item.itemExtent, _scrollDirection);
+          _finalDropPosition = _itemOffsetAt(itemIndex) + _extentOffset(item.itemExtent, _scrollDirection);
         }
       }
     });
@@ -736,7 +753,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
-  Future<void> _autoScroll() async {
+  Future<void> _autoScrollIfNecessary() async {
     if (!_autoScrolling && _dragInfo != null && _dragInfo!.scrollable != null) {
       final ScrollPosition position = _dragInfo!.scrollable!.position;
       double? newOffset;
@@ -780,14 +797,15 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         _autoScrolling = false;
         if (_dragItem != null) {
           _dragUpdateItems();
-          _autoScroll();
+          _autoScrollIfNecessary();
         }
       }
     }
   }
 
-  SliverChildDelegate _createDelegate() {
-    return SliverChildBuilderDelegate(_itemBuilder, childCount: widget.itemCount + (_reorderingDrag ? 1 : 0));
+  Offset _itemOffsetAt(int index) {
+    final RenderBox itemRenderBox =  _items[index]!.context.findRenderObject()! as RenderBox;
+    return itemRenderBox.localToGlobal(Offset.zero);
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -814,7 +832,10 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     return SliverList(
-      delegate: _createDelegate(),
+      // When dragging, the dragged item is still in the list but has been replaced
+      // by a zero height SizedBox, so that the gap can move around. To make the
+      // list extent stable we add a dummy entry to the end.
+      delegate: SliverChildBuilderDelegate(_itemBuilder, childCount: widget.itemCount + (_reorderingDrag ? 1 : 0)),
     );
   }
 }
@@ -865,13 +886,14 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   @override
   void dispose() {
     _offsetAnimation?.dispose();
+    _listState._unregisterItem(index, this);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant _ReorderableItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.key != widget.key || oldWidget.index != widget.index) {
+    if (oldWidget.index != widget.index) {
       _listState._unregisterItem(oldWidget.index, this);
       _listState._registerItem(this);
     }
@@ -882,6 +904,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     if (_dragging) {
       return const SizedBox();
     }
+    _listState._registerItem(this);
     return Transform(
       transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
       child: widget.child,
@@ -914,7 +937,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
             vsync: _listState,
             duration: const Duration(milliseconds: 250),
           )
-            ..addListener(_update)
+            ..addListener(rebuild)
             ..addStatusListener((AnimationStatus status) {
               if (status == AnimationStatus.completed) {
                 _startOffset = _targetOffset;
@@ -934,7 +957,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
         }
         _startOffset = _targetOffset;
       }
-      _update();
+      rebuild();
     }
   }
 
@@ -945,7 +968,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     }
     _startOffset = Offset.zero;
     _targetOffset = Offset.zero;
-    _update();
+    rebuild();
   }
 
   Rect targetGeometry() {
@@ -954,16 +977,16 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     return itemPosition & itemRenderBox.size;
   }
 
-  void _update() {
+  void rebuild() {
     if (mounted) {
       setState(() {});
     }
   }
 }
 
-/// A wrapper widget that will recognize the start of a drag on a by a
-/// [PointerDownEvent], and immediately initiate dragging the wrapped
-/// item to a new location in a reorderable list.
+/// A wrapper widget that will recognize the start of a drag on the wrapped
+/// widget by a [PointerDownEvent], and immediately initiate dragging the
+/// wrapped item to a new location in a reorderable list.
 ///
 /// See also:
 ///
@@ -976,7 +999,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 ///  * [ReorderableListView], a material design list that allows the user to
 ///    reorder its items.
 class ReorderableDragStartListener extends StatelessWidget {
-  /// Creates a listener for an drag immediately following a pointer down
+  /// Creates a listener for a drag immediately following a pointer down
   /// event over the given child widget.
   ///
   /// This is most commonly used to wrap part of a list item like a drag
@@ -1008,14 +1031,8 @@ class ReorderableDragStartListener extends StatelessWidget {
   /// By default this returns an [ImmediateMultiDragGestureRecognizer] but
   /// subclasses can use this to customize the drag start gesture.
   @protected
-  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer({
-    Object? debugOwner,
-    PointerDeviceKind? kind,
-  }) {
-    return ImmediateMultiDragGestureRecognizer(
-      debugOwner: debugOwner,
-      kind: kind,
-    );
+  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer() {
+    return ImmediateMultiDragGestureRecognizer(debugOwner: this);
   }
 
   void _startDragging(BuildContext context, PointerDownEvent event) {
@@ -1023,7 +1040,7 @@ class ReorderableDragStartListener extends StatelessWidget {
     list?.startItemDragReorder(
         index: index,
         event: event,
-        recognizer: createRecognizer(debugOwner: this, kind: event.kind)
+        recognizer: createRecognizer()
     );
   }
 }
@@ -1055,14 +1072,8 @@ class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
   }) : super(key: key, child: child, index: index);
 
   @override
-  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer({
-    Object? debugOwner,
-    PointerDeviceKind? kind,
-  }) {
-    return DelayedMultiDragGestureRecognizer(
-      debugOwner: debugOwner,
-      kind: kind,
-    );
+  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer() {
+    return DelayedMultiDragGestureRecognizer(debugOwner: this);
   }
 }
 

@@ -31,7 +31,7 @@ import 'theme.dart';
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ```dart
-/// final List<int> items = List<int>.generate(50, (int index) => index);
+/// final List<int> _items = List<int>.generate(50, (int index) => index);
 ///
 /// Widget build(BuildContext context){
 ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -41,11 +41,11 @@ import 'theme.dart';
 ///   return ReorderableListView(
 ///     padding: const EdgeInsets.symmetric(horizontal: 40),
 ///     children: <Widget>[
-///       for (int index = 0; index < items.length; index++)
+///       for (int index = 0; index < _items.length; index++)
 ///         ListTile(
 ///           key: Key('$index'),
-///           tileColor: items[index].isOdd ? oddItemColor : evenItemColor,
-///           title: Text('Item ${items[index]}'),
+///           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+///           title: Text('Item ${_items[index]}'),
 ///         ),
 ///     ],
 ///     onReorder: (int oldIndex, int newIndex) {
@@ -53,8 +53,8 @@ import 'theme.dart';
 ///         if (oldIndex < newIndex) {
 ///           newIndex -= 1;
 ///         }
-///         final int item = items.removeAt(oldIndex);
-///         items.insert(newIndex, item);
+///         final int item = _items.removeAt(oldIndex);
+///         _items.insert(newIndex, item);
 ///       });
 ///     },
 ///   );
@@ -83,6 +83,7 @@ class ReorderableListView extends StatefulWidget {
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
        ),
+       assert(buildDefaultDragHandles != null),
        super(key: key);
 
   /// A non-reorderable header widget to show before the list.
@@ -143,7 +144,8 @@ class ReorderableListView extends StatefulWidget {
   /// To change the appearance or the layout of the drag handles, make
   /// this parameter false and wrap each list item, or a widget within
   /// each list item, with [ReorderableDragStartListener] or
-  /// [ReorderableDelayedDragStartListener].
+  /// [ReorderableDelayedDragStartListener], or a custom subclass
+  /// of [ReorderableDragStartListener].
   ///
   /// The following sample specifies `buildDefaultDragHandles: false`, and
   /// uses a [Card] at the leading edge of each item for the item's drag handle.
@@ -151,7 +153,7 @@ class ReorderableListView extends StatefulWidget {
   /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// ```dart
-  /// final List<int> items = List<int>.generate(50, (int index) => index);
+  /// final List<int> _items = List<int>.generate(50, (int index) => index);
   ///
   /// Widget build(BuildContext context){
   ///   final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -161,10 +163,10 @@ class ReorderableListView extends StatefulWidget {
   ///   return ReorderableListView(
   ///     buildDefaultDragHandles: false,
   ///     children: <Widget>[
-  ///       for (int index = 0; index < items.length; index++)
+  ///       for (int index = 0; index < _items.length; index++)
   ///         Container(
   ///           key: Key('$index'),
-  ///           color: items[index].isOdd ? oddItemColor : evenItemColor,
+  ///           color: _items[index].isOdd ? oddItemColor : evenItemColor,
   ///           child: Row(
   ///             children: <Widget>[
   ///               Container(
@@ -179,7 +181,7 @@ class ReorderableListView extends StatefulWidget {
   ///                   ),
   ///                 ),
   ///               ),
-  ///               Text('Item ${items[index]}'),
+  ///               Text('Item ${_items[index]}'),
   ///             ],
   ///           ),
   ///         ),
@@ -189,8 +191,8 @@ class ReorderableListView extends StatefulWidget {
   ///         if (oldIndex < newIndex) {
   ///           newIndex -= 1;
   ///         }
-  ///         final int item = items.removeAt(oldIndex);
-  ///         items.insert(newIndex, item);
+  ///         final int item = _items.removeAt(oldIndex);
+  ///         _items.insert(newIndex, item);
   ///       });
   ///     },
   ///   );
@@ -202,7 +204,7 @@ class ReorderableListView extends StatefulWidget {
   /// A callback that allows the app to add an animated decoration around
   /// an item when it is being dragged.
   ///
-  /// The this is null, a default decoration of a Material widget with
+  /// If this is null, a default decoration of a Material widget with
   /// an animated elevation will be used.
   final ReorderItemProxyDecorator? proxyDecorator;
 
@@ -210,6 +212,13 @@ class ReorderableListView extends StatefulWidget {
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
 
+// This top-level state manages an Overlay that contains the list and
+// also any items being dragged on top fo the list.
+//
+// The Overlay doesn't properly keep state by building new overlay entries,
+// and so we cache a single OverlayEntry for use as the list layer.
+// That overlay entry then builds a _ReorderableListContent which may
+// insert items being dragged into the Overlay above itself.
 class _ReorderableListViewState extends State<ReorderableListView> {
   // This entry contains the scrolling list itself.
   late OverlayEntry _listOverlayEntry;
@@ -231,13 +240,15 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           buildDefaultDragHandles: widget.buildDefaultDragHandles,
           proxyDecorator: widget.proxyDecorator,
         );
-      }
+      },
     );
   }
 
   @override
   void didUpdateWidget(ReorderableListView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // As this depends on pretty much everything, it
+    // is ok to mark this as dirty unconditionally.
     _listOverlayEntry.markNeedsBuild();
   }
 
@@ -323,8 +334,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
       semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
     }
 
-    // We pass toWrap with a GlobalKey into the Draggable so that when a list
-    // item gets dragged, the accessibility framework can preserve the selected
+    // We pass toWrap with a GlobalKey into the item so that when it
+    // gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
     //
     // We also apply the relevant custom accessibility actions for moving the item
@@ -339,7 +350,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
 
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.children[index];
-    assert(item.key != null);
 
     // TODO(goderbauer): The semantics stuff should probably happen inside
     //   _ReorderableItem so the widget versions can have them as well.
@@ -412,22 +422,26 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     final EdgeInsets padding = widget.padding ?? const EdgeInsets.all(0);
     late EdgeInsets outerPadding;
     late EdgeInsets listPadding;
-    if (widget.scrollDirection == Axis.vertical) {
-      if (widget.reverse) {
-        outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
-        listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
-      } else {
-        outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
-        listPadding = EdgeInsets.fromLTRB(0, 0, 0, padding.bottom);
-      }
-    } else {
-      if (widget.reverse) {
-        outerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
-        listPadding = EdgeInsets.fromLTRB(padding.left, 0, 0, 0);
-      } else {
-        outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
-        listPadding = EdgeInsets.fromLTRB(0, 0, padding.right, 0);
-      }
+    switch (widget.scrollDirection) {
+
+      case Axis.horizontal:
+        if (widget.reverse) {
+          outerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
+          listPadding = EdgeInsets.fromLTRB(padding.left, 0, 0, 0);
+        } else {
+          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, 0, padding.bottom);
+          listPadding = EdgeInsets.fromLTRB(0, 0, padding.right, 0);
+        }
+        break;
+      case Axis.vertical:
+        if (widget.reverse) {
+          outerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
+          listPadding = EdgeInsets.fromLTRB(0, padding.top, 0, 0);
+        } else {
+          outerPadding = EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0);
+          listPadding = EdgeInsets.fromLTRB(0, 0, 0, padding.bottom);
+        }
+        break;
     }
 
     return Padding(
