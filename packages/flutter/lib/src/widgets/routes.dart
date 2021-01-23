@@ -435,9 +435,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// top route should define the secondary animation transition for this bottom route
 /// and in that case it will delegate that transition
 mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
-
-  DelegatedTransitionsRoute<dynamic>? _nextRoute;
-
   /// {@macro flutter.widget.ModalRoute.buildTransitions}
   Widget buildTransitions(
     BuildContext context,
@@ -497,7 +494,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///    [secondaryAnimation] for the route below it runs from 1.0 to 0.0.
   ///  * `child`, the page contents from the previous route by
   ///     previous route's [buildPage].
-  Widget buildSecondaryAnimationTransitionForPreviousRoute(
+  Widget buildSecondaryTransitionForPreviousRoute(
     BuildContext context,
     Animation<double> secondaryAnimation,
     Widget child,
@@ -514,7 +511,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///
   /// If true, and `previousRoute.canTransitionTo()` is true, then the route
   /// [previousRoute] will delegate its `secondaryAnimation` transition to
-  /// this route's [buildSecondaryAnimationTransitionForPreviousRoute] method
+  /// this route's [buildSecondaryTransitionForPreviousRoute] method
   ///
   /// If false, [previousRoute]'s `secondaryAnimation` transition will be
   /// handled by default by [buildTransitions]
@@ -523,19 +520,34 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///
   /// See also:
   ///  * [canTransitionTo], which must be true for [previousRoute] for the
-  ///    [getSecondaryAnimationTransitionForPreviousRoute] `secondaryAnimation` to run.
+  ///    [buildSecondaryTransitionForPreviousRoute] `secondaryAnimation` to run.
   ///
-  ///  * [buildSecondaryAnimationTransitionForPreviousRoute], to define
+  ///  * [buildSecondaryTransitionForPreviousRoute], to define
   ///    [previousRoute]'s `secondaryAnimation` transition when this is true
-  bool handleSecondaryAnimationTransitionForPreviousRoute(Route<dynamic> previousRoute) => false;
+  bool canDriveSecondaryTransitionForPreviousRoute(Route<dynamic> previousRoute) => false;
 
+  List<DelegatedTransitionsRoute<dynamic>>? _nextRoutes;
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
-    if (nextRoute is DelegatedTransitionsRoute) {
-      _nextRoute = nextRoute;
+    if (nextRoute is DelegatedTransitionsRoute &&
+        nextRoute.canDriveSecondaryTransitionForPreviousRoute(this)) {
+      _nextRoutes ??= <DelegatedTransitionsRoute<dynamic>>[];
+      _nextRoutes!.add(nextRoute);
+
+      nextRoute.completed.then((dynamic value) {
+        _nextRoutes!.remove(nextRoute);
+      });
     }
     super.didChangeNext(nextRoute);
+  }
+
+  @override
+  void didReplace(Route<dynamic>? oldRoute) {
+    if (oldRoute is DelegatedTransitionsRoute && oldRoute._nextRoutes != null) {
+      _nextRoutes = List<DelegatedTransitionsRoute<dynamic>>.from(oldRoute._nextRoutes!);
+    }
+    super.didReplace(oldRoute);
   }
 
   Widget _buildProxyTransitions(
@@ -544,16 +556,19 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    // We remove the _nextRoute when has completed animating
-    if (secondaryAnimation.status == AnimationStatus.dismissed)
-        _nextRoute = null;
+    if (_nextRoutes != null && _nextRoutes!.isNotEmpty) {
+      Widget proxyChild = child;
+      for (final DelegatedTransitionsRoute<dynamic> nextRoute in _nextRoutes!) {
+        final ProxyAnimation secondaryAnimation = ProxyAnimation(nextRoute.animation!);
+        assert(!nextRoute._transitionCompleter.isCompleted,
+            'Cannot reuse a ${nextRoute.runtimeType} after disposing it.');
+        proxyChild =
+            nextRoute.buildSecondaryTransitionForPreviousRoute(context, secondaryAnimation, child);
+      }
 
-    if (_nextRoute != null && _nextRoute!.handleSecondaryAnimationTransitionForPreviousRoute(this)) {
-      assert(!_nextRoute!._transitionCompleter.isCompleted, 'Cannot reuse a ${_nextRoute!.runtimeType} after disposing it.');
       final ProxyAnimation proxySecondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
-      final Widget proxyChild = _nextRoute!.buildSecondaryAnimationTransitionForPreviousRoute(context, secondaryAnimation, child);
       return buildTransitions(context, animation, proxySecondaryAnimation, proxyChild);
-    } else {
+    } else { 
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
   }
@@ -942,7 +957,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: AnimatedBuilder(
                           animation: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
+                            return widget.route._buildProxyTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,

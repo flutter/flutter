@@ -2034,7 +2034,7 @@ Widget buildNavigator({
   );
 }
 
-typedef RouteSecondaryAnimationTransitionBuilder = Widget Function(
+typedef RouteSecondaryTransitionBuilder = Widget Function(
     BuildContext context, Animation<double> secondaryAnimation, Widget child);
 
 // Uses the same `secondaryAnimation` transition defined in [transitionsBuilder]
@@ -2055,15 +2055,15 @@ class MockDelegateTransitionRoute<T> extends PageRouteBuilder<T> {
           transitionsBuilder: transitionsBuilder,
         );
 
-  final RouteSecondaryAnimationTransitionBuilder secondaryTransitionBuilder;
+  final RouteSecondaryTransitionBuilder secondaryTransitionBuilder;
 
   @override
-  bool handleSecondaryAnimationTransitionForPreviousRoute(Route<dynamic> previousRoute) {
+  bool canDriveSecondaryTransitionForPreviousRoute(Route<dynamic> previousRoute) {
     return true;
   }
 
   @override
-  Widget buildSecondaryAnimationTransitionForPreviousRoute(
+  Widget buildSecondaryTransitionForPreviousRoute(
       BuildContext context, Animation<double> secondaryAnimation, Widget child) {
     return secondaryTransitionBuilder(context, secondaryAnimation, child);
   }
