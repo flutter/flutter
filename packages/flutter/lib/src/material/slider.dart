@@ -151,6 +151,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.precision,
     this.label,
     this.activeColor,
     this.inactiveColor,
@@ -187,6 +188,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.precision,
     this.label,
     this.mouseCursor,
     this.activeColor,
@@ -336,6 +338,9 @@ class Slider extends StatefulWidget {
   ///
   /// If null, the slider is continuous.
   final int? divisions;
+
+  /// Precision for the value of slider.
+  final int? precision;
 
   /// A label to show above the slider when the slider is active.
   ///
@@ -534,9 +539,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  double _learpPrecision(double value){
+    return double.parse(value.toStringAsFixed(widget.precision!));
+  }
+
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    final double lerpValue = _lerp(value);
+    double lerpValue = _lerp(value);
+    if(widget.precision!=null){
+      lerpValue = _learpPrecision(lerpValue);
+    }
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
     }
