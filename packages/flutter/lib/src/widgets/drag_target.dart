@@ -69,7 +69,7 @@ typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
 /// Signature for the strategy that determines the drag start point.
 ///
 /// Used for the injectable [Draggable.dragAnchorStrategy] and
-/// [_defaultDragAnchorStrategy]
+/// [defaultDragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
 /// The default implementation of the strategy to determine the Offset for the
@@ -288,7 +288,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   final DragAnchor dragAnchor;
 
   /// An optional injectable strategy that overrides the
-  /// [_defaultDragAnchorStrategy] and is used to determine how this widget
+  /// [defaultDragAnchorStrategy] and is used to determine how this widget
   /// should be anchored during a drag. When a custom [dragAnchorStrategy] is
   /// injected it is asserted that the [dragAnchor] is custom, to prevent any
   /// surprises.
