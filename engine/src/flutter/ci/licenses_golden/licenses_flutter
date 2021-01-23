@@ -917,6 +917,8 @@ FILE: ../../../flutter/shell/platform/common/cpp/engine_switches_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate.cc
 FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate.h
 FILE: ../../../flutter/shell/platform/common/cpp/flutter_platform_node_delegate_unittests.cc
+FILE: ../../../flutter/shell/platform/common/cpp/geometry.h
+FILE: ../../../flutter/shell/platform/common/cpp/geometry_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/incoming_message_dispatcher.cc
 FILE: ../../../flutter/shell/platform/common/cpp/incoming_message_dispatcher.h
 FILE: ../../../flutter/shell/platform/common/cpp/json_message_codec.cc
@@ -1496,6 +1498,7 @@ FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
+FILE: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils.cc
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils.h
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils_unittests.cc
