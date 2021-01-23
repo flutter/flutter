@@ -1,4 +1,4 @@
-Signature: 5e51085f4208a0df4de78a69dc1cfbae
+Signature: 4f84e13df37f11d0f54513e91f0ae07e
 
 UNUSED LICENSES:
 
@@ -5460,6 +5460,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
 FILE: ../../../third_party/skia/gm/crbug_1167277.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
+FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
