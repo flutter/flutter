@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
@@ -21,12 +22,9 @@ void main() {
 
   setUp(() {
     androidWorkflow = AndroidWorkflow(
-      platform: FakePlatform(),
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -35,12 +33,9 @@ void main() {
       androidSdk: FakeAndroidSdk(null),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(),
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -57,12 +52,9 @@ void main() {
       androidSdk: null,
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(),
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -100,14 +92,11 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(),
         androidSdk: FakeAndroidSdk(),
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),

@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -76,12 +75,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -102,12 +98,9 @@ void main() {
         ]),
         androidSdk: null,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: null,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -140,12 +133,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -185,12 +175,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -225,12 +212,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -267,12 +251,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
@@ -312,12 +293,9 @@ void main() {
         ]),
         androidSdk: mockSdk,
         androidWorkflow: AndroidWorkflow(
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          fileSystem: MemoryFileSystem.test(),
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();

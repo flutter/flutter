@@ -42,24 +42,16 @@ final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required FileSystem fileSystem,
     @required AndroidSdk androidSdk,
     @required FeatureFlags featureFlags,
-  }) : _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
-       _androidSdk = androidSdk,
-       _featureFlags = featureFlags;
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) : _androidSdk = androidSdk,
+       _featureFlags = featureFlags,
+       _operatingSystemUtils = operatingSystemUtils;
 
-  final OperatingSystemUtils _operatingSystemUtils;
   final AndroidSdk _androidSdk;
   final FeatureFlags _featureFlags;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled

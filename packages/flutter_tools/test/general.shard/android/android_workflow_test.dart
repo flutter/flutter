@@ -46,12 +46,9 @@ void main() {
 
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
-      platform: FakePlatform(),
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(),
       androidSdk: null,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(androidWorkflow.canLaunchDevices, false);
@@ -63,12 +60,9 @@ void main() {
     final MockAndroidSdk androidSdk = MockAndroidSdk();
     when(androidSdk.adbPath).thenReturn(null);
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
-      platform: FakePlatform(),
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
       featureFlags: TestFeatureFlags(),
       androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(androidWorkflow.canLaunchDevices, false);
