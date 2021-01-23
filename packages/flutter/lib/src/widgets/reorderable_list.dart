@@ -89,7 +89,7 @@ typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Ani
 /// by wrapping each child in a [ReorderableDragStartListener] or a
 /// [ReorderableDelayedDragStartListener]. These will take care of recognizing
 /// the start of a drag gesture and call the list state's
-/// [ReorderableListState.startDrag] method.
+/// [ReorderableListState.startItemDragReorder] method.
 ///
 /// This widget's [ReorderableListState] can be used to manually start an item
 /// reorder, or cancel a current drag. To refer to the
