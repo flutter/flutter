@@ -124,7 +124,10 @@ source_set("common_cpp") {
 # embedding is futher along and it's clearer how much, if any, shared
 # API surface there will be.
 source_set("common_cpp_core") {
-  public = [ "path_utils.h" ]
+  public = [
+    "geometry.h",
+    "path_utils.h",
+  ]
 
   sources = [ "path_utils.cc" ]
 
@@ -160,6 +163,7 @@ if (enable_unittests) {
 
     sources = [
       "engine_switches_unittests.cc",
+      "geometry_unittests.cc",
       "json_message_codec_unittests.cc",
       "json_method_codec_unittests.cc",
       "text_input_model_unittests.cc",

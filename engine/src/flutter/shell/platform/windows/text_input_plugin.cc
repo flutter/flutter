@@ -10,12 +10,16 @@
 #include <iostream>
 
 #include "flutter/shell/platform/common/cpp/json_method_codec.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kClearClientMethod[] = "TextInput.clearClient";
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
 static constexpr char kShowMethod[] = "TextInput.show";
 static constexpr char kHideMethod[] = "TextInput.hide";
+static constexpr char kSetMarkedTextRect[] = "TextInput.setMarkedTextRect";
+static constexpr char kSetEditableSizeAndTransform[] =
+    "TextInput.setEditableSizeAndTransform";
 
 static constexpr char kMultilineInputType[] = "TextInputType.multiline";
 
@@ -34,6 +38,11 @@ static constexpr char kSelectionBaseKey[] = "selectionBase";
 static constexpr char kSelectionExtentKey[] = "selectionExtent";
 static constexpr char kSelectionIsDirectionalKey[] = "selectionIsDirectional";
 static constexpr char kTextKey[] = "text";
+static constexpr char kXKey[] = "x";
+static constexpr char kYKey[] = "y";
+static constexpr char kWidthKey[] = "width";
+static constexpr char kHeightKey[] = "height";
+static constexpr char kTransformKey[] = "transform";
 
 static constexpr char kChannelName[] = "flutter/textinput";
 
@@ -73,11 +82,13 @@ void TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
   }
 }
 
-TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger)
+TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
+                                 TextInputPluginDelegate* delegate)
     : channel_(std::make_unique<flutter::MethodChannel<rapidjson::Document>>(
           messenger,
           kChannelName,
           &flutter::JsonMethodCodec::GetInstance())),
+      delegate_(delegate),
       active_model_(nullptr) {
   channel_->SetMethodCallHandler(
       [this](
@@ -171,6 +182,54 @@ void TextInputPlugin::HandleMethodCall(
     }
     active_model_->SetText(text->value.GetString());
     active_model_->SetSelection(TextRange(base, extent));
+  } else if (method.compare(kSetMarkedTextRect) == 0) {
+    if (!method_call.arguments() || method_call.arguments()->IsNull()) {
+      result->Error(kBadArgumentError, "Method invoked without args");
+      return;
+    }
+    const rapidjson::Document& args = *method_call.arguments();
+    auto x = args.FindMember(kXKey);
+    auto y = args.FindMember(kYKey);
+    auto width = args.FindMember(kWidthKey);
+    auto height = args.FindMember(kHeightKey);
+    if (x == args.MemberEnd() || x->value.IsNull() ||          //
+        y == args.MemberEnd() || y->value.IsNull() ||          //
+        width == args.MemberEnd() || width->value.IsNull() ||  //
+        height == args.MemberEnd() || height->value.IsNull()) {
+      result->Error(kInternalConsistencyError,
+                    "Composing rect values invalid.");
+      return;
+    }
+    composing_rect_ = {{x->value.GetDouble(), y->value.GetDouble()},
+                       {width->value.GetDouble(), height->value.GetDouble()}};
+
+    Rect transformed_rect = GetCursorRect();
+    delegate_->OnCursorRectUpdated(transformed_rect);
+  } else if (method.compare(kSetEditableSizeAndTransform) == 0) {
+    if (!method_call.arguments() || method_call.arguments()->IsNull()) {
+      result->Error(kBadArgumentError, "Method invoked without args");
+      return;
+    }
+    const rapidjson::Document& args = *method_call.arguments();
+    auto transform = args.FindMember(kTransformKey);
+    if (transform == args.MemberEnd() || transform->value.IsNull() ||
+        !transform->value.IsArray() || transform->value.Size() != 16) {
+      result->Error(kInternalConsistencyError,
+                    "EditableText transform invalid.");
+      return;
+    }
+    size_t i = 0;
+    for (auto& entry : transform->value.GetArray()) {
+      if (entry.IsNull()) {
+        result->Error(kInternalConsistencyError,
+                      "EditableText transform contains null value.");
+        return;
+      }
+      editabletext_transform_[i / 4][i % 4] = entry.GetDouble();
+      ++i;
+    }
+    Rect transformed_rect = GetCursorRect();
+    delegate_->OnCursorRectUpdated(transformed_rect);
   } else {
     result->NotImplemented();
     return;
@@ -178,6 +237,17 @@ void TextInputPlugin::HandleMethodCall(
   // All error conditions return early, so if nothing has gone wrong indicate
   // success.
   result->Success();
+}
+
+Rect TextInputPlugin::GetCursorRect() const {
+  Point transformed_point = {
+      composing_rect_.left() * editabletext_transform_[0][0] +
+          composing_rect_.top() * editabletext_transform_[1][0] +
+          editabletext_transform_[3][0] + composing_rect_.width(),
+      composing_rect_.left() * editabletext_transform_[0][1] +
+          composing_rect_.top() * editabletext_transform_[1][1] +
+          editabletext_transform_[3][1] + composing_rect_.height()};
+  return {transformed_point, composing_rect_.size()};
 }
 
 void TextInputPlugin::SendStateUpdate(const TextInputModel& model) {

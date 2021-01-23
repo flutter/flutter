@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
+#include "flutter/shell/platform/common/cpp/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
@@ -22,6 +23,7 @@
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/window_state.h"
@@ -33,7 +35,8 @@ inline constexpr uint32_t kWindowFrameBufferID = 0;
 
 // An OS-windowing neutral abstration for flutter
 // view that works with win32 hwnds and Windows::UI::Composition visuals.
-class FlutterWindowsView : public WindowBindingHandlerDelegate {
+class FlutterWindowsView : public WindowBindingHandlerDelegate,
+                           public TextInputPluginDelegate {
  public:
   // Creates a FlutterWindowsView with the given implementator of
   // WindowBindingHandler.
@@ -105,6 +108,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                 double delta_x,
                 double delta_y,
                 int scroll_offset_multiplier) override;
+
+  // |TextInputPluginDelegate|
+  void OnCursorRectUpdated(const Rect& rect) override;
 
  private:
   // Struct holding the mouse state. The engine doesn't keep track of which
