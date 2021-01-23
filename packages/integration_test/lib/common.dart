@@ -106,48 +106,21 @@ class Response {
   }
 }
 
-/// Represents the result of running a test.
-class TestResult {
-  TestResult._(this.methodName);
+/// Representing a failure includes the method name and the failure details.
+class Failure {
+  /// Constructor requiring all fields during initialization.
+  Failure(this.methodName, this.details);
 
   /// The name of the test method which failed.
   final String methodName;
-}
 
-/// Represents successful execution of a test.
-class Success extends TestResult {
-  /// Constructor requiring all fields during initialization.
-  Success(String methodName) : super._(methodName);
-}
-
-/// Represents a test failure.
-class Failure extends TestResult {
-  /// Constructor requiring all fields during initialization.
-  ///
-  /// If [error] is passed, [errors] will be ignored.
-  Failure(String methodName, String details, {
-    Object error,
-    List<AsyncError> errors,
-  }) :
-    errors = error != null
-      ? <AsyncError>[AsyncError(error, StackTrace.fromString(details))]
-      : errors ?? <AsyncError>[],
-    super._(methodName);
-
-  /// Errors that were thrown during the test.
-  final List<AsyncError> errors;
-
-  /// The first error that was thrown during the test.
-  Object get error => errors.isEmpty ? null : errors.first.error;
-
-  /// The details of the first failure such as stack trace.
-  String get details => errors.isEmpty ? null : errors.first.stackTrace.toString();
+  /// The details of the failure such as stack trace.
+  final String details;
 
   /// Serializes the object to JSON.
   String toJson() {
     return json.encode(<String, String>{
       'methodName': methodName,
-      'error': error.toString(),
       'details': details,
     });
   }

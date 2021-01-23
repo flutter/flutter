@@ -33,12 +33,6 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
       },
       {
-         "name":"Linux build_gallery",
-         "repo":"flutter",
-         "task_name":"linux_build_gallery",
-         "enabled":true
-      },
-      {
          "name":"Linux framework_tests",
          "repo":"flutter",
          "task_name":"linux_framework_tests",
@@ -68,6 +62,13 @@
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
          "enabled":true
+      },
+      {
+        "name":"Linux gradle_desugar_classes_test",
+        "repo":"flutter",
+        "task_name":"linux_gradle_desugar_classes_test",
+        "enabled":true,
+        "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Linux gradle_non_android_plugin_test",
@@ -198,7 +199,7 @@
          "name":"Mac build_ios_framework_module_test",
          "repo":"flutter",
          "task_name":"mac_build_ios_framework_module_test",
-         "enabled":false,
+         "enabled":true,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
@@ -211,12 +212,6 @@
          "name":"Mac customer_testing",
          "repo":"flutter",
          "task_name":"mac_customer_testing",
-         "enabled":true
-      },
-      {
-         "name":"Mac build_gallery",
-         "repo":"flutter",
-         "task_name":"mac_build_gallery",
          "enabled":true
       },
       {
@@ -279,7 +274,7 @@
          "name":"Mac module_test_ios",
          "repo":"flutter",
          "task_name":"mac_module_test_ios",
-         "enabled":false,
+         "enabled":true,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
@@ -293,7 +288,7 @@
          "name":"Mac plugin_test",
          "repo":"flutter",
          "task_name":"mac_plugin_lint_mac",
-         "enabled":false,
+         "enabled":true,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
