@@ -218,6 +218,7 @@ abstract class Artifacts {
       fileSystem: globals.fs,
       processManager: globals.processManager,
       platform: globals.platform,
+      operatingSystemUtils: globals.os,
     );
   }
 
@@ -244,13 +245,16 @@ class CachedArtifacts implements Artifacts {
     @required FileSystem fileSystem,
     @required Platform platform,
     @required Cache cache,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _fileSystem = fileSystem,
        _platform = platform,
-       _cache = cache;
+       _cache = cache,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final Cache _cache;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   String getArtifactPath(
@@ -278,7 +282,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       default: // could be null, but that can't be specified as a case.
-        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform), mode);
+        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
     }
   }
 
@@ -294,7 +298,7 @@ class CachedArtifacts implements Artifacts {
       final String engineDir = _getEngineArtifactsPath(platform, mode);
       return _fileSystem.path.join(engineDir, _artifactToFileName(artifact));
     }
-    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform), mode);
+    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform, _operatingSystemUtils), mode);
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -517,18 +521,11 @@ class CachedArtifacts implements Artifacts {
   bool get isLocalEngine => false;
 }
 
-TargetPlatform _currentHostPlatform(Platform platform) {
+TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils operatingSystemUtils) {
   if (platform.isMacOS) {
     return TargetPlatform.darwin_x64;
   }
   if (platform.isLinux) {
-    final OperatingSystemUtils operatingSystemUtils =
-        OperatingSystemUtils(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            platform: platform,
-            processManager: globals.processManager,
-        );
     return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 ?
              TargetPlatform.linux_x64 : TargetPlatform.linux_arm64;
   }
@@ -579,10 +576,12 @@ class LocalEngineArtifacts implements Artifacts {
     @required Cache cache,
     @required ProcessManager processManager,
     @required Platform platform,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _fileSystem = fileSystem,
        _cache = cache,
        _processManager = processManager,
-       _platform = platform;
+       _platform = platform,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final String engineOutPath; // TODO(goderbauer): This should be private.
   final String _hostEngineOutPath;
@@ -590,6 +589,7 @@ class LocalEngineArtifacts implements Artifacts {
   final Cache _cache;
   final ProcessManager _processManager;
   final Platform _platform;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   String getArtifactPath(
@@ -598,7 +598,7 @@ class LocalEngineArtifacts implements Artifacts {
     BuildMode mode,
     EnvironmentType environmentType,
   }) {
-    platform ??= _currentHostPlatform(_platform);
+    platform ??= _currentHostPlatform(_platform, _operatingSystemUtils);
     final bool isDirectoryArtifact = artifact == Artifact.flutterWebSdk || artifact == Artifact.flutterPatchedSdkPath;
     final String artifactFileName = isDirectoryArtifact ? null : _artifactToFileName(artifact, platform, mode);
     switch (artifact) {

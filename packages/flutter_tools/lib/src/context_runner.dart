@@ -116,6 +116,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
+        operatingSystemUtils: globals.os,
       ),
       AssetBundleFactory: () {
         return AssetBundleFactory.defaultInstance(

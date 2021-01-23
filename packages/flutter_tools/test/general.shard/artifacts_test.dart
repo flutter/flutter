@@ -38,6 +38,7 @@ void main() {
         fileSystem: fileSystem,
         cache: cache,
         platform: platform,
+        operatingSystemUtils: MockOperatingSystemUtils(),
       );
     });
 
@@ -190,6 +191,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: FakeProcessManager.any(),
+        operatingSystemUtils: MockOperatingSystemUtils(),
       );
     });
 
@@ -300,6 +302,7 @@ void main() {
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
         processManager: FakeProcessManager.any(),
+        operatingSystemUtils: MockOperatingSystemUtils(hostPlatform: HostPlatform.windows_x64),
       );
 
       expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
@@ -311,4 +314,13 @@ void main() {
   });
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  MockOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
+}
