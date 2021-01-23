@@ -435,12 +435,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 /// top route should define the secondary animation transition for this bottom route
 /// and in that case it will delegate that transition
 mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
-<<<<<<< HEAD
-=======
-
-  DelegatedTransitionsRoute<dynamic>? _nextRoute;
-
->>>>>>> Fix trailing space
   /// {@macro flutter.widget.ModalRoute.buildTransitions}
   Widget buildTransitions(
     BuildContext context,
@@ -487,14 +481,6 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///   ).animate(secondaryAnimation),
   ///   child: child,
   /// );
-<<<<<<< HEAD
-=======
-  /// ```
-  ///
-  /// In practice this method is used pretty rarely.
-  ///
-  /// The arguments to this method are as follows:
->>>>>>> Fix trailing space
   ///
   ///  * `context`: The context in which the route is being built.
   ///  * [secondaryAnimation]: When the Navigator pushes this route
@@ -520,11 +506,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///
   /// If true, and `previousRoute.canTransitionTo()` is true, then the route
   /// [previousRoute] will delegate its `secondaryAnimation` transition to
-<<<<<<< HEAD
   /// this route's [buildSecondaryTransitionForPreviousRoute] method
-=======
-  /// this route's [buildSecondaryAnimationTransitionForPreviousRoute] method
->>>>>>> Fix trailing space
   ///
   /// If false, [previousRoute]'s `secondaryAnimation` transition will be
   /// handled by default by [buildTransitions]
@@ -535,11 +517,7 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
   ///  * [canTransitionTo], which must be true for [previousRoute] for the
   ///    [buildSecondaryTransitionForPreviousRoute] `secondaryAnimation` to run.
   ///
-<<<<<<< HEAD
   ///  * [buildSecondaryTransitionForPreviousRoute], to define
-=======
-  ///  * [buildSecondaryAnimationTransitionForPreviousRoute], to define
->>>>>>> Fix trailing space
   ///    [previousRoute]'s `secondaryAnimation` transition when this is true
   bool canDriveSecondaryTransitionForPreviousRoute(Route<dynamic> previousRoute) => false;
 
@@ -573,7 +551,6 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-<<<<<<< HEAD
     if (_nextRoutes != null && _nextRoutes!.isNotEmpty) {
       Widget proxyChild = child;
       for (final DelegatedTransitionsRoute<dynamic> nextRoute in _nextRoutes!) {
@@ -585,16 +562,6 @@ mixin DelegatedTransitionsRoute<T> on TransitionRoute<T> {
       }
 
       final ProxyAnimation proxySecondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
-=======
-    // We remove the _nextRoute when has completed animating
-    if (secondaryAnimation.status == AnimationStatus.dismissed)
-        _nextRoute = null;
-
-    if (_nextRoute != null && _nextRoute!.handleSecondaryAnimationTransitionForPreviousRoute(this)) {
-      assert(!_nextRoute!._transitionCompleter.isCompleted, 'Cannot reuse a ${_nextRoute!.runtimeType} after disposing it.');
-      final ProxyAnimation proxySecondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
-      final Widget proxyChild = _nextRoute!.buildSecondaryAnimationTransitionForPreviousRoute(context, secondaryAnimation, child);
->>>>>>> Fix trailing space
       return buildTransitions(context, animation, proxySecondaryAnimation, proxyChild);
     } else { 
       return buildTransitions(context, animation, secondaryAnimation, child);
