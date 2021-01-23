@@ -125,9 +125,9 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir,
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
-        '-D_FLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
+        '-DFLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
         if (targetPlatform == TargetPlatform.linux_arm64)
-          '-D_FLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
+          '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
         if (targetPlatform == TargetPlatform.linux_arm64)
           '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
         if (targetPlatform == TargetPlatform.linux_arm64)

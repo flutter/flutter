@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -15,11 +18,13 @@ import 'build.dart';
 
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
-  BuildLinuxCommand({ bool verboseHelp = false }) {
+  BuildLinuxCommand({
+    @required OperatingSystemUtils operatingSystemUtils,
+    bool verboseHelp = false,
+  }) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    final HostPlatform hostPlatform = getCurrentHostPlatform();
     final String defaultTargetPlatform =
-        (hostPlatform == HostPlatform.linux_arm64) ?
+        (operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
             'linux-arm64' : 'linux-x64';
     argParser.addOption('target-platform',
       defaultsTo: defaultTargetPlatform,

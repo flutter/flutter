@@ -67,16 +67,20 @@ void main() {
   }
 
   // Returns the command matching the build_linux call to cmake.
-  FakeCommand cmakeCommand(String buildMode, {void Function() onRun}) {
+  FakeCommand cmakeCommand(String buildMode, {
+    String target = 'x64',
+    void Function() onRun,
+  }) {
     return FakeCommand(
       command: <String>[
         'cmake',
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
+        '-DFLUTTER_TARGET_PLATFORM=linux-$target',
         '/linux',
       ],
-      workingDirectory: 'build/linux/$buildMode',
+      workingDirectory: 'build/linux/$target/$buildMode',
       onRun: onRun,
     );
   }
@@ -84,6 +88,7 @@ void main() {
   // Returns the command matching the build_linux call to ninja.
   FakeCommand ninjaCommand(String buildMode, {
     Map<String, String> environment,
+    String target = 'x64',
     void Function() onRun,
     String stdout = '',
   }) {
@@ -91,7 +96,7 @@ void main() {
       command: <String>[
         'ninja',
         '-C',
-        'build/linux/$buildMode',
+        'build/linux/$target/$buildMode',
         'install',
       ],
       environment: environment,
@@ -216,7 +221,7 @@ void main() {
     // This contains a mix of routine build output and various types of errors
     // (Dart error, compile error, link error), edited down for compactness.
     const String stdout = r'''
-ninja: Entering directory `build/linux/release'
+ninja: Entering directory `build/linux/x64/release'
 [1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
@@ -415,14 +420,14 @@ set(BINARY_NAME "fizz_bar")
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
-    expect(BuildLinuxCommand().hidden, true);
+    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
     Platform: () => notLinuxPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on Linux host', () {
-    expect(BuildLinuxCommand().hidden, false);
+    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Platform: () => linuxPlatform,
@@ -451,7 +456,7 @@ set(BINARY_NAME "fizz_bar")
       }),
     ]);
 
-    fileSystem.file('build/linux/release/bundle/libapp.so')
+    fileSystem.file('build/linux/x64/release/bundle/libapp.so')
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
