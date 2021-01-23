@@ -225,6 +225,26 @@ Win32Window::HandleMessage(UINT const message,
         s_pending_high_surrogate = 0;
       }
 
+      // All key presses that generate a character should be sent from
+      // WM_CHAR. In order to send the full key press information, the keycode
+      // is persisted in keycode_for_char_message_ obtained from WM_KEYDOWN.
+      if (keycode_for_char_message_ != 0) {
+        const unsigned int scancode = (lparam >> 16) & 0xff;
+        const bool extended = ((lparam >> 24) & 0x01) == 0x01;
+
+        bool handled = OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN,
+                             code_point, extended);
+        keycode_for_char_message_ = 0;
+        if (handled) {
+          // If the OnKey handler handles the message, then return so we don't
+          // pass it to OnText, because handling the message indicates that
+          // OnKey either just sent it to the framework to be processed, or the
+          // framework handled the key in its response, so it shouldn't also be
+          // added as text.
+          return 0;
+        }
+      }
+
       // Of the messages handled here, only WM_CHAR should be treated as
       // characters. WM_SYS*CHAR are not part of text input, and WM_DEADCHAR
       // will be incorporated into a later WM_CHAR with the full character.
@@ -235,15 +255,6 @@ Win32Window::HandleMessage(UINT const message,
       if (message == WM_CHAR && s_pending_high_surrogate == 0 &&
           character >= u' ') {
         OnText(text);
-      }
-
-      // All key presses that generate a character should be sent from
-      // WM_CHAR. In order to send the full key press information, the keycode
-      // is persisted in keycode_for_char_message_ obtained from WM_KEYDOWN.
-      if (keycode_for_char_message_ != 0) {
-        const unsigned int scancode = (lparam >> 16) & 0xff;
-        OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN, code_point);
-        keycode_for_char_message_ = 0;
       }
       break;
     }
@@ -263,12 +274,15 @@ Win32Window::HandleMessage(UINT const message,
       }
       unsigned int keyCode(wparam);
       const unsigned int scancode = (lparam >> 16) & 0xff;
+      const bool extended = ((lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.
       if (keyCode == VK_SHIFT || keyCode == VK_MENU || keyCode == VK_CONTROL) {
         keyCode = MapVirtualKey(scancode, MAPVK_VSC_TO_VK_EX);
       }
       const int action = is_keydown_message ? WM_KEYDOWN : WM_KEYUP;
-      OnKey(keyCode, scancode, action, 0);
+      if (OnKey(keyCode, scancode, action, 0, extended)) {
+        return 0;
+      }
       break;
   }
 

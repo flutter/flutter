@@ -102,7 +102,7 @@ TEST(FlutterWindowsEngine, SendPlatformMessageWithoutResponse) {
   const char* channel = "test";
   const std::vector<uint8_t> test_message = {1, 2, 3, 4};
 
-  // Without a respones, SendPlatformMessage should be a simple passthrough.
+  // Without a response, SendPlatformMessage should be a simple pass-through.
   bool called = false;
   modifier.embedder_api().SendPlatformMessage = MOCK_ENGINE_PROC(
       SendPlatformMessage, ([&called, test_message](auto engine, auto message) {

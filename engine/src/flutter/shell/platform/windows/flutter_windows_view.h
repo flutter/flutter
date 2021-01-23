@@ -38,14 +38,14 @@ inline constexpr uint32_t kWindowFrameBufferID = 0;
 class FlutterWindowsView : public WindowBindingHandlerDelegate,
                            public TextInputPluginDelegate {
  public:
-  // Creates a FlutterWindowsView with the given implementator of
+  // Creates a FlutterWindowsView with the given implementor of
   // WindowBindingHandler.
   //
   // In order for object to render Flutter content the SetEngine method must be
   // called with a valid FlutterWindowsEngine instance.
   FlutterWindowsView(std::unique_ptr<WindowBindingHandler> window_binding);
 
-  ~FlutterWindowsView();
+  virtual ~FlutterWindowsView();
 
   // Configures the window instance with an instance of a running Flutter
   // engine.
@@ -100,7 +100,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   void OnText(const std::u16string&) override;
 
   // |WindowBindingHandlerDelegate|
-  void OnKey(int key, int scancode, int action, char32_t character) override;
+  bool OnKey(int key,
+             int scancode,
+             int action,
+             char32_t character,
+             bool extended) override;
 
   // |WindowBindingHandlerDelegate|
   void OnScroll(double x,
@@ -111,6 +115,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
   // |TextInputPluginDelegate|
   void OnCursorRectUpdated(const Rect& rect) override;
+
+ protected:
+  // Called to create the keyboard hook handlers.
+  virtual void RegisterKeyboardHookHandlers(
+      flutter::BinaryMessenger* messenger);
+
+  // Used by RegisterKeyboardHookHandlers to add a new keyboard hook handler.
+  void AddKeyboardHookHandler(
+      std::unique_ptr<flutter::KeyboardHookHandler> handler);
 
  private:
   // Struct holding the mouse state. The engine doesn't keep track of which
@@ -166,7 +179,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   void SendText(const std::u16string&);
 
   // Reports a raw keyboard message to Flutter engine.
-  void SendKey(int key, int scancode, int action, char32_t character);
+  bool SendKey(int key,
+               int scancode,
+               int action,
+               char32_t character,
+               bool extended);
 
   // Reports scroll wheel events to Flutter engine.
   void SendScroll(double x,

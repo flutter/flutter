@@ -33,11 +33,12 @@ class TextInputPlugin : public KeyboardHookHandler {
   virtual ~TextInputPlugin();
 
   // |KeyboardHookHandler|
-  void KeyboardHook(FlutterWindowsView* view,
+  bool KeyboardHook(FlutterWindowsView* view,
                     int key,
                     int scancode,
                     int action,
-                    char32_t character) override;
+                    char32_t character,
+                    bool extended) override;
 
   // |KeyboardHookHandler|
   void TextHook(FlutterWindowsView* view, const std::u16string& text) override;

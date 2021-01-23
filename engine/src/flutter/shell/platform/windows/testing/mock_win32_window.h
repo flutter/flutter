@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_
+
 #include <windowsx.h>
 
 #include "flutter/shell/platform/windows/win32_window.h"
@@ -24,9 +27,9 @@ class MockWin32Window : public Win32Window {
   UINT GetDpi();
 
   // Simulates a WindowProc message from the OS.
-  void InjectWindowMessage(UINT const message,
-                           WPARAM const wparam,
-                           LPARAM const lparam);
+  LRESULT InjectWindowMessage(UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam);
 
   MOCK_METHOD1(OnDpiScale, void(unsigned int));
   MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
@@ -36,9 +39,11 @@ class MockWin32Window : public Win32Window {
   MOCK_METHOD0(OnPointerLeave, void());
   MOCK_METHOD0(OnSetCursor, void());
   MOCK_METHOD1(OnText, void(const std::u16string&));
-  MOCK_METHOD4(OnKey, void(int, int, int, char32_t));
+  MOCK_METHOD5(OnKey, bool(int, int, int, char32_t, bool));
   MOCK_METHOD2(OnScroll, void(double, double));
 };
 
 }  // namespace testing
 }  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_

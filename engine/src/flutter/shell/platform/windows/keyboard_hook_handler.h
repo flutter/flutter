@@ -19,11 +19,15 @@ class KeyboardHookHandler {
   virtual ~KeyboardHookHandler() = default;
 
   // A function for hooking into keyboard input.
-  virtual void KeyboardHook(FlutterWindowsView* view,
+  //
+  // Returns true if the key event has been handled, to indicate that other
+  // handlers should not be called for this event.
+  virtual bool KeyboardHook(FlutterWindowsView* view,
                             int key,
                             int scancode,
                             int action,
-                            char32_t character) = 0;
+                            char32_t character,
+                            bool extended) = 0;
 
   // A function for hooking into Unicode text input.
   virtual void TextHook(FlutterWindowsView* view,

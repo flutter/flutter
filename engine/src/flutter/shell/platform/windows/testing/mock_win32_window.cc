@@ -15,10 +15,10 @@ UINT MockWin32Window::GetDpi() {
   return GetCurrentDPI();
 }
 
-void MockWin32Window::InjectWindowMessage(UINT const message,
-                                          WPARAM const wparam,
-                                          LPARAM const lparam) {
-  HandleMessage(message, wparam, lparam);
+LRESULT MockWin32Window::InjectWindowMessage(UINT const message,
+                                             WPARAM const wparam,
+                                             LPARAM const lparam) {
+  return HandleMessage(message, wparam, lparam);
 }
 
 }  // namespace testing

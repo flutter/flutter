@@ -61,13 +61,14 @@ void TextInputPlugin::TextHook(FlutterWindowsView* view,
   SendStateUpdate(*active_model_);
 }
 
-void TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
+bool TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
                                    int key,
                                    int scancode,
                                    int action,
-                                   char32_t character) {
+                                   char32_t character,
+                                   bool extended) {
   if (active_model_ == nullptr) {
-    return;
+    return false;
   }
   if (action == WM_KEYDOWN) {
     // Most editing keys (arrow keys, backspace, delete, etc.) are handled in
@@ -80,6 +81,7 @@ void TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
         break;
     }
   }
+  return false;
 }
 
 TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,

@@ -1475,6 +1475,7 @@ FILE: ../../../flutter/shell/platform/windows/flutter_windows_win32.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/key_event_handler.cc
 FILE: ../../../flutter/shell/platform/windows/key_event_handler.h
+FILE: ../../../flutter/shell/platform/windows/key_event_handler_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/keyboard_hook_handler.h
 FILE: ../../../flutter/shell/platform/windows/platform_handler.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.h
