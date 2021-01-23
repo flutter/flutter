@@ -121,12 +121,6 @@
          "flaky": false
       },
       {
-         "name": "Linux build_gallery",
-         "repo": "flutter",
-         "task_name": "linux_build_gallery",
-         "flaky": false
-      },
-      {
          "name": "Linux build_tests",
          "repo": "flutter",
          "task_name": "linux_build_tests",
@@ -695,12 +689,6 @@
          "repo": "flutter",
          "task_name": "mac_build_tests",
          "flaky": false
-      },
-      {
-         "name": "Mac build_gallery",
-         "repo": "flutter",
-         "task_name": "mac_build_gallery",
-         "flaky": true
       },
       {
          "name": "Mac customer_testing",
