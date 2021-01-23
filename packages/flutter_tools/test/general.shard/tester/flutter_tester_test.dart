@@ -8,10 +8,10 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -27,19 +27,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
-
-  HostPlatform getFakeCurrentHostPlatform() {
-    if (globals.platform.isMacOS) {
-      return HostPlatform.darwin_x64;
-    }
-    if (globals.platform.isLinux) {
-      return HostPlatform.linux_x64;
-    }
-    if (globals.platform.isWindows) {
-      return HostPlatform.windows_x64;
-    }
-    return HostPlatform.linux_x64;
-  }
 
   testWithoutContext('FlutterTesterApp can be created from the current directory', () async {
     const String projectPath = '/home/my/projects/my_project';
@@ -122,6 +109,7 @@ void main() {
         buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: MockFlutterVersion(),
+        operatingSystemUtils: MockOperatingSystemUtils(),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -176,7 +164,6 @@ Hello!
       final LaunchResult result = await device.startApp(app,
         mainPath: mainPath,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        hostPlatform: getFakeCurrentHostPlatform(),
       );
 
       expect(result.started, isTrue);
@@ -200,8 +187,19 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
       logger: logger,
     ),
     flutterVersion: MockFlutterVersion(),
+    operatingSystemUtils: MockOperatingSystemUtils(),
   );
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  MockOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
+}

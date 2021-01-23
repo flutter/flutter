@@ -13,6 +13,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
@@ -53,12 +54,14 @@ class FlutterTesterDevice extends Device {
     @required String buildDirectory,
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
        _buildDirectory = buildDirectory,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
+       _operatingSystemUtils = operatingSystemUtils,
        super(
         deviceId,
         platformType: null,
@@ -72,6 +75,7 @@ class FlutterTesterDevice extends Device {
   final String _buildDirectory;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Process _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -142,7 +146,6 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
     String userIdentifier,
-    HostPlatform hostPlatform, // used for test.
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
@@ -161,7 +164,7 @@ class FlutterTesterDevice extends Device {
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      platform: getTargetPlatformForName(getNameForHostPlatform(hostPlatform ?? getCurrentHostPlatform())),
+      platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
       treeShakeIcons: buildInfo.treeShakeIcons,
     );
 
@@ -269,6 +272,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     @required Logger logger,
     @required FlutterVersion flutterVersion,
     @required Config config,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
@@ -277,6 +281,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
         buildDirectory: getBuildDirectory(config, fileSystem),
         logger: logger,
         flutterVersion: flutterVersion,
+        operatingSystemUtils: operatingSystemUtils,
       ),
        super('Flutter tester');
 

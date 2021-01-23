@@ -661,14 +661,8 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.darwin_x64;
   }
   if (globals.platform.isLinux) {
-    final OperatingSystemUtils operatingSystemUtils =
-        OperatingSystemUtils(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            platform: globals.platform,
-            processManager: globals.processManager,
-        );
-    return operatingSystemUtils.hostPlatform;
+    // support x64 and arm64 architecture.
+    return globals.os.hostPlatform;
   }
   if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
