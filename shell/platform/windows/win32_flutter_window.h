@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter/shell/platform/common/cpp/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/win32_window.h"
@@ -75,6 +76,9 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
   void UpdateFlutterCursor(const std::string& cursor_name) override;
 
   // |FlutterWindowBindingHandler|
+  void UpdateCursorRect(const Rect& rect) override;
+
+  // |FlutterWindowBindingHandler|
   void OnWindowResized() override;
 
  private:
@@ -84,6 +88,9 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
 
   // The last cursor set by Flutter. Defaults to the arrow cursor.
   HCURSOR current_cursor_;
+
+  // The cursor rect set by Flutter.
+  RECT cursor_rect_;
 };
 
 }  // namespace flutter

@@ -178,4 +178,8 @@ void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
                                       kScrollOffsetMultiplier);
 }
 
+void Win32FlutterWindow::UpdateCursorRect(const Rect& rect) {
+  // TODO(cbracken): Implement IMM candidate window positioning.
+}
+
 }  // namespace flutter
