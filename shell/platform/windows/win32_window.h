@@ -92,7 +92,14 @@ class Win32Window {
   virtual void OnText(const std::u16string& text) = 0;
 
   // Called when raw keyboard input occurs.
-  virtual void OnKey(int key, int scancode, int action, char32_t character) = 0;
+  //
+  // Returns true if the event was handled, indicating that DefWindowProc should
+  // not be called on the event by the main message loop.
+  virtual bool OnKey(int key,
+                     int scancode,
+                     int action,
+                     char32_t character,
+                     bool extended) = 0;
 
   // Called when mouse scrollwheel input occurs.
   virtual void OnScroll(double delta_x, double delta_y) = 0;
