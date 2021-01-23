@@ -25,15 +25,18 @@ class LinuxDevice extends DesktopDevice {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required OperatingSystemUtils operatingSystemUtils,
-  }) : super(
-      'linux',
-      platformType: PlatformType.linux,
-      ephemeral: false,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-  );
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'linux',
+          platformType: PlatformType.linux,
+          ephemeral: false,
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
+
+  final OperatingSystemUtils _operatingSystemUtils;
 
   TargetPlatform _targetPlatform;
 
@@ -46,8 +49,7 @@ class LinuxDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async {
     if (_targetPlatform == null) {
-      final HostPlatform hostPlatform = getCurrentHostPlatform();
-      if (hostPlatform == HostPlatform.linux_x64) {
+      if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
         _targetPlatform = TargetPlatform.linux_x64;
       } else {
         _targetPlatform = TargetPlatform.linux_arm64;

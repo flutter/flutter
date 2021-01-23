@@ -157,6 +157,15 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class MockLinuxApp extends Mock implements LinuxApp {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
   @override
   String get name => 'Linux';
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
 }
