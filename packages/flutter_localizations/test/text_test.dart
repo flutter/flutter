@@ -38,7 +38,6 @@ void main() {
               key: targetKey,
               builder: (BuildContext context) {
                 return PopupMenuButton<int>(
-                  placement: PopupMenuPlacement.belowButton,
                   onSelected: (int value) {
                     Navigator.pushNamed(context, '/next');
                   },
@@ -79,20 +78,20 @@ void main() {
     Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
     Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
 
-    expect(topLeft, const Offset(392.0, 347.5));
-    expect(topRight, const Offset(596.0, 347.5));
-    expect(bottomLeft, const Offset(392.0, 364.5));
-    expect(bottomRight, const Offset(596.0, 364.5));
+    expect(topLeft, const Offset(392.0, 299.5));
+    expect(topRight, const Offset(596.0, 299.5));
+    expect(bottomLeft, const Offset(392.0, 316.5));
+    expect(bottomRight, const Offset(596.0, 316.5));
 
     topLeft = tester.getTopLeft(find.text('你好，世界'));
     topRight = tester.getTopRight(find.text('你好，世界'));
     bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
     bottomRight = tester.getBottomRight(find.text('你好，世界'));
 
-    expect(topLeft, const Offset(392.0, 395.5));
-    expect(topRight, const Offset(477.0, 395.5));
-    expect(bottomLeft, const Offset(392.0, 412.5));
-    expect(bottomRight, const Offset(477.0, 412.5));
+    expect(topLeft, const Offset(392.0, 347.5));
+    expect(topRight, const Offset(477.0, 347.5));
+    expect(bottomLeft, const Offset(392.0, 364.5));
+    expect(bottomRight, const Offset(477.0, 364.5));
   });
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
@@ -125,7 +124,6 @@ void main() {
               key: targetKey,
               builder: (BuildContext context) {
                 return PopupMenuButton<int>(
-                  placement: PopupMenuPlacement.belowButton,
                   onSelected: (int value) {
                     Navigator.pushNamed(context, '/next');
                   },
@@ -166,19 +164,19 @@ void main() {
     Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
     Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
 
-    expect(topLeft, const Offset(392.0, 348.0));
-    expect(topRight, const Offset(584.0, 348.0));
-    expect(bottomLeft, const Offset(392.0, 364));
-    expect(bottomRight, const Offset(584.0, 364));
+    expect(topLeft, const Offset(392.0, 300.0));
+    expect(topRight, const Offset(584.0, 300.0));
+    expect(bottomLeft, const Offset(392.0, 316));
+    expect(bottomRight, const Offset(584.0, 316));
 
     topLeft = tester.getTopLeft(find.text('你好，世界'));
     topRight = tester.getTopRight(find.text('你好，世界'));
     bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
     bottomRight = tester.getBottomRight(find.text('你好，世界'));
 
-    expect(topLeft, const Offset(392.0, 396.0));
-    expect(topRight, const Offset(472.0, 396.0));
-    expect(bottomLeft, const Offset(392.0, 412.0));
-    expect(bottomRight, const Offset(472.0, 412.0));
+    expect(topLeft, const Offset(392.0, 348.0));
+    expect(topRight, const Offset(472.0, 348.0));
+    expect(bottomLeft, const Offset(392.0, 364.0));
+    expect(bottomRight, const Offset(472.0, 364.0));
   });
 }

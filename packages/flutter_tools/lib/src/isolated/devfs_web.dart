@@ -552,6 +552,7 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -561,18 +562,20 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> sourceMapContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     return utf8.decode(_webMemoryFS.sourcemaps[serverPath]);
   }
 
   @override
   Future<String> metadataContents(String serverPath) async {
+    serverPath = _stripBasePath(serverPath, basePath);
     if (serverPath == 'main_module.ddc_merged_metadata') {
       return _webMemoryFS.mergedMetadata;
     }
     if (_webMemoryFS.metadataFiles.containsKey(serverPath)) {
       return utf8.decode(_webMemoryFS.metadataFiles[serverPath]);
     }
-    return null;
+    throw Exception('Could not find metadata contents for $serverPath');
   }
 
   @override
