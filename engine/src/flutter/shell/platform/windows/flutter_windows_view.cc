@@ -35,10 +35,7 @@ void FlutterWindowsView::SetEngine(
 
   // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
-  keyboard_hook_handlers_.push_back(
-      std::make_unique<flutter::KeyEventHandler>(internal_plugin_messenger));
-  keyboard_hook_handlers_.push_back(std::make_unique<flutter::TextInputPlugin>(
-      internal_plugin_messenger, this));
+  RegisterKeyboardHookHandlers(internal_plugin_messenger);
   platform_handler_ = PlatformHandler::Create(internal_plugin_messenger, this);
   cursor_handler_ = std::make_unique<flutter::CursorHandler>(
       internal_plugin_messenger, binding_handler_.get());
@@ -47,6 +44,18 @@ void FlutterWindowsView::SetEngine(
 
   SendWindowMetrics(bounds.width, bounds.height,
                     binding_handler_->GetDpiScale());
+}
+
+void FlutterWindowsView::RegisterKeyboardHookHandlers(
+    flutter::BinaryMessenger* messenger) {
+  AddKeyboardHookHandler(std::make_unique<flutter::KeyEventHandler>(messenger));
+  AddKeyboardHookHandler(
+      std::make_unique<flutter::TextInputPlugin>(messenger, this));
+}
+
+void FlutterWindowsView::AddKeyboardHookHandler(
+    std::unique_ptr<flutter::KeyboardHookHandler> handler) {
+  keyboard_hook_handlers_.push_back(std::move(handler));
 }
 
 uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
@@ -120,11 +129,12 @@ void FlutterWindowsView::OnText(const std::u16string& text) {
   SendText(text);
 }
 
-void FlutterWindowsView::OnKey(int key,
+bool FlutterWindowsView::OnKey(int key,
                                int scancode,
                                int action,
-                               char32_t character) {
-  SendKey(key, scancode, action, character);
+                               char32_t character,
+                               bool extended) {
+  return SendKey(key, scancode, action, character, extended);
 }
 
 void FlutterWindowsView::OnScroll(double x,
@@ -215,13 +225,19 @@ void FlutterWindowsView::SendText(const std::u16string& text) {
   }
 }
 
-void FlutterWindowsView::SendKey(int key,
+bool FlutterWindowsView::SendKey(int key,
                                  int scancode,
                                  int action,
-                                 char32_t character) {
+                                 char32_t character,
+                                 bool extended) {
   for (const auto& handler : keyboard_hook_handlers_) {
-    handler->KeyboardHook(this, key, scancode, action, character);
+    if (handler->KeyboardHook(this, key, scancode, action, character,
+                              extended)) {
+      // key event was handled, so don't send to other handlers.
+      return true;
+    }
   }
+  return false;
 }
 
 void FlutterWindowsView::SendScroll(double x,
