@@ -137,6 +137,19 @@ bool FlutterWindowsView::OnKey(int key,
   return SendKey(key, scancode, action, character, extended);
 }
 
+void FlutterWindowsView::OnComposeBegin() {
+  SendComposeBegin();
+}
+
+void FlutterWindowsView::OnComposeEnd() {
+  SendComposeEnd();
+}
+
+void FlutterWindowsView::OnComposeChange(const std::u16string& text,
+                                         int cursor_pos) {
+  SendComposeChange(text, cursor_pos);
+}
+
 void FlutterWindowsView::OnScroll(double x,
                                   double y,
                                   double delta_x,
@@ -238,6 +251,25 @@ bool FlutterWindowsView::SendKey(int key,
     }
   }
   return false;
+}
+
+void FlutterWindowsView::SendComposeBegin() {
+  for (const auto& handler : keyboard_hook_handlers_) {
+    handler->ComposeBeginHook();
+  }
+}
+
+void FlutterWindowsView::SendComposeEnd() {
+  for (const auto& handler : keyboard_hook_handlers_) {
+    handler->ComposeEndHook();
+  }
+}
+
+void FlutterWindowsView::SendComposeChange(const std::u16string& text,
+                                           int cursor_pos) {
+  for (const auto& handler : keyboard_hook_handlers_) {
+    handler->ComposeChangeHook(text, cursor_pos);
+  }
 }
 
 void FlutterWindowsView::SendScroll(double x,

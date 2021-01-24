@@ -1497,6 +1497,8 @@ FILE: ../../../flutter/shell/platform/windows/task_runner_win32.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_win32.h
 FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.cc
 FILE: ../../../flutter/shell/platform/windows/task_runner_winuwp.h
+FILE: ../../../flutter/shell/platform/windows/text_input_manager.cc
+FILE: ../../../flutter/shell/platform/windows/text_input_manager.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h

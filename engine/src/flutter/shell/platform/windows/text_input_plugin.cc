@@ -102,6 +102,26 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
 
 TextInputPlugin::~TextInputPlugin() = default;
 
+void TextInputPlugin::ComposeBeginHook() {
+  active_model_->BeginComposing();
+  SendStateUpdate(*active_model_);
+}
+
+void TextInputPlugin::ComposeEndHook() {
+  active_model_->CommitComposing();
+  active_model_->EndComposing();
+  SendStateUpdate(*active_model_);
+}
+
+void TextInputPlugin::ComposeChangeHook(const std::u16string& text,
+                                        int cursor_pos) {
+  active_model_->AddText(text);
+  cursor_pos += active_model_->composing_range().base();
+  active_model_->UpdateComposingText(text);
+  active_model_->SetSelection(TextRange(cursor_pos, cursor_pos));
+  SendStateUpdate(*active_model_);
+}
+
 void TextInputPlugin::HandleMethodCall(
     const flutter::MethodCall<rapidjson::Document>& method_call,
     std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
@@ -167,23 +187,41 @@ void TextInputPlugin::HandleMethodCall(
                     "Set editing state has been invoked, but without text.");
       return;
     }
-    auto selection_base = args.FindMember(kSelectionBaseKey);
-    auto selection_extent = args.FindMember(kSelectionExtentKey);
-    if (selection_base == args.MemberEnd() || selection_base->value.IsNull() ||
-        selection_extent == args.MemberEnd() ||
-        selection_extent->value.IsNull()) {
+    auto base = args.FindMember(kSelectionBaseKey);
+    auto extent = args.FindMember(kSelectionExtentKey);
+    if (base == args.MemberEnd() || base->value.IsNull() ||
+        extent == args.MemberEnd() || extent->value.IsNull()) {
       result->Error(kInternalConsistencyError,
                     "Selection base/extent values invalid.");
       return;
     }
     // Flutter uses -1/-1 for invalid; translate that to 0/0 for the model.
-    int base = selection_base->value.GetInt();
-    int extent = selection_extent->value.GetInt();
-    if (base == -1 && extent == -1) {
-      base = extent = 0;
+    int selection_base = base->value.GetInt();
+    int selection_extent = extent->value.GetInt();
+    if (selection_base == -1 && selection_extent == -1) {
+      selection_base = selection_extent = 0;
     }
     active_model_->SetText(text->value.GetString());
-    active_model_->SetSelection(TextRange(base, extent));
+    active_model_->SetSelection(TextRange(selection_base, selection_extent));
+
+    base = args.FindMember(kComposingBaseKey);
+    extent = args.FindMember(kComposingExtentKey);
+    if (base == args.MemberEnd() || base->value.IsNull() ||
+        extent == args.MemberEnd() || extent->value.IsNull()) {
+      result->Error(kInternalConsistencyError,
+                    "Composing base/extent values invalid.");
+      return;
+    }
+    int composing_base = base->value.GetInt();
+    int composing_extent = base->value.GetInt();
+    if (composing_base == -1 && composing_extent == -1) {
+      active_model_->EndComposing();
+    } else {
+      int composing_start = std::min(composing_base, composing_extent);
+      int cursor_offset = selection_base - composing_start;
+      active_model_->SetComposingRange(
+          TextRange(composing_base, composing_extent), cursor_offset);
+    }
   } else if (method.compare(kSetMarkedTextRect) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
@@ -259,13 +297,17 @@ void TextInputPlugin::SendStateUpdate(const TextInputModel& model) {
 
   TextRange selection = model.selection();
   rapidjson::Value editing_state(rapidjson::kObjectType);
-  editing_state.AddMember(kComposingBaseKey, -1, allocator);
-  editing_state.AddMember(kComposingExtentKey, -1, allocator);
   editing_state.AddMember(kSelectionAffinityKey, kAffinityDownstream,
                           allocator);
   editing_state.AddMember(kSelectionBaseKey, selection.base(), allocator);
   editing_state.AddMember(kSelectionExtentKey, selection.extent(), allocator);
   editing_state.AddMember(kSelectionIsDirectionalKey, false, allocator);
+
+  int composing_base = model.composing() ? model.composing_range().base() : -1;
+  int composing_extent =
+      model.composing() ? model.composing_range().extent() : -1;
+  editing_state.AddMember(kComposingBaseKey, composing_base, allocator);
+  editing_state.AddMember(kComposingExtentKey, composing_extent, allocator);
   editing_state.AddMember(
       kTextKey, rapidjson::Value(model.GetText(), allocator).Move(), allocator);
   args->PushBack(editing_state, allocator);

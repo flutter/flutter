@@ -50,6 +50,24 @@ class WindowBindingHandlerDelegate {
                      char32_t character,
                      bool extended) = 0;
 
+  // Notifies the delegate that IME composing mode has begun.
+  //
+  // Triggered when the user begins editing composing text using a multi-step
+  // input method such as in CJK text input.
+  virtual void OnComposeBegin() = 0;
+
+  // Notifies the delegate that IME composing mode has ended.
+  //
+  // Triggered when the user commits the composing text while using a multi-step
+  // input method such as in CJK text input.
+  virtual void OnComposeEnd() = 0;
+
+  // Notifies the delegate that IME composing region contents have changed.
+  //
+  // Triggered when the user edits the composing text while using a multi-step
+  // input method such as in CJK text input.
+  virtual void OnComposeChange(const std::u16string& text, int cursor_pos) = 0;
+
   // Notifies delegate that backing window size has recevied scroll.
   // Typically called by currently configured WindowBindingHandler
   virtual void OnScroll(double x,
