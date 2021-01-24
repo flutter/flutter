@@ -9,7 +9,7 @@ import 'dart:js_util' as js_util;
 import 'package:test/bootstrap/browser.dart'; // ignore: import_of_legacy_library_into_null_safe
 import 'package:test/test.dart'; // ignore: import_of_legacy_library_into_null_safe
 import 'package:ui/ui.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' hide PhysicalShapeEngineLayer;
 
 import 'package:web_engine_tester/golden_tester.dart'; // ignore: import_of_legacy_library_into_null_safe
 
