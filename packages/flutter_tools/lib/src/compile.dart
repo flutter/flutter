@@ -342,9 +342,9 @@ Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File ne
     return false;
   }
   final FlutterProject rootProject = FlutterProject.current();
-  final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-    && rootProject.packagesFile.existsSync()
-    && rootProject.packageConfigFile.existsSync();
+  final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
+      rootProject.packagesFile.existsSync() &&
+      rootProject.packageConfigFile.existsSync();
   if (!hasPlugins) {
     return false;
   }
