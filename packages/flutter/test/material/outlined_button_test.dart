@@ -1281,22 +1281,6 @@ void main() {
     expect(label, rowInsideElevatedButton.children.first);
     expect(icon, rowInsideElevatedButton.children.last);
   });
-
-  testWidgets('Text does not overflow in OutlinedButton label', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.forbidden,
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.add),
-            label: const Text('this is a very long text used to check whether an overflow occurs or not'),
-            onPressed: () {},
-          ),
-        ),
-      ),
-    );
-  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {
