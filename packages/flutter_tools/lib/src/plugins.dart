@@ -425,7 +425,7 @@ class PluginInterfaceResolution {
   // The name of the platform that this plugin implements.
   final String platform;
   // The name of the Dart class.
-  String dartClass;
+  final String dartClass;
 }
 
 /// Resolves the platform implementations for Dart only plugins.
