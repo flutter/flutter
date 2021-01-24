@@ -107,7 +107,7 @@ void testMain() {
             canvas.drawShadow(shape, ui.Color(0xFFFF0000), elevation, true);
             canvas.drawPath(shape, shapePaint);
 
-            final PhysicalShapeLayer psl = PhysicalShapeLayer(
+            final PhysicalShapeEngineLayer psl = PhysicalShapeEngineLayer(
               elevation,
               const ui.Color(0xFF000000),
               const ui.Color(0xFF000000),
@@ -149,12 +149,12 @@ void testMain() {
         (rectSize + padding) * 3 + padding,
         (rectSize + padding) * 2 + padding,
       );
-      late List<PhysicalShapeLayer> physicalShapeLayers;
+      late List<PhysicalShapeEngineLayer> physicalShapeLayers;
 
       LayerTree buildTestScene({ required bool paintShadowBounds }) {
-        final Iterator<PhysicalShapeLayer>? shadowBounds = paintShadowBounds
+        final Iterator<PhysicalShapeEngineLayer>? shadowBounds = paintShadowBounds
           ? physicalShapeLayers.iterator : null;
-        physicalShapeLayers = <PhysicalShapeLayer>[];
+        physicalShapeLayers = <PhysicalShapeEngineLayer>[];
 
         final LayerSceneBuilder builder = LayerSceneBuilder();
         builder.pushOffset(padding + halfSize, padding + halfSize);
@@ -177,7 +177,7 @@ void testMain() {
               elevation: 6,
               color: const ui.Color(0xFF009900),
               shadowColor: const ui.Color(0xFF000000),
-            ) as PhysicalShapeLayer);
+            ));
             if (shadowBounds != null) {
               shadowBounds.moveNext();
               final ui.Rect bounds = shadowBounds.current.paintBounds;

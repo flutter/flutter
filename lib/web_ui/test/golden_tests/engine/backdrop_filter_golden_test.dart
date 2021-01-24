@@ -8,7 +8,7 @@ import 'dart:html' as html;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' hide ClipRectEngineLayer, BackdropFilterEngineLayer;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
