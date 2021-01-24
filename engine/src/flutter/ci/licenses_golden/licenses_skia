@@ -1,4 +1,4 @@
-Signature: 8a0763a50d136ad38f2817eb6e489542
+Signature: 31ee48d40623f557e4cd12f283650ed7
 
 UNUSED LICENSES:
 
@@ -1556,7 +1556,6 @@ FILE: ../../../third_party/skia/gm/dftext.cpp
 FILE: ../../../third_party/skia/gm/drawbitmaprect.cpp
 FILE: ../../../third_party/skia/gm/emptypath.cpp
 FILE: ../../../third_party/skia/gm/encode.cpp
-FILE: ../../../third_party/skia/gm/extractbitmap.cpp
 FILE: ../../../third_party/skia/gm/filltypes.cpp
 FILE: ../../../third_party/skia/gm/filltypespersp.cpp
 FILE: ../../../third_party/skia/gm/filterbitmap.cpp
