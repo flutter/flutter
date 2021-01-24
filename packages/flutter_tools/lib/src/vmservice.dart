@@ -728,23 +728,12 @@ extension FlutterVmService on vm_service.VmService {
     return null;
   }
 
-  /// Invoke a flutter extension method, if the flutter extension is not
-  /// available, returns null.
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
+  Future<vm_service.Response> _checkedCallServiceExtension(
     String method, {
-    @required String isolateId,
     Map<String, dynamic> args,
   }) async {
     try {
-
-      final vm_service.Response response = await callServiceExtension(
-        method,
-        args: <String, Object>{
-          'isolateId': isolateId,
-          ...?args,
-        },
-      );
-      return response.json;
+      return await callServiceExtension(method, args: args);
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
@@ -754,6 +743,23 @@ extension FlutterVmService on vm_service.VmService {
       }
       rethrow;
     }
+  }
+
+  /// Invoke a flutter extension method, if the flutter extension is not
+  /// available, returns null.
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
+    String method, {
+    @required String isolateId,
+    Map<String, dynamic> args,
+  }) async {
+    final vm_service.Response response = await _checkedCallServiceExtension(
+      method,
+      args: <String, Object>{
+        'isolateId': isolateId,
+        ...?args,
+      },
+    );
+    return response?.json;
   }
 
   /// List all [FlutterView]s attached to the current VM.
@@ -799,26 +805,34 @@ extension FlutterVmService on vm_service.VmService {
 
   /// Create a new development file system on the device.
   Future<vm_service.Response> createDevFS(String fsName) {
-    return callServiceExtension('_createDevFS', args: <String, dynamic>{'fsName': fsName});
+    // Call the unchecked version of `callServiceExtension` because the caller
+    // has custom handling of certain RPCErrors.
+    return callServiceExtension(
+      '_createDevFS',
+      args: <String, dynamic>{'fsName': fsName},
+    );
   }
 
   /// Delete an existing file system.
-  Future<vm_service.Response> deleteDevFS(String fsName) {
-    return callServiceExtension('_deleteDevFS', args: <String, dynamic>{'fsName': fsName});
+  Future<void> deleteDevFS(String fsName) async {
+    await _checkedCallServiceExtension(
+      '_deleteDevFS',
+      args: <String, dynamic>{'fsName': fsName},
+    );
   }
 
   Future<vm_service.Response> screenshot() {
-    return callServiceExtension(kScreenshotMethod);
+    return _checkedCallServiceExtension(kScreenshotMethod);
   }
 
   Future<vm_service.Response> screenshotSkp() {
-    return callServiceExtension(kScreenshotSkpMethod);
+    return _checkedCallServiceExtension(kScreenshotSkpMethod);
   }
 
   /// Set the VM timeline flags.
-  Future<vm_service.Response> setVMTimelineFlags(List<String> recordedStreams) {
+  Future<void> setTimelineFlags(List<String> recordedStreams) async {
     assert(recordedStreams != null);
-    return callServiceExtension(
+    await _checkedCallServiceExtension(
       'setVMTimelineFlags',
       args: <String, dynamic>{
         'recordedStreams': recordedStreams,
@@ -826,8 +840,8 @@ extension FlutterVmService on vm_service.VmService {
     );
   }
 
-  Future<vm_service.Response> getVMTimeline() {
-    return callServiceExtension('getVMTimeline');
+  Future<vm_service.Response> getTimeline() {
+    return _checkedCallServiceExtension('getVMTimeline');
   }
 }
 
