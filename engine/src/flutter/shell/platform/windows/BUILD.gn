@@ -68,6 +68,8 @@ source_set("flutter_windows_source") {
     "string_conversion.h",
     "system_utils.h",
     "task_runner.h",
+    "text_input_manager.cc",
+    "text_input_manager.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
     "window_binding_handler.h",
@@ -103,7 +105,10 @@ source_set("flutter_windows_source") {
       "win32_window_proc_delegate_manager.h",
     ]
 
-    libs = [ "dwmapi.lib" ]
+    libs = [
+      "dwmapi.lib",
+      "imm32.lib",
+    ]
   }
 
   configs += [

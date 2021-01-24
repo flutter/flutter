@@ -43,6 +43,15 @@ class TextInputPlugin : public KeyboardHookHandler {
   // |KeyboardHookHandler|
   void TextHook(FlutterWindowsView* view, const std::u16string& text) override;
 
+  // |KeyboardHookHandler|
+  void ComposeBeginHook() override;
+
+  // |KeyboardHookHandler|
+  void ComposeEndHook() override;
+
+  // |KeyboardHookHandler|
+  void ComposeChangeHook(const std::u16string& text, int cursor_pos) override;
+
  private:
   // Sends the current state of the given model to the Flutter engine.
   void SendStateUpdate(const TextInputModel& model);

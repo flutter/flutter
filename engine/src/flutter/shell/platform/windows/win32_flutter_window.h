@@ -62,6 +62,15 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
              bool extended) override;
 
   // |Win32Window|
+  void OnComposeBegin() override;
+
+  // |Win32Window|
+  void OnComposeEnd() override;
+
+  // |Win32Window|
+  void OnComposeChange(const std::u16string& text, int cursor_pos) override;
+
+  // |Win32Window|
   void OnScroll(double delta_x, double delta_y) override;
 
   // |FlutterWindowBindingHandler|

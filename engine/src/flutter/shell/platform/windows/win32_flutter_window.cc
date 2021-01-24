@@ -171,6 +171,19 @@ bool Win32FlutterWindow::OnKey(int key,
                                           extended);
 }
 
+void Win32FlutterWindow::OnComposeBegin() {
+  binding_handler_delegate_->OnComposeBegin();
+}
+
+void Win32FlutterWindow::OnComposeEnd() {
+  binding_handler_delegate_->OnComposeEnd();
+}
+
+void Win32FlutterWindow::OnComposeChange(const std::u16string& text,
+                                         int cursor_pos) {
+  binding_handler_delegate_->OnComposeChange(text, cursor_pos);
+}
+
 void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
   POINT point;
   GetCursorPos(&point);
@@ -181,7 +194,7 @@ void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
 }
 
 void Win32FlutterWindow::UpdateCursorRect(const Rect& rect) {
-  // TODO(cbracken): Implement IMM candidate window positioning.
+  text_input_manager_.UpdateCaretRect(rect);
 }
 
 }  // namespace flutter

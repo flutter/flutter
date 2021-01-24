@@ -67,11 +67,7 @@ void TextInputModel::BeginComposing() {
   composing_range_ = TextRange(selection_.start());
 }
 
-void TextInputModel::UpdateComposingText(const std::string& composing_text) {
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
-      utf16_converter;
-  std::u16string text = utf16_converter.from_bytes(composing_text);
-
+void TextInputModel::UpdateComposingText(const std::u16string& text) {
   // Preserve selection if we get a no-op update to the composing region.
   if (text.length() == 0 && composing_range_.collapsed()) {
     return;
@@ -80,6 +76,12 @@ void TextInputModel::UpdateComposingText(const std::string& composing_text) {
   text_.replace(composing_range_.start(), composing_range_.length(), text);
   composing_range_.set_end(composing_range_.start() + text.length());
   selection_ = TextRange(composing_range_.end());
+}
+
+void TextInputModel::UpdateComposingText(const std::string& text) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf16_converter;
+  UpdateComposingText(utf16_converter.from_bytes(text));
 }
 
 void TextInputModel::CommitComposing() {

@@ -107,6 +107,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
              bool extended) override;
 
   // |WindowBindingHandlerDelegate|
+  void OnComposeBegin() override;
+
+  // |WindowBindingHandlerDelegate|
+  void OnComposeEnd() override;
+
+  // |WindowBindingHandlerDelegate|
+  void OnComposeChange(const std::u16string& text, int cursor_pos) override;
+
+  // |WindowBindingHandlerDelegate|
   void OnScroll(double x,
                 double y,
                 double delta_x,
@@ -184,6 +193,24 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
                int action,
                char32_t character,
                bool extended);
+
+  // Reports an IME compose begin event.
+  //
+  // Triggered when the user begins editing composing text using a multi-step
+  // input method such as in CJK text input.
+  void SendComposeBegin();
+
+  // Reports an IME compose end event.
+  //
+  // Triggered when the user commits the composing text while using a multi-step
+  // input method such as in CJK text input.
+  void SendComposeEnd();
+
+  // Reports an IME composing region change event.
+  //
+  // Triggered when the user edits the composing text while using a multi-step
+  // input method such as in CJK text input.
+  void SendComposeChange(const std::u16string& text, int cursor_pos);
 
   // Reports scroll wheel events to Flutter engine.
   void SendScroll(double x,
