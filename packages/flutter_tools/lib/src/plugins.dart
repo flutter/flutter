@@ -77,7 +77,7 @@ class Plugin {
     YamlMap pluginYaml,
     List<String> dependencies, {
     @required FileSystem fileSystem,
-    @required bool isDirectDependency,
+    bool isDirectDependency = false,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
