@@ -2404,7 +2404,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
     Logger: () => logger,
   });
-  
+
   testUsingContext('flutter create prints note about null safety', () async {
     await _createProject(
       projectDir,
