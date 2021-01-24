@@ -393,6 +393,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     VoidCallback? onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
+    this.delay = kLongPressTimeout,
   }) : super(
     key: key,
     child: child,
@@ -414,9 +415,14 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
+  /// The duration required for a "long press"
+  ///
+  /// Defaults to [kLongPressTimeout]
+  final Duration delay;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer()
+    return DelayedMultiDragGestureRecognizer(delay: delay)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart)

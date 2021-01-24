@@ -2452,6 +2452,14 @@ void main() {
     expect(onDragStartedCalled, isTrue);
   });
 
+  testWidgets('long-press draggable calls onDragStartedCalled after specified duration of long press', (WidgetTester tester) async {
+    await _testLongPressDraggableCustomDelay(tester: tester, delay: const Duration(milliseconds: 100));
+  });
+
+  testWidgets('long-press draggable calls onDragStartedCalled after specified duration of long press', (WidgetTester tester) async {
+    await _testLongPressDraggableCustomDelay(tester: tester, delay: const Duration(seconds: 2));
+  });
+
   testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
     await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
   });
@@ -2849,6 +2857,41 @@ Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester teste
   expect(find.text('Dragging'), findsOneWidget);
   expect(onDragStartedCalled, isTrue);
   expect(hapticFeedbackCalls, expectedHapticFeedbackCount);
+}
+
+Future<void> _testLongPressDraggableCustomDelay({ required WidgetTester tester, required Duration delay }) async {
+    bool onDragStartedCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        delay: delay,
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+
+    await tester.pump(delay);
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
+
 }
 
 Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
