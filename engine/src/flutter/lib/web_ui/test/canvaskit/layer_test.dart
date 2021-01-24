@@ -44,10 +44,10 @@ void testMain() {
       sb.addPicture(ui.Offset.zero, picture);
       final LayerTree layerTree = sb.build().layerTree;
       dispatcher.rasterizer!.draw(layerTree);
-      final ClipRectLayer clipRect = layerTree.rootLayer as ClipRectLayer;
+      final ClipRectEngineLayer clipRect = layerTree.rootLayer as ClipRectEngineLayer;
       expect(clipRect.paintBounds, ui.Rect.fromLTRB(15, 15, 30, 30));
 
-      final TransformLayer transform = clipRect.debugLayers.single as TransformLayer;
+      final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
       expect(transform.paintBounds, ui.Rect.fromLTRB(0, 0, 30, 30));
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
