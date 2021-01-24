@@ -322,7 +322,9 @@ class CompileConfig {
     this.generateDartPluginRegistrant = false,
   }) : assert(generateDartPluginRegistrant != null);
 
-  /// Should the hot runner assume that the minimal Dart dependencies do not change?
+  /// Whether to enable the generation of the Dart plugin registrant.
+  /// This generates a new main.dart which wraps the entrypoint,
+  /// and includes a _registerPlugin function.
   final bool generateDartPluginRegistrant;
 }
 
