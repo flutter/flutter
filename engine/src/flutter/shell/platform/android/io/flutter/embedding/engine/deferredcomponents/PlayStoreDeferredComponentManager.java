@@ -6,9 +6,12 @@ package io.flutter.embedding.engine.deferredcomponents;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import androidx.annotation.NonNull;
@@ -52,6 +55,8 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
   private @NonNull SparseIntArray sessionIdToLoadingUnitId;
   private @NonNull SparseArray<String> sessionIdToState;
   private @NonNull Map<String, Integer> nameToSessionId;
+
+  protected @NonNull SparseArray<String> loadingUnitIdToModuleNames;
 
   private FeatureInstallStateUpdatedListener listener;
 
@@ -202,6 +207,9 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     sessionIdToLoadingUnitId = new SparseIntArray();
     sessionIdToState = new SparseArray<>();
     nameToSessionId = new HashMap<>();
+
+    loadingUnitIdToModuleNames = new SparseArray<>();
+    initLoadingUnitMappingToModuleNames();
   }
 
   public void setJNI(@NonNull FlutterJNI flutterJNI) {
@@ -222,19 +230,49 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     this.channel = channel;
   }
 
-  private String loadingUnitIdToModuleName(int loadingUnitId) {
-    // Loading unit id to module name mapping stored in android Strings
-    // resources.
-    int moduleNameIdentifier =
-        context
-            .getResources()
-            .getIdentifier("loadingUnit" + loadingUnitId, "string", context.getPackageName());
-    return context.getResources().getString(moduleNameIdentifier);
+  @NonNull
+  private ApplicationInfo getApplicationInfo() {
+    try {
+      return context
+          .getPackageManager()
+          .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+    } catch (NameNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // Obtain and parses the metadata string. An example encoded string is:
+  //
+  //    "2:module2,3:module3,4:module1"
+  //
+  // Where loading unit 2 is included in module2, loading unit 3 is
+  // included in module3, and loading unit 4 is included in module1.
+  private void initLoadingUnitMappingToModuleNames() {
+    String mappingKey = DeferredComponentManager.class.getName() + ".loadingUnitMapping";
+    ApplicationInfo applicationInfo = getApplicationInfo();
+    if (applicationInfo != null) {
+      Bundle metaData = applicationInfo.metaData;
+      if (metaData != null) {
+        String rawMappingString = metaData.getString(mappingKey, null);
+        if (rawMappingString == null) {
+          Log.e(
+              TAG,
+              "No loading unit to dynamic feature module name found. Ensure '"
+                  + mappingKey
+                  + "' is defined in the base module's AndroidManifest.");
+        } else {
+          for (String entry : rawMappingString.split(",")) {
+            String[] splitEntry = entry.split(":");
+            loadingUnitIdToModuleNames.put(Integer.parseInt(splitEntry[0]), splitEntry[1]);
+          }
+        }
+      }
+    }
   }
 
   public void installDeferredComponent(int loadingUnitId, String moduleName) {
     String resolvedModuleName =
-        moduleName != null ? moduleName : loadingUnitIdToModuleName(loadingUnitId);
+        moduleName != null ? moduleName : loadingUnitIdToModuleNames.get(loadingUnitId);
     if (resolvedModuleName == null) {
       Log.e(
           TAG,
@@ -297,7 +335,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
   public String getDeferredComponentInstallState(int loadingUnitId, String moduleName) {
     String resolvedModuleName =
-        moduleName != null ? moduleName : loadingUnitIdToModuleName(loadingUnitId);
+        moduleName != null ? moduleName : loadingUnitIdToModuleNames.get(loadingUnitId);
     if (resolvedModuleName == null) {
       Log.e(
           TAG,
@@ -400,7 +438,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
   public boolean uninstallDeferredComponent(int loadingUnitId, String moduleName) {
     String resolvedModuleName =
-        moduleName != null ? moduleName : loadingUnitIdToModuleName(loadingUnitId);
+        moduleName != null ? moduleName : loadingUnitIdToModuleNames.get(loadingUnitId);
     if (resolvedModuleName == null) {
       Log.e(
           TAG,
@@ -410,7 +448,9 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     List<String> modulesToUninstall = new ArrayList<>();
     modulesToUninstall.add(resolvedModuleName);
     splitInstallManager.deferredUninstall(modulesToUninstall);
-    sessionIdToState.delete(nameToSessionId.get(resolvedModuleName));
+    if (nameToSessionId.get(resolvedModuleName) != null) {
+      sessionIdToState.delete(nameToSessionId.get(resolvedModuleName));
+    }
     return true;
   }
 
