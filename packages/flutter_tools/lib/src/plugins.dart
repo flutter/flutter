@@ -440,7 +440,10 @@ class PluginInterfaceResolution {
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
-List<PluginInterfaceResolution> resolvePlatformInterfaces(List<Plugin> plugins) {
+List<PluginInterfaceResolution> resolvePlatformInterfaces(
+  List<Plugin> plugins, {
+  bool throwOnPluginPubspecError = true,
+}) {
   final List<String> platforms = <String>[
     LinuxPlugin.kConfigKey,
     MacOSPlugin.kConfigKey,
@@ -458,35 +461,28 @@ List<PluginInterfaceResolution> resolvePlatformInterfaces(List<Plugin> plugins) 
         continue;
       }
       final Map<String, dynamic> platformEntries = plugin.platforms[platform].toMap();
-      if (platformEntries[kDefaultPackage] == null &&
-          plugin.implement == null) {
-        throwToolExit(
-          'Plugin `${plugin.name}` doesn\'t specify which plugin interface it '
-          'implements. For example:\n'
-          'flutter:\n'
-          '  plugin:\n'
-          '    implements: <plugin-interface>\n'
-        );
-      }
       // The plugin doesn't implement an interface, verify that it has a default implementation.
       if (plugin.implement == null || plugin.implement.isEmpty) {
         final String defaultImplementation = platformEntries[kDefaultPackage] as String;
         if (defaultImplementation == null) {
-          throwToolExit(
-            'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
-            'a default implementation in pubspec.yaml.\n\n'
-            'To set a default implementation, use:\n'
-            'flutter:\n'
-            '  plugin:\n'
-            '    platforms:\n'
-            '      $platform:\n'
-            '        $kDefaultPackage: <plugin-implementation>\n'
-            '\n'
-            'To implement an interface, use:\n'
-            'flutter:\n'
-            '  plugin:\n'
-            '    implements: <plugin-interface>\n'
-          );
+          if (throwOnPluginPubspecError) {
+            throwToolExit(
+              'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+              'a default implementation in pubspec.yaml.\n\n'
+              'To set a default implementation, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    platforms:\n'
+              '      $platform:\n'
+              '        $kDefaultPackage: <plugin-implementation>\n'
+              '\n'
+              'To implement an interface, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    implements: <plugin-interface>\n'
+            );
+          }
+          continue;
         }
         defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
         continue;

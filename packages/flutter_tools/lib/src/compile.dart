@@ -349,7 +349,11 @@ Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File ne
     return false;
   }
   final List<Plugin> plugins = await findPlugins(rootProject);
-  final List<PluginInterfaceResolution> resolutions = resolvePlatformInterfaces(plugins);
+  final List<PluginInterfaceResolution> resolutions = resolvePlatformInterfaces(
+    plugins,
+    // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
+    throwOnPluginPubspecError: false,
+  );
 
   final StringBuffer importBuffer = StringBuffer();
   final Map<String, StringBuffer> registrantBuffer = <String, StringBuffer>{
