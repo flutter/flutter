@@ -383,16 +383,16 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     'pubspec.yaml',
   );
-  dynamic pubspec;
+  YamlMap dependencies;
   try {
-    pubspec = loadYaml(globals.fs.file(pubspecFile).readAsStringSync());
+    final dynamic pubspec = loadYaml(globals.fs.file(pubspecFile).readAsStringSync());
+    dependencies = pubspec['dependencies'] as YamlMap;
   } on YamlException catch (err) {
     if (throwOnError) {
       throwToolExit('Failed to parse pubspec.yaml $err');
     }
     globals.printTrace('Failed to parse pubspec.yaml $err');
   }
-  final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
@@ -403,7 +403,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     final Plugin plugin = _pluginFromPackage(
       package.name,
       packageRoot,
-      isDirectDependency: dependencies.keys.contains(package.name),
+      isDirectDependency: dependencies != null ?? dependencies.keys.contains(package.name),
     );
     if (plugin != null) {
       plugins.add(plugin);
