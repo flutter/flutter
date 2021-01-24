@@ -25,6 +25,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'compile.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -212,6 +213,9 @@ Future<T> runInContext<T>(
       ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
+      CompileConfig: () => CompileConfig(
+        generateDartPluginRegistrant: true,
+      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
         processManager: globals.processManager,

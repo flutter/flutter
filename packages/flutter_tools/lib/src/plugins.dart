@@ -35,10 +35,13 @@ class Plugin {
     @required this.path,
     @required this.platforms,
     @required this.dependencies,
+    @required this.isDirectDependency,
+    this.implement,
   }) : assert(name != null),
        assert(path != null),
        assert(platforms != null),
-       assert(dependencies != null);
+       assert(dependencies != null),
+       assert(isDirectDependency != null);
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -74,15 +77,30 @@ class Plugin {
     YamlMap pluginYaml,
     List<String> dependencies, {
     @required FileSystem fileSystem,
+    @required bool isDirectDependency,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies, fileSystem);
+      return Plugin._fromMultiPlatformYaml(
+        name,
+        path,
+        pluginYaml,
+        dependencies,
+        fileSystem,
+        isDirectDependency,
+      );
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies, fileSystem);
+    return Plugin._fromLegacyYaml(
+      name,
+      path,
+      pluginYaml,
+      dependencies,
+      fileSystem,
+      isDirectDependency,
+    );
   }
 
   factory Plugin._fromMultiPlatformYaml(
@@ -91,6 +109,7 @@ class Plugin {
     dynamic pluginYaml,
     List<String> dependencies,
     FileSystem fileSystem,
+    bool isDirectDependency,
   ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification $name.');
@@ -140,6 +159,8 @@ class Plugin {
       path: path,
       platforms: platforms,
       dependencies: dependencies,
+      isDirectDependency: isDirectDependency,
+      implement: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
     );
   }
 
@@ -149,6 +170,7 @@ class Plugin {
     dynamic pluginYaml,
     List<String> dependencies,
     FileSystem fileSystem,
+    bool isDirectDependency,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'] as String;
@@ -177,6 +199,7 @@ class Plugin {
       path: path,
       platforms: platforms,
       dependencies: dependencies,
+      isDirectDependency: isDirectDependency,
     );
   }
 
@@ -297,23 +320,27 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
-      return false;
-    }
     return true;
   }
 
   final String name;
   final String path;
 
+  /// The name of the interface package that this plugin implements.
+  final String implement;
+
   /// The name of the packages this plugin depends on.
   final List<String> dependencies;
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
+
+  /// Whether this plugin is a direct dependency of the app.
+  /// If [false], the plugin is a dependency of another plugin.
+  final bool isDirectDependency;
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, { bool isDirectDependency }) {
   final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
@@ -342,6 +369,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: globals.fs,
+    isDirectDependency: isDirectDependency,
   );
 }
 
@@ -351,6 +379,20 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     '.packages',
   );
+  final String pubspecFile = globals.fs.path.join(
+    project.directory.path,
+    'pubspec.yaml',
+  );
+  dynamic pubspec;
+  try {
+    pubspec = loadYaml(globals.fs.file(pubspecFile).readAsStringSync());
+  } on YamlException catch (err) {
+    if (throwOnError) {
+      throwToolExit('Failed to parse pubspec.yaml $err');
+    }
+    globals.printTrace('Failed to parse pubspec.yaml $err');
+  }
+  final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
@@ -358,12 +400,135 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
+    final Plugin plugin = _pluginFromPackage(
+      package.name,
+      packageRoot,
+      isDirectDependency: dependencies.keys.contains(package.name),
+    );
     if (plugin != null) {
       plugins.add(plugin);
     }
   }
   return plugins;
+}
+
+/// Metadata associated with the resolution of a platform interface of a plugin.
+class PluginInterfaceResolution {
+  PluginInterfaceResolution({
+    @required this.plugin,
+    this.platform,
+    this.dartClass,
+  }) : assert(plugin != null);
+
+  /// The plugin.
+  final Plugin plugin;
+  // The name of the platform that this plugin implements.
+  final String platform;
+  // The name of the Dart class.
+  String dartClass;
+}
+
+/// Resolves the platform implementations for Dart only plugins.
+///
+///   * If there are multiple direct pub dependencies on packages that implement the
+///     frontend plugin for the current platform, fail.
+///   * If there is a single direct dependency on a package that implements the
+///     frontend plugin for the target platform, this package is the selected implementation.
+///   * If there is no direct dependency on a package that implements the frontend
+///     plugin for the target platform, and the frontend plugin has a default implementation
+///     for the target platform the default implementation is selected.
+///   * Else fail.
+///
+///  For more details, https://flutter.dev/go/federated-plugins.
+List<PluginInterfaceResolution> resolvePlatformInterfaces(List<Plugin> plugins) {
+  final List<String> platforms = <String>[
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  ];
+  final Map<String, PluginInterfaceResolution> directDependencyResolutions
+      = <String, PluginInterfaceResolution>{};
+
+  final Map<String, String> defaultImplementations = <String, String>{};
+
+  for (final Plugin plugin in plugins) {
+    for (final String platform in platforms) {
+      // The plugin doesn't implement this platform.
+      if (plugin.platforms[platform] == null) {
+        continue;
+      }
+      final Map<String, dynamic> platformEntries = plugin.platforms[platform].toMap();
+      if (platformEntries[kDefaultPackage] == null &&
+          plugin.implement == null) {
+        throwToolExit(
+          'Plugin `${plugin.name}` doesn\'t specify which plugin interface it '
+          'implements. For example:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    implements: <plugin-interface>\n'
+        );
+      }
+      // The plugin doesn't implement an interface, verify that it has a default implementation.
+      if (plugin.implement == null || plugin.implement.isEmpty) {
+        final String defaultImplementation = platformEntries[kDefaultPackage] as String;
+        if (defaultImplementation == null) {
+          throwToolExit(
+            'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+            'a default implementation in pubspec.yaml.\n\n'
+            'To set a default implementation, use:\n'
+            'flutter:\n'
+            '  plugin:\n'
+            '    platforms:\n'
+            '      $platform:\n'
+            '        $kDefaultPackage: <plugin-implementation>\n'
+            '\n'
+            'To implement an interface, use:\n'
+            'flutter:\n'
+            '  plugin:\n'
+            '    implements: <plugin-interface>\n'
+          );
+        }
+        defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
+        continue;
+      }
+      if (platformEntries[kDartPluginClass] == null ||
+          platformEntries[kDartPluginClass] == 'none') {
+        continue;
+      }
+      final String resolutionKey = '$platform/${plugin.implement}';
+      if (directDependencyResolutions.containsKey(resolutionKey)) {
+        final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
+        if (currResolution.plugin.isDirectDependency && plugin.isDirectDependency) {
+          throwToolExit(
+            'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
+            'implemented by plugin `${currResolution.plugin.name}`.\n'
+            'To fix this issue, remove either dependency from pubspec.yaml.'
+          );
+        }
+        if (currResolution.plugin.isDirectDependency) {
+          // Use the plugin implementation added by the user as a direct dependency.
+          continue;
+        }
+      }
+      directDependencyResolutions[resolutionKey] = PluginInterfaceResolution(
+        plugin: plugin,
+        platform: platform,
+        dartClass: platformEntries[kDartPluginClass] as String,
+      );
+    }
+  }
+  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
+  for (final MapEntry<String, PluginInterfaceResolution> resolution in directDependencyResolutions.entries) {
+    if (resolution.value.plugin.isDirectDependency) {
+      finalResolution.add(resolution.value);
+    } else if (defaultImplementations.containsKey(resolution.key)) {
+      // Pick the default implementation.
+      if (defaultImplementations[resolution.key] == resolution.value.plugin.name) {
+        finalResolution.add(resolution.value);
+      }
+    }
+  }
+  return finalResolution;
 }
 
 // Key strings for the .flutter-plugins-dependencies file.
