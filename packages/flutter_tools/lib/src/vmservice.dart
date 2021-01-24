@@ -759,7 +759,7 @@ extension FlutterVmService on vm_service.VmService {
         ...?args,
       },
     );
-    return response.json;
+    return response?.json;
   }
 
   /// List all [FlutterView]s attached to the current VM.
