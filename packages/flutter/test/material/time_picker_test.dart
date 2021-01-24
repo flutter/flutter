@@ -958,7 +958,7 @@ class PickerObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is DialogRoute) {
       pickerCount++;
     }
     super.didPush(route, previousRoute);

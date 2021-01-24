@@ -1650,7 +1650,7 @@ void main() {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: Builder(builder: (BuildContext context) {
-          return RaisedButton(
+          return ElevatedButton(
             child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
@@ -1663,7 +1663,7 @@ void main() {
     ));
 
     final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.byType(RaisedButton)));
+    await gesture.down(tester.getCenter(find.byType(ElevatedButton)));
     await gesture.up();
 
     await tester.pumpAndSettle();
@@ -1734,7 +1734,7 @@ class DialogObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is CupertinoDialogRoute) {
       dialogCount++;
     }
     super.didPush(route, previousRoute);

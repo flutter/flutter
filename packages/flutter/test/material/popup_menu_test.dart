@@ -1876,6 +1876,34 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
   });
+
+  testWidgets('iconSize parameter tests', (WidgetTester tester) async {
+    Future<void> buildFrame({double? iconSize}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                iconSize: iconSize,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildFrame();
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
+
+    await buildFrame(iconSize: 50);
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+  });
 }
 
 class TestApp extends StatefulWidget {

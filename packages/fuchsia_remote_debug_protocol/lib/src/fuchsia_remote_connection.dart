@@ -473,12 +473,9 @@ class FuchsiaRemoteConnection {
   /// Removes any failing ports from the cache.
   Future<void> _checkPorts([ bool queueEvents = true ]) async {
     // Filters out stale ports after connecting. Ignores results.
-    await _invokeForAllVms<Map<String, dynamic>>(
+    await _invokeForAllVms<void>(
       (DartVm vmService) async {
-        final Map<String, dynamic> res =
-            await vmService.invokeRpc('getVersion');
-        _log.fine('DartVM(${vmService.uri}) version check result: $res');
-        return res;
+        await vmService.ping();
       },
       queueEvents,
     );

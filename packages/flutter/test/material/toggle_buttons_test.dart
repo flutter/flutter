@@ -891,13 +891,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -925,13 +918,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -958,13 +944,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.12),
-            strokeWidth: defaultBorderWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1005,13 +984,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: borderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -1041,13 +1013,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: selectedBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -1076,13 +1041,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: disabledBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
@@ -1509,6 +1467,80 @@ void main() {
       expect(tester.getCenter(find.text('First child')), const Offset(400.0, 349.0));
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/73725
+  testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: RepaintBoundary(
+            child: ToggleButtons(
+              borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The only button should be laid out at the center of the screen.
+    expect(tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
+
+    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+      return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+    }).toSet().toList();
+
+    // The first button paints the left, top and right sides with a path.
+    expect(
+      toggleButtonRenderObject[0],
+      paints
+      // left side, top and right - enabled.
+        ..path(
+          style: PaintingStyle.stroke,
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          strokeWidth: _defaultBorderWidth,
+        ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint.png'),
+    );
+  });
+
+  testWidgets('Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: RepaintBoundary(
+            child: ToggleButtons(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.elliptical(10, 0),
+                topLeft: Radius.elliptical(0, 10),
+                bottomRight: Radius.elliptical(0, 10),
+                bottomLeft: Radius.elliptical(10, 0),
+              ),
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint2.png'),
+    );
+  });
 
   testWidgets('ToggleButtons implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
