@@ -1002,8 +1002,7 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pump();
 
-    final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-    final ScrollController scrollController = listView.controller!;
+    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
     // Make sure there is no overscroll
     expect(scrollController.offset, scrollController.position.maxScrollExtent);
 
@@ -1863,8 +1862,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1900,8 +1898,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1937,8 +1934,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1974,8 +1970,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -2916,5 +2911,19 @@ void main() {
     expect(find.text('third').hitTestable(), findsOneWidget);
     expect(find.text('first').hitTestable(), findsNothing);
     expect(find.text('second').hitTestable(), findsNothing);
+  });
+
+  testWidgets('Dropdown menu is scrollable, then should show scroll bar', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      items: List<String>.generate(/*length=*/100, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    expect(scrollController.position.maxScrollExtent > 0, isTrue);
+    expect(find.byType(Scrollbar), paints..rect());
   });
 }
