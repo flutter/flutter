@@ -537,7 +537,9 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
 }
 
 void _printWarningDisabledPlatform(List<String> platforms) {
-  final  List<String> desktop = <String>[], web = <String>[];
+  final List<String> desktop = <String>[];
+  final List<String> web = <String>[];
+
   for (final String platform in platforms) {
     if (platform == 'web') {
       web.add(platform);
@@ -547,8 +549,11 @@ void _printWarningDisabledPlatform(List<String> platforms) {
   }
 
   if (desktop.isNotEmpty) {
+    final String platforms = desktop.length > 1 ? 'platforms' : 'platform';
+    final String verb = desktop.length > 1 ? 'are' : 'is';
+
     globals.printStatus('''
-The desktop ${desktop.length > 1 ? 'platforms' : 'platform'}: ${desktop.join(', ')} ${desktop.length > 1 ? 'are' : 'is'} currently not supported on your local environment.
+The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
 For more details, see: https://flutter.dev/desktop
 ''');
   }
