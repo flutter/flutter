@@ -315,58 +315,20 @@ void main() {
   testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: kGetSkSLsMethod,
-          args: <String, Object>{
-            'viewId': '1234',
-          },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kListViewsMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kScreenshotMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: kScreenshotSkpMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: 'setVMTimelineFlags',
-          args: <String, dynamic>{
-            'recordedStreams': <String>['test'],
-          },
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
-          method: 'getVMTimeline',
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
+        const FakeVmServiceRequest(method: kGetSkSLsMethod, args: <String, Object>{
+          'viewId': '1234',
+        }, errorCode: RPCErrorCodes.kServiceDisappeared),
+        const FakeVmServiceRequest(method: kListViewsMethod, errorCode: RPCErrorCodes.kServiceDisappeared),
       ]
     );
 
     final Map<String, Object> skSLs = await fakeVmServiceHost.vmService.getSkSLs(
       viewId: '1234',
     );
-    expect(skSLs, isNull);
+    expect(skSLs, null);
 
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
-    expect(views, isNull);
-
-    final vm_service.Response screenshot = await fakeVmServiceHost.vmService.screenshot();
-    expect(screenshot, isNull);
-
-    final vm_service.Response screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
-    expect(screenshotSkp, isNull);
-
-    // Checking that this doesn't throw.
-    await fakeVmServiceHost.vmService.setTimelineFlags(<String>['test']);
-
-    final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
-    expect(timeline, isNull);
+    expect(views, null);
 
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
