@@ -283,6 +283,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -360,7 +361,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
             data: IconThemeData(color: resolvedForegroundColor),
             child: Padding(
               padding: padding,
-              child: Center(
+              child: Align(
+                alignment: resolvedAlignment!,
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: widget.child,

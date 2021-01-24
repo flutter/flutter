@@ -622,4 +622,39 @@ void main() {
     recognized.clear();
     doubleTap.dispose();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/73667
+  testGesture('Unfinished DoubleTap does not prevent competing Tap', (GestureTester tester) {
+    int tapCount = 0;
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
+      ..onDoubleTap = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTap = () => tapCount++;
+
+    // Open a arena with 2 members and holding.
+    doubleTap.addPointer(down1);
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance!.gestureArena.sweep(1);
+
+    // Open a new arena with only one TapGestureRecognizer.
+    tester.async.elapse(const Duration(milliseconds: 100));
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    final PointerMoveEvent move2 = PointerMoveEvent(pointer: 2, position: down2.position);
+    tester.route(move2);
+    tester.route(up2);
+    expect(tapCount, 1); // The second tap will win immediately.
+    GestureBinding.instance!.gestureArena.sweep(2);
+
+    // Finish the previous gesture arena.
+    tester.async.elapse(const Duration(milliseconds: 300));
+    expect(tapCount, 1); // The first tap should not trigger onTap callback though it wins the arena.
+
+    tap.dispose();
+    doubleTap.dispose();
+  });
 }

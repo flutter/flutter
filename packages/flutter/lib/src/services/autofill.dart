@@ -479,6 +479,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  ///   As of iOS 14.2 this hint does not trigger autofill.
   /// * web: ["address-line2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine2 = 'streetAddressLine2';
