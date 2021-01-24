@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.deferredcomponents;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -19,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.ApplicationInfoLoader;
@@ -70,6 +72,9 @@ public class PlayStoreDeferredComponentManagerTest {
   private class TestPlayStoreDeferredComponentManager extends PlayStoreDeferredComponentManager {
     public TestPlayStoreDeferredComponentManager(Context context, FlutterJNI jni) {
       super(context, jni);
+      loadingUnitIdToModuleNames = new SparseArray<>();
+      loadingUnitIdToModuleNames.put(5, "FakeModuleName5");
+      loadingUnitIdToModuleNames.put(2, "FakeModuleName2");
     }
 
     @Override
@@ -222,5 +227,17 @@ public class PlayStoreDeferredComponentManagerTest {
     TestPlayStoreDeferredComponentManager playStoreManager =
         new TestPlayStoreDeferredComponentManager(spyContext, jni);
     assertEquals(playStoreManager.getDeferredComponentInstallState(-1, "invalidName"), "unknown");
+  }
+
+  @Test
+  public void loadingUnitMappingFindsMatch() throws NameNotFoundException {
+    TestFlutterJNI jni = new TestFlutterJNI();
+    Context spyContext = spy(RuntimeEnvironment.application);
+    TestPlayStoreDeferredComponentManager playStoreManager =
+        new TestPlayStoreDeferredComponentManager(spyContext, jni);
+
+    assertTrue(playStoreManager.uninstallDeferredComponent(5, null));
+    assertTrue(playStoreManager.uninstallDeferredComponent(2, null));
+    assertFalse(playStoreManager.uninstallDeferredComponent(3, null));
   }
 }
