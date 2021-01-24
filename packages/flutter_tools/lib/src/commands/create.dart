@@ -564,7 +564,7 @@ For more details, see: https://flutter.dev/desktop
   }
   if (web.isNotEmpty) {
     globals.printStatus('''
-The web is currently not supported on your local environment. 
+The web is currently not supported on your local environment.
 For more details, see: https://flutter.dev/docs/get-started/web
 ''');
   }
