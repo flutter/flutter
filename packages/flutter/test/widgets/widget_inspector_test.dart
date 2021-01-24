@@ -2835,6 +2835,31 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('http://127.0.0.1:9100/#/inspector?uri=http%3A%2F%2F127.0.0.1%3A55269%2F798ay5al_FM%3D%2F&inspectorRef=inspector-0'),
       );
     });
+
+    test('DevToolsDeepLinkProperty test', () {
+      final DevToolsDeepLinkProperty node =
+      DevToolsDeepLinkProperty(
+        'description of the deep link',
+        'the-deep-link',
+      );
+      expect(node.toString(), equals('description of the deep link'));
+      expect(node.name, isEmpty);
+      expect(node.value, equals('the-deep-link'));
+      expect(
+        node.toJsonMap(const DiagnosticsSerializationDelegate()),
+        equals(<String, dynamic>{
+          'description': 'description of the deep link',
+          'type': 'DevToolsDeepLinkProperty',
+          'name': '',
+          'style': 'singleLine',
+          'allowNameWrap': true,
+          'missingIfNull': false,
+          'propertyType': 'String',
+          'defaultLevel': 'info',
+          'value': 'the-deep-link',
+        }),
+      );
+    });
   }
 }
 

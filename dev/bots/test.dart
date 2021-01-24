@@ -1395,48 +1395,6 @@ CiProviders get ciProvider {
   return null;
 }
 
-String get ciProviderName {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return 'cirrusci';
-    case CiProviders.luci:
-      return 'luci';
-  }
-  return 'unknown';
-}
-
-int get prNumber {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_PR'] == null
-          ? -1
-          : int.tryParse(Platform.environment['CIRRUS_PR']);
-    case CiProviders.luci:
-      return -1; // LUCI doesn't know about this.
-  }
-  return -1;
-}
-
-String get ciUrl {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return 'https://cirrus-ci.com/task/${Platform.environment['CIRRUS_TASK_ID']}';
-    case CiProviders.luci:
-      return 'https://ci.chromium.org/p/flutter/g/framework/console'; // TODO(dnfield): can we get a direct link to the actual build?
-  }
-  return '';
-}
-
-String get gitHash {
-  switch(ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
-    case CiProviders.luci:
-      return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
-  }
-  return '';
-}
-
 /// Returns the name of the branch being tested.
 String get branchName {
   switch(ciProvider) {
