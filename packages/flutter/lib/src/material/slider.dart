@@ -166,7 +166,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       assert(precision==null || (precision >= 0 && precision <= 20)),
+       assert(precision == null || (precision >= 0 && precision <= 20)),
        super(key: key);
 
   /// Creates an adaptive [Slider] based on the target platform, following
@@ -204,7 +204,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       assert(precision==null || (precision >= 0 && precision <= 20)),
+       assert(precision == null || (precision >= 0 && precision <= 20)),
        super(key: key);
 
   /// The currently selected value for this slider.
