@@ -44,6 +44,15 @@ class KeyEventHandler : public KeyboardHookHandler {
   void TextHook(FlutterWindowsView* window,
                 const std::u16string& text) override;
 
+  // |KeyboardHookHandler|
+  void ComposeBeginHook() override;
+
+  // |KeyboardHookHandler|
+  void ComposeEndHook() override;
+
+  // |KeyboardHookHandler|
+  void ComposeChangeHook(const std::u16string& text, int cursor_pos) override;
+
  private:
   KEYBDINPUT* FindPendingEvent(uint64_t id);
   void RemovePendingEvent(uint64_t id);
