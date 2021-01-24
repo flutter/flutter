@@ -410,6 +410,52 @@ void main() {
     expect(updates, equals(1));
   });
 
+testWidgets('Slider respects precision value', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Center(
+                    child: SizedBox(
+                      width: 144.0 + 2 * 16.0, // _kPreferredTotalWidth
+                      child: Slider(
+                        key: sliderKey,
+                        min: 0.0,
+                        max: 100.0,
+                        divisions: 100,
+                        precision: 0,
+                        value: value,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(value, equals(0.0));
+    await tester.tap(find.byKey(sliderKey));
+    expect(value, equals(50.0));
+    await tester.drag(find.byKey(sliderKey), const Offset(10.0, 0.0));
+    expect(value, equals(58.0));
+  });
+
   testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;

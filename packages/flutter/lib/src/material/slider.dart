@@ -166,6 +166,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(precision==null || (precision >= 0 && precision <= 20)),
        super(key: key);
 
   /// Creates an adaptive [Slider] based on the target platform, following
@@ -203,6 +204,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(precision==null || (precision >= 0 && precision <= 20)),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -339,7 +341,9 @@ class Slider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
-  /// Precision for the value of slider.
+  /// Precision for value of the slider.
+  ///
+  /// Defaults to null. Must be an integer satisfying: 0 <= fractionDigits <= 20.
   final int? precision;
 
   /// A label to show above the slider when the slider is active.
@@ -539,15 +543,15 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  double _learpPrecision(double value){
+  double _preciseLerp(double value){
     return double.parse(value.toStringAsFixed(widget.precision!));
   }
 
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
     double lerpValue = _lerp(value);
-    if(widget.precision!=null){
-      lerpValue = _learpPrecision(lerpValue);
+    if (widget.precision != null) {
+      lerpValue = _preciseLerp(lerpValue);
     }
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
