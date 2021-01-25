@@ -713,12 +713,6 @@ mixin WidgetInspectorService {
     _instance = instance;
   }
 
-  /// Information about the VM service protocol for the running application.
-  ///
-  /// This information is necessary to provide Flutter DevTools deep links in
-  /// error messages.
-  developer.ServiceProtocolInfo? _serviceInfo;
-
   static bool _debugServiceExtensionsRegistered = false;
 
   /// Ground truth tracking what object(s) are currently selected used by both
@@ -982,12 +976,6 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
-    if (!kIsWeb) {
-      developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
-        _serviceInfo = info;
-      });
-    }
-
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -1399,13 +1387,10 @@ mixin WidgetInspectorService {
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
   String? _devToolsInspectorUriForElement(Element element) {
-    if (activeDevToolsServerAddress != null && _serviceInfo != null) {
-      final Uri? vmServiceUri = _serviceInfo!.serverUri;
-      if (vmServiceUri != null) {
-        final String? inspectorRef = toId(element, _consoleObjectGroup);
-        if (inspectorRef != null) {
-          return devToolsInspectorUri(vmServiceUri, inspectorRef);
-        }
+    if (activeDevToolsServerAddress != null && connectedVmServiceUri != null) {
+      final String? inspectorRef = toId(element, _consoleObjectGroup);
+      if (inspectorRef != null) {
+        return devToolsInspectorUri(inspectorRef);
       }
     }
     return null;
@@ -1414,10 +1399,13 @@ mixin WidgetInspectorService {
   /// Returns the DevTools inspector uri for the given vm service connection and
   /// inspector reference.
   @visibleForTesting
-  String devToolsInspectorUri(Uri vmServiceUri, String inspectorRef) {
+  String devToolsInspectorUri(String inspectorRef) {
+    assert(activeDevToolsServerAddress != null);
+    assert(connectedVmServiceUri != null);
+
     final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
       queryParameters: <String, dynamic>{
-        'uri': '$vmServiceUri',
+        'uri': connectedVmServiceUri!,
         'inspectorRef': inspectorRef,
       },
     );
@@ -2958,7 +2946,6 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     element.visitAncestorElements(processElement);
   return nodes;
 }
-
 
 /// Debugging message for DevTools deep links.
 ///
