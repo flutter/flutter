@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -120,6 +121,11 @@ class ColdRunner extends ResidentRunner {
       appFinished();
     }
 
+    if (debuggingEnabled) {
+      unawaited(maybeCallDevToolsUriServiceExtension());
+      unawaited(callConnectedVmServiceUriExtension());
+    }
+
     appStartedCompleter?.complete();
 
     writeVmServiceFile();
@@ -147,7 +153,7 @@ class ColdRunner extends ResidentRunner {
         serveDevToolsGracefully(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         ),
-      ]);
+      ], eagerError: true);
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
@@ -161,6 +167,10 @@ class ColdRunner extends ResidentRunner {
         globals.printTrace('Connected to $view.');
       }
     }
+
+    unawaited(maybeCallDevToolsUriServiceExtension());
+    unawaited(callConnectedVmServiceUriExtension());
+
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();

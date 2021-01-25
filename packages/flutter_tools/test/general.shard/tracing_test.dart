@@ -130,6 +130,29 @@ void main() {
     });
   });
 
+  testWithoutContext('throws tool exit if the vmservice disconnects', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[
+      ...vmServiceSetup,
+      const FakeVmServiceRequest(
+        method: 'getVMTimeline',
+        errorCode: RPCErrorCodes.kServiceDisappeared,
+      ),
+      const FakeVmServiceRequest(
+        method: 'setVMTimelineFlags',
+        args: <String, Object>{
+          'recordedStreams': <Object>[],
+        },
+      ),
+    ]);
+
+    await expectLater(() async => await downloadStartupTrace(fakeVmServiceHost.vmService,
+      output: fileSystem.currentDirectory,
+      logger: logger,
+    ), throwsToolExit(message: 'The device disconnected before the timeline could be retrieved.'));
+  });
+
   testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();

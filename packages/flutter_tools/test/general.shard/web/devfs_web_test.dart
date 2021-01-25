@@ -1003,6 +1003,27 @@ void main() {
     expect(response.statusCode, 404);
   }));
 
+  test('WebAssetServer strips leading base href off off asset requests', () => testbed.run(() async {
+    const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+    globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(htmlContent);
+    final WebAssetServer webAssetServer = WebAssetServer(
+      MockHttpServer(),
+      PackageConfig.empty,
+      InternetAddress.anyIPv4,
+      <String, String>{},
+      <String, String>{},
+      NullSafetyMode.sound,
+    );
+
+    expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
+    // Not base href.
+    expect(() async  => await webAssetServer.metadataContents('bar/main_module.ddc_merged_metadata'), throwsException);
+  }));
+
   test('DevFS URI includes any specified base path.', () => testbed.run(() async {
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);

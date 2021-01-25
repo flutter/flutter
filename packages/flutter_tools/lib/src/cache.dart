@@ -1793,10 +1793,14 @@ class ArtifactUpdater {
 
       try {
         extractor(tempFile, location);
-      } on Exception {
+      } on Exception catch (err) {
         retries -= 1;
         if (retries == 0) {
-          rethrow;
+          throwToolExit(
+            'Flutter could not download and/or extract $url. Ensure you have '
+            'network connectivity and all of the required dependencies listed at'
+            'flutter.dev/setup.\nThe original exception was: $err.'
+          );
         }
         _deleteIgnoringErrors(tempFile);
         continue;
