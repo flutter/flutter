@@ -28,7 +28,7 @@ class SkiaFontCollection {
   final Map<String, List<SkTypeface>> familyToTypefaceMap =
       <String, List<SkTypeface>>{};
 
-  final List<String> globalFontFallbacks = <String>[];
+  final List<String> globalFontFallbacks = <String>['Roboto'];
 
   final Map<String, int> _fontFallbackCounts = <String, int>{};
 
@@ -178,6 +178,7 @@ class SkiaFontCollection {
   void debugResetFallbackFonts() {
     _registeredFallbackFonts.clear();
     globalFontFallbacks.clear();
+    globalFontFallbacks.add('Roboto');
     _fontFallbackCounts.clear();
   }
 
