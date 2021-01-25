@@ -25,7 +25,6 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
-import 'compile.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -47,6 +46,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'plugins.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -213,7 +213,7 @@ Future<T> runInContext<T>(
       ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      CompileConfig: () => CompileConfig(
+      PluginRegistrantConfig: () => PluginRegistrantConfig(
         generateDartPluginRegistrant: true,
       ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(

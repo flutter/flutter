@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
@@ -445,6 +446,14 @@ class PluginInterfaceResolution {
   final String platform;
   // The name of the Dart class.
   final String dartClass;
+
+  Map<String, String> toMap() {
+    return <String, String> {
+      'pluginName': plugin.name,
+      'dartClass': dartClass,
+      'platform': platform,
+    };
+  }
 }
 
 /// Resolves the platform implementations for Dart only plugins.
@@ -862,6 +871,74 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   );
 }
 
+PluginRegistrantConfig get pluginRegistrantConfig => context.get<PluginRegistrantConfig>();
+
+/// Plugin registrant configuration.
+class PluginRegistrantConfig {
+  PluginRegistrantConfig({
+    this.generateDartPluginRegistrant = false,
+  }) : assert(generateDartPluginRegistrant != null);
+
+  /// Whether to enable the generation of the Dart plugin registrant.
+  /// This generates a new main.dart which wraps the entrypoint,
+  /// and includes a _registerPlugin function.
+  final bool generateDartPluginRegistrant;
+}
+
+/// Generates the Dart plugin registrant, which allows to bind a platform
+/// implementation of a Dart only plugin to its interface.
+/// The new entrypoint wraps [currentMainUri], adds a _registerPlugins function,
+/// and writes the file to [newMainDart].
+///
+/// Returns [true] if it's necessary to create a plugin registrant, and
+/// if the new entrypoint was written to disk.
+///
+/// For more details, see https://flutter.dev/go/federated-plugins.
+Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) async {
+  if (!pluginRegistrantConfig.generateDartPluginRegistrant) {
+    return false;
+  }
+  final FlutterProject rootProject = FlutterProject.current();
+  final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
+      rootProject.packagesFile.existsSync() &&
+      rootProject.packageConfigFile.existsSync();
+  if (!hasPlugins) {
+    return false;
+  }
+  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<PluginInterfaceResolution> resolutions = resolvePlatformInterfaces(
+    plugins,
+    // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
+    throwOnPluginPubspecError: false,
+  );
+  final Map<String, dynamic> templateContext = <String, dynamic>{
+    'mainEntrypoint': currentMainUri,
+    LinuxPlugin.kConfigKey: <dynamic>[],
+    MacOSPlugin.kConfigKey: <dynamic>[],
+    WindowsPlugin.kConfigKey: <dynamic>[],
+  };
+  bool didFindPlugin = false;
+  for (final PluginInterfaceResolution resolution in resolutions) {
+    assert(templateContext.containsKey(resolution.platform));
+    (templateContext[resolution.platform] as List<dynamic>).add(resolution.toMap());
+    didFindPlugin = true;
+  }
+  if (!didFindPlugin) {
+    return false;
+  }
+  try {
+    _renderTemplateToFile(
+      _dartPluginRegistryForDesktopTemplate,
+      templateContext,
+      newMainDart.path,
+    );
+    return true;
+  } on FileSystemException catch (error) {
+    throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
+    return false;
+  }
+}
+
 const String _objcPluginRegistryHeaderTemplate = '''
 //
 //  Generated file. Do not edit.
@@ -955,7 +1032,7 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
-const String _dartPluginRegistryTemplate = '''
+const String _dartPluginRegistryForWebTemplate = '''
 //
 // Generated file. Do not edit.
 //
@@ -974,6 +1051,45 @@ void registerPlugins(Registrar registrar) {
   {{class}}.registerWith(registrar);
 {{/plugins}}
   registrar.registerMessageHandler();
+}
+''';
+
+// TODO(egarciad): Evaluate merging the web and desktop plugin registry templates.
+const String _dartPluginRegistryForDesktopTemplate = '''
+//
+// Generated file. Do not edit.
+//
+
+import '{{mainEntrypoint}}' as entrypoint;
+import 'dart:io';
+{{#linux}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/linux}}
+{{#macos}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/macos}}
+{{#windows}}
+import 'package:{{pluginName}}/{{pluginName}}.dart';
+{{/windows}}
+
+@pragma('vm:entry-point')
+void _registerPlugins() {
+  if (Platform.isLinux) {
+    {{#linux}}
+      {{dartClass}}.registerWith();
+    {{/linux}}
+  } else if (Platform.isMacOS) {
+    {{#macos}}
+      {{dartClass}}.registerWith();
+    {{/macos}}
+  } else if (Platform.isWindows) {
+    {{#windows}}
+      {{dartClass}}.registerWith();
+    {{/windows}}
+  }
+}
+void main() {
+  entrypoint.main();
 }
 ''';
 
@@ -1218,7 +1334,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
     return ErrorHandlingFileSystem.deleteIfExists(file);
   } else {
     _renderTemplateToFile(
-      _dartPluginRegistryTemplate,
+      _dartPluginRegistryForWebTemplate,
       context,
       filePath,
     );

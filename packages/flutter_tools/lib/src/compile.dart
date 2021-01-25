@@ -11,7 +11,6 @@ import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -19,9 +18,7 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
-import 'platform_plugins.dart';
 import 'plugins.dart';
-import 'project.dart';
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -313,92 +310,6 @@ class KernelCompiler {
       return _stdoutHandler.compilerOutput.future;
     }
     return null;
-  }
-}
-
-CompileConfig get compileConfig => context.get<CompileConfig>();
-
-/// Compile configuration for the kernel and resident compilers.
-class CompileConfig {
-  CompileConfig({
-    this.generateDartPluginRegistrant = false,
-  }) : assert(generateDartPluginRegistrant != null);
-
-  /// Whether to enable the generation of the Dart plugin registrant.
-  /// This generates a new main.dart which wraps the entrypoint,
-  /// and includes a _registerPlugin function.
-  final bool generateDartPluginRegistrant;
-}
-
-/// Generates the Dart plugin registrant, which allows to bind a platform
-/// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds a _registerPlugins function,
-/// and writes the file to [newMainDart].
-///
-/// Returns [true] if it's necessary to create a plugin registrant, and
-/// if the new entrypoint was written to disk.
-///
-/// For more details, see https://flutter.dev/go/federated-plugins.
-Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) async {
-  if (!compileConfig.generateDartPluginRegistrant) {
-    return false;
-  }
-  final FlutterProject rootProject = FlutterProject.current();
-  final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
-      rootProject.packagesFile.existsSync() &&
-      rootProject.packageConfigFile.existsSync();
-  if (!hasPlugins) {
-    return false;
-  }
-  final List<Plugin> plugins = await findPlugins(rootProject);
-  final List<PluginInterfaceResolution> resolutions = resolvePlatformInterfaces(
-    plugins,
-    // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
-    throwOnPluginPubspecError: false,
-  );
-
-  final StringBuffer importBuffer = StringBuffer();
-  final Map<String, StringBuffer> registrantBuffer = <String, StringBuffer>{
-    LinuxPlugin.kConfigKey: StringBuffer(),
-    MacOSPlugin.kConfigKey: StringBuffer(),
-    WindowsPlugin.kConfigKey: StringBuffer(),
-  };
-
-  for (final PluginInterfaceResolution resolution in resolutions) {
-    assert(registrantBuffer.containsKey(resolution.platform));
-    final String pluginName = resolution.plugin.name;
-    importBuffer.write('import \'package:$pluginName/$pluginName.dart\';\n');
-    registrantBuffer[resolution.platform].write('${resolution.dartClass}.registerWith();\n');
-  }
-  if (importBuffer.isEmpty || registrantBuffer.isEmpty) {
-    return false;
-  }
-  try {
-  newMainDart.writeAsStringSync('''
-// Auto generated. Do not edit!
-
-import '$currentMainUri' as entrypoint;
-import 'dart:io';
-${importBuffer.toString().trimRight()}
-
-@pragma('vm:entry-point')
-void _registerPlugins() {
-  if (Platform.isLinux) {
-    ${registrantBuffer[LinuxPlugin.kConfigKey].toString().trimRight()}
-  } else if (Platform.isMacOS) {
-    ${registrantBuffer[MacOSPlugin.kConfigKey].toString().trimRight()}
-  } else if (Platform.isWindows) {
-    ${registrantBuffer[WindowsPlugin.kConfigKey].toString().trimRight()}
-  }
-}
-void main() {
-  entrypoint.main();
-}
-''');
-    return true;
-  } on FileSystemException catch (error) {
-    throwToolExit('Unable to write ${newMainDart.path}, received error: $error');
-    return false;
   }
 }
 
