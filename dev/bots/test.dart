@@ -301,6 +301,8 @@ Future<void> _runToolTests() async {
         forceSingleCore: subshard != 'general',
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         enableFlutterToolAsserts: subshard != 'general',
+        // Detect unit test time regressions (poor time delay handling, etc).
+        perTestTimeout: (subshard == 'general') ? const Duration(seconds: 2) : null,
       );
     },
   );
