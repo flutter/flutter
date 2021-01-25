@@ -1450,34 +1450,36 @@ abstract class ResidentRunner {
 
   // Clears the screen.
   void clearScreen() => globals.logger.clear();
+}
 
-  Future<vm_service.Isolate> waitForExtension(vm_service.VmService vmService, String extension) async {
-    final Completer<void> completer = Completer<void>();
-    try {
-      await vmService.streamListen(vm_service.EventStreams.kExtension);
-    } on Exception {
-      // do nothing
-    }
-    StreamSubscription<vm_service.Event> extensionStream;
-    extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
-      if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-        // The 'Flutter.FrameworkInitialization' event is sent on hot restart
-        // as well, so make sure we don't try to complete this twice.
-        if (!completer.isCompleted) {
-          completer.complete();
-          extensionStream.cancel();
-        }
+@visibleForTesting
+Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
+  final Completer<void> completer = Completer<void>();
+  try {
+    await vmService.streamListen(vm_service.EventStreams.kExtension);
+  } on Exception {
+    // do nothing
+  }
+  StreamSubscription<vm_service.Event> extensionStream;
+  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
+    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
+      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
+      // as well, so make sure we don't try to complete this twice.
+      if (!completer.isCompleted) {
+        completer.complete();
+        extensionStream.cancel();
       }
-    });
-    final vm_service.IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
+    }
+  });
+  final vm_service.VM vm = await vmService.getVM();
+  if (vm.isolates.isNotEmpty) {
+    final vm_service.IsolateRef isolateRef = vm.isolates.first;
     final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
     if (isolate.extensionRPCs.contains(extension)) {
-      return isolate;
+      return;
     }
-    await completer.future;
-    return isolate;
   }
-
+  await completer.future;
 }
 
 class OperationResult {
