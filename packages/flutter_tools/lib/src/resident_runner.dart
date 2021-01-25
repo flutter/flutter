@@ -275,6 +275,9 @@ class FlutterDevice {
             existingDds = true;
           }
         } on Exception catch (e, st) {
+          if (e is ToolExit) {
+            rethrow;
+          }
           handleError(e, st);
           return;
         }
