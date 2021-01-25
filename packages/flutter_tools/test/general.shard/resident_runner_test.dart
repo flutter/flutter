@@ -2762,7 +2762,7 @@ void main() {
     await residentRunner.run();
     // Await a short delay so that we don't try to exit before all the expected
     // VM service requests have been fired.
-    await Future<void>.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
 
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
