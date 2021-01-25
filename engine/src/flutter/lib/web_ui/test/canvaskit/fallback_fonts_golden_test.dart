@@ -51,6 +51,10 @@ void testMain() {
       ui.window.onPlatformMessage = savedCallback;
     });
 
+    test('Roboto is always a fallback font', () {
+      expect(skiaFontCollection.globalFontFallbacks, contains('Roboto'));
+    });
+
     test('will download Noto Naskh Arabic if Arabic text is added', () async {
       final Completer<void> fontChangeCompleter = Completer<void>();
       // Intercept the system font change message.
@@ -83,7 +87,7 @@ void testMain() {
 }
 ''';
 
-      expect(skiaFontCollection.globalFontFallbacks, isEmpty);
+      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -123,7 +127,7 @@ void testMain() {
               'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic+UI'] =
           'invalid CSS... this should cause our parser to fail';
 
-      expect(skiaFontCollection.globalFontFallbacks, isEmpty);
+      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -136,7 +140,7 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
 
       expect(notoDownloadQueue.isPending, isFalse);
-      expect(skiaFontCollection.globalFontFallbacks, isEmpty);
+      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
