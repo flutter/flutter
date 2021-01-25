@@ -2947,10 +2947,6 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   return nodes;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 35b9288e13b03d346c4f46106b9df4c408b7ff06
 /// Debugging message for DevTools deep links.
 ///
 /// The [value] for this property is a string representation of the Flutter
