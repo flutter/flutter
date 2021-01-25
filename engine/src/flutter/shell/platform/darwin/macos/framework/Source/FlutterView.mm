@@ -27,6 +27,7 @@
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
+    [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     _reshapeListener = reshapeListener;
     _resizableBackingStoreProvider = [[FlutterMetalResizableBackingStoreProvider alloc]
         initWithDevice:device
@@ -44,7 +45,14 @@
 }
 
 - (CALayer*)makeBackingLayer {
-  return [CAMetalLayer layer];
+  CAMetalLayer* metalLayer = [CAMetalLayer layer];
+  // This is set to true to synchronize the presentation of the layer and its contents with Core
+  // Animation. When presenting the texture see `[FlutterMetalResizableBackingStoreProvider
+  // resizeSynchronizerCommit:]` we start a CATransaction and wait for the command buffer to be
+  // scheduled. This ensures that the resizing process is smooth.
+  metalLayer.presentsWithTransaction = YES;
+  metalLayer.autoresizingMask = kCALayerHeightSizable | kCALayerWidthSizable;
+  return metalLayer;
 }
 #endif
 

@@ -78,14 +78,19 @@
 }
 
 - (void)resizeSynchronizerFlush:(nonnull FlutterResizeSynchronizer*)synchronizer {
-  // TODO (kaushikiska): Support smooth resizing on Metal.
+  // no-op when using Metal rendering backend.
 }
 
 - (void)resizeSynchronizerCommit:(nonnull FlutterResizeSynchronizer*)synchronizer {
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
   [commandBuffer commit];
   [commandBuffer waitUntilScheduled];
   [_surfaceManager swapBuffers];
+
+  [CATransaction commit];
 }
 
 @end
