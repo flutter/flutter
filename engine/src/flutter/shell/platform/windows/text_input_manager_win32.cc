@@ -6,7 +6,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/text_input_manager.h"
+#include "flutter/shell/platform/windows/text_input_manager_win32.h"
 
 #include <imm.h>
 
@@ -14,11 +14,11 @@
 
 namespace flutter {
 
-void TextInputManager::SetWindowHandle(HWND window_handle) {
+void TextInputManagerWin32::SetWindowHandle(HWND window_handle) {
   window_handle_ = window_handle;
 }
 
-void TextInputManager::CreateImeWindow() {
+void TextInputManagerWin32::CreateImeWindow() {
   if (window_handle_ == nullptr) {
     return;
   }
@@ -35,7 +35,7 @@ void TextInputManager::CreateImeWindow() {
   UpdateImeWindow();
 }
 
-void TextInputManager::DestroyImeWindow() {
+void TextInputManagerWin32::DestroyImeWindow() {
   if (window_handle_ == nullptr) {
     return;
   }
@@ -47,7 +47,7 @@ void TextInputManager::DestroyImeWindow() {
   ime_active_ = false;
 }
 
-void TextInputManager::UpdateImeWindow() {
+void TextInputManagerWin32::UpdateImeWindow() {
   if (window_handle_ == nullptr) {
     return;
   }
@@ -59,7 +59,7 @@ void TextInputManager::UpdateImeWindow() {
   }
 }
 
-void TextInputManager::UpdateCaretRect(const Rect& rect) {
+void TextInputManagerWin32::UpdateCaretRect(const Rect& rect) {
   caret_rect_ = rect;
 
   if (window_handle_ == nullptr) {
@@ -74,7 +74,7 @@ void TextInputManager::UpdateCaretRect(const Rect& rect) {
   }
 }
 
-long TextInputManager::GetComposingCursorPosition() const {
+long TextInputManagerWin32::GetComposingCursorPosition() const {
   if (window_handle_ == nullptr) {
     return false;
   }
@@ -90,15 +90,16 @@ long TextInputManager::GetComposingCursorPosition() const {
   return -1;
 }
 
-std::optional<std::u16string> TextInputManager::GetComposingString() const {
+std::optional<std::u16string> TextInputManagerWin32::GetComposingString()
+    const {
   return GetString(GCS_COMPSTR);
 }
 
-std::optional<std::u16string> TextInputManager::GetResultString() const {
+std::optional<std::u16string> TextInputManagerWin32::GetResultString() const {
   return GetString(GCS_RESULTSTR);
 }
 
-std::optional<std::u16string> TextInputManager::GetString(int type) const {
+std::optional<std::u16string> TextInputManagerWin32::GetString(int type) const {
   if (window_handle_ == nullptr || !ime_active_) {
     return std::nullopt;
   }
@@ -121,7 +122,7 @@ std::optional<std::u16string> TextInputManager::GetString(int type) const {
   return std::nullopt;
 }
 
-void TextInputManager::MoveImeWindow(HIMC imm_context) {
+void TextInputManagerWin32::MoveImeWindow(HIMC imm_context) {
   if (GetFocus() != window_handle_ || !ime_active_) {
     return;
   }

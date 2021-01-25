@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-#include "flutter/shell/platform/windows/text_input_manager.h"
+#include "flutter/shell/platform/windows/text_input_manager_win32.h"
 
 namespace flutter {
 
@@ -183,7 +183,7 @@ class Win32Window {
   int keycode_for_char_message_ = 0;
 
  protected:
-  TextInputManager text_input_manager_;
+  TextInputManagerWin32 text_input_manager_;
 };
 
 }  // namespace flutter
