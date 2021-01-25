@@ -2916,7 +2916,7 @@ void main() {
     expect(find.text('second').hitTestable(), findsNothing);
   });
 
-  testWidgets('Dropdown menu is scrollable, then should show scroll bar', (WidgetTester tester) async {
+  testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(
       value: '0',
       items: List<String>.generate(/*length=*/100, (int index) => index.toString()),
