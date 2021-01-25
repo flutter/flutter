@@ -53,7 +53,7 @@
   "refreshIndicatorSemanticLabel": "Freskatu",
   "moreButtonTooltip": "Gehiago",
   "dateSeparator": "/",
-  "dateHelpText": "hh/ee/uuuu",
+  "dateHelpText": "uuuu/hh/ee",
   "selectYearSemanticsLabel": "Hautatu urtea",
   "unspecifiedDate": "Data",
   "unspecifiedDateRange": "Data tartea",
