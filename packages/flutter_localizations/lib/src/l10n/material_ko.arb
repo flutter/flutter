@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "새로고침",
   "moreButtonTooltip": "더보기",
   "dateSeparator": ".",
-  "dateHelpText": "yyyy/mm/dd",
+  "dateHelpText": "yyyy.mm.dd",
   "selectYearSemanticsLabel": "연도 선택",
   "unspecifiedDate": "날짜",
   "unspecifiedDateRange": "기간",
