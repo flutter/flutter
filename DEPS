@@ -504,7 +504,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/mac-amd64',
-        'version': 'git_revision:7d48eff8ba172216fca3649a3c452de4c7c16c00' 
+        'version': '139p8dSfWkDS3XU7olg1SCcPowC4MokiYUR5u2aqDOMC' 
       }
     ],
     'condition': 'host_os == "mac"',
