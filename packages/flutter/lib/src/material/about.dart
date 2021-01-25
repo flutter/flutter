@@ -1205,9 +1205,9 @@ class _MasterDetailFlow extends StatefulWidget {
     assert(() {
       if (pageOpener == null) {
         throw FlutterError(
-          'Master Detail operation requested with a context that does not include a Master Detail'
-          ' Flow.\nThe context used to open a detail page from the Master Detail Flow must be'
-          ' that of a widget that is a descendant of a Master Detail Flow widget.'
+          'Master Detail operation requested with a context that does not include a Master Detail '
+          'Flow.\nThe context used to open a detail page from the Master Detail Flow must be '
+          'that of a widget that is a descendant of a Master Detail Flow widget.'
         );
       }
       return true;
