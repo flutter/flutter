@@ -324,7 +324,7 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
+    if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
       return true;
     }
     return false;
@@ -334,7 +334,7 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
+    if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
       return false;
     }
     return true;

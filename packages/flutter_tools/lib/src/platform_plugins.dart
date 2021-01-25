@@ -230,7 +230,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'macos';
@@ -285,7 +287,9 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     if (yaml == null) {
       return false;
     }
-    return yaml[kDartPluginClass] is String || yaml[kPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'windows';
@@ -341,7 +345,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     if (yaml == null) {
       return false;
     }
-    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
+    return yaml[kPluginClass] is String ||
+           yaml[kDartPluginClass] is String ||
+           yaml[kDefaultPackage] is String;
   }
 
   static const String kConfigKey = 'linux';
