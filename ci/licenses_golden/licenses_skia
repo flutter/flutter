@@ -1,4 +1,4 @@
-Signature: 37c325466ba05fe161d179a7870f75df
+Signature: 6bd5732229921ccf7d203881a71f4a59
 
 UNUSED LICENSES:
 
@@ -1122,9 +1122,8 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-iOS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-ASAN.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-Metal.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac10.15.5-Clang-arm64-Debug-iOS.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac10.15.7-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-arm64-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Win-Clang-x86_64-Debug-ANGLE.json
@@ -4226,8 +4225,6 @@ FILE: ../../../third_party/skia/docs/examples/Canvas_drawArc_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawArc_b.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_2.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_3.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmap.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapRect.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapRect_2.cpp
