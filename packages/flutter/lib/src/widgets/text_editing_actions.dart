@@ -1,12 +1,15 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextEditingAction;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter/widgets.dart';
+
+import 'text_editing_action.dart';
 
 class AltArrowLeftTextIntent extends Intent {}
 class AltArrowRightTextIntent extends Intent {}
@@ -19,15 +22,19 @@ class ControlCTextIntent extends Intent {}
 class MetaCTextIntent extends Intent {}
 class ShiftArrowLeftTextIntent extends Intent {}
 class ShiftArrowRightTextIntent extends Intent {}
+class SingleTapUpTextIntent extends Intent {
+  const SingleTapUpTextIntent({
+    required this.details,
+  });
 
+  final TapUpDetails details;
+}
 class TapDownTextIntent extends Intent {
   const TapDownTextIntent({
     required this.details,
-    required this.renderEditable,
   });
 
   final TapDownDetails details;
-  final RenderEditable renderEditable;
 }
 
 // TODO(justinmc): Document.
@@ -38,23 +45,30 @@ class TapDownTextIntent extends Intent {
 ///
 /// * [Actions], the widget that accepts a map like this.
 class TextEditingActions extends StatelessWidget {
+  /// Creates an instance of TextEditingActions.
   TextEditingActions({
     Key? key,
     // TODO(justinmc): Is additionalActions a good way to do this?
     Map<Type, Action<Intent>>? additionalActions,
     required this.child,
-  }) : this.additionalActions = additionalActions ?? Map<Type, Action<Intent>>(),
+  }) : additionalActions = additionalActions ?? <Type, Action<Intent>>{},
        super(key: key);
 
+  /// The child [Widget] of TextEditingActions.
   final Widget child;
 
+  /// The actions to be merged with the default text editing actions.
+  ///
+  /// The default text editing actions will override any conflicting keys in
+  /// additionalActions. To override the default text editing actions, use an
+  /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
 
-  final CallbackAction<SingleTapUpTextIntent> _singleTapUpTextAction = CallbackAction<SingleTapUpTextIntent>(
-    onInvoke: (SingleTapUpTextIntent intent) {
+  final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
+    onInvoke: (SingleTapUpTextIntent intent, EditableTextState editableTextState) {
       print('justin TEB singleTapUp action invoked');
-      intent.editableTextState.hideToolbar();
-      if (intent.editableTextState.widget.selectionEnabled) {
+      editableTextState.hideToolbar();
+      if (editableTextState.widget.selectionEnabled) {
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
@@ -63,13 +77,13 @@ class TextEditingActions extends StatelessWidget {
               case PointerDeviceKind.stylus:
               case PointerDeviceKind.invertedStylus:
                 // Precise devices should place the cursor at a precise position.
-                intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+                editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
                 break;
               case PointerDeviceKind.touch:
               case PointerDeviceKind.unknown:
                 // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
                 // of the word.
-                intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+                editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
                 break;
             }
             break;
@@ -77,7 +91,7 @@ class TextEditingActions extends StatelessWidget {
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+            editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
             break;
         }
       }
@@ -99,11 +113,11 @@ class TextEditingActions extends StatelessWidget {
   /// See also:
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
-  final CallbackAction<TapDownTextIntent> _tapDownTextAction = CallbackAction<TapDownTextIntent>(
-    onInvoke: (TapDownTextIntent intent) {
+  final TextEditingAction<TapDownTextIntent> _tapDownTextAction = TextEditingAction<TapDownTextIntent>(
+    onInvoke: (TapDownTextIntent intent, EditableTextState editableTextState) {
       // TODO(justinmc): Should be no handling anything in renderEditable, it
       // should just receive commands to do specific things.
-      intent.renderEditable.handleTapDown(intent.details);
+      editableTextState.renderEditable.handleTapDown(intent.details);
       // The selection overlay should only be shown when the user is interacting
       // through a touch screen (via either a finger or a stylus). A mouse shouldn't
       // trigger the selection overlay.

@@ -60,81 +60,6 @@ class SingleTapCancelTextIntent extends Intent {
   const SingleTapCancelTextIntent();
 }
 
-class SingleTapUpTextIntent extends Intent {
-  const SingleTapUpTextIntent({
-    required this.details,
-    required this.editableTextState,
-  });
-
-  final TapUpDetails details;
-  final EditableTextState editableTextState;
-}
-
-// TODO(justinmc): Instead of passing in editableTextState like this, should I
-// create a hardcoded Intent type that has it?
-// Or, should _editableTextState be public but protected?
-/// The signature of a callback accepted by [TextEditingAction].
-typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
-  T intent,
-  EditableTextState editableTextState,
-);
-
-/// An [Action] related to editing text.
-///
-/// If an [EditableText] is currently focused, the given [onInvoke] callback
-/// will be called with the [EditableTextState]. If not, then [isEnabled] will
-/// be false and [onInvoke] will not be called.
-///
-/// See also:
-///
-///  * [CallbackAction], which is a similar Action type but unrelated to text
-///    editing.
-class TextEditingAction<T extends Intent> extends Action<T> {
-  ///   /// A constructor for a [TextEditingAction].
-  ///
-  /// The [onInvoke] parameter must not be null.
-  /// The [onInvoke] parameter is required.
-  TextEditingAction({required this.onInvoke}) : assert(onInvoke != null);
-
-  EditableTextState? get _editableTextState {
-    // If an EditableText is not focused, then ignore this action.
-    if (primaryFocus?.context?.widget is! EditableText) {
-      return null;
-    }
-    final EditableText editableText = primaryFocus!.context!.widget as EditableText;
-    // TODO(justinmc): I seem to need the EditableText to have a key for
-    // this. Is there another way to get EditableTextState, or should I
-    // force EditableText to have a key?
-    if (editableText.key == null
-        || (editableText.key! as GlobalKey).currentState == null) {
-      return null;
-    }
-    return (editableText.key! as GlobalKey).currentState! as EditableTextState;
-  }
-
-  /// The callback to be called when invoked.
-  ///
-  /// If an EditableText is not focused, then isEnabled will be false, and this
-  /// will not be invoked.
-  ///
-  /// Must not be null.
-  @protected
-  final OnInvokeTextEditingCallback<T> onInvoke;
-
-  @override
-  Object? invoke(covariant T intent) {
-    // _editableTextState shouldn't be null because isEnabled will return false
-    // and invoke shouldn't be called if so.
-    assert(_editableTextState != null);
-    return onInvoke(intent, _editableTextState!);
-  }
-
-  @override
-  bool isEnabled(Intent intent) {
-    return _editableTextState != null;
-  }
-}
-
 // TODO(justinmc): Remove from widgets/text_selection.dart.
 /// A gesture detector to respond to non-exclusive event chains for a text field.
 ///
@@ -191,7 +116,6 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
   void _handleTapDown(TapDownDetails details) {
     Actions.invoke<TapDownTextIntent>(context, TapDownTextIntent(
       details: details,
-      renderEditable: _editableTextState.renderEditable,
     ), nullOk: true);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
@@ -212,7 +136,6 @@ class _TextEditingGestureDetectorState extends State<TextEditingGestureDetector>
     if (!_isDoubleTap) {
       Actions.invoke<SingleTapUpTextIntent>(context, SingleTapUpTextIntent(
         details: details,
-        editableTextState: _editableTextState,
       ), nullOk: true);
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
