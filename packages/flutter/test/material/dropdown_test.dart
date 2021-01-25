@@ -1023,7 +1023,7 @@ void main() {
     // Selected item should be aligned to the bottom of the dropdown menu.
     expect(
       selectedItem.size.bottomCenter(selectedItemOffset).dy,
-      equals(menuItemContainer.size.bottomCenter(menuItemContainerOffset).dy,
+      menuItemContainer.size.bottomCenter(menuItemContainerOffset).dy,
     );
   });
 

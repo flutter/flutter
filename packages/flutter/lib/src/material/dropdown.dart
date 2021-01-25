@@ -521,15 +521,21 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       menuTop = menuBottom - menuHeight;
     }
 
+    double scrollOffset = 0;
     // If all of the menu items will not fit within availableHeight then
     // compute the scroll offset that will line the selected menu item up
     // with the select item. This is only done when the menu is first
     // shown - subsequently we leave the scroll offset where the user left
     // it. This scroll offset is only accurate for fixed height menu items
     // (the default).
-    final double maxScrollOffset = preferredMenuHeight - menuHeight;
-    final double scrollOffset = preferredMenuHeight <= maxMenuHeight ? 0 :
-      math.min(math.max(0.0, selectedItemOffset - (buttonTop - menuTop)), maxScrollOffset);
+    if (preferredMenuHeight > maxMenuHeight) {
+      // The offset should be zero if the selected item is in view at the beginning
+      // of the menu. Otherwise, the scroll offset should center the item if possible.
+      scrollOffset = math.max(0.0, selectedItemOffset - (buttonTop - menuTop));
+      // If the selected item's scroll offset is greater than the maximum scroll offset,
+      // set it instead to the maximum allowed scroll offset.
+      scrollOffset = math.min(scrollOffset, preferredMenuHeight - menuHeight);
+    }
 
     return _MenuLimits(menuTop, menuBottom, menuHeight, scrollOffset);
   }
