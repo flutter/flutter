@@ -42,6 +42,7 @@ void main() {
 
         imageBefore = imageAfter;
       }
-    }, timeout: const Timeout(Duration(minutes: 2)));
+      throw 'is this even used';
+    });
   });
 }
