@@ -97,7 +97,6 @@ void main() {
     final Response response = await _flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
     final String vmServiceUri = response.json['value'] as String;
 
-    _flutterAttach.stdout.listen((event) => print(event));
     // Attach with a different DevTools server address.
     await _flutterAttach.attach(
       _flutterRun.vmServicePort,
