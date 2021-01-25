@@ -2953,6 +2953,47 @@ void main() {
     }) async => mockVMService,
   }));
 
+  testUsingContext('Handle existing VM service clients DDS error', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.dds).thenReturn(DartDevelopmentService(logger: testLogger));
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes, bool ipv6, Uri serviceUri}) {
+      throw FakeDartDevelopmentServiceException(message:
+        'Existing VM service clients prevent DDS from taking control.',
+      );
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    bool caught = false;
+    final Completer<void>done = Completer<void>();
+    runZonedGuarded(() {
+      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
+    }, (Object e, StackTrace st) {
+      expect(e is ToolExit, true);
+      expect((e as ToolExit).message,
+        contains('Existing VM service clients prevent DDS from taking control.',
+      ));
+      done.complete();
+      caught = true;
+    });
+    await done.future;
+    if (!caught) {
+      fail('Expected ToolExit to be thrown.');
+    }
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      GetSkSLMethod getSkSLMethod,
+      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
+  }));
+
   testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
     // See https://github.com/flutter/flutter/issues/72385 for context.
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
