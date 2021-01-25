@@ -256,6 +256,35 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
+    assert(() {
+      // Assertions that attempt to catch common cases of tweening types
+      // that do not conform to the Tween requirements.
+      dynamic? result;
+      try {
+        result = begin + (end - begin) * t;
+        result as T;
+        return true;
+      } on NoSuchMethodError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot tween between $begin and $end.'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} does not fully implement `+`, `-`, and/or `*`.',
+          ),
+          if (begin is Color || end is Color)
+            ErrorHint('To tween colors, use ColorTween instead.')
+        ]);
+      } on TypeError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Cannot tween between $begin and $end.'),
+          ErrorDescription(
+            'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
+            'multiplication with a double value.'
+          ),
+          if (begin is int || end is int)
+            ErrorHint('To tween int values, use IntTween instead.')
+        ]);
+      }
+    }());
     return begin + (end - begin) * t as T;
   }
 

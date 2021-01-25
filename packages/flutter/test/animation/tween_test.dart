@@ -8,6 +8,77 @@ import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
+    final Tween<Object> objetTween = Tween<Object>(
+      begin: Object(),
+      end: Object(),
+    );
+
+    FlutterError? error;
+    try {
+      objetTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot tween between Instance of \'Object\' and Instance of \'Object\'.',
+      'The type Object does not fully implement `+`, `-`, and/or `*`.',
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Color', () {
+    final Tween<Color> colorTween = Tween<Color>(
+      begin: const Color(0xFF000000),
+      end: const Color(0xFFFFFFFF),
+    );
+
+    FlutterError? error;
+    try {
+      colorTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot tween between Color(0xff000000) and Color(0xffffffff).',
+      'The type Color does not fully implement `+`, `-`, and/or `*`.',
+      'To tween colors, use ColorTween instead.',
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - int', () {
+    final Tween<int> colorTween = Tween<int>(
+      begin: 0,
+      end: 1,
+    );
+
+    FlutterError? error;
+    try {
+      colorTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot tween between 0 and 1.',
+      'The type int returned a double after multiplication with a double value.',
+      'To tween int values, use IntTween instead.',
+    ]);
+  });
+
   test('Can chain tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     expect(tween, hasOneLineDescription);
