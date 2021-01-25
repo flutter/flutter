@@ -1216,8 +1216,7 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a unique id for [object] that will remain live at least until
-  /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
-  /// returned by this method.
+  /// [disposeGroup] is called on [groupName].
   @protected
   String toId(Object object, String groupName) {
     if (object == null)
@@ -1424,7 +1423,7 @@ mixin WidgetInspectorService {
     ) ?? const <_DiagnosticsPathNode>[];
   }
 
-  List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName, { int maxparents }) {
+  List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName) {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
@@ -1894,7 +1893,7 @@ mixin WidgetInspectorService {
     }
   }
 
-  /// This method is called by [WidgetBinding.performReassemble] to flush caches
+  /// This method is called by [WidgetsBinding.performReassemble] to flush caches
   /// of obsolete values after a hot reload.
   ///
   /// Do not call this method directly. Instead, use
@@ -2293,6 +2292,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
+    // Be careful changing this build method. The _InspectorOverlayLayer
+    // assumes the root RenderObject for the WidgetInspector will be
+    // a RenderStack with a _RenderInspectorOverlay as the last child.
     return Stack(children: <Widget>[
       GestureDetector(
         onTap: _handleTap,
@@ -2441,15 +2443,16 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
+      rootRenderObject: parent is RenderObject ? parent as RenderObject : null,
     ));
   }
 }
 
 @immutable
 class _TransformedRect {
-  _TransformedRect(RenderObject object)
+  _TransformedRect(RenderObject object, RenderObject ancestor)
     : rect = object.semanticBounds,
-      transform = object.getTransformTo(null);
+      transform = object.getTransformTo(ancestor);
 
   final Rect rect;
   final Matrix4 transform;
@@ -2517,6 +2520,7 @@ class _InspectorOverlayLayer extends Layer {
   _InspectorOverlayLayer({
     @required this.overlayRect,
     @required this.selection,
+    @required this.rootRenderObject,
   }) : assert(overlayRect != null),
        assert(selection != null) {
     bool inDebugMode = false;
@@ -2543,6 +2547,10 @@ class _InspectorOverlayLayer extends Layer {
   /// (as described at [Layer]).
   final Rect overlayRect;
 
+  /// Widget inspector root render object. The selection overlay will be painted
+  /// with transforms relative to this render object.
+  final RenderObject rootRenderObject;
+
   _InspectorOverlayRenderState _lastState;
 
   /// Picture generated from _lastState.
@@ -2557,16 +2565,21 @@ class _InspectorOverlayLayer extends Layer {
       return;
 
     final RenderObject selected = selection.current;
+
+    if (!_isInInspectorRenderObjectTree(selected))
+      return;
+
     final List<_TransformedRect> candidates = <_TransformedRect>[];
     for (final RenderObject candidate in selection.candidates) {
-      if (candidate == selected || !candidate.attached)
+      if (candidate == selected || !candidate.attached
+          || !_isInInspectorRenderObjectTree(candidate))
         continue;
-      candidates.add(_TransformedRect(candidate));
+      candidates.add(_TransformedRect(candidate, rootRenderObject));
     }
 
     final _InspectorOverlayRenderState state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
-      selected: _TransformedRect(selected),
+      selected: _TransformedRect(selected, rootRenderObject),
       tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
@@ -2583,6 +2596,9 @@ class _InspectorOverlayLayer extends Layer {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
+    // The overlay rect could have an offset if the widget inspector does
+    // not take all the screen.
+    canvas.translate(state.overlayRect.left, state.overlayRect.top);
 
     final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill
@@ -2693,6 +2709,24 @@ class _InspectorOverlayLayer extends Layer {
     Offset localPosition, {
     bool onlyFirst,
   }) {
+    return false;
+  }
+
+  /// Return whether or not a render object belongs to this inspector widget
+  /// tree.
+  /// The inspector selection is static, so if there are multiple inspector
+  /// overlays in the same app (i.e. an storyboard), a selected or candidate
+  /// render object may not belong to this tree.
+  bool _isInInspectorRenderObjectTree(RenderObject child) {
+    RenderObject current = child.parent as RenderObject;
+    while (current != null) {
+      // We found the widget inspector render object.
+      if (current is RenderStack
+          && current.lastChild is _RenderInspectorOverlay) {
+        return rootRenderObject == current;
+      }
+      current = current.parent as RenderObject;
+    }
     return false;
   }
 }

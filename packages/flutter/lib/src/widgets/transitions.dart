@@ -18,6 +18,8 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=LKKgYpC-EPQ}
+///
 /// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
@@ -947,7 +949,9 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// Animated version of an [Align] that animates its [Align.alignment] property.
 ///
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
-/// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
+/// [DecoratedBoxTransition.decoration] animated by a [CurvedAnimation] set to
+/// [Curves.decelerate]:
+///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
 ///
 /// See also:

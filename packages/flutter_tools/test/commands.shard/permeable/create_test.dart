@@ -10,6 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -47,6 +48,7 @@ void main() {
   Directory projectDir;
   FlutterVersion mockFlutterVersion;
   LoggingProcessManager loggingProcessManager;
+  BufferLogger logger;
 
   setUpAll(() async {
     Cache.disableLocking();
@@ -55,6 +57,7 @@ void main() {
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
+    logger = BufferLogger.test();
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     mockFlutterVersion = MockFlutterVersion();
@@ -1037,7 +1040,7 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   });
 
-  testUsingContext('has correct application id for android and bundle id for ios', () async {
+  testUsingContext('has correct application id for android, bundle id for ios and application id for Linux', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -1068,6 +1071,10 @@ void main() {
         project.android.applicationId,
         'com.example.hello_flutter',
     );
+    expect(
+        project.linux.applicationId,
+        'com.example.hello_flutter',
+    );
 
     tmpProjectDir = globals.fs.path.join(tempDir.path, 'test_abc');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
@@ -1092,9 +1099,14 @@ void main() {
         project.android.applicationId,
         'flutter_project.untitled',
     );
+    expect(
+        project.linux.applicationId,
+        'flutter_project.untitled',
+    );
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
     Platform: _kNoColorTerminalPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('can re-gen default template over existing project', () async {
@@ -1533,7 +1545,7 @@ void main() {
 
     // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
     // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('linux').existsSync(), false);
@@ -1542,7 +1554,7 @@ void main() {
 
     // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
     // https://github.com/flutter/flutter/issues/59787
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
@@ -1556,25 +1568,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-
-  // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
-  // https://github.com/flutter/flutter/issues/59787
-  testUsingContext('create an empty plugin contains a no-op ios folder, but no pubspec entry.', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-
-    expect(projectDir.childDirectory('ios').existsSync(), true);
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'some_platform'
-    ], pluginClass: 'somePluginClass',
-    unexpectedPlatforms: <String>['ios']);
-  });
 
   testUsingContext('plugin supports ios if requested', () async {
     Cache.flutterRoot = '../..';
@@ -1943,6 +1936,34 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
+  });
+
+  testUsingContext('flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(logger.statusText, isNot(contains('The `pubspec.yaml` under the project directory must be updated to support')));
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+    expect(logger.statusText, contains('The `pubspec.yaml` under the project directory must be updated to support'));
+  }, overrides: <Type, Generator> {
+    Logger: () => logger,
   });
 
 }

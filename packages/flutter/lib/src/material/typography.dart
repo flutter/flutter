@@ -41,7 +41,7 @@ enum ScriptCategory {
   tall,
 }
 
-/// The color and geometry [TextThemes] for Material apps.
+/// The color and geometry [TextTheme]s for Material apps.
 ///
 /// The text themes provided by the overall [Theme], like
 /// [ThemeData.textTheme], are based on the current locale's
@@ -56,7 +56,7 @@ enum ScriptCategory {
 /// `Theme.of(context).accentTextTheme`.
 ///
 /// The color text themes are [blackMountainView], [whiteMountainView],
-/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyles]
+/// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyle]s
 /// are based on the Roboto fonts as used on Android. The Cupertino themes are
 /// based on the [San Francisco
 /// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
@@ -111,7 +111,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
@@ -139,7 +139,7 @@ class Typography with Diagnosticable {
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
-  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// [whiteMountainView]. If [platform] is null then both [black] and [white]
   /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are

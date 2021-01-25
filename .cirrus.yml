@@ -74,6 +74,7 @@ task:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
     cpu: $CPU
     memory: $MEMORY
+    use_in_memory_disk: $USE_IN_MEMORY_DISK
   environment:
     # We shrink our default resource requirement as much as possible because that way we are more
     # likely to get scheduled. We require 4G of RAM because most of the shards (all but one as of
@@ -86,6 +87,7 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
+    USE_IN_MEMORY_DISK: false
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
@@ -272,17 +274,15 @@ task:
     - name: hostonly_devicelab_tests-3_last-linux
       << : *LINUX_SHARD_TEMPLATE
 
-    # TODO(ianh): name: add_to_app_tests-linux
-
     - name: docs-linux # linux-only
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/**') || $CIRRUS_PR == ''"
       environment:
-        # Empirically, as of October 2019, the docs-linux shard took about 30 minutes when run with
-        # 1 CPU and 4G of RAM. 2 CPUs reduced that to 20 minutes, more CPUs did not improve matters.
-        CPU: 2
+        # TODO(tvolkert): optimize CPU and MEMORY settings once #60646 is resolved.
+        CPU: 4
+        MEMORY: 8G
         # For uploading master docs to Firebase master branch staging site
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
-        # For uploading beta docs to Firebase public live site
+        # For uploading stable docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       script:
         - ./dev/bots/docs.sh
@@ -508,8 +508,6 @@ task:
         CPU: 4
         MEMORY: 6G
 
-    # TODO(ianh): name: add_to_app_tests-windows
-
     - name: customer_testing-windows
       environment:
         # As of December 2019, the customer_testing-windows shard got faster with more CPUs up to 4
@@ -623,13 +621,6 @@ task:
 
     - name: hostonly_devicelab_tests-3_last-macos
       << : *MACOS_SHARD_TEMPLATE
-
-    - name: add_to_app_tests-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
-      skip: true # https://github.com/flutter/flutter/pull/42444
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
 
     - name: customer_testing-macos
       script:

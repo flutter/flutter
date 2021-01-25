@@ -117,7 +117,6 @@ abstract class MaterialInkController {
 /// and [ShapeBorder.lerp] between the previous and next [shape] values is
 /// supported. Shape changes are also animated for [animationDuration].
 ///
-///
 /// ## Shape
 ///
 /// The shape for material is determined by [shape], [type], and [borderRadius].
@@ -150,6 +149,16 @@ abstract class MaterialInkController {
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
 ///
+/// ## Painting over the material
+///
+/// Material widgets will often trigger reactions on their nearest material
+/// ancestor. For example, [ListTile.hoverColor] triggers a reaction on the
+/// tile's material when a pointer is hovering over it. These reactions will be
+/// obscured if any widget in between them and the material paints in such a
+/// way as to obscure the material (such as setting a [BoxDecoration.color] on
+/// a [DecoratedBox]). To avoid this behavior, use [InkDecoration] to decorate
+/// the material itself.
+///
 /// See also:
 ///
 ///  * [MergeableMaterial], a piece of material that can split and re-merge.
@@ -172,7 +181,7 @@ class Material extends StatefulWidget {
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
-    this.shadowColor = const Color(0xFF000000),
+    this.shadowColor,
     this.textStyle,
     this.borderRadius,
     this.shape,
@@ -182,7 +191,6 @@ class Material extends StatefulWidget {
     this.child,
   }) : assert(type != null),
        assert(elevation != null && elevation >= 0.0),
-       assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
@@ -210,7 +218,7 @@ class Material extends StatefulWidget {
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow and the elevation
-  /// overlay to animate over [animationDuration].
+  /// overlay to animate over [Material.animationDuration].
   ///
   /// The value is non-negative.
   ///
@@ -218,7 +226,7 @@ class Material extends StatefulWidget {
   ///
   ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
   ///    an overlay color will be applied to indicate elevation.
-  ///  * [color] which may have an elevation overlay applied.
+  ///  * [Material.color] which may have an elevation overlay applied.
   ///
   /// {@endtemplate}
   final double elevation;
@@ -238,7 +246,17 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// Defaults to fully opaque black.
+  /// If null, [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  ///
+  /// Shadows can be difficult to see in a dark theme, so the elevation of a
+  /// surface should be portrayed with an "overlay" in addition to the shadow.
+  /// As the elevation of the component increases, the overlay increases in
+  /// opacity.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
+  /// on or off for dark themes.
   final Color shadowColor;
 
   /// The typographical style to use for text within this material.
@@ -308,7 +326,7 @@ class Material extends StatefulWidget {
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
@@ -391,7 +409,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: ElevationOverlay.applyOverlay(context, backgroundColor, widget.elevation),
-        shadowColor: widget.shadowColor,
+        shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -416,7 +434,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor,
-      shadowColor: widget.shadowColor,
+      shadowColor: widget.shadowColor ?? Theme.of(context).shadowColor,
       child: contents,
     );
   }

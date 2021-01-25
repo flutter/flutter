@@ -48,7 +48,7 @@ void main() {
     });
 
     test('should throw when locking is not acquired', () {
-      expect(() => Cache.checkLockAcquired(), throwsStateError);
+      expect(Cache.checkLockAcquired, throwsStateError);
     });
 
     test('should not throw when locking is disabled', () {
@@ -259,15 +259,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, false);
-    expect(DevelopmentArtifact.linux.unstable, false);
-    expect(DevelopmentArtifact.macOS.unstable, false);
-    expect(DevelopmentArtifact.windows.unstable, false);
-    expect(DevelopmentArtifact.fuchsia.unstable, true);
-    expect(DevelopmentArtifact.flutterRunner.unstable, true);
   });
 
   group('EngineCachedArtifact', () {
@@ -547,7 +538,7 @@ void main() {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
     when(mockCache.includeAllPlatforms).thenReturn(false);
-    expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+    expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
   });

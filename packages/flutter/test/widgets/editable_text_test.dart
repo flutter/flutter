@@ -129,6 +129,7 @@ void main() {
     expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
+    expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
   });
 
@@ -4320,6 +4321,30 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
+  testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SkipPainting(
+          child: Transform(
+            transform: Matrix4.zero(),
+            child: EditableText(
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    expect(rect.isFinite, false);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -4382,13 +4407,12 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
     ];
-    expect(tester.testTextInput.log.length, 8);
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
     for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
@@ -4427,7 +4451,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4475,7 +4498,6 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
-      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4700,20 +4722,20 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
-    controller.text = '';
+    controller.text = 'test';
     await tester.idle();
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(tester.testTextInput.editingState['text'], equals('test'));
     expect(state.wantKeepAlive, true);
 
     expect(formatter.formatCallCount, 0);
-    state.updateEditingValue(const TextEditingValue(text: ''));
-    state.updateEditingValue(const TextEditingValue(text: '', composing: TextRange(start: 1, end: 2)));
+    state.updateEditingValue(const TextEditingValue(text: 'test'));
+    state.updateEditingValue(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 2)));
     state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
-    expect(formatter.lastOldValue.text, '');
+    expect(formatter.lastOldValue.text, 'test');
   });
 
   testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {
@@ -5170,6 +5192,34 @@ void main() {
     expect(renderObject.textHeightBehavior, isNot(equals(inheritedTextHeightBehavior)));
     expect(renderObject.textHeightBehavior, equals(customTextHeightBehavior));
   });
+
+  test('Asserts if composing text is not valid', () async {
+    void expectToAssert(TextEditingValue value, bool shouldAssert) {
+      dynamic initException;
+      dynamic updateException;
+      controller = TextEditingController();
+      try {
+        controller = TextEditingController.fromValue(value);
+      } catch (e) {
+        initException = e;
+      }
+
+      controller = TextEditingController();
+      try {
+        controller.value = value;
+      } catch (e) {
+        updateException = e;
+      }
+
+      expect(initException?.toString(), shouldAssert ? contains('composing range'): isNull);
+      expect(updateException?.toString(), shouldAssert ? contains('composing range'): isNull);
+    }
+
+    expectToAssert(const TextEditingValue(text: ''), false);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)), true);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 9)), true);
+    expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
@@ -5294,7 +5344,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
                 backgroundCursorColor: Colors.grey,
               ),
             ),
-            RaisedButton(
+            ElevatedButton(
               key: widget.transformButtonKey,
               onPressed: () {
                 setState(() {
@@ -5320,4 +5370,16 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
   NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
+}
+
+class SkipPainting extends SingleChildRenderObjectWidget {
+  const SkipPainting({ Key key, Widget child }): super(key: key, child: child);
+
+  @override
+  SkipPaintingRenderObject createRenderObject(BuildContext context) => SkipPaintingRenderObject();
+}
+
+class SkipPaintingRenderObject extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) { }
 }

@@ -122,7 +122,7 @@ void main() {
 
     await fileCache.diffFileList(<File>[file]);
 
-    expect(() => fileCache.persist(), returnsNormally);
+    expect(fileCache.persist, returnsNormally);
   });
 
   testWithoutContext('FileStore handles hashing missing files', () async {

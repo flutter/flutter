@@ -300,12 +300,12 @@ class FixedExtentScrollController extends ScrollController {
 /// Metrics for a [ScrollPosition] to a scroll view with fixed item sizes.
 ///
 /// The metrics are available on [ScrollNotification]s generated from a scroll
-/// views such as [ListWheelScrollView]s with a [FixedExtentScrollController] and
-/// exposes the current [itemIndex] and the scroll view's [itemExtent].
+/// views such as [ListWheelScrollView]s with a [FixedExtentScrollController]
+/// and exposes the current [itemIndex] and the scroll view's extents.
 ///
-/// `FixedExtent` refers to the fact that the scrollable items have the same size.
-/// This is distinct from `Fixed` in the parent class name's [FixedScrollMetric]
-/// which refers to its immutability.
+/// `FixedExtent` refers to the fact that the scrollable items have the same
+/// size. This is distinct from `Fixed` in the parent class name's
+/// [FixedScrollMetrics] which refers to its immutability.
 class FixedExtentMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a
   /// [ListWheelScrollView].
@@ -558,6 +558,8 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 ///
 /// This widget is similar to a [ListView] but with the restriction that all
 /// children must be the same size along the scrolling axis.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=dUhmWAz4C7Y}
 ///
 /// When the list is at the zero scroll offset, the first child is aligned with
 /// the middle of the viewport. When the list is at the final scroll offset,

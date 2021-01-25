@@ -119,18 +119,10 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
 
-  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await app.project.projectInfo();
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
-    globals.printError('');
-    if (projectInfo.definesCustomSchemes) {
-      globals.printError('The Xcode project defines schemes: ${projectInfo.schemes.join(', ')}');
-      globals.printError('You must specify a --flavor option to select one of them.');
-    } else {
-      globals.printError('The Xcode project does not define custom schemes.');
-      globals.printError('You cannot use the --flavor option.');
-    }
-    return XcodeBuildResult(success: false);
+    projectInfo.reportFlavorNotFoundAndExit();
   }
   final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
@@ -328,7 +320,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
-  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
+  initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.slowOperation);
 
   final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
 
@@ -608,7 +600,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
+const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.$kXcodeRequiredVersionPatch or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {

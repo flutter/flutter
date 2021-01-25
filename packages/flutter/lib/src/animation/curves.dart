@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
 
 import 'dart:math' as math;
 import 'dart:ui';
@@ -526,7 +525,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     assert(x != null);
     double start = 0.0;
     double end = 1.0;
-    double mid;
+    late double mid;
     double offsetToOrigin(double pos) => x - transform(pos).dx;
     // Use a binary search to find the inverse point within 1e-6, or 100
     // subdivisions, whichever comes first.
@@ -626,8 +625,8 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline(
       List<Offset> controlPoints, {
         double tension = 0.0,
-        Offset startHandle,
-        Offset endHandle,
+        Offset? startHandle,
+        Offset? endHandle,
       }) : assert(controlPoints != null),
            assert(tension != null),
            assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
@@ -646,8 +645,8 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline.precompute(
       List<Offset> controlPoints, {
         double tension = 0.0,
-        Offset startHandle,
-        Offset endHandle,
+        Offset? startHandle,
+        Offset? endHandle,
       }) : assert(controlPoints != null),
            assert(tension != null),
            assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
@@ -663,8 +662,8 @@ class CatmullRomSpline extends Curve2D {
   static List<List<Offset>> _computeSegments(
       List<Offset> controlPoints,
       double tension, {
-      Offset startHandle,
-      Offset endHandle,
+      Offset? startHandle,
+      Offset? endHandle,
     }) {
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
@@ -713,17 +712,17 @@ class CatmullRomSpline extends Curve2D {
   final List<List<Offset>> _cubicSegments;
 
   // This is non-empty only if the _cubicSegments are being computed lazily.
-  final List<Offset> _controlPoints;
-  final Offset _startHandle;
-  final Offset _endHandle;
-  final double _tension;
+  final List<Offset>? _controlPoints;
+  final Offset? _startHandle;
+  final Offset? _endHandle;
+  final double? _tension;
 
   void _initializeIfNeeded() {
     if (_cubicSegments.isNotEmpty) {
       return;
     }
     _cubicSegments.addAll(
-      _computeSegments(_controlPoints, _tension, startHandle: _startHandle, endHandle: _endHandle),
+      _computeSegments(_controlPoints!, _tension!, startHandle: _startHandle, endHandle: _endHandle),
     );
   }
 
@@ -905,9 +904,9 @@ class CatmullRomCurve extends Curve {
   /// In release mode, this function can be used to decide if a proposed
   /// modification to the curve will result in a valid curve.
   static bool validateControlPoints(
-      List<Offset> controlPoints, {
+      List<Offset>? controlPoints, {
       double tension = 0.0,
-      List<String> reasons,
+      List<String>? reasons,
     }) {
     assert(tension != null);
     if (controlPoints == null) {
@@ -937,7 +936,7 @@ class CatmullRomCurve extends Curve {
           (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
           reasons?.add('Control points must have X values between 0.0 and 1.0, exclusive. '
-              'Point $i has an x value (${controlPoints[i].dx}) which is outside the range.');
+              'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.');
           return true;
         }());
         return false;
@@ -946,7 +945,7 @@ class CatmullRomCurve extends Curve {
         assert(() {
           reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
               '(i.e. must be monotonically increasing in X). Point $i has an x value of '
-              '${controlPoints[i].dx}, which is not greater than $lastX');
+              '${controlPoints![i].dx}, which is not greater than $lastX');
           return true;
         }());
         return false;
@@ -1053,7 +1052,7 @@ class CatmullRomCurve extends Curve {
 
     // Now interpolate between the found sample and the next one.
     final double t2 = (t - startValue.dx) / (endValue.dx - startValue.dx);
-    return lerpDouble(startValue.dy, endValue.dy, t2);
+    return lerpDouble(startValue.dy, endValue.dy, t2)!;
   }
 }
 

@@ -121,7 +121,6 @@ Future<void> main(List<String> args) async {
     await _runSmokeTests();
     print('═' * 80);
     await selectShard(const <String, ShardRunner>{
-      'add_to_app_tests': _runAddToAppTests,
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
       'build_tests': _runBuildTests,
       'firebase_test_lab_tests': _runFirebaseTestLabTests,
@@ -330,6 +329,7 @@ Future<void> _runToolTests() async {
       } else {
         await _pubRunTest(
           toolsPath,
+          forceSingleCore: true,
           testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
           enableFlutterToolAsserts: true,
         );
@@ -523,17 +523,6 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication, String targe
       'FLUTTER_WEB': 'true',
     },
   );
-}
-
-Future<void> _runAddToAppTests() async {
-  if (Platform.isMacOS) {
-    print('${green}Running add-to-app iOS integration tests$reset...');
-    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
-    await runCommand('./build_and_test.sh',
-      <String>[],
-      workingDirectory: addToAppDir,
-    );
-  }
 }
 
 Future<void> _runAddToAppLifeCycleTests() async {
@@ -758,6 +747,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
@@ -1238,7 +1228,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
     if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
-    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_canvaskit', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   await _selectIndexedSubshard(tests, kDeviceLabShardCount);

@@ -158,8 +158,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
-/// This will ensure we discard any resources used by the object.
+/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// when it is no longer needed. This will ensure we discard any resources used
+/// by the object.
 ///
 /// {@tool snippet}
 /// This example shows how to create a [TextField] that will obscure input. The
@@ -339,6 +340,7 @@ class TextField extends StatefulWidget {
     this.inputFormatters,
     this.enabled,
     this.cursorWidth = 2.0,
+    this.cursorHeight,
     this.cursorRadius,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -554,8 +556,9 @@ class TextField extends StatefulWidget {
   /// character count.
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
-  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  /// characters may be entered, but the error counter and divider will switch
+  /// to the [decoration]'s [InputDecoration.errorStyle] when the limit is
+  /// exceeded.
   ///
   /// ## Limitations
   ///
@@ -599,7 +602,7 @@ class TextField extends StatefulWidget {
   ///
   ///  * [inputFormatters], which are called before [onChanged]
   ///    runs and can validate and change ("format") the input value.
-  ///  * [onEditingComplete], [onSubmitted], [onSelectionChanged]:
+  ///  * [onEditingComplete], [onSubmitted]:
   ///    which are more specialized input change notifications.
   final ValueChanged<String> onChanged;
 
@@ -622,18 +625,21 @@ class TextField extends StatefulWidget {
   /// [decoration] is rendered in grey.
   ///
   /// If non-null this property overrides the [decoration]'s
-  /// [Decoration.enabled] property.
+  /// [InputDecoration.enabled] property.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
+
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double cursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// Defaults to [ThemeData.cursorColor] or [CupertinoThemeData.primaryColor]
   /// depending on [ThemeData.platform].
   final Color cursorColor;
 
@@ -707,15 +713,15 @@ class TextField extends StatefulWidget {
   /// the editing position.
   final MouseCursor mouseCursor;
 
-  /// Callback that generates a custom [InputDecorator.counter] widget.
+  /// Callback that generates a custom [InputDecoration.counter] widget.
   ///
   /// See [InputCounterWidgetBuilder] for an explanation of the passed in
   /// arguments.  The returned widget will be placed below the line in place of
-  /// the default widget built when [counterText] is specified.
+  /// the default widget built when [InputDecoration.counterText] is specified.
   ///
   /// The returned widget will be wrapped in a [Semantics] widget for
-  /// accessibility, but it also needs to be accessible itself.  For example,
-  /// if returning a Text widget, set the [semanticsLabel] property.
+  /// accessibility, but it also needs to be accessible itself. For example,
+  /// if returning a Text widget, set the [Text.semanticsLabel] property.
   ///
   /// {@tool snippet}
   /// ```dart
@@ -779,6 +785,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
@@ -1100,6 +1107,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         rendererIgnoresPointer: true,
         mouseCursor: MouseCursor.defer, // TextField will handle the cursor
         cursorWidth: widget.cursorWidth,
+        cursorHeight: widget.cursorHeight,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         selectionHeightStyle: widget.selectionHeightStyle,

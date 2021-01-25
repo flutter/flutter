@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 import 'tween.dart';
@@ -90,8 +87,7 @@ class TweenSequence<T> extends Animatable<T> {
         return _evaluateAt(t, index);
     }
     // Should be unreachable.
-    assert(false, 'TweenSequence.evaluate() could not find an interval for $t');
-    return null;
+    throw StateError('TweenSequence.evaluate() could not find an interval for $t');
   }
 
   @override
@@ -128,8 +124,8 @@ class TweenSequenceItem<T> {
   ///
   /// The [tween] must not be null and [weight] must be greater than 0.0.
   const TweenSequenceItem({
-    @required this.tween,
-    @required this.weight,
+    required this.tween,
+    required this.weight,
   }) : assert(tween != null),
        assert(weight != null),
        assert(weight > 0.0);
