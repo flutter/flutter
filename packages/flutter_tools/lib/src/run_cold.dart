@@ -123,6 +123,7 @@ class ColdRunner extends ResidentRunner {
 
     if (debuggingEnabled) {
       unawaited(maybeCallDevToolsUriServiceExtension());
+      unawaited(callConnectedVmServiceUriExtension());
     }
 
     appStartedCompleter?.complete();
@@ -168,6 +169,7 @@ class ColdRunner extends ResidentRunner {
     }
 
     unawaited(maybeCallDevToolsUriServiceExtension());
+    unawaited(callConnectedVmServiceUriExtension());
 
     appStartedCompleter?.complete();
     if (stayResident) {
