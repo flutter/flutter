@@ -1010,7 +1010,11 @@ void main() {
     final Finder menuItemFinder = find.byType(Scrollable);
     final RenderBox menuItemContainer = tester.renderObject<RenderBox>(menuItemFinder);
     final RenderBox selectedItem = tester.renderObject<RenderBox>(
-        find.descendant(of: menuItemFinder, matching: find.byKey(const ValueKey<String>('99'))));
+      find.descendant(
+        of: menuItemFinder,
+        matching: find.byKey(const ValueKey<String>('99')),
+      ),
+    );
 
     // kMaterialListPadding.vertical is 8.
     const Offset menuPaddingOffset = Offset(0.0, -8.0);
