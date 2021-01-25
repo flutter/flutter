@@ -5,7 +5,7 @@
 declare_args() {
   # The default clang toolchain provided by the prebuilt. This variable is
   # additionally consumed by the Go toolchain.
-  clang_base = rebase_path("//fuchsia/toolchain/$host_os/lib")
+  clang_base = rebase_path("//buildtools/${host_os}-${host_cpu}/clang/lib")
 }
 
 if (current_cpu == "arm64") {

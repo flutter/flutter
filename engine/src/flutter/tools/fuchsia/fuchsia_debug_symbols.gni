@@ -33,7 +33,7 @@ template("_copy_debug_symbols") {
       "--destination-base",
       rebase_path(_dest_base),
       "--read-elf",
-      rebase_path("//fuchsia/toolchain/$host_os/bin/llvm-readelf"),
+      rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin/llvm-readelf"),
     ]
 
     if (unstripped) {
