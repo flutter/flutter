@@ -95,13 +95,6 @@ class _MacOSHostAgent extends HostAgent {
           filesToCopy.addAll(simDiagnosticLogs.listSync().whereType<File>());
         }
 
-        // ~/Library/Logs/CoreSimulator/06841A41-188A-4F33-B7A6-CDEBFC8D6DE8/system.log.0.gz
-        filesToCopy.addAll(simulatorDirectory
-            .listSync()
-            .whereType<File>()
-            .where((File simulatorContent) =>
-                simulatorContent.basename.startsWith('system.log')));
-
         if (filesToCopy.isEmpty) {
           continue;
         }

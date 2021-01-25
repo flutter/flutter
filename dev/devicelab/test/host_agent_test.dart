@@ -89,11 +89,6 @@ void main() {
             ..createSync(recursive: true)
             ..writeAsString('');
 
-      final Directory simulatorDirectory2 = simulatorDirectory.childDirectory('0987654321');
-      simulatorDirectory2.childFile('system.log.0.gz')
-        ..createSync(recursive: true)
-        ..writeAsString('');
-
       // Empty directory to be skipped.
       simulatorDirectory.childDirectory('37129343498').createSync();
 
@@ -101,16 +96,11 @@ void main() {
 
       expect(await agent.dump(), isTrue);
       final Directory simulatorRoot = agent.dumpDirectory.childDirectory('ios-simulators');
-      expect(simulatorRoot.listSync().length, 2);
+      expect(simulatorRoot.listSync().length, 1);
 
       final Directory expectedSimulatorDirectory1 = simulatorRoot.childDirectory('123456789');
-      expect(expectedSimulatorDirectory1.listSync().length, 2);
-      expect(expectedSimulatorDirectory1.childFile('system.log').existsSync(), isTrue);
+      expect(expectedSimulatorDirectory1.listSync().length, 1);
       expect(expectedSimulatorDirectory1.childFile('crash_log').existsSync(), isTrue);
-
-      final Directory expectedSimulatorDirectory2 = simulatorRoot.childDirectory('0987654321');
-      expect(expectedSimulatorDirectory2.listSync().length, 1);
-      expect(expectedSimulatorDirectory2.childFile('system.log.0.gz').existsSync(), isTrue);
     });
   });
 }
