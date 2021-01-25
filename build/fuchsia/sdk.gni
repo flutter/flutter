@@ -15,7 +15,7 @@ declare_args() {
 
   # The following variables are Flutter buildroot specific.
   fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
-  fuchsia_toolchain_path = "//fuchsia/toolchain/$host_os"
+  fuchsia_toolchain_path = "//buildtools/${host_os}-${host_cpu}/clang"
 }
 
 declare_args() {
