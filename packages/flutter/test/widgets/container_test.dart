@@ -627,7 +627,7 @@ void main() {
       ),
     ));
 
-    await tester.tap(find.byType(Container));
+    await tester.tap(find.byType(Container), warnIfMissed: false);
     expect(tapped, false);
   });
 

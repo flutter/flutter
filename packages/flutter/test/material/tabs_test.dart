@@ -2209,7 +2209,7 @@ void main() {
 
     // A fling in the TabBar or TabBarView, shouldn't do anything.
 
-    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0);
+    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0, warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0);

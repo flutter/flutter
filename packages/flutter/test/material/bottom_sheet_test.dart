@@ -734,6 +734,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showModalBottomSheet<void>(
                   context: context,
@@ -754,7 +755,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -793,6 +793,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showBottomSheet<void>(
                   context: context,
@@ -817,7 +818,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
