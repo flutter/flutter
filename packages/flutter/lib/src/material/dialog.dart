@@ -243,19 +243,17 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ],
 ///       ),
-///     ).then(
-///       (returnVal) {
-///         if (returnVal != null) {
-///           ScaffoldMessenger.of(context).showSnackBar(
-///             SnackBar(
-///               duration: Duration(seconds: 2),
-///               content: Text('You clicked: $returnVal'),
-///               action: SnackBarAction(label: 'OK', onPressed: () {}),
-///             ),
-///           );
-///         }
-///       },
-///     );
+///     ).then((returnVal) {
+///       if (returnVal != null) {
+///         ScaffoldMessenger.of(context).showSnackBar(
+///           SnackBar(
+///             duration: Duration(seconds: 2),
+///             content: Text('You clicked: $returnVal'),
+///             action: SnackBarAction(label: 'OK', onPressed: () {}),
+///           ),
+///         );
+///       }
+///     });
 ///   }
 ///
 ///   return Scaffold(
