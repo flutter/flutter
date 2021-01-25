@@ -240,9 +240,11 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
-    final File newMainDart = buildDir.childFile('generated_main.dart');
-    if (await generateMainDartWithPluginRegistrant(mainUri, newMainDart)) {
-      mainUri = newMainDart.path;
+    if (buildDir != null) {
+      final File newMainDart = buildDir.childFile('generated_main.dart');
+      if (await generateMainDartWithPluginRegistrant(mainUri, newMainDart)) {
+        mainUri = newMainDart.path;
+      }
     }
 
     final List<String> command = <String>[
@@ -678,7 +680,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     // Write `generated_main.dart` under the tool's owned directory.
     // This ensures that the `lib` directory isn't polluted with generated files.
     final Directory buildDir = globals.fs.file(mainUri.path)
-        .parent.parent
+        .parent
+        .parent
         .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
     final File newMainDart = buildDir.childFile('generated_main.dart');
     if (await generateMainDartWithPluginRegistrant(

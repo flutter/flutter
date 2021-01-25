@@ -134,12 +134,14 @@ class Plugin {
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey) ||
+        _providesDefaultPackageForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
       platforms[LinuxPlugin.kConfigKey] =
           LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey) ||
+        _providesDefaultPackageForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey] as YamlMap);
     }
@@ -149,7 +151,8 @@ class Plugin {
           WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey) ||
+        _providesDefaultPackageForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
       platforms[WindowsPlugin.kConfigKey] =
           WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
@@ -316,8 +319,21 @@ class Plugin {
     return errors;
   }
 
+  static bool _providesDefaultPackageForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!platformsYaml.containsKey(platformKey)) {
+      return false;
+    }
+    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
+      return true;
+    }
+    return false;
+  }
+
   static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
     if (!platformsYaml.containsKey(platformKey)) {
+      return false;
+    }
+    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
       return false;
     }
     return true;
