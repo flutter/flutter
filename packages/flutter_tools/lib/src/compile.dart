@@ -17,7 +17,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
 import 'plugins.dart';
 
 /// The target model describes the set of core libraries that are available within
@@ -210,6 +209,7 @@ class KernelCompiler {
     String initializeFromDill,
     String platformDill,
     Directory buildDir,
+    bool generateDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -237,7 +237,7 @@ class KernelCompiler {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
 
-    if (buildDir != null) {
+    if (buildDir != null && generateDartPluginRegistry) {
       // `generated_main.dart` is under `.dart_tools/flutter_build/`,
       // so the resident compiler can find it.
       final File newMainDart = buildDir.parent.childFile('generated_main.dart');
@@ -417,6 +417,7 @@ abstract class ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
@@ -517,6 +518,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
+    @required FileSystem fileSystem,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
@@ -535,6 +537,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _artifacts = artifacts,
        _stdoutHandler = StdoutHandler(logger: logger),
        _platform = platform,
+       _fileSystem = fileSystem,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
@@ -543,6 +546,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final ProcessManager _processManager;
   final Artifacts _artifacts;
   final Platform _platform;
+  final FileSystem _fileSystem;
 
   final bool testCompilation;
   final BuildMode buildMode;
@@ -592,10 +596,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     // Write `generated_main.dart` under the tool's owned directory.
     // This ensures that the `lib` directory isn't polluted with generated files.
-    final Directory buildDir = globals.fs.file(mainUri.path)
+    final Directory buildDir = _fileSystem.file(mainUri.path)
         .parent
         .parent
-        .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
+        .childDirectory(_fileSystem.path.join('.dart_tool', 'flutter_build'));
     final File newMainDart = buildDir.childFile('generated_main.dart');
     if (newMainDart.existsSync()) {
       mainUri = newMainDart.uri;

@@ -56,6 +56,7 @@ class FlutterDevice {
          ),
          buildMode: buildInfo.mode,
          trackWidgetCreation: buildInfo.trackWidgetCreation,
+         fileSystem: globals.fs,
          fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
@@ -114,6 +115,7 @@ class FlutterDevice {
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
+        fileSystem: globals.fs,
         fileSystemRoots: fileSystemRoots ?? <String>[],
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
@@ -155,6 +157,7 @@ class FlutterDevice {
         ),
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
+        fileSystem: globals.fs,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
@@ -903,6 +906,7 @@ abstract class ResidentRunner {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),

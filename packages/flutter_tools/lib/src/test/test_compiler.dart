@@ -109,6 +109,7 @@ class TestCompiler {
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
+      fileSystem: globals.fs,
     );
     return residentCompiler;
   }

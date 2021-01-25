@@ -71,7 +71,7 @@ void main() {
       throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('KernelSnapshot handles null result from kernel compilation', () async {
+  testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -107,7 +107,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot does not use track widget creation on profile builds', () async {
+  testWithoutContext('KernelSnapshot does not use track widget creation on profile builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -143,7 +143,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
+  testWithoutContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -180,7 +180,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
+  testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -219,7 +219,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -256,7 +256,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
+  testWithoutContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -294,7 +294,7 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testUsingContext('KernelSnapshot does use track widget creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');

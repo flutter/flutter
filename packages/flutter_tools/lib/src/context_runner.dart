@@ -46,7 +46,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
-import 'plugins.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -213,9 +212,6 @@ Future<T> runInContext<T>(
       ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      PluginRegistrantConfig: () => PluginRegistrantConfig(
-        generateDartPluginRegistrant: true,
-      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
         processManager: globals.processManager,

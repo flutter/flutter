@@ -9,7 +9,6 @@ import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
@@ -871,20 +870,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   );
 }
 
-PluginRegistrantConfig get pluginRegistrantConfig => context.get<PluginRegistrantConfig>();
-
-/// Plugin registrant configuration.
-class PluginRegistrantConfig {
-  PluginRegistrantConfig({
-    this.generateDartPluginRegistrant = false,
-  }) : assert(generateDartPluginRegistrant != null);
-
-  /// Whether to enable the generation of the Dart plugin registrant.
-  /// This generates a new main.dart which wraps the entrypoint,
-  /// and includes a _registerPlugin function.
-  final bool generateDartPluginRegistrant;
-}
-
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
 /// The new entrypoint wraps [currentMainUri], adds a _registerPlugins function,
@@ -895,9 +880,6 @@ class PluginRegistrantConfig {
 ///
 /// For more details, see https://flutter.dev/go/federated-plugins.
 Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) async {
-  if (!pluginRegistrantConfig.generateDartPluginRegistrant) {
-    return false;
-  }
   final FlutterProject rootProject = FlutterProject.current();
   final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
       rootProject.packagesFile.existsSync() &&
