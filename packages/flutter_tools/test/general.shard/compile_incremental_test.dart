@@ -73,7 +73,7 @@ void main() {
     );
   });
 
-  testWithoutContext('incremental compile single dart compile', () async {
+  testUsingContext('incremental compile single dart compile', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -93,7 +93,7 @@ void main() {
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   });
 
-  testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
+  testUsingContext('incremental compile single dart compile with filesystem scheme', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -113,7 +113,7 @@ void main() {
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   });
 
-  testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
+  testUsingContext('incremental compile single dart compile abnormally terminates', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
     );
@@ -126,7 +126,7 @@ void main() {
     )), throwsToolExit());
   });
 
-  testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
+  testUsingContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
     when(mockFrontendServer.exitCode)
         .thenAnswer((Invocation invocation) async => 1);
     when(mockFrontendServer.stdout)
@@ -141,7 +141,7 @@ void main() {
     )), throwsToolExit());
   });
 
-  testWithoutContext('incremental compile and recompile', () async {
+  testUsingContext('incremental compile and recompile', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -178,7 +178,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('incremental compile and recompile with filesystem scheme', () async {
+  testUsingContext('incremental compile and recompile with filesystem scheme', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -219,7 +219,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('incremental compile and recompile non-entrypoint file with filesystem scheme', () async {
+  testUsingContext('incremental compile and recompile non-entrypoint file with filesystem scheme', () async {
     final Uri mainUri = Uri.parse('file:///foo/bar/fizz/main.dart');
     const String expectedMainUri = 'scheme:///main.dart';
     final List<Uri> updatedUris = <Uri>[
@@ -275,7 +275,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('incremental compile can suppress errors', () async {
+  testUsingContext('incremental compile can suppress errors', () async {
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => stdoutController.stream);
@@ -310,7 +310,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('incremental compile and recompile twice', () async {
+  testUsingContext('incremental compile and recompile twice', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);

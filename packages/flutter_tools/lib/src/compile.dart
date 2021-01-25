@@ -238,7 +238,9 @@ class KernelCompiler {
     }
 
     if (buildDir != null) {
-      final File newMainDart = buildDir.childFile('generated_main.dart');
+      // `generated_main.dart` is under `.dart_tools/flutter_build/`,
+      // so the resident compiler can find it.
+      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
       if (await generateMainDartWithPluginRegistrant(mainUri, newMainDart)) {
         mainUri = newMainDart.path;
       }
@@ -595,13 +597,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
         .parent
         .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
     final File newMainDart = buildDir.childFile('generated_main.dart');
-    if (await generateMainDartWithPluginRegistrant(
-      packageConfig.toPackageUri(mainUri).toString(),
-      newMainDart,
-    )) {
+    if (newMainDart.existsSync()) {
       mainUri = newMainDart.uri;
     }
-
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
