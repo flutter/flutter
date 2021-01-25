@@ -5,7 +5,6 @@ environment:
   sdk: ">=2.8.0 <3.0.0"
 
 dependencies:
-  image: 3.0.0-nullsafety.0
   flutter:
     sdk: flutter
   flutter_driver:
