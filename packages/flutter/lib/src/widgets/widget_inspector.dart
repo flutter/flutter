@@ -2504,7 +2504,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(const Size(double.infinity, double.infinity));
+    return constraints.constrain(Size.infinite);
   }
 
   @override

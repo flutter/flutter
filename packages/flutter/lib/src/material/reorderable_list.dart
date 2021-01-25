@@ -419,7 +419,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     // so we wrap the CustomScrollView in the padding for the top, left and right
     // and only add the padding from the bottom to the sliver list (or the equivalent
     // for other axis directions).
-    final EdgeInsets padding = widget.padding ?? const EdgeInsets.all(0);
+    final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
     late EdgeInsets outerPadding;
     late EdgeInsets listPadding;
     switch (widget.scrollDirection) {
