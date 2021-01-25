@@ -1013,10 +1013,13 @@ void main() {
         find.descendant(of: menuItemFinder, matching: find.byKey(const ValueKey<String>('99'))));
 
     // kMaterialListPadding.vertical is 8.
-    const Offset selectedItemOffset = Offset(0.0, -8.0);
+    const Offset menuPaddingOffset = Offset(0.0, -8.0);
+    final Offset selectedItemOffset = selectedItem.localToGlobal(Offset.zero);
+    final Offset menuItemContainerOffset = menuItemContainer.localToGlobal(menuPaddingOffset);
+    // Selected item should be aligned to the bottom of the dropdown menu.
     expect(
-      selectedItem.size.bottomCenter(selectedItem.localToGlobal(Offset.zero)).dy,
-      equals(menuItemContainer.size.bottomCenter(menuItemContainer.localToGlobal(selectedItemOffset)).dy),
+      selectedItem.size.bottomCenter(selectedItemOffset).dy,
+      equals(menuItemContainer.size.bottomCenter(menuItemContainerOffset).dy,
     );
   });
 
