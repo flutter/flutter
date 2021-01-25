@@ -153,7 +153,7 @@ class ColdRunner extends ResidentRunner {
         serveDevToolsGracefully(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         ),
-      ]);
+      ], eagerError: true);
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
