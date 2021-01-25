@@ -2291,4 +2291,36 @@ void main() {
 
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
   });
+
+  testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: const Scaffold(),
+        floatingActionButton: FloatingActionButton(onPressed: () {}),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      content: const Text('ScaffoldMessenger'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    // The FloatingActionButton helps us identify which Scaffold has the
+    // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
+    // should be above it. If the inner Scaffold had the SnackBar, it would be
+    // overlapping the FAB.
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('snack_bar.scaffold.nested.png'),
+    );
+    final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+    expect(snackBarTopRight.dy, 465.0);
+  });
 }
