@@ -814,9 +814,7 @@ enum _ParagraphCommandType {
 List<String> _getEffectiveFontFamilies(String? fontFamily,
     [List<String>? fontFamilyFallback]) {
   List<String> fontFamilies = <String>[];
-  if (fontFamily == null) {
-    fontFamilies.add('Roboto');
-  } else {
+  if (fontFamily != null) {
     fontFamilies.add(fontFamily);
   }
   if (fontFamilyFallback != null &&
