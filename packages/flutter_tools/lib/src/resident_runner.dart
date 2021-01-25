@@ -1285,7 +1285,7 @@ abstract class ResidentRunner {
 
   Future<void> maybeCallDevToolsUriServiceExtension() async {
     _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (_devToolsLauncher.activeDevToolsServer != null) {
+    if (_devToolsLauncher?.activeDevToolsServer != null) {
       await Future.wait(<Future<void>>[
         for (final FlutterDevice device in flutterDevices)
           _callDevToolsUriExtension(device),
@@ -1294,7 +1294,9 @@ abstract class ResidentRunner {
   }
 
   Future<void> _callDevToolsUriExtension(FlutterDevice device) async {
-    assert(_devToolsLauncher != null);
+    if (_devToolsLauncher == null) {
+      return;
+    }
     await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
     try {
       unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
