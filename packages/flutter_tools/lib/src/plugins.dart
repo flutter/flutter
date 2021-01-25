@@ -402,7 +402,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   YamlMap dependencies;
   try {
     final dynamic pubspec = loadYaml(globals.fs.file(pubspecFile).readAsStringSync());
-    dependencies = pubspec['dependencies'] as YamlMap;
+    dependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
   } on YamlException catch (err) {
     if (throwOnError) {
       throwToolExit('Failed to parse pubspec.yaml $err');
