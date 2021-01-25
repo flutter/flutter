@@ -85,6 +85,9 @@ class AccessibilityBridge
   void AddSemanticsNodeUpdate(const flutter::SemanticsNodeUpdates update,
                               float view_pixel_ratio);
 
+  // Requests a message announcement from the accessibility TTS system.
+  void RequestAnnounce(const std::string message);
+
   // Notifies the bridge of a 'hover move' touch exploration event.
   zx_status_t OnHoverMove(double x, double y);
 

@@ -103,6 +103,16 @@ TEST_F(AccessibilityBridgeTest, EnableDisable) {
   EXPECT_TRUE(accessibility_delegate_.enabled());
 }
 
+TEST_F(AccessibilityBridgeTest, RequestAnnounce) {
+  accessibility_bridge_->RequestAnnounce("message");
+  RunLoopUntilIdle();
+
+  auto& last_events = semantics_manager_.GetLastEvents();
+  ASSERT_EQ(last_events.size(), 1u);
+  ASSERT_TRUE(last_events[0].is_announce());
+  EXPECT_EQ(last_events[0].announce().message(), "message");
+}
+
 TEST_F(AccessibilityBridgeTest, UpdatesNodeRoles) {
   flutter::SemanticsNodeUpdates updates;
 

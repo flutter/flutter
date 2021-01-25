@@ -15,6 +15,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/lib/ui/window/window.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h"
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_message_codec.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 #include "third_party/rapidjson/include/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
@@ -658,6 +660,25 @@ void PlatformView::UpdateSemantics(
 void PlatformView::HandleAccessibilityChannelPlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   FML_DCHECK(message->channel() == kAccessibilityChannel);
+
+  const flutter::StandardMessageCodec& standard_message_codec =
+      flutter::StandardMessageCodec::GetInstance(nullptr);
+  std::unique_ptr<flutter::EncodableValue> decoded =
+      standard_message_codec.DecodeMessage(message->data());
+
+  flutter::EncodableMap map = std::get<flutter::EncodableMap>(*decoded);
+  std::string type =
+      std::get<std::string>(map.at(flutter::EncodableValue("type")));
+  if (type == "announce") {
+    flutter::EncodableMap data_map = std::get<flutter::EncodableMap>(
+        map.at(flutter::EncodableValue("data")));
+    std::string text =
+        std::get<std::string>(data_map.at(flutter::EncodableValue("message")));
+
+    accessibility_bridge_->RequestAnnounce(text);
+  }
+
+  message->response()->CompleteEmpty();
 }
 
 // Channel handler for kFlutterPlatformChannel
