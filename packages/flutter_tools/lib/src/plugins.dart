@@ -395,14 +395,17 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     '.packages',
   );
-  final String pubspecFile = globals.fs.path.join(
+  final String pubspec = globals.fs.path.join(
     project.directory.path,
     'pubspec.yaml',
   );
   YamlMap dependencies;
   try {
-    final dynamic pubspec = loadYaml(globals.fs.file(pubspecFile).readAsStringSync());
-    dependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
+    final File pubspecFile = globals.fs.file(pubspec);
+    if (pubspecFile.existsSync()) {
+      final dynamic pubspec = loadYaml(pubspecFile.readAsStringSync());
+      dependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
+    }
   } on YamlException catch (err) {
     if (throwOnError) {
       throwToolExit('Failed to parse pubspec.yaml $err');
