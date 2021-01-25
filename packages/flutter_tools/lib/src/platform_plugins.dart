@@ -266,7 +266,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -324,7 +324,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.pluginClass,
     this.dartPluginClass,
     this.defaultPackage,
-  }) : assert(pluginClass != null || dartPluginClass != null);
+  }) : assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
