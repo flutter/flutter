@@ -21,7 +21,7 @@ template("generate_dart_profiler_symbols") {
 
     args = [
       "--nm",
-      rebase_path("//fuchsia/toolchain/$host_os/bin/llvm-nm"),
+      rebase_path("//buildtools/${host_os}-${host_cpu}/clang/bin/llvm-nm"),
       "--binary",
       rebase_path(invoker.library_path),
       "--output",
