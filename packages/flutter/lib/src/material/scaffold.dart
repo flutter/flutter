@@ -2796,8 +2796,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   @override
   void didChangeDependencies() {
-    // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
-    // currently available for managing SnackBars.
+    // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
+    // are currently available for managing SnackBars.
     final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&

@@ -217,6 +217,7 @@ class HotRunner extends ResidentRunner {
     }
 
     unawaited(maybeCallDevToolsUriServiceExtension());
+    unawaited(callConnectedVmServiceUriExtension());
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
@@ -635,6 +636,7 @@ class HotRunner extends ResidentRunner {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
       unawaited(maybeCallDevToolsUriServiceExtension());
+      unawaited(callConnectedVmServiceUriExtension());
       return result;
     }
     final OperationResult result = await _hotReloadHelper(

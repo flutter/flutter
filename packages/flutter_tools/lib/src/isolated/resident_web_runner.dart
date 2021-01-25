@@ -131,6 +131,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   @override
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
     String method, {
+    FlutterDevice device,
     Map<String, dynamic> params,
   }) async {
     final vmservice.Response response =
