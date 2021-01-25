@@ -431,6 +431,15 @@ fuchsia::accessibility::semantics::Node AccessibilityBridge::GetRootNodeUpdate(
   return root_fuchsia_node;
 }
 
+void AccessibilityBridge::RequestAnnounce(const std::string message) {
+  fuchsia::accessibility::semantics::SemanticEvent semantic_event;
+  fuchsia::accessibility::semantics::AnnounceEvent announce_event;
+  announce_event.set_message(message);
+  semantic_event.set_announce(std::move(announce_event));
+
+  tree_ptr_->SendSemanticEvent(std::move(semantic_event), []() {});
+}
+
 void AccessibilityBridge::UpdateScreenRects() {
   std::unordered_set<int32_t> visited_nodes;
   UpdateScreenRects(kRootNodeId, SkM44{}, &visited_nodes);
