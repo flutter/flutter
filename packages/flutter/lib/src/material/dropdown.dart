@@ -302,7 +302,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                         children: children,
                       ),
                     );
-                  }
+                  },
                 ),
               ),
             ),
