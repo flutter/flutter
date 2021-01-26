@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
-import 'package:flutter_frontend_server/server.dart';
-import 'package:frontend_server/frontend_server.dart' as frontend show ProgramTransformer;
+import 'package:frontend_server/frontend_server.dart' as frontend
+    show ProgramTransformer, ToStringTransformer, ToStringVisitor;
 import 'package:kernel/kernel.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
@@ -25,7 +25,7 @@ void main(List<String> args) async {
   };
 
   test('No packages', () {
-    final ToStringTransformer transformer = ToStringTransformer(null, <String>{});
+    final frontend.ToStringTransformer transformer = frontend.ToStringTransformer(null, <String>{});
 
     final MockComponent component = MockComponent();
     transformer.transform(component);
@@ -33,7 +33,7 @@ void main(List<String> args) async {
   });
 
   test('dart:ui package', () {
-    final ToStringTransformer transformer = ToStringTransformer(null, uiAndFlutter);
+    final frontend.ToStringTransformer transformer = frontend.ToStringTransformer(null, uiAndFlutter);
 
     final MockComponent component = MockComponent();
     transformer.transform(component);
@@ -42,7 +42,7 @@ void main(List<String> args) async {
 
   test('Child transformer', () {
     final MockTransformer childTransformer = MockTransformer();
-    final ToStringTransformer transformer = ToStringTransformer(childTransformer, <String>{});
+    final frontend.ToStringTransformer transformer = frontend.ToStringTransformer(childTransformer, <String>{});
 
     final MockComponent component = MockComponent();
     transformer.transform(component);
@@ -51,7 +51,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores non-toString procedures', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     when(procedure.name).thenReturn(Name('main'));
     when(procedure.annotations).thenReturn(const <Expression>[]);
@@ -65,7 +65,7 @@ void main(List<String> args) async {
     //
     // void main() {}
     // String toString() => 'why?';
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -84,7 +84,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores abstract toString', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -103,7 +103,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores static toString', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -122,7 +122,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores enum toString', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -141,7 +141,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores non-specified libraries', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -160,7 +160,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor ignores @keepToString', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -198,7 +198,7 @@ void main(List<String> args) async {
   }
 
   test('ToStringVisitor replaces toString in specified libraries (dart:ui)', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
@@ -219,7 +219,7 @@ void main(List<String> args) async {
   });
 
   test('ToStringVisitor replaces toString in specified libraries (package:flutter)', () {
-    final ToStringVisitor visitor = ToStringVisitor(uiAndFlutter);
+    final frontend.ToStringVisitor visitor = frontend.ToStringVisitor(uiAndFlutter);
     final MockProcedure procedure = MockProcedure();
     final MockFunctionNode function = MockFunctionNode();
     final MockStatement statement = MockStatement();
