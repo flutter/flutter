@@ -1203,6 +1203,18 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Parsing of plugins handles invalid JSON', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        createFakePlugin(fs);
+        flutterProject.flutterPluginsFile.writeAsStringSync('{');
+
+        expect(() => createPluginSymlinks(flutterProject), returnsNormally);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Existing symlinks are removed when no longer in use with force', () {
         when(linuxProject.existsSync()).thenReturn(true);
         when(windowsProject.existsSync()).thenReturn(true);

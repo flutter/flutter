@@ -1057,7 +1057,12 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   Map<String, dynamic> platformPlugins;
   final String pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
   if (pluginFileContent != null) {
-    final Map<String, dynamic> pluginInfo = json.decode(pluginFileContent) as Map<String, dynamic>;
+    Map<String, dynamic> pluginInfo;
+    try {
+      pluginInfo = json.decode(pluginFileContent) as Map<String, dynamic>;
+    } on FormatException {
+      pluginInfo = <String, dynamic>{};
+    }
     platformPlugins = pluginInfo[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
   }
   platformPlugins ??= <String, dynamic>{};
