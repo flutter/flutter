@@ -2217,6 +2217,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The text to display.
   TextSpan? get text => _textPainter.text as TextSpan?;
   final TextPainter _textPainter;
+  TextPainter? get textPainter => _textPainter;
   set text(TextSpan? value) {
     if (_textPainter.text == value)
       return;

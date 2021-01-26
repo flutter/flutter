@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
@@ -663,9 +664,11 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
+    this.scribbleInProgress = false,
   }) : assert(text != null),
        assert(selection != null),
-       assert(composing != null);
+       assert(composing != null),
+       assert(scribbleInProgress != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -681,6 +684,7 @@ class TextEditingValue {
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
       ),
+      scribbleInProgress: encoded['scribbleInProgress'] as bool? ?? false,
     );
   }
 
@@ -694,6 +698,7 @@ class TextEditingValue {
       'selectionIsDirectional': selection.isDirectional,
       'composingBase': composing.start,
       'composingExtent': composing.end,
+      'scribbleInProgress': scribbleInProgress,
     };
   }
 
@@ -706,6 +711,9 @@ class TextEditingValue {
   /// The range of text that is still being composed.
   final TextRange composing;
 
+  /// true if the update occurred during a scribble interaction
+  final bool scribbleInProgress;
+
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
@@ -714,11 +722,13 @@ class TextEditingValue {
     String? text,
     TextSelection? selection,
     TextRange? composing,
+    bool? scribbleInProgress,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing,
+      scribbleInProgress: scribbleInProgress ?? this.scribbleInProgress,
     );
   }
 
@@ -743,7 +753,8 @@ class TextEditingValue {
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
-        && other.composing == composing;
+        && other.composing == composing
+        && other.scribbleInProgress == scribbleInProgress;
   }
 
   @override
@@ -751,6 +762,7 @@ class TextEditingValue {
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
+    scribbleInProgress.hashCode,
   );
 }
 
@@ -789,6 +801,9 @@ enum SelectionChangedCause {
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
   drag,
+
+  /// The user iPadOS 14 Scribble to change the selection.
+  scribble,
 }
 
 /// A mixin for manipulating the selection, to be used by the implementer
@@ -908,6 +923,21 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
+  /// Requests that the client show the editing toolbar, for example when the
+  /// platform changes the selection through a non-flutter method such as
+  /// scribble.
+  void showToolbar();
+}
+
+abstract class ScribbleClient {
+  String get elementIdentifier;
+
+  void onScribbleFocus(double x, double y);
+
+  bool inScribbleRect(double x, double y, double width, double height);
+
+  List<double> get bounds;
 }
 
 /// An interface for interacting with a text input control.
@@ -927,6 +957,7 @@ class TextInputConnection {
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
+  List cachedTextBoxes = [];
 
   static int _nextId = 1;
   final int _id;
@@ -1045,6 +1076,16 @@ class TextInputConnection {
         'y': validRect.top,
       },
     );
+  }
+  
+  void setSelectionRects(List textBoxes) {
+    if (!listEquals(cachedTextBoxes, textBoxes)) {
+      cachedTextBoxes = textBoxes;
+      TextInput._instance._setSelectionRects(textBoxes.map((box) {
+        var rect = box.toRect();
+        return <double>[rect.left, rect.top, rect.width, rect.height];
+      }).toList());
+    }
   }
 
   /// Send text styling information.
@@ -1308,10 +1349,23 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
+  Map<String, ScribbleClient> _scribbleClients = {};
+
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
-    if (_currentConnection == null)
-      return;
     final String method = methodCall.method;
+    if (method == 'TextInputClient.focusElement') {
+      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      if (_scribbleClients.containsKey(args[0])) {
+        _scribbleClients[args[0]]?.onScribbleFocus(args[1], args[2]);
+      }
+      return;
+    } else if (method == 'TextInputClient.requestElementsInRect') {
+      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      return _scribbleClients.keys.where((elementIdentifier) {
+        return _scribbleClients[elementIdentifier]?.inScribbleRect(args[0].toDouble(), args[1].toDouble(), args[2].toDouble(), args[3].toDouble()) ?? false;
+      }).map((elementIdentifier) => [elementIdentifier, ...(_scribbleClients[elementIdentifier]?.bounds ?? [])]).toList();
+    }
+    if (_currentConnection == null) return;
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1326,6 +1380,7 @@ class TextInput {
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    print('[scribble][flutter] $method: $args');
 
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final TextInputClient client = _currentConnection!._client;
@@ -1369,6 +1424,9 @@ class TextInput {
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      case 'TextInputClient.showToolbar':
+        _currentConnection!._client.showToolbar();
         break;
       default:
         throw MissingPluginException();
@@ -1443,6 +1501,13 @@ class TextInput {
     );
   }
 
+  void _setSelectionRects(List<List<double>> args) {
+    _channel.invokeMethod<void>(
+      'TextInput.setSelectionRects',
+      args,
+    );
+  }
+
   void _setStyle(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
@@ -1504,5 +1569,16 @@ class TextInput {
       'TextInput.finishAutofillContext',
       shouldSave ,
     );
+  }
+
+  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused using an
+  /// UIIndirectScribbleInteraction on an iPad
+  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
+    TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
+  }
+
+  /// Deregisters a [ScribbleClient] with [elementIdentifier]
+  static void deregisterScribbleElement(String elementIdentifier) {
+    TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 }

@@ -1734,7 +1734,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
+      _handleSelectionChanged(value.selection, value.scribbleInProgress ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
       hideToolbar();
       _currentPromptRectRange = null;
@@ -2436,6 +2436,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
       _textInputConnection!.setEditableSizeAndTransform(size, transform);
+      var textSpan = buildTextSpan();
+      var rects = List.generate(
+          textSpan.text?.length ?? 0, (i) => renderEditable.textPainter?.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first);
+      _textInputConnection!.setSelectionRects(rects);
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }
@@ -2645,53 +2649,57 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               onCopy: _semanticsOnCopy(controls),
               onCut: _semanticsOnCut(controls),
               onPaste: _semanticsOnPaste(controls),
-              child: _Editable(
-                key: _editableKey,
-                startHandleLayerLink: _startHandleLayerLink,
-                endHandleLayerLink: _endHandleLayerLink,
-                textSpan: buildTextSpan(),
-                value: _value,
-                cursorColor: _cursorColor,
-                backgroundCursorColor: widget.backgroundCursorColor,
-                showCursor: EditableText.debugDeterministicCursor
-                    ? ValueNotifier<bool>(widget.showCursor)
-                    : _cursorVisibilityNotifier,
-                forceLine: widget.forceLine,
-                readOnly: widget.readOnly,
-                hasFocus: _hasFocus,
-                maxLines: widget.maxLines,
-                minLines: widget.minLines,
-                expands: widget.expands,
-                strutStyle: widget.strutStyle,
-                selectionColor: widget.selectionColor,
-                textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-                textAlign: widget.textAlign,
-                textDirection: _textDirection,
-                locale: widget.locale,
-                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
-                textWidthBasis: widget.textWidthBasis,
-                obscuringCharacter: widget.obscuringCharacter,
-                obscureText: widget.obscureText,
-                autocorrect: widget.autocorrect,
-                smartDashesType: widget.smartDashesType,
-                smartQuotesType: widget.smartQuotesType,
-                enableSuggestions: widget.enableSuggestions,
-                offset: offset,
-                onCaretChanged: _handleCaretChanged,
-                rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                cursorWidth: widget.cursorWidth,
-                cursorHeight: widget.cursorHeight,
-                cursorRadius: widget.cursorRadius,
-                cursorOffset: widget.cursorOffset ?? Offset.zero,
-                selectionHeightStyle: widget.selectionHeightStyle,
-                selectionWidthStyle: widget.selectionWidthStyle,
-                paintCursorAboveText: widget.paintCursorAboveText,
-                enableInteractiveSelection: widget.enableInteractiveSelection,
-                textSelectionDelegate: this,
-                devicePixelRatio: _devicePixelRatio,
-                promptRectRange: _currentPromptRectRange,
-                promptRectColor: widget.autocorrectionTextRectColor,
-                clipBehavior: widget.clipBehavior,
+              child: _ScribbleElement(
+                focusNode: widget.focusNode,
+                editableKey: _editableKey,
+                child: _Editable(
+                  key: _editableKey,
+                  startHandleLayerLink: _startHandleLayerLink,
+                  endHandleLayerLink: _endHandleLayerLink,
+                  textSpan: buildTextSpan(),
+                  value: _value,
+                  cursorColor: _cursorColor,
+                  backgroundCursorColor: widget.backgroundCursorColor,
+                  showCursor: EditableText.debugDeterministicCursor
+                      ? ValueNotifier<bool>(widget.showCursor)
+                      : _cursorVisibilityNotifier,
+                  forceLine: widget.forceLine,
+                  readOnly: widget.readOnly,
+                  hasFocus: _hasFocus,
+                  maxLines: widget.maxLines,
+                  minLines: widget.minLines,
+                  expands: widget.expands,
+                  strutStyle: widget.strutStyle,
+                  selectionColor: widget.selectionColor,
+                  textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                  textAlign: widget.textAlign,
+                  textDirection: _textDirection,
+                  locale: widget.locale,
+                  textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+                  textWidthBasis: widget.textWidthBasis,
+                  obscuringCharacter: widget.obscuringCharacter,
+                  obscureText: widget.obscureText,
+                  autocorrect: widget.autocorrect,
+                  smartDashesType: widget.smartDashesType,
+                  smartQuotesType: widget.smartQuotesType,
+                  enableSuggestions: widget.enableSuggestions,
+                  offset: offset,
+                  onCaretChanged: _handleCaretChanged,
+                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                  cursorWidth: widget.cursorWidth,
+                  cursorHeight: widget.cursorHeight,
+                  cursorRadius: widget.cursorRadius,
+                  cursorOffset: widget.cursorOffset ?? Offset.zero,
+                  selectionHeightStyle: widget.selectionHeightStyle,
+                  selectionWidthStyle: widget.selectionWidthStyle,
+                  paintCursorAboveText: widget.paintCursorAboveText,
+                  enableInteractiveSelection: widget.enableInteractiveSelection,
+                  textSelectionDelegate: this,
+                  devicePixelRatio: _devicePixelRatio,
+                  promptRectRange: _currentPromptRectRange,
+                  promptRectColor: widget.autocorrectionTextRectColor,
+                  clipBehavior: widget.clipBehavior,
+                ),
               ),
             ),
           );
@@ -2907,5 +2915,71 @@ class _Editable extends LeafRenderObjectWidget {
       ..promptRectColor = promptRectColor
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
+  }
+}
+
+class _ScribbleElement extends StatefulWidget {
+  final Widget child;
+  final FocusNode focusNode;
+  final GlobalKey editableKey;
+
+  _ScribbleElement({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
+
+  @override
+  _ScribbleElementState createState() => _ScribbleElementState();
+}
+
+class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleClient {
+  @override
+  void initState() {
+    super.initState();
+    TextInput.registerScribbleElement(elementIdentifier, this);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    TextInput.deregisterScribbleElement(elementIdentifier);
+  }
+
+  RenderEditable get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable;
+
+  String? _elementIdentifier;
+
+  @override
+  String get elementIdentifier {
+  if (_elementIdentifier == null) {
+      math.Random random = math.Random();
+      _elementIdentifier = random.nextInt(1<<32).toString().padLeft(10, '0');
+    }
+    return _elementIdentifier!;
+  }
+
+  @override
+  void onScribbleFocus(double x, double y) {
+    widget.focusNode.requestFocus();
+    renderEditable.selectPositionAt(from: Offset(x, y), cause: SelectionChangedCause.keyboard);
+  }
+
+  @override
+  bool inScribbleRect(double x, double y, double width, double height) {
+    List<double> _bounds = bounds;
+    if (_bounds.isEmpty) return false;
+    Rect rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
+    Rect scribbleRect = Rect.fromLTWH(x, y, width, height);
+    return rect.overlaps(scribbleRect);
+  }
+
+  @override
+  List<double> get bounds {
+    RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null || !mounted || !box.attached) return [];
+    Offset topLeft = box.localToGlobal(Offset.zero);
+    return [topLeft.dx, topLeft.dy, box.size.width, box.size.height];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
