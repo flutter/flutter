@@ -38,6 +38,21 @@ class EndTextIntent extends Intent {
 class HomeTextIntent extends Intent {
   const HomeTextIntent();
 }
+class MetaArrowLeftTextIntent extends Intent {
+  const MetaArrowLeftTextIntent();
+}
+class MetaArrowRightTextIntent extends Intent {
+  const MetaArrowRightTextIntent();
+}
+class MetaShiftArrowLeftTextIntent extends Intent {
+  const MetaShiftArrowLeftTextIntent();
+}
+class MetaShiftArrowRightTextIntent extends Intent {
+  const MetaShiftArrowRightTextIntent();
+}
+class MetaCTextIntent extends Intent {
+  const MetaCTextIntent();
+}
 class SingleLongTapEndTextIntent extends Intent {
   const SingleLongTapEndTextIntent();
 }
@@ -58,9 +73,6 @@ class ControlATextIntent extends Intent {}
 class ControlArrowLeftTextIntent extends Intent {}
 class ControlArrowRightTextIntent extends Intent {}
 class ControlCTextIntent extends Intent {}
-class MetaArrowRightTextIntent extends Intent {}
-class MetaArrowLeftTextIntent extends Intent {}
-class MetaCTextIntent extends Intent {}
 class ShiftArrowLeftTextIntent extends Intent {}
 class ShiftArrowRightTextIntent extends Intent {}
 class SingleTapUpTextIntent extends Intent {
@@ -212,7 +224,7 @@ class TextEditingActions extends StatelessWidget {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
-          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard, false);
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -230,7 +242,7 @@ class TextEditingActions extends StatelessWidget {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
-          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard, false);
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -241,13 +253,63 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<MetaShiftArrowLeftTextIntent> _metaShiftArrowLeftTextAction = TextEditingAction<MetaShiftArrowLeftTextIntent>(
+    onInvoke: (MetaShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<MetaShiftArrowRightTextIntent> _metaShiftArrowRightTextAction = TextEditingAction<MetaShiftArrowRightTextIntent>(
+    onInvoke: (MetaShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
+    onInvoke: (MetaCTextIntent intent, EditableTextState editableTextState) {
+      // TODO(justinmc): This needs to be deduplicated with text_selection.dart.
+      final TextSelectionDelegate delegate = editableTextState.renderEditable.textSelectionDelegate;
+      final TextEditingValue value = delegate.textEditingValue;
+      Clipboard.setData(ClipboardData(
+        text: value.selection.textInside(value.text),
+      ));
+      //clipboardStatus?.update();
+      delegate.textEditingValue = TextEditingValue(
+        text: value.text,
+        selection: TextSelection.collapsed(offset: value.selection.end),
+      );
+      delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+      //delegate.hideToolbar();
+    },
+  );
+
   // TODO(justinmc): Notice that this does nearly the same thing as
   // MetaArrowLeftTextIntent, but for different platforms.
   final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
     onInvoke: (HomeTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
-          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard, false);
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
@@ -263,7 +325,7 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (EndTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
-          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard, false);
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
@@ -331,24 +393,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
-    onInvoke: (MetaCTextIntent intent, EditableTextState editableTextState) {
-      // TODO(justinmc): This needs to be deduplicated with text_selection.dart.
-      final TextSelectionDelegate delegate = editableTextState.renderEditable.textSelectionDelegate;
-      final TextEditingValue value = delegate.textEditingValue;
-      Clipboard.setData(ClipboardData(
-        text: value.selection.textInside(value.text),
-      ));
-      //clipboardStatus?.update();
-      delegate.textEditingValue = TextEditingValue(
-        text: value.text,
-        selection: TextSelection.collapsed(offset: value.selection.end),
-      );
-      delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-      //delegate.hideToolbar();
-    },
-  );
-
   final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
     onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
@@ -387,6 +431,8 @@ class TextEditingActions extends StatelessWidget {
         MetaCTextIntent: _metaCTextAction,
         MetaArrowRightTextIntent: _metaArrowRightTextAction,
         MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
+        MetaShiftArrowLeftTextIntent: _metaShiftArrowLeftTextAction,
+        MetaShiftArrowRightTextIntent: _metaShiftArrowRightTextAction,
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
         SingleTapUpTextIntent: _singleTapUpTextAction,

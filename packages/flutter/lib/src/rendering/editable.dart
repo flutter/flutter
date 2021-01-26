@@ -743,6 +743,46 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  void extendSelectionLeftByLine(SelectionChangedCause cause) {
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+
+    late TextSelection nextSelection;
+    if (selection!.isCollapsed || selection!.extentOffset < selection!.baseOffset) {
+      nextSelection = TextSelection(
+        baseOffset: selection!.baseOffset,
+        extentOffset: selectedLine.baseOffset,
+      );
+    } else {
+      nextSelection = TextSelection(
+        baseOffset: selectedLine.baseOffset,
+        extentOffset: selection!.extentOffset,
+      );
+    }
+
+    _updateSelection(nextSelection, cause);
+  }
+
+  void extendSelectionRightByLine(SelectionChangedCause cause) {
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+
+    late TextSelection nextSelection;
+    if (selection!.isCollapsed || selection!.baseOffset < selection!.extentOffset) {
+      nextSelection = TextSelection(
+        baseOffset: selection!.baseOffset,
+        extentOffset: selectedLine.extentOffset,
+      );
+    } else {
+      nextSelection = TextSelection(
+        baseOffset: selectedLine.extentOffset,
+        extentOffset: selection!.extentOffset,
+      );
+    }
+
+    _updateSelection(nextSelection, cause);
+  }
+
   void moveSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionLeft(
       selection!,
@@ -807,7 +847,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  void moveSelectionLeftByLine(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+  void moveSelectionLeftByLine(SelectionChangedCause cause) {
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since _selectLineAtOffset finds the line boundaries without
@@ -821,8 +861,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): This doesn't do exactly what native does. Same with left.
-  void moveSelectionRightByLine(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+  // TODO(justinmc): This doesn't do exactly what native does. Same with left
+  // and with extend.
+  void moveSelectionRightByLine(SelectionChangedCause cause) {
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
     // for the line bounds, since _selectLineAtOffset finds the line
