@@ -796,7 +796,6 @@ class CupertinoTextField extends StatefulWidget {
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
-  final ActionDispatcher _actionDispatcher = ActionDispatcher();
   RestorableTextEditingController? _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
@@ -1193,9 +1192,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           },
         ),
       },
-      // TODO(justinmc): Should I be looking this up, or is just creating a new
-      // one like this ok?
-      dispatcher: _actionDispatcher,
       child: Semantics(
         enabled: enabled,
         onTap: !enabled ? null : () {
@@ -1208,8 +1204,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           ignoring: !enabled,
           child: Container(
             decoration: effectiveDecoration,
-            child: TextEditingGestureDetector(
-              editableTextKey: editableTextKey,
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
               child: Align(
                 alignment: Alignment(-1.0, _textAlignVertical.y),
                 widthFactor: 1.0,

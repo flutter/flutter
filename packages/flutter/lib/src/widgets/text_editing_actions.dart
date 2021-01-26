@@ -11,6 +11,39 @@ import 'package:flutter/widgets.dart';
 
 import 'text_editing_action.dart';
 
+// TODO(justinmc): Maybe move these to a text_editing_intents.dart?
+// TODO(justinmc): Do I want the const constructors? I think so so that the
+// instantiation can be const.
+class DoubleTapDownTextIntent extends Intent {
+  const DoubleTapDownTextIntent();
+}
+class DragSelectionEndTextIntent extends Intent {
+  const DragSelectionEndTextIntent();
+}
+class DragSelectionStartTextIntent extends Intent {
+  const DragSelectionStartTextIntent();
+}
+class DragSelectionUpdateTextIntent extends Intent {
+  const DragSelectionUpdateTextIntent();
+}
+class ForcePressEndTextIntent extends Intent {
+  const ForcePressEndTextIntent();
+}
+class ForcePressStartTextIntent extends Intent {
+  const ForcePressStartTextIntent();
+}
+class SingleLongTapEndTextIntent extends Intent {
+  const SingleLongTapEndTextIntent();
+}
+class SingleLongTapMoveUpdateTextIntent extends Intent {
+  const SingleLongTapMoveUpdateTextIntent();
+}
+class SingleLongTapStartTextIntent extends Intent {
+  const SingleLongTapStartTextIntent();
+}
+class SingleTapCancelTextIntent extends Intent {
+  const SingleTapCancelTextIntent();
+}
 class AltArrowLeftTextIntent extends Intent {}
 class AltArrowRightTextIntent extends Intent {}
 class ArrowLeftTextIntent extends Intent {}

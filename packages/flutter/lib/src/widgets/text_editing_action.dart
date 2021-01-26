@@ -62,8 +62,6 @@ class TextEditingAction<T extends Intent> extends Action<T> {
     // _editableTextState shouldn't be null because isEnabled will return false
     // and invoke shouldn't be called if so.
     assert(_editableTextState != null);
-    // TODO(justinmc): Instead of passing _editableTextState here, would it be
-    // better if I set it on the intent? Then I'd create a TextEditingIntent.
     return onInvoke(intent, _editableTextState!);
   }
 

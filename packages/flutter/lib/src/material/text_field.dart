@@ -930,7 +930,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    // TODO(justinmc): Get rid of this gesture detector builder.
+    // TODO(justinmc): I hope to get rid of this selectiongesturedetector.
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(
       state: this,
     );
@@ -1259,8 +1259,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
               child: child,
             );
           },
-          child: TextEditingGestureDetector(
-            editableTextKey: editableTextKey,
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
             child: child,
           ),
         ),

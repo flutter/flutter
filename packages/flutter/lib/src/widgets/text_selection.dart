@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -19,6 +20,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'text_editing_actions.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
@@ -1199,45 +1201,83 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
+  @Deprecated(
+    'Use an Actions widget and respond to the TapDownTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureTapDownCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
+  @Deprecated(
+    'Use an Actions widget and respond to the ForcePressStartTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureForcePressStartCallback? onForcePressStart;
 
   /// Called when a pointer that had previously triggered [onForcePressStart] is
   /// lifted off the screen.
+  @Deprecated(
+    'Use an Actions widget and respond to the ForcePressEndTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureForcePressEndCallback? onForcePressEnd;
 
   /// Called for each distinct tap except for every second tap of a double tap.
   /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
   /// down, followed by a double tap down, followed by a single tap down.
+  @Deprecated(
+    'Use an Actions widget and respond to the SingleTapUpTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureTapUpCallback? onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
   /// short tap, such as a long tap or drag. It is called at the moment when
   /// another gesture from the touch is recognized.
+  @Deprecated(
+    'Use an Actions widget and respond to the SingleTapCancelTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureTapCancelCallback? onSingleTapCancel;
 
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
   /// double-tap-hold, which calls [onDoubleTapDown] instead.
+  @Deprecated(
+    'Use an Actions widget and respond to the SingleLongTapStartTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureLongPressStartCallback? onSingleLongTapStart;
 
   /// Called after [onSingleLongTapStart] when the pointer is dragged.
+  @Deprecated(
+    'Use an Actions widget and respond to the SingleLongTapMoveTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureLongPressMoveUpdateCallback? onSingleLongTapMoveUpdate;
 
   /// Called after [onSingleLongTapStart] when the pointer is lifted.
+  @Deprecated(
+    'Use an Actions widget and respond to the SingleTapDownTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureLongPressEndCallback? onSingleLongTapEnd;
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
+  @Deprecated(
+    'Use an Actions widget and respond to the DoubleTapDownTextIntent instead.'
+    'This feature was deprecated after v1.26.0.'
+  )
   final GestureTapDownCallback? onDoubleTapDown;
 
+  // TODO(justinmc): Convert to Actions pattern if possible.
   /// Called when a mouse starts dragging to select text.
   final GestureDragStartCallback? onDragSelectionStart;
 
+  // TODO(justinmc): Convert to Actions pattern if possible.
   /// Called repeatedly as a mouse moves while dragging.
   ///
   /// The frequency of calls is throttled to avoid excessive text layout
@@ -1245,6 +1285,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// [_kDragSelectionUpdateThrottle].
   final DragSelectionUpdateCallback? onDragSelectionUpdate;
 
+  // TODO(justinmc): Convert to Actions pattern if possible.
   /// Called when a mouse that was previously dragging is released.
   final GestureDragEndCallback? onDragSelectionEnd;
 
@@ -1278,6 +1319,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDownDetails details) {
+    Actions.invoke<TapDownTextIntent>(context, TapDownTextIntent(
+      details: details,
+    ), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onTapDown != null) {
       widget.onTapDown!(details);
     }
@@ -1288,6 +1333,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
       // If there was already a previous tap, the second down hold/tap is a
       // double tap down.
+      Actions.invoke<DoubleTapDownTextIntent>(context, const DoubleTapDownTextIntent(), nullOk: true);
+      // TODO(justinmc): To be removed when deprecation removed.
       if (widget.onDoubleTapDown != null) {
         widget.onDoubleTapDown!(details);
       }
@@ -1300,6 +1347,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isDoubleTap) {
+      Actions.invoke<SingleTapUpTextIntent>(context, SingleTapUpTextIntent(
+        details: details,
+      ), nullOk: true);
+      // TODO(justinmc): To be removed when deprecation removed.
       if (widget.onSingleTapUp != null) {
         widget.onSingleTapUp!(details);
       }
@@ -1310,6 +1361,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleTapCancel() {
+    Actions.invoke<SingleTapCancelTextIntent>(context, const SingleTapCancelTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onSingleTapCancel != null) {
       widget.onSingleTapCancel!();
     }
@@ -1322,6 +1375,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleDragStart(DragStartDetails details) {
     assert(_lastDragStartDetails == null);
     _lastDragStartDetails = details;
+    Actions.invoke<DragSelectionStartTextIntent>(context, const DragSelectionStartTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onDragSelectionStart != null) {
       widget.onDragSelectionStart!(details);
     }
@@ -1342,6 +1397,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleDragUpdateThrottled() {
     assert(_lastDragStartDetails != null);
     assert(_lastDragUpdateDetails != null);
+    Actions.invoke<DragSelectionUpdateTextIntent>(context, const DragSelectionUpdateTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onDragSelectionUpdate != null) {
       widget.onDragSelectionUpdate!(_lastDragStartDetails!, _lastDragUpdateDetails!);
     }
@@ -1357,6 +1414,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       _dragUpdateThrottleTimer!.cancel();
       _handleDragUpdateThrottled();
     }
+    Actions.invoke<DragSelectionEndTextIntent>(context, const DragSelectionEndTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onDragSelectionEnd != null) {
       widget.onDragSelectionEnd!(details);
     }
@@ -1368,30 +1427,46 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _forcePressStarted(ForcePressDetails details) {
     _doubleTapTimer?.cancel();
     _doubleTapTimer = null;
+    Actions.invoke<ForcePressStartTextIntent>(context, const ForcePressStartTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onForcePressStart != null)
       widget.onForcePressStart!(details);
   }
 
   void _forcePressEnded(ForcePressDetails details) {
+    Actions.invoke<ForcePressEndTextIntent>(context, const ForcePressEndTextIntent(), nullOk: true);
+    // TODO(justinmc): To be removed when deprecation removed.
     if (widget.onForcePressEnd != null)
       widget.onForcePressEnd!(details);
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
-      widget.onSingleLongTapStart!(details);
+    if (!_isDoubleTap) {
+      Actions.invoke<SingleLongTapStartTextIntent>(context, const SingleLongTapStartTextIntent(), nullOk: true);
+      // TODO(justinmc): To be removed when deprecation removed.
+      if (widget.onSingleLongTapStart != null) {
+        widget.onSingleLongTapStart!(details);
+      }
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
-      widget.onSingleLongTapMoveUpdate!(details);
+    if (!_isDoubleTap) {
+      Actions.invoke<SingleLongTapMoveUpdateTextIntent>(context, const SingleLongTapMoveUpdateTextIntent(), nullOk: true);
+      // TODO(justinmc): To be removed when deprecation removed.
+      if (widget.onSingleLongTapMoveUpdate != null) {
+        widget.onSingleLongTapMoveUpdate!(details);
+      }
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
-      widget.onSingleLongTapEnd!(details);
+    if (!_isDoubleTap) {
+      Actions.invoke<SingleLongTapEndTextIntent>(context, const SingleLongTapEndTextIntent(), nullOk: true);
+      // TODO(justinmc): To be removed when deprecation removed.
+      if (widget.onSingleLongTapEnd != null) {
+        widget.onSingleLongTapEnd!(details);
+      }
     }
     _isDoubleTap = false;
   }
