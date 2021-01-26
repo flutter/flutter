@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
@@ -16,6 +15,7 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/version.dart';
 import 'convert.dart';
+import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
