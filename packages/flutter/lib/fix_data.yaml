@@ -11,6 +11,149 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to dependOnInheritedElement'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'inheritFromElement'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to dependOnInheritedWidgetOfExactType'
+    date: 2020-09-14
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'inheritFromWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to getElementForInheritedWidgetOfExactType'
+    date: 2020-09-14
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorInheritedElementForWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'getElementForInheritedWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to getElementForInheritedWidgetOfExactType'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorWidgetOfExactType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorWidgetOfExactType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to findAncestorStateOfType'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorStateOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorStateOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to findAncestorRenderObjectOfType'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'ancestorRenderObjectOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findAncestorRenderObjectOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189.
+  - title: 'Rename to findAncestorRenderObjectOfType'
+    date: 2020-12-23
+    element:
+      uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
+      method: 'rootAncestorStateOfType'
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'findRootAncestorStateOfType'
+      - kind: 'addTypeParameter'
+        index: 0
+        name: 'T'
+        argumentValue:
+          expression: '{% type %}'
+          variables:
+            type:
+              kind: 'fragment'
+              value: 'arguments[0].typeArguments[0]'
+      - kind: 'removeParameter'
+        index: 0
+
   # Changes made in https://github.com/flutter/flutter/pull/26259
   - title: 'Rename to resizeToAvoidBottomInset'
     date: 2020-12-23

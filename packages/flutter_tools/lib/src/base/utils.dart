@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' show max;
+import 'dart:math' as math;
 
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
@@ -159,9 +159,10 @@ const int kMinColumnWidth = 10;
 
 /// Wraps a block of text into lines no longer than [columnWidth].
 ///
-/// Tries to split at whitespace, but if that's not good enough to keep it
-/// under the limit, then it splits in the middle of a word. If [columnWidth] is
-/// smaller than 10 columns, will wrap at 10 columns.
+/// Tries to split at whitespace, but if that's not good enough to keep it under
+/// the limit, then it splits in the middle of a word. If [columnWidth] (minus
+/// any indent) is smaller than [kMinColumnWidth], the text is wrapped at that
+/// [kMinColumnWidth] instead.
 ///
 /// Preserves indentation (leading whitespace) for each line (delimited by '\n')
 /// in the input, and will indent wrapped lines that same amount, adding
@@ -190,21 +191,20 @@ const int kMinColumnWidth = 10;
 /// unchanged. If [shouldWrap] is specified, then it overrides the
 /// [outputPreferences.wrapText] setting.
 ///
-/// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
-/// added together.
+/// If the amount of indentation (from the text, [indent], and [hangingIndent])
+/// is such that less than [kMinColumnWidth] characters can fit in the
+/// [columnWidth], then the indent is truncated to allow the text to fit.
 String wrapText(String text, {
   @required int columnWidth,
   @required bool shouldWrap,
   int hangingIndent,
   int indent,
 }) {
+  assert(columnWidth >= 0);
   if (text == null || text.isEmpty) {
     return '';
   }
   indent ??= 0;
-  columnWidth -= indent;
-  assert(columnWidth >= 0);
-
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
   final List<String> result = <String>[];
@@ -218,34 +218,38 @@ String wrapText(String text, {
       // them twice and recombine.
       final List<String> firstLineWrap = _wrapTextAsLines(
         trimmedText,
-        columnWidth: columnWidth - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length - indent,
         shouldWrap: shouldWrap,
       );
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
-      if (firstLineWrap.isNotEmpty) {
+      if (trimmedText.isNotEmpty) {
         notIndented.addAll(_wrapTextAsLines(
           trimmedText,
-          columnWidth: columnWidth - leadingWhitespace.length - hangingIndent,
+          columnWidth: columnWidth - leadingWhitespace.length - indent - hangingIndent,
           shouldWrap: shouldWrap,
         ));
       }
     } else {
       notIndented = _wrapTextAsLines(
         trimmedText,
-        columnWidth: columnWidth - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length - indent,
         shouldWrap: shouldWrap,
       );
     }
     String hangingIndentString;
     final String indentString = ' ' * indent;
-    result.addAll(notIndented.map(
+    result.addAll(notIndented.map<String>(
       (String line) {
         // Don't return any lines with just whitespace on them.
         if (line.isEmpty) {
           return '';
         }
-        final String result = '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
+        String truncatedIndent = '$indentString${hangingIndentString ?? ''}$leadingWhitespace';
+        if (truncatedIndent.length > columnWidth - kMinColumnWidth) {
+          truncatedIndent = truncatedIndent.substring(0, math.max(columnWidth - kMinColumnWidth, 0));
+        }
+        final String result = '$truncatedIndent$line';
         hangingIndentString ??= ' ' * hangingIndent;
         return result;
       },
@@ -274,6 +278,9 @@ class _AnsiRun {
 /// terminal window by default. If the stdout is not a terminal window, then the
 /// default will be [outputPreferences.wrapColumn].
 ///
+/// The [columnWidth] is clamped to [kMinColumnWidth] at minimum (so passing negative
+/// widths is fine, for instance).
+///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
@@ -286,7 +293,6 @@ List<String> _wrapTextAsLines(String text, {
     return <String>[''];
   }
   assert(columnWidth != null);
-  assert(columnWidth >= 0);
   assert(start >= 0);
 
   // Splits a string so that the resulting list has the same number of elements
@@ -325,7 +331,7 @@ List<String> _wrapTextAsLines(String text, {
   }
 
   final List<String> result = <String>[];
-  final int effectiveLength = max(columnWidth - start, kMinColumnWidth);
+  final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.
