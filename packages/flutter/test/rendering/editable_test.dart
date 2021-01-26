@@ -1692,8 +1692,8 @@ void main() {
     tearDown(() {
       EditableText.debugDeterministicCursor = false;
       _TestRenderEditablePainter.paintHistory.clear();
-      editable.setForegroundPainter(null);
-      editable.setPainter(null);
+      editable.foregroundPainter = null;
+      editable.painter = null;
       editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
@@ -1706,7 +1706,7 @@ void main() {
       // Prepare for painting after layout.
 
       // Foreground painter.
-      editable.setForegroundPainter(_TestRenderEditablePainter());
+      editable.foregroundPainter = _TestRenderEditablePainter();
       pumpFrame(phase: EnginePhase.compositingBits);
 
       expect(
@@ -1717,8 +1717,8 @@ void main() {
       );
 
       // Background painter.
-      editable.setForegroundPainter(null);
-      editable.setPainter(_TestRenderEditablePainter());
+      editable.foregroundPainter = null;
+      editable.painter = _TestRenderEditablePainter();
 
       expect(
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -1727,8 +1727,8 @@ void main() {
           ..paragraph(),
       );
 
-      editable.setForegroundPainter(_TestRenderEditablePainter());
-      editable.setPainter(_TestRenderEditablePainter());
+      editable.foregroundPainter = _TestRenderEditablePainter();
+      editable.painter = _TestRenderEditablePainter();
 
       expect(
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -1745,15 +1745,15 @@ void main() {
 
       _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
       // Foreground painter.
-      editable.setForegroundPainter(currentPainter);
+      editable.foregroundPainter = currentPainter;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.setForegroundPainter(currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.setForegroundPainter(currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });
@@ -1764,15 +1764,15 @@ void main() {
 
       _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
       // Foreground painter.
-      editable.setPainter(currentPainter);
+      editable.painter = currentPainter;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.setPainter(currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.setPainter(currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });
@@ -1783,8 +1783,8 @@ void main() {
       final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter();
       final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter();
 
-      editable.setPainter(painter1);
-      editable.setForegroundPainter(painter2);
+      editable.painter = painter1;
+      editable.foregroundPainter = painter2;
       pumpFrame(phase: EnginePhase.paint);
       expect(
         _TestRenderEditablePainter.paintHistory,
@@ -1792,8 +1792,8 @@ void main() {
       );
 
       _TestRenderEditablePainter.paintHistory.clear();
-      editable.setPainter(painter2);
-      editable.setForegroundPainter(painter1);
+      editable.painter = painter2;
+      editable.foregroundPainter = painter1;
       pumpFrame(phase: EnginePhase.paint);
       expect(
         _TestRenderEditablePainter.paintHistory,
@@ -1806,8 +1806,8 @@ void main() {
 
       final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
       FlutterErrorDetails? errorDetails;
-      editable.setPainter(painter);
-      editable.setForegroundPainter(painter);
+      editable.painter = painter;
+      editable.foregroundPainter = painter;
       pumpFrame(phase: EnginePhase.paint, onErrors: () {
         errorDetails = renderer.takeFlutterErrorDetails();
       });
@@ -1829,7 +1829,7 @@ void main() {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
       final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
-      editable.setPainter(painter);
+      editable.painter = painter;
       pumpFrame(phase: EnginePhase.paint);
       editable.paintCount = 0;
       painter.paintCount = 0;
@@ -1845,7 +1845,7 @@ void main() {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
       final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
-      editable.setPainter(painter);
+      editable.painter = painter;
       pumpFrame(phase: EnginePhase.paint);
       editable.paintCount = 0;
       painter.paintCount = 0;
@@ -1861,7 +1861,7 @@ void main() {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
       final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
-      editable.setPainter(painter);
+      editable.painter = painter;
       editable.offset = ViewportOffset.fixed(1000);
 
       pumpFrame(phase: EnginePhase.compositingBits);
