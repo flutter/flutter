@@ -99,7 +99,7 @@ class Plugin {
       pluginYaml,
       dependencies,
       fileSystem,
-      appDependencies != null ?? appDependencies.contains(name),
+      appDependencies?.contains(name),
     );
   }
 
