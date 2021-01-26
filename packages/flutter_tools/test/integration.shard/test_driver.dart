@@ -643,7 +643,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      _vmService.dispose();
+      // TODO(dnfield): Remove ignore once internal repo is up to date
+      // https://github.com/flutter/flutter/issues/74518
+      // ignore: await_only_futures
+      await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Detaching from app...');
@@ -666,7 +669,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<int> stop() async {
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      _vmService.dispose();
+      await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping application...');

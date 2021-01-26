@@ -30,6 +30,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
   // Dart team owned nnbd deps
+  'archive': '3.0.0-nullsafety.0',
   'async': '2.5.0-nullsafety.3',
   'boolean_selector': '2.1.0-nullsafety.3',
   'characters': '1.1.0-nullsafety.5',
@@ -51,9 +52,9 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'stream_channel': '2.1.0-nullsafety.3',
   'string_scanner': '1.1.0-nullsafety.3',
   'term_glyph': '1.2.0-nullsafety.3',
-  'test': '1.16.0-nullsafety.9',
+  'test': '1.16.0-nullsafety.16',
   'test_api': '0.2.19-nullsafety.6',
-  'test_core': '0.3.12-nullsafety.9',
+  'test_core': '0.3.12-nullsafety.15',
   'typed_data': '1.3.0-nullsafety.5',
   'vector_math': '2.1.0-nullsafety.5',
   // Flutter team owned nnbd deps

@@ -169,7 +169,10 @@ class DartVm {
   ///
   /// After this function completes this object is no longer usable.
   Future<void> stop() async {
-    _vmService.dispose();
+    // TODO(dnfield): Remove ignore once internal repo is up to date
+    // https://github.com/flutter/flutter/issues/74518
+    // ignore: await_only_futures
+    await _vmService.dispose();
     await _vmService.onDone;
   }
 }
