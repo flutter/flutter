@@ -32,6 +32,12 @@ class ForcePressEndTextIntent extends Intent {
 class ForcePressStartTextIntent extends Intent {
   const ForcePressStartTextIntent();
 }
+class EndTextIntent extends Intent {
+  const EndTextIntent();
+}
+class HomeTextIntent extends Intent {
+  const HomeTextIntent();
+}
 class SingleLongTapEndTextIntent extends Intent {
   const SingleLongTapEndTextIntent();
 }
@@ -99,7 +105,9 @@ class TextEditingActions extends StatelessWidget {
   /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
 
-  final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
+  // TODO(justinmc): All of these can be static. Should be public for users to
+  // be able to use/remap them.
+  static final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
     onInvoke: (SingleTapUpTextIntent intent, EditableTextState editableTextState) {
       print('justin TEB singleTapUp action invoked');
       editableTextState.hideToolbar();
@@ -217,8 +225,6 @@ class TextEditingActions extends StatelessWidget {
 
   // TODO(justinmc): Holding both line and word modifier keys should not do
   // anything. How do I achieve that with Shortcuts?
-  // TODO(justinmc): Do I want to combine anything since meta and ctrl? both do
-  // the same thing here?
   final TextEditingAction<MetaArrowRightTextIntent> _metaArrowRightTextAction = TextEditingAction<MetaArrowRightTextIntent>(
     onInvoke: (MetaArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -230,6 +236,40 @@ class TextEditingActions extends StatelessWidget {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  // TODO(justinmc): Notice that this does nearly the same thing as
+  // MetaArrowLeftTextIntent, but for different platforms.
+  final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
+    onInvoke: (HomeTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<EndTextIntent> _endTextAction = TextEditingAction<EndTextIntent>(
+    onInvoke: (EndTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
           break;
       }
     },
@@ -327,6 +367,11 @@ class TextEditingActions extends StatelessWidget {
       // TODO(justinmc): Should handle all actions from
       // TextSelectionGestureDetectorBuilder and from
       // _TextFieldSelectionGestureDetectorBuilder.
+      // TODO(justinmc): Alternative idea: These intents should map to actions
+      // that are named for what they do. The mapping is different depending on
+      // the platform. I guess I'd have a bunch of properties above like
+      // _androidTextEditingActionMap etc. But then, would each action just be
+      // a single call to a RenderEditable method?
       actions: <Type, Action<Intent>>{
         ...additionalActions,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
@@ -337,6 +382,8 @@ class TextEditingActions extends StatelessWidget {
         ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
         ControlArrowRightTextIntent: _controlArrowRightTextAction,
         ControlCTextIntent: _controlCTextAction,
+        EndTextIntent: _endTextAction,
+        HomeTextIntent: _homeTextAction,
         MetaCTextIntent: _metaCTextAction,
         MetaArrowRightTextIntent: _metaArrowRightTextAction,
         MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
