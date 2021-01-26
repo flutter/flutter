@@ -703,7 +703,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Whether the Flutter engine has rasterized the first frame.
   ///
-  /// {@macro flutter.flutter_driver.WaitUntilFirstFrameRasterized}
+  /// Usually, the time that a frame is rasterized is very close to the time that
+  /// it gets presented on the display. Specifically, rasterization is the last
+  /// expensive phase of a frame that's still in Flutter's control.
   ///
   /// See also:
   ///
@@ -714,7 +716,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.flutter_driver.WaitUntilFirstFrameRasterized}
+  /// Usually, the time that a frame is rasterized is very close to the time that
+  /// it gets presented on the display. Specifically, rasterization is the last
+  /// expensive phase of a frame that's still in Flutter's control.
   ///
   /// See also:
   ///
@@ -730,36 +734,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [firstFrameRasterized], whether the first frame has finished rendering.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
-
-  /// Tell the framework not to report the frame it is building as a "useful"
-  /// first frame until there is a corresponding call to [allowFirstFrameReport].
-  ///
-  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
-  /// first frame.
-  @Deprecated(
-    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
-    'This feature was deprecated after v1.12.4.'
-  )
-  void deferFirstFrameReport() {
-    if (!kReleaseMode) {
-      deferFirstFrame();
-    }
-  }
-
-  /// When called after [deferFirstFrameReport]: tell the framework to report
-  /// the frame it is building as a "useful" first frame.
-  ///
-  /// Deprecated. Use [deferFirstFrame]/[allowFirstFrame] to delay rendering the
-  /// first frame.
-  @Deprecated(
-    'Use deferFirstFrame/allowFirstFrame to delay rendering the first frame. '
-    'This feature was deprecated after v1.12.4.'
-  )
-  void allowFirstFrameReport() {
-    if (!kReleaseMode) {
-      allowFirstFrame();
-    }
-  }
 
   void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes

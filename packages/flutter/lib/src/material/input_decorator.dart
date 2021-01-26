@@ -396,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
-            end: const Offset(0.0, 0.0),
+            end: Offset.zero,
           ).evaluate(_controller.view),
           child: Text(
             widget.errorText!,
@@ -1284,7 +1284,7 @@ class _RenderDecoration extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override
@@ -3014,7 +3014,7 @@ class InputDecoration {
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///

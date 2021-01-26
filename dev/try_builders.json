@@ -33,12 +33,6 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
       },
       {
-         "name":"Linux build_gallery",
-         "repo":"flutter",
-         "task_name":"linux_build_gallery",
-         "enabled":true
-      },
-      {
          "name":"Linux framework_tests",
          "repo":"flutter",
          "task_name":"linux_framework_tests",
@@ -68,6 +62,13 @@
          "repo":"flutter",
          "task_name":"linux_fuchsia_precache",
          "enabled":true
+      },
+      {
+        "name":"Linux gradle_desugar_classes_test",
+        "repo":"flutter",
+        "task_name":"linux_gradle_desugar_classes_test",
+        "enabled":true,
+        "run_if":["dev/**", "bin/**"]
       },
       {
          "name":"Linux gradle_non_android_plugin_test",
@@ -211,12 +212,6 @@
          "name":"Mac customer_testing",
          "repo":"flutter",
          "task_name":"mac_customer_testing",
-         "enabled":true
-      },
-      {
-         "name":"Mac build_gallery",
-         "repo":"flutter",
-         "task_name":"mac_build_gallery",
          "enabled":true
       },
       {

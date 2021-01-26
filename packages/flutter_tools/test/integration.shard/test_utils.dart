@@ -6,9 +6,12 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
+import 'test_driver.dart';
 
 /// The [FileSystem] for the integration test environment.
 const FileSystem fileSystem = LocalFileSystem();
@@ -72,4 +75,26 @@ List<String> getLocalEngineArguments() {
     if (platform.environment.containsKey(kLocalEngineLocation))
       '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
   ];
+}
+
+Future<void> pollForServiceExtensionValue<T>({
+  @required FlutterTestDriver testDriver,
+  @required String extension,
+  @required T continuePollingValue,
+  @required Matcher matches,
+  String valueKey = 'value',
+}) async {
+  for (int i = 0; i < 10; i++) {
+    final Response response = await testDriver.callServiceExtension(extension);
+    if (response.json[valueKey] as T == continuePollingValue) {
+      await Future<void>.delayed(const Duration(seconds: 1));
+    } else {
+      expect(response.json[valueKey] as T, matches);
+      return;
+    }
+  }
+  fail(
+    'Did not find expected value for service extension \'$extension\'. All call'
+    ' attempts responded with \'$continuePollingValue\'.',
+  );
 }

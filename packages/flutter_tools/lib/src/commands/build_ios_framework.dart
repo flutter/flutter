@@ -73,14 +73,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
               'By default, all build configurations are built.'
       )
       ..addFlag('universal',
-        help: '(Deprecated) Produce universal frameworks that include all valid architectures. '
-              'This option will be removed in a future version of Flutter.',
+        help: '(Deprecated) Produce universal frameworks that include all valid architectures.',
         negatable: true,
         hide: true,
       )
       ..addFlag('xcframework',
         help: 'Produce xcframeworks that include all valid architectures.',
+        negatable: false,
         defaultsTo: true,
+        hide: true,
       )
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
@@ -115,7 +116,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   final String name = 'ios-framework';
 
   @override
-  final String description = 'Produces .frameworks for a Flutter project '
+  final String description = 'Produces .xcframeworks for a Flutter project '
       'and its plugins for integration into existing, plain Xcode projects.\n'
       'This can only be run on macOS hosts.';
 
@@ -126,7 +127,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   FlutterProject _project;
 
-  Future<List<BuildInfo>> get buildInfos async {
+  Future<List<BuildInfo>> getBuildInfos() async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
     if (boolArg('debug')) {
@@ -150,18 +151,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if (!boolArg('universal') && !boolArg('xcframework')) {
-      throwToolExit('--xcframework or --universal is required.');
-    }
-    if (boolArg('xcframework') && globals.xcode.majorVersion < 11) {
-      throwToolExit('--xcframework requires Xcode 11.');
-    }
     if (boolArg('universal')) {
-      globals.printError('--universal has been deprecated to support Apple '
-          'Silicon ARM simulators and will be removed in a future version of '
-          'Flutter. Use --xcframework instead.');
+      throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
-    if ((await buildInfos).isEmpty) {
+    if ((await getBuildInfos()).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
   }
@@ -180,8 +173,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
-
-    for (final BuildInfo buildInfo in await buildInfos) {
+    final List<BuildInfo> buildInfos = await getBuildInfos();
+    displayNullSafetyMode(buildInfos.first);
+    for (final BuildInfo buildInfo in buildInfos) {
       final String productBundleIdentifier = await _project.ios.productBundleIdentifier(buildInfo);
       globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(buildInfo.mode));
@@ -196,7 +190,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         _flutterVersion ??= globals.flutterVersion;
         produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
-        // Copy Flutter.framework.
+        // Copy Flutter.xcframework.
         await _produceFlutterFramework(buildInfo, modeDirectory);
       }
 
@@ -311,7 +305,7 @@ end
     Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
-      ' ├─Populating Flutter.xcframework...',
+      ' ├─Copying Flutter.xcframework...',
     );
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(
       Artifact.flutterXcframework,
@@ -334,8 +328,6 @@ end
     } finally {
       status.stop();
     }
-
-    await _produceUniversalFromXCFramework(buildInfo, flutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(
@@ -347,21 +339,13 @@ end
     const String appFrameworkName = 'App.framework';
 
     final Status status = globals.logger.startProgress(
-      ' ├─Building App.framework...',
+      ' ├─Building App.xcframework...',
     );
     final List<EnvironmentType> environmentTypes = <EnvironmentType>[
       EnvironmentType.physical,
+      EnvironmentType.simulator,
     ];
     final List<Directory> frameworks = <Directory>[];
-    Target target;
-    if (buildInfo.isDebug) {
-      environmentTypes.add(EnvironmentType.simulator);
-      target = const DebugIosApplicationBundle();
-    } else if (buildInfo.isProfile) {
-      target = const ProfileIosApplicationBundle();
-    } else {
-      target = const ReleaseIosApplicationBundle();
-    }
 
     try {
       for (final EnvironmentType sdkType in environmentTypes) {
@@ -401,20 +385,28 @@ end
               ? null
               : globals.flutterVersion.engineRevision,
         );
+        Target target;
+        // Always build debug for simulator.
+        if (buildInfo.isDebug || sdkType == EnvironmentType.simulator) {
+          target = const DebugIosApplicationBundle();
+        } else if (buildInfo.isProfile) {
+          target = const ProfileIosApplicationBundle();
+        } else {
+          target = const ReleaseIosApplicationBundle();
+        }
         final BuildResult result = await buildSystem.build(target, environment);
         if (!result.success) {
           for (final ExceptionMeasurement measurement
               in result.exceptions.values) {
             globals.printError(measurement.exception.toString());
           }
-          throwToolExit('The App.framework build failed.');
+          throwToolExit('The App.xcframework build failed.');
         }
       }
     } finally {
       status.stop();
     }
 
-    await _produceUniversalFramework(frameworks, 'App', outputDirectory);
     await _produceXCFramework(frameworks, 'App', outputDirectory);
   }
 
@@ -430,12 +422,6 @@ end
       ' ├─Building plugins...'
     );
     try {
-      // Regardless of the last "flutter build" build mode,
-      // copy the corresponding engine.
-      // A plugin framework built with bitcode must link against the bitcode version
-      // of Flutter.framework (Release).
-      _project.ios.copyEngineArtifactToProject(mode, EnvironmentType.physical);
-
       final String bitcodeGenerationMode = mode == BuildMode.release ?
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
 
@@ -463,42 +449,42 @@ end
         throwToolExit('Unable to build plugin frameworks: ${buildPluginsResult.stderr}');
       }
 
-      if (mode == BuildMode.debug) {
-        pluginsBuildCommand = <String>[
-          ...globals.xcode.xcrunCommand(),
-          'xcodebuild',
-          '-alltargets',
-          '-sdk',
-          'iphonesimulator',
-          '-configuration',
-          xcodeBuildConfiguration,
-          'SYMROOT=${simulatorBuildOutput.path}',
-          'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
-          'ARCHS=x86_64',
-          'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
-          'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        ];
+      // Always build debug for simulator.
+      final String simulatorConfiguration = toTitleCase(getNameForBuildMode(BuildMode.debug));
+      pluginsBuildCommand = <String>[
+        ...globals.xcode.xcrunCommand(),
+        'xcodebuild',
+        '-alltargets',
+        '-sdk',
+        'iphonesimulator',
+        '-configuration',
+        simulatorConfiguration,
+        'SYMROOT=${simulatorBuildOutput.path}',
+        'ENABLE_BITCODE=YES', // Support host apps with bitcode enabled.
+        'ARCHS=x86_64',
+        'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+        'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+      ];
 
-        buildPluginsResult = await globals.processUtils.run(
-          pluginsBuildCommand,
-          workingDirectory: _project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .path,
-          allowReentrantFlutter: false,
+      buildPluginsResult = await globals.processUtils.run(
+        pluginsBuildCommand,
+        workingDirectory: _project.ios.hostAppRoot
+          .childDirectory('Pods')
+          .path,
+        allowReentrantFlutter: false,
+      );
+
+      if (buildPluginsResult.exitCode != 0) {
+        throwToolExit(
+          'Unable to build plugin frameworks for simulator: ${buildPluginsResult.stderr}',
         );
-
-        if (buildPluginsResult.exitCode != 0) {
-          throwToolExit(
-            'Unable to build plugin frameworks for simulator: ${buildPluginsResult.stderr}',
-          );
-        }
       }
 
       final Directory iPhoneBuildConfiguration = iPhoneBuildOutput.childDirectory(
         '$xcodeBuildConfiguration-iphoneos',
       );
       final Directory simulatorBuildConfiguration = simulatorBuildOutput.childDirectory(
-        '$xcodeBuildConfiguration-iphonesimulator',
+        '$simulatorConfiguration-iphonesimulator',
       );
 
       final Iterable<Directory> products = iPhoneBuildConfiguration
@@ -514,49 +500,16 @@ end
 
           final List<Directory> frameworks = <Directory>[
             podProduct as Directory,
-            if (mode == BuildMode.debug)
-              simulatorBuildConfiguration
-                  .childDirectory(builtProduct.basename)
-                  .childDirectory(podFrameworkName)
+            simulatorBuildConfiguration
+                .childDirectory(builtProduct.basename)
+                .childDirectory(podFrameworkName)
           ];
 
-          await _produceUniversalFramework(frameworks, binaryName, modeDirectory);
           await _produceXCFramework(frameworks, binaryName, modeDirectory);
         }
       }
     } finally {
       status.stop();
-    }
-  }
-
-  Future<void> _produceUniversalFromXCFramework(BuildInfo buildInfo, Directory xcframework) async {
-    if (boolArg('universal')) {
-      final String frameworkBinaryName =
-          globals.fs.path.basenameWithoutExtension(xcframework.basename);
-
-      final Status status = globals.logger.startProgress(
-        ' ├─Creating $frameworkBinaryName.framework...',
-      );
-      try {
-        final Iterable<Directory> frameworks = xcframework
-            .listSync()
-            .whereType<Directory>()
-            .map((Directory triple) => triple
-                .listSync()
-                .whereType<Directory>()
-                .firstWhere((Directory frameworkDirectory) =>
-                    frameworkDirectory.basename ==
-                    '$frameworkBinaryName.framework'));
-
-        await _produceUniversalFramework(
-            frameworks, frameworkBinaryName, xcframework.parent);
-      } finally {
-        status.stop();
-      }
-    }
-
-    if (!boolArg('xcframework')) {
-      xcframework.deleteSync(recursive: true);
     }
   }
 
@@ -585,44 +538,6 @@ end
     if (xcframeworkResult.exitCode != 0) {
       throwToolExit(
           'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}');
-    }
-  }
-
-  Future<void> _produceUniversalFramework(Iterable<Directory> frameworks,
-      String frameworkBinaryName, Directory outputDirectory) async {
-    if (!boolArg('universal')) {
-      return;
-    }
-    final Directory outputFrameworkDirectory =
-        outputDirectory.childDirectory('$frameworkBinaryName.framework');
-
-    // Copy the first framework over completely to get headers, resources, etc.
-    globals.fsUtils.copyDirectorySync(
-      frameworks.first,
-      outputFrameworkDirectory,
-    );
-
-    // Recreate the framework binary by lipo'ing the framework binaries together.
-    final List<String> lipoCommand = <String>[
-      ...globals.xcode.xcrunCommand(),
-      'lipo',
-      '-create',
-      for (Directory framework in frameworks) ...<String>[
-        framework.childFile(frameworkBinaryName).path
-      ],
-      '-output',
-      outputFrameworkDirectory.childFile(frameworkBinaryName).path
-    ];
-
-    final RunResult lipoResult = await globals.processUtils.run(
-      lipoCommand,
-      workingDirectory: outputDirectory.path,
-      allowReentrantFlutter: false,
-    );
-
-    if (lipoResult.exitCode != 0) {
-      throwToolExit(
-          'Unable to create $frameworkBinaryName.framework: ${lipoResult.stderr}');
     }
   }
 }

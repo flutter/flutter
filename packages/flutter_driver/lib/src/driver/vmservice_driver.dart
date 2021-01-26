@@ -234,7 +234,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
-      client.dispose();
+      // TODO(dnfield): Remove ignore once internal repo is up to date
+      // https://github.com/flutter/flutter/issues/74518
+      // ignore: await_only_futures
+      await client.dispose();
       await client.onDone;
       throw DriverError('Flutter application health check failed.');
     }
@@ -525,7 +528,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> close() async {
-    _serviceClient.dispose();
+    // TODO(dnfield): Remove ignore once internal repo is up to date
+    // https://github.com/flutter/flutter/issues/74518
+    await _serviceClient.dispose(); // ignore: await_only_futures
     await _serviceClient.onDone;
   }
 }

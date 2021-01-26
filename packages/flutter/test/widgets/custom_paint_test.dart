@@ -198,4 +198,20 @@ void main() {
     expect(() => CustomPaint(isComplex: true), throwsAssertionError);
     expect(() => CustomPaint(willChange: true), throwsAssertionError);
   });
+
+  test('RenderCustomPaint consults preferred size for intrinsics when it has no child', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size(20, 30));
+    expect(inner.getMinIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 30);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 30);
+  });
+
+  test('RenderCustomPaint does not return infinity for its intrinsics', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size.square(double.infinity));
+    expect(inner.getMinIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 0);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 0);
+  });
 }

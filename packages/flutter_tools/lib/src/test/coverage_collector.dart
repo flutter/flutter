@@ -205,7 +205,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   final vm_service.VmService vmService = await connector(serviceUri);
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
-  vmService.dispose();
+  // TODO(dnfield): Remove ignore once internal repo is up to date
+  // https://github.com/flutter/flutter/issues/74518
+  // ignore: await_only_futures
+  await vmService.dispose();
   return result;
 }
 
