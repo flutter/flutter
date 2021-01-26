@@ -1,4 +1,4 @@
-Signature: 6bd5732229921ccf7d203881a71f4a59
+Signature: f98da8be33ddfec015228bb36e415d71
 
 UNUSED LICENSES:
 
@@ -3932,6 +3932,7 @@ FILE: ../../../third_party/skia/modules/svg/include/SkSVGFe.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeBlend.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeColorMatrix.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeComposite.h
+FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeDisplacementMap.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeFlood.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeGaussianBlur.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeMorphology.h
@@ -3943,6 +3944,7 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGFe.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeBlend.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeColorMatrix.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeComposite.cpp
+FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeDisplacementMap.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeFlood.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeGaussianBlur.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeMorphology.cpp
