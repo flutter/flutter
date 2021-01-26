@@ -1359,7 +1359,6 @@ class ListView extends BoxScrollView {
   ///       ),
   ///       bottomNavigationBar: BottomAppBar(
   ///         child: Row(
-  ///         child: Row(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             TextButton(
