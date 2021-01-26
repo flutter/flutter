@@ -1,4 +1,4 @@
-Signature: 8d4521c3fe82b7be926a7af5f8b15557
+Signature: 9db8bafec80ab28ff11bebe46f68a9c5
 
 UNUSED LICENSES:
 
@@ -9750,11 +9750,9 @@ FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/arena.dart
 FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/rti.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
