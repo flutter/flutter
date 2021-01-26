@@ -9,14 +9,14 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
-    final Tween<Object> objetTween = Tween<Object>(
+    final Tween<Object> objectTween = Tween<Object>(
       begin: Object(),
       end: Object(),
     );
 
     FlutterError? error;
     try {
-      objetTween.transform(0.1);
+      objectTween.transform(0.1);
     } on FlutterError catch (err) {
       error = err;
     }
@@ -26,8 +26,9 @@ void main() {
     }
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
-      'Cannot tween between Instance of \'Object\' and Instance of \'Object\'.',
-      'The type Object does not fully implement `+`, `-`, and/or `*`.',
+      'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
+      'The type Object might not fully implement `+`, `-`, and/or `*`.',
+      'There may be a dedicated "ObjectTween" for this type, or you may need to create one.'
     ]);
   });
 
@@ -49,9 +50,33 @@ void main() {
     }
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
-      'Cannot tween between Color(0xff000000) and Color(0xffffffff).',
-      'The type Color does not fully implement `+`, `-`, and/or `*`.',
-      'To tween colors, use ColorTween instead.',
+      'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
+      'The type Color might not fully implement `+`, `-`, and/or `*`.',
+      'To lerp colors, consider ColorTween instead.',
+    ]);
+  });
+
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Rect', () {
+    final Tween<Rect> rectTween = Tween<Rect>(
+      begin: const Rect.fromLTWH(0, 0, 10, 10),
+      end: const Rect.fromLTWH(2, 2, 2, 2)
+    );
+
+    FlutterError? error;
+    try {
+      rectTween.transform(0.1);
+    } on FlutterError catch (err) {
+      error = err;
+    }
+
+    if (error == null) {
+      fail('Expected Tween.transform to throw a FlutterError');
+    }
+
+    expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
+      'Cannot lerp between "Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)" and "Rect.fromLTRB(2.0, 2.0, 4.0, 4.0)".',
+      'The type Rect might not fully implement `+`, `-`, and/or `*`.',
+      'To lerp rects, consider RectTween instead.',
     ]);
   });
 
@@ -73,9 +98,9 @@ void main() {
     }
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
-      'Cannot tween between 0 and 1.',
+      'Cannot lerp between "0" and "1".',
       'The type int returned a double after multiplication with a double value.',
-      'To tween int values, use IntTween instead.',
+      'To lerp int values, consider IntTween or StepTween instead.',
     ]);
   });
 

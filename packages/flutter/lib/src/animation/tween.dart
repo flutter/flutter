@@ -266,22 +266,34 @@ class Tween<T extends dynamic> extends Animatable<T> {
         return true;
       } on NoSuchMethodError {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot tween between $begin and $end.'),
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
           ErrorDescription(
-            'The type ${begin.runtimeType} does not fully implement `+`, `-`, and/or `*`.',
+            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`.',
           ),
           if (begin is Color || end is Color)
-            ErrorHint('To tween colors, use ColorTween instead.')
+            ErrorHint('To lerp colors, consider ColorTween instead.')
+          else if (begin is Rect || end is Rect)
+            ErrorHint('To lerp rects, consider RectTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.'
+            ),
         ]);
       } on TypeError {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot tween between $begin and $end.'),
+          ErrorSummary('Cannot lerp between "$begin" and "$end".'),
           ErrorDescription(
             'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
             'multiplication with a double value.'
           ),
           if (begin is int || end is int)
-            ErrorHint('To tween int values, use IntTween instead.')
+            ErrorHint('To lerp int values, consider IntTween or StepTween instead.')
+          else
+            ErrorHint(
+              'There may be a dedicated "${begin.runtimeType}Tween" for this type, '
+              'or you may need to create one.'
+            ),
         ]);
       }
     }());
