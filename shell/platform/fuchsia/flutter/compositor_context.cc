@@ -93,7 +93,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
                  "of size: "
               << physical_size.width() << "x" << physical_size.height();
         } else {
-          task.material.SetTexture(*(surface->GetImage()));
+          task.material.SetTexture(surface->GetImageId());
         }
 
         frame_surfaces.emplace_back(std::move(surface));

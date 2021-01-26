@@ -4,6 +4,8 @@
 
 #include "vulkan_surface_pool.h"
 
+#include <lib/fdio/directory.h>
+
 #include <algorithm>
 #include <string>
 
@@ -12,21 +14,17 @@
 
 namespace flutter_runner {
 
-namespace {
-
-std::string ToString(const SkISize& size) {
-  return "{width: " + std::to_string(size.width()) +
-         ", height: " + std::to_string(size.height()) + "}";
-}
-
-}  // namespace
-
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
                                      sk_sp<GrDirectContext> context,
                                      scenic::Session* scenic_session)
     : vulkan_provider_(vulkan_provider),
       context_(std::move(context)),
-      scenic_session_(scenic_session) {}
+      scenic_session_(scenic_session) {
+  zx_status_t status = fdio_service_connect(
+      "/svc/fuchsia.sysmem.Allocator",
+      sysmem_allocator_.NewRequest().TakeChannel().release());
+  FML_DCHECK(status != ZX_OK);
+}
 
 VulkanSurfacePool::~VulkanSurfacePool() {}
 
@@ -66,49 +64,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
     }
   }
 
-  // Then, look for a surface that has enough |VkDeviceMemory| to hold a
-  // |VkImage| of size |size|, but is currently holding a |VkImage| of a
-  // different size.
-  VulkanImage vulkan_image;
-  if (!CreateVulkanImage(vulkan_provider_, size, &vulkan_image)) {
-    FML_DLOG(ERROR) << "Failed to create a VkImage of size: " << ToString(size);
-    return nullptr;
-  }
-
-  auto best_it = available_surfaces_.end();
-  for (auto it = available_surfaces_.begin(); it != available_surfaces_.end();
-       ++it) {
-    const auto& surface = *it;
-    if (!surface->IsValid() || surface->GetAllocationSize() <
-                                   vulkan_image.vk_memory_requirements.size) {
-      continue;
-    }
-    if (best_it == available_surfaces_.end() ||
-        surface->GetAllocationSize() < (*best_it)->GetAllocationSize()) {
-      best_it = it;
-    }
-  }
-
-  // If no such surface exists, then create a new one.
-  if (best_it == available_surfaces_.end()) {
-    TRACE_EVENT_INSTANT0("flutter", "No available surfaces");
-    return CreateSurface(size);
-  }
-
-  auto acquired_surface = std::move(*best_it);
-  available_surfaces_.erase(best_it);
-  bool swap_succeeded =
-      acquired_surface->BindToImage(context_, std::move(vulkan_image));
-  if (!swap_succeeded) {
-    FML_DLOG(ERROR) << "Failed to swap VulkanSurface to new VkImage of size: "
-                    << ToString(size);
-    TRACE_EVENT_INSTANT0("flutter", "failed to swap, making new");
-    return CreateSurface(size);
-  }
-  TRACE_EVENT_INSTANT0("flutter", "Using differently sized image");
-  FML_DCHECK(acquired_surface->IsValid());
-  trace_surfaces_reused_++;
-  return acquired_surface;
+  return CreateSurface(size);
 }
 
 void VulkanSurfacePool::SubmitSurface(
@@ -140,8 +96,9 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::CreateSurface(
     const SkISize& size) {
   TRACE_EVENT2("flutter", "VulkanSurfacePool::CreateSurface", "width",
                size.width(), "height", size.height());
-  auto surface = std::make_unique<VulkanSurface>(vulkan_provider_, context_,
-                                                 scenic_session_, size);
+  auto surface = std::make_unique<VulkanSurface>(
+      vulkan_provider_, sysmem_allocator_, context_, scenic_session_, size,
+      buffer_id_++);
   if (!surface->IsValid()) {
     return nullptr;
   }

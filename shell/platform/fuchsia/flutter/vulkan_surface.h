@@ -37,7 +37,7 @@ class SurfaceProducerSurface {
   virtual void SignalWritesFinished(
       const std::function<void(void)>& on_writes_committed) = 0;
 
-  virtual scenic::Image* GetImage() = 0;
+  virtual uint32_t GetImageId() = 0;
 
   virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
 };
@@ -59,7 +59,7 @@ struct VulkanImage {
   VulkanImage(VulkanImage&&) = default;
   VulkanImage& operator=(VulkanImage&&) = default;
 
-  VkExternalMemoryImageCreateInfo vk_external_image_create_info;
+  VkBufferCollectionImageCreateInfoFUCHSIA vk_collection_image_create_info;
   VkImageCreateInfo vk_image_create_info;
   VkMemoryRequirements vk_memory_requirements;
   vulkan::VulkanHandle<VkImage> vk_image;
@@ -67,19 +67,14 @@ struct VulkanImage {
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanImage);
 };
 
-// Create a new |VulkanImage| of size |size|, stored in
-// |out_vulkan_image|.  Returns whether creation of the |VkImage| was
-// successful.
-bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
-                       const SkISize& size,
-                       VulkanImage* out_vulkan_image);
-
 class VulkanSurface final : public SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
+                fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
                 sk_sp<GrDirectContext> context,
                 scenic::Session* session,
-                const SkISize& size);
+                const SkISize& size,
+                uint32_t buffer_id);
 
   ~VulkanSurface() override;
 
@@ -101,7 +96,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
       const std::function<void(void)>& on_writes_committed) override;
 
   // |SurfaceProducerSurface|
-  scenic::Image* GetImage() override;
+  uint32_t GetImageId() override;
 
   // |SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
@@ -141,13 +136,6 @@ class VulkanSurface final : public SurfaceProducerSurface {
                       size_history_.begin());
   }
 
-  // Bind |vulkan_image| to |vk_memory_| and create a new skia surface,
-  // replacing the previous |vk_image_|.  |vulkan_image| MUST require less
-  // than or equal the amount of memory contained in |vk_memory_|. Returns
-  // whether the swap was successful.  The |VulkanSurface| will become invalid
-  // if the swap was not successful.
-  bool BindToImage(sk_sp<GrDirectContext> context, VulkanImage vulkan_image);
-
  private:
   static constexpr int kSizeHistorySize = 4;
 
@@ -156,9 +144,13 @@ class VulkanSurface final : public SurfaceProducerSurface {
                      zx_status_t status,
                      const zx_packet_signal_t* signal);
 
-  bool AllocateDeviceMemory(sk_sp<GrDirectContext> context,
-                            const SkISize& size,
-                            zx::vmo& exported_vmo);
+  bool AllocateDeviceMemory(fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+                            sk_sp<GrDirectContext> context,
+                            const SkISize& size);
+
+  bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
+                         const SkISize& size,
+                         VulkanImage* out_vulkan_image);
 
   bool SetupSkiaSurface(sk_sp<GrDirectContext> context,
                         const SkISize& size,
@@ -168,7 +160,7 @@ class VulkanSurface final : public SurfaceProducerSurface {
 
   bool CreateFences();
 
-  bool PushSessionImageSetupOps(scenic::Session* session);
+  void PushSessionImageSetupOps(scenic::Session* session);
 
   void Reset();
 
@@ -182,9 +174,9 @@ class VulkanSurface final : public SurfaceProducerSurface {
   VkMemoryAllocateInfo vk_memory_info_;
   vulkan::VulkanHandle<VkFence> command_buffer_fence_;
   sk_sp<SkSurface> sk_surface_;
-  // TODO: Don't heap allocate this once SCN-268 is resolved.
-  std::unique_ptr<scenic::Memory> scenic_memory_;
-  std::unique_ptr<scenic::Image> session_image_;
+  const uint32_t buffer_id_;
+  uint32_t image_id_ = 0;
+  VkBufferCollectionFUCHSIA collection_;
   zx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   std::unique_ptr<vulkan::VulkanCommandBuffer> command_buffer_;
