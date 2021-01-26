@@ -268,7 +268,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot lerp between "$begin" and "$end".'),
           ErrorDescription(
-            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`.',
+            'The type ${begin.runtimeType} might not fully implement `+`, `-`, and/or `*`. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
           ),
           if (begin is Color || end is Color)
             ErrorHint('To lerp colors, consider ColorTween instead.')
@@ -285,7 +287,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
           ErrorSummary('Cannot lerp between "$begin" and "$end".'),
           ErrorDescription(
             'The type ${begin.runtimeType} returned a ${result.runtimeType} after '
-            'multiplication with a double value.'
+            'multiplication with a double value. '
+            'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html '
+            'for more information.',
           ),
           if (begin is int || end is int)
             ErrorHint('To lerp int values, consider IntTween or StepTween instead.')

@@ -7,6 +7,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
+
 void main() {
   test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
     final Tween<Object> objectTween = Tween<Object>(
@@ -27,7 +29,7 @@ void main() {
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
-      'The type Object might not fully implement `+`, `-`, and/or `*`.',
+      'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
       'There may be a dedicated "ObjectTween" for this type, or you may need to create one.'
     ]);
   });
@@ -51,7 +53,7 @@ void main() {
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
-      'The type Color might not fully implement `+`, `-`, and/or `*`.',
+      'The type Color might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
       'To lerp colors, consider ColorTween instead.',
     ]);
   });
@@ -75,7 +77,7 @@ void main() {
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)" and "Rect.fromLTRB(2.0, 2.0, 4.0, 4.0)".',
-      'The type Rect might not fully implement `+`, `-`, and/or `*`.',
+      'The type Rect might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
       'To lerp rects, consider RectTween instead.',
     ]);
   });
@@ -99,7 +101,7 @@ void main() {
 
     expect(error.diagnostics.map((DiagnosticsNode node) => node.toString()), <String>[
       'Cannot lerp between "0" and "1".',
-      'The type int returned a double after multiplication with a double value.',
+      'The type int returned a double after multiplication with a double value. $kApiDocsLink',
       'To lerp int values, consider IntTween or StepTween instead.',
     ]);
   });
