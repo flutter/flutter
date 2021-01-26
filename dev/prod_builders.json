@@ -445,12 +445,6 @@
          "flaky": false
       },
       {
-         "name": "Mac_android android_plugin_example_app_build_test",
-         "repo": "flutter",
-         "task_name": "mac_android_android_plugin_example_app_build_test",
-         "flaky": false
-      },
-      {
          "name": "Mac_android android_semantics_integration_test",
          "repo": "flutter",
          "task_name": "mac_android_android_semantics_integration_test",
