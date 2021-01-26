@@ -422,7 +422,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     final Plugin plugin = _pluginFromPackage(
       package.name,
       packageRoot,
-      <String>[...appDependencies.keys.cast<String>()],
+      appDependencies != null ? <String>[...appDependencies.keys.cast<String>()] : <String>[],
     );
     if (plugin != null) {
       plugins.add(plugin);
