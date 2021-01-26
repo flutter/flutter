@@ -396,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
-            end: const Offset(0.0, 0.0),
+            end: Offset.zero,
           ).evaluate(_controller.view),
           child: Text(
             widget.errorText!,
@@ -1284,7 +1284,7 @@ class _RenderDecoration extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override
@@ -2164,6 +2164,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration!.hintText!,
         style: hintStyle,
+        textDirection: decoration!.hintTextDirection,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration!.hintMaxLines,
@@ -2389,7 +2390,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
@@ -2414,7 +2415,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
@@ -2434,7 +2435,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
@@ -2455,7 +2456,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
@@ -2509,6 +2510,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintTextDirection,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2566,6 +2568,7 @@ class InputDecoration {
     this.hasFloatingPlaceholder = true,
     this.floatingLabelBehavior,
     this.hintStyle,
+    this.hintTextDirection,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2686,6 +2689,12 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
+
+  /// The direction to use for the [hintText].
+  ///
+  /// If null, defaults to a value derived from [Directionality] for the
+  /// input field and the current context.
+  final TextDirection? hintTextDirection;
 
   /// The maximum number of lines the [hintText] can occupy.
   ///
@@ -2836,7 +2845,8 @@ class InputDecoration {
   /// setting the constraints' minimum height and width to a value lower than
   /// 48px.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  ///
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3004,7 +3014,7 @@ class InputDecoration {
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   ///
-  /// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
@@ -3306,6 +3316,7 @@ class InputDecoration {
     int? helperMaxLines,
     String? hintText,
     TextStyle? hintStyle,
+    TextDirection? hintTextDirection,
     int? hintMaxLines,
     String? errorText,
     TextStyle? errorStyle,
@@ -3351,6 +3362,7 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3439,6 +3451,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
+        && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3487,6 +3500,7 @@ class InputDecoration {
       helperMaxLines,
       hintText,
       hintStyle,
+      hintTextDirection,
       hintMaxLines,
       errorText,
       errorStyle,

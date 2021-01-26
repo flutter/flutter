@@ -13,9 +13,6 @@ import 'inline_span.dart';
 import 'text_painter.dart';
 import 'text_style.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property. The style will
@@ -82,7 +79,6 @@ class TextSpan extends InlineSpan {
   /// children.
   ///
   /// This getter does not include the contents of its children.
-  @override
   final String? text;
 
 
@@ -95,7 +91,6 @@ class TextSpan extends InlineSpan {
   /// and may have unexpected results.
   ///
   /// The list must not contain any nulls.
-  @override
   final List<InlineSpan>? children;
 
   /// A gesture recognizer that will receive events that hit this span.
@@ -128,7 +123,7 @@ class TextSpan extends InlineSpan {
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///   late LongPressGestureRecognizer _longPressRecognizer;
   ///
   ///   @override
   ///   void initState() {
@@ -173,7 +168,6 @@ class TextSpan extends InlineSpan {
   /// }
   /// ```
   /// {@end-tool}
-  @override
   final GestureRecognizer? recognizer;
 
   /// An alternative semantics label for this [TextSpan].
@@ -236,36 +230,6 @@ class TextSpan extends InlineSpan {
     if (children != null) {
       for (final InlineSpan child in children!) {
         if (!child.visitChildren(visitor))
-          return false;
-      }
-    }
-    return true;
-  }
-
-  // TODO(garyq): Remove this after next stable release.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor`
-  /// returns false, then the walk will end.
-  @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    if (text != null) {
-      if (!visitor(this))
-        return false;
-    }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        assert(
-          child is TextSpan,
-          'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
-        );
-        final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
     }
@@ -341,7 +305,15 @@ class TextSpan extends InlineSpan {
     return null;
   }
 
-  @override
+  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
+  /// to be able to construct a [SemanticsNode].
+  ///
+  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
+  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
+  /// replacement character (0xFFFC) that is inserted to represent it.
+  ///
+  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
+  /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
     if (
       recognizer != null &&

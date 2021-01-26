@@ -1,0 +1,117 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+void main() {
+
+  // Changes made in https://github.com/flutter/flutter/pull/26259
+  const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
+  final bool resize = scaffold.resizeToAvoidBottomInset;
+
+  // Change made in https://github.com/flutter/flutter/pull/15303
+  showDialog(builder: (context) => Text('Fix me.'));
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.dependOnInheritedElement(ancestor);
+  element.dependOnInheritedWidgetOfExactType<targetType>();
+  element.getElementForInheritedWidgetOfExactType<targetType>();
+  element.findAncestorWidgetOfExactType<targetType>();
+  element.findAncestorStateOfType<targetType>();
+  element.findRootAncestorStateOfType<targetType>();
+  element.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/45941
+  final WidgetsBinding binding = WidgetsBinding.instance!;
+  binding.deferFirstFrame();
+  binding.allowFirstFrame();
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.dependOnInheritedElement(ancestor);
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const BuildContext buildContext = Element(myWidget);
+  buildContext.dependOnInheritedElement(ancestor);
+  buildContext.dependOnInheritedWidgetOfExactType<targetType>();
+  buildContext.getElementForInheritedWidgetOfExactType<targetType>();
+  buildContext.findAncestorWidgetOfExactType<targetType>();
+  buildContext.findAncestorStateOfType<targetType>();
+  buildContext.findRootAncestorStateOfType<targetType>();
+  buildContext.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  final behavior = stack.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutoValidateMode.always);
+  const Form form = Form(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
+  final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.always);
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutoValidateMode.disabled);
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.always);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutoValidateMode.disabled);
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme textTheme = TextTheme(
+    headline1: displayStyle4,
+    headline2: displayStyle3,
+    headline3: displayStyle2,
+    headline4: displayStyle1,
+    headline5: headlineStyle,
+    headline6: titleStyle,
+    subtitle1: subheadStyle,
+    bodyText1: body2Style,
+    bodyText2: body1Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    subtitle2: subtitleStyle,
+    overline: overlineStyle,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var TextTheme copiedTextTheme = TextTheme.copyWith(
+    headline1: displayStyle4,
+    headline2: displayStyle3,
+    headline3: displayStyle2,
+    headline4: displayStyle1,
+    headline5: headlineStyle,
+    headline6: titleStyle,
+    subtitle1: subheadStyle,
+    bodyText1: body2Style,
+    bodyText2: body1Style,
+    caption: captionStyle,
+    button: buttonStyle,
+    subtitle2: subtitleStyle,
+    overline: overlineStyle,
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/48547
+  var style;
+  style = textTheme.headline1;
+  style = textTheme.headline2;
+  style = textTheme.headline3;
+  style = textTheme.headline4;
+  style = textTheme.headline5;
+  style = textTheme.headline6;
+  style = textTheme.subtitle1;
+  style = textTheme.bodyText1;
+  style = textTheme.bodyText2;
+  style = textTheme.caption;
+  style = textTheme.button;
+  style = textTheme.subtitle2;
+  style = textTheme.overline;
+}

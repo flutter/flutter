@@ -729,7 +729,7 @@ class _AppBarState extends State<AppBar> {
 
     final Color backgroundColor = backwardsCompatibility
       ? widget.backgroundColor
-        ?? appBarTheme.color
+        ?? appBarTheme.backgroundColor
         ?? theme.primaryColor
       : widget.backgroundColor
         ?? appBarTheme.backgroundColor
@@ -1464,7 +1464,7 @@ class SliverAppBar extends StatefulWidget {
        assert(toolbarHeight != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
-       assert(collapsedHeight == null || collapsedHeight > toolbarHeight, 'The "collapsedHeight" argument has to be larger than [toolbarHeight].'),
+       assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].'),
        super(key: key);
 
   /// {@macro flutter.material.appbar.leading}

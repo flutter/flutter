@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -842,7 +844,7 @@ void main() {
     }),
   );
 
-  testWidgets('Hover animation is not triggered on mobile', (WidgetTester tester) async {
+  testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -864,7 +866,7 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
         color: const Color(0x1a000000),
@@ -873,21 +875,53 @@ void main() {
     await tester.tapAt(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
-    // Tapping on mobile triggers a hover enter event. In this case, the
-    // Scrollbar should be unchanged since it ignores hover events on mobile.
+    // Tapping triggers a hover enter event. In this case, the Scrollbar should
+    // be unchanged since it ignores hover events that aren't from a mouse.
     expect(
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(794.0, 0.0, 798.0, 90.0),
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
           const Radius.circular(8.0),
         ),
         color: const Color(0x1a000000),
       ),
     );
+
+    // Now trigger hover with a mouse.
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(const Offset(794.0, 5.0));
+    await tester.pump();
+
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+          color: const Color(0x08000000),
+        )
+        ..line(
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x1a000000),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            // Scrollbar thumb is larger
+            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+            const Radius.circular(8.0),
+          ),
+          // Hover color
+          color: const Color(0x80000000),
+        ),
+    );
+
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
+      TargetPlatform.linux,
     }),
   );
 
@@ -957,4 +991,134 @@ void main() {
       TargetPlatform.fuchsia,
     }),
   );
+
+  testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
+    Widget viewWithScroll(TargetPlatform platform) {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(
+            platform: platform
+          ),
+          child: const Scrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(Scrollbar), paints..rect());
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Scrollbar), paints..rrect());
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll(TargetPlatform? platform) {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(
+            platform: platform
+          ),
+          child: Scrollbar(
+            controller: controller,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll(debugDefaultTargetPlatformOverride));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
+    expect(scrollbar.controller, isNotNull);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    final GlobalKey outerKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Scrollbar(
+            key: key2,
+            notificationPredicate: null,
+            child: SingleChildScrollView(
+              key: outerKey,
+              child: SizedBox(
+                height: 1000.0,
+                width: double.infinity,
+                child: Column(
+                  children: <Widget>[
+                    Scrollbar(
+                      key: key1,
+                      notificationPredicate: null,
+                      child: SizedBox(
+                        height: 300.0,
+                        width: double.infinity,
+                        child: SingleChildScrollView(
+                          key: innerKey,
+                          child: const SizedBox(
+                            key: Key('Inner scrollable'),
+                            height: 1000.0,
+                            width: double.infinity,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the inner scrollable widget.
+    await tester.drag(find.byKey(innerKey), const Offset(0.0, -25.0));
+    await tester.pump();
+    // Scrollbar fully showing.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      tester.renderObject(find.byKey(key2)),
+      paintsExactlyCountTimes(#drawRect, 2), // Each bar will call [drawRect] twice.
+    );
+
+    expect(
+      tester.renderObject(find.byKey(key1)),
+      paintsExactlyCountTimes(#drawRect, 2),
+    );
+  }, variant: TargetPlatformVariant.all());
 }

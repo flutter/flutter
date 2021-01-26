@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -1047,7 +1049,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
+
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        textSelectionControls ??= cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        break;
+    }
+
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -1167,50 +1184,53 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
-          onInvoke: (SingleTapUpTextIntent intent) {
-            print('justin Cupertino\'s SingleTapUpTextIntent action was invoked');
-            // Because TextSelectionGestureDetector listens to taps that happen on
-            // widgets in front of it, tapping the clear button will also trigger
-            // this handler. If the clear button widget recognizes the up event,
-            // then do not handle it.
-            if (_clearGlobalKey.currentContext != null) {
-              final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
-              final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
-              if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-                return;
+    return Shortcuts(
+      shortcuts: scrollShortcutOverrides,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
+            onInvoke: (SingleTapUpTextIntent intent) {
+              print('justin Cupertino\'s SingleTapUpTextIntent action was invoked');
+              // Because TextSelectionGestureDetector listens to taps that happen on
+              // widgets in front of it, tapping the clear button will also trigger
+              // this handler. If the clear button widget recognizes the up event,
+              // then do not handle it.
+              if (_clearGlobalKey.currentContext != null) {
+                final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+                final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
+                if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+                  return;
+                }
               }
-            }
-            Actions.invoke<SingleTapUpTextIntent>(context, intent);
-            // TODO(justinmc): I'm still figuring out how we'll handle
-            // requesting the keyboard and the onTap param.
-            _requestKeyboard();
-            if (widget.onTap != null)
-              widget.onTap!();
-          },
-        ),
-      },
-      child: Semantics(
-        enabled: enabled,
-        onTap: !enabled ? null : () {
-          if (!controller.selection.isValid) {
-            controller.selection = TextSelection.collapsed(offset: controller.text.length);
-          }
-          _requestKeyboard();
+              Actions.invoke<SingleTapUpTextIntent>(context, intent);
+              // TODO(justinmc): I'm still figuring out how we'll handle
+              // requesting the keyboard and the onTap param.
+              _requestKeyboard();
+              if (widget.onTap != null)
+                widget.onTap!();
+            },
+          ),
         },
-        child: IgnorePointer(
-          ignoring: !enabled,
-          child: Container(
-            decoration: effectiveDecoration,
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: Align(
-                alignment: Alignment(-1.0, _textAlignVertical.y),
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+        child: Semantics(
+          enabled: enabled,
+          onTap: !enabled || widget.readOnly ? null : () {
+            if (!controller.selection.isValid) {
+              controller.selection = TextSelection.collapsed(offset: controller.text.length);
+            }
+            _requestKeyboard();
+          },
+          child: IgnorePointer(
+            ignoring: !enabled,
+            child: Container(
+              decoration: effectiveDecoration,
+              child: _selectionGestureDetectorBuilder.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: Align(
+                  alignment: Alignment(-1.0, _textAlignVertical.y),
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+                ),
               ),
             ),
           ),

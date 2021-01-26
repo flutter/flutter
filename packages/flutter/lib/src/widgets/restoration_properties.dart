@@ -10,9 +10,6 @@ import 'package:flutter/services.dart';
 import 'editable_text.dart';
 import 'restoration.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-
 /// A [RestorableProperty] that makes the wrapped value accessible to the owning
 /// [State] object via the [value] getter and setter.
 ///
@@ -22,7 +19,7 @@ import 'restoration.dart';
 ///
 /// ## Using a RestorableValue
 ///
-/// {@tool dartpad --template=stateful_widget_restoration_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_restoration}
 /// A [StatefulWidget] that has a restorable [int] property.
 ///
 /// ```dart
@@ -33,7 +30,7 @@ import 'restoration.dart';
 ///   RestorableInt _answer = RestorableInt(42);
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the answer either has its old value restored or is
 ///     // initialized to its default value.
@@ -77,14 +74,17 @@ import 'restoration.dart';
 ///   Duration createDefaultValue() => const Duration();
 ///
 ///   @override
-///   void didUpdateValue(Duration oldValue) {
-///     if (oldValue.inMicroseconds != value.inMicroseconds)
+///   void didUpdateValue(Duration? oldValue) {
+///     if (oldValue == null || oldValue.inMicroseconds != value.inMicroseconds)
 ///       notifyListeners();
 ///   }
 ///
 ///   @override
-///   Duration fromPrimitives(Object data) {
-///     return Duration(microseconds: data as int);
+///   Duration fromPrimitives(Object? data) {
+///     if (data != null) {
+///       return Duration(microseconds: data as int);
+///     }
+///     return const Duration();
 ///   }
 ///
 ///   @override
@@ -306,11 +306,11 @@ class RestorableBoolN extends _RestorablePrimitiveValueN<bool?> {
 /// See also:
 ///
 ///  * [RestorableNum] for the non-nullable version of this class.
-class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
+class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<T> {
   /// Creates a [RestorableNumN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableNumN(num? defaultValue) : super(defaultValue);
+  RestorableNumN(T defaultValue) : super(defaultValue);
 }
 
 /// A [RestorableProperty] that knows how to store and restore a [double]
@@ -321,7 +321,7 @@ class RestorableNumN<T extends num?> extends _RestorablePrimitiveValueN<num?> {
 /// See also:
 ///
 ///  * [RestorableDouble] for the non-nullable version of this class.
-class RestorableDoubleN extends RestorableNumN<double> {
+class RestorableDoubleN extends RestorableNumN<double?> {
   /// Creates a [RestorableDoubleN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
@@ -336,7 +336,7 @@ class RestorableDoubleN extends RestorableNumN<double> {
 /// See also:
 ///
 ///  * [RestorableInt] for the non-nullable version of this class.
-class RestorableIntN extends RestorableNumN<int> {
+class RestorableIntN extends RestorableNumN<int?> {
   /// Creates a [RestorableIntN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}

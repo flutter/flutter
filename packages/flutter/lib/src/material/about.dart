@@ -44,14 +44,14 @@ import 'theme.dart';
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
 ///
-/// {@tool dartpad --template=stateless_widget_material_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
+///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2!;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      SizedBox(height: 24),
 ///      RichText(
@@ -1199,18 +1199,16 @@ class _MasterDetailFlow extends StatefulWidget {
   /// ```dart
   /// _MasterDetailFlow.of(context).openDetailPage(arguments);
   /// ```
-  static _MasterDetailFlowProxy? of(
-      BuildContext context, {
-        bool nullOk = false,
-      }) {
+  static _MasterDetailFlowProxy? of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
-      if (pageOpener == null && !nullOk) {
+      if (pageOpener == null) {
         throw FlutterError(
-            'Master Detail operation requested with a context that does not include a Master Detail'
-                ' Flow.\nThe context used to open a detail page from the Master Detail Flow must be'
-                ' that of a widget that is a descendant of a Master Detail Flow widget.');
+          'Master Detail operation requested with a context that does not include a Master Detail '
+          'Flow.\nThe context used to open a detail page from the Master Detail Flow must be '
+          'that of a widget that is a descendant of a Master Detail Flow widget.'
+        );
       }
       return true;
     }());

@@ -24,9 +24,8 @@ import 'scroll_controller.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // dynamic routeObserver;
-// NavigatorState navigator;
+// late NavigatorState navigator;
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -541,7 +540,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   ///     // rectangle. When this local history entry is removed, we hide the red
   ///     // rectangle.
   ///     setState(() => _showRectangle = true);
-  ///     ModalRoute.of(context).addLocalHistoryEntry(
+  ///     ModalRoute.of(context)?.addLocalHistoryEntry(
   ///         LocalHistoryEntry(
   ///             onRemove: () {
   ///               // Hide the red rectangle.
@@ -872,15 +871,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings? settings,
-    ui.ImageFilter? filter,
-  }) : _filter = filter,
-       super(settings: settings);
+    this.filter,
+  }) : super(settings: settings);
 
   /// The filter to add to the barrier.
   ///
   /// If given, this filter will be applied to the modal barrier using
   /// [BackdropFilter]. This allows blur effects, for example.
-  final ui.ImageFilter? _filter;
+  final ui.ImageFilter? filter;
 
   // The API for general users of this class
 
@@ -1131,9 +1129,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
-  /// If this getter would ever start returning a different value, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different value,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// See also:
   ///
@@ -1155,6 +1158,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// If [semanticsDismissible] is false, then modal barrier semantics are
   /// excluded from the semantics tree and tapping on the modal barrier
   /// has no effect.
+  ///
+  /// If this getter would ever start returning a different value,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   bool get semanticsDismissible => true;
 
   /// {@template flutter.widgets.ModalRoute.barrierColor}
@@ -1175,21 +1187,23 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// transparent to the specified color.
   /// {@endtemplate}
   ///
-  /// If this getter would ever start returning a different color, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different color, one
+  /// of the [changedInternalState] or [changedExternalState] methods
+  /// should be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// {@tool snippet}
   ///
-  /// It is safe to use `navigator.context` here. For example, to make
-  /// the barrier color use the theme's background color, one could say:
+  /// For example, to make the barrier color use the theme's
+  /// background color, one could say:
   ///
   /// ```dart
   /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
   /// ```
-  ///
-  /// The [Navigator] causes the [ModalRoute]'s modal barrier overlay entry
-  /// to rebuild any time its dependencies change.
   ///
   /// {@end-tool}
   ///
@@ -1214,9 +1228,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// usually darkened by the modal barrier.
   /// {@endtemplate}
   ///
-  /// If this getter would ever start returning a different label, the
-  /// [Route.changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different label,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// See also:
   ///
@@ -1237,9 +1256,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified [barrierColor].
   ///
-  /// If this getter would ever start returning a different curve, the
-  /// [changedInternalState] should be invoked so that the change can take
-  /// effect.
+  /// If this getter would ever start returning a different curve,
+  /// either [changedInternalState] or [changedExternalState] should
+  /// be invoked so that the change can take effect.
+  ///
+  /// It is safe to use `navigator.context` to look up inherited
+  /// widgets here, because the [Navigator] calls
+  /// [changedExternalState] whenever its dependencies change, and
+  /// [changedExternalState] causes the modal barrier to rebuild.
   ///
   /// It defaults to [Curves.ease].
   ///
@@ -1452,16 +1476,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedExternalState() {
     super.changedExternalState();
+    _modalBarrier.markNeedsBuild();
     if (_scopeKey.currentState != null)
       _scopeKey.currentState!._forceRebuildPage();
   }
 
   /// Whether this route can be popped.
   ///
+  /// A route can be popped if there is at least one active route below it, or
+  /// if [willHandlePopInternally] returns true.
+  ///
   /// When this changes, if the route is visible, the route will
   /// rebuild, and any widgets that used [ModalRoute.of] will be
   /// notified.
-  bool get canPop => !isFirst || willHandlePopInternally;
+  bool get canPop => hasActiveRouteBelow || willHandlePopInternally;
 
   // Internals
 
@@ -1494,9 +1522,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    if (_filter != null) {
+    if (filter != null) {
       barrier = BackdropFilter(
-        filter: _filter!,
+        filter: filter!,
         child: barrier,
       );
     }
@@ -1719,12 +1747,40 @@ abstract class RouteAware {
   void didPushNext() { }
 }
 
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
+/// A general dialog route which allows for customization of the dialog popup.
+///
+/// It is used internally by [showGeneralDialog] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showGeneralDialog] for a state restoration app example.
+///
+/// This function takes a `pageBuilder`, which typically builds a dialog.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything below the dialog. If `null`, the default
+/// color `Colors.black54` is used.
+///
+/// The `settings` argument define the settings for this route. See
+/// [RouteSettings] for details.
+///
+/// See also:
+///
+///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
+///  * [showDialog], which is a way to display a DialogRoute.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+class RawDialogRoute<T> extends PopupRoute<T> {
+  /// A general dialog route which allows for customization of the dialog popup.
+  RawDialogRoute({
     required RoutePageBuilder pageBuilder,
     bool barrierDismissible = true,
-    String? barrierLabel,
     Color? barrierColor = const Color(0x80000000),
+    String? barrierLabel,
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     RouteSettings? settings,
@@ -1830,6 +1886,73 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// ### State Restoration in Dialogs
+///
+/// Using this method will not enable state restoration for the dialog. In order
+/// to enable state restoration for a dialog, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [RawDialogRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable dialog. This is
+/// accomplished by enabling state restoration by specifying
+/// [WidgetsApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [RawDialogRoute] when the button is tapped.
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       restorationScopeId: 'app',
+///       home: MyHomePage(),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatelessWidget {
+///   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+///     return RawDialogRoute<void>(
+///       pageBuilder: (
+///         BuildContext context,
+///         Animation<double> animation,
+///         Animation<double> secondaryAnimation,
+///       ) {
+///         return const AlertDialog(title: Text('Alert!'));
+///       },
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: Center(
+///         child: OutlinedButton(
+///           onPressed: () {
+///             Navigator.of(context).restorablePush(_dialogBuilder);
+///           },
+///           child: const Text('Open Dialog'),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [showDialog], which displays a Material-style dialog.
@@ -1848,7 +1971,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(_DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(RawDialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,

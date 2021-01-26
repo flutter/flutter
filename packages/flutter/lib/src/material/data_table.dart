@@ -133,6 +133,10 @@ class DataRow {
   /// A row whose [onSelectChanged] callback is null is ignored for
   /// the purposes of determining the state of the "all" checkbox,
   /// and its checkbox is disabled.
+  ///
+  /// If a [DataCell] in the row has its [DataCell.onTap] callback defined,
+  /// that callback behavior overrides the gesture behavior of the row for
+  /// that particular cell.
   final ValueChanged<bool?>? onSelectChanged;
 
   /// Whether the row is selected.
@@ -240,6 +244,9 @@ class DataCell {
   /// If non-null, tapping the cell will call this callback. If
   /// null, tapping the cell will attempt to select the row (if
   /// [DataRow.onSelectChanged] is provided).
+  ///
+  /// To define a tap behavior for the entire row, see
+  /// [DataRow.onSelectChanged].
   final VoidCallback? onTap;
 
   bool get _debugInteractive => onTap != null;
@@ -260,7 +267,7 @@ class DataCell {
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
@@ -322,7 +329,7 @@ class DataCell {
 /// {@end-tool}
 ///
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// This sample shows how to display a [DataTable] with alternate colors per
 /// row, and a custom color for when the row is selected.
@@ -344,7 +351,7 @@ class DataCell {
 ///       rows: List<DataRow>.generate(
 ///         numItems,
 ///         (index) => DataRow(
-///           color: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+///           color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
 ///             // All rows will have the same selected color.
 ///             if (states.contains(MaterialState.selected))
 ///               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
@@ -355,9 +362,9 @@ class DataCell {
 ///           }),
 ///           cells: [DataCell(Text('Row $index'))],
 ///           selected: selected[index],
-///           onSelectChanged: (bool value) {
+///           onSelectChanged: (bool? value) {
 ///             setState(() {
-///               selected[index] = value;
+///               selected[index] = value!;
 ///             });
 ///           },
 ///         ),
@@ -1028,6 +1035,12 @@ class DataTable extends StatelessWidget {
 /// thus the splash will not occur. (In general, this is easy to
 /// achieve: just put the [TableRowInkWell] as the direct child of the
 /// [Table], and put the other contents of the cell inside it.)
+///
+/// See also:
+///
+///  * [DataTable], which makes use of [TableRowInkWell] when
+///    [DataRow.onSelectChanged] is defined and [DataCell.onTap]
+///    is not.
 class TableRowInkWell extends InkResponse {
   /// Creates an ink well for a table row.
   const TableRowInkWell({

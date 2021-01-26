@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -44,7 +43,7 @@ enum OverflowBarAlignment {
 /// If the layout overflows, then children's order within their
 /// column is specified by [overflowDirection] instead.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
 /// This example defines a simple approximation of a dialog
 /// layout, where the layout of the dialog's action buttons are

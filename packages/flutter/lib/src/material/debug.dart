@@ -51,7 +51,6 @@ bool debugCheckHasMaterial(BuildContext context) {
   return true;
 }
 
-
 /// Asserts that the given context has a [Localizations] ancestor that contains
 /// a [MaterialLocalizations] delegate.
 ///

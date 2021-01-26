@@ -25,8 +25,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 const double _kDefaultFontSize = 14.0;
 
 // Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
+// late BuildContext context;
 
 /// An immutable style describing how to format and paint text.
 ///
@@ -126,10 +125,10 @@ const double _kDefaultFontSize = 14.0;
 /// The [height] property allows manual adjustment of the height of the line as
 /// a multiple of [fontSize]. For most fonts, setting [height] to 1.0 is not
 /// the same as omitting or setting height to null. The following diagram
-/// illustrates the difference between the font-metrics defined line height and
+/// illustrates the difference between the font-metrics-defined line height and
 /// the line height produced with `height: 1.0` (also known as the EM-square):
 ///
-/// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+/// ![With the font-metrics-defined line height, there is space between lines appropriate for the font, whereas the EM-square is only the height required to hold most of the characters.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
 ///
 /// {@tool snippet}
 /// The [height] property can be used to change the line height. Here, the line
@@ -147,7 +146,7 @@ const double _kDefaultFontSize = 14.0;
 ///
 /// Examples of the resulting heights from different values of `TextStyle.height`:
 ///
-/// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+/// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
 /// See [StrutStyle] for further control of line height at the paragraph level.
 ///
@@ -192,7 +191,7 @@ const double _kDefaultFontSize = 14.0;
 /// should be provided as a [foreground] paint. The following example uses a [Stack]
 /// to produce a stroke and fill effect.
 ///
-/// ![Text border](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
 ///
 /// ```dart
 /// Stack(
@@ -205,7 +204,7 @@ const double _kDefaultFontSize = 14.0;
 ///         foreground: Paint()
 ///           ..style = PaintingStyle.stroke
 ///           ..strokeWidth = 6
-///           ..color = Colors.blue[700],
+///           ..color = Colors.blue[700]!,
 ///       ),
 ///     ),
 ///     // Solid text as fill.
@@ -228,7 +227,7 @@ const double _kDefaultFontSize = 14.0;
 /// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
 /// shader.
 ///
-/// ![Text gradient](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
 ///
 /// ```dart
 /// Text(
@@ -552,11 +551,11 @@ class TextStyle with Diagnosticable {
   /// defined line height and the line height produced with `height: 1.0`
   /// (which forms the upper and lower edges of the EM-square):
   ///
-  /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+  /// ![With the font-metrics-defined line height, there is space between lines appropriate for the font, whereas the EM-square is only the height required to hold most of the characters.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   ///
   /// Examples of the resulting line heights from different values of `TextStyle.height`:
   ///
-  /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+  /// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
   /// See [StrutStyle] for further control of line height at the paragraph level.
   final double? height;

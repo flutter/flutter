@@ -4,9 +4,7 @@
 
 import 'dart:ui' as ui show TextHeightBehavior;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -19,7 +17,6 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// // @dart = 2.9
 // class MyWidget extends ImplicitlyAnimatedWidget {
 //   MyWidget() : super(duration: const Duration(seconds: 1));
 //   final Color targetColor = Colors.black;
@@ -146,7 +143,7 @@ class BorderRadiusTween extends Tween<BorderRadius> {
 /// [Border.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class BorderTween extends Tween<Border> {
+class BorderTween extends Tween<Border?> {
   /// Creates a [Border] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -155,7 +152,11 @@ class BorderTween extends Tween<Border> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Border lerp(double t) => Border.lerp(begin, end, t)!;
+  Border? lerp(double t) {
+    if (begin == null || end == null)
+      return t < 0.5 ? begin : end;
+    return Border.lerp(begin!, end!, t);
+  }
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -480,14 +481,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
-  ///   ColorTween _colorTween;
+  ///   ColorTween? _colorTween;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Text(
   ///       'Hello World',
   ///       // Computes the value of the text color at any given time.
-  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///       style: TextStyle(color: _colorTween?.evaluate(animation)),
   ///     );
   ///   }
   ///
@@ -502,7 +503,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///       // A function that takes a color value and returns a tween
   ///       // beginning at that value.
   ///       (value) => ColorTween(begin: value),
-  ///     );
+  ///     ) as ColorTween?;
   ///
   ///     // We could have more tweens than one by using the visitor
   ///     // multiple times.
@@ -573,7 +574,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the `height`, `width`, `color`, and
@@ -812,7 +813,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following code implements the [AnimatedPadding] widget, using a [curve] of
 /// [Curves.easeInOut].
@@ -933,7 +934,7 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following code implements the [AnimatedAlign] widget, using a [curve] of
 /// [Curves.fastOutSlowIn].
@@ -1098,7 +1099,7 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// it also requires more development overhead as you have to manually manage
 /// the lifecycle of the underlying [AnimationController].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// The following example transitions an AnimatedPositioned
 /// between two states. It adjusts the `height`, `width`, and
@@ -1550,7 +1551,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state_no_null_safety}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///

@@ -34,8 +34,6 @@ void main() {
     mockAndroidSdk = MockAndroidSdk();
     mockFlutterVersion = MockFlutterVersion();
     mockUsage = MockUsage();
-
-    when(mockUsage.isFirstRun).thenReturn(false);
   });
 
   void verifyNoAnalytics() {
@@ -188,19 +186,19 @@ void main() {
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-web: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-web: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-linux-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-linux-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-windows-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-windows-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-macos-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-macos-desktop: true'),
       );
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
