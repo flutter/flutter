@@ -352,6 +352,18 @@ void Canvas::drawImageRect(const CanvasImage* image,
                          SkCanvas::kFast_SrcRectConstraint);
 }
 
+static SkFilterMode paint_to_filter(const SkPaint* paint) {
+  return paint && (paint->getFilterQuality() != kNone_SkFilterQuality)
+             ? SkFilterMode::kLinear
+             : SkFilterMode::kNearest;
+}
+
+static SkSamplingOptions paint_to_sampling(const SkPaint* paint) {
+  return SkSamplingOptions(
+      paint ? paint->getFilterQuality() : kNone_SkFilterQuality,
+      SkSamplingOptions::kMedium_asMipmapLinear);
+}
+
 void Canvas::drawImageNine(const CanvasImage* image,
                            double center_left,
                            double center_top,
@@ -376,7 +388,10 @@ void Canvas::drawImageNine(const CanvasImage* image,
   SkIRect icenter;
   center.round(&icenter);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  canvas_->drawImageNine(image->image(), icenter, dst, paint.paint());
+  // TODO: add filtering to public API, since paint's quality is deprecated
+  SkFilterMode filter = paint_to_filter(paint.paint());
+  canvas_->drawImageNine(image->image().get(), icenter, dst, filter,
+                         paint.paint());
 }
 
 void Canvas::drawPicture(Picture* picture) {
@@ -448,12 +463,15 @@ void Canvas::drawAtlas(const Paint& paint,
   static_assert(sizeof(SkRect) == sizeof(float) * 4,
                 "SkRect doesn't use floats.");
 
+  // TODO: add filtering to public API, since paint's quality is deprecated
+  SkSamplingOptions sampling = paint_to_sampling(paint.paint());
+
   canvas_->drawAtlas(
       skImage.get(), reinterpret_cast<const SkRSXform*>(transforms.data()),
       reinterpret_cast<const SkRect*>(rects.data()),
       reinterpret_cast<const SkColor*>(colors.data()),
       rects.num_elements() / 4,  // SkRect have four floats.
-      blend_mode, reinterpret_cast<const SkRect*>(cull_rect.data()),
+      blend_mode, sampling, reinterpret_cast<const SkRect*>(cull_rect.data()),
       paint.paint());
 }
 
