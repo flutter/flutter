@@ -21,7 +21,7 @@ import 'theme.dart';
 /// child that could possibly be displayed in the list view instead of just
 /// those children that are actually visible.
 ///
-/// All [children] must have a key.
+/// All list items must have a key.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
@@ -250,6 +250,9 @@ class ReorderableListView extends StatefulWidget {
   final ScrollController? scrollController;
 
   /// {@macro flutter.widgets.scroll_view.primary}
+
+  /// Defaults to true when [scrollDirection] is [Axis.vertical] and
+  /// [scrollController] is null.
   final bool? primary;
 
   /// {@macro flutter.widgets.scroll_view.physics}

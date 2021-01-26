@@ -163,10 +163,10 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
+  /// {@endtemplate}
   ///
   /// Defaults to true when [scrollDirection] is [Axis.vertical] and
   /// [controller] is null.
-  /// {@endtemplate}
   final bool primary;
 
   /// {@template flutter.widgets.scroll_view.physics}
@@ -1358,6 +1358,7 @@ class ListView extends BoxScrollView {
   ///         ),
   ///       ),
   ///       bottomNavigationBar: BottomAppBar(
+  ///         child: Row(
   ///         child: Row(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
