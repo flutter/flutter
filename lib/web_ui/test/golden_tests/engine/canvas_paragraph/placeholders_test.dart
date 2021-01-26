@@ -95,4 +95,40 @@ void testMain() async {
 
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_placeholders_align');
   });
+
+  test('draws paragraphs with placeholders and text align in DOM mode', () {
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+
+    const List<TextAlign> aligns = <TextAlign>[
+      TextAlign.left,
+      TextAlign.center,
+      TextAlign.right,
+    ];
+
+    Offset offset = Offset.zero;
+    for (TextAlign align in aligns) {
+      final CanvasParagraph paragraph = rich(
+        ParagraphStyle(fontFamily: 'Roboto', fontSize: 14.0, textAlign: align),
+        (builder) {
+          builder.pushStyle(TextStyle(color: black));
+          builder.addText('Lorem');
+          builder.addPlaceholder(80.0, 50.0, PlaceholderAlignment.bottom);
+          builder.pushStyle(TextStyle(color: blue));
+          builder.addText('ipsum.');
+        },
+      )..layout(constrain(200.0));
+
+      // Draw the paragraph.
+      canvas.drawParagraph(paragraph, offset);
+
+      // Then fill the placeholders.
+      final TextBox placeholderBox = paragraph.getBoxesForPlaceholders().single;
+      final SurfacePaint redPaint = Paint()..color = red;
+      canvas.drawRect(placeholderBox.toRect().shift(offset), redPaint.paintData);
+
+      offset = offset.translate(0.0, paragraph.height + 30.0);
+    }
+
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_placeholders_align_dom');
+  });
 }

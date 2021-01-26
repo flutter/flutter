@@ -23,7 +23,7 @@ class TextLayoutService {
 
   double height = 0.0;
 
-  double longestLine = 0.0;
+  EngineLineMetrics? longestLine;
 
   double minIntrinsicWidth = 0.0;
 
@@ -65,7 +65,7 @@ class TextLayoutService {
     // Reset results from previous layout.
     width = constraints.width;
     height = 0.0;
-    longestLine = 0.0;
+    longestLine = null;
     minIntrinsicWidth = 0.0;
     maxIntrinsicWidth = 0.0;
     didExceedMaxLines = false;
@@ -187,8 +187,9 @@ class TextLayoutService {
         alphabeticBaseline = line.baseline;
         ideographicBaseline = alphabeticBaseline * _baselineRatioHack;
       }
-      if (longestLine < line.width) {
-        longestLine = line.width;
+      final double longestLineWidth = longestLine?.width ?? 0.0;
+      if (longestLineWidth < line.width) {
+        longestLine = line;
       }
     }
 
