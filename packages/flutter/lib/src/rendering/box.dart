@@ -1884,7 +1884,7 @@ abstract class RenderBox extends RenderObject {
         ),
       ]),
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   static bool _dryLayoutCalculationValid = true;

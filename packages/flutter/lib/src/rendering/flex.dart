@@ -677,7 +677,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout cannot be computed for CrossAxisAlignment.baseline, which requires a full layout.'
       ));
-      return const Size(0, 0);
+      return Size.zero;
     }
     FlutterError? constraintsError;
     assert(() {
@@ -689,7 +689,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }());
     if (constraintsError != null) {
       assert(debugCannotComputeDryLayout(error: constraintsError));
-      return const Size(0, 0);
+      return Size.zero;
     }
 
     final _LayoutSizes sizes = _computeSizes(

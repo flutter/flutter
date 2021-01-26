@@ -1691,7 +1691,7 @@ class _RenderListTile extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.'
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   // All of the dimensions below were taken from the Material Design spec:
