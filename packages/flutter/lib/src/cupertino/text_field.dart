@@ -19,7 +19,7 @@ import 'theme.dart';
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
-  fontWeight: FontWeight.w400,
+  fontWeight: FontWeight.w300,
   color: CupertinoColors.placeholderText,
 );
 
@@ -229,12 +229,9 @@ class CupertinoTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration = _kDefaultRoundedBorderDecoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.padding = const EdgeInsets.symmetric(horizontal: 7.0, vertical: 6.0),
     this.placeholder,
-    this.placeholderStyle = const TextStyle(
-      fontWeight: FontWeight.w400,
-      color: CupertinoColors.placeholderText,
-    ),
+    this.placeholderStyle = _kDefaultPlaceholderStyle,
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
