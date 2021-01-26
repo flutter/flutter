@@ -9,7 +9,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'binding.dart' show WidgetsBinding;
+import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
