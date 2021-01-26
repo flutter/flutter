@@ -698,7 +698,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'قص';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => 'إدخال التاريخ';
@@ -1310,7 +1310,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kəsin';
 
   @override
-  String get dateHelpText => 'aa/gg/iiii';
+  String get dateHelpText => 'aa.gg.iiii';
 
   @override
   String get dateInputLabel => 'Tarix daxil edin';
@@ -1616,7 +1616,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Выразаць';
 
   @override
-  String get dateHelpText => 'мм/дд/гггг';
+  String get dateHelpText => 'дд.мм.гггг';
 
   @override
   String get dateInputLabel => 'Увядзіце дату';
@@ -1922,7 +1922,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Изрязване';
 
   @override
-  String get dateHelpText => 'дд/мм/гггг';
+  String get dateHelpText => 'дд.мм.гггг';
 
   @override
   String get dateInputLabel => 'Въвеждане на дата';
@@ -2534,7 +2534,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'mm/dd/gggg';
+  String get dateHelpText => 'dd. mm. gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -3452,7 +3452,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klip';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd/mm/åååå';
 
   @override
   String get dateInputLabel => 'Angiv en dato';
@@ -8165,7 +8165,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Lõika';
 
   @override
-  String get dateHelpText => 'kk/pp/aaaa';
+  String get dateHelpText => 'pp.kk.aaaa';
 
   @override
   String get dateInputLabel => 'Sisestage kuupäev';
@@ -8471,7 +8471,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Ebaki';
 
   @override
-  String get dateHelpText => 'hh/ee/uuuu';
+  String get dateHelpText => 'uuuu/hh/ee';
 
   @override
   String get dateInputLabel => 'Idatzi data';
@@ -9083,7 +9083,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Leikkaa';
 
   @override
-  String get dateHelpText => 'kk/pp/vvvv';
+  String get dateHelpText => 'pp/kk/vvvv';
 
   @override
   String get dateInputLabel => 'Lisää päivämäärä';
@@ -11021,7 +11021,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'גזירה';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
+  String get dateHelpText => 'dd.mm.yyyy';
 
   @override
   String get dateInputLabel => 'יש להזין תאריך';
@@ -11633,7 +11633,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'mm/dd/gggg';
+  String get dateHelpText => 'dd. mm. gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -11939,7 +11939,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kivágás';
 
   @override
-  String get dateHelpText => 'hh.nn.éééé';
+  String get dateHelpText => 'éééé. hh. nn.';
 
   @override
   String get dateInputLabel => 'Adja meg a dátumot';
@@ -12857,7 +12857,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klippa';
 
   @override
-  String get dateHelpText => 'mm/dd/áááá';
+  String get dateHelpText => 'dd.mm.áááá';
 
   @override
   String get dateInputLabel => 'Slá inn dagsetningu';
@@ -13775,7 +13775,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'ამოჭრა';
 
   @override
-  String get dateHelpText => 'დდ/თთ/წწწწ';
+  String get dateHelpText => 'დდ.თთ.წწწწ';
 
   @override
   String get dateInputLabel => 'შეიყვანეთ თარიღი';
@@ -14081,7 +14081,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Қию';
 
   @override
-  String get dateHelpText => 'ай/күн/жыл';
+  String get dateHelpText => 'кк.аа.жжжж';
 
   @override
   String get dateInputLabel => 'Күнді енгізу';
@@ -14387,7 +14387,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'កាត់';
 
   @override
-  String get dateHelpText => 'ខែ/ថ្ងៃ/ឆ្នាំ';
+  String get dateHelpText => 'ថ្ងៃ/ខែ/ឆ្នាំ';
 
   @override
   String get dateInputLabel => 'បញ្ចូល​កាលបរិច្ឆេទ';
@@ -14999,7 +14999,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => '잘라냄';
 
   @override
-  String get dateHelpText => 'yyyy/mm/dd';
+  String get dateHelpText => 'yyyy.mm.dd';
 
   @override
   String get dateInputLabel => '날짜 입력';
@@ -15305,7 +15305,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Кесүү';
 
   @override
-  String get dateHelpText => 'аа/кк/жжжж';
+  String get dateHelpText => 'кк.аа.жжжж';
 
   @override
   String get dateInputLabel => 'Күндү киргизүү';
@@ -15917,7 +15917,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Iškirpti';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd/';
 
   @override
   String get dateInputLabel => 'Įveskite datą';
@@ -16529,7 +16529,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Исечи';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd.mm.yyyy';
 
   @override
   String get dateInputLabel => 'Внесете датум';
@@ -17141,7 +17141,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Таслах';
 
   @override
-  String get dateHelpText => 'сар/өдөр/жил';
+  String get dateHelpText => 'жжжж.сс.өө';
 
   @override
   String get dateInputLabel => 'Огноо оруулах';
@@ -17180,7 +17180,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dialogLabel => 'Харилцах цонх';
 
   @override
-  String get drawerLabel => 'Навигацийн цэс';
+  String get drawerLabel => 'Навигацын цэс';
 
   @override
   String get expandedIconTapHint => 'Буулгах';
@@ -17240,7 +17240,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get okButtonLabel => 'OK';
 
   @override
-  String get openAppDrawerTooltip => 'Навигацийн цэсийг нээх';
+  String get openAppDrawerTooltip => 'Навигацын цэсийг нээх';
 
   @override
   String get pageRowsInfoTitleRaw => r'$rowCount-н $firstRow–$lastRow';
@@ -18059,7 +18059,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd-mm-yyyy';
 
   @override
   String get dateInputLabel => 'ရက်စွဲ ထည့်ရန်';
@@ -18365,7 +18365,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd.mm.åååå';
 
   @override
   String get dateInputLabel => 'Skriv inn datoen';
@@ -18671,7 +18671,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'काट्नुहोस्';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => 'मिति प्रविष्टि गर्नुहोस्';
@@ -19283,7 +19283,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'dd.mm.åååå';
 
   @override
   String get dateInputLabel => 'Skriv inn datoen';
@@ -21245,7 +21245,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Decupați';
 
   @override
-  String get dateHelpText => 'zz/ll/aaaa';
+  String get dateHelpText => 'zz.ll.aaaa';
 
   @override
   String get dateInputLabel => 'Introduceți data';
@@ -21857,7 +21857,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'කපන්න';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'mm.dd.yyyy';
 
   @override
   String get dateInputLabel => 'දිනය ඇතුළු කරන්න';
@@ -22469,7 +22469,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Izreži';
 
   @override
-  String get dateHelpText => 'dd/mm/llll';
+  String get dateHelpText => 'dd. mm. llll';
 
   @override
   String get dateInputLabel => 'Vnesite datum';
@@ -23081,7 +23081,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Исеци';
 
   @override
-  String get dateHelpText => 'дд/мм/гггг';
+  String get dateHelpText => 'дд.мм.гггг.';
 
   @override
   String get dateInputLabel => 'Унесите датум';
@@ -23417,7 +23417,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get cutButtonLabel => 'Iseci';
 
   @override
-  String get dateHelpText => 'dd/mm/gggg';
+  String get dateHelpText => 'dd.mm.gggg.';
 
   @override
   String get dateInputLabel => 'Unesite datum';
@@ -23687,7 +23687,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Klipp ut';
 
   @override
-  String get dateHelpText => 'mm/dd/åååå';
+  String get dateHelpText => 'åååå-mm-dd';
 
   @override
   String get dateInputLabel => 'Ange datum';
@@ -24644,7 +24644,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get dialogLabel => 'డైలాగ్';
 
   @override
-  String get drawerLabel => 'నావిగేషన్ మెను';
+  String get drawerLabel => 'నావిగేషన్ మెనూ';
 
   @override
   String get expandedIconTapHint => 'కుదించు';
@@ -24716,7 +24716,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get pasteButtonLabel => 'అతికించు';
 
   @override
-  String get popupMenuLabel => 'పాప్‌అప్ మెను';
+  String get popupMenuLabel => 'పాప్‌అప్ మెనూ';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
@@ -25523,7 +25523,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Kes';
 
   @override
-  String get dateHelpText => 'aa/gg/yyyy';
+  String get dateHelpText => 'gg.aa.yyyy';
 
   @override
   String get dateInputLabel => 'Tarih Girin';
@@ -25829,7 +25829,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Вирізати';
 
   @override
-  String get dateHelpText => 'дд/мм/рррр';
+  String get dateHelpText => 'дд.мм.рррр';
 
   @override
   String get dateInputLabel => 'Введіть дату';
@@ -26135,7 +26135,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'کٹ کریں';
 
   @override
-  String get dateHelpText => 'dd/mm/yy';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get dateInputLabel => 'تاریخ درج کریں';
@@ -27053,7 +27053,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get cutButtonLabel => '剪切';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get dateInputLabel => '输入日期';
@@ -27380,7 +27380,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get cutButtonLabel => '剪下';
 
   @override
-  String get dateHelpText => 'yyyy/mm/dd';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get dateInputLabel => '輸入日期';
@@ -27656,7 +27656,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get selectYearSemanticsLabel => '選取年份';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'yyyy/mm/dd';
 
   @override
   String get tabLabelRaw => r'第 $tabIndex 個分頁 (共 $tabCount 個)';

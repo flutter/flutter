@@ -137,6 +137,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   }
   /// }
   /// ```
+  ///
+  /// To receive the result of invoking an action, it must be invoked using
+  /// [Actions.invoke], or by invoking it using an [ActionDispatcher]. An action
+  /// invoked via a [Shortcuts] widget will have its return value ignored.
   @protected
   Object? invoke(covariant T intent);
 
@@ -519,6 +523,168 @@ class ActionDispatcher with Diagnosticable {
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This example creates a custom [Action] subclass `ModifyAction` for modifying
+/// a model, and another, `SaveAction` for saving it.
+///
+/// This example demonstrates passing arguments to the [Intent] to be carried to
+/// the [Action]. Actions can get data either from their own construction (like
+/// the `model` in this example), or from the intent passed to them when invoked
+/// (like the increment `amount` in this example).
+///
+/// This example also demonstrates how to use Intents to limit a widget's
+/// dependencies on its surroundings. The `SaveButton` widget defined in this
+/// example can invoke actions defined in its ancestor widgets, which can be
+/// customized to match the part of the widget tree that it is in. It doesn't
+/// need to know about the `SaveAction` class, only the `SaveIntent`, and it
+/// only needs to know about a value notifier, not the entire model.
+///
+/// ```dart preamble
+/// // A simple model class that notifies listeners when it changes.
+/// class Model {
+///   ValueNotifier<bool> isDirty = ValueNotifier<bool>(false);
+///   ValueNotifier<int> data = ValueNotifier<int>(0);
+///
+///   int save() {
+///     if (isDirty.value) {
+///       print('Saved Data: ${data.value}');
+///       isDirty.value = false;
+///     }
+///     return data.value;
+///   }
+///
+///   void setValue(int newValue) {
+///     isDirty.value = data.value != newValue;
+///     data.value = newValue;
+///   }
+/// }
+///
+/// class ModifyIntent extends Intent {
+///   const ModifyIntent(this.value);
+///
+///   final int value;
+/// }
+///
+/// // An Action that modifies the model by setting it to the value that it gets
+/// // from the Intent passed to it when invoked.
+/// class ModifyAction extends Action<ModifyIntent> {
+///   ModifyAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   void invoke(covariant ModifyIntent intent) {
+///     model.setValue(intent.value);
+///   }
+/// }
+///
+/// // An intent for saving data.
+/// class SaveIntent extends Intent {
+///   const SaveIntent();
+/// }
+///
+/// // An Action that saves the data in the model it is created with.
+/// class SaveAction extends Action<SaveIntent> {
+///   SaveAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   int invoke(covariant SaveIntent intent) => model.save();
+/// }
+///
+/// class SaveButton extends StatefulWidget {
+///   const SaveButton(this.valueNotifier);
+///
+///   final ValueNotifier<bool> valueNotifier;
+///
+///   @override
+///   _SaveButtonState createState() => _SaveButtonState();
+/// }
+///
+/// class _SaveButtonState extends State<SaveButton> {
+///   int savedValue = 0;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return AnimatedBuilder(
+///       animation: widget.valueNotifier,
+///       builder: (BuildContext context, Widget? child) {
+///         return TextButton.icon(
+///           icon: const Icon(Icons.save),
+///           label: Text('$savedValue'),
+///           style: ButtonStyle(
+///             foregroundColor: MaterialStateProperty.all<Color>(
+///               widget.valueNotifier.value ? Colors.red : Colors.green,
+///             ),
+///           ),
+///           onPressed: () {
+///             setState(() {
+///               savedValue = Actions.invoke(context, const SaveIntent()) as int;
+///             });
+///           },
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Model model = Model();
+/// int count = 0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Actions(
+///     actions: <Type, Action<Intent>>{
+///       ModifyIntent: ModifyAction(model),
+///       SaveIntent: SaveAction(model),
+///     },
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         return Row(
+///           mainAxisAlignment: MainAxisAlignment.spaceAround,
+///           children: <Widget>[
+///             const Spacer(),
+///             Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 IconButton(
+///                   icon: const Icon(Icons.exposure_plus_1),
+///                   onPressed: () {
+///                     Actions.invoke(context, ModifyIntent(count++));
+///                   },
+///                 ),
+///                 AnimatedBuilder(
+///                   animation: model.data,
+///                   builder: (BuildContext context, Widget? child) {
+///                     return Padding(
+///                       padding: const EdgeInsets.all(8.0),
+///                       child: Text('${model.data.value}',
+///                           style: Theme.of(context).textTheme.headline4),
+///                     );
+///                   }),
+///                 IconButton(
+///                   icon: const Icon(Icons.exposure_minus_1),
+///                   onPressed: () {
+///                     Actions.invoke(context, ModifyIntent(count--));
+///                   },
+///                 ),
+///               ],
+///             ),
+///             SaveButton(model.isDirty),
+///             const Spacer(),
+///           ],
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ActionDispatcher], the object that this widget uses to manage actions.
@@ -716,35 +882,24 @@ class Actions extends StatefulWidget {
   /// Invokes the action associated with the given [Intent] using the
   /// [Actions] widget that most tightly encloses the given [BuildContext].
   ///
-  /// The `context`, `intent` and `nullOk` arguments must not be null.
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method.
+  ///
+  /// The `context` and `intent` arguments must not be null.
   ///
   /// If the given `intent` doesn't map to an action, or doesn't map to one that
   /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
   /// then it will look to the next ancestor [Actions] widget in the hierarchy
   /// until it reaches the root.
   ///
-  /// In debug mode, if `nullOk` is false, this method will throw an exception
-  /// if no ambient [Actions] widget is found, or if the given `intent` doesn't
-  /// map to an action in any of the [Actions.actions] maps that are found. In
-  /// release mode, this method will return null if no matching enabled action
-  /// is found, regardless of the setting of `nullOk`.
-  ///
-  /// Setting `nullOk` to true indicates that if no ambient [Actions] widget is
-  /// found, then in debug mode, this method should return null instead of
-  /// throwing an exception.
-  ///
-  /// This method returns the result of invoking the action's [Action.invoke]
-  /// method. If no action mapping was found for the specified intent (and
-  /// `nullOk` is true), or if the actions that were found were disabled, or the
-  /// action itself returns null from [Action.invoke], then this method returns
-  /// null.
+  /// This method will throw an exception if no ambient [Actions] widget is
+  /// found, or if the given `intent` doesn't map to an enabled action in any of
+  /// the [Actions.actions] maps that are found.
   static Object? invoke<T extends Intent>(
     BuildContext context,
-    T intent, {
-    bool nullOk = false,
-  }) {
+    T intent,
+  ) {
     assert(intent != null);
-    assert(nullOk != null);
     assert(context != null);
     Action<T>? action;
     InheritedElement? actionElement;
@@ -763,7 +918,7 @@ class Actions extends StatefulWidget {
     });
 
     assert(() {
-      if (!nullOk && actionElement == null) {
+      if (actionElement == null) {
         throw FlutterError('Unable to find an action for an Intent with type '
             '${intent.runtimeType} in an $Actions widget in the given context.\n'
             '$Actions.invoke() was unable to find an $Actions widget that '
@@ -777,6 +932,50 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
+    if (actionElement == null || action == null) {
+      return null;
+    }
+    // Invoke the action we found using the relevant dispatcher from the Actions
+    // Element we found.
+    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+  }
+
+  /// Invokes the action associated with the given [Intent] using the
+  /// [Actions] widget that most tightly encloses the given [BuildContext].
+  ///
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method. If no action mapping was found for the specified intent, or if the
+  /// actions that were found were disabled, or the action itself returns null
+  /// from [Action.invoke], then this method returns null.
+  ///
+  /// The `context` and `intent` arguments must not be null.
+  ///
+  /// If the given `intent` doesn't map to an action, or doesn't map to one that
+  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
+  /// then it will look to the next ancestor [Actions] widget in the hierarchy
+  /// until it reaches the root.
+  static Object? maybeInvoke<T extends Intent>(
+    BuildContext context,
+    T intent,
+  ) {
+    assert(intent != null);
+    assert(context != null);
+    Action<T>? action;
+    InheritedElement? actionElement;
+
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      if (result != null) {
+        actionElement = element;
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
+      }
+      return false;
+    });
+
     if (actionElement == null || action == null) {
       return null;
     }

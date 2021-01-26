@@ -396,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
-            end: const Offset(0.0, 0.0),
+            end: Offset.zero,
           ).evaluate(_controller.view),
           child: Text(
             widget.errorText!,
@@ -1284,7 +1284,7 @@ class _RenderDecoration extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override

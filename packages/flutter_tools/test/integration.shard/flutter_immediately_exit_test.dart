@@ -10,34 +10,36 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
-  final ProjectWithImmediateExit _project = ProjectWithImmediateExit();
-  FlutterRunTestDriver _flutter;
+  group('immediate exit', () {
+    Directory tempDir;
+    final ProjectWithImmediateExit _project = ProjectWithImmediateExit();
+    FlutterRunTestDriver _flutter;
 
-  setUp(() async {
-    tempDir = createResolvedTempDirectorySync('run_test.');
-    await _project.setUpIn(tempDir);
-    _flutter = FlutterRunTestDriver(tempDir);
-  });
+    setUp(() async {
+      tempDir = createResolvedTempDirectorySync('run_test.');
+      await _project.setUpIn(tempDir);
+      _flutter = FlutterRunTestDriver(tempDir);
+    });
 
-  tearDown(() async {
-    tryToDelete(tempDir);
-  });
+    tearDown(() async {
+      tryToDelete(tempDir);
+    });
 
-
-  testWithoutContext('flutter_tools gracefully handles quick app shutdown', () async {
-    try {
-      await _flutter.run();
-    } on Exception {
-      expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
-      expect(
-        _flutter.lastErrorInfo.contains(
-          // Looks for stack trace entry of the form:
-          //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
-          RegExp(r'^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
-        ),
-        isFalse
-      );
-    }
-  });
+    testWithoutContext('flutter_tools gracefully handles quick app shutdown', () async {
+      try {
+        await _flutter.run();
+      } on Exception {
+        expect(_flutter.lastErrorInfo, contains('Error connecting to the service protocol:'));
+        expect(
+            _flutter.lastErrorInfo.contains(
+              // Looks for stack trace entry of the form:
+              //   test/integration.shard/test_driver.dart 379:18  FlutterTestDriver._waitFor.<fn>
+                RegExp(r'^(.+)\/([^\/]+)\.dart \d*:\d*\s*.*\$')
+            ),
+            isFalse
+        );
+      }
+    });
+  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/74052
+  );
 }

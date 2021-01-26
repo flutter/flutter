@@ -4,8 +4,10 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:package_config/package_config.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -249,4 +251,22 @@ library funstuff;
 
     expect(determineLanguageVersion(file, package), LanguageVersion(2, 7));
   });
+
+
+  testWithoutContext('Returns null safe error if reading the file throws a FileSystemException', () {
+    final Package package = Package(
+      'foo',
+      Uri.parse('file://foo/'),
+      languageVersion: LanguageVersion(2, 7),
+    );
+
+    expect(determineLanguageVersion(FakeFile(), package), nullSafeVersion);
+  });
+}
+
+class FakeFile extends Fake implements File {
+  @override
+  List<String> readAsLinesSync({ Encoding encoding = utf8ForTesting }) {
+    throw const FileSystemException();
+  }
 }

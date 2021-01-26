@@ -2236,17 +2236,6 @@ abstract class BuildContext {
   /// Registers this build context with [ancestor] such that when
   /// [ancestor]'s widget changes this build context is rebuilt.
   ///
-  /// This method is deprecated. Please use [dependOnInheritedElement] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use dependOnInheritedElement instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
-
-  /// Registers this build context with [ancestor] such that when
-  /// [ancestor]'s widget changes this build context is rebuilt.
-  ///
   /// Returns `ancestor.widget`.
   ///
   /// This method is rarely called directly. Most applications should use
@@ -2256,20 +2245,6 @@ abstract class BuildContext {
   /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
-
-  /// Obtains the nearest widget of the given type, which must be the type of a
-  /// concrete [InheritedWidget] subclass, and registers this build context with
-  /// that widget such that when that widget changes (or a new widget of that
-  /// type is introduced, or the widget goes away), this build context is
-  /// rebuilt so that it can obtain new values from that widget.
-  ///
-  /// This method is deprecated. Please use [dependOnInheritedWidgetOfExactType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use dependOnInheritedWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  InheritedWidget? inheritFromWidgetOfExactType(Type targetType, { Object? aspect });
 
   /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
@@ -2312,17 +2287,6 @@ abstract class BuildContext {
   /// widget this context depends on.
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
 
-  /// Obtains the element corresponding to the nearest widget of the given type,
-  /// which must be the type of a concrete [InheritedWidget] subclass.
-  ///
-  /// This method is deprecated. Please use [getElementForInheritedWidgetOfExactType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use getElementForInheritedWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  InheritedElement? ancestorInheritedElementForWidgetOfExactType(Type targetType);
-
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
@@ -2340,17 +2304,6 @@ abstract class BuildContext {
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
-
-  /// Returns the nearest ancestor widget of the given type, which must be the
-  /// type of a concrete [Widget] subclass.
-  ///
-  /// This method is deprecated. Please use [findAncestorWidgetOfExactType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  Widget? ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
@@ -2377,17 +2330,6 @@ abstract class BuildContext {
   /// Returns null if a widget of the requested type does not appear in the
   /// ancestors of this context.
   T? findAncestorWidgetOfExactType<T extends Widget>();
-
-  /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
-  /// that matches the given [TypeMatcher].
-  ///
-  /// This method is deprecated. Please use [findAncestorStateOfType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorStateOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  State? ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
@@ -2423,17 +2365,6 @@ abstract class BuildContext {
   T? findAncestorStateOfType<T extends State>();
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
-  /// that matches the given [TypeMatcher].
-  ///
-  /// This method is deprecated. Please use [findRootAncestorStateOfType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findRootAncestorStateOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  State? rootAncestorStateOfType(TypeMatcher matcher);
-
-  /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
   ///
   /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
@@ -2443,17 +2374,6 @@ abstract class BuildContext {
   /// This operation is O(N) as well though N is the entire widget tree rather than
   /// a subtree.
   T? findRootAncestorStateOfType<T extends State>();
-
-  /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
-  /// that matches the given [TypeMatcher].
-  ///
-  /// This method is deprecated. Please use [findAncestorRenderObjectOfType] instead.
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorRenderObjectOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  RenderObject? ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
   /// that is an instance of the given type `T`.
@@ -3959,16 +3879,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return true;
   }
 
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use dependOnInheritedElement instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object? aspect }) {
-    return dependOnInheritedElement(ancestor, aspect: aspect);
-  }
-
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
     assert(ancestor != null);
@@ -3976,23 +3886,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies!.add(ancestor);
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget;
-  }
-
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use dependOnInheritedWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  InheritedWidget? inheritFromWidgetOfExactType(Type targetType, { Object? aspect }) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![targetType];
-    if (ancestor != null) {
-      assert(ancestor is InheritedElement);
-      return inheritFromElement(ancestor, aspect: aspect);
-    }
-    _hadUnsatisfiedDependencies = true;
-    return null;
   }
 
   @override
@@ -4007,18 +3900,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return null;
   }
 
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use getElementForInheritedWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  InheritedElement? ancestorInheritedElementForWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![targetType];
-    return ancestor;
-  }
-
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -4031,20 +3912,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorWidgetOfExactType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  Widget? ancestorWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    Element? ancestor = _parent;
-    while (ancestor != null && ancestor.widget.runtimeType != targetType)
-      ancestor = ancestor._parent;
-    return ancestor?.widget;
-  }
-
   @override
   T? findAncestorWidgetOfExactType<T extends Widget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -4052,24 +3919,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     while (ancestor != null && ancestor.widget.runtimeType != T)
       ancestor = ancestor._parent;
     return ancestor?.widget as T?;
-  }
-
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorStateOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  State? ancestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    Element? ancestor = _parent;
-    while (ancestor != null) {
-      if (ancestor is StatefulElement && matcher.check(ancestor.state))
-        break;
-      ancestor = ancestor._parent;
-    }
-    final StatefulElement? statefulAncestor = ancestor as StatefulElement?;
-    return statefulAncestor?.state;
   }
 
   @override
@@ -4085,24 +3934,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return statefulAncestor?.state as T?;
   }
 
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findRootAncestorStateOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  State? rootAncestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    Element? ancestor = _parent;
-    StatefulElement? statefulAncestor;
-    while (ancestor != null) {
-      if (ancestor is StatefulElement && matcher.check(ancestor.state))
-        statefulAncestor = ancestor;
-      ancestor = ancestor._parent;
-    }
-    return statefulAncestor?.state;
-  }
-
   @override
   T? findRootAncestorStateOfType<T extends State<StatefulWidget>>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
@@ -4114,23 +3945,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       ancestor = ancestor._parent;
     }
     return statefulAncestor?.state as T?;
-  }
-
-  // TODO(a14n): Remove this when it goes to stable, https://github.com/flutter/flutter/pull/44189
-  @Deprecated(
-    'Use findAncestorRenderObjectOfType instead. '
-    'This feature was deprecated after v1.12.1.'
-  )
-  @override
-  RenderObject? ancestorRenderObjectOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    Element? ancestor = _parent;
-    while (ancestor != null) {
-      if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
-        return ancestor.renderObject;
-      ancestor = ancestor._parent;
-    }
-    return null;
   }
 
   @override
@@ -5463,8 +5277,8 @@ abstract class RenderObjectElement extends Element {
 
   /// The underlying [RenderObject] for this element.
   @override
-  RenderObject get renderObject => _renderObject;
-  late RenderObject _renderObject;
+  RenderObject get renderObject => _renderObject!;
+  RenderObject? _renderObject;
 
   bool _debugDoingBuild = false;
   @override
@@ -5566,7 +5380,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject.debugCreator = DebugCreator(this);
+      renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -6058,7 +5872,7 @@ abstract class RenderObjectElement extends Element {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
+    properties.add(DiagnosticsProperty<RenderObject>('renderObject', _renderObject, defaultValue: null));
   }
 }
 
@@ -6295,8 +6109,8 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
 /// A wrapper class for the [Element] that is the creator of a [RenderObject].
 ///
-/// Attaching a [DebugCreator] attach the [RenderObject] will lead to better error
-/// message.
+/// Setting a [DebugCreator] as [RenderObject.debugCreator] will lead to better
+/// error messages.
 class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
   DebugCreator(this.element);
