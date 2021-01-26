@@ -22,7 +22,7 @@ ConcurrentMessageLoop::ConcurrentMessageLoop(size_t worker_count)
   for (size_t i = 0; i < worker_count_; ++i) {
     workers_.emplace_back([i, this]() {
       fml::Thread::SetCurrentThreadName(
-          std::string{"io.flutter.worker." + std::to_string(i + 1)});
+          std::string{"io.worker." + std::to_string(i + 1)});
       WorkerMain();
     });
   }
