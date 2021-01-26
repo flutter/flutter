@@ -27,7 +27,6 @@ abstract class FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
     String tags,
@@ -64,7 +63,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
     String tags,
@@ -206,14 +204,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       additionalArguments: additionalArguments,
     );
 
-    // Call package:test's main method in the appropriate directory.
-    final Directory saved = globals.fs.currentDirectory;
     try {
-      if (workDir != null) {
-        globals.printTrace('switching to directory $workDir to run tests');
-        globals.fs.currentDirectory = workDir;
-      }
-
       globals.printTrace('running test package with arguments: $testArgs');
       await testWrapper.main(testArgs);
 
@@ -222,7 +213,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
       return exitCode;
     } finally {
-      globals.fs.currentDirectory = saved.path;
       await platform.close();
     }
   }
