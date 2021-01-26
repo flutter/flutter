@@ -1,4 +1,4 @@
-Signature: cf2a0c08644e3d4fb5b5955b5501e40f
+Signature: f7eff203079fb787a7df8a356ff4583b
 
 UNUSED LICENSES:
 
@@ -4123,9 +4123,6 @@ FILE: ../../../third_party/skia/docs/examples/Bitmap_HeapAllocator_allocPixelRef
 FILE: ../../../third_party/skia/docs/examples/Bitmap_allocN32Pixels.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_allocPixels.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_allocPixelsFlags.cpp
-FILE: ../../../third_party/skia/docs/examples/Bitmap_allocPixels_2.cpp
-FILE: ../../../third_party/skia/docs/examples/Bitmap_allocPixels_3.cpp
-FILE: ../../../third_party/skia/docs/examples/Bitmap_allocPixels_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_bounds.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_bytesPerPixel.cpp
 FILE: ../../../third_party/skia/docs/examples/Bitmap_colorSpace.cpp
