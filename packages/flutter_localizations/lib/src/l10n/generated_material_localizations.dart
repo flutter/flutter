@@ -755,7 +755,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'تصغير';
 
   @override
-  String get firstPageTooltip => 'الأولى';
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'إخفاء الحسابات';
@@ -776,7 +776,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'يُرجى إدخال وقت صالح.';
 
   @override
-  String get lastPageTooltip => 'الاخيرة';
+  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount تراخيص';
@@ -5411,7 +5411,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ocultar';
 
   @override
-  String get firstPageTooltip => 'Página primera';
+  String get firstPageTooltip => 'First page';
 
   @override
   String get hideAccountsLabel => 'Ocultar cuentas';
@@ -5432,7 +5432,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Indica una hora válida';
 
   @override
-  String get lastPageTooltip => 'Página última';
+  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -5708,12 +5708,6 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -5841,12 +5835,6 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -5981,12 +5969,6 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -6114,12 +6096,6 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -6251,12 +6227,6 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -6384,12 +6354,6 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -6521,12 +6485,6 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -6654,12 +6612,6 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -6791,12 +6743,6 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -6924,12 +6870,6 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -7061,12 +7001,6 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -7194,12 +7128,6 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -7331,12 +7259,6 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -7464,12 +7386,6 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -7601,12 +7517,6 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -7736,12 +7646,6 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get nextPageTooltip => 'Próxima página';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
 
   @override
@@ -7869,12 +7773,6 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -8012,12 +7910,6 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get openAppDrawerTooltip => 'Abrir menú de navegación';
 
   @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
-
-  @override
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
@@ -8142,12 +8034,6 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -8277,12 +8163,6 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 
   @override
   String get nextPageTooltip => 'Próxima página';
-
-  @override
-  String get firstPageTooltip => 'Primera página';
-
-  @override
-  String get lastPageTooltip => 'Última página';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
