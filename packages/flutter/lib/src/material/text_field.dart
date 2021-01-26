@@ -1290,12 +1290,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return Shortcuts(
-      shortcuts: scrollShortcutOverrides,
-      child: MouseRegion(
-        cursor: effectiveMouseCursor,
-        onEnter: (PointerEnterEvent event) => _handleHover(true),
-        onExit: (PointerExitEvent event) => _handleHover(false),
+    return MouseRegion(
+      cursor: effectiveMouseCursor,
+      onEnter: (PointerEnterEvent event) => _handleHover(true),
+      onExit: (PointerExitEvent event) => _handleHover(false),
+      child: Shortcuts(
+        shortcuts: scrollShortcutOverrides,
         child: IgnorePointer(
           ignoring: !_isEnabled,
           child: AnimatedBuilder(

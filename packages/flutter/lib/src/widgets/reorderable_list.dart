@@ -136,6 +136,9 @@ class ReorderableList extends StatefulWidget {
   final IndexedWidgetBuilder itemBuilder;
 
   /// The number of items in the list.
+  ///
+  /// It must be a non-negative integer. When zero, nothing is displayed and
+  /// the widget occupies no space.
   final int itemCount;
 
   /// A callback used by the list to report that a list item has been dragged
@@ -333,7 +336,7 @@ class ReorderableListState extends State<ReorderableList> {
       shrinkWrap: widget.shrinkWrap,
       slivers: <Widget>[
         SliverPadding(
-          padding: widget.padding ?? const EdgeInsets.all(0),
+          padding: widget.padding ?? EdgeInsets.zero,
           sliver: SliverReorderableList(
             key: _sliverReorderableListKey,
             itemBuilder: widget.itemBuilder,

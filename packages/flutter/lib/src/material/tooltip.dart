@@ -228,7 +228,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
+  static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
 
   late double height;

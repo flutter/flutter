@@ -14,12 +14,12 @@ import './stdio.dart';
 import './version.dart';
 
 /// Create a new dev release without cherry picks.
-class RollDev extends Command<void> {
-  RollDev({
-    this.fileSystem,
-    this.platform,
-    this.repository,
-    this.stdio,
+class RollDevCommand extends Command<void> {
+  RollDevCommand({
+    @required this.checkouts,
+    @required this.fileSystem,
+    @required this.platform,
+    @required this.stdio,
   }) {
     argParser.addOption(
       kIncrement,
@@ -60,10 +60,10 @@ class RollDev extends Command<void> {
     argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   }
 
+  final Checkouts checkouts;
   final FileSystem fileSystem;
   final Platform platform;
   final Stdio stdio;
-  final Repository repository;
 
   @override
   String get name => 'roll-dev';
@@ -76,9 +76,7 @@ class RollDev extends Command<void> {
   void run() {
     rollDev(
       argResults: argResults,
-      fileSystem: fileSystem,
-      platform: platform,
-      repository: repository,
+      repository: FrameworkRepository(checkouts),
       stdio: stdio,
       usage: argParser.usage,
     );
@@ -93,9 +91,7 @@ bool rollDev({
   @required String usage,
   @required ArgResults argResults,
   @required Stdio stdio,
-  @required Platform platform,
-  @required FileSystem fileSystem,
-  @required Repository repository,
+  @required FrameworkRepository repository,
   String remoteName = 'origin',
 }) {
   final String level = argResults[kIncrement] as String;

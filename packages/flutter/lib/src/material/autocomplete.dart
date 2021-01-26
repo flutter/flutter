@@ -231,7 +231,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
         child: Container(
           height: 200.0,
           child: ListView.builder(
-            padding: const EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);

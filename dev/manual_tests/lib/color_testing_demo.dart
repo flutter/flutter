@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class ColorTestingDemo extends StatelessWidget {
   const ColorTestingDemo({ Key key }) : super(key: key);

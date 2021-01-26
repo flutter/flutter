@@ -219,6 +219,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: httpClient,
+      uploadRetryThrottle: Duration.zero,
     );
     await devFS.create();
 
