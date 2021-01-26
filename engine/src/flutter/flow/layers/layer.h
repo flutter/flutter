@@ -64,6 +64,9 @@ struct PrerollContext {
   // Informs whether a layer needs to be system composited.
   bool child_scene_layer_exists_below = false;
 #endif
+  // These allow us to track properties like elevation, opacity, and the
+  // prescence of a texture layer during Preroll.
+  bool has_texture_layer = false;
 };
 
 // Represents a single composited layer. Created on the UI thread but then
