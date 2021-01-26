@@ -40,11 +40,11 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
 }
 
 Material _getMaterialFromDialog(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+  return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject! as RenderParagraph;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
 }
 
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
@@ -158,9 +158,23 @@ void main() {
     expect(content.text.style, contentTextStyle);
   });
 
-  testWidgets('Custom clipBehavior', (WidgetTester tester) async {
+  testWidgets('AlertDialog custom clipBehavior', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[],
+      clipBehavior: Clip.antiAlias,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
+    const SimpleDialog dialog = SimpleDialog(
+      children: <Widget>[],
       clipBehavior: Clip.antiAlias,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
