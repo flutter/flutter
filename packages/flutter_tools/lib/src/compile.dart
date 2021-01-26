@@ -229,7 +229,8 @@ class KernelCompiler {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    final File mainFile = _fileSystem.file(mainPath);
+    final Uri mainFileUri = mainFile.uri;
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
@@ -246,6 +247,7 @@ class KernelCompiler {
         FlutterProject.current(),
         mainUri,
         newMainDart,
+        mainFile,
       )) {
         mainUri = newMainDart.path;
       }
@@ -601,10 +603,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     // Write `generated_main.dart` under the tool's owned directory.
     // This ensures that the `lib` directory isn't polluted with generated files.
-    final Directory buildDir = _fileSystem.file(mainUri.path)
-        .parent
-        .parent
+    final Directory buildDir = FlutterProject.current()
+        .directory
         .childDirectory(_fileSystem.path.join('.dart_tool', 'flutter_build'));
+
     final File newMainDart = buildDir.childFile('generated_main.dart');
     if (newMainDart.existsSync()) {
       mainUri = newMainDart.uri;

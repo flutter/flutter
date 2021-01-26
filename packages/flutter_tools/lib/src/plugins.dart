@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/dart/language_version.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
@@ -36,7 +37,7 @@ class Plugin {
     @required this.platforms,
     @required this.dependencies,
     @required this.isDirectDependency,
-    this.implement,
+    this.implementsPackage,
   }) : assert(name != null),
        assert(path != null),
        assert(platforms != null),
@@ -90,7 +91,7 @@ class Plugin {
         pluginYaml,
         dependencies,
         fileSystem,
-        appDependencies?.contains(name),
+        appDependencies != null && appDependencies.contains(name),
       );
     }
     return Plugin._fromLegacyYaml(
@@ -99,7 +100,7 @@ class Plugin {
       pluginYaml,
       dependencies,
       fileSystem,
-      appDependencies?.contains(name),
+      appDependencies != null && appDependencies.contains(name),
     );
   }
 
@@ -163,7 +164,7 @@ class Plugin {
       platforms: platforms,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
-      implement: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
+      implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
     );
   }
 
@@ -343,7 +344,8 @@ class Plugin {
   final String path;
 
   /// The name of the interface package that this plugin implements.
-  final String implement;
+  /// If [null], this plugin doesn't implement an interface.
+  final String implementsPackage;
 
   /// The name of the packages this plugin depends on.
   final List<String> dependencies;
@@ -478,8 +480,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   ];
   final Map<String, PluginInterfaceResolution> directDependencyResolutions
       = <String, PluginInterfaceResolution>{};
-
   final Map<String, String> defaultImplementations = <String, String>{};
+  bool didFindError = false;
 
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
@@ -489,26 +491,26 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       }
       final Map<String, dynamic> platformEntries = plugin.platforms[platform].toMap();
       // The plugin doesn't implement an interface, verify that it has a default implementation.
-      if (plugin.implement == null || plugin.implement.isEmpty) {
+      if (plugin.implementsPackage == null || plugin.implementsPackage.isEmpty) {
         final String defaultImplementation = platformEntries[kDefaultPackage] as String;
         if (defaultImplementation == null) {
-          if (throwOnPluginPubspecError) {
-            throwToolExit(
-              'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
-              'a default implementation in pubspec.yaml.\n\n'
-              'To set a default implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platform:\n'
-              '        $kDefaultPackage: <plugin-implementation>\n'
-              '\n'
-              'To implement an interface, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    implements: <plugin-interface>\n'
-            );
-          }
+          globals.printError(
+            'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+            'a default implementation in pubspec.yaml.\n\n'
+            'To set a default implementation, use:\n'
+            'flutter:\n'
+            '  plugin:\n'
+            '    platforms:\n'
+            '      $platform:\n'
+            '        $kDefaultPackage: <plugin-implementation>\n'
+            '\n'
+            'To implement an interface, use:\n'
+            'flutter:\n'
+            '  plugin:\n'
+            '    implements: <plugin-interface>'
+            '\n'
+          );
+          didFindError = true;
           continue;
         }
         defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
@@ -518,15 +520,17 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           platformEntries[kDartPluginClass] == 'none') {
         continue;
       }
-      final String resolutionKey = '$platform/${plugin.implement}';
+      final String resolutionKey = '$platform/${plugin.implementsPackage}';
       if (directDependencyResolutions.containsKey(resolutionKey)) {
         final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
         if (currResolution.plugin.isDirectDependency && plugin.isDirectDependency) {
-          throwToolExit(
+          globals.printError(
             'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
             'implemented by plugin `${currResolution.plugin.name}`.\n'
             'To fix this issue, remove either dependency from pubspec.yaml.'
+            '\n\n'
           );
+          didFindError = true;
         }
         if (currResolution.plugin.isDirectDependency) {
           // Use the plugin implementation added by the user as a direct dependency.
@@ -539,6 +543,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         dartClass: platformEntries[kDartPluginClass] as String,
       );
     }
+  }
+  if (didFindError && throwOnPluginPubspecError) {
+    throwToolExit('Please resolve the errors');
   }
   final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
   for (final MapEntry<String, PluginInterfaceResolution> resolution in directDependencyResolutions.entries) {
@@ -875,6 +882,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 /// The new entrypoint wraps [currentMainUri], adds a [_registerPlugins] function,
 /// and writes the file to [newMainDart].
 ///
+/// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
+///
 /// Returns [true] if it's necessary to create a plugin registrant, and
 /// if the new entrypoint was written to disk.
 ///
@@ -883,6 +892,7 @@ Future<bool> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   String currentMainUri,
   File newMainDart,
+  File mainFile,
 ) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
@@ -890,8 +900,10 @@ Future<bool> generateMainDartWithPluginRegistrant(
     // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
     throwOnPluginPubspecError: false,
   );
+  final LanguageVersion entrypointVersion = determineLanguageVersion(mainFile, null);
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'mainEntrypoint': currentMainUri,
+    'dartLanguageVersion': entrypointVersion.toString(),
     LinuxPlugin.kConfigKey: <dynamic>[],
     MacOSPlugin.kConfigKey: <dynamic>[],
     WindowsPlugin.kConfigKey: <dynamic>[],
@@ -1038,6 +1050,8 @@ const String _dartPluginRegistryForDesktopTemplate = '''
 //
 // Generated file. Do not edit.
 //
+
+// @dart = {{dartLanguageVersion}}
 
 import '{{mainEntrypoint}}' as entrypoint;
 import 'dart:io';

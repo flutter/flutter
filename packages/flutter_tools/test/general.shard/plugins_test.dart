@@ -1202,17 +1202,29 @@ $pluginDependencies
 flutter:
   uses-material-design: true
 ''');
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart');
+        mainFile.writeAsStringSync('''
+// @dart = 2.8
+void main() {
+}
+''');
         final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
         final bool didGenerate = await generateMainDartWithPluginRegistrant(
           flutterProject,
           'main',
           flutterBuild,
+          mainFile,
         );
         expect(didGenerate, isTrue);
         expect(flutterBuild.readAsStringSync(),
             '//\n'
             '// Generated file. Do not edit.\n'
             '//\n'
+            '\n'
+            '// @dart = 2.8\n'
             '\n'
             'import \'main\' as entrypoint;\n'
             'import \'dart:io\';\n'
@@ -1700,7 +1712,7 @@ flutter:
         );
       });
 
-      test('throws tool exit when user selected multiple implementations', () async {
+      testUsingContext('provides error when user selected multiple implementations', () async {
         final FileSystem fs = MemoryFileSystem();
         final List<String> directDependencies = <String>[
           'url_launcher_linux_1',
@@ -1740,14 +1752,71 @@ flutter:
             ),
           ]);
 
+          expect(
+            testLogger.errorText,
+            'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
+            'To fix this issue, remove either dependency from pubspec.yaml.'
+            '\n\n'
+          );
         },
         throwsToolExit(
-          message: 'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
-                   'To fix this issue, remove either dependency from pubspec.yaml.')
-        );
+          message: 'Please resolve the errors',
+        ));
       });
 
-      test('throws tool exit when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
+      testUsingContext('provides all errors when user selected multiple implementations', () async {
+        final FileSystem fs = MemoryFileSystem();
+        final List<String> directDependencies = <String>[
+          'url_launcher_linux_1',
+          'url_launcher_linux_2',
+        ];
+        expect(() {
+          resolvePlatformImplementation(<Plugin>[
+            Plugin.fromYaml(
+              'url_launcher_linux_1',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux_2',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ]);
+
+          expect(
+            testLogger.errorText,
+            'Plugin `url_launcher_linux_2` implements an interface for `linux`, which was already implemented by plugin `url_launcher_linux_1`.\n'
+            'To fix this issue, remove either dependency from pubspec.yaml.'
+            '\n\n'
+          );
+        },
+        throwsToolExit(
+          message: 'Please resolve the errors',
+        ));
+      });
+
+      testUsingContext('provides error when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
         final FileSystem fs = MemoryFileSystem();
         final List<String> directDependencies = <String>[
           'url_launcher_linux_1',
@@ -1771,19 +1840,98 @@ flutter:
           ]);
         },
         throwsToolExit(
-          message: 'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
-                   'nor sets a default implementation in pubspec.yaml.\n\n'
-                   'To set a default implementation, use:\n'
-                   'flutter:\n'
-                   '  plugin:\n'
-                   '    platforms:\n'
-                   '      linux:\n'
-                   '        default_package: <plugin-implementation>\n'
-                   '\n'
-                   'To implement an interface, use:\n'
-                   'flutter:\n'
-                   '  plugin:\n'
-                   '    implements: <plugin-interface>\n')
+          message: 'Please resolve the errors'
+        ));
+        expect(
+          testLogger.errorText,
+          'Plugin `url_launcher_linux_1` doesn\'t implement a plugin interface, '
+          'nor sets a default implementation in pubspec.yaml.\n\n'
+          'To set a default implementation, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    platforms:\n'
+          '      linux:\n'
+          '        default_package: <plugin-implementation>\n'
+          '\n'
+          'To implement an interface, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    implements: <plugin-interface>'
+          '\n\n'
+        );
+      });
+
+      testUsingContext('provides all errors when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
+        final FileSystem fs = MemoryFileSystem();
+        final List<String> directDependencies = <String>[
+          'url_launcher_linux',
+          'url_launcher_windows',
+        ];
+        expect(() {
+          resolvePlatformImplementation(<Plugin>[
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_windows',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'windows': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginWindows',
+                  },
+                },
+              }),
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ]);
+        },
+        throwsToolExit(
+          message: 'Please resolve the errors'
+        ));
+        expect(
+          testLogger.errorText,
+          'Plugin `url_launcher_linux` doesn\'t implement a plugin interface, '
+          'nor sets a default implementation in pubspec.yaml.\n\n'
+          'To set a default implementation, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    platforms:\n'
+          '      linux:\n'
+          '        default_package: <plugin-implementation>\n'
+          '\n'
+          'To implement an interface, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    implements: <plugin-interface>'
+          '\n\n'
+          'Plugin `url_launcher_windows` doesn\'t implement a plugin interface, '
+          'nor sets a default implementation in pubspec.yaml.\n\n'
+          'To set a default implementation, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    platforms:\n'
+          '      windows:\n'
+          '        default_package: <plugin-implementation>\n'
+          '\n'
+          'To implement an interface, use:\n'
+          'flutter:\n'
+          '  plugin:\n'
+          '    implements: <plugin-interface>'
+          '\n\n'
         );
       });
     });
