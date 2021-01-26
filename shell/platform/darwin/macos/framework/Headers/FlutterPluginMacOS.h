@@ -22,7 +22,7 @@
  * Currently the macOS version of FlutterPlugin has very limited functionality, but is expected to
  * expand over time to more closely match the functionality of the iOS FlutterPlugin.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @protocol FlutterPlugin <NSObject>
 
 /**

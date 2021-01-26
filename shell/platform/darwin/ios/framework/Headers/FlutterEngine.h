@@ -55,7 +55,7 @@ extern NSString* const FlutterDefaultInitialRoute;
  * either `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI` is invoked.
  * One of these methods must be invoked before calling `-setViewController:`.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**

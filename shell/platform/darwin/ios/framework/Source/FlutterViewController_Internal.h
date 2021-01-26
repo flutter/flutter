@@ -14,13 +14,13 @@ namespace flutter {
 class FlutterPlatformViewsController;
 }
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 extern NSNotificationName const FlutterViewControllerWillDealloc;
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 extern NSNotificationName const FlutterViewControllerHideHomeIndicator;
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 @interface FlutterViewController ()

@@ -14,7 +14,7 @@
  *
  * TODO(stuartmorgan): Align API with FlutterDartProject, and combine.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterDartProject : NSObject
 
 /**
