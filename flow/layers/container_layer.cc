@@ -43,6 +43,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
   // always be false.
   FML_DCHECK(!context->has_platform_view);
   bool child_has_platform_view = false;
+  bool child_has_texture_layer = false;
   for (auto& layer : layers_) {
     // Reset context->has_platform_view to false so that layers aren't treated
     // as if they have a platform view based on one being previously found in a
@@ -58,9 +59,12 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 
     child_has_platform_view =
         child_has_platform_view || context->has_platform_view;
+    child_has_texture_layer =
+        child_has_texture_layer || context->has_texture_layer;
   }
 
   context->has_platform_view = child_has_platform_view;
+  context->has_texture_layer = child_has_texture_layer;
 
 #if defined(LEGACY_FUCHSIA_EMBEDDER)
   if (child_layer_exists_below_) {
@@ -90,7 +94,8 @@ void ContainerLayer::PaintChildren(PaintContext& context) const {
 void ContainerLayer::TryToPrepareRasterCache(PrerollContext* context,
                                              Layer* layer,
                                              const SkMatrix& matrix) {
-  if (!context->has_platform_view && context->raster_cache &&
+  if (!context->has_platform_view && !context->has_texture_layer &&
+      context->raster_cache &&
       SkRect::Intersects(context->cull_rect, layer->paint_bounds())) {
     context->raster_cache->Prepare(context, layer, matrix);
   }
