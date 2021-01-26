@@ -146,9 +146,10 @@ class ReorderableListView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(scrollDirection != null),
-        assert(onReorder != null),
-        assert(buildDefaultDragHandles != null),
-        super(key: key);
+       assert(itemCount >= 0),
+       assert(onReorder != null),
+       assert(buildDefaultDragHandles != null),
+       super(key: key);
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
