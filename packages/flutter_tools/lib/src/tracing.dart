@@ -28,7 +28,7 @@ class Tracing {
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
-  final vm_service.VmService vmService;
+  final FlutterVmService vmService;
   final Logger _logger;
 
   Future<void> startTracing() async {
@@ -91,7 +91,7 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(vm_service.VmService vmService, {
+Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   @required Logger logger,
   @required Directory output,

@@ -832,7 +832,7 @@ class HotRunner extends ResidentRunner {
     await _evictDirtyAssets();
 
     // Check if any isolates are paused and reassemble those that aren't.
-    final Map<FlutterView, vm_service.VmService> reassembleViews = <FlutterView, vm_service.VmService>{};
+    final Map<FlutterView, FlutterVmService> reassembleViews = <FlutterView, FlutterVmService>{};
     final List<Future<void>> reassembleFutures = <Future<void>>[];
     String serviceEventKind;
     int pausedIsolatesFound = 0;

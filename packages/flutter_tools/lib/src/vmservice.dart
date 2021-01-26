@@ -144,7 +144,7 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
-typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, {
+typedef VMServiceConnector = Future<FlutterVmService> Function(Uri httpUri, {
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
@@ -154,33 +154,30 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   Device device,
 });
 
-final Expando<Uri> _httpAddressExpando = Expando<Uri>();
 
-final Expando<Uri> _wsAddressExpando = Expando<Uri>();
-
-void setHttpAddress(Uri uri, vm_service.VmService vmService) {
+void setHttpAddress(Uri uri, FlutterVmService vmService) {
   if(vmService == null) {
     return;
   }
-  _httpAddressExpando[vmService] = uri;
+  vmService._httpAddress = uri;
 }
 
-void setWsAddress(Uri uri, vm_service.VmService vmService) {
+void setWsAddress(Uri uri, FlutterVmService vmService) {
   if(vmService == null) {
     return;
   }
-  _wsAddressExpando[vmService] = uri;
+  vmService._wsAddress = uri;
 }
 
 /// A connection to the Dart VM Service.
-vm_service.VmService setUpVmService(
+FlutterVmService setUpVmService(
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
   Device device,
   GetSkSLMethod skSLMethod,
   PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-  vm_service.VmService vmService
+  FlutterVmService vmService
 ) {
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
@@ -290,7 +287,7 @@ vm_service.VmService setUpVmService(
 /// protocol itself.
 ///
 /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
-Future<vm_service.VmService> connectToVmService(
+Future<FlutterVmService> connectToVmService(
   Uri httpUri, {
     ReloadSources reloadSources,
     Restart restart,
@@ -312,7 +309,7 @@ Future<vm_service.VmService> connectToVmService(
   );
 }
 
-Future<vm_service.VmService> _connect(
+Future<FlutterVmService> _connect(
   Uri httpUri, {
   ReloadSources reloadSources,
   Restart restart,
@@ -324,7 +321,7 @@ Future<vm_service.VmService> _connect(
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-  final vm_service.VmService delegateService = vm_service.VmService(
+  final FlutterVmService delegateService = FlutterVmService(
     channel,
     channel.add,
     log: null,
@@ -333,7 +330,7 @@ Future<vm_service.VmService> _connect(
     },
   );
 
-  final vm_service.VmService service = setUpVmService(
+  final FlutterVmService service = setUpVmService(
     reloadSources,
     restart,
     compileExpression,
@@ -342,8 +339,8 @@ Future<vm_service.VmService> _connect(
     printStructuredErrorLogMethod,
     delegateService,
   );
-  _httpAddressExpando[service] = httpUri;
-  _wsAddressExpando[service] = wsUri;
+  service._httpAddress = httpUri;
+  service._wsAddress = wsUri;
 
   // This call is to ensure we are able to establish a connection instead of
   // keeping on trucking and failing farther down the process.
@@ -412,10 +409,454 @@ class FlutterView {
 }
 
 /// Flutter specific VM Service functionality.
-extension FlutterVmService on vm_service.VmService {
-  Uri get wsAddress => this != null ? _wsAddressExpando[this] : null;
+class FlutterVmService implements vm_service.VmService {
 
-  Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
+  FlutterVmService(
+    Stream<dynamic> /*String|List<int>*/ inStream,
+    void writeMessage(String message), {
+    vm_service.Log log,
+    vm_service.DisposeHandler disposeHandler,
+    Future<void> streamClosed,
+  }) : _delegate = vm_service.VmService(
+    inStream,
+    writeMessage,
+    log: log,
+    disposeHandler: disposeHandler,
+    streamClosed: streamClosed,
+  );
+
+  FlutterVmService.fromVmService(vm_service.VmService delegate) :
+    _delegate = delegate;
+
+  final vm_service.VmService _delegate;
+
+  Uri _wsAddress;
+  Uri _httpAddress;
+
+  Uri get wsAddress => _wsAddress;
+
+  Uri get httpAddress => _httpAddress;
+
+  @override
+  Stream<vm_service.Event> onEvent(String streamId) => _delegate.onEvent(streamId);
+
+  @override
+  Stream<vm_service.Event> get onVMEvent => _delegate.onVMEvent;
+
+  @override
+  Stream<vm_service.Event> get onIsolateEvent => _delegate.onIsolateEvent;
+
+  @override
+  Stream<vm_service.Event> get onDebugEvent => _delegate.onDebugEvent;
+
+  @override
+  Stream<vm_service.Event> get onGCEvent => _delegate.onGCEvent;
+
+  @override
+  Stream<vm_service.Event> get onExtensionEvent => _delegate.onExtensionEvent;
+
+  @override
+  Stream<vm_service.Event> get onTimelineEvent => _delegate.onTimelineEvent;
+
+  @override
+  Stream<vm_service.Event> get onLoggingEvent => _delegate.onLoggingEvent;
+
+  @override
+  Stream<vm_service.Event> get onServiceEvent => _delegate.onServiceEvent;
+
+  @override
+  Stream<vm_service.Event> get onHeapSnapshotEvent => _delegate.onHeapSnapshotEvent;
+
+  @override
+  Stream<vm_service.Event> get onStdoutEvent => _delegate.onStdoutEvent;
+
+  @override
+  Stream<vm_service.Event> get onStderrEvent => _delegate.onStderrEvent;
+
+  @override
+  Future<vm_service.Breakpoint> addBreakpoint(
+    String isolateId,
+    String scriptId,
+    int line, {
+    int column,
+  }) => _delegate.addBreakpoint(isolateId, scriptId, line, column: column);
+
+  @override
+  Future<vm_service.Breakpoint> addBreakpointWithScriptUri(
+    String isolateId,
+    String scriptUri,
+    int line, {
+    int column,
+  }) => _delegate.addBreakpointWithScriptUri(
+    isolateId,
+    scriptUri,
+    line,
+    column: column,
+  );
+
+  @override
+  Future<vm_service.Breakpoint> addBreakpointAtEntry(
+    String isolateId,
+    String functionId,
+  ) => _delegate.addBreakpointAtEntry(isolateId, functionId);
+
+  @override
+  Future<vm_service.Success> clearCpuSamples(String isolateId) =>
+    _delegate.clearCpuSamples(isolateId);
+
+  @override
+  Future<vm_service.Success> clearVMTimeline() => _delegate.clearVMTimeline();
+
+  @override
+  Future<vm_service.Response> invoke(
+    String isolateId,
+    String targetId,
+    String selector,
+    List<String> argumentIds, {
+    bool disableBreakpoints,
+  }) => _delegate.invoke(
+    isolateId,
+    targetId,
+    selector,
+    argumentIds,
+    disableBreakpoints: disableBreakpoints,
+  );
+
+  @override
+  Future<vm_service.Response> evaluate(
+    String isolateId,
+    String targetId,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  }) => _delegate.evaluate(
+    isolateId,
+    targetId,
+    expression,
+    scope: scope,
+    disableBreakpoints: disableBreakpoints,
+  );
+
+  @override
+  Future<vm_service.Response> evaluateInFrame(
+    String isolateId,
+    int frameIndex,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  }) => _delegate.evaluateInFrame(
+    isolateId,
+    frameIndex,
+    expression,
+    scope: scope,
+    disableBreakpoints: disableBreakpoints,
+  );
+
+  @override
+  Future<vm_service.AllocationProfile> getAllocationProfile(
+    String isolateId, {
+    bool reset,
+    bool gc,
+  }) => _delegate.getAllocationProfile(
+    isolateId,
+    reset: reset,
+    gc: gc,
+  );
+
+  @override
+  Future<vm_service.ClassList> getClassList(String isolateId) =>
+    _delegate.getClassList(
+      isolateId,
+    );
+
+  @override
+  Future<vm_service.CpuSamples> getCpuSamples(
+    String isolateId,
+    int timeOriginMicros,
+    int timeExtentMicros,
+  ) => _delegate.getCpuSamples(
+    isolateId,
+    timeOriginMicros,
+    timeExtentMicros,
+  );
+
+  @override
+  Future<vm_service.FlagList> getFlagList() => _delegate.getFlagList();
+
+  @override
+  Future<vm_service.InboundReferences> getInboundReferences(
+    String isolateId,
+    String targetId,
+    int limit,
+  ) => _delegate.getInboundReferences(
+    isolateId,
+    targetId,
+    limit,
+  );
+
+
+  @override
+  Future<vm_service.InstanceSet> getInstances(
+    String isolateId,
+    String objectId,
+    int limit,
+  ) => _delegate.getInstances(
+    isolateId,
+    objectId,
+    limit,
+  );
+
+  @override
+  Future<vm_service.Isolate> getIsolate(
+    String isolateId,
+  ) => _delegate.getIsolate(
+    isolateId,
+  );
+
+  @override
+  Future<vm_service.IsolateGroup> getIsolateGroup(
+    String isolateGroupId,
+  ) => _delegate.getIsolateGroup(
+    isolateGroupId,
+  );
+
+  @override
+  Future<vm_service.MemoryUsage> getMemoryUsage(
+    String isolateId,
+  ) => _delegate.getMemoryUsage(
+    isolateId,
+  );
+
+  @override
+  Future<vm_service.MemoryUsage> getIsolateGroupMemoryUsage(
+    String isolateGroupId,
+  ) => _delegate.getIsolateGroupMemoryUsage(
+    isolateGroupId,
+  );
+
+  @override
+  Future<vm_service.ScriptList> getScripts(
+    String isolateId,
+  ) => _delegate.getScripts(isolateId);
+
+  @override
+  Future<vm_service.Obj> getObject(
+    String isolateId,
+    String objectId, {
+    int offset,
+    int count,
+  }) => _delegate.getObject(
+    isolateId,
+    objectId,
+    offset: offset,
+    count: count,
+  );
+
+  @override
+  Future<vm_service.PortList> getPorts(
+    String isolateId,
+  ) => _delegate.getPorts(
+    isolateId,
+  );
+
+  @override
+  Future<vm_service.RetainingPath> getRetainingPath(
+    String isolateId,
+    String targetId,
+    int limit,
+  ) => _delegate.getRetainingPath(
+    isolateId,
+    targetId,
+    limit,
+  );
+
+  @override
+  Future<vm_service.ProcessMemoryUsage> getProcessMemoryUsage() =>
+    _delegate.getProcessMemoryUsage();
+
+  @override
+  Future<vm_service.Stack> getStack(
+    String isolateId, {
+    int limit,
+  }) => _delegate.getStack(
+    isolateId,
+    limit: limit,
+  );
+
+  @override
+  Future<vm_service.ProtocolList> getSupportedProtocols() =>
+    _delegate.getSupportedProtocols();
+
+  @override
+  Future<vm_service.SourceReport> getSourceReport(
+    String isolateId,
+    /*List<SourceReportKind>*/
+    List<String> reports, {
+    String scriptId,
+    int tokenPos,
+    int endTokenPos,
+    bool forceCompile,
+  }) => _delegate.getSourceReport(
+    isolateId,
+    reports,
+    scriptId: scriptId,
+    tokenPos: tokenPos,
+    endTokenPos: endTokenPos,
+    forceCompile: forceCompile,
+  );
+
+  @override
+  Future<vm_service.Version> getVersion() => _delegate.getVersion();
+
+  @override
+  Future<vm_service.VM> getVM() => _delegate.getVM();
+
+  @override
+  Future<vm_service.Timeline> getVMTimeline({
+    int timeOriginMicros,
+    int timeExtentMicros,
+  }) => _delegate.getVMTimeline(
+    timeOriginMicros: timeOriginMicros,
+    timeExtentMicros: timeExtentMicros,
+  );
+
+  @override
+  Future<vm_service.TimelineFlags> getVMTimelineFlags() => _delegate.getVMTimelineFlags();
+
+  @override
+  Future<vm_service.Timestamp> getVMTimelineMicros() => _delegate.getVMTimelineMicros();
+
+  @override
+  Future<vm_service.Success> pause(String isolateId) => _delegate.pause(isolateId);
+
+  @override
+  Future<vm_service.Success> kill(String isolateId) => _delegate.kill(isolateId);
+
+  @override
+  Future<vm_service.Success> registerService(String service, String alias) =>
+    _delegate.registerService(service, alias);
+
+  @override
+  Future<vm_service.ReloadReport> reloadSources(
+    String isolateId, {
+    bool force,
+    bool pause,
+    String rootLibUri,
+    String packagesUri,
+  }) => _delegate.reloadSources(
+    isolateId,
+    force: force,
+    pause: pause,
+    rootLibUri: rootLibUri,
+    packagesUri: packagesUri,
+  );
+
+  @override
+  Future<vm_service.Success> removeBreakpoint(String isolateId, String breakpointId) =>
+    _delegate.removeBreakpoint(isolateId, breakpointId);
+
+  @override
+  Future<vm_service.Success> requestHeapSnapshot(String isolateId) =>
+    _delegate.requestHeapSnapshot(isolateId);
+
+  @override
+  Future<vm_service.Success> resume(
+    String isolateId, {
+    /*StepOption*/ String step,
+    int frameIndex,
+  }) => _delegate.resume(
+    isolateId,
+    step: step,
+    frameIndex: frameIndex,
+  );
+
+  @override
+  Future<vm_service.Success> setExceptionPauseMode(
+    String isolateId,
+    /*ExceptionPauseMode*/ String mode,
+  ) => _delegate.setExceptionPauseMode(
+    isolateId,
+    mode,
+  );
+
+  @override
+  Future<vm_service.Response> setFlag(String name, String value) =>
+    _delegate.setFlag(name, value);
+
+  @override
+  Future<vm_service.Success> setLibraryDebuggable(
+    String isolateId,
+    String libraryId,
+    bool isDebuggable,
+  ) => _delegate.setLibraryDebuggable(
+    isolateId,
+    libraryId,
+    isDebuggable,
+  );
+
+  @override
+  Future<vm_service.Success> setName(String isolateId, String name) =>
+    _delegate.setName(isolateId, name);
+
+  @override
+  Future<vm_service.Success> setVMName(String name) => _delegate.setVMName(name);
+
+  @override
+  Future<vm_service.Success> setVMTimelineFlags(List<String> recordedStreams) =>
+    _delegate.setVMTimelineFlags(recordedStreams);
+
+  @override
+  Future<vm_service.Success> streamCancel(String streamId) =>
+    _delegate.streamCancel(streamId);
+
+  @override
+  Future<vm_service.Success> streamListen(String streamId) =>
+    _delegate.streamListen(streamId);
+
+  @override
+  Future<vm_service.Response> callMethod(
+    String method, {
+    String isolateId,
+    Map<dynamic, dynamic> args,
+  }) => _delegate.callMethod(
+    method,
+    isolateId: isolateId,
+    args: args,
+  );
+
+  /// Invoke a specific service protocol extension method.
+  ///
+  /// See https://api.dart.dev/stable/dart-developer/dart-developer-library.html.
+  @override
+  Future<vm_service.Response> callServiceExtension(
+    String method, {
+    String isolateId,
+    Map<dynamic, dynamic> args,
+  }) => _delegate.callServiceExtension(
+    method,
+    isolateId: isolateId,
+    args: args,
+  );
+
+  @override
+  Stream<String> get onSend => _delegate.onSend;
+
+  @override
+  Stream<String> get onReceive => _delegate.onReceive;
+
+  @override
+  void dispose() => _delegate.dispose();
+
+  @override
+  Future<void> get onDone => _delegate.onDone;
+
+  @override
+  void registerServiceCallback(String service, vm_service.ServiceCallback cb) =>
+    _delegate.registerServiceCallback(service, cb);
+
+
+  // Flutter specific methods follow.
+
 
   Future<vm_service.Response> callMethodWrapper(
     String method, {

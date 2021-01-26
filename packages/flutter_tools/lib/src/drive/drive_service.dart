@@ -125,7 +125,7 @@ class FlutterDriverService extends DriverService {
   Device _device;
   ApplicationPackage _applicationPackage;
   String _vmServiceUri;
-  vm_service.VmService _vmService;
+  FlutterVmService _vmService;
 
   @override
   Future<void> start(

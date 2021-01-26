@@ -3126,7 +3126,7 @@ void main() {
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockVMService extends Mock implements vm_service.VmService {}
+class MockVMService extends Mock implements FlutterVmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}

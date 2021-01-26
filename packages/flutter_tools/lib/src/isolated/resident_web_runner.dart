@@ -120,8 +120,10 @@ abstract class ResidentWebRunner extends ResidentRunner {
   WipConnection _wipConnection;
   ChromiumLauncher _chromiumLauncher;
 
-  vmservice.VmService get _vmService =>
-      _connectionResult?.debugConnection?.vmService;
+  FlutterVmService get _vmService => _flutterVmService ??= FlutterVmService.fromVmService(
+    _connectionResult?.debugConnection?.vmService,
+  );
+  FlutterVmService _flutterVmService;
 
   @override
   bool get canHotRestart {
@@ -812,7 +814,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         _connectionResult.appConnection.runMain();
       } else {
         StreamSubscription<void> resumeSub;
-        resumeSub = _connectionResult.debugConnection.vmService.onDebugEvent
+        resumeSub = _vmService.onDebugEvent
             .listen((vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
             _connectionResult.appConnection.runMain();

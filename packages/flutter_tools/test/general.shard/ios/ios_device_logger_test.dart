@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -325,5 +326,5 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 }
 
-class MockVmService extends Mock implements VmService {}
+class MockVmService extends Mock implements FlutterVmService {}
 class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}

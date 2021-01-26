@@ -192,7 +192,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> handleTestTimedOut(ProcessEvent event) async { }
 }
 
-Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
@@ -200,16 +200,16 @@ Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
+  Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final vm_service.VmService vmService = await connector(serviceUri);
+  final FlutterVmService vmService = await connector(serviceUri);
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
   vmService.dispose();
   return result;
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool Function(String) libraryPredicate) async {
+Future<Map<String, dynamic>> _getAllCoverage(FlutterVmService service, bool Function(String) libraryPredicate) async {
   final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final vm_service.IsolateRef isolateRef in vm.isolates) {

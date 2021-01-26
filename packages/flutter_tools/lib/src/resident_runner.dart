@@ -192,7 +192,7 @@ class FlutterDevice {
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
-  vm_service.VmService vmService;
+  FlutterVmService vmService;
   DevFS devFS;
   ApplicationPackage package;
   List<String> fileSystemRoots;
@@ -234,7 +234,7 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       bool existingDds = false;
-      vm_service.VmService service;
+      FlutterVmService service;
       if (!disableDds) {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
@@ -300,7 +300,7 @@ class FlutterDevice {
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
           ]
-        ) as vm_service.VmService;
+        ) as FlutterVmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
@@ -366,12 +366,12 @@ class FlutterDevice {
           stackTrace: stackTrace,
          );
       })
-      .timeout(timeoutDelay, onTimeout: () {
+      .timeout(timeoutDelay, onTimeout: () async {
         // TODO(jonahwilliams): this only seems to fail on CI in the
         // flutter_attach_android_test. This log should help verify this
         // is where the tool is getting stuck.
         globals.logger.printTrace('error: vm service shutdown failed');
-        return device.stopApp(package, userIdentifier: userIdentifier);
+        await device.stopApp(package, userIdentifier: userIdentifier);
       });
   }
 
@@ -1324,7 +1324,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
-    if (device.vmService.httpAddress != null || device.vmService.wsAddress != null) {
+    if (device.vmService?.httpAddress != null || device.vmService?.wsAddress != null) {
       final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
       await waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri');
       try {
@@ -1455,7 +1455,7 @@ abstract class ResidentRunner {
 }
 
 @visibleForTesting
-Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
+Future<void> waitForExtension(FlutterVmService vmService, String extension) async {
   final Completer<void> completer = Completer<void>();
   try {
     await vmService.streamListen(vm_service.EventStreams.kExtension);

@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
@@ -285,7 +286,7 @@ class FakeVmServiceHost {
   FakeVmServiceHost({
     @required List<VmServiceExpectation> requests,
   }) : _requests = requests {
-    _vmService = vm_service.VmService(
+    _vmService = FlutterVmService(
       _input.stream,
       _output.add,
     );
@@ -328,8 +329,8 @@ class FakeVmServiceHost {
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
-  vm_service.VmService get vmService => _vmService;
-  vm_service.VmService _vmService;
+  FlutterVmService get vmService => _vmService;
+  FlutterVmService _vmService;
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 

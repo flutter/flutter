@@ -218,7 +218,7 @@ void main() {
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final FlutterVmService  vmService = FlutterVmService(
       const Stream<String>.empty(),
       completer.complete,
     );
@@ -243,7 +243,7 @@ void main() {
 
   testWithoutContext('getSkSLs forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final FlutterVmService  vmService = FlutterVmService(
       const Stream<String>.empty(),
       completer.complete,
     );
@@ -264,7 +264,7 @@ void main() {
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final FlutterVmService  vmService = FlutterVmService(
       const Stream<String>.empty(),
       completer.complete,
     );
@@ -447,13 +447,6 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('expandos are null safe', () {
-    vm_service.VmService vmService;
-
-    expect(vmService.httpAddress, null);
-    expect(vmService.wsAddress, null);
-  });
-
   testWithoutContext('Can process log events from the vm service', () {
     final vm_service.Event event = vm_service.Event(
       bytes: base64.encode(utf8.encode('Hello There\n')),
@@ -466,7 +459,7 @@ void main() {
 }
 
 class MockDevice extends Mock implements Device {}
-class MockVMService extends Mock implements vm_service.VmService {}
+class MockVMService extends Mock implements FlutterVmService {}
 class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
