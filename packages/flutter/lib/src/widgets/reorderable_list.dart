@@ -165,7 +165,7 @@ class ReorderableList extends StatefulWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
 
   /// {@template flutter.widgets.reorderable_list.padding}
-  /// The amount of space by which to inset the children.
+  /// The amount of space by which to inset the list contents.
   ///
   /// It defaults to `EdgeInsets.all(0)`.
   /// {@endtemplate}
