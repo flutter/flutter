@@ -217,7 +217,9 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(plugin.platforms, <String, PluginPlatform>{});
+    expect(plugin.platforms.containsKey('linux'), isTrue);
+    expect(plugin.platforms.containsKey('macos'), isTrue);
+    expect(plugin.platforms.containsKey('windows'), isTrue);
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {

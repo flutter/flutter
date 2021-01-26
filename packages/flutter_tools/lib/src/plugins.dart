@@ -77,7 +77,7 @@ class Plugin {
     YamlMap pluginYaml,
     List<String> dependencies, {
     @required FileSystem fileSystem,
-    bool isDirectDependency = false,
+    List<String> appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
@@ -90,7 +90,7 @@ class Plugin {
         pluginYaml,
         dependencies,
         fileSystem,
-        isDirectDependency,
+        appDependencies?.contains(name),
       );
     }
     return Plugin._fromLegacyYaml(
@@ -99,7 +99,7 @@ class Plugin {
       pluginYaml,
       dependencies,
       fileSystem,
-      isDirectDependency,
+      appDependencies != null ?? appDependencies.contains(name),
     );
   }
 
@@ -356,7 +356,7 @@ class Plugin {
   final bool isDirectDependency;
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot, { bool isDirectDependency }) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, List<String> appDependencies) {
   final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
@@ -385,7 +385,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot, { bool isDirectDependenc
     flutterConfig['plugin'] as YamlMap,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: globals.fs,
-    isDirectDependency: isDirectDependency,
+    appDependencies: appDependencies,
   );
 }
 
@@ -399,12 +399,12 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     'pubspec.yaml',
   );
-  YamlMap dependencies;
+  YamlMap appDependencies;
   try {
     final File pubspecFile = globals.fs.file(pubspec);
     if (pubspecFile.existsSync()) {
       final dynamic pubspec = loadYaml(pubspecFile.readAsStringSync());
-      dependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
+      appDependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
     }
   } on YamlException catch (err) {
     if (throwOnError) {
@@ -422,7 +422,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     final Plugin plugin = _pluginFromPackage(
       package.name,
       packageRoot,
-      isDirectDependency: dependencies != null ?? dependencies.keys.contains(package.name),
+      <String>[...appDependencies.keys.cast<String>()],
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -455,7 +455,7 @@ class PluginInterfaceResolution {
   }
 }
 
-/// Resolves the platform implementations for Dart only plugins.
+/// Resolves the platform implementation for Dart-only plugins.
 ///
 ///   * If there are multiple direct pub dependencies on packages that implement the
 ///     frontend plugin for the current platform, fail.
@@ -467,7 +467,7 @@ class PluginInterfaceResolution {
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
-List<PluginInterfaceResolution> resolvePlatformInterfaces(
+List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   bool throwOnPluginPubspecError = true,
 }) {
@@ -872,23 +872,20 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds a _registerPlugins function,
+/// The new entrypoint wraps [currentMainUri], adds a [_registerPlugins] function,
 /// and writes the file to [newMainDart].
 ///
 /// Returns [true] if it's necessary to create a plugin registrant, and
 /// if the new entrypoint was written to disk.
 ///
 /// For more details, see https://flutter.dev/go/federated-plugins.
-Future<bool> generateMainDartWithPluginRegistrant(String currentMainUri, File newMainDart) async {
-  final FlutterProject rootProject = FlutterProject.current();
-  final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync() &&
-      rootProject.packagesFile.existsSync() &&
-      rootProject.packageConfigFile.existsSync();
-  if (!hasPlugins) {
-    return false;
-  }
+Future<bool> generateMainDartWithPluginRegistrant(
+  FlutterProject rootProject,
+  String currentMainUri,
+  File newMainDart,
+) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
-  final List<PluginInterfaceResolution> resolutions = resolvePlatformInterfaces(
+  final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
     throwOnPluginPubspecError: false,

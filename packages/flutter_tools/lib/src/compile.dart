@@ -18,6 +18,7 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'plugins.dart';
+import 'project.dart';
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -241,7 +242,11 @@ class KernelCompiler {
       // `generated_main.dart` is under `.dart_tools/flutter_build/`,
       // so the resident compiler can find it.
       final File newMainDart = buildDir.parent.childFile('generated_main.dart');
-      if (await generateMainDartWithPluginRegistrant(mainUri, newMainDart)) {
+      if (await generateMainDartWithPluginRegistrant(
+        FlutterProject.current(),
+        mainUri,
+        newMainDart,
+      )) {
         mainUri = newMainDart.path;
       }
     }
