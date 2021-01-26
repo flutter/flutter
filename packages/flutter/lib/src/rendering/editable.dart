@@ -807,6 +807,35 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  void moveSelectionLeftByLine(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since _selectLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.baseOffset,
+    );
+
+    _updateSelection(nextSelection, cause);
+  }
+
+  // TODO(justinmc): This doesn't do exactly what native does. Same with left.
+  void moveSelectionRightByLine(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    // When going right, we want to skip over any whitespace after the line,
+    // so we go forward to the first non-whitespace character before asking
+    // for the line bounds, since _selectLineAtOffset finds the line
+    // boundaries without including whitespace (like the newline).
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.extentOffset,
+    );
+
+    _updateSelection(nextSelection, cause);
+  }
+
   void moveSelectionRight(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionRight(
       selection!,
@@ -871,6 +900,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         // If control/command is pressed, we will decide which way to expand to
         // the beginning/end of the line based on which arrow is pressed.
         if (leftArrow) {
+          // TODO(justinmc): This has been moved to moveSelectionLeftByLine above.
           // When going left, we want to skip over any whitespace before the line,
           // so we go back to the first non-whitespace before asking for the line
           // bounds, since _selectLineAtOffset finds the line boundaries without
@@ -879,6 +909,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
           newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
         } else {
+          // TODO(justinmc): This has been moved to moveSelectionRightByLine above.
           // When going right, we want to skip over any whitespace after the line,
           // so we go forward to the first non-whitespace character before asking
           // for the line bounds, since _selectLineAtOffset finds the line

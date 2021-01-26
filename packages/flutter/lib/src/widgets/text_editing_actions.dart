@@ -52,6 +52,8 @@ class ControlATextIntent extends Intent {}
 class ControlArrowLeftTextIntent extends Intent {}
 class ControlArrowRightTextIntent extends Intent {}
 class ControlCTextIntent extends Intent {}
+class MetaArrowRightTextIntent extends Intent {}
+class MetaArrowLeftTextIntent extends Intent {}
 class MetaCTextIntent extends Intent {}
 class ShiftArrowLeftTextIntent extends Intent {}
 class ShiftArrowRightTextIntent extends Intent {}
@@ -197,6 +199,42 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<MetaArrowLeftTextIntent> _metaArrowLeftTextAction = TextEditingAction<MetaArrowLeftTextIntent>(
+    onInvoke: (MetaArrowLeftTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  // TODO(justinmc): Holding both line and word modifier keys should not do
+  // anything. How do I achieve that with Shortcuts?
+  // TODO(justinmc): Do I want to combine anything since meta and ctrl? both do
+  // the same thing here?
+  final TextEditingAction<MetaArrowRightTextIntent> _metaArrowRightTextAction = TextEditingAction<MetaArrowRightTextIntent>(
+    onInvoke: (MetaArrowRightTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
   final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
     onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
@@ -300,6 +338,8 @@ class TextEditingActions extends StatelessWidget {
         ControlArrowRightTextIntent: _controlArrowRightTextAction,
         ControlCTextIntent: _controlCTextAction,
         MetaCTextIntent: _metaCTextAction,
+        MetaArrowRightTextIntent: _metaArrowRightTextAction,
+        MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
         SingleTapUpTextIntent: _singleTapUpTextAction,
