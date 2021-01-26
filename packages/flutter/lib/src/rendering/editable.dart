@@ -2193,7 +2193,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(boundedOffset != null);
     assert(lastTextPosition != null);
     if (state == FloatingCursorDragState.Start) {
-      _relativeOrigin = const Offset(0, 0);
+      _relativeOrigin = Offset.zero;
       _previousOffset = null;
       _resetOriginOnBottom = false;
       _resetOriginOnTop = false;
@@ -2242,7 +2242,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // The relative origin in relation to the distance the user has theoretically
   // dragged the floating cursor offscreen. This value is used to account for the
   // difference in the rendering position and the raw offset value.
-  Offset _relativeOrigin = const Offset(0, 0);
+  Offset _relativeOrigin = Offset.zero;
   Offset? _previousOffset;
   bool _resetOriginOnLeft = false;
   bool _resetOriginOnRight = false;
@@ -2252,7 +2252,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
-    Offset deltaPosition = const Offset(0, 0);
+    Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
     final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;

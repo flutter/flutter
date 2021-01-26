@@ -53,7 +53,7 @@
   "refreshIndicatorSemanticLabel": "Освежи",
   "moreButtonTooltip": "Уште",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "dd.mm.yyyy",
   "selectYearSemanticsLabel": "Изберете година",
   "unspecifiedDate": "Датум",
   "unspecifiedDateRange": "Временски период",

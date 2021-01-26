@@ -8,6 +8,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  testWidgets('negative itemCount should assert', (WidgetTester tester) async {
+    final List<int> items = <int>[1, 2, 3];
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+          builder: (BuildContext outerContext, StateSetter setState) {
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemCount: -1,
+                  onReorder: (int fromIndex, int toIndex) {
+                    setState(() {
+                      if (toIndex > fromIndex) {
+                        toIndex -= 1;
+                      }
+                      items.insert(toIndex, items.removeAt(fromIndex));
+                    });
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: 100,
+                      child: Text('item ${items[index]}'),
+                    );
+                  },
+                ),
+              ],
+            );
+          }
+      ),
+    ));
+    expect(tester.takeException(), isA<AssertionError>());
+  });
+
+  testWidgets('zero itemCount should not build widget', (WidgetTester tester) async {
+    final List<int> items = <int>[1, 2, 3];
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+          builder: (BuildContext outerContext, StateSetter setState) {
+            return CustomScrollView(
+              slivers: <Widget>[
+                SliverFixedExtentList(
+                  itemExtent: 50.0,
+                  delegate: SliverChildListDelegate(<Widget>[
+                    const Text('before'),
+                  ]),
+                ),
+                SliverReorderableList(
+                  itemCount: 0,
+                  onReorder: (int fromIndex, int toIndex) {
+                    setState(() {
+                      if (toIndex > fromIndex) {
+                        toIndex -= 1;
+                      }
+                      items.insert(toIndex, items.removeAt(fromIndex));
+                    });
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: 100,
+                      child: Text('item ${items[index]}'),
+                    );
+                  },
+                ),
+                SliverFixedExtentList(
+                  itemExtent: 50.0,
+                  delegate: SliverChildListDelegate(<Widget>[
+                    const Text('after'),
+                  ]),
+                ),
+              ],
+            );
+          }
+      ),
+    ));
+
+    expect(find.text('before'), findsOneWidget);
+    expect(find.byType(SliverReorderableList), findsNothing);
+    expect(find.text('after'), findsOneWidget);
+  });
+
   testWidgets('SliverReorderableList, drag and drop, fixed height items', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(8, (int index) => index);
 
@@ -126,6 +205,69 @@ void main() {
     expect(getIconStyle().color, iconColor);
     expect(getTextStyle().color, textColor);
   });
+
+  testWidgets('SliverReorderableList - custom proxyDecorator', (WidgetTester tester) async {
+    const ValueKey<String> fadeTransitionKey = ValueKey<String>('reordered-fade');
+
+    await tester.pumpWidget(
+      TestList(
+        items: List<int>.from(<int>[0, 1, 2, 3]),
+        proxyDecorator: (
+            Widget child,
+            int index,
+            Animation<double> animation,
+            ) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              final Tween<double> fadeValues = Tween<double>(begin: 1.0, end: 0.5);
+              final Animation<double> fadeAnimation = animation.drive(fadeValues);
+              return FadeTransition(
+                key: fadeTransitionKey,
+                opacity: fadeAnimation,
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+      ),
+    );
+
+    Finder getItemFadeTransition() => find.byKey(fadeTransitionKey);
+
+    expect(getItemFadeTransition(), findsNothing);
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough for transition animation defined in proxyDecorator to start.
+    await drag.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    // At the start, opacity should be at 1.0.
+    expect(getItemFadeTransition(), findsOneWidget);
+    FadeTransition fadeTransition = tester.widget(getItemFadeTransition());
+    expect(fadeTransition.opacity.value, 1.0);
+
+    // Let animation run halfway.
+    await tester.pump(const Duration(milliseconds: 125));
+    fadeTransition = tester.widget(getItemFadeTransition());
+    expect(fadeTransition.opacity.value, greaterThan(0.5));
+    expect(fadeTransition.opacity.value, lessThan(1.0));
+
+    // Allow animation to run to the end.
+    await tester.pumpAndSettle();
+    expect(find.byKey(fadeTransitionKey), findsOneWidget);
+    fadeTransition = tester.widget(getItemFadeTransition());
+    expect(fadeTransition.opacity.value, 0.5);
+
+    // Finish reordering.
+    await drag.up();
+    await tester.pumpAndSettle();
+    expect(getItemFadeTransition(), findsNothing);
+  });
 }
 
 class TestList extends StatefulWidget {
@@ -133,12 +275,14 @@ class TestList extends StatefulWidget {
     Key? key,
     this.textColor,
     this.iconColor,
+    this.proxyDecorator,
     required this.items,
   }) : super(key: key);
 
   final List<int> items;
   final Color? textColor;
   final Color? iconColor;
+  final ReorderItemProxyDecorator? proxyDecorator;
 
   @override
   _TestListState createState() => _TestListState();
@@ -185,6 +329,7 @@ class _TestListState extends State<TestList> {
                             items.insert(toIndex, items.removeAt(fromIndex));
                           });
                         },
+                        proxyDecorator: widget.proxyDecorator,
                       ),
                     ],
                   );
