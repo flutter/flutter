@@ -276,7 +276,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   }
 
   // Sort all descendants, taking into account the FocusTraversalGroup
-  // that they are each in, and filtering out non-traversable/focusable nodes.
+  // that they are each in, and filtering out non-traversable/focusable nodes,
+  // but leaving in any group nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope, FocusNode currentNode) {
     assert(scope != null);
     final _FocusTraversalGroupMarker? scopeGroupMarker = _getMarker(scope.context);
@@ -335,10 +336,23 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
 
+    // Visit the children of the scope.
     visitGroups(groups[scopeGroupMarker?.focusNode]!);
+
+    // Remove the FocusTraversalGroup nodes themselves, which aren't focusable.
+    // They were left in above because they were needed to find their members
+    // during sorting.
+    sortedDescendants.removeWhere((FocusNode node) {
+      return !node.canRequestFocus || node.skipTraversal;
+    });
+
+    // Sanity check to make sure that the algorithm above doesn't diverge from
+    // the one in FocusScopeNode.traversalDescendants in terms of which nodes it
+    // finds.
     assert(
       sortedDescendants.length <= scope.traversalDescendants.length && sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
+      'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
+      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}'
     );
     return sortedDescendants;
   }
