@@ -44,6 +44,9 @@ import java.util.Queue;
 public class PlayStoreDeferredComponentManager implements DeferredComponentManager {
   private static final String TAG = "PlayStoreDeferredComponentManager";
 
+  public static final String MAPPING_KEY =
+      DeferredComponentManager.class.getName() + ".loadingUnitMapping";
+
   private @NonNull SplitInstallManager splitInstallManager;
   private @Nullable FlutterJNI flutterJNI;
   private @Nullable DeferredComponentChannel channel;
@@ -57,6 +60,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
   private @NonNull Map<String, Integer> nameToSessionId;
 
   protected @NonNull SparseArray<String> loadingUnitIdToModuleNames;
+  protected @NonNull SparseArray<String> loadingUnitIdToSharedLibraryNames;
 
   private FeatureInstallStateUpdatedListener listener;
 
@@ -209,6 +213,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     nameToSessionId = new HashMap<>();
 
     loadingUnitIdToModuleNames = new SparseArray<>();
+    loadingUnitIdToSharedLibraryNames = new SparseArray<>();
     initLoadingUnitMappingToModuleNames();
   }
 
@@ -243,27 +248,33 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
   // Obtain and parses the metadata string. An example encoded string is:
   //
-  //    "2:module2,3:module3,4:module1"
+  //    "2:module2,3:module3,4:module1:libmodule4.so"
   //
   // Where loading unit 2 is included in module2, loading unit 3 is
   // included in module3, and loading unit 4 is included in module1.
+  // An optional third parameter can be added to indicate the name of
+  // the shared library of the loading unit.
   private void initLoadingUnitMappingToModuleNames() {
     String mappingKey = DeferredComponentManager.class.getName() + ".loadingUnitMapping";
     ApplicationInfo applicationInfo = getApplicationInfo();
     if (applicationInfo != null) {
       Bundle metaData = applicationInfo.metaData;
       if (metaData != null) {
-        String rawMappingString = metaData.getString(mappingKey, null);
+        String rawMappingString = metaData.getString(MAPPING_KEY, null);
         if (rawMappingString == null) {
           Log.e(
               TAG,
               "No loading unit to dynamic feature module name found. Ensure '"
-                  + mappingKey
+                  + MAPPING_KEY
                   + "' is defined in the base module's AndroidManifest.");
         } else {
           for (String entry : rawMappingString.split(",")) {
             String[] splitEntry = entry.split(":");
-            loadingUnitIdToModuleNames.put(Integer.parseInt(splitEntry[0]), splitEntry[1]);
+            int loadingUnitId = Integer.parseInt(splitEntry[0]);
+            loadingUnitIdToModuleNames.put(loadingUnitId, splitEntry[1]);
+            if (splitEntry.length > 2) {
+              loadingUnitIdToSharedLibraryNames.put(loadingUnitId, splitEntry[2]);
+            }
           }
         }
       }
@@ -379,9 +390,12 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
       return;
     }
 
-    // This matches/depends on dart's loading unit naming convention, which we use unchanged.
-    String aotSharedLibraryName =
-        flutterApplicationInfo.aotSharedLibraryName + "-" + loadingUnitId + ".part.so";
+    String aotSharedLibraryName = loadingUnitIdToSharedLibraryNames.get(loadingUnitId);
+    if (aotSharedLibraryName == null) {
+      // If the filename is not specified, we use dart's loading unit naming convention.
+      aotSharedLibraryName =
+          flutterApplicationInfo.aotSharedLibraryName + "-" + loadingUnitId + ".part.so";
+    }
 
     // Possible values: armeabi, armeabi-v7a, arm64-v8a, x86, x86_64, mips, mips64
     String abi;
