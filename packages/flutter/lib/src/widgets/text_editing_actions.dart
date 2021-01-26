@@ -65,6 +65,12 @@ class SingleLongTapStartTextIntent extends Intent {
 class SingleTapCancelTextIntent extends Intent {
   const SingleTapCancelTextIntent();
 }
+class ShiftEndTextIntent extends Intent {
+  const ShiftEndTextIntent();
+}
+class ShiftHomeTextIntent extends Intent {
+  const ShiftHomeTextIntent();
+}
 class AltArrowLeftTextIntent extends Intent {}
 class AltArrowRightTextIntent extends Intent {}
 class ArrowLeftTextIntent extends Intent {}
@@ -405,6 +411,38 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<ShiftHomeTextIntent> _shiftHomeTextAction = TextEditingAction<ShiftHomeTextIntent>(
+    onInvoke: (ShiftHomeTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<ShiftEndTextIntent> _shiftEndTextAction = TextEditingAction<ShiftEndTextIntent>(
+    onInvoke: (ShiftEndTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+          break;
+      }
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
     return Actions(
@@ -436,6 +474,8 @@ class TextEditingActions extends StatelessWidget {
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
         SingleTapUpTextIntent: _singleTapUpTextAction,
+        ShiftHomeTextIntent: _shiftHomeTextAction,
+        ShiftEndTextIntent: _shiftEndTextAction,
         TapDownTextIntent: _tapDownTextAction,
       },
       child: child,
