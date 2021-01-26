@@ -20,6 +20,7 @@ class CanvasParagraph implements EngineParagraph {
     required this.paragraphStyle,
     required this.plainText,
     required this.placeholderCount,
+    required this.drawOnCanvas,
   });
 
   /// The flat list of spans that make up this paragraph.
@@ -35,13 +36,16 @@ class CanvasParagraph implements EngineParagraph {
   final int placeholderCount;
 
   @override
+  final bool drawOnCanvas;
+
+  @override
   double get width => _layoutService.width;
 
   @override
   double get height => _layoutService.height;
 
   @override
-  double get longestLine => _layoutService.longestLine;
+  double get longestLine => _layoutService.longestLine?.width ?? 0.0;
 
   @override
   double get minIntrinsicWidth => _layoutService.minIntrinsicWidth;
@@ -124,6 +128,14 @@ class CanvasParagraph implements EngineParagraph {
     return domElement.clone(true) as html.HtmlElement;
   }
 
+  double _getParagraphAlignOffset() {
+    final EngineLineMetrics? longestLine = _layoutService.longestLine;
+    if (longestLine != null) {
+      return longestLine.left;
+    }
+    return 0.0;
+  }
+
   html.HtmlElement _createDomElement() {
     final html.HtmlElement rootElement =
         domRenderer.createElement('p') as html.HtmlElement;
@@ -136,6 +148,11 @@ class CanvasParagraph implements EngineParagraph {
       // Prevent the browser from doing any line breaks in the paragraph. We want
       // to insert our own <BR> breaks based on layout results.
       ..whiteSpace = 'pre';
+
+    final double alignOffset = _getParagraphAlignOffset();
+    if (alignOffset != 0.0) {
+      cssStyle.marginLeft = '${alignOffset}px';
+    }
 
     if (paragraphStyle._maxLines != null || paragraphStyle._ellipsis != null) {
       cssStyle
@@ -198,15 +215,6 @@ class CanvasParagraph implements EngineParagraph {
   List<ui.TextBox> getBoxesForPlaceholders() {
     return _layoutService.getBoxesForPlaceholders();
   }
-
-  // TODO(mdebbar): Check for child spans if any has styles that can't be drawn
-  // on a canvas. e.g:
-  // - decoration
-  // - word-spacing
-  // - shadows (may be possible? https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/shadowBlur)
-  // - font features
-  @override
-  final bool drawOnCanvas = true;
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -599,12 +607,28 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
     }
   }
 
+  bool _drawOnCanvas = true;
+
   @override
   void addText(String text) {
     final EngineTextStyle style = _currentStyleNode.resolveStyle();
     final int start = _plainTextBuffer.length;
     _plainTextBuffer.write(text);
     final int end = _plainTextBuffer.length;
+
+    if (_drawOnCanvas) {
+      final ui.TextDecoration? decoration = style._decoration;
+      if (decoration != null && decoration != ui.TextDecoration.none) {
+        _drawOnCanvas = false;
+      }
+    }
+
+    if (_drawOnCanvas) {
+      final List<ui.FontFeature>? fontFeatures = style._fontFeatures;
+      if (fontFeatures != null && fontFeatures.isNotEmpty) {
+        _drawOnCanvas = false;
+      }
+    }
 
     _spans.add(FlatTextSpan(style: style, start: start, end: end));
   }
@@ -616,6 +640,7 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
       paragraphStyle: _paragraphStyle,
       plainText: _plainTextBuffer.toString(),
       placeholderCount: _placeholderCount,
+      drawOnCanvas: _drawOnCanvas,
     );
   }
 }
