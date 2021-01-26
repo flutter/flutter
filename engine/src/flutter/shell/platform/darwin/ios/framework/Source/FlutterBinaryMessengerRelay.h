@@ -6,7 +6,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 #endif
 @interface FlutterBinaryMessengerRelay : NSObject <FlutterBinaryMessenger>
 @property(nonatomic, assign) NSObject<FlutterBinaryMessenger>* parent;

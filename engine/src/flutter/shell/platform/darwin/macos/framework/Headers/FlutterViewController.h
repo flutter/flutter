@@ -25,7 +25,7 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
 /**
  * Controls a view that displays Flutter content and manages input.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterViewController : NSViewController <FlutterPluginRegistry>
 
 /**

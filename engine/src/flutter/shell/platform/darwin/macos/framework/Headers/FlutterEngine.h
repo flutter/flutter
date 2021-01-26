@@ -20,7 +20,7 @@
 /**
  * Coordinates a single instance of execution of a Flutter engine.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**
