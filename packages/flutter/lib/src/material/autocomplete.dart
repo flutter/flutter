@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
 import 'material.dart';
+import 'scrollbar.dart';
 import 'text_form_field.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
@@ -120,7 +122,7 @@ import 'text_form_field.dart';
 ///
 ///  * [RawAutocomplete], which is what Autocomplete is built upon, and which
 ///    contains more detailed examples.
-class Autocomplete<T extends Object> extends StatelessWidget {
+class Autocomplete<T extends Object> extends StatefulWidget {
   /// Creates an instance of [Autocomplete].
   const Autocomplete({
     Key? key,
@@ -163,19 +165,44 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   }
 
   @override
+  _AutocompleteState<T> createState() => _AutocompleteState<T>();
+}
+
+class _AutocompleteState<T extends Object> extends State<Autocomplete<T>> {
+  late FocusNode fieldFocusNode;
+  late FocusScopeNode optionsFocusNode;
+  late TextEditingController textEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    fieldFocusNode = FocusNode(
+      debugLabel: 'Field Focus Node',
+    );
+    optionsFocusNode= FocusScopeNode(
+      debugLabel: 'Options Focus Node',
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RawAutocomplete<T>(
-      displayStringForOption: displayStringForOption,
-      fieldViewBuilder: fieldViewBuilder,
-      optionsBuilder: optionsBuilder,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+      focusNode: fieldFocusNode,
+      optionsFocusNode: optionsFocusNode,
+      textEditingController: textEditingController,
+      displayStringForOption: widget.displayStringForOption,
+      fieldViewBuilder: widget.fieldViewBuilder,
+      onSelected: widget.onSelected,
+      optionsBuilder: widget.optionsBuilder,
+      optionsViewBuilder: widget.optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
-          displayStringForOption: displayStringForOption,
+          optionsFocusNode: optionsFocusNode,
+          fieldFocusNode: fieldFocusNode,
+          displayStringForOption: widget.displayStringForOption,
           onSelected: onSelected,
           options: options,
         );
       },
-      onSelected: onSelected,
     );
   }
 }
@@ -208,12 +235,14 @@ class _AutocompleteField extends StatelessWidget {
 }
 
 // The default Material-style Autocomplete options.
-class _AutocompleteOptions<T extends Object> extends StatelessWidget {
+class _AutocompleteOptions<T extends Object> extends StatefulWidget {
   const _AutocompleteOptions({
     Key? key,
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
+    required this.fieldFocusNode,
+    required this.optionsFocusNode,
   }) : super(key: key);
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -221,6 +250,69 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final AutocompleteOnSelected<T> onSelected;
 
   final Iterable<T> options;
+
+  final FocusNode fieldFocusNode;
+
+  final FocusScopeNode optionsFocusNode;
+
+  @override
+  _AutocompleteOptionsState<T> createState() => _AutocompleteOptionsState<T>();
+}
+
+class _AutocompleteOptionsState<T extends Object> extends State<_AutocompleteOptions<T>> {
+  late FocusNode firstItem;
+  late FocusNode lastItem;
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.fieldFocusNode.attach(context, onKey: _handleKeyPress);
+    firstItem = FocusNode(
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            lastItem.requestFocus();
+            scrollController.jumpTo(scrollController.position.maxScrollExtent);
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+    );
+    lastItem = FocusNode(
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            firstItem.requestFocus();
+            scrollController.jumpTo(0);
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    firstItem.dispose();
+    lastItem.dispose();
+    super.dispose();
+  }
+
+  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        lastItem.requestFocus();
+        return KeyEventResult.handled;
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        firstItem.requestFocus();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,21 +322,60 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
         elevation: 4.0,
         child: Container(
           height: 200.0,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
-              final T option = options.elementAt(index);
-              return InkWell(
-                onTap: () {
-                  onSelected(option);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(displayStringForOption(option)),
-                ),
-              );
+          child: FocusScope(
+            node: widget.optionsFocusNode,
+            onKey: (FocusNode node, RawKeyEvent event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.tab) {
+                  widget.fieldFocusNode.requestFocus();
+                  widget.fieldFocusNode.nextFocus();
+                  return KeyEventResult.handled;
+                }
+              }
+              return KeyEventResult.ignored;
             },
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: Scrollbar(
+                isAlwaysShown: true,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: widget.options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final T option = widget.options.elementAt(index);
+                    FocusNode? focusNode;
+                    if (index == 0) {
+                      focusNode = firstItem;
+                    } else if (index == widget.options.length - 1) {
+                      focusNode = lastItem;
+                    } else {
+                      focusNode = FocusNode(
+                        onKey: (FocusNode node, RawKeyEvent event) {
+                          if (event is RawKeyDownEvent) {
+                            if (event.logicalKey == LogicalKeyboardKey.enter) {
+                              widget.onSelected(option);
+                              widget.fieldFocusNode.requestFocus();
+                              return KeyEventResult.handled;
+                            }
+                          }
+                          return KeyEventResult.ignored;
+                        },
+                      );
+                    }
+                    return InkWell(
+                      focusNode: focusNode,
+                      onTap: () {
+                        widget.onSelected(option);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(widget.displayStringForOption(option)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       ),

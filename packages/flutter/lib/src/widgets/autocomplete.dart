@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -442,6 +443,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
+    this.optionsFocusNode,
     this.onSelected,
     this.textEditingController,
   }) : assert(displayStringForOption != null),
@@ -564,6 +566,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// If this parameter is not null, then [textEditingController] must also be
   /// not null.
   final FocusNode? focusNode;
+
+  final FocusScopeNode? optionsFocusNode;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
   /// Builds the selectable options widgets from a list of options objects.
@@ -707,7 +711,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         },
       );
       Overlay.of(context, rootOverlay: true)!.insert(_floatingOptions!);
-    } else if (_floatingOptions != null) {
+    } else if ((_floatingOptions != null && !_focusNode.hasFocus) || (_selection != null && _focusNode.hasFocus)) {
       _floatingOptions!.remove();
       _floatingOptions = null;
     }
