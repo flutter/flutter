@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -26,6 +27,7 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
@@ -52,6 +54,19 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
+
+/// A map used to disable scrolling shortcuts in text fields.
+///
+/// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
+final Map<LogicalKeySet, Intent> scrollShortcutOverrides = kIsWeb
+    ? <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+      }
+    : <LogicalKeySet, Intent>{};
 
 /// A controller for an editable text field.
 ///

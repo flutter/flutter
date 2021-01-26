@@ -712,33 +712,57 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // case where the user moves the cursor to the end or beginning of the text
     // and then back up or down.
     if (downArrow || upArrow) {
-      // The caret offset gives a location in the upper left hand corner of
-      // the caret so the middle of the line above is a half line above that
-      // point and the line below is 1.5 lines below that point.
-      final double preferredLineHeight = _textPainter.preferredLineHeight;
-      final double verticalOffset = upArrow ? -0.5 * preferredLineHeight : 1.5 * preferredLineHeight;
-
-      final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: newSelection.extentOffset), _caretPrototype);
-      final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-      final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
-
-      // To account for the possibility where the user vertically highlights
-      // all the way to the top or bottom of the text, we hold the previous
-      // cursor location. This allows us to restore to this position in the
-      // case that the user wants to unhighlight some text.
-      if (position.offset == newSelection.extentOffset) {
-        if (downArrow) {
-          newSelection = newSelection.copyWith(extentOffset: _plainText.length);
-        } else if (upArrow) {
-          newSelection = newSelection.copyWith(extentOffset: 0);
+      if (lineModifier) {
+        if (upArrow) {
+          // Extend the selection to the beginning of the field.
+          final int upperOffset = math.max(0, math.max(
+            newSelection.baseOffset,
+            newSelection.extentOffset,
+          ));
+          newSelection = TextSelection(
+            baseOffset: shift ? upperOffset : 0,
+            extentOffset: 0,
+          );
+        } else {
+          // Extend the selection to the end of the field.
+          final int lowerOffset = math.max(0, math.min(
+            newSelection.baseOffset,
+            newSelection.extentOffset,
+          ));
+          newSelection = TextSelection(
+            baseOffset: shift ? lowerOffset : _plainText.length,
+            extentOffset: _plainText.length,
+          );
         }
-        _wasSelectingVerticallyWithKeyboard = shift;
-      } else if (_wasSelectingVerticallyWithKeyboard && shift) {
-        newSelection = newSelection.copyWith(extentOffset: _cursorResetLocation);
-        _wasSelectingVerticallyWithKeyboard = false;
       } else {
-        newSelection = newSelection.copyWith(extentOffset: position.offset);
-        _cursorResetLocation = newSelection.extentOffset;
+        // The caret offset gives a location in the upper left hand corner of
+        // the caret so the middle of the line above is a half line above that
+        // point and the line below is 1.5 lines below that point.
+        final double preferredLineHeight = _textPainter.preferredLineHeight;
+        final double verticalOffset = upArrow ? -0.5 * preferredLineHeight : 1.5 * preferredLineHeight;
+
+        final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: newSelection.extentOffset), _caretPrototype);
+        final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+        final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+
+        // To account for the possibility where the user vertically highlights
+        // all the way to the top or bottom of the text, we hold the previous
+        // cursor location. This allows us to restore to this position in the
+        // case that the user wants to unhighlight some text.
+        if (position.offset == newSelection.extentOffset) {
+          if (downArrow) {
+            newSelection = newSelection.copyWith(extentOffset: _plainText.length);
+          } else if (upArrow) {
+            newSelection = newSelection.copyWith(extentOffset: 0);
+          }
+          _wasSelectingVerticallyWithKeyboard = shift;
+        } else if (_wasSelectingVerticallyWithKeyboard && shift) {
+          newSelection = newSelection.copyWith(extentOffset: _cursorResetLocation);
+          _wasSelectingVerticallyWithKeyboard = false;
+        } else {
+          newSelection = newSelection.copyWith(extentOffset: position.offset);
+          _cursorResetLocation = newSelection.extentOffset;
+        }
       }
     }
 
@@ -2169,7 +2193,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(boundedOffset != null);
     assert(lastTextPosition != null);
     if (state == FloatingCursorDragState.Start) {
-      _relativeOrigin = const Offset(0, 0);
+      _relativeOrigin = Offset.zero;
       _previousOffset = null;
       _resetOriginOnBottom = false;
       _resetOriginOnTop = false;
@@ -2218,7 +2242,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // The relative origin in relation to the distance the user has theoretically
   // dragged the floating cursor offscreen. This value is used to account for the
   // difference in the rendering position and the raw offset value.
-  Offset _relativeOrigin = const Offset(0, 0);
+  Offset _relativeOrigin = Offset.zero;
   Offset? _previousOffset;
   bool _resetOriginOnLeft = false;
   bool _resetOriginOnRight = false;
@@ -2228,7 +2252,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
-    Offset deltaPosition = const Offset(0, 0);
+    Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
     final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;

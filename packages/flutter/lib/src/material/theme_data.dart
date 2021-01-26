@@ -416,7 +416,7 @@ class ThemeData with Diagnosticable {
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
-      secondaryColor: primaryColor,
+      secondaryColor: isDark ? Colors.tealAccent[200]! : primaryColor,
       brightness: colorScheme.brightness,
       labelStyle: textTheme.bodyText1!,
     );

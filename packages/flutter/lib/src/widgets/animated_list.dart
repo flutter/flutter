@@ -495,7 +495,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       shrinkWrap: widget.shrinkWrap,
       slivers: <Widget>[
         SliverPadding(
-          padding: widget.padding ?? const EdgeInsets.all(0),
+          padding: widget.padding ?? EdgeInsets.zero,
           sliver: SliverAnimatedList(
             key: _sliverAnimatedListKey,
             itemBuilder: widget.itemBuilder,

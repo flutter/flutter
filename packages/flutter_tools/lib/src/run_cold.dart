@@ -123,6 +123,7 @@ class ColdRunner extends ResidentRunner {
 
     if (debuggingEnabled) {
       unawaited(maybeCallDevToolsUriServiceExtension());
+      unawaited(callConnectedVmServiceUriExtension());
     }
 
     appStartedCompleter?.complete();
@@ -152,7 +153,7 @@ class ColdRunner extends ResidentRunner {
         serveDevToolsGracefully(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         ),
-      ]);
+      ], eagerError: true);
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
@@ -168,6 +169,7 @@ class ColdRunner extends ResidentRunner {
     }
 
     unawaited(maybeCallDevToolsUriServiceExtension());
+    unawaited(callConnectedVmServiceUriExtension());
 
     appStartedCompleter?.complete();
     if (stayResident) {

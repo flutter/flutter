@@ -113,3 +113,6 @@ ui.Brightness? debugBrightnessOverride;
 /// The address for the active DevTools server used for debugging this
 /// application.
 String? activeDevToolsServerAddress;
+
+/// The uri for the connected vm service protocol.
+String? connectedVmServiceUri;
