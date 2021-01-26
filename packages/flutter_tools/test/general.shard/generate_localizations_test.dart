@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/memory.dart';
@@ -10,6 +9,7 @@ import 'package:yaml/yaml.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
@@ -548,7 +548,8 @@ void main() {
   });
 
   test(
-    'untranslated messages suggestion is printed when translation is missing',
+    'untranslated messages suggestion is printed when translation is missing: '
+    'command line message',
     () {
       final BufferLogger testLogger = BufferLogger.test();
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -566,6 +567,7 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
+            useSyntheticPackage: false,
           )
           ..loadResources()
           ..writeOutputFiles(testLogger);
@@ -573,7 +575,51 @@ void main() {
         fail('Generating output should not fail: \n${e.message}');
       }
 
-      expect(testLogger.statusText, contains('To see a detailed report, use the --untranslated-messages-file'));
+      expect(
+        testLogger.statusText,
+        contains('To see a detailed report, use the --untranslated-messages-file'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('flutter gen-l10n --untranslated-messages-file=desiredFileName.txt'),
+      );
+    },
+  );
+
+  test(
+    'untranslated messages suggestion is printed when translation is missing: '
+    'l10n.yaml message',
+    () {
+      final BufferLogger testLogger = BufferLogger.test();
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+        ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          )
+          ..loadResources()
+          ..writeOutputFiles(testLogger, isFromYaml: true);
+      } on L10nException catch (e) {
+        fail('Generating output should not fail: \n${e.message}');
+      }
+
+      expect(
+        testLogger.statusText,
+        contains('To see a detailed report, use the untranslated-messages-file'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('untranslated-messages-file: desiredFileName.txt'),
+      );
     },
   );
 
@@ -938,7 +984,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocale: preferredSupportedLocale,
+          preferredSupportedLocales: preferredSupportedLocale,
         );
         generator.loadResources();
       } on L10nException catch (e) {
@@ -974,7 +1020,7 @@ void main() {
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
-            preferredSupportedLocale: preferredSupportedLocale,
+            preferredSupportedLocales: preferredSupportedLocale,
           );
           generator.loadResources();
         } on L10nException catch (e) {
@@ -1387,7 +1433,7 @@ void main() {
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
-          preferredSupportedLocale: preferredSupportedLocale,
+          preferredSupportedLocales: preferredSupportedLocale,
         );
         generator.loadResources();
         generator.writeOutputFiles(BufferLogger.test());

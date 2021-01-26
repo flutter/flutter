@@ -345,7 +345,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project) async {
+Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final String packagesFile = globals.fs.path.join(
     project.directory.path,
@@ -354,6 +354,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
+    throwOnError: throwOnError,
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
@@ -779,6 +780,8 @@ const String _dartPluginRegistryTemplate = '''
 // Generated file. Do not edit.
 //
 
+// ignore_for_file: lines_longer_than_80_chars
+
 {{#plugins}}
 import 'package:{{name}}/{{file}}';
 {{/plugins}}
@@ -1137,7 +1140,8 @@ Future<void> refreshPluginsList(
   bool macOSPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
   // TODO(franciscojma): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);

@@ -18,13 +18,10 @@ import 'dart:ui' as ui
         PointMode,
         SceneBuilder,
         Vertices;
-import 'dart:ui' show Canvas, Offset;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'app.dart';
 import 'basic.dart';
@@ -960,7 +957,15 @@ mixin WidgetInspectorService {
   /// Structured errors provide semantic information that can be used by IDEs
   /// to enhance the display of errors with rich formatting.
   bool isStructuredErrorsEnabled() {
-    return const bool.fromEnvironment('flutter.inspector.structuredErrors');
+    // This is a debug mode only feature and will default to false for
+    // profile mode.
+    bool enabled = false;
+    assert(() {
+      // TODO(kenz): add support for structured errors on the web.
+      enabled = const bool.fromEnvironment('flutter.inspector.structuredErrors', defaultValue: !kIsWeb);
+      return true;
+    }());
+    return enabled;
   }
 
   /// Called to register service extensions.
@@ -1378,6 +1383,46 @@ mixin WidgetInspectorService {
       return true;
     }
     return false;
+  }
+
+  /// Returns a DevTools uri linking to a specific element on the inspector page.
+  String? _devToolsInspectorUriForElement(Element element) {
+    if (activeDevToolsServerAddress != null && connectedVmServiceUri != null) {
+      final String? inspectorRef = toId(element, _consoleObjectGroup);
+      if (inspectorRef != null) {
+        return devToolsInspectorUri(inspectorRef);
+      }
+    }
+    return null;
+  }
+
+  /// Returns the DevTools inspector uri for the given vm service connection and
+  /// inspector reference.
+  @visibleForTesting
+  String devToolsInspectorUri(String inspectorRef) {
+    assert(activeDevToolsServerAddress != null);
+    assert(connectedVmServiceUri != null);
+
+    final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
+      queryParameters: <String, dynamic>{
+        'uri': connectedVmServiceUri!,
+        'inspectorRef': inspectorRef,
+      },
+    );
+
+    // We cannot add the '/#/inspector' path by means of
+    // [Uri.replace(path: '/#/inspector')] because the '#' character will be
+    // encoded when we try to print the url as a string. DevTools will not
+    // load properly if this character is encoded in the url.
+    // Related: https://github.com/flutter/devtools/issues/2475.
+    final String devToolsInspectorUri = uri.toString();
+    final int startQueryParamIndex = devToolsInspectorUri.indexOf('?');
+    // The query parameter character '?' should be present because we manually
+    // added query parameters above.
+    assert(startQueryParamIndex != -1);
+    return '${devToolsInspectorUri.substring(0, startQueryParamIndex)}'
+        '/#/inspector'
+        '${devToolsInspectorUri.substring(startQueryParamIndex)}';
   }
 
   /// Returns JSON representing the chain of [DiagnosticsNode] instances from
@@ -2447,7 +2492,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(const Size(double.infinity, double.infinity));
+    return constraints.constrain(Size.infinite);
   }
 
   @override
@@ -2872,15 +2917,27 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
-      nodes.add(
+
+      DiagnosticsNode? devToolsDiagnostic;
+      final String? devToolsInspectorUri =
+          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+      if (devToolsInspectorUri != null) {
+        devToolsDiagnostic = DevToolsDeepLinkProperty(
+          'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+          devToolsInspectorUri,
+        );
+      }
+
+      nodes.addAll(<DiagnosticsNode>[
         DiagnosticsBlock(
           name: 'The relevant error-causing widget was',
           children: <DiagnosticsNode>[
             ErrorDescription('${target.widget.toStringShort()} ${_describeCreationLocation(target)}'),
           ],
         ),
-      );
-      nodes.add(ErrorSpacer());
+        ErrorSpacer(),
+        if (devToolsDiagnostic != null) ...<DiagnosticsNode>[devToolsDiagnostic, ErrorSpacer()],
+      ]);
       return false;
     }
     return true;
@@ -2888,6 +2945,26 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   if (processElement(element))
     element.visitAncestorElements(processElement);
   return nodes;
+}
+
+/// Debugging message for DevTools deep links.
+///
+/// The [value] for this property is a string representation of the Flutter
+/// DevTools url.
+///
+/// Properties `description` and `url` must not be null.
+class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
+  /// Creates a diagnostics property that displays a deep link to Flutter DevTools.
+  ///
+  /// The [value] of this property will return a map of data for the Flutter
+  /// DevTools deep link, including the full `url`, the Flutter DevTools `screenId`,
+  /// and the `objectId` in Flutter DevTools that this diagnostic references.
+  ///
+  /// The `description` and `url` arguments must not be null.
+  DevToolsDeepLinkProperty(String description, String url)
+    : assert(description != null),
+      assert(url != null),
+      super('', url, description: description, level: DiagnosticLevel.info);
 }
 
 /// Returns if an object is user created.

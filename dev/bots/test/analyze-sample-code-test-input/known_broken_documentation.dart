@@ -103,3 +103,32 @@
 /// const text1 = _Text('Poor wandering ones!');
 /// ```
 /// {@end-tool}
+///
+/// {@tool snippet}
+/// Snippet with null-safe syntax
+///
+/// ```dart
+/// final String? bar = 'Hello';
+/// final int foo = null;
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+/// Dartpad with null-safe syntax
+///
+/// ```dart preamble
+/// bool? _visible = true;
+/// final GlobalKey globalKey = GlobalKey();
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   final String title;
+///   return Opacity(
+///     key: globalKey,
+///     opacity: _visible! ? 1.0 : 0.0,
+///     child: Text(title),
+///   );
+/// }
+/// ```
+/// {@end-tool}

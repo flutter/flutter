@@ -14,6 +14,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -25,9 +26,8 @@ import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
-const int kXcodeRequiredVersionMajor = 11;
-const int kXcodeRequiredVersionMinor = 0;
-const int kXcodeRequiredVersionPatch = 0;
+Version get xcodeRequiredVersion => Version(11, 0, 0, text: '11.0');
+Version get xcodeRecommendedVersion => Version(12, 0, 1, text: '12.0.1');
 
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
@@ -60,7 +60,7 @@ class Xcode {
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
-  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
@@ -85,9 +85,13 @@ class Xcode {
     return _xcodeProjectInterpreter.isInstalled;
   }
 
-  int get majorVersion => _xcodeProjectInterpreter.majorVersion;
-  int get minorVersion => _xcodeProjectInterpreter.minorVersion;
-  int get patchVersion => _xcodeProjectInterpreter.patchVersion;
+  Version get currentVersion => Version(
+        _xcodeProjectInterpreter.majorVersion,
+        _xcodeProjectInterpreter.minorVersion,
+        _xcodeProjectInterpreter.patchVersion,
+        text:
+            '${_xcodeProjectInterpreter.majorVersion}.${_xcodeProjectInterpreter.minorVersion}.${_xcodeProjectInterpreter.patchVersion}',
+      );
 
   String get versionText => _xcodeProjectInterpreter.versionText;
 
@@ -124,7 +128,7 @@ class Xcode {
         final RunResult result = _processUtils.runSync(
           <String>[...xcrunCommand(), 'simctl', 'list'],
         );
-        _isSimctlInstalled = result.stderr == null || result.stderr == '';
+        _isSimctlInstalled = result.exitCode == 0;
       } on ProcessException {
         _isSimctlInstalled = false;
       }
@@ -132,20 +136,18 @@ class Xcode {
     return _isSimctlInstalled;
   }
 
-  bool get isVersionSatisfactory {
+  bool get isRequiredVersionSatisfactory {
     if (!_xcodeProjectInterpreter.isInstalled) {
       return false;
     }
-    if (majorVersion > kXcodeRequiredVersionMajor) {
-      return true;
+    return currentVersion >= xcodeRequiredVersion;
+  }
+
+  bool get isRecommendedVersionSatisfactory {
+    if (!_xcodeProjectInterpreter.isInstalled) {
+      return false;
     }
-    if (majorVersion == kXcodeRequiredVersionMajor) {
-      if (minorVersion == kXcodeRequiredVersionMinor) {
-        return patchVersion >= kXcodeRequiredVersionPatch;
-      }
-      return minorVersion >= kXcodeRequiredVersionMinor;
-    }
-    return false;
+    return currentVersion >= xcodeRecommendedVersion;
   }
 
   /// See [XcodeProjectInterpreter.xcrunCommand].

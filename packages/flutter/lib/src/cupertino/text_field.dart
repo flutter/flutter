@@ -4,12 +4,14 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -151,7 +153,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// }
 ///
 /// class _MyPrefilledTextState extends State<MyPrefilledText> {
-///   TextEditingController _textController;
+///   late TextEditingController _textController;
 ///
 ///   @override
 ///   void initState() {
@@ -259,6 +261,11 @@ class CupertinoTextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
@@ -406,6 +413,11 @@ class CupertinoTextField extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.maxLength,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     this.maxLengthEnforced = true,
     this.maxLengthEnforcement,
     this.onChanged,
@@ -651,6 +663,11 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// If true, prevents the field from allowing more than [maxLength]
   /// characters.
+  @Deprecated(
+    'Use maxLengthEnforcement parameter which provides more specific '
+    'behavior related to the maxLength limit. '
+    'This feature was deprecated after v1.25.0-5.0.pre.'
+  )
   final bool maxLengthEnforced;
 
   /// Determines how the [maxLength] limit should be enforced.
@@ -805,7 +822,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
-    ?? LengthLimitingTextInputFormatter.inferredDefaultMaxLengthEnforcement;
+    ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement();
 
   bool _showSelectionHandles = false;
 
@@ -1049,7 +1066,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
+
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        textSelectionControls ??= cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        break;
+    }
+
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -1169,25 +1201,28 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Semantics(
-      enabled: enabled,
-      onTap: !enabled ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
-        _requestKeyboard();
-      },
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: Container(
-          decoration: effectiveDecoration,
-          child: _selectionGestureDetectorBuilder.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Align(
-              alignment: Alignment(-1.0, _textAlignVertical.y),
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+    return Shortcuts(
+      shortcuts: scrollShortcutOverrides,
+      child: Semantics(
+        enabled: enabled,
+        onTap: !enabled || widget.readOnly ? null : () {
+          if (!controller.selection.isValid) {
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          }
+          _requestKeyboard();
+        },
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),

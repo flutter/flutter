@@ -230,7 +230,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   Widget build(BuildContext context) {
     return Theme(
       child: widget.child,
-      data: _data!.evaluate(animation!),
+      data: _data!.evaluate(animation),
     );
   }
 

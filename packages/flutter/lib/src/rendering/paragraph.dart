@@ -8,9 +8,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, Tex
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -266,11 +264,10 @@ class RenderParagraph extends RenderBox
   /// Used by this paragraph's internal [TextPainter] to select a
   /// locale-specific font.
   ///
-  /// In some cases the same Unicode character may be rendered differently
-  /// depending
-  /// on the locale. For example the '骨' character is rendered differently in
-  /// the Chinese and Japanese locales. In these cases the [locale] may be used
-  /// to select a locale-specific font.
+  /// In some cases, the same Unicode character may be rendered differently
+  /// depending on the locale. For example, the '骨' character is rendered
+  /// differently in the Chinese and Japanese locales. In these cases, the
+  /// [locale] may be used to select a locale-specific font.
   Locale? get locale => _textPainter.locale;
   /// The value may be null.
   set locale(Locale? value) {
@@ -378,7 +375,7 @@ class RenderParagraph extends RenderBox
         case ui.PlaceholderAlignment.belowBaseline: {
           assert(RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline,');
+            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.');
           return false;
         }
         case ui.PlaceholderAlignment.top:
@@ -432,7 +429,7 @@ class RenderParagraph extends RenderBox
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty, growable: false);
     int childIndex = 0;
     // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scale up when it paints.
+    // span will be scaled up when it paints.
     width = width / textScaleFactor;
     while (child != null) {
       final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
@@ -556,7 +553,7 @@ class RenderParagraph extends RenderBox
     // Leave height unconstrained, which will overflow if expanded past.
     BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     // The content will be enlarged by textScaleFactor during painting phase.
-    // We reduce constraint by textScaleFactor so that the content will fit
+    // We reduce constraints by textScaleFactor, so that the content will fit
     // into the box once it is enlarged.
     boxConstraints = boxConstraints / textScaleFactor;
     while (child != null) {
@@ -640,7 +637,7 @@ class RenderParagraph extends RenderBox
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
       ));
-      return const Size(0, 0);
+      return Size.zero;
     }
     _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);

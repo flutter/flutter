@@ -228,15 +228,18 @@ class _DevFSHttpWriter implements DevFSWriter {
     @required OperatingSystemUtils osUtils,
     @required HttpClient httpClient,
     @required Logger logger,
+    Duration uploadRetryThrottle,
   })
     : httpAddress = serviceProtocol.httpAddress,
       _client = httpClient,
       _osUtils = osUtils,
+      _uploadRetryThrottle = uploadRetryThrottle,
       _logger = logger;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
   final Logger _logger;
+  final Duration _uploadRetryThrottle;
 
   final String fsName;
   final Uri httpAddress;
@@ -320,7 +323,7 @@ class _DevFSHttpWriter implements DevFSWriter {
           if (retry > 0) {
             retry--;
             _logger.printTrace('trying again in a few - $retry more attempts left');
-            await Future<void>.delayed(const Duration(milliseconds: 500));
+            await Future<void>.delayed(_uploadRetryThrottle ?? const Duration(milliseconds: 500));
             continue;
           }
           _completer.completeError(error, trace);
@@ -364,6 +367,8 @@ class UpdateFSReport {
 
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
+  ///
+  /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
   DevFS(
     vm_service.VmService serviceProtocol,
     this.fsName,
@@ -372,6 +377,7 @@ class DevFS {
     @required Logger logger,
     @required FileSystem fileSystem,
     HttpClient httpClient,
+    Duration uploadRetryThrottle,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -380,6 +386,7 @@ class DevFS {
         serviceProtocol,
         osUtils: osUtils,
         logger: logger,
+        uploadRetryThrottle: uploadRetryThrottle,
         httpClient: httpClient ?? ((context.get<HttpClientFactory>() == null)
           ? HttpClient()
           : context.get<HttpClientFactory>()())
@@ -419,8 +426,15 @@ class DevFS {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
+      if (rpcException.code == RPCErrorCodes.kServiceDisappeared) {
+        // This can happen if the device has been disconnected, so translate to
+        // a DevFSException, which the caller will handle.
+        throw DevFSException('Service disconnected', rpcException);
+      }
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
+        // Other RPCErrors are unexpected. Rethrow so it will hit crash
+        // logging.
         rethrow;
       }
       _logger.printTrace('DevFS: Creating failed. Destroying and trying again');

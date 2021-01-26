@@ -248,7 +248,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ```dart
-///  AnimationController controller;
+///  late AnimationController controller;
 ///
 ///  @override
 ///  void initState() {
@@ -486,7 +486,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ```dart
-///  AnimationController controller;
+///  late AnimationController controller;
 ///
 ///  @override
 ///  void initState() {

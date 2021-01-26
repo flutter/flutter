@@ -66,6 +66,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'url_launcher': '6.0.0-nullsafety.1',
   'connectivity': '3.0.0-nullsafety.1',
   'device_info': '2.0.0-nullsafety.1',
+  'camera': '0.6.4+5',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1425,12 +1426,13 @@ Directory createTemporaryFlutterSdk(
   Directory realFlutter,
   List<PubspecYaml> pubspecs,
 ) {
-  final Set<String> currentPackages = realFlutter
-    .childDirectory('packages')
-    .listSync()
-    .whereType<Directory>()
-    .map((Directory directory) => fileSystem.path.basename(directory.path))
-    .toSet();
+  final Set<String> currentPackages = <String>{};
+  for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
+    // Verify that a pubspec.yaml exists to ensure this isn't a left over directory.
+    if (entity is Directory && entity.childFile('pubspec.yaml').existsSync()) {
+      currentPackages.add(fileSystem.path.basename(entity.path));
+    }
+  }
 
   final Map<String, PubspecYaml> pubspecsByName = <String, PubspecYaml>{};
   for (final PubspecYaml pubspec in pubspecs) {

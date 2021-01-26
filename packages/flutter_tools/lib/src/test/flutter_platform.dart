@@ -63,6 +63,7 @@ FlutterPlatform installHook({
   PlatformPluginRegistration platformPluginRegistration,
   bool nullAssertions = false,
   @required BuildInfo buildInfo,
+  List<String> additionalArguments,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -96,6 +97,7 @@ FlutterPlatform installHook({
     icudtlPath: icudtlPath,
     nullAssertions: nullAssertions,
     buildInfo: buildInfo,
+    additionalArguments: additionalArguments,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -248,6 +250,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.flutterProject,
     this.icudtlPath,
     this.nullAssertions = false,
+    this.additionalArguments,
     @required this.buildInfo,
   }) : assert(shellPath != null);
 
@@ -270,6 +273,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String icudtlPath;
   final bool nullAssertions;
   final BuildInfo buildInfo;
+  final List<String> additionalArguments;
 
   Directory fontsDirectory;
 
@@ -446,6 +450,7 @@ class FlutterPlatform extends PlatformPlugin {
         disableServiceAuthCodes: disableServiceAuthCodes,
         observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
+        additionalArguments: additionalArguments,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -454,9 +459,9 @@ class FlutterPlatform extends PlatformPlugin {
           process.kill(io.ProcessSignal.sigkill);
           final int exitCode = await process.exitCode;
           subprocessActive = false;
-          if (!controllerSinkClosed && exitCode != -15) {
-            // ProcessSignal.SIGTERM
-            // We expect SIGTERM (15) because we tried to terminate it.
+          if (!controllerSinkClosed && exitCode != -9) {
+            // ProcessSignal.SIGKILL
+            // We expect SIGKILL (9) because we tried to terminate it.
             // It's negative because signals are returned as negative exit codes.
             final String message = _getErrorMessage(
                 _getExitCodeMessage(exitCode, 'after tests finished'),
@@ -769,6 +774,7 @@ class FlutterPlatform extends PlatformPlugin {
     bool disableServiceAuthCodes = false,
     int observatoryPort,
     int serverPort,
+    List<String> additionalArguments,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -802,6 +808,7 @@ class FlutterPlatform extends PlatformPlugin {
       '--packages=$packages',
       if (nullAssertions)
         '--dart-flags=--null_assertions',
+      ...?additionalArguments,
       testPath,
     ];
 

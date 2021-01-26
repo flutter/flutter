@@ -268,6 +268,7 @@ void main() {
       const <String>[
         'precache',
         '--no-ios',
+        '--android',
         '--android_gen_snapshot',
         '--android_maven',
         '--android_internal_build',
@@ -402,6 +403,34 @@ void main() {
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
     verify(cache.clearStampFiles()).called(1);
+  });
+
+  testUsingContext('precache downloads all enabled platforms if no flags are provided.', () async {
+    final PrecacheCommand command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(
+        isWebEnabled: true,
+        isLinuxEnabled: true,
+        isWindowsEnabled: true,
+        isMacOSEnabled: true,
+        isIOSEnabled: false,
+        isAndroidEnabled: false,
+      ),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+    await createTestCommandRunner(command).run(const <String>['precache']);
+
+    expect(
+      artifacts,
+      unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.web,
+        DevelopmentArtifact.macOS,
+        DevelopmentArtifact.windows,
+        DevelopmentArtifact.linux,
+        DevelopmentArtifact.universal,
+        // iOS and android specifically excluded
+      }));
   });
 }
 
