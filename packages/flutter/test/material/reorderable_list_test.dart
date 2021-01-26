@@ -1165,7 +1165,7 @@ void main() {
     });
 
     testWidgets('ReorderableListView.builder only creates the children it needs', (WidgetTester tester) async {
-      final Set<int> itemsCreated = {};
+      final Set<int> itemsCreated = <int>{};
       await tester.pumpWidget(MaterialApp(
         home: ReorderableListView.builder(
           itemBuilder: (BuildContext context, int index) {
