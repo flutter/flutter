@@ -300,7 +300,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _caretPainter.cursorOffset = cursorOffset;
     _caretPainter.backgroundCursorColor = backgroundCursorColor;
 
-    _updateForgroundPainter(foregroundPainter);
+    _updateForegroundPainter(foregroundPainter);
     _updatePainter(painter);
   }
 
@@ -308,12 +308,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderEditableCustomPaint? _foregroundRenderObject;
   _RenderEditableCustomPaint? _backgroundRenderObject;
 
-  RenderEditablePainter? _foregroundPainter;
-  void _updateForgroundPainter(RenderEditablePainter? newPainter) {
+  void _updateForegroundPainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
-      ? _builtInForegounrdPainters
+      ? _builtInForegroundPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
-         _builtInForegounrdPainters,
+         _builtInForegroundPainters,
          newPainter,
       ]);
 
@@ -326,19 +325,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _foregroundPainter = newPainter;
   }
-  /// Sets the [RenderEditablePainter] to use for painting above this
+
+  /// The [RenderEditablePainter] to use for painting above this
   /// [RenderEditable]'s text content.
   ///
   /// The new [RenderEditablePainter] will replace the previously specified
   /// foreground painter, and schedule a repaint if the new painter's
   /// `shouldRepaint` method returns true.
-  void setForegroundPainter(RenderEditablePainter? newPainter) {
+  RenderEditablePainter? get foregroundPainter => _foregroundPainter;
+  RenderEditablePainter? _foregroundPainter;
+  set foregroundPainter(RenderEditablePainter? newPainter) {
     if (newPainter == _foregroundPainter)
       return;
-    _updateForgroundPainter(newPainter);
+    _updateForegroundPainter(newPainter);
   }
 
-  RenderEditablePainter? _painter;
   void _updatePainter(RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtInPainters
@@ -353,13 +354,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _painter = newPainter;
   }
+
   /// Sets the [RenderEditablePainter] to use for painting beneath this
   /// [RenderEditable]'s text content.
   ///
   /// The new [RenderEditablePainter] will replace the previously specified
   /// painter, and schedule a repaint if the new painter's `shouldRepaint`
   /// method returns true.
-  void setPainter(RenderEditablePainter? newPainter) {
+  RenderEditablePainter? get painter => _painter;
+  RenderEditablePainter? _painter;
+  set painter(RenderEditablePainter? newPainter) {
     if (newPainter == _painter)
       return;
     _updatePainter(newPainter);
@@ -373,7 +377,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
   final _TextHighlightPainter _autocorrectHighlightPainter = _TextHighlightPainter();
 
-  _CompositeRenderEditablePainter get _builtInForegounrdPainters => _cachedBuiltInForegroundPainters ??= _createBuiltInForegroundPainters();
+  _CompositeRenderEditablePainter get _builtInForegroundPainters => _cachedBuiltInForegroundPainters ??= _createBuiltInForegroundPainters();
   _CompositeRenderEditablePainter? _cachedBuiltInForegroundPainters;
   _CompositeRenderEditablePainter _createBuiltInForegroundPainters() {
     return _CompositeRenderEditablePainter(
@@ -1309,7 +1313,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _cachedBuiltInForegroundPainters = null;
     _cachedBuiltInPainters = null;
     // Call update methods to rebuild and set the effective painters.
-    _updateForgroundPainter(_foregroundPainter);
+    _updateForegroundPainter(_foregroundPainter);
     _updatePainter(_painter);
   }
 
@@ -2435,13 +2439,15 @@ class _RenderEditableCustomPaint extends RenderBox {
 /// to repaint without triggering a repaint on the entire [RenderEditable] stack
 /// when only auxiliary content changes (e.g. a blinking cursor) are present. It
 /// will be scheduled to repaint when:
-///   * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
-///     returns true.
-///   * Any of the [RenderEditable]s it is attached to repaints.
-///   * The [notifyListeners] method is called, which typically happens when the
-///     painter's attributes change.
+///
+///  * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
+///    returns true.
+///  * Any of the [RenderEditable]s it is attached to repaints.
+///  * The [notifyListeners] method is called, which typically happens when the
+///    painter's attributes change.
 ///
 /// See also:
+///
 ///  * [RenderEditable.setForegroundPainter], which takes a [RenderEditablePainter]
 ///    and sets it as the foreground painter of the [RenderEditable].
 ///  * [RenderEditable.setPainter], which takes a [RenderEditablePainter]
@@ -2685,6 +2691,8 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
 
+    // TODO(LongCatIsLooong): avoid painting the caret when the selection is
+    // (-1, -1).
     if (selection == null || !selection.isCollapsed /* || !selection.isValid*/)
       return;
 
