@@ -9,10 +9,17 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  test('plugin example can be built using current Flutter Gradle plugin',
-      () async {
-    final Directory tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
+  Directory tempDir;
 
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
+  });
+
+  tearDown(() async {
+    tryToDelete(tempDir);
+  });
+
+  test('plugin example can be built using current Flutter Gradle plugin', () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -99,7 +106,5 @@ android.enableR8=true''');
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
     expect(exampleApk, exists);
-
-    tryToDelete(tempDir);
   });
 }
