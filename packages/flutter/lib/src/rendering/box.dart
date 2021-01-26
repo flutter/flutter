@@ -1942,7 +1942,8 @@ abstract class RenderBox extends RenderObject {
       final Size? _size = this._size;
       if (_size is _DebugSize) {
         assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
+        if (RenderObject.debugActiveLayout != null &&
+            !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
