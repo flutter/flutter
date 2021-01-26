@@ -299,8 +299,8 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
       if (layer->second.canvas_spy->DidDrawIntoCanvas()) {
         const auto& surface_index = frame_surface_indices.find(layer_id);
         FML_DCHECK(surface_index != frame_surface_indices.end());
-        scenic::Image* surface_image =
-            frame_surfaces[surface_index->second]->GetImage();
+        uint32_t surface_image_id =
+            frame_surfaces[surface_index->second]->GetImageId();
 
         // Create a new layer if needed for the surface.
         FML_DCHECK(scenic_layer_index <= scenic_layers_.size());
@@ -363,7 +363,7 @@ void FuchsiaExternalViewEmbedder::SubmitFrame(
             layer->second.surface_size.height() * 0.5f, -layer_elevation);
         scenic_layer.material.SetColor(SK_AlphaOPAQUE, SK_AlphaOPAQUE,
                                        SK_AlphaOPAQUE, SK_AlphaOPAQUE - 1);
-        scenic_layer.material.SetTexture(*surface_image);
+        scenic_layer.material.SetTexture(surface_image_id);
 
         // Only the first (i.e. the bottom-most) layer should receive input.
         // TODO: Workaround for invisible overlays stealing input. Remove when

@@ -5,6 +5,7 @@
 #include "vulkan_surface.h"
 
 #include <lib/async/default.h>
+#include <lib/ui/scenic/cpp/commands.h>
 
 #include <algorithm>
 
@@ -15,52 +16,51 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
+#define LOG_AND_RETURN(cond, msg) \
+  if (cond) {                     \
+    FML_DLOG(ERROR) << msg;       \
+    return false;                 \
+  }
+
 namespace flutter_runner {
 
 namespace {
 
-// Immutable format is technically limited to R8G8B8A8_SRGB but
-// R8G8B8A8_UNORM works with existing ARM drivers so we allow that
-// until we have a more reliable API for creating external Vulkan
-// images using sysmem. TODO(fxb/52835)
-#if defined(__aarch64__)
 constexpr SkColorType kSkiaColorType = kRGBA_8888_SkColorType;
-constexpr fuchsia::images::PixelFormat kPixelFormat =
-    fuchsia::images::PixelFormat::R8G8B8A8;
+constexpr fuchsia::sysmem::PixelFormatType kSysmemPixelFormat =
+    fuchsia::sysmem::PixelFormatType::R8G8B8A8;
 constexpr VkFormat kVulkanFormat = VK_FORMAT_R8G8B8A8_UNORM;
 constexpr VkImageCreateFlags kVulkanImageCreateFlags = 0;
-#else
-constexpr SkColorType kSkiaColorType = kBGRA_8888_SkColorType;
-constexpr fuchsia::images::PixelFormat kPixelFormat =
-    fuchsia::images::PixelFormat::BGRA_8;
-constexpr VkFormat kVulkanFormat = VK_FORMAT_B8G8R8A8_UNORM;
-constexpr VkImageCreateFlags kVulkanImageCreateFlags =
-    VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-#endif
+// TODO: We should only keep usages that are actually required by Skia.
+constexpr VkImageUsageFlags kVkImageUsage =
+    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+constexpr uint32_t kSysmemImageUsage =
+    fuchsia::sysmem::VULKAN_IMAGE_USAGE_COLOR_ATTACHMENT |
+    fuchsia::sysmem::VULKAN_IMAGE_USAGE_TRANSFER_DST |
+    fuchsia::sysmem::VULKAN_IMAGE_USAGE_TRANSFER_SRC |
+    fuchsia::sysmem::VULKAN_IMAGE_USAGE_SAMPLED;
 
 }  // namespace
 
-bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
-                       const SkISize& size,
-                       VulkanImage* out_vulkan_image) {
+bool VulkanSurface::CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
+                                      const SkISize& size,
+                                      VulkanImage* out_vulkan_image) {
   TRACE_EVENT0("flutter", "CreateVulkanImage");
 
   FML_DCHECK(!size.isEmpty());
   FML_DCHECK(out_vulkan_image != nullptr);
 
-  // The image creation parameters need to be the same as those in scenic
-  // (src/ui/scenic/lib/gfx/resources/gpu_image.cc and
-  // src/ui/lib/escher/util/image_utils.cc) or else the different vulkan
-  // devices may interpret the bytes differently.
-  // TODO(SCN-1369): Use API to coordinate this with scenic.
-  out_vulkan_image->vk_external_image_create_info = {
-      .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+  out_vulkan_image->vk_collection_image_create_info = {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA,
       .pNext = nullptr,
-      .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA,
+      .collection = collection_,
+      .index = 0,
   };
+
   out_vulkan_image->vk_image_create_info = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-      .pNext = &out_vulkan_image->vk_external_image_create_info,
+      .pNext = &out_vulkan_image->vk_collection_image_create_info,
       .flags = kVulkanImageCreateFlags,
       .imageType = VK_IMAGE_TYPE_2D,
       .format = kVulkanFormat,
@@ -70,18 +70,22 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
       .arrayLayers = 1,
       .samples = VK_SAMPLE_COUNT_1_BIT,
       .tiling = VK_IMAGE_TILING_OPTIMAL,
-      .usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-               VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-               VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+      .usage = kVkImageUsage,
       .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices = nullptr,
       .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
   };
 
+  if (VK_CALL_LOG_ERROR(
+          vulkan_provider.vk().SetBufferCollectionConstraintsFUCHSIA(
+              vulkan_provider.vk_device(), collection_,
+              &out_vulkan_image->vk_image_create_info)) != VK_SUCCESS) {
+    return false;
+  }
+
   {
     VkImage vk_image = VK_NULL_HANDLE;
-
     if (VK_CALL_LOG_ERROR(vulkan_provider.vk().CreateImage(
             vulkan_provider.vk_device(),
             &out_vulkan_image->vk_image_create_info, nullptr, &vk_image)) !=
@@ -103,35 +107,30 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   return true;
 }
 
-VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
-                             sk_sp<GrDirectContext> context,
-                             scenic::Session* session,
-                             const SkISize& size)
-    : vulkan_provider_(vulkan_provider), session_(session), wait_(this) {
+VulkanSurface::VulkanSurface(
+    vulkan::VulkanProvider& vulkan_provider,
+    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    sk_sp<GrDirectContext> context,
+    scenic::Session* session,
+    const SkISize& size,
+    uint32_t buffer_id)
+    : vulkan_provider_(vulkan_provider),
+      session_(session),
+      buffer_id_(buffer_id),
+      wait_(this) {
   FML_DCHECK(session_);
 
-  zx::vmo exported_vmo;
-  if (!AllocateDeviceMemory(std::move(context), size, exported_vmo)) {
+  if (!AllocateDeviceMemory(sysmem_allocator, std::move(context), size)) {
     FML_DLOG(INFO) << "Could not allocate device memory.";
     return;
   }
-
-  uint64_t vmo_size;
-  zx_status_t status = exported_vmo.get_size(&vmo_size);
-  FML_DCHECK(status == ZX_OK);
 
   if (!CreateFences()) {
     FML_DLOG(INFO) << "Could not create signal fences.";
     return;
   }
 
-  scenic_memory_ = std::make_unique<scenic::Memory>(
-      session, std::move(exported_vmo), vmo_size,
-      fuchsia::images::MemoryType::VK_DEVICE_MEMORY);
-  if (!PushSessionImageSetupOps(session)) {
-    FML_DLOG(INFO) << "Could not push session image setup ops.";
-    return;
-  }
+  PushSessionImageSetupOps(session);
 
   std::fill(size_history_.begin(), size_history_.end(), SkISize::MakeEmpty());
 
@@ -226,57 +225,100 @@ bool VulkanSurface::CreateFences() {
   return true;
 }
 
-bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrDirectContext> context,
-                                         const SkISize& size,
-                                         zx::vmo& exported_vmo) {
+bool VulkanSurface::AllocateDeviceMemory(
+    fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
+    sk_sp<GrDirectContext> context,
+    const SkISize& size) {
   if (size.isEmpty()) {
     return false;
   }
 
-  VulkanImage vulkan_image;
-  if (!CreateVulkanImage(vulkan_provider_, size, &vulkan_image)) {
-    FML_DLOG(ERROR) << "Failed to create VkImage";
+  fuchsia::sysmem::BufferCollectionTokenSyncPtr local_token;
+  zx_status_t status =
+      sysmem_allocator->AllocateSharedCollection(local_token.NewRequest());
+  LOG_AND_RETURN(status != ZX_OK, "Failed to allocate collection");
+  fuchsia::sysmem::BufferCollectionTokenSyncPtr scenic_token;
+  status = local_token->Duplicate(std::numeric_limits<uint32_t>::max(),
+                                  scenic_token.NewRequest());
+  LOG_AND_RETURN(status != ZX_OK, "Failed to duplicate token");
+  status = local_token->Sync();
+  LOG_AND_RETURN(status != ZX_OK, "Failed to sync token");
+  fuchsia::sysmem::BufferCollectionTokenSyncPtr vulkan_token;
+  status = local_token->Duplicate(std::numeric_limits<uint32_t>::max(),
+                                  vulkan_token.NewRequest());
+  LOG_AND_RETURN(status != ZX_OK, "Failed to duplicate token");
+  status = local_token->Sync();
+  LOG_AND_RETURN(status != ZX_OK, "Failed to sync token");
+
+  session_->RegisterBufferCollection(buffer_id_, std::move(scenic_token));
+
+  fuchsia::sysmem::BufferCollectionSyncPtr buffer_collection;
+  status = sysmem_allocator->BindSharedCollection(
+      std::move(local_token), buffer_collection.NewRequest());
+  LOG_AND_RETURN(status != ZX_OK, "Failed to bind collection");
+
+  fuchsia::sysmem::BufferCollectionConstraints constraints;
+  constraints.min_buffer_count = 1;
+  constraints.usage.vulkan = kSysmemImageUsage;
+
+  constraints.image_format_constraints_count = 1;
+  fuchsia::sysmem::ImageFormatConstraints& image_constraints =
+      constraints.image_format_constraints[0];
+  image_constraints = fuchsia::sysmem::ImageFormatConstraints();
+  image_constraints.min_coded_width = size.width();
+  image_constraints.min_coded_height = size.height();
+  image_constraints.max_coded_width = size.width();
+  image_constraints.max_coded_height = size.height();
+  image_constraints.min_bytes_per_row = 0;
+  image_constraints.pixel_format.type = kSysmemPixelFormat;
+  image_constraints.color_spaces_count = 1;
+  image_constraints.color_space[0].type = fuchsia::sysmem::ColorSpaceType::SRGB;
+
+  status = buffer_collection->SetConstraints(true, constraints);
+  LOG_AND_RETURN(status != ZX_OK, "Failed to set constraints");
+
+  VkBufferCollectionCreateInfoFUCHSIA import_info;
+  import_info.collectionToken = vulkan_token.Unbind().TakeChannel().release();
+  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIA(
+          vulkan_provider_.vk_device(), &import_info, nullptr, &collection_)) !=
+      VK_SUCCESS) {
     return false;
   }
 
+  VulkanImage vulkan_image;
+  LOG_AND_RETURN(!CreateVulkanImage(vulkan_provider_, size, &vulkan_image),
+                 "Failed to create VkImage");
+
+  status = buffer_collection->Close();
+  LOG_AND_RETURN(status != ZX_OK, "Failed to close collection");
+
   vulkan_image_ = std::move(vulkan_image);
-  const VkMemoryRequirements& memory_reqs =
+  const VkMemoryRequirements& memory_requirements =
       vulkan_image_.vk_memory_requirements;
-  const VkImageCreateInfo& image_create_info =
-      vulkan_image_.vk_image_create_info;
+  VkImageCreateInfo& image_create_info = vulkan_image_.vk_image_create_info;
 
-  uint32_t memory_type = 0;
-  for (; memory_type < 32; memory_type++) {
-    if ((memory_reqs.memoryTypeBits & (1 << memory_type))) {
-      break;
-    }
-  }
-
-  VkMemoryDedicatedAllocateInfo dedicated_allocate_info = {
-      .sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+  VkImportMemoryBufferCollectionFUCHSIA import_memory_info = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIA,
       .pNext = nullptr,
-      .image = vulkan_image_.vk_image,
-      .buffer = VK_NULL_HANDLE};
-  VkExportMemoryAllocateInfoKHR export_allocate_info = {
-      .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
-      .pNext = &dedicated_allocate_info,
-      .handleTypes =
-          VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA};
-
-  const VkMemoryAllocateInfo alloc_info = {
+      .collection = collection_,
+      .index = 0,
+  };
+  auto bits = memory_requirements.memoryTypeBits;
+  FML_DCHECK(bits != 0);
+  VkMemoryAllocateInfo allocation_info = {
       .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-      .pNext = &export_allocate_info,
-      .allocationSize = memory_reqs.size,
-      .memoryTypeIndex = memory_type,
+      .pNext = &import_memory_info,
+      .allocationSize = memory_requirements.size,
+      .memoryTypeIndex = static_cast<uint32_t>(__builtin_ctz(bits)),
   };
 
   {
     TRACE_EVENT1("flutter", "vkAllocateMemory", "allocationSize",
-                 alloc_info.allocationSize);
+                 allocation_info.allocationSize);
     VkDeviceMemory vk_memory = VK_NULL_HANDLE;
     if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().AllocateMemory(
-            vulkan_provider_.vk_device(), &alloc_info, NULL, &vk_memory)) !=
-        VK_SUCCESS) {
+            vulkan_provider_.vk_device(), &allocation_info, NULL,
+            &vk_memory)) != VK_SUCCESS) {
       return false;
     }
 
@@ -286,7 +328,7 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrDirectContext> context,
                                                     memory, NULL);
                   }};
 
-    vk_memory_info_ = alloc_info;
+    vk_memory_info_ = allocation_info;
   }
 
   // Bind image memory.
@@ -296,31 +338,8 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrDirectContext> context,
     return false;
   }
 
-  {
-    // Acquire the VMO for the device memory.
-    uint32_t vmo_handle = 0;
-
-    VkMemoryGetZirconHandleInfoFUCHSIA get_handle_info = {
-        VK_STRUCTURE_TYPE_TEMP_MEMORY_GET_ZIRCON_HANDLE_INFO_FUCHSIA, nullptr,
-        vk_memory_, VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA};
-    if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().GetMemoryZirconHandleFUCHSIA(
-            vulkan_provider_.vk_device(), &get_handle_info, &vmo_handle)) !=
-        VK_SUCCESS) {
-      return false;
-    }
-
-    exported_vmo.reset(static_cast<zx_handle_t>(vmo_handle));
-  }
-
-  // Assert that the VMO size was sufficient.
-  size_t vmo_size = 0;
-  if (exported_vmo.get_size(&vmo_size) != ZX_OK ||
-      vmo_size < memory_reqs.size) {
-    return false;
-  }
-
   return SetupSkiaSurface(std::move(context), size, kSkiaColorType,
-                          image_create_info, memory_reqs);
+                          image_create_info, memory_requirements);
 }
 
 bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
@@ -370,87 +389,19 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   return true;
 }
 
-bool VulkanSurface::PushSessionImageSetupOps(scenic::Session* session) {
-  FML_DCHECK(scenic_memory_ != nullptr);
-
-  if (sk_surface_ == nullptr) {
-    return false;
-  }
-
-  fuchsia::images::ImageInfo image_info;
-  image_info.width = sk_surface_->width();
-  image_info.height = sk_surface_->height();
-  image_info.stride = 4 * sk_surface_->width();
-  image_info.pixel_format = kPixelFormat;
-  image_info.color_space = fuchsia::images::ColorSpace::SRGB;
-  switch (vulkan_image_.vk_image_create_info.tiling) {
-    case VK_IMAGE_TILING_OPTIMAL:
-      image_info.tiling = fuchsia::images::Tiling::GPU_OPTIMAL;
-      break;
-    case VK_IMAGE_TILING_LINEAR:
-      image_info.tiling = fuchsia::images::Tiling::LINEAR;
-      break;
-    default:
-      FML_DLOG(ERROR) << "Bad image tiling: "
-                      << vulkan_image_.vk_image_create_info.tiling;
-      return false;
-  }
-
-  session_image_ = std::make_unique<scenic::Image>(
-      *scenic_memory_, 0 /* memory offset */, std::move(image_info));
-
-  return session_image_ != nullptr;
+void VulkanSurface::PushSessionImageSetupOps(scenic::Session* session) {
+  if (image_id_ == 0)
+    image_id_ = session->AllocResourceId();
+  session->Enqueue(scenic::NewCreateImage2Cmd(
+      image_id_, sk_surface_->width(), sk_surface_->height(), buffer_id_, 0));
 }
 
-scenic::Image* VulkanSurface::GetImage() {
-  if (!valid_) {
-    return 0;
-  }
-  return session_image_.get();
+uint32_t VulkanSurface::GetImageId() {
+  return image_id_;
 }
 
 sk_sp<SkSurface> VulkanSurface::GetSkiaSurface() const {
   return valid_ ? sk_surface_ : nullptr;
-}
-
-bool VulkanSurface::BindToImage(sk_sp<GrDirectContext> context,
-                                VulkanImage vulkan_image) {
-  FML_DCHECK(vulkan_image.vk_memory_requirements.size <=
-             vk_memory_info_.allocationSize);
-
-  vulkan_image_ = std::move(vulkan_image);
-
-  // Bind image memory.
-  if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().BindImageMemory(
-          vulkan_provider_.vk_device(), vulkan_image_.vk_image, vk_memory_,
-          0)) != VK_SUCCESS) {
-    valid_ = false;
-    return false;
-  }
-
-  const auto& extent = vulkan_image.vk_image_create_info.extent;
-  auto size = SkISize::Make(extent.width, extent.height);
-
-  if (!SetupSkiaSurface(std::move(context), size, kSkiaColorType,
-                        vulkan_image.vk_image_create_info,
-                        vulkan_image.vk_memory_requirements)) {
-    FML_DLOG(ERROR) << "Failed to setup skia surface";
-    valid_ = false;
-    return false;
-  }
-
-  if (sk_surface_ == nullptr) {
-    valid_ = false;
-    return false;
-  }
-
-  if (!PushSessionImageSetupOps(session_)) {
-    FML_DLOG(ERROR) << "Could not push session image setup ops.";
-    valid_ = false;
-    return false;
-  }
-
-  return true;
 }
 
 size_t VulkanSurface::AdvanceAndGetAge() {
