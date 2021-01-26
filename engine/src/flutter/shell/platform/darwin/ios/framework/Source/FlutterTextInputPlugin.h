@@ -45,7 +45,7 @@
 @end
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 #endif
 @interface FlutterTextInputView : UIView <UITextInput>
 

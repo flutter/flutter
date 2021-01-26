@@ -13,7 +13,7 @@
  * An object containing the result of `FlutterCallbackCache`'s `lookupCallbackInformation`
  * method.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterCallbackInformation : NSObject
 /**
  * The name of the callback.
@@ -33,7 +33,7 @@ FLUTTER_EXPORT
  * The cache containing callback information for spawning a
  * `FlutterHeadlessDartRunner`.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterCallbackCache : NSObject
 /**
  * Returns the callback information for the given callback handle.

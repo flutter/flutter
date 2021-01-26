@@ -7,11 +7,11 @@
 
 #if defined(FLUTTER_FRAMEWORK)
 
-#define FLUTTER_EXPORT __attribute__((visibility("default")))
+#define FLUTTER_DARWIN_EXPORT __attribute__((visibility("default")))
 
 #else  // defined(FLUTTER_SDK)
 
-#define FLUTTER_EXPORT
+#define FLUTTER_DARWIN_EXPORT
 
 #endif  // defined(FLUTTER_SDK)
 

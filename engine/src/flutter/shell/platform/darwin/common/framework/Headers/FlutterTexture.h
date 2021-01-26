@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 /**
  * Represents a texture that can be shared with Flutter.
  *
@@ -31,7 +31,7 @@ FLUTTER_EXPORT
 - (void)onTextureUnregistered:(NSObject<FlutterTexture>*)texture;
 @end
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 /**
  * A collection of registered `FlutterTexture`'s.
  */

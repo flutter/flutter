@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  * The object passed as the sender is the `FlutterViewController` associated
  * with the update.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 extern NSNotificationName const FlutterSemanticsUpdateNotification;
 
 /**
@@ -47,7 +47,7 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  * Dart-related state and asynchronous tasks when navigating back and forth between a
  * FlutterViewController and other `UIViewController`s.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 #ifdef __IPHONE_13_4
 @interface FlutterViewController
     : UIViewController <FlutterTextureRegistry, FlutterPluginRegistry, UIPointerInteractionDelegate>

@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning This class is a work-in-progress and may change.
  * @see https://github.com/flutter/flutter/issues/72009
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @interface FlutterEngineGroup : NSObject
 - (instancetype)init NS_UNAVAILABLE;
 

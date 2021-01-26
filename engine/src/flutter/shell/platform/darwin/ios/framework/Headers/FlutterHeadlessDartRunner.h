@@ -29,7 +29,7 @@ typedef void (^FlutterHeadlessDartRunnerCallback)(BOOL success);
  * Most callers should prefer using `FlutterEngine` directly; this interface exists
  * for legacy support.
  */
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 FLUTTER_DEPRECATED("FlutterEngine should be used rather than FlutterHeadlessDartRunner")
 @interface FlutterHeadlessDartRunner : FlutterEngine
 

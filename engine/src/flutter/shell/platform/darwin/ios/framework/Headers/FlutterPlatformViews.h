@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIView*)view;
 @end
 
-FLUTTER_EXPORT
+FLUTTER_DARWIN_EXPORT
 @protocol FlutterPlatformViewFactory <NSObject>
 /**
  * Create a `FlutterPlatformView`.
