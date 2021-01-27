@@ -966,7 +966,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     this.barrierColor = _kModalBarrierColor,
     bool barrierDismissible = true,
     bool? semanticsDismissible,
-    required ImageFilter? filter,
+    ImageFilter? filter,
     RouteSettings? settings,
   }) : super(
          filter: filter,
@@ -1082,6 +1082,87 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
+///
+/// ### State Restoration in Modals
+///
+/// Using this method will not enable state restoration for the modal. In order
+/// to enable state restoration for a modal, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [CupertinoModalPopupRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable Cupertino modal route.
+/// This is accomplished by enabling state restoration by specifying
+/// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [CupertinoModalPopupRoute] when the [CupertinoButton] is tapped.
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoApp(
+///       restorationScopeId: 'app',
+///       home: MyHomePage(),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatelessWidget {
+///   static Route _modalBuilder(BuildContext context, Object? arguments) {
+///     return CupertinoModalPopupRoute(
+///       builder: (BuildContext context) {
+///         return CupertinoActionSheet(
+///           title: const Text('Title'),
+///           message: const Text('Message'),
+///           actions: [
+///             CupertinoActionSheetAction(
+///               child: const Text('Action One'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///             CupertinoActionSheetAction(
+///               child: const Text('Action Two'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///           ],
+///         );
+///       },
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoPageScaffold(
+///       navigationBar: const CupertinoNavigationBar(
+///         middle: Text('Home'),
+///       ),
+///       child: Center(child: CupertinoButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_modalBuilder);
+///         },
+///         child: const Text('Open Dialog'),
+///       )),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
 ///
 /// See also:
 ///
