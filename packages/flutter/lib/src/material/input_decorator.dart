@@ -935,9 +935,20 @@ class _RenderDecoration extends RenderBox {
     // baseline from the alphabetic baseline. The ideographic baseline is for
     // use post-layout and is derived from the alphabetic baseline combined with
     // the font metrics.
-    final double? baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
-    assert(baseline != null && baseline >= 0.0);
-    return baseline!;
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+
+    assert(() {
+      if (baseline >= 0)
+        return true;
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary("One of InputDecorator's children reported a negative baseline offset."),
+        ErrorDescription(
+          '${box.runtimeType}, of size ${box.size}, reported a negative '
+          'alphabetic baseline of $baseline.',
+        ),
+      ]);
+    }());
+    return baseline;
   }
 
   // Returns a value used by performLayout to position all of the renderers.
