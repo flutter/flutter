@@ -265,7 +265,8 @@ void testMain() async {
     html.Element viewElement5 = builder5.build().webOnlyRootElement;
     html.document.body.append(viewElement5);
     await matchGoldenFile('compositing_physical_update_3.png',
-         region: region, maxDiffRatePercent: 0.4);
+         region: region, maxDiffRatePercent:
+         browserEngine == BrowserEngine.webkit ? 0.6 : 0.4);
     viewElement5.remove();
 
     /// Update shadow color.
