@@ -1789,6 +1789,11 @@ class ArtifactUpdater {
       } finally {
         status.stop();
       }
+      /// Unzipping multiple file into a directory will not remove old files
+      /// from previous versions that are not present in the new bundle.
+      if (location.existsSync()) {
+        location.deleteSync(recursive: true);
+      }
       _ensureExists(location);
 
       try {
