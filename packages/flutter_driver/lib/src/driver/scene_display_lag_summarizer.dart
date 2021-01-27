@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'percentile_utils.dart';
 import 'timeline.dart';
@@ -35,41 +35,41 @@ const String _kVsyncTransitionsMissed = 'vsync_transitions_missed';
 class SceneDisplayLagSummarizer {
   /// Creates a SceneDisplayLagSummarizer given the timeline events.
   SceneDisplayLagSummarizer(this.sceneDisplayLagEvents) {
-    for (final TimelineEvent event in sceneDisplayLagEvents) {
+    for (final TimelineEvent event in sceneDisplayLagEvents!) {
       assert(event.name == kSceneDisplayLagEvent);
     }
   }
 
   /// The scene display lag events.
-  final List<TimelineEvent> sceneDisplayLagEvents;
+  final List<TimelineEvent>? sceneDisplayLagEvents;
 
   /// Computes the average of the `vsync_transitions_missed` over the lag events.
   double computeAverageVsyncTransitionsMissed() {
-    if (sceneDisplayLagEvents.isEmpty) {
+    if (sceneDisplayLagEvents!.isEmpty) {
       return 0;
     }
 
-    final double total = sceneDisplayLagEvents
+    final double total = sceneDisplayLagEvents!
         .map(_getVsyncTransitionsMissed)
         .reduce((double a, double b) => a + b);
-    return total / sceneDisplayLagEvents.length;
+    return total / sceneDisplayLagEvents!.length;
   }
 
   /// The [percentile]-th percentile `vsync_transitions_missed` over the lag events.
   double computePercentileVsyncTransitionsMissed(double percentile) {
-    if (sceneDisplayLagEvents.isEmpty) {
+    if (sceneDisplayLagEvents!.isEmpty) {
       return 0;
     }
 
     final List<double> doubles =
-        sceneDisplayLagEvents.map(_getVsyncTransitionsMissed).toList();
+        sceneDisplayLagEvents!.map(_getVsyncTransitionsMissed).toList();
     return findPercentile(doubles, percentile);
   }
 
   double _getVsyncTransitionsMissed(TimelineEvent e) {
     assert(e.name == kSceneDisplayLagEvent);
-    assert(e.arguments.containsKey(_kVsyncTransitionsMissed));
-    final dynamic transitionsMissed = e.arguments[_kVsyncTransitionsMissed];
+    assert(e.arguments!.containsKey(_kVsyncTransitionsMissed));
+    final dynamic transitionsMissed = e.arguments![_kVsyncTransitionsMissed];
     assert(transitionsMissed is String);
     return double.parse(transitionsMissed as String);
   }
