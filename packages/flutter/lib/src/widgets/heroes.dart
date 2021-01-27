@@ -102,13 +102,11 @@ enum HeroFlightDirection {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
-/// This sample shows a `Hero` with List item along with Icon: here we will be using a
-/// rectangle widget for icon. Icon widget in list item at first page , with Hero
-/// widget in list and Enlarged icon to display on Second Page.
-///
-/// Navigator.of(context).push() is needed to navigate to second page from
-/// first page using the SAME tag Making sure both widgets have same tag. Hero
-/// transitions use the same tag to identify the start and destination widgets.
+/// This sample shows a [Hero] used within a [ListTile]. Tapping on the Hero-wrapped rectangle triggers a hero
+/// animation as a new [MaterialPageRoute] is pushed. Both the size and location of the rectangle animates.
+/// 
+/// Both widgets use the same [Hero.tag]. The Hero widget uses the matching tags to identify and execute this
+/// animation.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
@@ -125,22 +123,13 @@ enum HeroFlightDirection {
 ///
 ///  class _HeroAnimationRecipeState extends State<HeroAnimationRecipe> {
 ///
-///    Widget _blueIconRectangle() {
+///    Widget _blueRectangle(Size size) {
 ///     return Container(
-///       width: 50,
-///       height: 50,
+///       width: size.width,
+///       height: size.height,
 ///       color: Colors.blue,
 ///      );
 ///    }
-///
-///    Widget _blueDetailRectangle() {
-///     return Container(
-///      width: 200,
-///       height: 200,
-///       color: Colors.blue,
-///     );
-///    }
-///
 ///    @override
 ///    Widget build(BuildContext context) {
 ///     return Scaffold(
@@ -163,7 +152,7 @@ enum HeroFlightDirection {
 ///             leading: GestureDetector(
 ///               child: Hero(
 ///                 tag: 'hero-rectangle',
-///                 child: _blueIconRectangle(),
+///                 child: _blueRectangle(Size(50,50)),
 ///               ),
 ///               onTap: () => _gotoDetailsPage(context),
 ///             ),
@@ -176,7 +165,7 @@ enum HeroFlightDirection {
 ///
 ///    void _gotoDetailsPage(BuildContext context) {
 ///      Navigator.of(context).push(MaterialPageRoute(
-///        builder: (ctx) => Scaffold(
+///        builder: (BuildContext context) => Scaffold(
 ///          appBar: AppBar(
 ///            title: Text('second Page'),
 ///          ),
@@ -186,10 +175,7 @@ enum HeroFlightDirection {
 ///               children: <Widget>[
 ///                Hero(
 ///                  tag: 'hero-rectangle',
-///                  child: _blueDetailRectangle(),
-///                ),
-///                Text(
-///                   'This is where you can see details about the list item tapped at previous page.',
+///                  child: _blueRectangle(Size(200,200)),
 ///                ),
 ///              ],
 ///            ),
