@@ -1602,6 +1602,20 @@ void main() {
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
 
+  testUsingContext('null-safe sample-based project have no analyzer errors', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>['lib/main.dart'],
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('String?'), // uses null-safe syntax
+    );
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() { String? foo; print(foo); }'),
+  });
+
   testUsingContext('can write samples index to disk', () async {
     final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
