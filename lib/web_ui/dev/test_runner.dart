@@ -88,6 +88,15 @@ class TestCommand extends Command<bool> with ArgUtils {
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
             'for example, when a new browser version affects pixels.',
       )
+      ..addFlag(
+        'fetch-goldens-repo',
+        defaultsTo: true,
+        negatable: true,
+        help:
+            'Whether to fetch the goldens repo. Set this to false to iterate '
+            'on golden tests without fearing that the fetcher will overwrite '
+            'your local changes.',
+      )
       ..addOption(
         'browser',
         defaultsTo: 'chrome',
@@ -272,9 +281,9 @@ class TestCommand extends Command<bool> with ArgUtils {
     environment.webUiTestResultsDirectory.createSync(recursive: true);
 
     // If screenshot tests are available, fetch the screenshot goldens.
-    if (isScreenshotTestsAvailable) {
+    if (isScreenshotTestsAvailable && doFetchGoldensRepo) {
       if (isVerboseLoggingEnabled) {
-        print('INFO: Screenshot tests available');
+        print('INFO: Fetching goldens repo');
       }
       final GoldensRepoFetcher goldensRepoFetcher = GoldensRepoFetcher(
           environment.webUiGoldensRepositoryDirectory,
@@ -482,6 +491,9 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
   bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens');
+
+  /// Whether to fetch the goldens repo prior to running tests.
+  bool get doFetchGoldensRepo => boolArg('fetch-goldens-repo');
 
   /// Runs all tests specified in [targets].
   ///
