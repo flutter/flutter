@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
 import 'dart:typed_data';
