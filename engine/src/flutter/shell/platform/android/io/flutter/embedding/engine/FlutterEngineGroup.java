@@ -8,7 +8,9 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,9 @@ import java.util.List;
  * io.flutter.embedding.engine.FlutterEngine}s are created, resources from an existing living {@link
  * io.flutter.embedding.engine.FlutterEngine} is re-used.
  *
+ * <p>The shared resources are kept until the last surviving {@link
+ * io.flutter.embedding.engine.FlutterEngine} is destroyed.
+ *
  * <p>Deleting a FlutterEngineGroup doesn't invalidate its existing {@link
  * io.flutter.embedding.engine.FlutterEngine}s, but it eliminates the possibility to create more
  * {@link io.flutter.embedding.engine.FlutterEngine}s in that group.
@@ -32,6 +37,23 @@ import java.util.List;
 public class FlutterEngineGroup {
 
   /* package */ @VisibleForTesting final List<FlutterEngine> activeEngines = new ArrayList<>();
+
+  /** Create a FlutterEngineGroup whose child engines will share resources. */
+  public FlutterEngineGroup(@NonNull Context context) {
+    this(context, null);
+  }
+
+  /**
+   * Create a FlutterEngineGroup whose child engines will share resources. Use {@code dartVmArgs} to
+   * pass flags to the Dart VM during initialization.
+   */
+  public FlutterEngineGroup(@NonNull Context context, @Nullable String[] dartVmArgs) {
+    FlutterLoader loader = FlutterInjector.instance().flutterLoader();
+    if (!loader.initialized()) {
+      loader.startInitialization(context.getApplicationContext());
+      loader.ensureInitializationComplete(context, dartVmArgs);
+    }
+  }
 
   /**
    * Creates a {@link io.flutter.embedding.engine.FlutterEngine} in this group and run its {@link
@@ -67,18 +89,13 @@ public class FlutterEngineGroup {
   public FlutterEngine createAndRunEngine(
       @NonNull Context context, @Nullable DartEntrypoint dartEntrypoint) {
     FlutterEngine engine = null;
-    // This is done up here because an engine needs to be created first in order to be able to use
-    // DartEntrypoint.createDefault. The engine creation initializes the FlutterLoader so
-    // DartEntrypoint known where to find the assets for the AOT or kernel code.
-    if (activeEngines.size() == 0) {
-      engine = createEngine(context);
-    }
 
     if (dartEntrypoint == null) {
       dartEntrypoint = DartEntrypoint.createDefault();
     }
 
     if (activeEngines.size() == 0) {
+      engine = createEngine(context);
       engine.getDartExecutor().executeDartEntrypoint(dartEntrypoint);
     } else {
       engine = activeEngines.get(0).spawn(context, dartEntrypoint);
