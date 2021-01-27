@@ -1,4 +1,4 @@
-Signature: e1ec42beee5a2a94a6314c22864c8cd7
+Signature: b2fc32267ef2ae2a830f03b59b768a6a
 
 UNUSED LICENSES:
 
@@ -4013,8 +4013,8 @@ FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGBase.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGGeometry.h
-FILE: ../../../third_party/skia/src/utils/mac/SkCTFontSmoothBehavior.cpp
-FILE: ../../../third_party/skia/src/utils/mac/SkCTFontSmoothBehavior.h
+FILE: ../../../third_party/skia/src/utils/mac/SkCTFont.cpp
+FILE: ../../../third_party/skia/src/utils/mac/SkCTFont.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google Inc.
 
