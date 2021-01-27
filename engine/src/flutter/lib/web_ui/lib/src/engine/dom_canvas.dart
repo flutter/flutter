@@ -256,6 +256,7 @@ html.Element _pathToSvgElement(SurfacePath path, SurfacePaintData paint,
   if (paint.style == ui.PaintingStyle.stroke) {
     sb.write('stroke="${colorToCssString(color)}" ');
     sb.write('stroke-width="${paint.strokeWidth}" ');
+    sb.write('fill="none" ');
   } else if (paint.color != null) {
     sb.write('fill="${colorToCssString(color)}" ');
   } else {
