@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
