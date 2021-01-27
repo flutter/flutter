@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-// @dart = 2.9
-
 // Do not add package imports to this file.
 import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.
