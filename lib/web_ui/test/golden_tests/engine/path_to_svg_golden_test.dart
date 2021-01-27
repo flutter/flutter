@@ -19,26 +19,33 @@ void main() {
 void testMain() async {
   final Rect region = Rect.fromLTWH(8, 8, 600, 800); // Compensate for old scuba tester padding
 
-  Future<void> testPath(Path path, String scubaFileName, {Paint paint, double maxDiffRatePercent = null}) async {
+  Future<void> testPath(Path path, String scubaFileName,
+      {Paint paint, double maxDiffRatePercent = null, bool write = false,
+      bool strokeEnabled = true, bool enableFill = true}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 800);
     final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds,
         RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
-    paint ??= Paint()
-      ..color = const Color(0x807F7F7F)
-      ..style = PaintingStyle.fill;
+    if (enableFill) {
+      paint ??= Paint()
+        ..color = const Color(0x807F7F7F)
+        ..style = PaintingStyle.fill;
+      canvas.drawPath(path, paint);
+    }
+
+    if (strokeEnabled) {
+      paint = Paint()
+        ..strokeWidth = 2
+        ..color = enableFill ? const Color(0xFFFF0000) :
+            const Color(0xFF000000)
+        ..style = PaintingStyle.stroke;
+    }
 
     canvas.drawPath(path, paint);
 
-    paint = Paint()
-      ..strokeWidth = 2
-      ..color = const Color(0xFFFF0000)
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawPath(path, paint);
-
-    final html.Element svgElement = pathToSvgElement(path, paint);
+    final html.Element svgElement = pathToSvgElement(path, paint,
+        enableFill);
 
     html.document.body.append(bitmapCanvas.rootElement);
     html.document.body.append(svgElement);
@@ -46,7 +53,8 @@ void testMain() async {
     canvas.endRecording();
     canvas.apply(bitmapCanvas, canvasBounds);
 
-    await matchGoldenFile('$scubaFileName.png', region: region, maxDiffRatePercent: maxDiffRatePercent);
+    await matchGoldenFile('$scubaFileName.png', region: region,
+        maxDiffRatePercent: maxDiffRatePercent, write: write);
 
     bitmapCanvas.rootElement.remove();
     svgElement.remove();
@@ -131,17 +139,42 @@ void testMain() async {
     path.lineTo(0, 10);
     await testPath(path, 'svg_notch');
   });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/70980
+  test('render notch', () async {
+    const double w = 0.7;
+    final Path path = Path();
+    path.moveTo(0.5, 14);
+    path.conicTo(0.5, 10.5, 4, 10.5, w);
+    path.moveTo(4, 10.5);
+    path.lineTo(6.5, 10.5);
+    path.moveTo(36.0, 10.5);
+    path.lineTo(158, 10.5);
+    path.conicTo(161.5, 10.5, 161.5, 14, w);
+    path.moveTo(161.5, 14);
+    path.lineTo(161.5, 48);
+    path.conicTo(161.5, 51.5, 158, 51.5, w);
+    path.lineTo(4, 51.5);
+    path.conicTo(0.5, 51.5, 0.5, 48, w);
+    path.lineTo(0.5, 14);
+    await testPath(path, 'svg_editoutline', enableFill: false);
+  });
 }
 
-html.Element pathToSvgElement(Path path, Paint paint) {
+html.Element pathToSvgElement(Path path, Paint paint,
+    bool enableFill) {
   final Rect bounds = path.getBounds();
   final StringBuffer sb = StringBuffer();
   sb.write(
-      '<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" width="${bounds.right}" height="${bounds.bottom}">');
+      '<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" '
+          'width="${bounds.right}" height="${bounds.bottom}">');
   sb.write('<path ');
   if (paint.style == PaintingStyle.stroke) {
     sb.write('stroke="${colorToCssString(paint.color)}" ');
     sb.write('stroke-width="${paint.strokeWidth}" ');
+    if (!enableFill) {
+      sb.write('fill="none" ');
+    }
   }
   if (paint.style == PaintingStyle.fill) {
     sb.write('fill="${colorToCssString(paint.color)}" ');
