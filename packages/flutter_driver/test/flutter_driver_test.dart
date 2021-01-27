@@ -31,9 +31,9 @@ void main() {
   };
 
   group('VMServiceFlutterDriver.connect', () {
-    FakeVmService? fakeClient;
-    FakeVM? fakeVM;
-    FakeIsolate? fakeIsolate;
+    late FakeVmService fakeClient;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -45,9 +45,9 @@ void main() {
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
       vmServiceConnectFunction = (String url, Map<String, dynamic>? headers) async {
-        return fakeClient!;
+        return fakeClient;
       };
-      fakeClient!.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
+      fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
     });
 
     tearDown(() async {
@@ -56,7 +56,7 @@ void main() {
 
 
     test('throws after retries if no isolate', () async {
-      fakeVM!.numberOfTriesBeforeResolvingIsolate = 10000;
+      fakeVM.numberOfTriesBeforeResolvingIsolate = 10000;
       FakeAsync().run((FakeAsync time) {
         FlutterDriver.connect(dartVmServiceUrl: '');
         time.elapse(kUnusuallyLongTimeout);
@@ -68,12 +68,12 @@ void main() {
     });
 
     test('Retries connections if isolate is not available', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
-      fakeVM!.numberOfTriesBeforeResolvingIsolate = 5;
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      fakeVM.numberOfTriesBeforeResolvingIsolate = 5;
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expect(
-        fakeClient!.connectionLog,
+        fakeClient.connectionLog,
         <String>[
           'getIsolate',
           'setFlag pause_isolates_on_start false',
@@ -87,11 +87,11 @@ void main() {
     });
 
     test('Connects to isolate number', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
-      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate!.number));
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number));
       expect(driver, isNotNull);
       expect(
-        fakeClient!.connectionLog,
+        fakeClient.connectionLog,
         <String>[
           'getIsolate',
           'setFlag pause_isolates_on_start false',
@@ -105,13 +105,13 @@ void main() {
     });
 
     test('connects to isolate paused at start', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
       expect(
-        fakeClient!.connectionLog,
+        fakeClient.connectionLog,
         <String>[
           'getIsolate',
           'setFlag pause_isolates_on_start false',
@@ -125,8 +125,8 @@ void main() {
     });
 
     test('ignores setFlag failure', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
-      fakeClient!.failOnSetFlag = true;
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
+      fakeClient.failOnSetFlag = true;
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expectLogContains('Failed to set pause_isolates_on_start=false, proceeding. '
@@ -136,7 +136,7 @@ void main() {
 
 
     test('connects to isolate paused mid-flight', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -148,8 +148,8 @@ void main() {
     // we do. There's no need to fail as we should be able to drive the app
     // just fine.
     test('connects despite losing the race to resume isolate', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
-      fakeClient!.failOnResumeWith101 = true;
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
+      fakeClient.failOnResumeWith101 = true;
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -157,7 +157,7 @@ void main() {
     });
 
     test('connects to unpaused isolate', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -166,8 +166,8 @@ void main() {
 
     test('connects to unpaused when onExtensionAdded does not contain the '
       'driver extension', () async {
-      fakeIsolate!.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
-      fakeIsolate!.extensionRPCs.add('ext.flutter.driver');
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kResume, timestamp: 0);
+      fakeIsolate.extensionRPCs.add('ext.flutter.driver');
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
