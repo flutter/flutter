@@ -14,6 +14,10 @@
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
+#ifdef WINUWP
+#include <winrt/Windows.UI.Composition.h>
+#endif
+
 namespace flutter {
 
 class FlutterWindowsView;
@@ -24,8 +28,14 @@ struct PhysicalWindowBounds {
   size_t height;
 };
 
-using WindowsRenderTarget = std::variant<
-    /*winrt::Windows::UI::Composition::SpriteVisual, */ HWND>;
+#ifdef WINUWP
+using WindowsRenderTarget =
+    std::variant<winrt::Windows::UI::Composition::SpriteVisual,
+                 winrt::Windows::UI::Core::CoreWindow,
+                 HWND>;
+#else
+using WindowsRenderTarget = std::variant<HWND>;
+#endif
 
 // Abstract class for binding Windows platform windows to Flutter views.
 class WindowBindingHandler {

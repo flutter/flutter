@@ -15,20 +15,50 @@ namespace flutter {
 std::vector<LanguageInfo> GetPreferredLanguageInfo() {
   std::vector<std::wstring> languages = GetPreferredLanguages();
   std::vector<LanguageInfo> language_info;
-  // TODO populate via WinRT
+  for (auto language : languages) {
+    language_info.push_back(ParseLanguageName(language));
+  }
   return language_info;
 }
 
 std::vector<std::wstring> GetPreferredLanguages() {
   std::vector<std::wstring> languages;
-  // TODO populate via WinRT
+  // TODO(clarkezone) need to implement a complete version of this function in
+  // order to get full list of platform languages
+  // https://github.com/flutter/flutter/issues/74156
+  languages.push_back(L"en-US");
+  languages.push_back(L"en");
+
   return languages;
 }
 
 LanguageInfo ParseLanguageName(std::wstring language_name) {
   LanguageInfo info;
 
-  // TODO populate via WinRT
+  // Split by '-', discarding any suplemental language info (-x-foo).
+  std::vector<std::string> components;
+  std::istringstream stream(Utf8FromUtf16(language_name));
+  std::string component;
+  while (getline(stream, component, '-')) {
+    if (component == "x") {
+      break;
+    }
+    components.push_back(component);
+  }
+
+  // Determine which components are which.
+  info.language = components[0];
+  if (components.size() == 3) {
+    info.script = components[1];
+    info.region = components[2];
+  } else if (components.size() == 2) {
+    // A script code will always be four characters long.
+    if (components[1].size() == 4) {
+      info.script = components[1];
+    } else {
+      info.region = components[1];
+    }
+  }
   return info;
 }
 

@@ -164,8 +164,10 @@ group("flutter") {
 
       if (is_win) {
         if (target_os == "winuwp") {
-          # TODO: Add winnup variant of the unit tests here; see
+          # TODO: Add winnup variant of client_wrapper_windows_unittests here; see
           # https://github.com/flutter/flutter/issues/70197
+          public_deps +=
+              [ "//flutter/shell/platform/windows:flutter_windows_unittests" ]
         } else {
           public_deps += [
             "//flutter/shell/platform/windows:flutter_windows_unittests",
