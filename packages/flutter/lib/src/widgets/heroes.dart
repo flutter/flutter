@@ -130,15 +130,13 @@ enum HeroFlightDirection {
 ///          height: 20.0,
 ///        ),
 ///        ListTile(
-///          leading: GestureDetector(
-///            child: Hero(
+///          leading: Hero(
 ///              tag: 'hero-rectangle',
 ///              child: _blueRectangle(Size(50,50)),
 ///            ),
 ///            onTap: () => _gotoDetailsPage(context),
 ///          ),
 ///          title: Text('Tap on the icon to view hero animation transition.'),
-///        ),
 ///      ],
 ///    );
 ///  }
