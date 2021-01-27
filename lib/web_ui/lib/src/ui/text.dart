@@ -68,44 +68,56 @@ class FontWeight {
 }
 
 class FontFeature {
-  const FontFeature(this.feature, [this.value = 1])
-      : assert(feature != null), // ignore: unnecessary_null_comparison
-        assert(feature.length == 4),
-        assert(value != null), // ignore: unnecessary_null_comparison
-        assert(value >= 0);
+  const FontFeature(
+    this.feature,
+    [ this.value = 1 ]
+  ) : assert(feature != null), // ignore: unnecessary_null_comparison
+      assert(feature.length == 4, 'Feature tag must be exactly four characters long.'),
+      assert(value != null), // ignore: unnecessary_null_comparison
+      assert(value >= 0, 'Feature value must be zero or a positive integer.');
   const FontFeature.enable(String feature) : this(feature, 1);
   const FontFeature.disable(String feature) : this(feature, 0);
-  const FontFeature.randomize()
-      : feature = 'rand',
-        value = 1;
+  const FontFeature.alternative(this.value) : feature = 'aalt';
+  const FontFeature.alternativeFractions() : feature = 'afrc', value = 1;
+  const FontFeature.contextualAlternates() : feature = 'calt', value = 1;
+  const FontFeature.caseSensitiveForms() : feature = 'case', value = 1;
+  factory FontFeature.characterVariant(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('cv${value.toString().padLeft(2, "0")}');
+  }
+  const FontFeature.denominator() : feature = 'dnom', value = 1;
+  const FontFeature.fractions() : feature = 'frac', value = 1;
+  const FontFeature.historicalForms() : feature = 'hist', value = 1;
+  const FontFeature.historicalLigatures() : feature = 'hlig', value = 1;
+  const FontFeature.liningFigures() : feature = 'lnum', value = 1;
+  const FontFeature.localeAware({ bool enable = true }) : feature = 'locl', value = enable ? 1 : 0;
+  const FontFeature.notationalForms([this.value = 1]) : feature = 'nalt', assert(value >= 0);
+  const FontFeature.numerators() : feature = 'numr', value = 1;
+  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
+  const FontFeature.ordinalForms() : feature = 'ordn', value = 1;
+  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
+  const FontFeature.randomize() : feature = 'rand', value = 1;
+  const FontFeature.stylisticAlternates() : feature = 'salt', value = 1;
+  const FontFeature.scientificInferiors() : feature = 'sinf', value = 1;
   factory FontFeature.stylisticSet(int value) {
     assert(value >= 1);
     assert(value <= 20);
     return FontFeature('ss${value.toString().padLeft(2, "0")}');
   }
-  const FontFeature.slashedZero()
-      : feature = 'zero',
-        value = 1;
-  const FontFeature.oldstyleFigures()
-      : feature = 'onum',
-        value = 1;
-  const FontFeature.proportionalFigures()
-      : feature = 'pnum',
-        value = 1;
-  const FontFeature.tabularFigures()
-      : feature = 'tnum',
-        value = 1;
+  const FontFeature.subscripts() : feature = 'subs', value = 1;
+  const FontFeature.superscripts() : feature = 'sups', value = 1;
+  const FontFeature.swash([this.value = 1]) : feature = 'swsh', assert(value >= 0);
+  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
+  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+
   final String feature;
   final int value;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
+    if (other.runtimeType != runtimeType)
       return false;
-    }
     return other is FontFeature
         && other.feature == feature
         && other.value == value;
@@ -115,7 +127,7 @@ class FontFeature {
   int get hashCode => hashValues(feature, value);
 
   @override
-  String toString() => 'FontFeature($feature, $value)';
+  String toString() => "FontFeature('$feature', $value)";
 }
 
 // The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.

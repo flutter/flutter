@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // @dart = 2.12
 part of dart.ui;
 
@@ -106,76 +105,88 @@ class FontWeight {
 
 /// A feature tag and value that affect the selection of glyphs in a font.
 ///
+/// Different fonts support different features. Consider using a tool
+/// such as <https://wakamaifondue.com/> to examine your fonts to
+/// determine what features are available.
+///
 /// {@tool sample --template=freeform}
 ///
-/// This example shows usage of several OpenType font features, including
-/// Small Caps (smcp), old-style figures, fractional ligatures and stylistic
-/// sets.
+/// This example shows usage of several OpenType font features,
+/// including Small Caps (selected manually using the "smcp" code),
+/// old-style figures, fractional ligatures, and stylistic sets.
 ///
 /// ```dart
-///class TypePage extends StatelessWidget {
-///  // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
-///  // Google Fonts (https://www.google.com/fonts).
+/// class TypePage extends StatelessWidget {
+///   // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
+///   // Google Fonts (https://www.google.com/fonts).
 ///
-///  final titleStyle = TextStyle(
-///    fontSize: 18,
-///    fontFeatures: [FontFeature.enable('smcp')],
-///    color: Colors.blueGrey[600],
-///  );
+///   final titleStyle = TextStyle(
+///     fontSize: 18,
+///     fontFeatures: [FontFeature.enable('smcp')],
+///     color: Colors.blueGrey[600],
+///   );
 ///
-///  @override
-///  Widget build(BuildContext context) {
-///    return Scaffold(
-///      body: Center(
-///        child: Column(
-///          mainAxisAlignment: MainAxisAlignment.center,
-///          children: <Widget>[
-///            Spacer(flex: 5),
-///            Text('regular numbers have their place:', style: titleStyle),
-///            Text('The 1972 cup final was a 1-1 draw.',
-///                style: TextStyle(
-///                  fontFamily: 'Cardo',
-///                  fontSize: 24,
-///                )),
-///            Spacer(),
-///            Text('but old-style figures blend well with lower case:',
-///                style: titleStyle),
-///            Text('The 1972 cup final was a 1-1 draw.',
-///                style: TextStyle(
-///                    fontFamily: 'Cardo',
-///                    fontSize: 24,
-///                    fontFeatures: [FontFeature.oldstyleFigures()])),
-///            Spacer(),
-///            Divider(),
-///            Spacer(),
-///            Text('fractions look better with a custom ligature:',
-///                style: titleStyle),
-///            Text('Add 1/2 tsp of flour and stir.',
-///                style: TextStyle(
-///                    fontFamily: 'Milonga',
-///                    fontSize: 24,
-///                    fontFeatures: [FontFeature.enable('frac')])),
-///            Spacer(),
-///            Divider(),
-///            Spacer(),
-///            Text('multiple stylistic sets in one font:', style: titleStyle),
-///            Text('Raleway Dots',
-///                style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
-///            Text('Raleway Dots',
-///                style: TextStyle(
-///                  fontFeatures: [FontFeature.stylisticSet(1)],
-///                  fontFamily: 'Raleway Dots',
-///                  fontSize: 48,
-///                )),
-///            Spacer(flex: 5),
-///          ],
-///        ),
-///      ),
-///    );
-///  }
-///}
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Spacer(flex: 5),
+///             Text('regular numbers have their place:', style: titleStyle),
+///             Text('The 1972 cup final was a 1-1 draw.',
+///                 style: TextStyle(
+///                   fontFamily: 'Cardo',
+///                   fontSize: 24,
+///                 )),
+///             Spacer(),
+///             Text('but old-style figures blend well with lower case:',
+///                 style: titleStyle),
+///             Text('The 1972 cup final was a 1-1 draw.',
+///                 style: TextStyle(
+///                     fontFamily: 'Cardo',
+///                     fontSize: 24,
+///                     fontFeatures: [FontFeature.oldstyleFigures()])),
+///             Spacer(),
+///             Divider(),
+///             Spacer(),
+///             Text('fractions look better with a custom ligature:',
+///                 style: titleStyle),
+///             Text('Add 1/2 tsp of flour and stir.',
+///                 style: TextStyle(
+///                     fontFamily: 'Milonga',
+///                     fontSize: 24,
+///                     fontFeatures: [FontFeature.alternativeFractions()])),
+///             Spacer(),
+///             Divider(),
+///             Spacer(),
+///             Text('multiple stylistic sets in one font:', style: titleStyle),
+///             Text('Raleway Dots',
+///                 style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
+///             Text('Raleway Dots',
+///                 style: TextStyle(
+///                   fontFeatures: [FontFeature.stylisticSet(1)],
+///                   fontFamily: 'Raleway Dots',
+///                   fontSize: 48,
+///                 )),
+///             Spacer(flex: 5),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * <https://en.wikipedia.org/wiki/List_of_typographic_features>,
+///    Wikipedia's description of these typographic features.
+///
+///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>,
+///    Microsoft's registry of these features.
 class FontFeature {
   /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
   /// change how the engine selects glyphs when rendering text.
@@ -183,13 +194,18 @@ class FontFeature {
   /// `feature` is the four-character tag that identifies the feature.
   /// These tags are specified by font formats such as OpenType.
   ///
-  /// `value` is the value that the feature will be set to.  The behavior
-  /// of the value depends on the specific feature.  Many features are
+  /// `value` is the value that the feature will be set to. The behavior
+  /// of the value depends on the specific feature. Many features are
   /// flags whose value can be 1 (when enabled) or 0 (when disabled).
   ///
   /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
-  // ignore: unnecessary_null_comparison
-  const FontFeature(this.feature, [ this.value = 1 ]) : assert(feature != null), assert(feature.length == 4), assert(value != null), assert(value >= 0);
+  const FontFeature(
+    this.feature,
+    [ this.value = 1 ]
+  ) : assert(feature != null), // ignore: unnecessary_null_comparison
+      assert(feature.length == 4, 'Feature tag must be exactly four characters long.'),
+      assert(value != null), // ignore: unnecessary_null_comparison
+      assert(value >= 0, 'Feature value must be zero or a positive integer.');
 
   /// Create a [FontFeature] object that enables the feature with the given tag.
   const FontFeature.enable(String feature) : this(feature, 1);
@@ -197,57 +213,732 @@ class FontFeature {
   /// Create a [FontFeature] object that disables the feature with the given tag.
   const FontFeature.disable(String feature) : this(feature, 0);
 
-  /// Randomize the alternate forms used in text.
-  ///
-  /// For example, this can be used with suitably-prepared handwriting fonts to
-  /// vary the forms used for each character, so that, for instance, the word
-  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
-  /// and three different "s"s.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
-  const FontFeature.randomize() : feature = 'rand', value = 1;
+  // Features below should be alphabetic by feature tag. This makes it
+  // easier to determine when a feature is missing so that we avoid
+  // adding duplicates.
+  //
+  // The full list is extremely long, and many of the features are
+  // language-specific, or indeed force-enabled for particular locales
+  // by HarfBuzz, so we don't even attempt to be comprehensive here.
+  // Features listed below are those we deemed "interesting enough" to
+  // have their own constructor, mostly on the basis of whether we
+  // could find a font where the feature had a useful effect that
+  // could be demonstrated.
 
-  /// Select a stylistic set.
+  // Start of feature tag list.
+  // ------------------------------------------------------------------------
+
+  // aalt
+  /// Access alternative glyphs. (`aalt`)
   ///
-  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
+  /// This feature selects the given glyph variant for glyphs in the span.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Raleway font supports several alternate glyphs. The code
+  /// below shows how specific glyphs can be selected. With `aalt` set
+  /// to zero, the default, the normal glyphs are used. With a
+  /// non-zero value, Raleway substitutes small caps for lower case
+  /// letters. With value 2, the lowercase "a" changes to a stemless
+  /// "a", whereas the lowercase "t" changes to a vertical bar instead
+  /// of having a curve. By targeting specific letters in the text
+  /// (using [Text.rich]), the desired rendering for each glyph can be
+  /// achieved.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Raleway font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'The infamous Tuna Torture.',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Raleway',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.alternative(1), // or 2, or 3, or...
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_aalt.png)
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
-  factory FontFeature.stylisticSet(int value) {
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#aalt>
+  const FontFeature.alternative(this.value) : feature = 'aalt';
+
+  // afrc
+  /// Use alternative ligatures to represent fractions. (`afrc`)
+  ///
+  /// When this feature is enabled (and the font supports it),
+  /// sequences of digits separated by U+002F SOLIDUS character (/) or
+  /// U+2044 FRACTION SLASH (⁄) are replaced by ligatures that
+  /// represent the corresponding fraction. These ligatures may differ
+  /// from those used by the [FontFeature.fractions] feature.
+  ///
+  /// This feature overrides all other features.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Ubuntu Mono font supports the `afrc` feature. It causes digits
+  /// before slashes to become superscripted and digits after slashes to become
+  /// subscripted. This contrasts to the effect seen with [FontFeature.fractions].
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Ubuntu Mono font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Fractions: 1/2 2/3 3/4 4/5',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Ubuntu Mono',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.alternativeFractions(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_afrc.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.fractions], which has a similar (but different) effect.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#afrc>
+  const FontFeature.alternativeFractions() : feature = 'afrc', value = 1;
+
+  // calt
+  /// Enable contextual alternates. (`calt`)
+  ///
+  /// With this feature enabled, specific glyphs may be replaced by
+  /// alternatives based on nearby text.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Barriecito font supports the `calt` feature. It causes some
+  /// letters in close proximity to other instances of themselves to
+  /// use different glyphs, to give the appearance of more variation
+  /// in the glyphs, rather than having each letter always use a
+  /// particular glyph.
+  ///
+  /// class Demo extends StatelessWidget {
+  ///   // The Barriecito font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Ooohh, we weren\'t going to tell him that.',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Barriecito',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.contextualAlternates(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_calt.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.randomize], which is more a rarely supported but more
+  ///    powerful way to get a similar effect.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#calt>
+  const FontFeature.contextualAlternates() : feature = 'calt', value = 1;
+
+  // case
+  /// Enable case-sensitive forms. (`case`)
+  ///
+  /// Some glyphs, for example parentheses or operators, are typically
+  /// designed to fit nicely with mixed case, or even predominantly
+  /// lowercase, text. When these glyphs are placed near strings of
+  /// capital letters, they appear a little off-center.
+  ///
+  /// This feature, when supported by the font, causes these glyphs to
+  /// be shifted slightly, or otherwise adjusted, so as to form a more
+  /// aethestically pleasing combination with capital letters.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `case` feature. It causes
+  /// parentheses, brackets, braces, guillemets, slashes, bullets, and
+  /// some other glyphs (not shown below) to be shifted up slightly so
+  /// that capital letters appear centered in comparison. When the
+  /// feature is disabled, those glyphs are optimized for use with
+  /// lowercase letters, and so capital letters appear to ride higher
+  /// relative to the punctuation marks.
+  ///
+  /// The difference is very subtle. It may be most obvious when
+  /// examining the square brackets compared to the capital A.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       '(A) [A] {A} «A» A/B A•B',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.caseSensitiveForms(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_case.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#case>
+  const FontFeature.caseSensitiveForms() : feature = 'case', value = 1;
+
+  // cvXX
+  /// Select a character variant. (`cv01` through `cv99`)
+  ///
+  /// Fonts may have up to 99 character variant sets, numbered 1
+  /// through 99, each of which can be independently enabled or
+  /// disabled.
+  ///
+  /// Related character variants are typically grouped into stylistic
+  /// sets, controlled by the [FontFeature.stylisticSet] feature
+  /// (`ssXX`).
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Source Code Pro font supports the `cvXX` feature for several
+  /// characters. In the example below, variants 1 (`cv01`), 2
+  /// (`cv02`), and 4 (`cv04`) are selected. Variant 1 changes the
+  /// rendering of the "a" character, variant 2 changes the lowercase
+  /// "g" character, and variant 4 changes the lowercase "i" and "l"
+  /// characters. There are also variants (not shown here) that
+  /// control the rendering of various greek characters such as beta
+  /// and theta.
+  ///
+  /// Notably, this can be contrasted with the stylistic sets, where
+  /// the set which affects the "a" character also affects beta, and
+  /// the set which affects the "g" character also affects theta and
+  /// delta.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'aáâ β gǵĝ θб Iiíî Ll',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Source Code Pro',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.characterVariant(1),
+  ///           FontFeature.characterVariant(2),
+  ///           FontFeature.characterVariant(4),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_cvXX.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.stylisticSet], which allows for groups of characters
+  ///    variants to be selected at once, as opposed to individual character variants.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#cv01-cv99>
+  factory FontFeature.characterVariant(int value) {
     assert(value >= 1);
     assert(value <= 20);
-    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+    return FontFeature('cv${value.toString().padLeft(2, "0")}');
   }
 
-  /// Use the slashed zero.
+  // dnom
+  /// Display digits as denominators. (`dnom`)
   ///
-  /// Some fonts contain both a circular zero and a zero with a slash. This
-  /// enables the use of the latter form.
+  /// This is typically used automatically by the font rendering
+  /// system as part of the implementation of `frac` for the denominator
+  /// part of fractions (see [FontFeature.fractions]).
   ///
-  /// This is overridden by [FontFeature.oldstyleFigures].
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `dnom` feature. It causes
+  /// the digits to be rendered smaller and near the bottom of the EM box.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Fractions: 1/2 2/3 3/4 4/5',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.denominator(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_dnom.png)
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
-  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ae#dnom>
+  const FontFeature.denominator() : feature = 'dnom', value = 1;
 
-  /// Use oldstyle figures.
+  // frac
+  /// Use ligatures to represent fractions. (`afrc`)
   ///
-  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
-  /// this feature is enabled, render with descenders under the baseline instead
-  /// of being entirely above the baseline.
+  /// When this feature is enabled (and the font supports it),
+  /// sequences of digits separated by U+002F SOLIDUS character (/) or
+  /// U+2044 FRACTION SLASH (⁄) are replaced by ligatures that
+  /// represent the corresponding fraction.
   ///
-  /// This overrides [FontFeature.slashedZero].
+  /// This feature may imply the [FontFeature.numerator] and
+  /// [FontFeature.denominator] features.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Ubuntu Mono font supports the `frac` feature. It causes
+  /// digits around slashes to be turned into dedicated fraction
+  /// glpyhs. This contrasts to the effect seen with
+  /// [FontFeature.alternativeFractions].
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Ubuntu Mono font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Fractions: 1/2 2/3 3/4 4/5',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Ubuntu Mono',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.fractions(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_frac.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.alternativeFractions], which has a similar (but different) effect.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#frac>
+  const FontFeature.fractions() : feature = 'frac', value = 1;
+
+  // hist
+  /// Use historical forms. (`hist`)
+  ///
+  /// Some fonts have alteratives for letters whose forms have changed
+  /// through the ages. In the Latin alphabet, this is common for
+  /// example with the long-form "s" or the Fraktur "k". This feature enables
+  /// those alternative glyphs.
+  ///
+  /// This does not enable legacy ligatures, only single-character alternatives.
+  /// To enable historical ligatures, use [FontFeature.historicalLigatures].
+  ///
+  /// This feature may override other glyph-substitution features.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Cardo font supports the `hist` feature specifically for the
+  /// letter "s": it changes occurrences of that letter for the glyph
+  /// used by U+017F LATIN SMALL LETTER LONG S.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'VIBRANT fish assisted his business.',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Sorts Mill Goudy',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.historicalForms(), // Enables "hist".
+  ///           // Use FontFeature.historicalLigatures() to enable "hlig" as well.
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_historical.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#hist>
+  const FontFeature.historicalForms() : feature = 'hist', value = 1;
+
+  // hlig
+  /// Use historical ligatures. (`hlig`)
+  ///
+  /// Some fonts support ligatures that have fallen out of favor today,
+  /// but were historically in common use. This feature enables those
+  /// ligatures.
+  ///
+  /// For example, the "long s" glyph was historically typeset with
+  /// characters such as "t" and "h" as a single ligature.
+  ///
+  /// This does not enable the legacy forms, only ligatures. See
+  /// [FontFeature.historicalForms] to enable single characters to be
+  /// replaced with their historical alternatives. Combining both is
+  /// usually desired since the ligatures typically apply specifically
+  /// to characters that have historical forms as well. For example,
+  /// the historical forms feature might replace the "s" character
+  /// with the "long s" (ſ) character, while the historical ligatures
+  /// feature might specifically apply to cases where "long s" is
+  /// followed by other characters such as "t". In such cases, without
+  /// the historical forms being enabled, the ligatures would only
+  /// apply when the "long s" is used explicitly.
+  ///
+  /// This feature may override other glyph-substitution features.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Cardo font supports the `hlig` feature. It has legacy
+  /// ligatures for "VI" and "NT", and various ligatures involving the
+  /// "long s". In the example below, both historical forms (`hist 1`)
+  /// and historical ligatures (`hlig 1`) are enabled, so, for
+  /// instance, "fish" becomes "fiſh" which is then rendered using a
+  /// ligature for the last two characters.
+  ///
+  /// Similarly, the word "business" is turned into "buſineſſ" by
+  /// `hist`, and the `ſi` and `ſſ` pairs are ligated by `hlig`.
+  /// Observe in particular the position of the dot of the "i" in
+  /// "business" in the various combinations of these features.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Cardo font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'VIBRANT fish assisted his business.',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Sorts Mill Goudy',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.historicalForms(), // Enables "hist".
+  ///           FontFeature.historicalLigatures() // Enables "hlig".
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_historical.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_fj#hlig>
+  const FontFeature.historicalLigatures() : feature = 'hlig', value = 1;
+
+  // lnum
+  /// Use lining figures. (`lnum`)
+  ///
+  /// Some fonts have digits that, like lowercase latin letters, have
+  /// both descenders and ascenders. In some situations, especially in
+  /// conjunction with capital letters, this leads to an aesthetically
+  /// questionable irregularity. Lining figures, on the other hand,
+  /// have a uniform height, and align with the baseline and the
+  /// height of capital letters. Conceptually, they can be thought of
+  /// as "capital digits".
+  ///
+  /// This feature may conflict with [FontFeature.oldstyleFigures].
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Sorts Mill Goudy font supports the `lnum` feature. It causes
+  /// digits to fit more seamlessly with capital letters.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'CALL 311-555-2368 NOW!',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Sorts Mill Goudy',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.liningFigures(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_lnum.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#lnum>
+  const FontFeature.liningFigures() : feature = 'lnum', value = 1;
+
+  // locl
+  /// Use locale-specific glyphs. (`locl`)
+  ///
+  /// Some characters, most notably those in the Unicode Han
+  /// Unification blocks, vary in presentation based on the locale in
+  /// use. For example, the ideograph for "grass" (U+8349, 草) has a
+  /// broken top line in Traditional Chinese, but a solid top line in
+  /// Simplified Chinese, Japanese, Korean, and Vietnamese. This kind
+  /// of variation also exists with other alphabets, for example
+  /// Cyrilic characters as used in the Bulgarian and Serbian
+  /// alphabets vary from their Russian counterparts.
+  ///
+  /// A particular font may default to the forms for the locale for
+  /// which it was constructed, but still support alternative forms
+  /// for other locales. When this feature is enabled, the locale (as
+  /// specified using [painting.TextStyle.locale], for instance) is
+  /// used to determine which glyphs to use when locale-specific
+  /// alternatives exist. Disabling this feature causes the font
+  /// rendering to ignore locale information and only use the default
+  /// glyphs.
+  ///
+  /// This feature is enabled by default. Using
+  /// `FontFeature.localeAware(enable: false)` disables the
+  /// locale-awareness. (So does not specifying the locale in the
+  /// first place, of course.)
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Noto Sans CJK font supports the `locl` feature for CJK characters.
+  /// In this example, the `localeAware` feature is not explicitly used, as it is
+  /// enabled by default. This example instead shows how to set the locale,
+  /// thus demonstrating how Noto Sans adapts the glyph shapes to the locale.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Noto family of fonts can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       '次 化 刃 直 入 令',
+  ///       locale: const Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc
+  ///       style: TextStyle(
+  ///         fontFamily: 'Noto Sans',
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_locl.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#locl>
+  ///  * <https://en.wikipedia.org/wiki/Han_unification>
+  ///  * <https://en.wikipedia.org/wiki/Cyrillic_script>
+  const FontFeature.localeAware({ bool enable = true }) : feature = 'locl', value = enable ? 1 : 0;
+
+  // nalt
+  /// Display alternative glyphs for numerals (alternate annotation forms). (`nalt`)
+  ///
+  /// Replaces glyphs used in numbering lists (e.g. 1, 2, 3...; or a, b, c...) with notational
+  /// variants that might be more typographically interesting.
+  ///
+  /// Fonts sometimes support multiple alternatives, and the argument
+  /// selects the set to use (a positive integer, or 0 to disable the
+  /// feature). The default set if none is specified is 1.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Gothic A1 font supports several notational variant sets via
+  /// the `nalt` feature.
+  ///
+  /// Set 1 changes the spacing of the glyphs. Set 2 parenthesizes the
+  /// latin letters and reduces the numerals to subscripts. Set 3
+  /// circles the glyphs. Set 4 parenthesizes the digits. Set 5 uses
+  /// reverse-video circles for the digits. Set 7 superscripts the
+  /// digits.
+  ///
+  /// The code below shows how to select set 3.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Gothic A1 font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'abc 123',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Gothic A1',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.notationalForms(3), // circled letters and digits
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_nalt.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#nalt>
+  const FontFeature.notationalForms([this.value = 1]) : feature = 'nalt', assert(value >= 0);
+
+  // numr
+  /// Display digits as numerators. (`numr`)
+  ///
+  /// This is typically used automatically by the font rendering
+  /// system as part of the implementation of `frac` for the numerator
+  /// part of fractions (see [FontFeature.fractions]).
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `numr` feature. It causes
+  /// the digits to be rendered smaller and near the top of the EM box.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Fractions: 1/2 2/3 3/4 4/5',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.numerators(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_numr.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#numr>
+  const FontFeature.numerators() : feature = 'numr', value = 1;
+
+  // onum
+  /// Use oldstyle figures. (`onum`)
+  ///
+  /// Some fonts have variants of the figures (e.g. the digit 9) that,
+  /// when this feature is enabled, render with descenders under the
+  /// baseline instead of being entirely above the baseline. If the
+  /// default digits are lining figures, this allows the selection of
+  /// digits that fit better with mixed case (uppercase and lowercase)
+  /// text.
+  ///
+  /// This overrides [FontFeature.slashedZero] and may conflict with
+  /// [FontFeature.liningFigures].
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `onum` feature. It causes
+  /// digits to extend below the baseline.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Call 311-555-2368 now!',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.oldstyleFigures(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_onum.png)
+  /// {@end-tool}
   ///
   /// See also:
   ///
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
+  ///  * <https://en.wikipedia.org/wiki/Text_figures>
   const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
 
-  /// Use proportional (varying width) figures.
+  // ordn
+  /// Use ordinal forms for alphabetic glyphs. (`ordn`)
+  ///
+  /// Some fonts have variants of the alphabetic glyphs intended for
+  /// use after numbers when expressing ordinals, as in "1st", "2nd",
+  /// "3rd". This feature enables those alternative glyphs.
+  ///
+  /// This may override other features that substitute glyphs.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `ordn` feature. It causes
+  /// alphabetic glyphs to become smaller and superscripted.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       '1st, 2nd, 3rd, 4th...',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.ordinalForms(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ordn.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#ordn>
+  const FontFeature.ordinalForms() : feature = 'ordn', value = 1;
+
+  // pnum
+  /// Use proportional (varying width) figures. (`pnum`)
   ///
   /// For fonts that have both proportional and tabular (monospace) figures,
   /// this enables the proportional figures.
@@ -256,35 +947,479 @@ class FontFeature {
   ///
   /// The default behavior varies from font to font.
   ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Kufam font supports the `pnum` feature. It causes the digits
+  /// to become proportionally-sized, rather than all being the same
+  /// width. In this font this is especially noticeable with the digit
+  /// "1": normally, the 1 has very noticeable serifs in this
+  /// sans-serif font, but with the proportionally figures enabled,
+  /// the digit becomes much narrower.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Kufam font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Call 311-555-2368 now!',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Kufam',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.proportionalFigures(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_pnum.png)
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
   const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
 
-  /// Use tabular (monospace) figures.
+  // rand
+  /// Randomize the alternate forms used in text. (`rand`)
+  ///
+  /// For example, this can be used with suitably-prepared handwriting fonts to
+  /// vary the forms used for each character, so that, for instance, the word
+  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
+  /// and three different "s"s.
+  ///
+  /// Contextual alternates ([FontFeature.contextualAlternates])
+  /// provide a similar effect in some fonts, without using
+  /// randomness.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
+  const FontFeature.randomize() : feature = 'rand', value = 1;
+
+  // salt
+  /// Enable stylistic alternates. (`salt`)
+  ///
+  /// Some fonts have alternative forms that are not tied to a
+  /// particular purpose (such as being historical forms, or
+  /// contextually relevant alternatives, or ligatures, etc). This
+  /// font feature enables these purely stylistic alternatives.
+  ///
+  /// This may override other features that substitute glyphs.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Source Code Pro font supports the `salt` feature. It causes
+  /// some glyphs to be rendered differently, for example the "a" and
+  /// "g" glyphs change from their typographically common
+  /// double-storey forms to simpler single-storey forms, the dollar
+  /// sign's line changes from discontinuous to continuous (and is
+  /// angled), and the "0" rendering changes from a center dot to a
+  /// slash.
+  ///
+  /// class Demo extends StatelessWidget {
+  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Agile Game - \$100 initial bet',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Source Code Pro',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.stylisticAlternates(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_salt.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.contextualAlternates], which is enables alternates specific to certain contexts.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#salt>
+  const FontFeature.stylisticAlternates() : feature = 'salt', value = 1;
+
+  // sinf
+  /// Use scientific inferiors. (`sinf`)
+  ///
+  /// Some fonts have variants of the figures (e.g. the digit 2) that,
+  /// when this feature is enabled, render in a manner more
+  /// appropriate for subscripted digits ("inferiors") used in
+  /// scientific contexts, e.g. the subscripts in chemical formulae.
+  ///
+  /// This may override other features that substitute glyphs.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `sinf` feature. It causes
+  /// digits to be smaller and subscripted.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'C8H10N4O2',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.scientificInferiors(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_sinf.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#sinf>
+  const FontFeature.scientificInferiors() : feature = 'sinf', value = 1;
+
+  // ssXX
+  /// Select a stylistic set. (`ss01` through `ss20`)
+  ///
+  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20,
+  /// each of which can be independently enabled or disabled.
+  ///
+  /// For more fine-grained control, in some fonts individual
+  /// character variants can also be controlled by the
+  /// [FontFeature.characterVariant] feature (`cvXX`).
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Source Code Pro font supports the `ssXX` feature for several
+  /// sets. In the example below, stylistic sets 2 (`ss02`), 3
+  /// (`ss03`), and 4 (`ss04`) are selected. Stylistic set 2 changes
+  /// the rendering of the "a" character and the beta character,
+  /// stylistic set 3 changes the lowercase "g", theta, and delta
+  /// characters, and stylistic set 4 changes the lowercase "i" and
+  /// "l" characters.
+  ///
+  /// This font also supports character variants (see
+  /// [FontFeature.characterVariant]).
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'aáâ β gǵĝ θб Iiíî Ll',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Source Code Pro',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.stylisticSet(2),
+  ///           FontFeature.stylisticSet(3),
+  ///           FontFeature.stylisticSet(4),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ssXX_1.png)
+  /// {@end-tool}
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `ssXX` feature for for more
+  /// elaborate stylistic effects. Set 1 turns some Latin characters
+  /// into Roman numerals, set 2 enables some ASCII characters to be
+  /// used to create pretty arrows, and so forth.
+  ///
+  /// _These_ stylistic sets do _not_ correspond to character variants.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       '-> MCMXCVII <-', // 1997
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.stylisticSet(1),
+  ///           FontFeature.stylisticSet(2),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_ssXX_2.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [FontFeature.characterVariant], which allows for individual character
+  ///    variants to be selected, as opposed to entire sets.
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
+  factory FontFeature.stylisticSet(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+  }
+
+  // subs
+  /// Enable subscripts. (`subs`)
+  ///
+  /// This feature causes some fonts to change some glyphs to their subscripted form.
+  ///
+  /// It typically does not affect all glyphs, and so is not appropriate for generally causing
+  /// all text to be subscripted.
+  ///
+  /// This may override other features that substitute glyphs.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `subs` feature. It causes
+  /// digits to be smaller and subscripted.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Line from x1,y1 to x2,y2',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.subscript(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_subs.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#subs>
+  ///  * [FontFeature.scientificInferiors], which is similar but intended specifically for
+  ///    subscripts used in scientific contexts.
+  ///  * [FontFeature.superscripts], which is similar but for subscripting.
+  const FontFeature.subscripts() : feature = 'subs', value = 1;
+
+  // sups
+  /// Enable superscripts. (`sups`)
+  ///
+  /// This feature causes some fonts to change some glyphs to their
+  /// superscripted form. This may be more than just changing their
+  /// position. For example, digits might change to lining figures
+  /// (see [FontFeature.liningFigures]) in addition to being raised
+  /// and shrunk.
+  ///
+  /// It typically does not affect all glyphs, and so is not
+  /// appropriate for generally causing all text to be superscripted.
+  ///
+  /// This may override other features that substitute glyphs.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Sorts Mill Goudy font supports the `sups` feature. It causes
+  /// digits to be smaller, superscripted, and changes them to lining
+  /// figures (so they are all the same height).
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Sorts Mill Goudy font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'The isotope 238U decays to 206Pb',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Sorts Mill Goudy',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.superscript(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_sups.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#sups>
+  ///  * [FontFeature.subscripts], which is similar but for subscripting.
+  const FontFeature.superscripts() : feature = 'sups', value = 1;
+
+  // swsh
+  /// Enable swash glyphs. (`swsh`)
+  ///
+  /// Some fonts have beautiful flourishes on some characters. These
+  /// come in many forms, such as exaggerated serifs, long tails, long
+  /// entry strokes, or other forms of decorative extensions to the
+  /// base character.
+  ///
+  /// This feature enables the rendering of these flourishes. Some
+  /// fonts have many swashes per character; the argument, if
+  /// specified, selects which swash to use (0 disables them
+  /// altogether).
+  ///
+  /// Some fonts have an absurd number of alternative swashes. For
+  /// example, Adobe's Poetica famously has 63 different ampersand
+  /// forms available through this feature!
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The BioRhyme Expanded font supports the `swsh` feature specifically
+  /// for the capital "Q" and "R" glyphs and the ampersand.
+  ///
+  /// class Demo extends StatelessWidget {
+  ///   // The BioRhyme Expanded font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Queer & Romantic',
+  ///       style: TextStyle(
+  ///         fontFamily: 'BioRhyme Expanded',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.swash(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_swsh.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#swsh>
+  ///  * <https://en.wikipedia.org/wiki/Swash_(typography)>
+  const FontFeature.swash([this.value = 1]) : feature = 'swsh', assert(value >= 0);
+
+  // tnum
+  /// Use tabular (monospace) figures. (`tnum`)
   ///
   /// For fonts that have both proportional (varying width) and tabular figures,
-  /// this enables the tabular figures.
+  /// this enables the tabular figures. Tabular figures are monospaced (all the
+  /// same width), so that they align in tables of figures.
   ///
   /// This is mutually exclusive with [FontFeature.proportionalFigures].
   ///
   /// The default behavior varies from font to font.
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Piazzolla font supports the `tnum` feature. It causes the
+  /// digits to become uniformally-sized, rather than having variable
+  /// widths. In this font this is especially noticeable with the
+  /// digit "1"; with tabular figures enabled, the "1" digit is more
+  /// widely spaced.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Piazzolla font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Call 311-555-2368 now!',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Piazzolla',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.tabularFigures(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_tnum.png)
+  /// {@end-tool}
   ///
   /// See also:
   ///
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
   const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
 
+  // zero
+  /// Use the slashed zero. (`zero`)
+  ///
+  /// Some fonts contain both a circular zero and a zero with a slash. This
+  /// enables the use of the latter form.
+  ///
+  /// This is overridden by [FontFeature.oldstyleFigures].
+  ///
+  /// {@tool sample --template=freeform}
+  ///
+  /// The Source Code Pro font supports the `zero` feature. It causes the
+  /// zero digit to be drawn with a slash rather than the default rendering,
+  /// which in this case has a dot through the zero rather than a slash.
+  ///
+  /// ```dart
+  /// class Demo extends StatelessWidget {
+  ///   // The Source Code Pro font can be downloaded from Google Fonts (https://www.google.com/fonts).
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'One million is: 1,000,000.00',
+  ///       style: TextStyle(
+  ///         fontFamily: 'Source Code Pro',
+  ///         fontFeatures: <FontFeature>[
+  ///           FontFeature.slashedZero(),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/font_feature_zero.png)
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
+  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+
+  // ------------------------------------------------------------------------
+  // End of feature tags list.
+
   /// The tag that identifies the effect of this feature.  Must consist of 4
   /// ASCII characters (typically lowercase letters).
   ///
-  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  /// These features are defined in a registry maintained by Microsoft:
+  /// <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
   final String feature;
 
   /// The value assigned to this feature.
   ///
-  /// Must be a positive integer.  Many features are Boolean values that accept
-  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
+  /// Must be a positive integer. Many features are Boolean values that accept
+  /// values of either 0 (feature is disabled) or 1 (feature is enabled). Other
+  /// features have a bound range of values (which may be documented in these
+  /// API docs for features that have dedicated constructors, and are generally
+  /// documented in the official registry). In some cases the precise supported
+  /// range depends on the font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist>
   final int value;
 
   static const int _kEncodedSize = 8;
@@ -299,8 +1434,6 @@ class FontFeature {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
     if (other.runtimeType != runtimeType)
       return false;
     return other is FontFeature
@@ -312,7 +1445,7 @@ class FontFeature {
   int get hashCode => hashValues(feature, value);
 
   @override
-  String toString() => 'FontFeature($feature, $value)';
+  String toString() => "FontFeature('$feature', $value)";
 }
 
 /// Whether and how to align text horizontally.
