@@ -88,7 +88,16 @@ class AssetManagerException implements Exception {
 class WebOnlyMockAssetManager implements AssetManager {
   String defaultAssetsDir = '';
   String defaultAssetManifest = '{}';
-  String defaultFontManifest = '[]';
+  String defaultFontManifest = '''[
+   {
+      "family":"$_robotoFontFamily",
+      "fonts":[{"asset":"$_robotoTestFontUrl"}]
+   },
+   {
+      "family":"$_ahemFontFamily",
+      "fonts":[{"asset":"$_ahemFontUrl"}]
+   }
+  ]''';
 
   @override
   String get assetsDir => defaultAssetsDir;
