@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -45,7 +43,7 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
       DeviceManager: () => NoDevicesManager(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Cache: () => cache,
       Artifacts: () => Artifacts.test(),
     });
@@ -57,7 +55,7 @@ void main() {
       expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Cache: () => cache,
       Artifacts: () => Artifacts.test(),
     });
@@ -106,7 +104,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Cache: () => cache,
       Artifacts: () => Artifacts.test(),
     });
@@ -127,37 +125,9 @@ webby (mobile)     • webby     • web-javascript • Web SDK (1.2.4) (emulato
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
-}
-
-class MockProcessManager extends Mock implements ProcessManager {
-  @override
-  Future<ProcessResult> run(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) async {
-    return ProcessResult(0, 0, '', '');
-  }
-
-  @override
-  ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    return ProcessResult(0, 0, '', '');
-  }
 }
 
 class _FakeDeviceManager extends DeviceManager {
