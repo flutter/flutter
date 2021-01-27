@@ -19,7 +19,6 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 /// Signature for [DataColumn.onSort] callback.
