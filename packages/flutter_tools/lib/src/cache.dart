@@ -1794,9 +1794,7 @@ class ArtifactUpdater {
       final Directory destination = location.childDirectory(
         tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
       );
-      if (destination.existsSync()) {
-        destination.deleteSync(recursive: true);
-      }
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
       _ensureExists(location);
 
       try {
