@@ -1012,8 +1012,39 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
-}
+  testWidgets('Fixed size TextButtons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(fixedSize: const Size(100, 100)),
+                onPressed: () {},
+                child: const Text('100x100'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(fixedSize: const Size.fromWidth(200)),
+                onPressed: () {},
+                child: const Text('200xh'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(fixedSize: const Size.fromHeight(200)),
+                onPressed: () {},
+                child: const Text('wx200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
+    expect(tester.getSize(find.widgetWithText(TextButton, '100x100')), const Size(100, 100));
+    expect(tester.getSize(find.widgetWithText(TextButton, '200xh')).width, 200);
+    expect(tester.getSize(find.widgetWithText(TextButton, 'wx200')).height, 200);
+  });
+}
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
