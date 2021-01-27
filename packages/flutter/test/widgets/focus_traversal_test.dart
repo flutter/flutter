@@ -753,7 +753,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(-1, -1),
+              alignment: Alignment.topLeft,
               children: List<Widget>.generate(nodeCount, (int index) {
                 // Boxes that all have the same upper left origin corner.
                 return Focus(
@@ -781,7 +781,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Focus(
                   focusNode: nodes[index],
@@ -809,7 +809,7 @@ void main() {
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: Stack(
-              alignment: const Alignment(0, 0),
+              alignment: Alignment.center,
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Positioned(
                   top: 5.0 * index * (index + 1),

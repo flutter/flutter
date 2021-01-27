@@ -376,7 +376,7 @@ void main() {
         ),
     );
 
-    await hoverGesture.moveTo(const Offset(0.0, 0.0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // Scrollbar defaults for dark themes:
     // - coloring slightly different based on ColorScheme.onSurface

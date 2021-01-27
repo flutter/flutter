@@ -137,7 +137,7 @@ void main() {
     );
 
     // Default margin is 4
-    expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Card)), Offset.zero);
     expect(tester.getSize(find.byType(Card)), const Size(108.0, 108.0));
 
     expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(4.0, 4.0));
@@ -159,10 +159,10 @@ void main() {
     );
 
     // Specified margin is zero
-    expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Card)), Offset.zero);
     expect(tester.getSize(find.byType(Card)), const Size(100.0, 100.0));
 
-    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byKey(contentsKey)), Offset.zero);
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 

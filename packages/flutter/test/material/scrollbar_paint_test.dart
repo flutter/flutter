@@ -65,7 +65,7 @@ void main() {
           color: const Color(0x00000000),
         )
         ..line(
-          p1: const Offset(0.0, 0.0),
+          p1: Offset.zero,
           p2: const Offset(0.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0x00000000),

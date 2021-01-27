@@ -247,7 +247,7 @@ void main() {
   test('CatmullRomSpline interpolates values properly', () {
     final CatmullRomSpline curve = CatmullRomSpline(
       const <Offset>[
-        Offset(0.0, 0.0),
+        Offset.zero,
         Offset(0.01, 0.25),
         Offset(0.2, 0.25),
         Offset(0.33, 0.25),
@@ -296,7 +296,7 @@ void main() {
   test('CatmullRomSpline interpolates values properly when precomputed', () {
     final CatmullRomSpline curve = CatmullRomSpline.precompute(
       const <Offset>[
-        Offset(0.0, 0.0),
+        Offset.zero,
         Offset(0.01, 0.25),
         Offset(0.2, 0.25),
         Offset(0.33, 0.25),

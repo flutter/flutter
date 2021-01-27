@@ -31,7 +31,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 0.0),
       const Offset(0.0, 100.0),
       const Offset(300.0, 100.0),
@@ -89,7 +89,7 @@ void main() {
       ),
     );
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 0.0),
       const Offset(0.0, 100.0),
       const Offset(300.0, 100.0),
@@ -190,7 +190,7 @@ void main() {
     );
     verify(tester, <Offset>[
       const Offset(300.0, 0.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(300.0, 100.0),
       const Offset(0.0, 100.0),
     ]);
@@ -295,7 +295,7 @@ void main() {
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(200.0, 0.0),
       const Offset(500.0, 0.0),
     ]);
@@ -367,7 +367,7 @@ void main() {
     verify(tester, <Offset>[
       const Offset(700.0, 0.0),
       const Offset(400.0, 0.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     ]);
 
     await tester.pumpWidget(Wrap(
@@ -441,7 +441,7 @@ void main() {
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(100.0, 0.0),
       const Offset(300.0, 0.0),
       const Offset(0.0, 265.0),
@@ -534,7 +534,7 @@ void main() {
       const Offset(100.0, 580.0),
       const Offset(300.0, 570.0),
       const Offset(0.0, 295.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     ]);
 
     await tester.pumpWidget(Wrap(
@@ -626,7 +626,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(700.0, 60.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(400.0, 10.0),
       const Offset(400.0, 40.0),
       const Offset(600.0, 50.0),
@@ -653,7 +653,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(500.0, 130.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 20.0),
       const Offset(0.0, 50.0),
       const Offset(0.0, 90.0),
@@ -684,7 +684,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(150.0, 510.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 260.0),
       const Offset(35.0, 0.0),
       const Offset(35.0, 260.0),
@@ -713,7 +713,7 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 250.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(22.0, 0.0),
       const Offset(54.0, 0.0),
       const Offset(96.0, 0.0),
@@ -847,7 +847,7 @@ void main() {
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(210.0, 0.0),
       const Offset(420.0, 0.0),
       const Offset(0.0, 20.0),
@@ -872,7 +872,7 @@ void main() {
     );
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
-    verify(tester, <Offset>[const Offset(0.0, 0.0)]);
+    verify(tester, <Offset>[Offset.zero]);
 
     await tester.pumpWidget(
       Column(
@@ -893,7 +893,7 @@ void main() {
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 20.0),
     ]);
   });
