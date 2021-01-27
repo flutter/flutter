@@ -340,7 +340,7 @@ void main() {
           ],
         ),
         TestDragData(
-          Offset(0.0, 0.0),
+          Offset.zero,
           Offset(-150.0, 0.0),
           <Offset>[
             Offset(-150.0, 0.0),

@@ -113,7 +113,7 @@ Future<void> main() async {
       offset += length;
       request.response.add(bytes);
       // Let other isolates and microtasks to run.
-      await Future<void>.delayed(const Duration());
+      await Future<void>.delayed(Duration.zero);
     }
     request.response.close();
   });

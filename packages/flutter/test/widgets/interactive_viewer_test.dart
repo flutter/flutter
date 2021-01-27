@@ -657,7 +657,7 @@ void main() {
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
       await scrollAt(center, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
-      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      const Velocity noMovement = Velocity.zero;
       final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
       expect(scaleChange, greaterThan(1.0));
@@ -741,7 +741,7 @@ void main() {
       final Offset offCenter = Offset(center.dx - 20.0, center.dy - 20.0);
       await scrollAt(offCenter, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
-      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      const Velocity noMovement = Velocity.zero;
       final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
       expect(scaleChange, greaterThan(1.0));
