@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -66,7 +66,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: FakeUsage(),
     );
 
     final Archive archive = Archive()
@@ -143,7 +143,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: FakeUsage(),
     );
 
     final Archive archive = Archive()
@@ -185,7 +185,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: MockUsage(),
+      flutterUsage: FakeUsage(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -224,4 +224,7 @@ void main() {
   });
 }
 
-class MockUsage extends Mock implements Usage {}
+class FakeUsage extends Fake implements Usage {
+  @override
+  void sendEvent(String category, String parameter, {String label, int value, Map<String, String> parameters}) { }
+}
