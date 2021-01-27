@@ -8,12 +8,17 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import io.flutter.embedding.engine.dart.DartExecutor;
+import android.content.res.AssetManager;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -27,34 +32,41 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-// It's a component test because it tests both FlutterEngineGroup and FlutterEngine.
+// It's a component test because it tests the FlutterEngineGroup its components such as the
+// FlutterEngine and the DartExecutor.
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FlutterEngineGroupComponentTest {
-  @Mock FlutterJNI flutterJNI;
+  @Mock FlutterJNI mockflutterJNI;
+  @Mock FlutterLoader mockFlutterLoader;
   FlutterEngineGroup engineGroupUnderTest;
   FlutterEngine firstEngineUnderTest;
   boolean jniAttached;
 
   @Before
   public void setUp() {
+    FlutterInjector.reset();
+
     MockitoAnnotations.initMocks(this);
     jniAttached = false;
-    when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
-    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative(false);
+    when(mockflutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(mockflutterJNI).attachToNative(false);
     GeneratedPluginRegistrant.clearRegisteredEngines();
+
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("some/path/to/flutter_assets");
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
 
     firstEngineUnderTest =
         spy(
             new FlutterEngine(
                 RuntimeEnvironment.application,
                 mock(FlutterLoader.class),
-                flutterJNI,
+                mockflutterJNI,
                 /*dartVmArgs=*/ new String[] {},
                 /*automaticallyRegisterPlugins=*/ false));
-    when(firstEngineUnderTest.getDartExecutor()).thenReturn(mock(DartExecutor.class));
     engineGroupUnderTest =
-        new FlutterEngineGroup() {
+        new FlutterEngineGroup(RuntimeEnvironment.application) {
           @Override
           FlutterEngine createEngine(Context context) {
             return firstEngineUnderTest;
@@ -126,5 +138,22 @@ public class FlutterEngineGroupComponentTest {
         engineGroupUnderTest.createAndRunEngine(
             RuntimeEnvironment.application, mock(DartEntrypoint.class));
     assertEquals(2, engineGroupUnderTest.activeEngines.size());
+  }
+
+  @Test
+  public void canCreateAndRunCustomEntrypoints() {
+    FlutterEngine firstEngine =
+        engineGroupUnderTest.createAndRunEngine(
+            RuntimeEnvironment.application,
+            new DartEntrypoint(
+                FlutterInjector.instance().flutterLoader().findAppBundlePath(),
+                "other entrypoint"));
+    assertEquals(1, engineGroupUnderTest.activeEngines.size());
+    verify(mockflutterJNI, times(1))
+        .runBundleAndSnapshotFromLibrary(
+            eq("some/path/to/flutter_assets"),
+            eq("other entrypoint"),
+            isNull(String.class),
+            any(AssetManager.class));
   }
 }
