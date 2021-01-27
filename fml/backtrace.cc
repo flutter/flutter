@@ -50,6 +50,9 @@ static std::string GetSymbolName(void* symbol) {
   if (::dladdr(symbol, &info) == 0) {
     return kKUnknownFrameName;
   }
+  if (info.dli_sname == nullptr) {
+    return kKUnknownFrameName;
+  }
 
   return DemangleSymbolName({info.dli_sname});
 }
