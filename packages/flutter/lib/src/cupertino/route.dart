@@ -25,9 +25,10 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 // user releases a page mid swipe.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
-// Barrier color for a Cupertino modal barrier.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
+/// Barrier color for a Cupertino modal barrier.
+///
+/// Extracted from https://developer.apple.com/design/resources/.
+const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x33000000),
   darkColor: Color(0x7A000000),
 );
@@ -941,7 +942,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 /// the popup. When unspecified, the barrier color defaults to a light opacity
 /// black scrim based on iOS's dialog screens. To correctly have iOS resolve
 /// to the appropriate modal colors, pass in
-/// `CupertinoDynamicColor.resolve(barrierColor, context)`.
+/// `CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context)`.
 ///
 /// The `barrierDismissible` argument determines whether clicking outside the
 /// popup results in dismissal. It is `true` by default.
@@ -963,7 +964,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   CupertinoModalPopupRoute({
     required this.builder,
     this.barrierLabel = 'Dismiss',
-    this.barrierColor = _kModalBarrierColor,
+    this.barrierColor = kCupertinoModalBarrierColor,
     bool barrierDismissible = true,
     bool? semanticsDismissible,
     ImageFilter? filter,
@@ -1155,7 +1156,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///         onPressed: () {
 ///           Navigator.of(context).restorablePush(_modalBuilder);
 ///         },
-///         child: const Text('Open Dialog'),
+///         child: const Text('Open Modal'),
 ///       )),
 ///     );
 ///   }
@@ -1173,7 +1174,7 @@ Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
-  Color barrierColor = _kModalBarrierColor,
+  Color barrierColor = kCupertinoModalBarrierColor,
   bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
@@ -1339,7 +1340,7 @@ Future<T?> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
-    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+    barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
   ));
 }
@@ -1396,7 +1397,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         },
         barrierDismissible: barrierDismissible,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
-        barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+        barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
         transitionDuration: transitionDuration,
         transitionBuilder: transitionBuilder,
         settings: settings,
