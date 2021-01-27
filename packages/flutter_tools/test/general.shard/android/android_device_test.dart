@@ -239,7 +239,7 @@ flutter:
       ]),
       id: 'emulator-5555',
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockWorkingAndroidConsoleSocket('dummyEmulatorId'),
+        FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
     expect(await device.emulatorId, equals('dummyEmulatorId'));
@@ -311,7 +311,7 @@ flutter:
         )
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockUnresponsiveAndroidConsoleSocket(),
+        FakeUnresponsiveAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);
@@ -326,7 +326,7 @@ flutter:
         )
       ]),
       androidConsoleSocketFactory: (String host, int port) async =>
-        MockDisconnectingAndroidConsoleSocket()
+        FakeDisconnectingAndroidConsoleSocket()
     );
 
     expect(await device.emulatorId, isNull);
@@ -478,7 +478,6 @@ AndroidDevice setUpAndroidDevice({
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockProcessManager extends Mock implements ProcessManager {}
 
 const String kAdbShellGetprop = '''
 [dalvik.vm.dex2oat-Xms]: [64m]
@@ -640,8 +639,8 @@ const String kAdbShellGetprop = '''
 
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
-class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
-  MockWorkingAndroidConsoleSocket(this.avdName) {
+class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
+  FakeWorkingAndroidConsoleSocket(this.avdName) {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -672,7 +671,7 @@ class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
+class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
@@ -686,8 +685,8 @@ class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockDisconnectingAndroidConsoleSocket extends Fake implements Socket {
-  MockDisconnectingAndroidConsoleSocket() {
+class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
+  FakeDisconnectingAndroidConsoleSocket() {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.

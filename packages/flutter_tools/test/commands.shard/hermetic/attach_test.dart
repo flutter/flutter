@@ -72,14 +72,14 @@ void main() {
       const int devicePort = 499;
       const int hostPort = 42;
 
-      FakeDeviceLogReader mockLogReader;
+      FakeDeviceLogReader fakeLogReader;
       MockPortForwarder portForwarder;
       MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
       MockHttpClient httpClient;
 
       setUp(() {
-        mockLogReader = FakeDeviceLogReader();
+        fakeLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
         mockDds = MockDartDevelopmentService();
@@ -112,16 +112,16 @@ void main() {
       });
 
       tearDown(() {
-        mockLogReader.dispose();
+        fakeLogReader.dispose();
       });
 
       testUsingContext('finds observatory port and forwards', () async {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
@@ -136,7 +136,7 @@ void main() {
         verify(
           portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
         ).called(1);
-        await mockLogReader.dispose();
+        await fakeLogReader.dispose();
         await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
@@ -149,10 +149,10 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
-            mockLogReader.dispose();
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
+            fakeLogReader.dispose();
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
@@ -167,9 +167,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -247,9 +247,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -270,9 +270,9 @@ void main() {
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
           .thenAnswer((_) {
             // Now that the reader is used, start writing messages to it.
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-            return mockLogReader;
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
           });
         testDeviceManager.addDevice(device);
 
@@ -293,7 +293,7 @@ void main() {
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
+      final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockAndroidDevice device = MockAndroidDevice();
@@ -330,10 +330,10 @@ void main() {
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine(
+          fakeLogReader.addLine('Foo');
+          fakeLogReader.addLine(
               'Observatory listening on http://127.0.0.1:$devicePort');
-          return mockLogReader;
+          return fakeLogReader;
         });
       final File foo = globals.fs.file('lib/foo.dart')
         ..createSync();
@@ -375,7 +375,7 @@ void main() {
     testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
+      final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockIOSDevice device = MockIOSDevice();
@@ -388,7 +388,7 @@ void main() {
       final Completer<void> noopCompleter = Completer<void>();
       when(mockDds.done).thenAnswer((_) => noopCompleter.future);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
-        .thenAnswer((_) => mockLogReader);
+        .thenAnswer((_) => fakeLogReader);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
         .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts)
