@@ -927,12 +927,14 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
-class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
-  _CupertinoModalPopupRoute({
-    required this.barrierColor,
-    required this.barrierLabel,
+/// Documentation.
+class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  /// Documentation.
+  CupertinoModalPopupRoute({
     required this.builder,
-    bool? barrierDismissible,
+    this.barrierLabel = 'Dismiss',
+    this.barrierColor = _kModalBarrierColor,
+    bool barrierDismissible = true,
     bool? semanticsDismissible,
     required ImageFilter? filter,
     RouteSettings? settings,
@@ -944,6 +946,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     _semanticsDismissible = semanticsDismissible;
   }
 
+  /// builder docs.
   final WidgetBuilder builder;
 
   bool? _barrierDismissible;
@@ -1060,12 +1063,11 @@ Future<T?> showCupertinoModalPopup<T>({
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
-    _CupertinoModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
-      barrierDismissible: barrierDismissible,
-      barrierLabel: 'Dismiss',
+    CupertinoModalPopupRoute<T>(
       builder: builder,
       filter: filter,
+      barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
+      barrierDismissible: barrierDismissible,
       semanticsDismissible: semanticsDismissible,
       settings: routeSettings,
     ),

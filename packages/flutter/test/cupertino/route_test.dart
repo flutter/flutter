@@ -1722,7 +1722,7 @@ class PopupObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       popupCount++;
     }
     super.didPush(route, previousRoute);
@@ -1746,7 +1746,7 @@ class RouteSettingsObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       routeName = route.settings.name;
     }
     super.didPush(route, previousRoute);
