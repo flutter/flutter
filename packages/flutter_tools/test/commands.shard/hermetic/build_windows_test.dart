@@ -5,13 +5,14 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -20,13 +21,15 @@ import '../../src/testbed.dart';
 
 const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'C:\windows\CMakeLists.txt';
-const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String programFilesPath = r'C:\Program Files (x86)';
+const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
 const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
-    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
+    'PROGRAMFILES(X86)': programFilesPath,
     'FLUTTER_ROOT': flutterRoot,
     'USERPROFILE': '/',
   }
@@ -42,7 +45,7 @@ void main() {
   FileSystem fileSystem;
 
   ProcessManager processManager;
-  MockVisualStudio mockVisualStudio;
+  VisualStudio visualStudio;
   Usage usage;
 
   setUpAll(() {
@@ -52,7 +55,36 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    mockVisualStudio = MockVisualStudio();
+
+    // Populate VisualStudio.cmakePath
+    final String vswherePathOutput = json.encode(<Map<String, dynamic>>[
+      <String, dynamic>{
+        'installationPath': visualStudioPath,
+      }
+    ]);
+    final FakeProcessManager vsProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        vswherePath,
+        '-format',
+        'json',
+        '-products',
+        '*',
+        '-utf8',
+        '-latest',
+        '-version',
+        '16',
+        '-requires',
+        'Microsoft.VisualStudio.Workload.NativeDesktop',
+        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+        'Microsoft.VisualStudio.Component.VC.CMake.Project'
+      ], stdout: vswherePathOutput)
+    ]);
+    visualStudio = VisualStudio(
+      fileSystem: fileSystem,
+      processManager: vsProcessManager,
+      platform: windowsPlatform,
+      logger: BufferLogger.test(),
+    );
     usage = Usage.test();
   });
 
@@ -115,7 +147,7 @@ void main() {
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -130,9 +162,8 @@ void main() {
 
   testUsingContext('Windows build fails when there is no windows project', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockCoreProjectFiles();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -146,9 +177,8 @@ void main() {
 
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
@@ -162,9 +192,8 @@ void main() {
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -187,9 +216,8 @@ void main() {
 
   testUsingContext('Windows build extracts errors from stdout', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     // This contains a mix of routine build output and various types of errors
     // (compile error, link error, warning treated as an error) from MSBuild,
@@ -245,9 +273,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -271,9 +298,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Windows build invokes build and writes generated files', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -336,9 +362,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Windows profile build passes Profile configuration', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),
@@ -371,9 +396,8 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
+      ..visualStudioOverride = visualStudio;
     setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.cmakePath).thenReturn(cmakePath);
 
     fileSystem.file(r'build\windows\runner\Release\app.so')
       ..createSync(recursive: true)
@@ -418,5 +442,3 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     Usage: () => usage,
   });
 }
-
-class MockVisualStudio extends Mock implements VisualStudio {}
