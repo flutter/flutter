@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -43,7 +42,6 @@ void main() {
       processManager: mockProcessManager,
       logger: testLogger,
       platform: FakePlatform(operatingSystem: 'linux'),
-      fileSystem: MemoryFileSystem(),
     );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);

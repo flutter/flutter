@@ -114,7 +114,6 @@ class WebTestCompiler {
       // Override the filesystem scheme so that the frontend_server can find
       // the generated entrypoint code.
       fileSystemScheme: 'org-dartlang-app',
-      fileSystem: _fileSystem,
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,

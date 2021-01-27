@@ -424,7 +424,6 @@ abstract class ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
-    @required FileSystem fileSystem,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
@@ -525,7 +524,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @required ProcessManager processManager,
     @required Artifacts artifacts,
     @required Platform platform,
-    @required FileSystem fileSystem,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
@@ -544,7 +542,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
        _artifacts = artifacts,
        _stdoutHandler = StdoutHandler(logger: logger),
        _platform = platform,
-       _fileSystem = fileSystem,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
@@ -553,7 +550,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final ProcessManager _processManager;
   final Artifacts _artifacts;
   final Platform _platform;
-  final FileSystem _fileSystem;
 
   final bool testCompilation;
   final BuildMode buildMode;
