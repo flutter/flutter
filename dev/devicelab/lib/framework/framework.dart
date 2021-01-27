@@ -13,7 +13,6 @@ import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'adb.dart';
-import 'host_agent.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
 import 'utils.dart';
@@ -123,15 +122,6 @@ class _TaskRunner {
         futureResult = futureResult.timeout(taskTimeout);
 
       TaskResult result = await futureResult;
-      if (result.failed) {
-        // Dump logs, device state, to disk.
-        section('Dumping agent logs for task...');
-        try {
-          await hostAgent.dump();
-        } catch (error) {
-          print('Failed to dump agent state: $error');
-        }
-      }
 
       section('Checking running Dart$exe processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(

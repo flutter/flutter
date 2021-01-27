@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
@@ -13,18 +11,8 @@ import 'package:platform/platform.dart';
 HostAgent get hostAgent => HostAgent(platform: const LocalPlatform(), fileSystem: const LocalFileSystem());
 
 /// Host machine running the tests.
-abstract class HostAgent {
-  factory HostAgent({@required Platform platform, @required FileSystem fileSystem}) {
-    if (platform.isWindows) {
-      return _WindowsHostAgent(platform: platform, fileSystem: fileSystem);
-    } else if (platform.isMacOS) {
-      return _MacOSHostAgent(platform: platform, fileSystem: fileSystem);
-    } else {
-      return _PosixHostAgent(platform: platform, fileSystem: fileSystem);
-    }
-  }
-
-  HostAgent._({@required Platform platform, @required FileSystem fileSystem})
+class HostAgent {
+  HostAgent({@required Platform platform, @required FileSystem fileSystem})
       : _platform = platform,
         _fileSystem = fileSystem;
 
@@ -53,70 +41,4 @@ abstract class HostAgent {
   void resetDumpDirectory() {
     _dumpDirectory = null;
   }
-
-  Future<bool> dump();
-}
-
-class _WindowsHostAgent extends HostAgent {
-  _WindowsHostAgent({@required Platform platform, @required FileSystem fileSystem})
-      : super._(platform: platform, fileSystem: fileSystem);
-
-  @override
-  Future<bool> dump() async => true;
-}
-
-class _MacOSHostAgent extends HostAgent {
-  _MacOSHostAgent({@required Platform platform, @required FileSystem fileSystem})
-      : super._(platform: platform, fileSystem: fileSystem);
-
-  @override
-  Future<bool> dump() async {
-    // Copy simulator logs and crash reports.
-    final String home = _platform.environment['HOME'];
-    if (home == null) {
-      print(r'$HOME not found, skipping simulator log dump.');
-      return false;
-    }
-
-    final Directory simulatorLogs = _fileSystem.directory(_fileSystem.path.join(home, 'Library', 'Logs', 'CoreSimulator'));
-    if (simulatorLogs.existsSync()) {
-      final Directory simulatorsDumpDestination = dumpDirectory.childDirectory('ios-simulators');
-
-      // Directory names are simulator UDIDs.
-      // ~/Library/Logs/CoreSimulator/06841A41-188A-4F33-B7A6-CDEBFC8D6DE8
-      for (final Directory simulatorDirectory in simulatorLogs.listSync().whereType<Directory>()) {
-        final List<File> filesToCopy = <File>[];
-
-        // ~/Library/Logs/CoreSimulator/06841A41-188A-4F33-B7A6-CDEBFC8D6DE8/CrashReporter/DiagnosticLogs
-        final Directory simDiagnosticLogs = simulatorDirectory
-            .childDirectory('CrashReporter')
-            .childDirectory('DiagnosticLogs');
-        if (simDiagnosticLogs.existsSync()) {
-          filesToCopy.addAll(simDiagnosticLogs.listSync().whereType<File>());
-        }
-
-        if (filesToCopy.isEmpty) {
-          continue;
-        }
-        final Directory simulatorDumpDestination = simulatorsDumpDestination
-            .childDirectory(simulatorDirectory.basename);
-        if (simulatorDumpDestination.existsSync()) {
-          simulatorDumpDestination.deleteSync();
-        }
-        simulatorDumpDestination.createSync(recursive: true);
-        for (final File file in filesToCopy) {
-          file.copySync(simulatorDumpDestination.childFile(file.basename).path);
-        }
-      }
-    }
-    return true;
-  }
-}
-
-class _PosixHostAgent extends HostAgent {
-  _PosixHostAgent({@required Platform platform, @required FileSystem fileSystem})
-      : super._(platform: platform, fileSystem: fileSystem);
-
-  @override
-  Future<bool> dump() async => true;
 }
