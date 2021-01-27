@@ -1,4 +1,4 @@
-Signature: b65a6462a8a6bd0566907f02de51536c
+Signature: 36b3de04b7c6894361d0ec1d57302602
 
 UNUSED LICENSES:
 
@@ -3412,6 +3412,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controlle
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The Fuchsia Authors. All rights reserved.
 
