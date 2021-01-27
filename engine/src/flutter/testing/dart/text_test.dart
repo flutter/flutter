@@ -164,4 +164,45 @@ void main() {
       expect(message, '{"type":"fontsChange"}');
     });
   });
+
+  test('FontFeature class', () {
+    expect(const FontFeature.alternative(1), const FontFeature('aalt', 1));
+    expect(const FontFeature.alternative(5), const FontFeature('aalt', 5));
+    expect(const FontFeature.alternativeFractions(), const FontFeature('afrc', 1));
+    expect(const FontFeature.contextualAlternates(), const FontFeature('calt', 1));
+    expect(const FontFeature.caseSensitiveForms(), const FontFeature('case', 1));
+    expect(      FontFeature.characterVariant(1), const FontFeature('cv01', 1));
+    expect(      FontFeature.characterVariant(18), const FontFeature('cv18', 1));
+    expect(const FontFeature.denominator(), const FontFeature('dnom', 1));
+    expect(const FontFeature.fractions(), const FontFeature('frac', 1));
+    expect(const FontFeature.historicalForms(), const FontFeature('hist', 1));
+    expect(const FontFeature.historicalLigatures(), const FontFeature('hlig', 1));
+    expect(const FontFeature.liningFigures(), const FontFeature('lnum', 1));
+    expect(const FontFeature.localeAware(), const FontFeature('locl', 1));
+    expect(const FontFeature.localeAware(enable: true), const FontFeature('locl', 1));
+    expect(const FontFeature.localeAware(enable: false), const FontFeature('locl', 0));
+    expect(const FontFeature.notationalForms(), const FontFeature('nalt', 1));
+    expect(const FontFeature.notationalForms(5), const FontFeature('nalt', 5));
+    expect(const FontFeature.numerators(), const FontFeature('numr', 1));
+    expect(const FontFeature.oldstyleFigures(), const FontFeature('onum', 1));
+    expect(const FontFeature.ordinalForms(), const FontFeature('ordn', 1));
+    expect(const FontFeature.proportionalFigures(), const FontFeature('pnum', 1));
+    expect(const FontFeature.randomize(), const FontFeature('rand', 1));
+    expect(const FontFeature.stylisticAlternates(), const FontFeature('salt', 1));
+    expect(const FontFeature.scientificInferiors(), const FontFeature('sinf', 1));
+    expect(      FontFeature.stylisticSet(1), const FontFeature('ss01', 1));
+    expect(      FontFeature.stylisticSet(18), const FontFeature('ss18', 1));
+    expect(const FontFeature.subscripts(), const FontFeature('subs', 1));
+    expect(const FontFeature.superscripts(), const FontFeature('sups', 1));
+    expect(const FontFeature.swash(), const FontFeature('swsh', 1));
+    expect(const FontFeature.swash(0), const FontFeature('swsh', 0));
+    expect(const FontFeature.swash(5), const FontFeature('swsh', 5));
+    expect(const FontFeature.tabularFigures(), const FontFeature('tnum', 1));
+    expect(const FontFeature.slashedZero(), const FontFeature('zero', 1));
+    expect(const FontFeature.enable('TEST'), const FontFeature('TEST', 1));
+    expect(const FontFeature.disable('TEST'), const FontFeature('TEST', 0));
+    expect(const FontFeature('FEAT', 1000).feature, 'FEAT');
+    expect(const FontFeature('FEAT', 1000).value, 1000);
+    expect(const FontFeature('FEAT', 1000).toString(), "FontFeature('FEAT', 1000)");
+  });
 }
