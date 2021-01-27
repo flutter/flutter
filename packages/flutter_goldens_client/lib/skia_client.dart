@@ -250,6 +250,7 @@ class SkiaGoldClient {
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
     final List<String> imgtestCommand = <String>[
+      _goldctl,
       'imgtest', 'add',
       '--work-dir', workDirectory
         .childDirectory('temp')
