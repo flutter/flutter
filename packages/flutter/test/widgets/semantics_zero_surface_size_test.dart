@@ -31,13 +31,13 @@ void main() {
       ), ignoreTransform: true,
     ));
 
-    await tester.binding.setSurfaceSize(const Size(0.0, 0.0));
+    await tester.binding.setSurfaceSize(Size.zero);
     await tester.pumpAndSettle();
 
     expect(semantics, hasSemantics(
       TestSemantics(
         id: 0,
-        rect: const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        rect: Rect.zero,
       ), ignoreTransform: true,
     ));
 

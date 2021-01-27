@@ -298,7 +298,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), const Offset(0.0, 0.0));
+      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), Offset.zero);
       // Standard test screen size.
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });
@@ -319,7 +319,7 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), const Offset(0.0, 0.0));
+      expect(tester.getTopLeft(find.byType(ListWheelScrollView)), Offset.zero);
       // Still fills standard test screen size.
       expect(tester.getBottomRight(find.byType(ListWheelScrollView)), const Offset(800.0, 600.0));
     });

@@ -1304,6 +1304,9 @@ abstract class ResidentRunner {
     }
     await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
     try {
+      if (_devToolsLauncher == null) {
+        return;
+      }
       unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
         'ext.flutter.activeDevToolsServerAddress',
         device: device,

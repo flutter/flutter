@@ -561,7 +561,7 @@ Information about project "Runner":
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
     expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
     expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false)), 'Paid');
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(BuildInfo.debug), isNull);
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
   });
 
@@ -670,7 +670,7 @@ Information about project "Runner":
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -698,7 +698,7 @@ Information about project "Runner":
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_debug_sim_unopt'));
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -752,7 +752,7 @@ Information about project "Runner":
               environmentType: anyNamed('environmentType')))
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -779,7 +779,7 @@ Information about project "Runner":
               environmentType: anyNamed('environmentType')))
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
 
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(

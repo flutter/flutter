@@ -10,7 +10,7 @@ void main() {
   testWidgets('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
-      alignment: const Alignment(1.0, 1.0),
+      alignment: Alignment.bottomRight,
       child: SizedBox(
         width: 10.0,
         height: 20.0,

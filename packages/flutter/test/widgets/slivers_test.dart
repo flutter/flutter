@@ -61,7 +61,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
 
 void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
   final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
+    (RenderBox target) => target.localToGlobal(Offset.zero)
   ).toList();
   final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter, skipOffstage: false)).map<bool>(
     (RenderSliverToBoxAdapter target) => target.geometry!.visible
@@ -75,7 +75,7 @@ void main() {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 400.0),
       const Offset(0.0, 800.0),
       const Offset(0.0, 1200.0),
@@ -143,7 +143,7 @@ void main() {
     verify(tester, <Offset>[
       const Offset(0.0, -800.0),
       const Offset(0.0, -400.0),
-      const Offset(0.0, 0.0),
+      Offset.zero,
       const Offset(0.0, 400.0),
       const Offset(0.0, 800.0),
     ], <bool>[false, false, true, true, false]);

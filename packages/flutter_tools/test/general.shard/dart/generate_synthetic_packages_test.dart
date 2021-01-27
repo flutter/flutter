@@ -31,7 +31,6 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').createSync();
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -39,7 +38,7 @@ void main() {
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: artifacts,
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -72,7 +71,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: true');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -80,7 +79,7 @@ void main() {
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: artifacts,
-      processManager: mockProcessManager,
+      processManager: fakeProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -113,14 +112,13 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: null');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -150,14 +148,13 @@ void main() {
     );
     pubspecFile.writeAsStringSync(content);
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -187,14 +184,13 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('helloWorld');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -227,14 +223,13 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: nonBoolValue');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 

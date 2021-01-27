@@ -44,6 +44,35 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
+  testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: MockHttpClient(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+    // Unrelated file from another cache.
+    fileSystem.file('out/bar').createSync(recursive: true);
+    // Stale file from current cache.
+    fileSystem.file('out/test/foo.txt').createSync(recursive: true);
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+    expect(fileSystem.file('out/bar'), exists);
+    expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
+  });
+
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
     'x-goog-hash header is present but missing an md5 entry', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();

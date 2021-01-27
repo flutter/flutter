@@ -58,15 +58,13 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// A map used to disable scrolling shortcuts in text fields.
 ///
 /// This is a temporary fix for: https://github.com/flutter/flutter/issues/74191
-final Map<LogicalKeySet, Intent> scrollShortcutOverrides = kIsWeb
-    ? <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
-      }
-    : <LogicalKeySet, Intent>{};
+final Map<LogicalKeySet, Intent> scrollShortcutOverrides = <LogicalKeySet, Intent>{
+  LogicalKeySet(LogicalKeyboardKey.space): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationIntent(),
+  LogicalKeySet(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationIntent(),
+};
 
 /// A controller for an editable text field.
 ///
