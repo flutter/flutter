@@ -1789,6 +1789,12 @@ class ArtifactUpdater {
       } finally {
         status.stop();
       }
+      /// Unzipping multiple file into a directory will not remove old files
+      /// from previous versions that are not present in the new bundle.
+      final Directory destination = location.childDirectory(
+        tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
+      );
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
       _ensureExists(location);
 
       try {
