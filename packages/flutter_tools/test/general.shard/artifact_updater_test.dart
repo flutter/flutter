@@ -57,8 +57,10 @@ void main() {
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
     );
-    // Create a stale file
-    fileSystem.file('out/foo').createSync(recursive: true);
+    // Unrelated file from another cache.
+    fileSystem.file('out/bar').createSync(recursive: true);
+    // Stale file from current cache.
+    fileSystem.file('out/test/foo.txt').createSync(recursive: true);
 
     await artifactUpdater.downloadZipArchive(
       'test message',
@@ -67,7 +69,8 @@ void main() {
     );
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
-    expect(fileSystem.file('out/foo'), isNot(exists));
+    expect(fileSystem.file('out/bar'), exists);
+    expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
   });
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '

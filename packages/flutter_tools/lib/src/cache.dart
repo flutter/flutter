@@ -1791,12 +1791,16 @@ class ArtifactUpdater {
       }
       /// Unzipping multiple file into a directory will not remove old files
       /// from previous versions that are not present in the new bundle.
-      if (location.existsSync()) {
-        location.deleteSync(recursive: true);
+      final Directory destination = location.childDirectory(
+        tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
+      );
+      if (destination.existsSync()) {
+        destination.deleteSync(recursive: true);
       }
       _ensureExists(location);
 
       try {
+        print(tempFile.path);
         extractor(tempFile, location);
       } on Exception catch (err) {
         retries -= 1;
