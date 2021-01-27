@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-// @dart = 2.9
-
 import 'dart:convert';
 import 'dart:io';
 
