@@ -1227,7 +1227,7 @@ void main() {
             '// @dart = 2.8\n'
             '\n'
             'import \'main\' as entrypoint;\n'
-            'import \'dart:io\';\n'
+            'import \'dart:io\'; // ignore: dart_io_import.\n'
             'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
             'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
             'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
