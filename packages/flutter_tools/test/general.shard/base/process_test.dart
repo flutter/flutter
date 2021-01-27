@@ -14,9 +14,9 @@ import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart' show MockProcess,
                                    MockProcessManager,
-                                   MockStdio,
                                    flakyProcessFactory;
 
 void main() {
@@ -84,7 +84,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: FakeStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
@@ -260,7 +260,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: FakeStdio(),
           platform: FakePlatform(stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),

@@ -20,6 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/mocks.dart' as mocks;
 
 final Platform kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
@@ -88,7 +89,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger(
       terminal: AnsiTerminal(
-        stdio: mocks.MockStdio(),
+        stdio: FakeStdio(),
         platform: kNoAnsiPlatform,
       ),
       outputPreferences: OutputPreferences.test(showColor: false),
