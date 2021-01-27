@@ -60,7 +60,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.

@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -224,7 +223,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -428,7 +427,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -455,7 +454,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(

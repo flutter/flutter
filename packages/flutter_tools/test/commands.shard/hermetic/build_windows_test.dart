@@ -53,7 +53,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.

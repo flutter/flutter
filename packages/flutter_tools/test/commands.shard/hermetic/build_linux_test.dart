@@ -50,7 +50,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.

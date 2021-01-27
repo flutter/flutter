@@ -55,7 +55,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = Usage.test();
+    usage = TestUsage();
     logger = BufferLogger.test();
   });
 
