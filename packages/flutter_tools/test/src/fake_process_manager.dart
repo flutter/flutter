@@ -302,7 +302,9 @@ abstract class FakeProcessManager implements ProcessManager {
   }
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) => true;
+  bool canRun(dynamic executable, {String workingDirectory}) => canRunSucceeds;
+
+  bool canRunSucceeds = true;
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

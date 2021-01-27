@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
@@ -19,16 +18,14 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-class MockProcessManager extends Mock implements ProcessManager {}
-
 void main() {
   MemoryFileSystem fileSystem;
-  MockProcessManager processManager;
+  FakeProcessManager fakeProcessManager;
   Config config;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = MockProcessManager();
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     config = Config.test(
       'test',
       directory: fileSystem.currentDirectory,
@@ -125,20 +122,20 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: argThat(isNotNull,  named: 'environment')))
-          .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
-      when(processManager.runSync(
-        <String>['/usr/libexec/java_home', '-v', '1.8'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 0, '', ''));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/libexec/java_home', '-v', '1.8'],
+        ),
+        FakeCommand(
+          command: <String>[sdk.sdkManagerPath, '--version'],
+          stdout: '26.1.1\n',
+        ),
+      ]);
 
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => fakeProcessManager,
       Config: () => config,
     });
 
@@ -149,7 +146,6 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.adbPath)).thenReturn(true);
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
       expect(validationIssues.first, 'No valid Android SDK platforms found in'
@@ -158,7 +154,7 @@ void main() {
         '  - android-23');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => fakeProcessManager,
       Config: () => config,
       Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
@@ -168,20 +164,22 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: argThat(isNotNull,  named: 'environment')))
-          .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
-      when(processManager.runSync(
-        <String>['/usr/libexec/java_home', '-v', '1.8'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 0, '', ''));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/libexec/java_home', '-v', '1.8'],
+        ),
+        FakeCommand(
+          command: <String>[sdk.sdkManagerPath, '--version'],
+          stdout: '26.1.1\n',
+          stderr: 'Mystery error',
+          exitCode: 1,
+        ),
+      ]);
 
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => fakeProcessManager,
       Config: () => config,
     });
 
@@ -190,11 +188,11 @@ void main() {
       config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(false);
+      fakeProcessManager.canRunSucceeds = false;
       expect(() => sdk.sdkManagerVersion, throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => fakeProcessManager,
       Config: () => config,
     });
   });
