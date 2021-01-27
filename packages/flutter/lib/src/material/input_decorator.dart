@@ -1778,7 +1778,9 @@ class _AffixText extends StatelessWidget {
 /// [InputDecorator] can be used to create widgets that look and behave like a
 /// [TextField] but support other kinds of input.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. The [child] widget,
+/// as well as the decorative widgets specified in [decoration], must have
+/// non-negative baselines.
 ///
 /// See also:
 ///
