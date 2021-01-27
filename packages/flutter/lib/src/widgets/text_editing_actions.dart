@@ -14,6 +14,12 @@ import 'text_editing_action.dart';
 // TODO(justinmc): Maybe move these to a text_editing_intents.dart?
 // TODO(justinmc): Do I want the const constructors? I think so so that the
 // instantiation can be const.
+class ArrowDownTextIntent extends Intent {
+  const ArrowDownTextIntent();
+}
+class ArrowUpTextIntent extends Intent {
+  const ArrowUpTextIntent();
+}
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
 }
@@ -343,6 +349,12 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<ArrowDownTextIntent> _arrowDownTextAction = TextEditingAction<ArrowDownTextIntent>(
+    onInvoke: (ArrowDownTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+    },
+  );
+
   final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
     onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
@@ -352,6 +364,12 @@ class TextEditingActions extends StatelessWidget {
   final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
     onInvoke: (ArrowRightTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    },
+  );
+
+  final TextEditingAction<ArrowUpTextIntent> _arrowUpTextAction = TextEditingAction<ArrowUpTextIntent>(
+    onInvoke: (ArrowUpTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
     },
   );
 
@@ -458,8 +476,10 @@ class TextEditingActions extends StatelessWidget {
         ...additionalActions,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
         AltArrowRightTextIntent: _altArrowRightTextAction,
+        ArrowDownTextIntent: _arrowDownTextAction,
         ArrowLeftTextIntent: _arrowLeftTextAction,
         ArrowRightTextIntent: _arrowRightTextAction,
+        ArrowUpTextIntent: _arrowUpTextAction,
         ControlATextIntent: _controlATextAction,
         ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
         ControlArrowRightTextIntent: _controlArrowRightTextAction,

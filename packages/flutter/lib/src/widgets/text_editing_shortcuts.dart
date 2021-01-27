@@ -29,8 +29,10 @@ class TextEditingShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): ArrowDownTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): ArrowRightTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): ArrowUpTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): AltArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): AltArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): ControlArrowLeftTextIntent(),
@@ -39,11 +41,11 @@ class TextEditingShortcuts extends StatelessWidget {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyC): ControlCTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.end): const EndTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.home): const HomeTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyC): MetaCTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): MetaArrowRightTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): MetaArrowLeftTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): MetaShiftArrowRightTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): MetaShiftArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyC): const MetaCTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const MetaArrowRightTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const MetaArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const MetaShiftArrowRightTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const MetaShiftArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ShiftArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ShiftArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): const ShiftHomeTextIntent(),

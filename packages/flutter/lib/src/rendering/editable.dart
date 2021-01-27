@@ -717,6 +717,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
+  // Returns the TextPosition above or below the given offset.
+  TextPosition _getTextPositionVertical(int textOffset, double verticalOffset) {
+    final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: textOffset), _caretPrototype);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    return _textPainter.getPositionForOffset(caretOffsetTranslated);
+  }
+
+  TextPosition _getTextPositionAbove(int offset) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = -0.5 * preferredLineHeight;
+    return _getTextPositionVertical(offset, verticalOffset);
+  }
+
+  TextPosition _getTextPositionBelow(int offset) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double preferredLineHeight = _textPainter.preferredLineHeight;
+    final double verticalOffset = 1.5 * preferredLineHeight;
+    return _getTextPositionVertical(offset, verticalOffset);
+  }
+
   void extendSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _extendGivenSelectionLeft(
       selection!,
@@ -778,6 +803,29 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         baseOffset: selectedLine.extentOffset,
         extentOffset: selection!.extentOffset,
       );
+    }
+
+    _updateSelection(nextSelection, cause);
+  }
+
+  void moveSelectionDown(SelectionChangedCause cause) {
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+      return;
+    }
+
+    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+
+    late TextSelection nextSelection;
+    if (positionBelow.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        baseOffset: _plainText.length,
+        extentOffset: _plainText.length,
+      );
+    } else {
+      nextSelection = TextSelection.fromPosition(positionBelow);
+      _cursorResetLocation = nextSelection.extentOffset;
     }
 
     _updateSelection(nextSelection, cause);
@@ -885,6 +933,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextSelection == selection) {
       return;
     }
+    _updateSelection(nextSelection, cause);
+  }
+
+  void moveSelectionUp(SelectionChangedCause cause) {
+    // If the selection is collapsed at the beginning of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+      return;
+    }
+
+    final TextPosition upPosition = _getTextPositionAbove(selection!.extentOffset);
+    late TextSelection nextSelection;
+    if (upPosition.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(baseOffset: 0, extentOffset: 0);
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: upPosition.offset,
+        extentOffset: upPosition.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
     _updateSelection(nextSelection, cause);
   }
 
@@ -1019,6 +1089,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           );
         }
       } else {
+        // TODO(justinmc): Moved to moveSelectionUp/Down above.
         // The caret offset gives a location in the upper left hand corner of
         // the caret so the middle of the line above is a half line above that
         // point and the line below is 1.5 lines below that point.
