@@ -601,16 +601,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-    // Write `generated_main.dart` under the tool's owned directory.
-    // This ensures that the `lib` directory isn't polluted with generated files.
-    final Directory buildDir = FlutterProject.current()
-        .directory
-        .childDirectory(_fileSystem.path.join('.dart_tool', 'flutter_build'));
-
-    final File newMainDart = buildDir.childFile('generated_main.dart');
-    if (newMainDart.existsSync()) {
-      mainUri = newMainDart.uri;
-    }
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)

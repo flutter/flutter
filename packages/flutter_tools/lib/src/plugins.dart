@@ -900,7 +900,16 @@ Future<bool> generateMainDartWithPluginRegistrant(
     // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
     throwOnPluginPubspecError: false,
   );
-  final LanguageVersion entrypointVersion = determineLanguageVersion(mainFile, null);
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+    rootProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+    logger: globals.logger,
+    throwOnError: false,
+  );
+  final LanguageVersion entrypointVersion = determineLanguageVersion(
+    mainFile,
+    packageConfig.packageOf(mainFile.absolute.uri),
+    defaultLanguageVersion: optOutNullSafeVersion,
+  );
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
