@@ -276,8 +276,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   }
 
   // Sort all descendants, taking into account the FocusTraversalGroup
-  // that they are each in, and filtering out non-traversable/focusable nodes,
-  // but leaving in any group nodes.
+  // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope, FocusNode currentNode) {
     assert(scope != null);
     final _FocusTraversalGroupMarker? scopeGroupMarker = _getMarker(scope.context);
