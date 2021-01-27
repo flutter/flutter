@@ -927,9 +927,39 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
-/// Documentation.
+/// A route that shows a modal iOS-style popup that slides up from the
+/// bottom of the screen.
+///
+/// Such a popup is an alternative to a menu or a dialog and prevents the user
+/// from interacting with the rest of the app.
+///
+/// It is used internally by [showCupertinoModalPopup] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showCupertinoModalPopup] for a state restoration app example.
+///
+/// The `barrierColor` argument determines the [Color] of the barrier underneath
+/// the popup. When unspecified, the barrier color defaults to a light opacity
+/// black scrim based on iOS's dialog screens. To correctly have iOS resolve
+/// to the appropriate modal colors, pass in
+/// `CupertinoDynamicColor.resolve(barrierColor, context)`.
+///
+/// The `barrierDismissible` argument determines whether clicking outside the
+/// popup results in dismissal. It is `true` by default.
+///
+/// The `semanticsDismissible` argument is used to determine whether the
+/// semantics of the modal barrier are included in the semantics tree.
+///
+/// The `routeSettings` argument is used to provide [RouteSettings] to the
+/// created Route.
+///
+/// See also:
+///
+///  * [CupertinoActionSheet], which is the widget usually returned by the
+///    `builder` argument.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
-  /// Documentation.
+  /// A route that shows a modal iOS-style popup that slides up from the
+  /// bottom of the screen.
   CupertinoModalPopupRoute({
     required this.builder,
     this.barrierLabel = 'Dismiss',
@@ -946,7 +976,14 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     _semanticsDismissible = semanticsDismissible;
   }
 
-  /// builder docs.
+  /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
+  ///
+  /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+  ///
+  /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
+  /// by the `builder` does not share a context with the route it was originally
+  /// built from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
+  /// widget needs to update dynamically.
   final WidgetBuilder builder;
 
   bool? _barrierDismissible;
