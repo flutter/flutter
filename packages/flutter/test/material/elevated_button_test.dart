@@ -1039,6 +1039,39 @@ void main() {
 
     expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
   });
+
+  testWidgets('Fixed size ElevatedButtons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size(100, 100)),
+                onPressed: () {},
+                child: const Text('100x100'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromWidth(200)),
+                onPressed: () {},
+                child: const Text('200xh'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromHeight(200)),
+                onPressed: () {},
+                child: const Text('wx200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '100x100')), const Size(100, 100));
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200xh')).width, 200);
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, 'wx200')).height, 200);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

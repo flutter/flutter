@@ -1215,6 +1215,39 @@ void main() {
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
+
+  testWidgets('Fixed size OutlinedButtons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(fixedSize: const Size(100, 100)),
+                onPressed: () {},
+                child: const Text('100x100'),
+              ),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(fixedSize: const Size.fromWidth(200)),
+                onPressed: () {},
+                child: const Text('200xh'),
+              ),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(fixedSize: const Size.fromHeight(200)),
+                onPressed: () {},
+                child: const Text('wx200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(OutlinedButton, '100x100')), const Size(100, 100));
+    expect(tester.getSize(find.widgetWithText(OutlinedButton, '200xh')).width, 200);
+    expect(tester.getSize(find.widgetWithText(OutlinedButton, 'wx200')).height, 200);
+  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {

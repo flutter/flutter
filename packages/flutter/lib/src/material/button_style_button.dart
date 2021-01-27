@@ -268,6 +268,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
+    final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -285,12 +286,29 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
+
+    BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
       ),
     );
+    if (resolvedFixedSize != null) {
+      final Size size = effectiveConstraints.constrain(resolvedFixedSize);
+      if (size.width.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minWidth: size.width,
+          maxWidth: size.width,
+        );
+      }
+      if (size.height.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minHeight: size.height,
+          maxHeight: size.height
+        );
+      }
+    }
+
     final EdgeInsetsGeometry padding = resolvedPadding!.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
