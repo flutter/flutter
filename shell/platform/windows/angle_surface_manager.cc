@@ -7,6 +7,15 @@
 #include <iostream>
 #include <vector>
 
+#ifdef WINUWP
+#include <windows.ui.core.h>
+#include <winrt/Windows.UI.Composition.h>
+#endif
+
+#if defined(WINUWP) && defined(USECOREWINDOW)
+#include <winrt/Windows.UI.Core.h>
+#endif
+
 namespace flutter {
 
 AngleSurfaceManager::AngleSurfaceManager()
@@ -188,10 +197,23 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
       EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
       EGL_HEIGHT,           height,   EGL_NONE};
 
+#ifdef WINUWP
+#ifdef USECOREWINDOW
+  auto target = std::get<winrt::Windows::UI::Core::CoreWindow>(*render_target);
+#else
+  auto target =
+      std::get<winrt::Windows::UI::Composition::SpriteVisual>(*render_target);
+#endif
+  surface = eglCreateWindowSurface(
+      egl_display_, egl_config_,
+      static_cast<EGLNativeWindowType>(winrt::get_abi(target)),
+      surfaceAttributes);
+#else
   surface = eglCreateWindowSurface(
       egl_display_, egl_config_,
       static_cast<EGLNativeWindowType>(std::get<HWND>(*render_target)),
       surfaceAttributes);
+#endif
   if (surface == EGL_NO_SURFACE) {
     std::cerr << "Surface creation failed." << std::endl;
   }
@@ -212,6 +234,8 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
     // preserve the previous surface contents. This resize approach could be
     // further optimized if Angle exposed a public entrypoint for
     // SwapChain11::reset or SwapChain11::resize.
+    // a possible starting point for that could build on
+    // eglPostSubBufferNV(egl_display_, render_surface_, 1, 1, width, height);
     DestroySurface();
     if (!CreateSurface(render_target, width, height)) {
       std::cerr << "AngleSurfaceManager::ResizeSurface failed to create surface"

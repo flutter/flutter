@@ -13,6 +13,22 @@ namespace flutter {
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
 class DartProject {
  public:
+#ifdef WINUWP
+  // Creates a DartProject from a series of absolute paths.
+  // The directory should contain the following top-level items:
+  // - icudtl.dat (provided as a resource by the Flutter tool)
+  // - flutter_assets (as built by the Flutter tool)
+  // - app.so, for an AOT build (as built by the Flutter tool)
+  //
+  // The path must be absolute.
+  explicit DartProject(const std::wstring& assetspath,
+                       const std::wstring& icupath,
+                       const std::wstring& aotpath) {
+    assets_path_ = assetspath;
+    icu_data_path_ = icupath;
+    aot_library_path_ = aotpath;
+  }
+#else
   // Creates a DartProject from a directory path. The directory should contain
   // the following top-level items:
   // - icudtl.dat (provided as a resource by the Flutter tool)
@@ -26,6 +42,7 @@ class DartProject {
     icu_data_path_ = path + L"\\icudtl.dat";
     aot_library_path_ = path + L"\\app.so";
   }
+#endif
 
   ~DartProject() = default;
 

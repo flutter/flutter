@@ -1462,6 +1462,8 @@ FILE: ../../../flutter/shell/platform/windows/external_texture_gl.h
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle.h
 FILE: ../../../flutter/shell/platform/windows/flutter_project_bundle_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/flutter_window_winuwp.cc
+FILE: ../../../flutter/shell/platform/windows/flutter_window_winuwp.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.cc
 FILE: ../../../flutter/shell/platform/windows/flutter_windows_engine.h

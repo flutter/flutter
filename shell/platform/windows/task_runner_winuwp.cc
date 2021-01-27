@@ -45,7 +45,7 @@ void TaskRunnerWinUwp::PostTask(TaskClosure task) {
   // TODO: Handle the target time. See PostFlutterTask()
 
   dispatcher_.RunAsync(winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,
-                       [task]() { task() });
+                       [task]() { task(); });
 }
 
 }  // namespace flutter
