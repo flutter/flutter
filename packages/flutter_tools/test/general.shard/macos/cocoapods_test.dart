@@ -69,7 +69,7 @@ void main() {
     projectUnderTest = FlutterProject.fromDirectory(fileSystem.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
-    usage = Usage.test() as TestUsage;
+    usage = Usage.test();
     cocoaPodsUnderTest = CocoaPods(
       fileSystem: fileSystem,
       processManager: mockProcessManager,

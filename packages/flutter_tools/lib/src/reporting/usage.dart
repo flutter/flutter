@@ -93,7 +93,7 @@ abstract class Usage {
   ///
   /// All sent events, exceptions, timings, and pages are
   /// buffered on the object and can be inspected later.
-  factory Usage.test() => TestUsage();
+  static TestUsage test() => TestUsage();
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
