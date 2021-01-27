@@ -308,12 +308,12 @@ void main() {
     });
 
     group('language', () {
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      XcodeProjectInterpreter xcodeProjectInterpreter;
       MemoryFileSystem fs;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: FakeProcessManager.any());
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,
           fileSystem: fs,
@@ -339,7 +339,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
