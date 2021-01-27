@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-// @dart = 2.9
-
 import 'dart:io';
 
 /// Produces a per-library coverage summary when fed an lcov file, sorted by
