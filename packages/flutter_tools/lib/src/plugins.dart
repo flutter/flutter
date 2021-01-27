@@ -1063,7 +1063,7 @@ const String _dartPluginRegistryForDesktopTemplate = '''
 // @dart = {{dartLanguageVersion}}
 
 import '{{mainEntrypoint}}' as entrypoint;
-import 'dart:io';
+import 'dart:io'; // ignore: dart_io_import.
 {{#linux}}
 import 'package:{{pluginName}}/{{pluginName}}.dart';
 {{/linux}}
