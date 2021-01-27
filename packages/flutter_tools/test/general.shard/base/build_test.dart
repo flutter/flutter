@@ -6,12 +6,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -185,30 +181,16 @@ void main() {
     AOTSnapshotter snapshotter;
     Artifacts artifacts;
     FakeProcessManager processManager;
-    Logger logger;
 
     setUp(() async {
-      final Platform platform = FakePlatform(operatingSystem: 'macos');
-      logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       artifacts = Artifacts.test();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
-        logger: logger,
-        xcode: Xcode(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(operatingSystem: 'macos'),
+        logger: BufferLogger.test(),
+        xcode: Xcode.test(
           processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter(
-            platform: platform,
-            processManager: processManager,
-            logger: logger,
-            fileSystem: fileSystem,
-            terminal: Terminal.test(),
-            usage: Usage.test(),
-          ),
         ),
         artifacts: artifacts,
         processManager: processManager,
