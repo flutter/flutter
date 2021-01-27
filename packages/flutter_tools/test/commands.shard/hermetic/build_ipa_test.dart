@@ -80,7 +80,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, bool showBuildSettings = false, void Function() onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -207,8 +207,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpMockXcodeBuildHandler(),
-      setUpMockXcodeBuildHandler(showBuildSettings: true),
+      setUpFakeXcodeBuildHandler(),
+      setUpFakeXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -225,8 +225,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpMockXcodeBuildHandler(verbose: true),
-      setUpMockXcodeBuildHandler(verbose: true, showBuildSettings: true),
+      setUpFakeXcodeBuildHandler(verbose: true),
+      setUpFakeXcodeBuildHandler(verbose: true, showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -254,7 +254,7 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
-      setUpMockXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -270,7 +270,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
       }),
-      setUpMockXcodeBuildHandler(showBuildSettings: true),
+      setUpFakeXcodeBuildHandler(showBuildSettings: true),
     ]),
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
@@ -301,8 +301,8 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           xattrCommand,
-          setUpMockXcodeBuildHandler(),
-          setUpMockXcodeBuildHandler(showBuildSettings: true),
+          setUpFakeXcodeBuildHandler(),
+          setUpFakeXcodeBuildHandler(showBuildSettings: true),
           exportArchiveCommand,
         ]),
     Platform: () => macosPlatform,

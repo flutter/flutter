@@ -78,7 +78,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler(String configuration, { bool verbose = false, void Function() onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function() onRun }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -154,7 +154,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -170,7 +170,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -186,7 +186,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Debug', verbose: true)
+      setUpFakeXcodeBuildHandler('Debug', verbose: true)
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -203,7 +203,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Profile')
+      setUpFakeXcodeBuildHandler('Profile')
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -220,7 +220,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -269,7 +269,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -299,7 +299,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -349,7 +349,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpMockXcodeBuildHandler('Release', onRun: () {
+      setUpFakeXcodeBuildHandler('Release', onRun: () {
         fileSystem.file('build/flutter_size_01/snapshot.x86_64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
