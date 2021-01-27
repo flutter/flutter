@@ -380,19 +380,22 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       padding: widget.suffixInsets,
     );
 
-    return CupertinoTextField(
-      controller: _effectiveController,
-      decoration: decoration,
-      style: widget.style,
-      prefix: prefix,
-      suffix: suffix,
-      suffixMode: widget.suffixMode,
-      placeholder: placeholder,
-      placeholderStyle: placeholderStyle,
-      padding: widget.padding,
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      focusNode: widget.focusNode,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: CupertinoTextField(
+        controller: _effectiveController,
+        decoration: decoration,
+        style: widget.style,
+        prefix: prefix,
+        suffix: suffix,
+        suffixMode: widget.suffixMode,
+        placeholder: placeholder,
+        placeholderStyle: placeholderStyle,
+        padding: widget.padding,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+        focusNode: widget.focusNode,
+      ),
     );
   }
 }
