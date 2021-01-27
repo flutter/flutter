@@ -15,8 +15,8 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart' show MockProcess,
                                    MockProcessManager,
+                                   MockStdio,
                                    flakyProcessFactory;
-import '../runner/flutter_command_runner_test.dart' show FakeStdio;
 
 void main() {
   group('process exceptions', () {
@@ -88,7 +88,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: FakeStdio(),
+          stdio: MockStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
@@ -278,7 +278,7 @@ void main() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: FakeStdio(),
+          stdio: MockStdio(),
           platform: FakePlatform(stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
