@@ -1800,7 +1800,6 @@ class ArtifactUpdater {
       _ensureExists(location);
 
       try {
-        print(tempFile.path);
         extractor(tempFile, location);
       } on Exception catch (err) {
         retries -= 1;
