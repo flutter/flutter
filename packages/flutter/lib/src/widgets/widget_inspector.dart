@@ -2878,7 +2878,14 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node, properties)!;
+      ErrorSummary? errorSummary;
+      for (final DiagnosticsNode node in properties) {
+        if (node is ErrorSummary) {
+          errorSummary = node;
+          break;
+        }
+      }
+      yield* _parseDiagnosticsNode(node, errorSummary)!;
     } else {
       if (foundStackTrace) {
         pending.add(node);
@@ -2895,18 +2902,18 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 /// Return null if input [DiagnosticsNode] is not applicable.
 Iterable<DiagnosticsNode>? _parseDiagnosticsNode(
   DiagnosticsNode node,
-  Iterable<DiagnosticsNode> properties,
+  ErrorSummary? errorSummary,
 ) {
   if (!_isDebugCreator(node))
     return null;
   final DebugCreator debugCreator = node.value! as DebugCreator;
   final Element element = debugCreator.element;
-  return _describeRelevantUserCode(element, properties);
+  return _describeRelevantUserCode(element, errorSummary);
 }
 
 Iterable<DiagnosticsNode> _describeRelevantUserCode(
   Element element,
-  Iterable<DiagnosticsNode> properties,
+  ErrorSummary? errorSummary,
 ) {
   if (!WidgetInspectorService.instance.isWidgetCreationTracked()) {
     return <DiagnosticsNode>[
@@ -2920,13 +2927,10 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
   }
 
   bool isOverflowError() {
-    for (final DiagnosticsNode node in properties) {
-      if (node is ErrorSummary) {
-        if (node.value.isNotEmpty
-            && node.value.first is String
-            && (node.value.first as String).contains('A RenderFlex overflowed by')) {
-          return true;
-        }
+    if (errorSummary != null && errorSummary.value.isNotEmpty) {
+      final Object summary = errorSummary.value.first;
+      if (summary is String && summary.startsWith('A RenderFlex overflowed by')) {
+        return true;
       }
     }
     return false;
@@ -2943,7 +2947,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
 
       // TODO(kenz): once the inspector is better at dealing with broken trees,
       // we can enable deep links for more errors than just RenderFlex overflow
-      // errors.
+      // errors. See https://github.com/flutter/flutter/issues/74918.
       if (isOverflowError()) {
         final String? devToolsInspectorUri =
         WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
