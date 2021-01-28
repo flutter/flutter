@@ -102,13 +102,16 @@ enum HeroFlightDirection {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
 /// {@tool dartpad --template=stateless_widget_material}
-/// This sample shows a `Hero` with List item along with Icon: here we will be using a
-/// rectangle widget for icon. Icon widget in list item at first page , with Hero
-/// widget in list and Enlarged icon to display on Second Page.
+/// This sample shows a [Hero] used within a [ListTile].
 ///
-/// Navigator.of(context).push() is needed to navigate to second page from
-/// first page using the SAME tag Making sure both widgets have same tag. Hero
-/// transitions use the same tag to identify the start and destination widgets.
+/// Tapping on the Hero-wrapped rectangle triggers a hero
+/// animation as a new [MaterialPageRoute] is pushed. Both the size 
+/// and location of the rectangle animates.
+///
+/// Both widgets use the same [Hero.tag].
+/// 
+/// The Hero widget uses the matching tags to identify and execute this
+/// animation.
 ///
 /// ```dart
 ///  Widget build(BuildContext context) {
