@@ -1191,12 +1191,12 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       // A element rebuild only updates existing children. The underflow check
       // is here to make sure we look ahead one more child if we were at the end
       // of the child list before the update. By doing so, we can update the max
-      // scroll offset during the layout phase. Otherwise, the scroll view will
-      // be stuck at the previous max scroll offset and never gets update even
-      // if there are new children added at the end.
+      // scroll offset during the layout phase. Otherwise, the layout phase may
+      // be skipped, and the scroll view may be stuck at the previous max
+      // scroll offset.
       //
-      // This logic however is not needed if any existing children has been
-      // updated, because we will not skip the layout phase after the rebuild.
+      // This logic is not needed if any existing children has been updated,
+      // because we will not skip the layout phase if that happens.
       if (!childrenUpdated && _didUnderflow) {
         final int lastKey = _childElements.lastKey() ?? -1;
         final int rightBoundary = lastKey + 1;
