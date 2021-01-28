@@ -2878,7 +2878,7 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node)!;
+      yield* _parseDiagnosticsNode(node, properties)!;
     } else {
       if (foundStackTrace) {
         pending.add(node);
@@ -2893,15 +2893,15 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 /// Transform the input [DiagnosticsNode].
 ///
 /// Return null if input [DiagnosticsNode] is not applicable.
-Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node) {
+Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node, Iterable<DiagnosticsNode> properties) {
   if (!_isDebugCreator(node))
     return null;
   final DebugCreator debugCreator = node.value! as DebugCreator;
   final Element element = debugCreator.element;
-  return _describeRelevantUserCode(element);
+  return _describeRelevantUserCode(element, properties);
 }
 
-Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
+Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element, Iterable<DiagnosticsNode> properties) {
   if (!WidgetInspectorService.instance.isWidgetCreationTracked()) {
     return <DiagnosticsNode>[
       ErrorDescription(
@@ -2912,20 +2912,41 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
       ErrorSpacer(),
     ];
   }
+
+  bool isOverflowError() {
+    for (final DiagnosticsNode node in properties) {
+      if (node is ErrorSummary) {
+        if (node.value.isNotEmpty
+            && node.value.first is String
+            && (node.value.first as String).contains('A RenderFlex overflowed by')) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
   bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
 
+
       DiagnosticsNode? devToolsDiagnostic;
-      final String? devToolsInspectorUri =
-          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
-      if (devToolsInspectorUri != null) {
-        devToolsDiagnostic = DevToolsDeepLinkProperty(
-          'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
-          devToolsInspectorUri,
-        );
+
+      // TODO(kenz): once the inspector is better at dealing with broken trees,
+      // we can enable deep links for more errors than just RenderFlex overflow
+      // errors.
+      if (isOverflowError()) {
+        final String? devToolsInspectorUri =
+        WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+        if (devToolsInspectorUri != null) {
+          devToolsDiagnostic = DevToolsDeepLinkProperty(
+            'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+            devToolsInspectorUri,
+          );
+        }
       }
 
       nodes.addAll(<DiagnosticsNode>[
