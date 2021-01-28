@@ -536,7 +536,6 @@ void main() {
     expect((a.add(b.subtract(a) * 0.0)).resolve(TextDirection.ltr), a);
     expect((a.add(b.subtract(a) * 1.0)).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
   });
-  
   test('BorderRadius copyWith', () {
     const BorderRadius firstRadius = BorderRadius.only(
       topLeft: Radius.elliptical(10.0, 20.0),
