@@ -128,4 +128,6 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68908
   ScaffoldMessenger.of(context, nullOk: true);
   ScaffoldMessenger.of(context, nullOk: false);
+  Scaffold.of(context, nullOk: true);
+  Scaffold.of(context, nullOk: false);
 }
