@@ -11,8 +11,10 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-TaskFunction dartPluginRegistryTest(
-    {String deviceIdOverride, Map<String, String> environment}) {
+TaskFunction dartPluginRegistryTest({
+  String deviceIdOverride,
+  Map<String, String> environment,
+}) {
   final Directory tempDir = Directory.systemTemp
       .createTempSync('flutter_devicelab_dart_plugin_test.');
   return () async {
