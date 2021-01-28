@@ -157,14 +157,25 @@ class _WebGlRenderer implements _GlRenderer {
     // Setup color buffer.
     Object? colorsBuffer = gl.createBuffer();
     gl.bindArrayBuffer(colorsBuffer);
+
+    final int vertexCount = positions.length ~/ 2;
+
     // Buffer kBGRA_8888.
-    gl.bufferData(vertices._colors, gl.kStaticDraw);
+    if (vertices._colors == null) {
+      final ui.Color color = paint.color ?? ui.Color(0xFF000000);
+      Uint32List vertexColors = Uint32List(vertexCount);
+      for (int i = 0; i < vertexCount; i++) {
+        vertexColors[i] = color.value;
+      }
+      gl.bufferData(vertexColors, gl.kStaticDraw);
+    } else {
+      gl.bufferData(vertices._colors, gl.kStaticDraw);
+    }
     Object colorLoc = gl.getAttributeLocation(glProgram.program, 'color');
     js_util.callMethod(gl.glContext, 'vertexAttribPointer',
         <dynamic>[colorLoc, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
     gl.clear();
-    final int vertexCount = positions.length ~/ 2;
     gl.drawTriangles(vertexCount, vertices._mode);
 
     context!.save();

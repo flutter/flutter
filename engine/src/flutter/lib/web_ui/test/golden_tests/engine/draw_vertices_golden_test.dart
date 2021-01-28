@@ -59,11 +59,11 @@ void testMain() async {
 
   Future<void> _testVertices(String fileName, Vertices vertices,
       BlendMode blendMode,
-      Paint paint) async {
+      Paint paint, {bool write: false}) async {
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 500, 500));
     rc.drawVertices(vertices, blendMode, paint);
-    await _checkScreenshot(rc, fileName);
+    await _checkScreenshot(rc, fileName, write: write);
   }
 
   test('Should draw green hairline triangles when colors array is null.',
@@ -99,6 +99,31 @@ void testMain() async {
         vertices,
         BlendMode.srcOver,
         Paint());
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/71442.
+  test('Should draw filled triangles when colors array is null'
+      ' and Paint() has color.',
+        () async {
+      // ignore: unused_local_variable
+      final Int32List colors = Int32List.fromList(<int>[
+        0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
+        0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
+        0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
+        0xFFFF0000, 0xFF00FF00, 0xFF0000FF]);
+      final Vertices vertices = Vertices.raw(VertexMode.triangles,
+          Float32List.fromList([
+            20.0, 20.0, 220.0, 10.0, 110.0, 220.0,
+            220.0, 320.0, 20.0, 310.0, 200.0, 420.0
+          ]));
+      await _testVertices(
+          'draw_vertices_triangle_green_filled',
+          vertices,
+          BlendMode.srcOver,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = const Color(0xFF00FF00)
+      );
   });
 
   test('Should draw hairline triangleFan.',
