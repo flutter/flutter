@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/ios/ios_sdk.gni") # For use_ios_simulator
+
 declare_args() {
   # Enable the optional type profiler in Clang, which will tag heap allocations
   # with the allocation type.
@@ -26,5 +28,7 @@ declare_args() {
   # TODO(dnfield): We shouldn't need Xcode for bitcode_marker builds, but we do
   # until libpng and dart have explicitly added LLVM asm sections to their
   # assembly sources. https://github.com/flutter/flutter/issues/39281
-  use_xcode = enable_bitcode
+  # TODO(gw280): Once our own copy of clang 12 is capable of building for arm64 simulator,
+  # we can safely remove the requirement that we use xcode for arm64 simulator builds.
+  use_xcode = enable_bitcode || (use_ios_simulator && (target_cpu == "arm" || target_cpu == "arm64"))
 }
