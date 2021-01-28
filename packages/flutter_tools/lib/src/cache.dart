@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
@@ -1789,6 +1791,12 @@ class ArtifactUpdater {
       } finally {
         status.stop();
       }
+      /// Unzipping multiple file into a directory will not remove old files
+      /// from previous versions that are not present in the new bundle.
+      final Directory destination = location.childDirectory(
+        tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
+      );
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
       _ensureExists(location);
 
       try {

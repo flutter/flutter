@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
@@ -311,6 +313,7 @@ abstract class CreateBase extends FlutterCommand {
     String androidLanguage,
     String iosLanguage,
     String flutterRoot,
+    String dartSdkVersionBounds,
     bool withPluginHook = false,
     bool ios = false,
     bool android = false,
@@ -364,6 +367,7 @@ abstract class CreateBase extends FlutterCommand {
       'macos': macos,
       'windows': windows,
       'year': DateTime.now().year,
+      'dartSdkVersionBounds': dartSdkVersionBounds,
     };
   }
 

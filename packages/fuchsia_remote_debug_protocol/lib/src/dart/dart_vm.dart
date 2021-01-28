@@ -10,14 +10,13 @@ import 'package:vm_service/vm_service.dart' as vms;
 import '../common/logging.dart';
 
 const Duration _kConnectTimeout = Duration(seconds: 3);
-const Duration _kRpcTimeout = Duration(seconds: 5);
 final Logger _log = Logger('DartVm');
 
 /// Signature of an asynchronous function for establishing a [vms.VmService]
 /// connection to a [Uri].
 typedef RpcPeerConnectionFunction = Future<vms.VmService> Function(
   Uri uri, {
-  Duration timeout,
+  required Duration timeout,
 });
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
@@ -34,7 +33,7 @@ Future<vms.VmService> _waitAndConnect(
   Duration timeout = _kConnectTimeout,
 }) async {
   int attempts = 0;
-  WebSocket socket;
+  late WebSocket socket;
   while (true) {
     try {
       socket = await WebSocket.connect(uri.toString());
@@ -56,7 +55,7 @@ Future<vms.VmService> _waitAndConnect(
       await service.getVersion();
       return service;
     } catch (e) {
-      await socket?.close();
+      await socket.close();
       if (attempts > 5) {
         _log.warning('It is taking an unusually long time to connect to the VM...');
       }
@@ -112,9 +111,6 @@ class DartVm {
     }
 
     final vms.VmService service = await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
-    if (service == null) {
-      return null;
-    }
     return DartVm._(service, uri);
   }
 
@@ -123,16 +119,13 @@ class DartVm {
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
   /// VM. Therefore, the [pattern] argument should be written to exclude
   /// matching unintended isolates.
-  Future<List<IsolateRef>> getMainIsolatesByPattern(
-    Pattern pattern, {
-    Duration timeout = _kRpcTimeout,
-  }) async {
+  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final vms.VM vmRef = await _vmService.getVM();
     final List<IsolateRef> result = <IsolateRef>[];
-    for (final vms.IsolateRef isolateRef in vmRef.isolates) {
-      if (pattern.matchAsPrefix(isolateRef.name) != null) {
+    for (final vms.IsolateRef isolateRef in vmRef.isolates!) {
+      if (pattern.matchAsPrefix(isolateRef.name!) != null) {
         _log.fine('Found Isolate matching "$pattern": "${isolateRef.name}"');
-        result.add(IsolateRef._fromJson(isolateRef.json, this));
+        result.add(IsolateRef._fromJson(isolateRef.json!, this));
       }
     }
     return result;
@@ -145,16 +138,11 @@ class DartVm {
   /// the flutter view's name), then the flutter view's ID will be added
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
-  Future<List<FlutterView>> getAllFlutterViews({
-    Duration timeout = _kRpcTimeout,
-  }) async {
+  Future<List<FlutterView>> getAllFlutterViews() async {
     final List<FlutterView> views = <FlutterView>[];
     final vms.Response rpcResponse = await _vmService.callMethod('_flutter.listViews');
-    for (final Map<String, dynamic> jsonView in (rpcResponse.json['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-      final FlutterView flutterView = FlutterView._fromJson(jsonView);
-      if (flutterView != null) {
-        views.add(flutterView);
-      }
+    for (final Map<String, dynamic> jsonView in (rpcResponse.json!['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
+      views.add(FlutterView._fromJson(jsonView));
     }
     return views;
   }
@@ -190,25 +178,25 @@ class FlutterView {
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> isolate = json['isolate'] as Map<String, dynamic>;
-    final String id = json['id'] as String;
-    String name;
-    if (isolate != null) {
-      name = isolate['name'] as String;
-      if (name == null) {
-        throw RpcFormatError('Unable to find name for isolate "$isolate"');
-      }
-    }
+    final Map<String, dynamic>? isolate = json['isolate'] as Map<String, dynamic>?;
+    final String? id = json['id'] as String?;
+    String? name;
     if (id == null) {
       throw RpcFormatError(
           'Unable to find view name for the following JSON structure "$json"');
+    }
+    if (isolate != null) {
+      name = isolate['name'] as String?;
+      if (name == null) {
+        throw RpcFormatError('Unable to find name for isolate "$isolate"');
+      }
     }
     return FlutterView._(name, id);
   }
 
   /// Determines the name of the isolate associated with this view. If there is
   /// no associated isolate, this will be set to the view's ID.
-  final String _name;
+  final String? _name;
 
   /// The ID of the Flutter view.
   final String _id;
@@ -219,7 +207,7 @@ class FlutterView {
   /// Returns the name of the [FlutterView].
   ///
   /// May be null if there is no associated isolate.
-  String get name => _name;
+  String? get name => _name;
 }
 
 /// This is a wrapper class for the `@Isolate` RPC object.
@@ -233,9 +221,9 @@ class IsolateRef {
   IsolateRef._(this.name, this.number, this.dartVm);
 
   factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
-    final String number = json['number'] as String;
-    final String name = json['name'] as String;
-    final String type = json['type'] as String;
+    final String? number = json['number'] as String?;
+    final String? name = json['name'] as String?;
+    final String? type = json['type'] as String?;
     if (type == null) {
       throw RpcFormatError('Unable to find type within JSON "$json"');
     }

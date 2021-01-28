@@ -4,6 +4,9 @@ description: Flutter non-plugin UI integration tests.
 environment:
   sdk: ">=2.8.0 <3.0.0"
 
+# The "image" dependency below seems to only be needed for test_driver/screenshot_test.dart
+# It can probably be removed, see the comment in that file.
+
 dependencies:
   image: 3.0.0-nullsafety.0
   flutter:

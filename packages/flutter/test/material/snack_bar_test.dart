@@ -691,7 +691,7 @@ void main() {
     );
 
     final ThemeData theme = ThemeData.raw(
-      visualDensity: const VisualDensity(),
+      visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,

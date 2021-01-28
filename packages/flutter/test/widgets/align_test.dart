@@ -18,7 +18,7 @@ void main() {
     await tester.pumpWidget(
       Align(
         child: Container(),
-        alignment: const Alignment(0.0, 0.0),
+        alignment: Alignment.center,
       ),
     );
 
@@ -98,7 +98,7 @@ void main() {
             width: 10.0,
             height: 10.0,
           ),
-          alignment: const Alignment(0.0, 0.0),
+          alignment: Alignment.center,
         ),
       ),
     );
