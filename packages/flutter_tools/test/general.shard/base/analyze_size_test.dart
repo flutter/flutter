@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
@@ -68,7 +67,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: FakeUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -145,7 +144,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: FakeUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Archive archive = Archive()
@@ -187,7 +186,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
-      flutterUsage: FakeUsage(),
+      flutterUsage: TestUsage(),
     );
 
     final Directory outputDirectory = fileSystem.directory('example/out/foo.app')
@@ -224,9 +223,4 @@ void main() {
     expect(result['type'], 'linux');
     expect(result['precompiler-trace'], <String, Object>{});
   });
-}
-
-class FakeUsage extends Fake implements Usage {
-  @override
-  void sendEvent(String category, String parameter, {String label, int value, Map<String, String> parameters}) { }
 }
