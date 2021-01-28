@@ -6,14 +6,15 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -22,12 +23,14 @@ void main() {
   BufferLogger logger;
   FakePlatform platform;
   PersistentToolState persistentToolState;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
     logger = BufferLogger.test();
     platform = FakePlatform(environment: <String, String>{});
+    fileSystem = MemoryFileSystem.test();
 
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('devtools_launcher_test');
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('devtools_launcher_test');
     persistentToolState = PersistentToolState.test(
       directory: tempDir,
       logger: logger,
@@ -41,6 +44,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -85,6 +89,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -129,6 +134,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -178,6 +184,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -209,6 +216,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -255,6 +263,7 @@ void main() {
       logger: logger,
       platform: platform,
       persistentToolState: persistentToolState,
+      httpClient: FakeHttpClient(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -294,3 +303,17 @@ void main() {
     expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
   });
 }
+
+class FakeHttpClient extends Fake implements HttpClient {
+  @override
+  Future<HttpClientRequest> headUrl(Uri url) async {
+    return FakeHttpClientRequest();
+  }
+}
+class FakeHttpClientRequest extends Fake implements HttpClientRequest {
+  @override
+  Future<HttpClientResponse> close() async {
+    return FakehttpClientResponse();
+  }
+}
+class FakehttpClientResponse extends Fake implements HttpClientResponse {}

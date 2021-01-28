@@ -1275,18 +1275,33 @@ abstract class ResidentRunner {
     return _devToolsLauncher.activeDevToolsServer;
   }
 
-  Future<void> serveDevToolsGracefully({
-    Uri devToolsServerAddress
+  Future<void> serveDevToolsGracefully2({
+    Uri devToolServerUri
   }) async {
     if (!supportsServiceProtocol) {
       return;
     }
 
     _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (devToolsServerAddress != null) {
-      _devToolsLauncher.devToolsUri = devToolsServerAddress;
+    if (devToolServerUri != null) {
+      _devToolsLauncher.devToolsUri = devToolServerUri;
     } else {
       await _devToolsLauncher.serve();
+    }
+    final DevToolsServerAddress address = _devToolsLauncher.activeDevToolsServer;
+    if (address == null) {
+      return;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      final Uri uri = address.uri?.replace(
+        queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+      );
+      if (uri != null) {
+        globals.printStatus(
+          '\nFlutter DevTools, a Flutter debugger and profiler, on '
+          '${device.device.name} is available at: $uri',
+        );
+      }
     }
   }
 

@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -28,17 +27,23 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
+    @visibleForTesting Duration connectionTimeout = const Duration(hours: 1000),
+    @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
-        _persistentToolState = persistentToolState;
+        _persistentToolState = persistentToolState,
+        _connectionTimeout = connectionTimeout,
+        _httpClient = httpClient ?? io.HttpClient();
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
   final PersistentToolState _persistentToolState;
+  final Duration _connectionTimeout;
+  final io.HttpClient _httpClient;
 
   io.Process _devToolsProcess;
 
@@ -54,11 +59,11 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       bool offline = false;
       try {
         const String pubHostedUrlKey = 'PUB_HOSTED_URL';
-        if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
-        } else {
-          await http.head(Uri.https('pub.dev', ''));
-        }
+        final Uri uri = _platform.environment.containsKey(pubHostedUrlKey)
+          ? Uri.parse(_platform.environment[pubHostedUrlKey])
+          : Uri.https('pub.dev', '');
+        final io.HttpClientRequest request = await _httpClient.headUrl(uri);
+        await request.close();
       } on Exception {
         offline = true;
       }
@@ -110,7 +115,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(const LineSplitter())
           .listen(_logger.printError);
       devToolsUri = await completer.future
-        .timeout(const Duration(seconds: 10));
+        .timeout(_connectionTimeout);
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
