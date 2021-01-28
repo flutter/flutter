@@ -1451,7 +1451,7 @@ abstract class BaseSliderTrackShape {
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
 
-    final double trackLeft = offset.dx + overlayWidth / 2;
+    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
     final double trackBottom = trackTop + trackHeight;
