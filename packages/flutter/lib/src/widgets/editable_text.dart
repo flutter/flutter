@@ -198,7 +198,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// By default makes text in composing range appear as underlined. Descendants
   /// can override this method to customize appearance of text.
-  TextSpan buildTextSpan({TextStyle? style , required bool withComposing}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style , required bool withComposing}) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
@@ -2680,6 +2680,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     // Read only mode should not paint text composing.
     return widget.controller.buildTextSpan(
+      context: context,
       style: widget.style,
       withComposing: !widget.readOnly,
     );

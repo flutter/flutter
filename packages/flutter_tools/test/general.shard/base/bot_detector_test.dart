@@ -16,10 +16,12 @@ import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 
 void main() {
   group('BotDetector', () {
     FakePlatform fakePlatform;
+    MockStdio mockStdio;
     MockHttpClient mockHttpClient;
     MockHttpClientRequest mockHttpClientRequest;
     MockHttpHeaders mockHttpHeaders;
@@ -28,6 +30,7 @@ void main() {
 
     setUp(() {
       fakePlatform = FakePlatform()..environment = <String, String>{};
+      mockStdio = MockStdio();
       mockHttpClient = MockHttpClient();
       mockHttpClientRequest = MockHttpClientRequest();
       mockHttpHeaders = MockHttpHeaders();
@@ -55,6 +58,17 @@ void main() {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
 
+        expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+      });
+
+      testWithoutContext('returns false with and without a terminal attached', () async {
+        when(mockHttpClient.getUrl(any)).thenAnswer((_) {
+          throw const SocketException('HTTP connection timed out');
+        });
+        mockStdio.stdout.hasTerminal = true;
+        expect(await botDetector.isRunningOnBot, isFalse);
+        mockStdio.stdout.hasTerminal = false;
         expect(await botDetector.isRunningOnBot, isFalse);
         expect(persistentToolState.isRunningOnBot, isFalse);
       });
