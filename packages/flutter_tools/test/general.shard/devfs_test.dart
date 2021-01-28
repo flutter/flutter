@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -29,6 +31,20 @@ final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   jsonResponse: <String, Object>{
     'uri': Uri.parse('test').toString(),
   }
+);
+
+const FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
+  method: '_createDevFS',
+  args: <String, Object>{
+    'fsName': 'test',
+  },
+  errorCode: RPCErrorCodes.kServiceDisappeared,
+);
+
+const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
+  method: '_deleteDevFS',
+  args: <String, dynamic>{'fsName': 'test'},
+  errorCode: RPCErrorCodes.kServiceDisappeared,
 );
 
 void main() {
@@ -93,6 +109,73 @@ void main() {
     expect(content.isModified, isFalse);
   });
 
+  testWithoutContext('DevFS create throws a DevFSException when vmservice disconnects unexpectedly', () async {
+    final HttpClient httpClient = MockHttpClient();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final OperatingSystemUtils osUtils = MockOperatingSystemUtils();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[failingCreateDevFSRequest],
+    );
+    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
+
+    final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+    when(httpRequest.headers).thenReturn(MockHttpHeaders());
+    when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+      return Future<HttpClientRequest>.value(httpRequest);
+    });
+    final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+    when(httpRequest.close()).thenAnswer((Invocation invocation) {
+      return Future<HttpClientResponse>.value(httpClientResponse);
+    });
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      osUtils: osUtils,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      httpClient: httpClient,
+    );
+    expect(() async => await devFS.create(), throwsA(isA<DevFSException>()));
+  });
+
+  testWithoutContext('DevFS destroy is resiliant to vmservice disconnection', () async {
+    final HttpClient httpClient = MockHttpClient();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final OperatingSystemUtils osUtils = MockOperatingSystemUtils();
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        createDevFSRequest,
+        failingDeleteDevFSRequest,
+      ],
+    );
+    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
+
+    final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+    when(httpRequest.headers).thenReturn(MockHttpHeaders());
+    when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+      return Future<HttpClientRequest>.value(httpRequest);
+    });
+    final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+    when(httpRequest.close()).thenAnswer((Invocation invocation) {
+      return Future<HttpClientResponse>.value(httpClientResponse);
+    });
+
+    final DevFS devFS = DevFS(
+      fakeVmServiceHost.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      osUtils: osUtils,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      httpClient: httpClient,
+    );
+
+    expect(await devFS.create(), isNotNull);
+    await devFS.destroy();  // Testing that this does not throw.
+  });
+
   testWithoutContext('DevFS retries uploads when connection reset by peer', () async {
     final HttpClient httpClient = MockHttpClient();
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -138,6 +221,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       httpClient: httpClient,
+      uploadRetryThrottle: Duration.zero,
     );
     await devFS.create();
 

@@ -103,7 +103,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
@@ -136,7 +136,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context,int index) {
@@ -170,7 +170,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
           (BuildContext context,int index) {
@@ -206,7 +206,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
@@ -241,7 +241,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
@@ -275,7 +275,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
@@ -310,7 +310,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         crossAxisCount: 2,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
@@ -344,7 +344,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         maxCrossAxisExtent: 300,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
@@ -378,7 +378,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
@@ -415,7 +415,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
         child: ListView(
-      padding: const EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       children: focusNodes.map((FocusNode focusNode) {
         return Container(
@@ -446,7 +446,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context,int index) {
@@ -480,7 +480,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(
           (BuildContext context,int index) {
@@ -516,7 +516,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
@@ -551,7 +551,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
@@ -585,7 +585,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
@@ -620,7 +620,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         crossAxisCount: 2,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
@@ -654,7 +654,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         maxCrossAxisExtent: 300,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         children: focusNodes.map((FocusNode focusNode) {
@@ -688,7 +688,7 @@ void main() {
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
-        padding: const EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         childrenDelegate: SliverChildBuilderDelegate(

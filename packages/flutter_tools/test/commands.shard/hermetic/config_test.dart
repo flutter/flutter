@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
@@ -186,19 +188,19 @@ void main() {
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-web: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-web: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-linux-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-linux-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-windows-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-windows-desktop: true'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-macos-desktop: true (Unavailable)'),
+        containsIgnoringWhitespace('enable-macos-desktop: true'),
       );
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{

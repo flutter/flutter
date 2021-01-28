@@ -60,7 +60,7 @@
   "refreshIndicatorSemanticLabel": "Atnaujinti",
   "moreButtonTooltip": "Daugiau",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "yyyy/mm/dd/",
   "selectYearSemanticsLabel": "Pasirinkite metus",
   "unspecifiedDate": "Data",
   "unspecifiedDateRange": "Dienų seka",

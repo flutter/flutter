@@ -541,7 +541,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
 /// user scrolls, but it will also stretch when the user over-scrolls if the
-/// [stretch] value is `true`. Defaults to `true`.
+/// [stretch] value is `true`. Defaults to `false`.
 ///
 /// See also:
 ///
@@ -566,7 +566,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.stretch = true,
+    this.stretch = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
        assert(
@@ -658,7 +658,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   ///
   /// The nav bar can still expand and contract as the user scrolls, but it will
   /// also stretch when the user over-scrolls if the [stretch] value is `true`.
-  /// Defaults to `true`.
+  ///
+  /// When set to `true`, the nav bar will prevent subsequent slivers from
+  /// accessing overscrolls. This may be undesirable for using overscroll-based
+  /// widgets like the [CupertinoSliverRefreshControl].
+  ///
+  /// Defaults to `false`.
   final bool stretch;
 
   @override

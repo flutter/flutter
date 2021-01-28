@@ -53,7 +53,7 @@
   "refreshIndicatorSemanticLabel": "पुनः ताजा गर्नुहोस्",
   "moreButtonTooltip": "थप",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "yyyy/mm/dd",
   "selectYearSemanticsLabel": "वर्ष छान्नुहोस्",
   "unspecifiedDate": "मिति",
   "unspecifiedDateRange": "मितिको दायरा",

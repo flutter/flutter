@@ -1243,7 +1243,7 @@ void main() {
     final Offset scrollable = tester.getCenter(find.byType(SingleChildScrollView));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     testPointer.hover(scrollable);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 0.0)));
+    await tester.sendEventToBinding(testPointer.scroll(Offset.zero));
 
     expect(tester.takeException(), null);
   });

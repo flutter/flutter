@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "Värskendamine",
   "moreButtonTooltip": "Rohkem",
   "dateSeparator": ".",
-  "dateHelpText": "kk/pp/aaaa",
+  "dateHelpText": "pp.kk.aaaa",
   "selectYearSemanticsLabel": "Valige aasta",
   "unspecifiedDate": "Kuupäev",
   "unspecifiedDateRange": "Kuupäevavahemik",
