@@ -11,6 +11,29 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/68908.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'of'
+      inClass: 'ScaffoldMessenger'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
   # Changes made in https://github.com/flutter/flutter/pull/70726.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
