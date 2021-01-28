@@ -543,7 +543,7 @@ void main() {
       bottomLeft: Radius.elliptical(50.0, 60.0),
       bottomRight: Radius.elliptical(40.0, 80.0)
     );
-    BorderRadius secondRadius = firstRadius.copyWith(bottomRight: Radius.zero);
+    final BorderRadius secondRadius = firstRadius.copyWith(bottomRight: Radius.zero);
     expect(firstRadius.topLeft, secondRadius.topLeft);
     expect(firstRadius.topRight, secondRadius.topRight);
     expect(firstRadius.bottomLeft, secondRadius.bottomLeft);
