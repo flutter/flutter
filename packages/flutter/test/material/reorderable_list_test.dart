@@ -1305,6 +1305,12 @@ void main() {
     await drag.moveBy(const Offset(0, 700));
     await tester.pump(const Duration(seconds: 30));
     await tester.pumpAndSettle();
+    // Ensure we made it to the bottom (only 4 should be showing as there should
+    // be a gap at the end for the drop area of the dragged item.
+    for (final int i in <int>[95, 96, 97, 98, 99]) {
+      expect(find.text('item $i'), findsOneWidget);
+    }
+
     // Drag back to off the top of the list, which should autoscroll until
     // we hit the beginning of the list. This should cause the first item's
     // entry to be rebuilt. However, the contents should not be in both places.

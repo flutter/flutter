@@ -864,8 +864,6 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       setState(() {
         _dragging = dragging;
       });
-    } else {
-      print('trying to setting dragging on an unmounted item $this, $dragging');
     }
   }
   bool _dragging = false;
