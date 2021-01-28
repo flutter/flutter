@@ -71,4 +71,12 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68911
   Localizations.maybeLocaleOf(context);
   Localizations.localeOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
 }

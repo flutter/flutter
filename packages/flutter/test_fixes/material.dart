@@ -138,4 +138,12 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68911
   Localizations.localeOf(context, nullOk: true);
   Localizations.localeOf(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.of(context, nullOk: true);
+  FocusTraversalOrder.of(context, nullOk: false);
+  FocusTraversalGroup.of(context, nullOk: true);
+  FocusTraversalGroup.of(context, nullOk: false);
+  Focus.of(context, nullOk: true);
+  Focus.of(context, nullOk: false);
 }
