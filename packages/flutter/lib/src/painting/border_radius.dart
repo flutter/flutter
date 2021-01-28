@@ -327,19 +327,22 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomRight = Radius.zero,
   });
 
-  /// Creates a border radius with the given set of parameters
-  const BorderRadius.copyWith({
-    Radius topLeft = Radius.zero,
-    Radius topRight = Radius.zero,
-    Radius bottomLeft = Radius.zero,
-    Radius bottomRight = Radius.zero,
-    }) : this.only(
-      topLeft:topLeft,
-      topRight:topRight,
-      bottomLeft:bottomLeft,
-      bottomRight:bottomRight
+  /// Creates a border radius by overriding the previous values and
+  /// returing a new object
+  
+  BorderRadius copyWith({
+    Radius? topLeft,
+    Radius? topRight,
+    Radius? bottomLeft,
+    Radius? bottomRight,
+  }) {
+    return BorderRadius.only(
+      topLeft: topLeft ?? _topLeft,
+      topRight: topRight ?? _topRight,
+      bottomLeft: bottomLeft ?? _bottomLeft,
+      bottomRight: bottomRight ?? _bottomRight,
     );
-
+  }
   /// A border radius with all zero radii.
   static const BorderRadius zero = BorderRadius.all(Radius.zero);
 
@@ -504,6 +507,7 @@ class BorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) => this;
+
 }
 
 /// An immutable set of radii for each corner of a rectangle, but with the
