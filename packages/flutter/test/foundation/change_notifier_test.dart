@@ -459,7 +459,7 @@ void main() {
       test.addListener(listener);
     }
 
-    final List<int> remainingListenerIndexes = [0,2,5,6,7,8,9,10,11];
+    final List<int> remainingListenerIndexes = <int>[0,2,5,6,7,8,9,10,11];
     final List<String> expectedLog = remainingListenerIndexes.map((int i) => 'listener$i').toList();
 
     test.notify();
