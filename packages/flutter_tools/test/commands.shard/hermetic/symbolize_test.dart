@@ -17,12 +17,12 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../src/mocks.dart';
 
 
 void main() {
   MemoryFileSystem fileSystem;
-  FakeStdio stdio;
+  MockStdio stdio;
   SymbolizeCommand command;
   MockDwarfSymbolizationService mockDwarfSymbolizationService;
 
@@ -32,7 +32,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    stdio = FakeStdio();
+    stdio = MockStdio();
     mockDwarfSymbolizationService = MockDwarfSymbolizationService();
     command = SymbolizeCommand(
       stdio: stdio,

@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputP
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart';
+import '../../src/mocks.dart' show MockStdio;
 
 CommandHelp _createCommandHelp({
   @required bool ansi,
@@ -23,7 +23,7 @@ CommandHelp _createCommandHelp({
   return CommandHelp(
     logger: BufferLogger.test(),
     terminal: AnsiTerminal(
-      stdio: FakeStdio(),
+      stdio:  MockStdio(),
       platform: platform,
     ),
     platform: platform,
