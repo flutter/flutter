@@ -2125,7 +2125,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 
-  void _tryPaintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
+  void _paintCaretIfNeeded(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
@@ -2365,7 +2365,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (canShowCaret) {
       assert(selection != null);
-      _tryPaintCaret(context.canvas, effectiveOffset, selection!.extent);
+      _paintCaretIfNeeded(context.canvas, effectiveOffset, selection!.extent);
       _updateCaretRect();
     }
 
@@ -2374,7 +2374,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (_floatingCursorOn) {
       if (_resetFloatingCursorAnimationValue == null) {
-        _tryPaintCaret(context.canvas, effectiveOffset, _floatingCursorTextPosition);
+        _paintCaretIfNeeded(context.canvas, effectiveOffset, _floatingCursorTextPosition);
         _updateCaretRect();
       }
       _paintFloatingCaret(context.canvas, _floatingCursorOffset);
