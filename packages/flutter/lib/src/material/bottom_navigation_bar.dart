@@ -274,6 +274,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedLabelStyle,
     this.showSelectedLabels,
     this.showUnselectedLabels,
+    this.showTooltip = true,
     this.mouseCursor,
   }) : assert(items != null),
        assert(items.length >= 2),
@@ -291,6 +292,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+       assert(showTooltip != null),
        selectedItemColor = selectedItemColor ?? fixedColor,
        super(key: key);
 
@@ -404,6 +406,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   final bool? showSelectedLabels;
 
+  /// Whether the tooltip is shown when long pressed on the [BottomNavigationBarItem].
+  ///
+  /// Defaults to true.
+  final bool showTooltip;
+
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// tiles.
   ///
@@ -433,6 +440,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
     this.indexLabel,
+    required this.showTooltip,
     required this.mouseCursor,
     }) : assert(type != null),
          assert(item != null),
@@ -457,6 +465,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String? indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final bool showTooltip;
   final MouseCursor mouseCursor;
 
   @override
@@ -478,9 +487,6 @@ class _BottomNavigationTile extends StatelessWidget {
     // The amount that the unselected icons are bigger than the selected icon,
     // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
-
-    // The effective tool tip message to be shown on the BottomNavigationBarItem.
-    final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
 
     // Defines the padding for the animating icons + labels.
     //
@@ -572,14 +578,19 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (effectiveTooltip != null) {
-      result = Tooltip(
-        message: effectiveTooltip,
-        preferBelow: false,
-        verticalOffset: selectedIconSize + selectedFontSize,
-        excludeFromSemantics: true,
-        child: result,
-      );
+    if (showTooltip) {
+      // The effective tool tip message to be shown on the BottomNavigationBarItem.
+      final String? effectiveTooltip = item.tooltip == '' ? null : item.tooltip ?? item.label;
+
+      if(effectiveTooltip != null){
+        result = Tooltip(
+          message: effectiveTooltip,
+          preferBelow: false,
+          verticalOffset: selectedIconSize + selectedFontSize,
+          excludeFromSemantics: true,
+          child: result,
+        );
+      }
     }
 
     result = Semantics(
@@ -979,6 +990,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels ?? true,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+        showTooltip: widget.showTooltip,
         mouseCursor: effectiveMouseCursor,
       ));
     }
@@ -1000,7 +1012,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(!widget.showTooltip || Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
