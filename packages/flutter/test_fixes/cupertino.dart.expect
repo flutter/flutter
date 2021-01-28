@@ -107,4 +107,12 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68736
   CupertinoTheme.maybeBrightnessOf(context);
   CupertinoTheme.brightnessOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/69805
+  CupertinoThemeData.maybeResolveFrom(context);
+  CupertinoThemeData.resolveFrom(context);
+  NoDefaultCupertinoThemeData.maybeResolveFrom(context);
+  NoDefaultCupertinoThemeData.resolveFrom(context);
+  CupertinoTextThemeData.maybeResolveFrom(context);
+  CupertinoTextThemeData.resolveFrom(context);
 }

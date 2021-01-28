@@ -162,4 +162,8 @@ void main() {
   AnimatedList.of(context, nullOk: false);
   SliverAnimatedList.of(context, nullOk: true);
   SliverAnimatedList.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/69805
+  MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: true);
+  MaterialBasedCupertinoThemeData.resolveFrom(context, nullOk: false);
 }

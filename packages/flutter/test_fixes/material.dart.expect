@@ -162,4 +162,8 @@ void main() {
   AnimatedList.of(context);
   SliverAnimatedList.maybeOf(context);
   SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/69805
+  MaterialBasedCupertinoThemeData.maybeResolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
 }
