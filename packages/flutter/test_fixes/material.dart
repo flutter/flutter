@@ -130,4 +130,8 @@ void main() {
   ScaffoldMessenger.of(context, nullOk: false);
   Scaffold.of(context, nullOk: true);
   Scaffold.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.of(context, nullOk: true);
+  Router.of(context, nullOk: false);
 }

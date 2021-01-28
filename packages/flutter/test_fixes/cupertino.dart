@@ -63,4 +63,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/70726
   Navigator.of(context, nullOk: true);
   Navigator.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.of(context, nullOk: true);
+  Router.of(context, nullOk: false);
 }
