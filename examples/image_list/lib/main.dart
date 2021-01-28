@@ -7,7 +7,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 
 /// An example that sets up local http server for serving single
