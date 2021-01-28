@@ -329,7 +329,6 @@ class BorderRadius extends BorderRadiusGeometry {
 
   /// Creates a border radius by overriding the previous values and
   /// returing a new object
-  
   BorderRadius copyWith({
     Radius? topLeft,
     Radius? topRight,

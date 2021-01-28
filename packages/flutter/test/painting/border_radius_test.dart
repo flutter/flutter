@@ -536,4 +536,25 @@ void main() {
     expect((a.add(b.subtract(a) * 0.0)).resolve(TextDirection.ltr), a);
     expect((a.add(b.subtract(a) * 1.0)).resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
   });
+  
+  test('BorderRadius copyWith', () {
+    const BorderRadius firstRadius = BorderRadius.only(
+      topLeft: Radius.elliptical(10.0, 20.0),
+      topRight: Radius.elliptical(30.0, 40.0),
+      bottomLeft: Radius.elliptical(50.0, 60.0),
+      bottomRight: Radius.elliptical(40.0, 80.0)
+    );
+
+    BorderRadius secondRadius = firstRadius.copyWith(bottomRight: Radius.zero);
+    expect(firstRadius.topLeft, secondRadius.topLeft);
+    expect(firstRadius.topRight, secondRadius.topRight);
+    expect(firstRadius.bottomLeft, secondRadius.bottomLeft);
+    expect(firstRadius.bottomRight, isNot(secondRadius.topLeft));
+    
+
+  });
+  
+
+
+
 }
