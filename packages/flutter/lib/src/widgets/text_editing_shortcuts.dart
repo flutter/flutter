@@ -46,10 +46,12 @@ class TextEditingShortcuts extends StatelessWidget {
         LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const MetaArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const MetaShiftArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const MetaShiftArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ShiftArrowDownTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ShiftArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ShiftArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home): const ShiftHomeTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end): const ShiftEndTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ShiftArrowUpTextIntent(),
       },
       child: child,
     );

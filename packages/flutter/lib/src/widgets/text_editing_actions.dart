@@ -71,6 +71,18 @@ class SingleLongTapStartTextIntent extends Intent {
 class SingleTapCancelTextIntent extends Intent {
   const SingleTapCancelTextIntent();
 }
+class ShiftArrowDownTextIntent extends Intent {
+  const ShiftArrowDownTextIntent();
+}
+class ShiftArrowLeftTextIntent extends Intent {
+  const ShiftArrowLeftTextIntent();
+}
+class ShiftArrowRightTextIntent extends Intent {
+  const ShiftArrowRightTextIntent();
+}
+class ShiftArrowUpTextIntent extends Intent {
+  const ShiftArrowUpTextIntent();
+}
 class ShiftEndTextIntent extends Intent {
   const ShiftEndTextIntent();
 }
@@ -85,8 +97,6 @@ class ControlATextIntent extends Intent {}
 class ControlArrowLeftTextIntent extends Intent {}
 class ControlArrowRightTextIntent extends Intent {}
 class ControlCTextIntent extends Intent {}
-class ShiftArrowLeftTextIntent extends Intent {}
-class ShiftArrowRightTextIntent extends Intent {}
 class SingleTapUpTextIntent extends Intent {
   const SingleTapUpTextIntent({
     required this.details,
@@ -417,6 +427,12 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<ShiftArrowDownTextIntent> _shiftArrowDownTextAction = TextEditingAction<ShiftArrowDownTextIntent>(
+    onInvoke: (ShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+    },
+  );
+
   final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
     onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
@@ -426,6 +442,12 @@ class TextEditingActions extends StatelessWidget {
   final TextEditingAction<ShiftArrowRightTextIntent> _shiftArrowRightTextAction = TextEditingAction<ShiftArrowRightTextIntent>(
     onInvoke: (ShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+    },
+  );
+
+  final TextEditingAction<ShiftArrowUpTextIntent> _shiftArrowUpTextAction = TextEditingAction<ShiftArrowUpTextIntent>(
+    onInvoke: (ShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
     },
   );
 
@@ -491,8 +513,10 @@ class TextEditingActions extends StatelessWidget {
         MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
         MetaShiftArrowLeftTextIntent: _metaShiftArrowLeftTextAction,
         MetaShiftArrowRightTextIntent: _metaShiftArrowRightTextAction,
+        ShiftArrowDownTextIntent: _shiftArrowDownTextAction,
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
+        ShiftArrowUpTextIntent: _shiftArrowUpTextAction,
         SingleTapUpTextIntent: _singleTapUpTextAction,
         ShiftHomeTextIntent: _shiftHomeTextAction,
         ShiftEndTextIntent: _shiftEndTextAction,

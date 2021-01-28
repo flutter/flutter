@@ -742,6 +742,40 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  void extendSelectionDown(SelectionChangedCause cause) {
+    // If the selection is collapsed at the end of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
+      return;
+    }
+
+    final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
+    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+
+    late TextSelection nextSelection;
+    if (positionBelow.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        baseOffset: upperOffset,
+        extentOffset: _plainText.length,
+      );
+      _wasSelectingVerticallyWithKeyboard = true;
+    } else if (_wasSelectingVerticallyWithKeyboard) {
+      nextSelection = selection!.copyWith(
+        baseOffset: selection!.baseOffset,
+        extentOffset: _cursorResetLocation,
+      );
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: positionBelow.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
+    _updateSelection(nextSelection, cause);
+  }
+
   void extendSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _extendGivenSelectionLeft(
       selection!,
@@ -765,6 +799,41 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     final int distance = nextSelection.extentOffset - selection!.extentOffset;
     _cursorResetLocation += distance;
+    _updateSelection(nextSelection, cause);
+  }
+
+  void extendSelectionUp(SelectionChangedCause cause) {
+    // If the selection is collapsed at the beginning of the field already, then
+    // nothing happens.
+    if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
+      return;
+    }
+
+    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
+    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+
+    late TextSelection nextSelection;
+    if (positionAbove.offset == selection!.extentOffset) {
+      nextSelection = selection!.copyWith(
+        baseOffset: lowerOffset,
+        extentOffset: 0,
+      );
+      _wasSelectingVerticallyWithKeyboard = true;
+    } else if (_wasSelectingVerticallyWithKeyboard) {
+      nextSelection = selection!.copyWith(
+        baseOffset: selection!.baseOffset,
+        extentOffset: _cursorResetLocation,
+      );
+      _wasSelectingVerticallyWithKeyboard = false;
+    } else {
+      nextSelection = selection!.copyWith(
+        baseOffset: selection!.baseOffset,
+        extentOffset: positionAbove.offset,
+      );
+      _cursorResetLocation = nextSelection.extentOffset;
+    }
+
     _updateSelection(nextSelection, cause);
   }
 
@@ -823,6 +892,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         baseOffset: _plainText.length,
         extentOffset: _plainText.length,
       );
+      _wasSelectingVerticallyWithKeyboard = false;
     } else {
       nextSelection = TextSelection.fromPosition(positionBelow);
       _cursorResetLocation = nextSelection.extentOffset;
@@ -943,14 +1013,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    final TextPosition upPosition = _getTextPositionAbove(selection!.extentOffset);
+    final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
     late TextSelection nextSelection;
-    if (upPosition.offset == selection!.extentOffset) {
+    if (positionAbove.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(baseOffset: 0, extentOffset: 0);
+      _wasSelectingVerticallyWithKeyboard = false;
     } else {
       nextSelection = selection!.copyWith(
-        baseOffset: upPosition.offset,
-        extentOffset: upPosition.offset,
+        baseOffset: positionAbove.offset,
+        extentOffset: positionAbove.offset,
       );
       _cursorResetLocation = nextSelection.extentOffset;
     }
