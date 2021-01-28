@@ -780,6 +780,42 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
+  // Extend the current selection to the end of the field.
+  //
+  // See also:
+  //   * [extendSelectionToStart]
+  void _extendSelectionToEnd(SelectionChangedCause cause) {
+    if (selection!.extentOffset == _plainText.length) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToEnd(cause);
+    }
+
+    final TextSelection nextSelection = selection!.copyWith(
+      extentOffset: _plainText.length,
+    );
+    _updateSelection(nextSelection, cause);
+  }
+
+  // Extend the current selection to the start of the field.
+  //
+  // See also:
+  //   * [expandSelectionToEnd]
+  void _extendSelectionToStart(SelectionChangedCause cause) {
+    if (selection!.extentOffset == 0) {
+      return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToStart(cause);
+    }
+
+    final TextSelection nextSelection = selection!.copyWith(
+      extentOffset: 0,
+    );
+    _updateSelection(nextSelection, cause);
+  }
+
   // Returns the TextPosition above or below the given offset.
   TextPosition _getTextPositionVertical(int textOffset, double verticalOffset) {
     final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: textOffset), _caretPrototype);
@@ -841,8 +877,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): Rename this "grow" instead of "extend".
-  void extendSelectionToEnd(SelectionChangedCause cause) {
+  /// Expand the current selection to the end of the field.
+  ///
+  /// The selection will never shrink. The extentOffset will always be at the
+  /// end of the field, regardless of the original order of baseOffset and
+  /// extentOffset.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionToStart]
+  void expandSelectionToEnd(SelectionChangedCause cause) {
     if (selection!.extentOffset == _plainText.length) {
       return;
     }
@@ -932,8 +976,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): Rename this "grow" instead of "extend".
-  void extendSelectionToStart(SelectionChangedCause cause) {
+  /// Expand the current selection to the start of the field.
+  ///
+  /// The selection will never shrink. The extentOffset will always be at the
+  /// start of the field, regardless of the original order of baseOffset and
+  /// extentOffset.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionToEnd]
+  void expandSelectionToStart(SelectionChangedCause cause) {
     if (selection!.extentOffset == 0) {
       return;
     }
@@ -952,8 +1004,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): Rename this "grow" instead of "extend".
-  void extendSelectionLeftByLine(SelectionChangedCause cause) {
+  /// Expand the current selection to the start of the line.
+  ///
+  /// The selection will never shrink. The extentOffset will always be at the
+  /// start of the line, regardless of the original order of baseOffset and
+  /// extentOffset.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionRightByLine]
+  void expandSelectionLeftByLine(SelectionChangedCause cause) {
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -980,7 +1040,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return extendSelectionToStart(cause);
+      return _extendSelectionToStart(cause);
     }
 
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
@@ -1000,7 +1060,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return extendSelectionToEnd(cause);
+      return _extendSelectionToEnd(cause);
     }
 
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
@@ -1017,8 +1077,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): Rename this "grow" instead of "extend".
-  void extendSelectionRightByLine(SelectionChangedCause cause) {
+  /// Expand the current selection to the end of the line.
+  ///
+  /// The selection will never shrink. The extentOffset will always be at the
+  /// end of the line, regardless of the original order of baseOffset and
+  /// extentOffset.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionLeftByLine]
+  void expandSelectionRightByLine(SelectionChangedCause cause) {
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
