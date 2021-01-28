@@ -44,7 +44,7 @@ void main() {
     RenderTable table;
     layout(RenderPositionedBox(child: table = RenderTable(textDirection: TextDirection.ltr)));
 
-    expect(table.size, equals(const Size(0.0, 0.0)));
+    expect(table.size, equals(Size.zero));
   });
 
   test('Table control test: constrained flex columns', () {
@@ -77,7 +77,7 @@ void main() {
 
     layout(RenderPositionedBox(child: table));
 
-    expect(table.size, equals(const Size(0.0, 0.0)));
+    expect(table.size, equals(Size.zero));
 
     table.insertChild(RenderPositionedBox());
     table.insertChild(RenderPositionedBox());

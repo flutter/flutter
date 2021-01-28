@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vms;
+import 'package:test/fake.dart';
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 
@@ -11,9 +11,9 @@ import 'common.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
-    List<MockPortForwarder> forwardedPorts;
-    List<MockVmService> mockVmServices;
-    List<Uri> uriConnections;
+    late List<FakePortForwarder> forwardedPorts;
+    List<FakeVmService> fakeVmServices;
+    late List<Uri> uriConnections;
 
     setUp(() {
       final List<Map<String, dynamic>> flutterViewCannedResponses =
@@ -58,31 +58,27 @@ void main() {
         },
       ];
 
-      forwardedPorts = <MockPortForwarder>[];
-      mockVmServices = <MockVmService>[];
+      forwardedPorts = <FakePortForwarder>[];
+      fakeVmServices = <FakeVmService>[];
       uriConnections = <Uri>[];
-      Future<vms.VmService> mockVmConnectionFunction(
+      Future<vms.VmService> fakeVmConnectionFunction(
         Uri uri, {
-        Duration timeout,
+        Duration? timeout,
       }) {
         return Future<vms.VmService>(() async {
-          final MockVmService service = MockVmService();
-          mockVmServices.add(service);
+          final FakeVmService service = FakeVmService();
+          fakeVmServices.add(service);
           uriConnections.add(uri);
-          when(service.callMethod('_flutter.listViews'))
-              // The local ports match the desired indices for now, so get the
-              // canned response from the URI port.
-              .thenAnswer((_) => Future<vms.Response>(
-                  () => vms.Response.parse(flutterViewCannedResponses[uri.port])));
+          service.flutterListViews = vms.Response.parse(flutterViewCannedResponses[uri.port]);
           return service;
         });
       }
 
-      fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
+      fuchsiaVmServiceConnectionFunction = fakeVmConnectionFunction;
     });
 
     tearDown(() {
-      /// Most tests will mock out the port forwarding and connection
+      /// Most tests will fake out the port forwarding and connection
       /// functions.
       restoreFuchsiaPortForwardingFunction();
       restoreVmServiceConnectionFunction();
@@ -90,37 +86,33 @@ void main() {
 
     test('end-to-end with three vm connections and flutter view query', () async {
       int port = 0;
-      Future<PortForwarder> mockPortForwardingFunction(
+      Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final MockPortForwarder pf = MockPortForwarder();
+          final FakePortForwarder pf = FakePortForwarder();
           forwardedPorts.add(pf);
-          when(pf.port).thenReturn(port++);
-          when(pf.remotePort).thenReturn(remotePort);
+          pf.port = port++;
+          pf.remotePort = remotePort;
           return pf;
         });
       }
 
-      fuchsiaPortForwardingFunction = mockPortForwardingFunction;
-      final MockSshCommandRunner mockRunner = MockSshCommandRunner();
+      fuchsiaPortForwardingFunction = fakePortForwardingFunction;
+      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(argThat(startsWith('/bin/find')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['/hub/blah/blah/blah/vmservice-port\n']));
-      when(mockRunner.run(argThat(startsWith('/bin/ls')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['123\n\n\n', '456  ', '789']));
-      when(mockRunner.address).thenReturn('fe80::8eae:4cff:fef4:9247');
-      when(mockRunner.interface).thenReturn('eno1');
+      fakeRunner.findResponse = <String>['/hub/blah/blah/blah/vmservice-port\n'];
+      fakeRunner.lsResponse = <String>['123\n\n\n', '456  ', '789'];
+      fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
+      fakeRunner.interface = 'eno1';
 
       final FuchsiaRemoteConnection connection =
-          await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
-      // [mockPortForwardingFunction] will have returned three different
+      // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
       // check that the forwarding port was called).
       expect(forwardedPorts.length, 3);
@@ -132,7 +124,7 @@ void main() {
       expect(forwardedPorts[2].port, 2);
 
       // VMs should be accessed via localhost ports given by
-      // [mockPortForwardingFunction].
+      // [fakePortForwardingFunction].
       expect(uriConnections[0],
         Uri(scheme:'ws', host:'[::1]', port:0, path:'/ws'));
       expect(uriConnections[1],
@@ -154,44 +146,40 @@ void main() {
 
       // Ensure the ports are all closed after stop was called.
       await connection.stop();
-      verify(forwardedPorts[0].stop());
-      verify(forwardedPorts[1].stop());
-      verify(forwardedPorts[2].stop());
+      expect(forwardedPorts[0].stopped, true);
+      expect(forwardedPorts[1].stopped, true);
+      expect(forwardedPorts[2].stopped, true);
     });
 
     test('end-to-end with three vms and remote open port', () async {
       int port = 0;
-      Future<PortForwarder> mockPortForwardingFunction(
+      Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final MockPortForwarder pf = MockPortForwarder();
+          final FakePortForwarder pf = FakePortForwarder();
           forwardedPorts.add(pf);
-          when(pf.port).thenReturn(port++);
-          when(pf.remotePort).thenReturn(remotePort);
-          when(pf.openPortAddress).thenReturn('fe80::1:2%eno2');
+          pf.port = port++;
+          pf.remotePort = remotePort;
+          pf.openPortAddress = 'fe80::1:2%eno2';
           return pf;
         });
       }
 
-      fuchsiaPortForwardingFunction = mockPortForwardingFunction;
-      final MockSshCommandRunner mockRunner = MockSshCommandRunner();
+      fuchsiaPortForwardingFunction = fakePortForwardingFunction;
+      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(argThat(startsWith('/bin/find')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['/hub/blah/blah/blah/vmservice-port\n']));
-      when(mockRunner.run(argThat(startsWith('/bin/ls')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['123\n\n\n', '456  ', '789']));
-      when(mockRunner.address).thenReturn('fe80::8eae:4cff:fef4:9247');
-      when(mockRunner.interface).thenReturn('eno1');
+      fakeRunner.findResponse = <String>['/hub/blah/blah/blah/vmservice-port\n'];
+      fakeRunner.lsResponse = <String>['123\n\n\n', '456  ', '789'];
+      fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
+      fakeRunner.interface = 'eno1';
       final FuchsiaRemoteConnection connection =
-          await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
-      // [mockPortForwardingFunction] will have returned three different
+      // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
       // check that the forwarding port was called).
       expect(forwardedPorts.length, 3);
@@ -203,7 +191,7 @@ void main() {
       expect(forwardedPorts[2].port, 2);
 
       // VMs should be accessed via the alternate adddress given by
-      // [mockPortForwardingFunction].
+      // [fakePortForwardingFunction].
       expect(uriConnections[0],
         Uri(scheme:'ws', host:'[fe80::1:2%25eno2]', port:0, path:'/ws'));
       expect(uriConnections[1],
@@ -225,43 +213,39 @@ void main() {
 
       // Ensure the ports are all closed after stop was called.
       await connection.stop();
-      verify(forwardedPorts[0].stop());
-      verify(forwardedPorts[1].stop());
-      verify(forwardedPorts[2].stop());
+      expect(forwardedPorts[0].stopped, true);
+      expect(forwardedPorts[1].stopped, true);
+      expect(forwardedPorts[2].stopped, true);
     });
 
     test('end-to-end with three vms and ipv4', () async {
       int port = 0;
-      Future<PortForwarder> mockPortForwardingFunction(
+      Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final MockPortForwarder pf = MockPortForwarder();
+          final FakePortForwarder pf = FakePortForwarder();
           forwardedPorts.add(pf);
-          when(pf.port).thenReturn(port++);
-          when(pf.remotePort).thenReturn(remotePort);
+          pf.port = port++;
+          pf.remotePort = remotePort;
           return pf;
         });
       }
 
-      fuchsiaPortForwardingFunction = mockPortForwardingFunction;
-      final MockSshCommandRunner mockRunner = MockSshCommandRunner();
+      fuchsiaPortForwardingFunction = fakePortForwardingFunction;
+      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(argThat(startsWith('/bin/find')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['/hub/blah/blah/blah/vmservice-port\n']));
-      when(mockRunner.run(argThat(startsWith('/bin/ls')))).thenAnswer(
-          (_) => Future<List<String>>.value(
-              <String>['123\n\n\n', '456  ', '789']));
-      when(mockRunner.address).thenReturn('196.168.1.4');
+      fakeRunner.findResponse = <String>['/hub/blah/blah/blah/vmservice-port\n'];
+      fakeRunner.lsResponse = <String>['123\n\n\n', '456  ', '789'];
+      fakeRunner.address = '196.168.1.4';
 
       final FuchsiaRemoteConnection connection =
-          await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
+          await FuchsiaRemoteConnection.connectWithSshCommandRunner(fakeRunner);
 
-      // [mockPortForwardingFunction] will have returned three different
+      // [fakePortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
       // check that the forwarding port was called).
       expect(forwardedPorts.length, 3);
@@ -294,9 +278,9 @@ void main() {
 
       // Ensure the ports are all closed after stop was called.
       await connection.stop();
-      verify(forwardedPorts[0].stop());
-      verify(forwardedPorts[1].stop());
-      verify(forwardedPorts[2].stop());
+      expect(forwardedPorts[0].stopped, true);
+      expect(forwardedPorts[1].stopped, true);
+      expect(forwardedPorts[2].stopped, true);
     });
 
     test('env variable test without remote addr', () async {
@@ -311,8 +295,69 @@ void main() {
   });
 }
 
-class MockSshCommandRunner extends Mock implements SshCommandRunner {}
+class FakeSshCommandRunner extends Fake implements SshCommandRunner {
+  List<String>? findResponse;
+  List<String>? lsResponse;
+  @override
+  Future<List<String>> run(String command) async {
+    if (command.startsWith('/bin/find')) {
+      return findResponse!;
+    }
+    if (command.startsWith('/bin/ls')) {
+      return lsResponse!;
+    }
+    throw UnimplementedError(command);
+  }
 
-class MockPortForwarder extends Mock implements PortForwarder {}
+  @override
+  String interface = '';
 
-class MockVmService extends Mock implements vms.VmService {}
+  @override
+  String address = '';
+
+  @override
+  String get sshConfigPath => '~/.ssh';
+}
+
+class FakePortForwarder extends Fake implements PortForwarder {
+  @override
+  int port = 0;
+
+  @override
+  int remotePort = 0;
+
+  @override
+  String? openPortAddress;
+
+  bool stopped = false;
+  @override
+  Future<void> stop() async {
+    stopped = true;
+  }
+}
+
+class FakeVmService extends Fake implements vms.VmService {
+  bool disposed = false;
+  vms.Response? flutterListViews;
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+  }
+
+  @override
+  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
+    if (method == '_flutter.listViews') {
+      return flutterListViews!;
+    }
+    throw UnimplementedError(method);
+  }
+
+  @override
+  Future<void> onDone = Future<void>.value();
+
+  @override
+  Future<vms.Version> getVersion() async {
+    return vms.Version(major: -1, minor: -1);
+  }
+}

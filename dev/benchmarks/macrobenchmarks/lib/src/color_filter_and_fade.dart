@@ -3,12 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 // This tests whether the Opacity layer raster cache works with color filters.
 // See https://github.com/flutter/flutter/issues/51975.

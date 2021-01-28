@@ -2062,7 +2062,7 @@ class VisualDensity with Diagnosticable {
       case TargetPlatform.windows:
         return compact;
     }
-    return const VisualDensity();
+    return VisualDensity.standard;
   }
 
   /// Copy the current [VisualDensity] with the given values replacing the

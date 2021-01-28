@@ -53,7 +53,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -117,7 +117,7 @@ void main() {
 
         expect(
           tester.getTopLeft(find.widgetWithText(Container, '0')),
-          const Offset(0.0, 0.0),
+          Offset.zero,
         );
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -168,7 +168,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -194,7 +194,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 99.0));
       await tester.pump();
       await gesture.moveBy(const Offset(0.0, -30.0));
@@ -705,7 +705,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         // Start a refresh.
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
@@ -918,6 +918,47 @@ void main() {
 
       expect(tester.takeException(), isNull);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    // Test to make sure the refresh sliver's overscroll isn't eaten by the
+    // nav bar sliver https://github.com/flutter/flutter/issues/74516.
+    testWidgets(
+        'properly displays when the refresh sliver is behind the large title nav bar sliver',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const CupertinoSliverNavigationBar(
+                largeTitle: Text('Title'),
+              ),
+              CupertinoSliverRefreshControl(
+                builder: mockHelper.builder,
+              ),
+              buildAListOfStuff(),
+            ],
+          ),
+        ),
+      );
+
+      final double initialFirstCellY = tester.getTopLeft(find.widgetWithText(Container, '0')).dy;
+
+      // Drag down but not enough to trigger the refresh.
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0), touchSlopY: 0);
+      await tester.pump();
+
+      expect(mockHelper.invocations.first, matchesBuilder(
+        refreshState: RefreshIndicatorMode.drag,
+        pulledExtent: 50,
+        refreshTriggerPullDistance: 100,  // default value.
+        refreshIndicatorExtent: 60,  // default value.
+      ));
+      expect(mockHelper.invocations, hasLength(1));
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        initialFirstCellY + 50
+      );
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   };
 
   final VoidCallback stateMachineTestGroup = () {
@@ -989,7 +1030,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 79.0));
       await tester.pump();
       expect(
@@ -1025,7 +1066,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
         await tester.pump();
         expect(
@@ -1110,7 +1151,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
@@ -1168,7 +1209,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(

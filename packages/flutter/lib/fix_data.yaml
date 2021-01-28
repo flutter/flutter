@@ -12,7 +12,7 @@ version: 1
 transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to dependOnInheritedElement'
+  - title: "Rename to 'dependOnInheritedElement'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -23,7 +23,7 @@ transforms:
         newName: 'dependOnInheritedElement'
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to dependOnInheritedWidgetOfExactType'
+  - title: "Rename to 'dependOnInheritedWidgetOfExactType'"
     date: 2020-09-14
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -45,7 +45,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to getElementForInheritedWidgetOfExactType'
+  - title: "Rename to 'getElementForInheritedWidgetOfExactType'"
     date: 2020-09-14
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -67,7 +67,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to getElementForInheritedWidgetOfExactType'
+  - title: "Rename to 'getElementForInheritedWidgetOfExactType'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -89,7 +89,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to findAncestorStateOfType'
+  - title: "Rename to 'findAncestorStateOfType'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -111,7 +111,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to findAncestorRenderObjectOfType'
+  - title: "Rename to 'findAncestorRenderObjectOfType'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -133,7 +133,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to findAncestorRenderObjectOfType'
+  - title: "Rename to 'findAncestorRenderObjectOfType'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -155,7 +155,7 @@ transforms:
         index: 0
 
   # Changes made in https://github.com/flutter/flutter/pull/26259
-  - title: 'Rename to resizeToAvoidBottomInset'
+  - title: "Rename to 'resizeToAvoidBottomInset'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart' ]
@@ -166,7 +166,7 @@ transforms:
         newName: 'resizeToAvoidBottomInset'
 
   # Changes made in https://github.com/flutter/flutter/pull/26259
-  - title: 'Rename to resizeToAvoidBottomInset'
+  - title: "Rename to 'resizeToAvoidBottomInset'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart' ]
@@ -179,7 +179,7 @@ transforms:
 
   # Change made in https://github.com/flutter/flutter/pull/20649
   # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
-  - title: 'Replace with CupertinoPopupSurface'
+  - title: "Replace with 'CupertinoPopupSurface'"
     date: 2021-01-07
     bulkApply: false
     element:
@@ -191,7 +191,7 @@ transforms:
 
   # Change made in https://github.com/flutter/flutter/pull/20649
   # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
-  - title: 'Replace with CupertinoAlertDialog'
+  - title: "Replace with 'CupertinoAlertDialog'"
     date: 2021-01-07
     bulkApply: false
     element:
@@ -205,7 +205,7 @@ transforms:
         newName: 'content'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -216,7 +216,7 @@ transforms:
         newName: 'autovalidateMode'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -251,7 +251,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -262,7 +262,7 @@ transforms:
         newName: 'autovalidateMode'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -297,7 +297,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'material.dart' ]
@@ -332,7 +332,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/61648
-  - title: 'Migrate to autovalidateMode'
+  - title: "Migrate to 'autovalidateMode'"
     date: 2020-09-02
     element:
       uris: [ 'material.dart' ]
@@ -367,7 +367,7 @@ transforms:
         value: 'arguments[autovalidate]'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline1'
+  - title: "Rename to 'headline1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -378,7 +378,7 @@ transforms:
         newName: 'headline1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline2'
+  - title: "Rename to 'headline2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -389,7 +389,7 @@ transforms:
         newName: 'headline2'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline3'
+  - title: "Rename to 'headline3'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -400,7 +400,7 @@ transforms:
         newName: 'headline3'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline4'
+  - title: "Rename to 'headline4'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -411,7 +411,7 @@ transforms:
         newName: 'headline4'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline5'
+  - title: "Rename to 'headline5'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -422,7 +422,7 @@ transforms:
         newName: 'headline5'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to headline6'
+  - title: "Rename to 'headline6'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -433,7 +433,7 @@ transforms:
         newName: 'headline6'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to subtitle1'
+  - title: "Rename to 'subtitle1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -444,7 +444,7 @@ transforms:
         newName: 'subtitle1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to bodyText1'
+  - title: "Rename to 'bodyText1'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -455,7 +455,7 @@ transforms:
         newName: 'bodyText1'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to bodyText2'
+  - title: "Rename to 'bodyText2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -466,7 +466,7 @@ transforms:
         newName: 'bodyText2'
 
   # Changes made in https://github.com/flutter/flutter/pull/48547
-  - title: 'Renamed to subtitle2'
+  - title: "Rename to 'subtitle2'"
     date: 2020-01-24
     element:
       uris: [ 'material.dart' ]
@@ -555,7 +555,7 @@ transforms:
         newName: 'bodyText2'
 
   # Changes made in https://github.com/flutter/flutter/pull/66305
-  - title: 'Migrate to clipBehavior'
+  - title: "Migrate to 'clipBehavior'"
     date: 2020-09-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -566,7 +566,7 @@ transforms:
         newName: 'clipBehavior'
 
   # Changes made in https://github.com/flutter/flutter/pull/66305
-  - title: 'Migrate to clipBehavior'
+  - title: "Migrate to 'clipBehavior'"
     date: 2020-09-22
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
@@ -601,7 +601,7 @@ transforms:
         value: 'arguments[overflow]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Rename to dependOnInheritedElement'
+  - title: "Rename to 'dependOnInheritedElement'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -612,7 +612,7 @@ transforms:
         newName: 'dependOnInheritedElement'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to dependOnInheritedWidgetOfExactType'
+  - title: "Migrate to 'dependOnInheritedWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -634,7 +634,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to getElementForInheritedWidgetOfExactType'
+  - title: "Migrate to 'getElementForInheritedWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -656,7 +656,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to findAncestorWidgetOfExactType'
+  - title: "Migrate to 'findAncestorWidgetOfExactType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -678,7 +678,7 @@ transforms:
               value: 'arguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to findAncestorStateOfType'
+  - title: "Migrate to 'findAncestorStateOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -700,7 +700,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to rootAncestorStateOfType'
+  - title: "Migrate to 'rootAncestorStateOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -722,7 +722,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Change made in https://github.com/flutter/flutter/pull/44189.
-  - title: 'Migrate to ancestorRenderObjectOfType'
+  - title: "Migrate to 'ancestorRenderObjectOfType'"
     date: 2019-11-22
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -744,7 +744,7 @@ transforms:
               value: 'arguments[0].typeArguments[0]'
 
   # Changes made in https://github.com/flutter/flutter/pull/45941
-  - title: 'Rename to deferFirstFrame'
+  - title: "Rename to 'deferFirstFrame'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -755,7 +755,7 @@ transforms:
         newName: 'deferFirstFrame'
 
   # Changes made in https://github.com/flutter/flutter/pull/45941
-  - title: 'Rename to allowFirstFrame'
+  - title: "Rename to 'allowFirstFrame'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -766,7 +766,7 @@ transforms:
         newName: 'allowFirstFrame'
 
   # Changes made in https://github.com/flutter/flutter/pull/44189
-  - title: 'Rename to dependOnInheritedElement'
+  - title: "Rename to 'dependOnInheritedElement'"
     date: 2020-12-23
     element:
       uris: [ 'material.dart', 'cupertino.dart', 'widgets.dart' ]
@@ -777,7 +777,7 @@ transforms:
         newName: 'dependOnInheritedElement'
 
   # Changes made in https://github.com/flutter/flutter/pull/15303
-  - title: 'Replace child with builder'
+  - title: "Replace 'child' with 'builder'"
     date: 2020-12-17
     element:
       uris: [ 'material.dart' ]
@@ -798,7 +798,7 @@ transforms:
         name: 'child'
 
   # Changes made in https://github.com/flutter/flutter/pull/28602
-  - title: 'Rename to fromMouseEvent'
+  - title: "Rename to 'fromMouseEvent'"
     date: 2020-12-15
     element:
       uris: [ 'gestures.dart' ]
@@ -809,7 +809,7 @@ transforms:
         newName: 'fromMouseEvent'
 
   # Changes made in https://github.com/flutter/flutter/pull/28602
-  - title: 'Rename to fromMouseEvent'
+  - title: "Rename to 'fromMouseEvent'"
     date: 2020-12-15
     element:
       uris: [ 'gestures.dart' ]
@@ -820,7 +820,7 @@ transforms:
         newName: 'fromMouseEvent'
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Remove brightness'
+  - title: "Remove 'brightness'"
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]
@@ -831,7 +831,7 @@ transforms:
         name: 'brightness'
 
   # Changes made in https://github.com/flutter/flutter/pull/41859
-  - title: 'Remove brightness'
+  - title: "Remove 'brightness'"
     date: 2020-12-10
     element:
       uris: [ 'cupertino.dart' ]

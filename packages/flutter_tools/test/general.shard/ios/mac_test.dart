@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,7 +15,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -29,7 +30,6 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 };
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {

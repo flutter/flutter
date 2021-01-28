@@ -8,7 +8,6 @@ import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 

@@ -380,7 +380,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tapDownOffset);
     await tester.pump(); // start gesture
-    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
     await tester.pumpAndSettle();
   });
@@ -419,7 +419,7 @@ void main() {
     // Generate a tap cancel; Will cancel the ink splash before it started
     final TestGesture gesture = await tester.startGesture(tapDownOffset);
     await tester.pump(); // start gesture
-    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.moveTo(Offset.zero);
     await gesture.up(); // generates a tap cancel
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;

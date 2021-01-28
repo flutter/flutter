@@ -1096,17 +1096,17 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 24.0, 302.0,
           topLeft: const Radius.circular(2.0),
-          topRight: const Radius.circular(0.0),
-          bottomRight: const Radius.circular(0.0),
+          topRight: Radius.zero,
+          bottomRight: Radius.zero,
           bottomLeft: const Radius.circular(2.0),
         ))
         ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
-          topLeft: const Radius.circular(0.0),
+          topLeft: Radius.zero,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
-          bottomLeft: const Radius.circular(0.0),
+          bottomLeft: Radius.zero,
         ))
         ..circle(x: 24.0, y: 300.0)
         ..shadow(elevation: 1.0)

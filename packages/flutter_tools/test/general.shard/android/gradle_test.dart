@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -114,7 +116,7 @@ void main() {
 
     testWithoutContext('assemble debug', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
+        getAssembleTaskFor(BuildInfo.debug),
         equals('assembleDebug'),
       );
       expect(
@@ -209,7 +211,7 @@ void main() {
 
     testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app.aab', fileSystem);
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
+      final File bundle = findBundleFile(project, BuildInfo.debug);
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
     });
@@ -265,7 +267,7 @@ void main() {
 
     testWithoutContext('Finds app bundle in debug mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab', fileSystem);
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
+      final File bundle = findBundleFile(project, BuildInfo.debug);
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
     });
