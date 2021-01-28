@@ -2893,7 +2893,10 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 /// Transform the input [DiagnosticsNode].
 ///
 /// Return null if input [DiagnosticsNode] is not applicable.
-Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node, Iterable<DiagnosticsNode> properties) {
+Iterable<DiagnosticsNode>? _parseDiagnosticsNode(
+  DiagnosticsNode node,
+  Iterable<DiagnosticsNode> properties,
+) {
   if (!_isDebugCreator(node))
     return null;
   final DebugCreator debugCreator = node.value! as DebugCreator;
@@ -2901,7 +2904,10 @@ Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node, Iterable<
   return _describeRelevantUserCode(element, properties);
 }
 
-Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element, Iterable<DiagnosticsNode> properties) {
+Iterable<DiagnosticsNode> _describeRelevantUserCode(
+  Element element,
+  Iterable<DiagnosticsNode> properties,
+) {
   if (!WidgetInspectorService.instance.isWidgetCreationTracked()) {
     return <DiagnosticsNode>[
       ErrorDescription(
