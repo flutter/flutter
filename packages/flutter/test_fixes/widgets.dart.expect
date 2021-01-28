@@ -75,4 +75,14 @@ void main() {
   FocusTraversalGroup.of(context);
   Focus.maybeOf(context);
   Focus.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Actions.maybeFind(context);
+  Actions.find(context);
+  Actions.maybeHandler(context);
+  Actions.handler(context);
+  Actions.maybeInvoke(context);
+  Actions.invoke(context);
 }

@@ -11,6 +11,98 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'invoke'
+      inClass: 'Actions'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeInvoke'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'find'
+      inClass: 'Actions'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeFind'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'handler'
+      inClass: 'Actions'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeHandler'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Shortcuts'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
   # Changes made in https://github.com/flutter/flutter/pull/68917.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27

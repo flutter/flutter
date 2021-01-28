@@ -146,4 +146,14 @@ void main() {
   FocusTraversalGroup.of(context, nullOk: false);
   Focus.of(context, nullOk: true);
   Focus.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.of(context, nullOk: true);
+  Shortcuts.of(context, nullOk: false);
+  Actions.find(context, nullOk: true);
+  Actions.find(context, nullOk: false);
+  Actions.handler(context, nullOk: true);
+  Actions.handler(context, nullOk: false);
+  Actions.invoke(context, nullOk: true);
+  Actions.invoke(context, nullOk: false);
 }
