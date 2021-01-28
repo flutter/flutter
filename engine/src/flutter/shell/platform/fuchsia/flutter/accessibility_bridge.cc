@@ -314,6 +314,7 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
     nodes_[flutter_node.id] = {
         .id = flutter_node.id,
         .flags = flutter_node.flags,
+        .is_focusable = IsFocusable(flutter_node),
         .rect = flutter_node.rect,
         .transform = flutter_node.transform,
         .children_in_hit_test_order = flutter_node.childrenInHitTestOrder,
@@ -412,6 +413,7 @@ fuchsia::accessibility::semantics::Node AccessibilityBridge::GetRootNodeUpdate(
   nodes_[root_flutter_semantics_node_.id] = {
       .id = root_flutter_semantics_node_.id,
       .flags = root_flutter_semantics_node_.flags,
+      .is_focusable = IsFocusable(root_flutter_semantics_node_),
       .rect = root_flutter_semantics_node_.rect,
       .transform = result,
       .children_in_hit_test_order =
@@ -570,7 +572,36 @@ std::optional<int32_t> AccessibilityBridge::GetHitNode(int32_t node_id,
       return candidate;
     }
   }
-  return node_id;
+
+  if (node.is_focusable) {
+    return node_id;
+  }
+
+  return {};
+}
+
+bool AccessibilityBridge::IsFocusable(
+    const flutter::SemanticsNode& node) const {
+  if (node.HasFlag(flutter::SemanticsFlags::kScopesRoute)) {
+    return false;
+  }
+
+  if (node.HasFlag(flutter::SemanticsFlags::kIsFocusable)) {
+    return true;
+  }
+
+  // Always consider platform views focusable.
+  if (node.IsPlatformViewNode()) {
+    return true;
+  }
+
+  // Always conider actionable nodes focusable.
+  if (node.actions != 0) {
+    return true;
+  }
+
+  // Consider text nodes focusable.
+  return !node.label.empty() || !node.value.empty() || !node.hint.empty();
 }
 
 // |fuchsia::accessibility::semantics::SemanticListener|

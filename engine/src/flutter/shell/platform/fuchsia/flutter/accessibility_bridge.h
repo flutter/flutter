@@ -110,6 +110,7 @@ class AccessibilityBridge
   struct SemanticsNode {
     int32_t id;
     int32_t flags;
+    bool is_focusable;
     SkRect rect;
     SkRect screen_rect;
     SkM44 transform;
@@ -196,6 +197,9 @@ class AccessibilityBridge
   //
   // Assumes that SemanticsNode::screen_rect is up to date.
   std::optional<int32_t> GetHitNode(int32_t node_id, float x, float y);
+
+  // Returns whether the node is considered focusable.
+  bool IsFocusable(const flutter::SemanticsNode& node) const;
 
   // Converts a fuchsia::accessibility::semantics::Action to a
   // flutter::SemanticsAction.
