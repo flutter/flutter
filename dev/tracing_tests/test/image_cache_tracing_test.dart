@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service_io.dart';
 
 void main() {
   late VmService vmService;
-  String? isolateId;
+  late String isolateId;
   setUpAll(() async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
@@ -23,7 +23,7 @@ void main() {
 
     vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await vmService.setVMTimelineFlags(<String>['Dart']);
-    isolateId = developer.Service.getIsolateID(isolate.Isolate.current);
+    isolateId = developer.Service.getIsolateID(isolate.Isolate.current)!;
 
     // Initialize the image cache.
     TestWidgetsFlutterBinding.ensureInitialized();
