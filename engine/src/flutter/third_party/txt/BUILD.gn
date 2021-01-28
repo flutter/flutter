@@ -269,7 +269,6 @@ if (enable_unittests) {
       "benchmarks/paint_record_benchmarks.cc",
       "benchmarks/paragraph_benchmarks.cc",
       "benchmarks/paragraph_builder_benchmarks.cc",
-      "benchmarks/styled_runs_benchmarks.cc",
       "benchmarks/txt_run_all_benchmarks.cc",
     ]
 
