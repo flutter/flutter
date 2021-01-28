@@ -5,6 +5,9 @@
 import 'package:flutter/cupertino.dart';
 
 void main() {
+  // Generic reference variables.
+  BuildContext context;
+
   // Change made in https://github.com/flutter/flutter/pull/41859
   const CupertinoTextThemeData themeData = CupertinoTextThemeData();
   themeData.copyWith();
