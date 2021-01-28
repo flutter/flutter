@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:convert' show json;
 
 import 'package:file/file.dart';
@@ -480,7 +478,7 @@ void main() {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
           });
-          return SceneDisplayLagSummarizer(timeline.events);
+          return SceneDisplayLagSummarizer(timeline.events!);
       }
 
       test('average_vsyncs_missed', () async {

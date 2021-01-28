@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,8 +11,8 @@ import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:vm_service/vm_service.dart' as vms;
-import 'package:quiver/testing/async.dart';
 
 import 'common.dart';
 
