@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -147,15 +147,12 @@ void main() {
   });
 
   group('LocalFileSystem', () {
-    MockIoProcessSignal mockSignal;
+    FakeProcessSignal fakeSignal;
     ProcessSignal signalUnderTest;
-    StreamController<io.ProcessSignal> controller;
 
     setUp(() {
-      mockSignal = MockIoProcessSignal();
-      signalUnderTest = ProcessSignal(mockSignal);
-      controller = StreamController<io.ProcessSignal>();
-      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+      fakeSignal = FakeProcessSignal();
+      signalUnderTest = ProcessSignal(fakeSignal);
     });
 
     testUsingContext('deletes system temp entry on a fatal signal', () async {
@@ -173,7 +170,7 @@ void main() {
 
       expect(temp.existsSync(), isTrue);
 
-      controller.add(mockSignal);
+      fakeSignal.controller.add(fakeSignal);
       await completer.future;
 
       expect(temp.existsSync(), isFalse);
@@ -181,5 +178,10 @@ void main() {
   });
 }
 
-class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
-class MockFile extends Mock implements File {}
+class FakeProcessSignal extends Fake implements io.ProcessSignal {
+  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+
+  @override
+  Stream<io.ProcessSignal> watch() => controller.stream;
+}
+class FakeFile extends Fake implements File {}
