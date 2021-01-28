@@ -432,7 +432,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// arguments must not be null.
   FocusNode({
     String? debugLabel,
-    FocusOnKeyCallback? onKey,
+    this.onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
@@ -441,8 +441,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
-        _descendantsAreFocusable = descendantsAreFocusable,
-        _onKey = onKey {
+        _descendantsAreFocusable = descendantsAreFocusable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
@@ -573,8 +572,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [hasFocus] returns true).
   ///
   /// {@macro flutter.widgets.FocusNode.keyEvents}
-  FocusOnKeyCallback? get onKey => _onKey;
-  FocusOnKeyCallback? _onKey;
+  FocusOnKeyCallback? onKey;
 
   FocusManager? _manager;
   List<FocusNode>? _ancestors;
@@ -1028,7 +1026,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     _context = context;
-    _onKey = onKey ?? _onKey;
+    this.onKey = onKey ?? this.onKey;
     _attachment = FocusAttachment._(this);
     return _attachment!;
   }

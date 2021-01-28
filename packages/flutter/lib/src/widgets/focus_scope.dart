@@ -643,6 +643,9 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
+      if (widget.onKey != focusNode.onKey) {
+        focusNode.onKey = widget.onKey;
+      }
       if (widget.skipTraversal != null) {
         focusNode.skipTraversal = widget.skipTraversal!;
       }
