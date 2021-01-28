@@ -1892,6 +1892,7 @@ void main() {
 }
 
 Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) async {
+  await tester.binding.setSurfaceSize(const ui.Size(3, 3));
   // A 3x3 image encoded as PNG with white background and black pixels on the diagonal:
   // ┌───┐
   // │▓  │
