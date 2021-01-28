@@ -852,6 +852,7 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/74503
   testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       overlayShape: SliderComponentShape.noOverlay,
