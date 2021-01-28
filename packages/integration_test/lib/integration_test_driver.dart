@@ -68,7 +68,7 @@ Future<void> integrationDriver({
   ResponseDataCallback? responseDataCallback = writeResponseData,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
-  final String jsonResult = await driver.requestData('', timeout: timeout);
+  final String jsonResult = await driver.requestData(null, timeout: timeout);
   final Response response = Response.fromJson(jsonResult);
   await driver.close();
 
