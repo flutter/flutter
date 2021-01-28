@@ -29,12 +29,14 @@ class TextEditingShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): ArrowDownTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const ArrowDownTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): ArrowRightTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): ArrowUpTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): AltArrowLeftTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): AltArrowRightTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const ArrowUpTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): const AltArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): const AltArrowRightTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const AltShiftArrowLeftTextIntent(),
+        LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const AltShiftArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): ControlArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): ControlArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyA): ControlATextIntent(),

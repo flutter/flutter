@@ -14,6 +14,18 @@ import 'text_editing_action.dart';
 // TODO(justinmc): Maybe move these to a text_editing_intents.dart?
 // TODO(justinmc): Do I want the const constructors? I think so so that the
 // instantiation can be const.
+class AltArrowLeftTextIntent extends Intent {
+  const AltArrowLeftTextIntent();
+}
+class AltArrowRightTextIntent extends Intent {
+  const AltArrowRightTextIntent();
+}
+class AltShiftArrowLeftTextIntent extends Intent {
+  const AltShiftArrowLeftTextIntent();
+}
+class AltShiftArrowRightTextIntent extends Intent {
+  const AltShiftArrowRightTextIntent();
+}
 class ArrowDownTextIntent extends Intent {
   const ArrowDownTextIntent();
 }
@@ -101,8 +113,6 @@ class ShiftEndTextIntent extends Intent {
 class ShiftHomeTextIntent extends Intent {
   const ShiftHomeTextIntent();
 }
-class AltArrowLeftTextIntent extends Intent {}
-class AltArrowRightTextIntent extends Intent {}
 class ArrowLeftTextIntent extends Intent {}
 class ArrowRightTextIntent extends Intent {}
 class ControlATextIntent extends Intent {}
@@ -253,6 +263,38 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<AltShiftArrowLeftTextIntent> _altShiftArrowLeftTextAction = TextEditingAction<AltShiftArrowLeftTextIntent>(
+    onInvoke: (AltShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<AltShiftArrowRightTextIntent> _altShiftArrowRightTextAction = TextEditingAction<AltShiftArrowRightTextIntent>(
+    onInvoke: (AltShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
   final TextEditingAction<MetaArrowDownTextIntent> _metaArrowDownTextAction = TextEditingAction<MetaArrowDownTextIntent>(
     onInvoke: (MetaArrowDownTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -285,8 +327,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  // TODO(justinmc): Holding both line and word modifier keys should not do
-  // anything. How do I achieve that with Shortcuts?
   final TextEditingAction<MetaArrowRightTextIntent> _metaArrowRightTextAction = TextEditingAction<MetaArrowRightTextIntent>(
     onInvoke: (MetaArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -574,6 +614,8 @@ class TextEditingActions extends StatelessWidget {
         ...additionalActions,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
         AltArrowRightTextIntent: _altArrowRightTextAction,
+        AltShiftArrowLeftTextIntent: _altShiftArrowLeftTextAction,
+        AltShiftArrowRightTextIntent: _altShiftArrowRightTextAction,
         ArrowDownTextIntent: _arrowDownTextAction,
         ArrowLeftTextIntent: _arrowLeftTextAction,
         ArrowRightTextIntent: _arrowRightTextAction,

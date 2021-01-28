@@ -659,28 +659,95 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return TextSelection.fromPosition(TextPosition(offset: newOffset));
   }
 
+  // Return the offset at the start of the nearest word to the left of the given
+  // offset.
+  static int _getLeftByWord(TextPainter textPainter, int offset, [bool includeWhitespace = true]) {
+    // If the offset is already all the way left, there is nothing to do.
+    if (offset <= 0) {
+      return offset;
+    }
+
+    // If we can just return the start of the text without checking for a word.
+    if (offset == 1) {
+      return 0;
+    }
+
+    final String text = textPainter.text!.toPlainText();
+    final int startPoint = previousCharacter(offset, text, includeWhitespace);
+    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return word.start;
+  }
+
+  // Return the offset at the end of the nearest word to the right of the given
+  // offset.
+  static int _getRightByWord(TextPainter textPainter, int offset, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (offset == text.length) {
+      return offset;
+    }
+
+    // If we can just return the end of the text without checking for a word.
+    if (offset == text.length - 1
+        || offset == text.length) {
+      return text.length;
+    }
+
+    final int startPoint = nextCharacter(offset, text, includeWhitespace);
+    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return word.end;
+  }
+
+  // Return the given TextSelection extended left to the beginning of the
+  // nearest word.
+  static TextSelection _extendGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way left, there is nothing to do.
+    if (selection.isCollapsed && selection.extentOffset <= 0) {
+      return selection;
+    }
+
+    final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      extentOffset: leftOffset,
+    );
+  }
+
+  // Return the given TextSelection extended right to the end of the nearest
+  // word.
+  static TextSelection _extendGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
+    // If the selection is already all the way right, there is nothing to do.
+    final String text = textPainter.text!.toPlainText();
+    if (selection.isCollapsed && selection.extentOffset == text.length) {
+      return selection;
+    }
+
+    final int rightOffset = _getRightByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      extentOffset: rightOffset,
+    );
+  }
+
+  // Return the given TextSelection moved left to the end of the nearest word.
+  //
+  // A TextSelection that isn't collapsed will be collapsed and moved from the
+  // extentOffset.
   static TextSelection _moveGivenSelectionLeftByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
     // If the selection is already all the way left, there is nothing to do.
     if (selection.isCollapsed && selection.extentOffset <= 0) {
       return selection;
     }
 
-    // If we can just return the start of the text without checking for a word.
-    if (selection.extentOffset == 0 || selection.extentOffset == 1) {
-      return const TextSelection.collapsed(offset: 0);
-    }
-
-    // If the selection is one space from the left, just move it once left.
-    final String text = textPainter.text!.toPlainText();
-    if (selection.extentOffset == 1) {
-      return _moveGivenSelectionLeft(selection, text);
-    }
-
-    final int startPoint = previousCharacter(selection.extentOffset, text, includeWhitespace);
-    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
-    return TextSelection(baseOffset: word.start, extentOffset: word.start);
+    final int leftOffset = _getLeftByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      baseOffset: leftOffset,
+      extentOffset: leftOffset,
+    );
   }
 
+  // Return the given TextSelection moved right to the end of the nearest word.
+  //
+  // A TextSelection that isn't collapsed will be collapsed and moved from the
+  // extentOffset.
   static TextSelection _moveGivenSelectionRightByWord(TextPainter textPainter, TextSelection selection, [bool includeWhitespace = true]) {
     // If the selection is already all the way right, there is nothing to do.
     final String text = textPainter.text!.toPlainText();
@@ -688,15 +755,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return selection;
     }
 
-    // If we can just return the end of the text without checking for a word.
-    if (selection.extentOffset == text.length - 1
-        || selection.extentOffset == text.length) {
-      return TextSelection.collapsed(offset: text.length);
-    }
-
-    final int startPoint = nextCharacter(selection.extentOffset, text, includeWhitespace);
-    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
-    return TextSelection(baseOffset: word.end, extentOffset: word.end);
+    final int rightOffset = _getRightByWord(textPainter, selection.extentOffset, includeWhitespace);
+    return selection.copyWith(
+      baseOffset: rightOffset,
+      extentOffset: rightOffset,
+    );
   }
 
   static TextSelection _extendGivenSelectionLeft(TextSelection selection, String text, [bool includeWhitespace = true]) {
@@ -748,10 +811,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
       return;
     }
+    if (!selectionEnabled) {
+      return moveSelectionDown(cause);
+    }
 
     final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
     final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
-    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
 
     late TextSelection nextSelection;
     if (positionBelow.offset == selection!.extentOffset) {
@@ -776,9 +841,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  // TODO(justinmc): Rename this "grow" instead of "extend".
   void extendSelectionToEnd(SelectionChangedCause cause) {
     if (selection!.extentOffset == _plainText.length) {
       return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToEnd(cause);
     }
 
     final int upperOffset = math.max(0, math.min(
@@ -793,6 +862,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void extendSelectionLeft(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionLeft(cause);
+    }
+
     final TextSelection nextSelection = _extendGivenSelectionLeft(
       selection!,
       _plainText,
@@ -806,6 +879,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void extendSelectionRight(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionRight(cause);
+    }
+
     final TextSelection nextSelection = _extendGivenSelectionRight(
       selection!,
       _plainText,
@@ -823,6 +900,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // nothing happens.
     if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
       return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionUp(cause);
     }
 
     final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
@@ -852,9 +932,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  // TODO(justinmc): Rename this "grow" instead of "extend".
   void extendSelectionToStart(SelectionChangedCause cause) {
     if (selection!.extentOffset == 0) {
       return;
+    }
+    if (!selectionEnabled) {
+      return moveSelectionToStart(cause);
     }
 
     final int lowerOffset = math.max(0, math.max(
@@ -868,7 +952,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  // TODO(justinmc): Rename this "grow" instead of "extend".
   void extendSelectionLeftByLine(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionLeftByLine(cause);
+    }
+
     final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
@@ -888,7 +977,52 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return extendSelectionToStart(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _extendGivenSelectionLeftByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _updateSelection(nextSelection, cause);
+  }
+
+  void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    // When the text is obscured, the whole thing is treated as one big word.
+    if (obscureText) {
+      return extendSelectionToEnd(cause);
+    }
+
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+           _textLayoutLastMinWidth == constraints.minWidth,
+      'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextSelection nextSelection = _extendGivenSelectionRightByWord(
+      _textPainter,
+      selection!,
+      includeWhitespace,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _updateSelection(nextSelection, cause);
+  }
+
+  // TODO(justinmc): Rename this "grow" instead of "extend".
   void extendSelectionRightByLine(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionRightByLine(cause);
+    }
+
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
@@ -1066,6 +1200,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  // Handle updating the class to the new given selection.
   void _updateSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     _handleSelectionChange(nextSelection, SelectionChangedCause.keyboard);
     // Update the text selection delegate so that the engine knows what we did.
@@ -1229,6 +1364,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
 
+    // TODO(justinmc): This is the last part that might not be handled here! Do
+    // this and then delete _handleMovement.
     // Just place the collapsed selection at the end or beginning of the region
     // if shift isn't down or selection isn't enabled.
     if (!shift || !selectionEnabled) {
