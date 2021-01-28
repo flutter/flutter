@@ -2923,13 +2923,27 @@ void main() {
   testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(
       value: '0',
+      items: List<String>.generate(/*length=*/10, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    expect(scrollController.position.maxScrollExtent, 0);
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    await tester.tap(find.text('0').last);
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(buildFrame(
+      value: '0',
       items: List<String>.generate(/*length=*/100, (int index) => index.toString()),
       onChanged: onChanged,
     ));
     await tester.tap(find.text('0'));
     await tester.pumpAndSettle();
 
-    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
   });
