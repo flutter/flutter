@@ -37,11 +37,8 @@ void main() {
     await binding.endOfFrame;
   });
 
-  tearDownAll(() async {
-    // TODO(dnfield): Remove ignore once internal repo is up to date
-    // https://github.com/flutter/flutter/issues/74518
-    // ignore: await_only_futures
-    await vmService.dispose();
+  tearDownAll(() {
+    vmService.dispose();
   });
 
   test('Image painting events - deduplicates across frames', () async {
