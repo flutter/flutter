@@ -776,6 +776,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  void extendSelectionToEnd(SelectionChangedCause cause) {
+    if (selection!.extentOffset == _plainText.length) {
+      return;
+    }
+
+    final int upperOffset = math.max(0, math.min(
+      selection!.baseOffset,
+      selection!.extentOffset,
+    ));
+    final TextSelection nextSelection = TextSelection(
+      baseOffset: upperOffset,
+      extentOffset: _plainText.length,
+    );
+    _updateSelection(nextSelection, cause);
+  }
+
   void extendSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _extendGivenSelectionLeft(
       selection!,
@@ -810,7 +826,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
-    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
     final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
 
     late TextSelection nextSelection;
@@ -834,6 +849,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _cursorResetLocation = nextSelection.extentOffset;
     }
 
+    _updateSelection(nextSelection, cause);
+  }
+
+  void extendSelectionToStart(SelectionChangedCause cause) {
+    if (selection!.extentOffset == 0) {
+      return;
+    }
+
+    final int lowerOffset = math.max(0, math.max(
+      selection!.baseOffset,
+      selection!.extentOffset,
+    ));
+    final TextSelection nextSelection = TextSelection(
+      baseOffset: lowerOffset,
+      extentOffset: 0,
+    );
     _updateSelection(nextSelection, cause);
   }
 
@@ -913,14 +944,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  void _moveSelectionToEnd(SelectionChangedCause cause) {
+  void moveSelectionToEnd(SelectionChangedCause cause) {
+    if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
+      return;
+    }
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: _plainText.length,
     );
     _updateSelection(nextSelection, cause);
   }
 
-  void _moveSelectionToStart(SelectionChangedCause cause) {
+  void moveSelectionToStart(SelectionChangedCause cause) {
+    if (selection!.isCollapsed && selection!.extentOffset == 0) {
+      return;
+    }
     const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
     _updateSelection(nextSelection, cause);
   }
@@ -928,7 +965,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return _moveSelectionToStart(cause);
+      return moveSelectionToStart(cause);
     }
 
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
@@ -948,7 +985,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
-      return _moveSelectionToEnd(cause);
+      return moveSelectionToEnd(cause);
     }
 
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&

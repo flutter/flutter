@@ -44,17 +44,29 @@ class EndTextIntent extends Intent {
 class HomeTextIntent extends Intent {
   const HomeTextIntent();
 }
+class MetaArrowDownTextIntent extends Intent {
+  const MetaArrowDownTextIntent();
+}
 class MetaArrowLeftTextIntent extends Intent {
   const MetaArrowLeftTextIntent();
 }
 class MetaArrowRightTextIntent extends Intent {
   const MetaArrowRightTextIntent();
 }
+class MetaArrowUpTextIntent extends Intent {
+  const MetaArrowUpTextIntent();
+}
+class MetaShiftArrowDownTextIntent extends Intent {
+  const MetaShiftArrowDownTextIntent();
+}
 class MetaShiftArrowLeftTextIntent extends Intent {
   const MetaShiftArrowLeftTextIntent();
 }
 class MetaShiftArrowRightTextIntent extends Intent {
   const MetaShiftArrowRightTextIntent();
+}
+class MetaShiftArrowUpTextIntent extends Intent {
+  const MetaShiftArrowUpTextIntent();
 }
 class MetaCTextIntent extends Intent {
   const MetaCTextIntent();
@@ -241,6 +253,22 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<MetaArrowDownTextIntent> _metaArrowDownTextAction = TextEditingAction<MetaArrowDownTextIntent>(
+    onInvoke: (MetaArrowDownTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
   final TextEditingAction<MetaArrowLeftTextIntent> _metaArrowLeftTextAction = TextEditingAction<MetaArrowLeftTextIntent>(
     onInvoke: (MetaArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -275,6 +303,38 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  final TextEditingAction<MetaArrowUpTextIntent> _metaArrowUpTextAction = TextEditingAction<MetaArrowUpTextIntent>(
+    onInvoke: (MetaArrowUpTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<MetaShiftArrowDownTextIntent> _metaShiftArrowDownTextAction = TextEditingAction<MetaShiftArrowDownTextIntent>(
+    onInvoke: (MetaShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionToEnd(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
   final TextEditingAction<MetaShiftArrowLeftTextIntent> _metaShiftArrowLeftTextAction = TextEditingAction<MetaShiftArrowLeftTextIntent>(
     onInvoke: (MetaShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -297,6 +357,22 @@ class TextEditingActions extends StatelessWidget {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  final TextEditingAction<MetaShiftArrowUpTextIntent> _metaShiftArrowUpTextAction = TextEditingAction<MetaShiftArrowUpTextIntent>(
+    onInvoke: (MetaShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          editableTextState.renderEditable.extendSelectionToStart(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -509,10 +585,14 @@ class TextEditingActions extends StatelessWidget {
         EndTextIntent: _endTextAction,
         HomeTextIntent: _homeTextAction,
         MetaCTextIntent: _metaCTextAction,
+        MetaArrowDownTextIntent: _metaArrowDownTextAction,
         MetaArrowRightTextIntent: _metaArrowRightTextAction,
         MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
+        MetaArrowUpTextIntent: _metaArrowUpTextAction,
+        MetaShiftArrowDownTextIntent: _metaShiftArrowDownTextAction,
         MetaShiftArrowLeftTextIntent: _metaShiftArrowLeftTextAction,
         MetaShiftArrowRightTextIntent: _metaShiftArrowRightTextAction,
+        MetaShiftArrowUpTextIntent: _metaShiftArrowUpTextAction,
         ShiftArrowDownTextIntent: _shiftArrowDownTextAction,
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
