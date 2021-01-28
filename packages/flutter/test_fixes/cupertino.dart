@@ -108,7 +108,7 @@ void main() {
   CupertinoTheme.brightnessOf(context, nullOk: true);
   CupertinoTheme.brightnessOf(context, nullOk: false);
 
-  // Changes made in https://github.com/flutter/flutter/pull/69805
+  // Changes made in https://github.com/flutter/flutter/pull/68905
   CupertinoThemeData.resolveFrom(context, nullOk: true);
   CupertinoThemeData.resolveFrom(context, nullOk: false);
   NoDefaultCupertinoThemeData.resolveFrom(context, nullOk: true);

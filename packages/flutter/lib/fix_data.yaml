@@ -11,7 +11,7 @@
 version: 1
 transforms:
 
-  # Changes made in https://github.com/flutter/flutter/pull/69805.
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
     element:
@@ -34,7 +34,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[nullOk]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/69805.
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
     element:
@@ -57,7 +57,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[nullOk]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/69805.
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
     element:
@@ -80,7 +80,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[nullOk]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/69805.
+  # Changes made in https://github.com/flutter/flutter/pull/68905.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
     element:
