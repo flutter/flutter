@@ -45,7 +45,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  Usage usage;
+  TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -55,7 +55,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -401,16 +401,15 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['windows', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
     expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
+    expect(usage.events, contains(
+       const TestUsageEvent('code-size-analysis', 'windows'),
+    ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
