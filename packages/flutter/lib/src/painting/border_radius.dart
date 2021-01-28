@@ -506,7 +506,6 @@ class BorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) => this;
-
 }
 
 /// An immutable set of radii for each corner of a rectangle, but with the
