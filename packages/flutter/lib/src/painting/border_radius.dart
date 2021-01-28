@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -326,6 +327,19 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomLeft = Radius.zero,
     this.bottomRight = Radius.zero,
   });
+
+  /// Creates a border radius with the given set of parameters
+  const BorderRadius.copyWith({
+    Radius topLeft = Radius.zero,
+    Radius topRight = Radius.zero,
+    Radius bottomLeft = Radius.zero,
+    Radius bottomRight = Radius.zero,
+    }) : this.only(
+      topLeft:topLeft,
+      topRight:topRight,
+      bottomLeft:bottomLeft,
+      bottomRight:bottomRight
+    );
 
   /// A border radius with all zero radii.
   static const BorderRadius zero = BorderRadius.all(Radius.zero);
