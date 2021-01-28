@@ -89,4 +89,10 @@ void main() {
   Actions.handler(context);
   Actions.maybeInvoke(context);
   Actions.invoke(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
 }

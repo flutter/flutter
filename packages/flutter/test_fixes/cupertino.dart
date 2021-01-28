@@ -89,4 +89,10 @@ void main() {
   Actions.handler(context, nullOk: false);
   Actions.invoke(context, nullOk: true);
   Actions.invoke(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.of(context, nullOk: true);
+  AnimatedList.of(context, nullOk: false);
+  SliverAnimatedList.of(context, nullOk: true);
+  SliverAnimatedList.of(context, nullOk: false);
 }

@@ -11,6 +11,52 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'SliverAnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'AnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
   # Changes made in https://github.com/flutter/flutter/pull/68921.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27
