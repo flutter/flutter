@@ -153,7 +153,7 @@ void main() {
   group('analytics with mocks', () {
     MemoryFileSystem memoryFileSystem;
     MockStdio mockStdio;
-    Usage mockUsage;
+    TestUsage testUsage;
     SystemClock mockClock;
     Doctor mockDoctor;
     List<int> mockTimes;
@@ -161,7 +161,7 @@ void main() {
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
       mockStdio = MockStdio();
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       mockClock = MockClock();
       mockDoctor = MockDoctor();
       when(mockClock.now()).thenAnswer(
@@ -182,19 +182,15 @@ void main() {
 
       verify(mockClock.now()).called(2);
 
-      expect(
-        verify(mockUsage.sendTiming(
-          captureAny,
-          captureAny,
-          captureAny,
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
-      );
+      expect(testUsage.timings, contains(
+        const TestTimingEvent(
+            'flutter', 'doctor', Duration(milliseconds: 1000), label: 'success',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('doctor fail sends warning', () async {
@@ -207,19 +203,15 @@ void main() {
 
       verify(mockClock.now()).called(2);
 
-      expect(
-        verify(mockUsage.sendTiming(
-          captureAny,
-          captureAny,
-          captureAny,
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
-      );
+      expect(testUsage.timings, contains(
+        const TestTimingEvent(
+          'flutter', 'doctor', Duration(milliseconds: 1000), label: 'warning',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('single command usage path', () async {
@@ -227,7 +219,7 @@ void main() {
 
       expect(await doctorCommand.usagePath, 'doctor');
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('compound command usage path', () async {
@@ -236,7 +228,7 @@ void main() {
 
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('command sends localtime', () async {
@@ -382,8 +374,6 @@ class FakeFlutterCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 }
-
-class MockUsage extends Mock implements Usage {}
 
 class MockDoctor extends Mock implements Doctor {}
 
