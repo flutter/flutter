@@ -186,6 +186,31 @@ void main() {
     ...noColorTerminalOverride,
   });
 
+  testUsingContext('cannot create a project in flutter root', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
+    final ProcessResult exec = await Process.run(
+      flutterBin,
+      <String>[
+        'create',
+        'flutter_project',
+      ],
+      workingDirectory: Cache.flutterRoot,
+    );
+    expect(exec.exitCode, 2);
+    expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+    ...noColorTerminalOverride,
+  });
+
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childDirectory('.idea').create(recursive: true);
