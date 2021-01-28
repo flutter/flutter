@@ -109,7 +109,7 @@ enum HeroFlightDirection {
 /// and location of the rectangle animates.
 ///
 /// Both widgets use the same [Hero.tag].
-/// 
+///
 /// The Hero widget uses the matching tags to identify and execute this
 /// animation.
 ///
