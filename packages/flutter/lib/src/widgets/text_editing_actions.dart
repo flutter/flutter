@@ -32,6 +32,18 @@ class ArrowDownTextIntent extends Intent {
 class ArrowUpTextIntent extends Intent {
   const ArrowUpTextIntent();
 }
+class ControlArrowLeftTextIntent extends Intent {
+  const ControlArrowLeftTextIntent();
+}
+class ControlArrowRightTextIntent extends Intent {
+  const ControlArrowRightTextIntent();
+}
+class ControlShiftArrowLeftTextIntent extends Intent {
+  const ControlShiftArrowLeftTextIntent();
+}
+class ControlShiftArrowRightTextIntent extends Intent {
+  const ControlShiftArrowRightTextIntent();
+}
 class DoubleTapDownTextIntent extends Intent {
   const DoubleTapDownTextIntent();
 }
@@ -116,8 +128,6 @@ class ShiftHomeTextIntent extends Intent {
 class ArrowLeftTextIntent extends Intent {}
 class ArrowRightTextIntent extends Intent {}
 class ControlATextIntent extends Intent {}
-class ControlArrowLeftTextIntent extends Intent {}
-class ControlArrowRightTextIntent extends Intent {}
 class ControlCTextIntent extends Intent {}
 class SingleTapUpTextIntent extends Intent {
   const SingleTapUpTextIntent({
@@ -290,6 +300,42 @@ class TextEditingActions extends StatelessWidget {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          break;
+      }
+    },
+  );
+
+  // TODO(justinmc): This is nearly identical to altShiftArrowLeft. A reason to
+  // reuse actions?
+  final TextEditingAction<ControlShiftArrowLeftTextIntent> _controlShiftArrowLeftTextAction = TextEditingAction<ControlShiftArrowLeftTextIntent>(
+    onInvoke: (ControlShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+          break;
+      }
+    },
+  );
+
+  // TODO(justinmc): This is nearly identical to altShiftArrowRight. A reason to
+  // reuse actions?
+  final TextEditingAction<ControlShiftArrowRightTextIntent> _controlShiftArrowRightTextAction = TextEditingAction<ControlShiftArrowRightTextIntent>(
+    onInvoke: (ControlShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+        case TargetPlatform.iOS:
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
           break;
       }
     },
@@ -624,6 +670,8 @@ class TextEditingActions extends StatelessWidget {
         ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
         ControlArrowRightTextIntent: _controlArrowRightTextAction,
         ControlCTextIntent: _controlCTextAction,
+        ControlShiftArrowLeftTextIntent: _controlShiftArrowLeftTextAction,
+        ControlShiftArrowRightTextIntent: _controlShiftArrowRightTextAction,
         EndTextIntent: _endTextAction,
         HomeTextIntent: _homeTextAction,
         MetaCTextIntent: _metaCTextAction,
