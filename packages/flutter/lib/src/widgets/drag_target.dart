@@ -415,9 +415,9 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
-  /// The duration required for a "long press"
+  /// The duration that a user has to press down before a long press is registered.
   ///
-  /// Defaults to [kLongPressTimeout]
+  /// Defaults to [kLongPressTimeout].
   final Duration delay;
 
   @override
