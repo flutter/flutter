@@ -852,6 +852,27 @@ void main() {
     );
   });
 
+  testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      overlayShape: SliderComponentShape.noOverlay,
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)))!;
+
+    // The track rectangle begins at 10 pixels and ends at 790 pixels which position at the center of the screen(width: 800.0)
+    expect(material,
+      paints
+        // active track RRect
+        ..rrect(rrect: RRect.fromLTRBAndCorners(10.0, 297.0, 400.0, 303.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        // inactive track RRect
+        ..rrect(rrect: RRect.fromLTRBAndCorners(400.0, 298.0, 790.0, 302.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        // thumb
+        ..circle(x: 400.0, y: 300.0, radius: 10.0, )
+    );
+  });
+
   // Only the thumb, overlay, and tick mark have special shortcuts to provide
   // no-op or empty shapes.
   //
