@@ -26,7 +26,7 @@ import 'package:usage/usage_io.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
+import '../src/mocks.dart';
 
 void main() {
   setUpAll(() {
@@ -152,7 +152,7 @@ void main() {
 
   group('analytics with mocks', () {
     MemoryFileSystem memoryFileSystem;
-    FakeStdio fakeStdio;
+    MockStdio mockStdio;
     Usage mockUsage;
     SystemClock mockClock;
     Doctor mockDoctor;
@@ -160,7 +160,7 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      fakeStdio = FakeStdio();
+      mockStdio = MockStdio();
       mockUsage = MockUsage();
       mockClock = MockClock();
       mockDoctor = MockDoctor();
@@ -266,7 +266,7 @@ void main() {
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },
       ),
-      Stdio: () => fakeStdio,
+      Stdio: () => mockStdio,
     });
 
     testUsingContext('event sends localtime', () async {
@@ -296,7 +296,7 @@ void main() {
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },
       ),
-      Stdio: () => fakeStdio,
+      Stdio: () => mockStdio,
     });
   });
 
