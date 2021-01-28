@@ -95,4 +95,16 @@ void main() {
   AnimatedList.of(context);
   SliverAnimatedList.maybeOf(context);
   SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoDynamicColor.maybeResolve(Color(0), context);
+  CupertinoDynamicColor.resolve(Color(0), context);
+  CupertinoDynamicColor.maybeResolveFrom(context);
+  CupertinoDynamicColor.resolveFrom(context);
+  CupertinoUserInterfaceLevel.maybeOf(context);
+  CupertinoUserInterfaceLevel.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  CupertinoTheme.maybeBrightnessOf(context);
+  CupertinoTheme.brightnessOf(context);
 }

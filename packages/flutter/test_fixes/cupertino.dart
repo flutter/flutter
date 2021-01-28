@@ -95,4 +95,16 @@ void main() {
   AnimatedList.of(context, nullOk: false);
   SliverAnimatedList.of(context, nullOk: true);
   SliverAnimatedList.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoDynamicColor.resolve(Color(0), context, nullOk: true);
+  CupertinoDynamicColor.resolve(Color(0), context, nullOk: false);
+  CupertinoDynamicColor.resolveFrom(context, nullOk: true);
+  CupertinoDynamicColor.resolveFrom(context, nullOk: false);
+  CupertinoUserInterfaceLevel.of(context, nullOk: true);
+  CupertinoUserInterfaceLevel.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  CupertinoTheme.brightnessOf(context, nullOk: true);
+  CupertinoTheme.brightnessOf(context, nullOk: false);
 }
