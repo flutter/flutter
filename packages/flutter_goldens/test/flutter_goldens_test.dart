@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
@@ -49,10 +47,10 @@ Future<void> testWithOutput(String name, Future<void> body(), String expectedOut
 }
 
 void main() {
-  MemoryFileSystem fs;
-  FakePlatform platform;
-  FakeProcessManager process;
-  FakeHttpClient fakeHttpClient;
+  late MemoryFileSystem fs;
+  late FakePlatform platform;
+  late FakeProcessManager process;
+  late FakeHttpClient fakeHttpClient;
 
   setUp(() {
     fs = MemoryFileSystem();
@@ -66,8 +64,8 @@ void main() {
   });
 
   group('SkiaGoldClient', () {
-    SkiaGoldClient skiaClient;
-    Directory workDirectory;
+    late SkiaGoldClient skiaClient;
+    late Directory workDirectory;
 
     setUp(() {
       workDirectory = fs.directory('/workDirectory')
@@ -143,6 +141,8 @@ void main() {
         platform: platform,
         httpClient: fakeHttpClient,
       );
+
+      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
 
       const RunInvocation gitInvocation = RunInvocation(
         <String>['git', 'rev-parse', 'HEAD'],
@@ -285,11 +285,7 @@ void main() {
     });
 
     group('Request Handling', () {
-      String expectation;
-
-      setUp(() {
-        expectation = '55109a4bed52acc780530f7a9aeff6c0';
-      });
+      const String expectation = '55109a4bed52acc780530f7a9aeff6c0';
 
       test('image bytes are processed properly', () async {
         final Uri imageUrl = Uri.parse(
@@ -312,7 +308,7 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    FlutterPostSubmitFileComparator comparator;
+    late FlutterPostSubmitFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
@@ -553,7 +549,7 @@ void main() {
     });
 
     group('Local', () {
-      FlutterLocalFileComparator comparator;
+      late FlutterLocalFileComparator comparator;
       final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
 
       setUp(() async {
@@ -660,7 +656,7 @@ class RunInvocation {
   const RunInvocation(this.command, this.workingDirectory);
 
   final List<String> command;
-  final String workingDirectory;
+  final String? workingDirectory;
 
   @override
   int get hashCode => hashValues(hashList(command), workingDirectory);
@@ -697,69 +693,69 @@ class RunInvocation {
 class FakeProcessManager extends Fake implements ProcessManager {
   Map<RunInvocation, ProcessResult> processResults = <RunInvocation, ProcessResult>{};
 
-  /// Used if [processResults] does not contain an matching invocation.
-  ProcessResult fallbackProcessResult;
+  /// Used if [processResults] does not contain a matching invocation.
+  ProcessResult? fallbackProcessResult;
 
   final List<String> workingDirectories = <String>[];
 
   @override
   Future<ProcessResult> run(
     List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String workingDirectory = '',
+    Map<String, String> environment = const <String, String>{},
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) async {
     workingDirectories.add(workingDirectory);
-    final ProcessResult result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
+    final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
     if (result == null && fallbackProcessResult == null) {
       // Throwing here might gobble up the exception message if a test fails.
       print('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
-      fail('see above');
+      fail('See above.');
     }
-    return result ?? fallbackProcessResult;
+    return result ?? fallbackProcessResult!;
   }
 }
 
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
-  Object getExpectationForTestThrowable;
+  Object? getExpectationForTestThrowable;
   @override
   Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {
-      throw getExpectationForTestThrowable;
+      throw getExpectationForTestThrowable!;
     }
-    return expectationForTestValues[testName];
+    return expectationForTestValues[testName] ?? '';
   }
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override
-  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash];
+  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash]!;
 
   Map<String, String> cleanTestNameValues = <String, String>{};
   @override
-  String cleanTestName(String fileName) => cleanTestNameValues[fileName];
+  String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
 }
 
 class FakeLocalFileComparator extends Fake implements LocalFileComparator {
   @override
-  Uri basedir;
+  late Uri basedir;
 }
 
 class FakeDirectory extends Fake implements Directory {
-  bool existsSyncValue;
+  late bool existsSyncValue;
   @override
   bool existsSync() => existsSyncValue;
 
   @override
-  Uri uri;
+  late Uri uri;
 }
 
 class FakeHttpClient extends Fake implements HttpClient {
-  Uri lastUri;
-  FakeHttpClientRequest request;
+  late Uri lastUri;
+  late FakeHttpClientRequest request;
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
@@ -769,7 +765,7 @@ class FakeHttpClient extends Fake implements HttpClient {
 }
 
 class FakeHttpClientRequest extends Fake implements HttpClientRequest {
-  FakeHttpImageResponse response;
+  late FakeHttpImageResponse response;
 
   @override
   Future<HttpClientResponse> close() async {
@@ -784,10 +780,10 @@ class FakeHttpClientResponse extends Fake implements HttpClientResponse {
 
   @override
   StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
-      Function onError,
-      void onDone(),
-      bool cancelOnError,
+    void onData(List<int> event)?, {
+      Function? onError,
+      void onDone()?,
+      bool? cancelOnError,
     }) {
     return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

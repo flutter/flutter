@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -1600,6 +1602,20 @@ void main() {
       contains('void main() {}'));
   }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
+  });
+
+  testUsingContext('null-safe sample-based project have no analyzer errors', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>['lib/main.dart'],
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('String?'), // uses null-safe syntax
+    );
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() { String? foo; print(foo); }'),
   });
 
   testUsingContext('can write samples index to disk', () async {
