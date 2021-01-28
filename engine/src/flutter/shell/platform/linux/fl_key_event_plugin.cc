@@ -184,9 +184,9 @@ static void remove_pending_event(FlKeyEventPlugin* self, uint64_t id) {
       return;
     }
   }
-  g_warning(
-      "Tried to remove pending event with id %ld, but the event was not found.",
-      id);
+  g_warning("Tried to remove pending event with id %" PRIu64
+            ", but the event was not found.",
+            id);
 }
 
 // Adds an GdkEventKey to the pending event queue, with a unique ID, and the
