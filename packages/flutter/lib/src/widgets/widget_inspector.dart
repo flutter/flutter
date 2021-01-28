@@ -2873,18 +2873,18 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// in [WidgetsBinding.initInstances].
 Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
+  ErrorSummary? errorSummary;
+  for (final DiagnosticsNode node in properties) {
+    if (node is ErrorSummary) {
+      errorSummary = node;
+      break;
+    }
+  }
   bool foundStackTrace = false;
   for (final DiagnosticsNode node in properties) {
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      ErrorSummary? errorSummary;
-      for (final DiagnosticsNode node in properties) {
-        if (node is ErrorSummary) {
-          errorSummary = node;
-          break;
-        }
-      }
       yield* _parseDiagnosticsNode(node, errorSummary)!;
     } else {
       if (foundStackTrace) {
