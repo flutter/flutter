@@ -1152,6 +1152,141 @@ void main() {
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
   });
 
+  testWidgets('BottomNavigationBar does not show tool tips when showTooltip is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            showTooltip: false,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                label: 'A',
+                tooltip: 'A tooltip',
+                icon: Icon(Icons.ac_unit),
+              ),
+              BottomNavigationBarItem(
+                label: 'B',
+                icon: Icon(Icons.battery_alert),
+              ),
+              BottomNavigationBarItem(
+                label: 'C',
+                icon: Icon(Icons.cake),
+                tooltip: '',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byTooltip('A tooltip'), findsNothing);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsNothing);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
+  });
+
+  testWidgets('BottomNavigationBar requires Overlay ancestor when showTooltip is true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    label: 'A',
+                    tooltip: 'A tooltip',
+                    icon: Icon(Icons.ac_unit),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'B',
+                    icon: Icon(Icons.battery_alert),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'C',
+                    icon: Icon(Icons.cake),
+                    tooltip: '',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = await tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('No Overlay widget found.'));
+  });
+
+  testWidgets('BottomNavigationBar does not require Overlay ancestor when showTooltip is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                showTooltip: false,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    label: 'A',
+                    tooltip: 'A tooltip',
+                    icon: Icon(Icons.ac_unit),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'B',
+                    icon: Icon(Icons.battery_alert),
+                  ),
+                  BottomNavigationBarItem(
+                    label: 'C',
+                    icon: Icon(Icons.cake),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = await tester.takeException();
+    expect(exception, isNull);
+
+    expect(find.text('A'), findsOneWidget);
+    await tester.longPress(find.text('A'));
+    expect(find.byTooltip('A tooltip'), findsNothing);
+
+    expect(find.text('B'), findsOneWidget);
+    await tester.longPress(find.text('B'));
+    expect(find.byTooltip('B'), findsNothing);
+
+    expect(find.text('C'), findsOneWidget);
+    await tester.longPress(find.text('C'));
+    expect(find.byTooltip('C'), findsNothing);
+  });
+
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
