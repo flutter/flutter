@@ -85,7 +85,7 @@ void main() {
   Shortcuts.of(context);
   Actions.maybeFind(context);
   Actions.find(context);
-  Actions.maybeHandler(context);
+  Actions.handler(context);
   Actions.handler(context);
   Actions.maybeInvoke(context);
   Actions.invoke(context);
@@ -99,7 +99,7 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68905
   CupertinoDynamicColor.maybeResolve(Color(0), context);
   CupertinoDynamicColor.resolve(Color(0), context);
-  CupertinoDynamicColor.maybeResolveFrom(context);
+  CupertinoDynamicColor.resolveFrom(context);
   CupertinoDynamicColor.resolveFrom(context);
   CupertinoUserInterfaceLevel.maybeOf(context);
   CupertinoUserInterfaceLevel.of(context);
@@ -109,10 +109,10 @@ void main() {
   CupertinoTheme.brightnessOf(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68905
-  CupertinoThemeData.maybeResolveFrom(context);
   CupertinoThemeData.resolveFrom(context);
-  NoDefaultCupertinoThemeData.maybeResolveFrom(context);
+  CupertinoThemeData.resolveFrom(context);
   NoDefaultCupertinoThemeData.resolveFrom(context);
-  CupertinoTextThemeData.maybeResolveFrom(context);
+  NoDefaultCupertinoThemeData.resolveFrom(context);
+  CupertinoTextThemeData.resolveFrom(context);
   CupertinoTextThemeData.resolveFrom(context);
 }

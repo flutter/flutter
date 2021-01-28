@@ -152,7 +152,7 @@ void main() {
   Shortcuts.of(context);
   Actions.maybeFind(context);
   Actions.find(context);
-  Actions.maybeHandler(context);
+  Actions.handler(context);
   Actions.handler(context);
   Actions.maybeInvoke(context);
   Actions.invoke(context);
@@ -164,6 +164,6 @@ void main() {
   SliverAnimatedList.of(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/68905
-  MaterialBasedCupertinoThemeData.maybeResolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
   MaterialBasedCupertinoThemeData.resolveFrom(context);
 }

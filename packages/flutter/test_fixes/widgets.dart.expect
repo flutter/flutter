@@ -81,7 +81,7 @@ void main() {
   Shortcuts.of(context);
   Actions.maybeFind(context);
   Actions.find(context);
-  Actions.maybeHandler(context);
+  Actions.handler(context);
   Actions.handler(context);
   Actions.maybeInvoke(context);
   Actions.invoke(context);
