@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Ensure use_xcode_clang is visibile to ANGLE.
+import("//build/toolchain/toolchain.gni")
+
 # The ANGLE build requires this file to point to the location of third-party
 # dependencies.
 
