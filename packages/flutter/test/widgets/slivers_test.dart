@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -305,7 +305,7 @@ void main() {
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
     expect(find.text('6'), findsOneWidget);
-    expect(const ListEquality<String>().equals(initializedChild, <String>['6']), isTrue);
+    expect(listEquals<String>(initializedChild, <String>['6']), isTrue);
 
     // move to item 1 and swap the children at the same time
     controller.jumpTo(0);
@@ -334,7 +334,7 @@ void main() {
     expect(find.text('5'), findsNothing);
     expect(find.text('6'), findsOneWidget);
     // None of the children should be built.
-    expect(const ListEquality<String>().equals(initializedChild, <String>['6']), isTrue);
+    expect(listEquals<String>(initializedChild, <String>['6']), isTrue);
   });
 
   testWidgets(

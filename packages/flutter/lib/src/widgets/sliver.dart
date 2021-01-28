@@ -1188,7 +1188,15 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
       renderObject.debugChildIntegrityEnabled = false; // Moving children will temporary violate the integrity.
       newChildren.keys.forEach(processElement);
-      // We don't worry about underflow if any child has been updated.
+      // A element rebuild only updates existing children. The underflow check
+      // is here to make sure we look ahead one more child if we were at the end
+      // of the child list before the update. By doing so, we can update the max
+      // scroll offset during the layout phase. Otherwise, the scroll view will
+      // be stuck at the previous max scroll offset and never gets update even
+      // if there are new children added at the end.
+      //
+      // This logic however is not needed if any existing children has been
+      // updated, because we will not skip the layout phase after the rebuild.
       if (!childrenUpdated && _didUnderflow) {
         final int lastKey = _childElements.lastKey() ?? -1;
         final int rightBoundary = lastKey + 1;
