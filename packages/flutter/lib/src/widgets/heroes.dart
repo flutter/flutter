@@ -105,7 +105,7 @@ enum HeroFlightDirection {
 /// This sample shows a [Hero] used within a [ListTile].
 ///
 /// Tapping on the Hero-wrapped rectangle triggers a hero
-/// animation as a new [MaterialPageRoute] is pushed. Both the size 
+/// animation as a new [MaterialPageRoute] is pushed. Both the size
 /// and location of the rectangle animates.
 ///
 /// Both widgets use the same [Hero.tag].
