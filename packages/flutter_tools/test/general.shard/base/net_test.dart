@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart' show MockStdio;
+import '../../src/fakes.dart';
 
 void main() {
   BufferLogger testLogger;
@@ -26,7 +26,7 @@ void main() {
   setUp(() {
     testLogger = BufferLogger(
       terminal: AnsiTerminal(
-        stdio: MockStdio(),
+        stdio: FakeStdio(),
         platform: FakePlatform(stdoutSupportsAnsi: false),
       ),
       outputPreferences: OutputPreferences.test(),

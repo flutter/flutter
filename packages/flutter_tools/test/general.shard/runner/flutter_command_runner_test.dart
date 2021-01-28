@@ -20,6 +20,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
@@ -252,21 +253,4 @@ class FakeFlutterCommand extends FlutterCommand {
 
   @override
   String get name => 'fake';
-}
-
-class FakeStdio extends Stdio {
-  FakeStdio({this.hasFakeTerminal});
-
-  final bool hasFakeTerminal;
-
-  @override
-  bool get hasTerminal => hasFakeTerminal;
-
-  @override
-  int get terminalColumns => hasFakeTerminal ? 80 : null;
-
-  @override
-  int get terminalLines => hasFakeTerminal ? 24 : null;
-  @override
-  bool get supportsAnsiEscapes => hasFakeTerminal;
 }

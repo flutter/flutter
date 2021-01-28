@@ -64,17 +64,17 @@ void main() {
 
     group('Observatory and DDS setup', () {
       Platform fakePlatform;
-      ProcessManager mockProcessManager;
+      ProcessManager fakeProcessManager;
       FlutterPlatform flutterPlatform;
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => fakePlatform,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
       };
 
       setUp(() {
         fakePlatform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
-        mockProcessManager = FakeProcessManager.list(<FakeCommand>[
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
               '/',
