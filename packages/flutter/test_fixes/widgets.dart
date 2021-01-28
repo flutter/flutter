@@ -48,4 +48,8 @@ void main() {
   const Stack stack = Stack(overflow: Overflow.visible);
   const Stack stack = Stack(overflow: Overflow.clip);
   final behavior = stack.overflow;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
 }

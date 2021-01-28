@@ -114,4 +114,8 @@ void main() {
   style = textTheme.button;
   style = textTheme.subtitle;
   style = textTheme.overline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
 }

@@ -52,4 +52,8 @@ void main() {
   const FormField formField = FormField(autovalidate: true);
   const FormField formField = FormField(autovalidate: false);
   final autoMode = formField.autovalidate;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
 }

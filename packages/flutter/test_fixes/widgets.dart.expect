@@ -48,4 +48,8 @@ void main() {
   const Stack stack = Stack(clipBehavior: Clip.none);
   const Stack stack = Stack(clipBehavior: Clip.hardEdge);
   final behavior = stack.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
 }
