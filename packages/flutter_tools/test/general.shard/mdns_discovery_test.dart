@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 

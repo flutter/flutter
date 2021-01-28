@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 

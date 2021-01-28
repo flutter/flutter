@@ -296,7 +296,7 @@ class XcodeProjectInterpreter {
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
-      usage: Usage.test(),
+      usage: TestUsage(),
       logger: BufferLogger.test(),
       terminal: Terminal.test(),
       majorVersion: majorVersion,
