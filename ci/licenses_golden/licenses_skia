@@ -1,4 +1,4 @@
-Signature: 67204a801c2180795cdcb79ed93fa2ed
+Signature: c4640d5955419626679e8aa56e86146a
 
 UNUSED LICENSES:
 
@@ -4455,9 +4455,7 @@ FILE: ../../../third_party/skia/docs/examples/ImageInfo_gammaCloseToSRGB.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_height.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_isEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_isOpaque.cpp
-FILE: ../../../third_party/skia/docs/examples/ImageInfo_makeAlphaType.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_makeColorSpace.cpp
-FILE: ../../../third_party/skia/docs/examples/ImageInfo_makeColorType.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_makeWH.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_minRowBytes.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_minRowBytes64.cpp
@@ -4521,7 +4519,6 @@ FILE: ../../../third_party/skia/docs/examples/Matrix_InvalidMatrix.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_MakeAll.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_MakeRectToRect.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_MakeScale.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_MakeScale_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_MakeTrans.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_ScaleToFit.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_SetAffineIdentity.cpp
@@ -5388,7 +5385,6 @@ FILE: ../../../third_party/skia/docs/examples/image_subsets_get_different_uids.c
 FILE: ../../../third_party/skia/docs/examples/image_to_bitmap_does_not_preserve_genid.cpp
 FILE: ../../../third_party/skia/docs/examples/inlinepixmapconstructor.cpp
 FILE: ../../../third_party/skia/docs/examples/issue640176.cpp
-FILE: ../../../third_party/skia/docs/examples/kLow_SkFilterQuality.cpp
 FILE: ../../../third_party/skia/docs/examples/l_system_plant.cpp
 FILE: ../../../third_party/skia/docs/examples/maddash.cpp
 FILE: ../../../third_party/skia/docs/examples/makeRasterImage_fail.cpp
@@ -7250,12 +7246,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathStencilFillOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
