@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -65,21 +64,4 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   @override
   Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
   }
-}
-
-class FakeStdio extends Stdio {
-  FakeStdio({this.hasFakeTerminal});
-
-  final bool hasFakeTerminal;
-
-  @override
-  bool get hasTerminal => hasFakeTerminal;
-
-  @override
-  int get terminalColumns => hasFakeTerminal ? 80 : null;
-
-  @override
-  int get terminalLines => hasFakeTerminal ? 24 : null;
-  @override
-  bool get supportsAnsiEscapes => hasFakeTerminal;
 }
