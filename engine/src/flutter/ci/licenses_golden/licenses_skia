@@ -1,4 +1,4 @@
-Signature: a0f02e7c6126d410ff0a5c4ca03a502b
+Signature: 67204a801c2180795cdcb79ed93fa2ed
 
 UNUSED LICENSES:
 
@@ -492,9 +492,7 @@ FILE: ../../../third_party/skia/include/core/SkMilestone.h
 FILE: ../../../third_party/skia/include/core/SkOverdrawCanvas.h
 FILE: ../../../third_party/skia/include/core/SkRasterHandleAllocator.h
 FILE: ../../../third_party/skia/include/core/SkSwizzle.h
-FILE: ../../../third_party/skia/include/effects/SkArithmeticImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkOverdrawColorFilter.h
-FILE: ../../../third_party/skia/include/effects/SkPaintImageFilter.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkExtensions.h
 FILE: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h
@@ -606,7 +604,9 @@ FILE: ../../../third_party/skia/src/core/SkSpecialSurface.h
 FILE: ../../../third_party/skia/src/core/SkSwizzle.cpp
 FILE: ../../../third_party/skia/src/effects/SkOverdrawColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkPaintImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkPaintImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrAppliedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.h
@@ -2347,7 +2347,6 @@ FILE: ../../../third_party/skia/include/core/SkPngChunkReader.h
 FILE: ../../../third_party/skia/include/core/SkPoint3.h
 FILE: ../../../third_party/skia/include/core/SkRSXform.h
 FILE: ../../../third_party/skia/include/core/SkTraceMemoryDump.h
-FILE: ../../../third_party/skia/include/effects/SkImageSource.h
 FILE: ../../../third_party/skia/include/effects/SkTableColorFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h
@@ -2449,6 +2448,7 @@ FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.h
 FILE: ../../../third_party/skia/src/effects/SkTableColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageSource.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageSource.h
 FILE: ../../../third_party/skia/src/gpu/GrAutoLocaleSetter.h
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.h
@@ -2729,13 +2729,8 @@ FILE: ../../../third_party/skia/include/core/SkFontMgr.h
 FILE: ../../../third_party/skia/include/core/SkFontStyle.h
 FILE: ../../../third_party/skia/include/core/SkImageGenerator.h
 FILE: ../../../third_party/skia/include/core/SkImageInfo.h
-FILE: ../../../third_party/skia/include/effects/SkAlphaThresholdFilter.h
-FILE: ../../../third_party/skia/include/effects/SkComposeImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkDisplacementMapEffect.h
-FILE: ../../../third_party/skia/include/effects/SkDropShadowImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkLumaColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
-FILE: ../../../third_party/skia/include/effects/SkTileImageFilter.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
 FILE: ../../../third_party/skia/include/private/GrTypesPriv.h
@@ -2773,10 +2768,15 @@ FILE: ../../../third_party/skia/src/core/SkTMultiMap.h
 FILE: ../../../third_party/skia/src/core/SkValidationUtils.h
 FILE: ../../../third_party/skia/src/effects/SkLumaColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapEffect.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapEffect.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrBlend.h
 FILE: ../../../third_party/skia/src/gpu/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrGeometryProcessor.h
@@ -4059,22 +4059,22 @@ ORIGIN: ../../../third_party/skia/bench/ReadPixBench.cpp + ../../../third_party/
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ReadPixBench.cpp
 FILE: ../../../third_party/skia/bench/WriterBench.cpp
-FILE: ../../../third_party/skia/include/effects/SkColorFilterImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkLightingImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMagnifierImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMatrixConvolutionImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMergeImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMorphologyImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkOffsetImageFilter.h
 FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2012 The Android Open Source Project
@@ -6213,11 +6213,11 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/core/SkDrawLooper.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/core/SkDrawLooper.h
-FILE: ../../../third_party/skia/include/effects/SkBlurImageFilter.h
 FILE: ../../../third_party/skia/src/core/SkScan.h
 FILE: ../../../third_party/skia/src/core/SkScan_Antihair.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkBlurImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkBlurImageFilter.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_android_parser.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_android_parser.h
 ----------------------------------------------------------------------------------------------------
@@ -6401,46 +6401,6 @@ FILE: ../../../third_party/skia/src/utils/SkUTF.cpp
 FILE: ../../../third_party/skia/src/utils/SkUTF.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/include/effects/SkPictureImageFilter.h + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/include/effects/SkPictureImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkXfermodeImageFilter.h
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkPictureImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkXfermodeImageFilter.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2013 The Android Open Source Project
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -7142,6 +7102,46 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkTraceEvent.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2014 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/src/effects/imagefilters/SkPictureImageFilter.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkPictureImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkPictureImageFilter.h
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkXfermodeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkXfermodeImageFilter.h
+----------------------------------------------------------------------------------------------------
+Copyright 2013 The Android Open Source Project
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
