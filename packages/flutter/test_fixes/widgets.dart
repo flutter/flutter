@@ -55,4 +55,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.of(context, nullOk: true);
   MediaQuery.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.of(context, nullOk: true);
+  Navigator.of(context, nullOk: false);
 }

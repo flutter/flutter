@@ -55,4 +55,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68736
   MediaQuery.maybeOf(context);
   MediaQuery.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
 }
