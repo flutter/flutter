@@ -497,7 +497,6 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
         constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1));
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
     final double childMainAxisExtent = mainAxisExtent ?? childCrossAxisExtent / childAspectRatio;
-    print('usableCrossAxisExtent $usableCrossAxisExtent, childMainAxisExtent $childMainAxisExtent');
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,
