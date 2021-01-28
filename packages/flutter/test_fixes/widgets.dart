@@ -63,4 +63,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68910
   Router.of(context, nullOk: true);
   Router.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.localeOf(context, nullOk: true);
+  Localizations.localeOf(context, nullOk: false);
 }
