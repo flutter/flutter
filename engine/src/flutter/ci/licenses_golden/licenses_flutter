@@ -2229,7 +2229,6 @@ FILE: ../../../flutter/third_party/txt/benchmarks/paint_record_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_builder_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/skparagraph_benchmarks.cc
-FILE: ../../../flutter/third_party/txt/benchmarks/styled_runs_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/txt_run_all_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/src/log/log.cc
 FILE: ../../../flutter/third_party/txt/src/log/log.h
