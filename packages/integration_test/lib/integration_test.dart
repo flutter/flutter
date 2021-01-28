@@ -41,7 +41,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
         await _channel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
-            'results': results.map((String name, Object result) {
+            'results': results.map<String, dynamic>((String name, Object result) {
               if (result is Failure) {
                 return MapEntry<String, dynamic>(name, result.details);
               }
@@ -202,7 +202,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
   }) async {
-    assert(streams != null);
+    assert(streams != null); // ignore: unnecessary_null_comparison
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;

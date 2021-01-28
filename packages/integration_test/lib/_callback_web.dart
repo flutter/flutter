@@ -82,7 +82,6 @@ class WebCallbackManager implements CallbackManager {
         return params['message'] == null
             ? _requestData(testRunner)
             : _requestDataWithMessage(params['message']!, testRunner);
-        break;
       case 'get_health':
         response = <String, String>{'status': 'ok'};
         break;

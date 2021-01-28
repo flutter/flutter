@@ -32,7 +32,7 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
-  assert(testOutputFilename != null);
+  assert(testOutputFilename != null); // ignore: unnecessary_null_comparison
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
   final File file = fs.file(path.join(
@@ -65,10 +65,10 @@ Future<void> writeResponseData(
 /// ```
 Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 1),
-  ResponseDataCallback responseDataCallback = writeResponseData,
+  ResponseDataCallback? responseDataCallback = writeResponseData,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
-  final String jsonResult = await driver.requestData(null, timeout: timeout);
+  final String jsonResult = await driver.requestData('', timeout: timeout);
   final Response response = Response.fromJson(jsonResult);
   await driver.close();
 
