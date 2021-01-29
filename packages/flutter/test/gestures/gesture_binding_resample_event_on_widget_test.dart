@@ -25,7 +25,7 @@ void main() {
         ui.PointerData(
             change: ui.PointerChange.add,
             physicalX: 0.0,
-            timeStamp: epoch + const Duration(milliseconds: 0),
+            timeStamp: epoch + Duration.zero,
         ),
         ui.PointerData(
             change: ui.PointerChange.down,

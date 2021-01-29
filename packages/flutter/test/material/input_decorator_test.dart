@@ -1519,7 +1519,7 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1542,7 +1542,7 @@ void main() {
       buildInputDecorator(
         isEmpty: true,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1577,7 +1577,7 @@ void main() {
       buildInputDecorator(
         isEmpty: false,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -3811,7 +3811,7 @@ void main() {
           // is rounded.
 
           // Top-left
-          Offset(0.0, 0.0),
+          Offset.zero,
           // Top-right
           Offset(inputDecoratorWidth, 0.0),
           // Bottom-left

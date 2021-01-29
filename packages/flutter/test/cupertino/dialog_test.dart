@@ -797,7 +797,7 @@ void main() {
     // issue for our use-case, so we don't worry about it.
     expect(actionsSectionBox, paints..path(
       includes: <Offset>[
-        const Offset(0.0, 0.0),
+        Offset.zero,
         Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
       ],
     ));

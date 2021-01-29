@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1185,56 +1185,61 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Shortcuts(
-      shortcuts: scrollShortcutOverrides,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
-            onInvoke: (SingleTapUpTextIntent intent) {
-              // Because TextSelectionGestureDetector listens to taps that happen on
-              // widgets in front of it, tapping the clear button will also trigger
-              // this handler. If the clear button widget recognizes the up event,
-              // then do not handle it.
-              if (_clearGlobalKey.currentContext != null) {
-                final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
-                final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
-                if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-                  return;
-                }
+    final Widget child = Actions(
+      actions: <Type, Action<Intent>>{
+        SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
+          onInvoke: (SingleTapUpTextIntent intent) {
+            // Because TextSelectionGestureDetector listens to taps that happen on
+            // widgets in front of it, tapping the clear button will also trigger
+            // this handler. If the clear button widget recognizes the up event,
+            // then do not handle it.
+            if (_clearGlobalKey.currentContext != null) {
+              final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+              final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
+              if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+                return;
               }
-              // Call through to the default SingleTapUpTextIntent Action.
-              Actions.invoke<SingleTapUpTextIntent>(context, intent);
-              _requestKeyboard();
-              if (widget.onTap != null)
-                widget.onTap!();
-            },
-          ),
-        },
-        child: Semantics(
-          enabled: enabled,
-          onTap: !enabled || widget.readOnly ? null : () {
-            if (!controller.selection.isValid) {
-              controller.selection = TextSelection.collapsed(offset: controller.text.length);
             }
+            // Call through to the default SingleTapUpTextIntent Action.
+            Actions.invoke<SingleTapUpTextIntent>(context, intent);
             _requestKeyboard();
+            if (widget.onTap != null)
+              widget.onTap!();
           },
-          child: IgnorePointer(
-            ignoring: !enabled,
-            child: Container(
-              decoration: effectiveDecoration,
-              child: _selectionGestureDetectorBuilder.buildGestureDetector(
-                behavior: HitTestBehavior.translucent,
-                child: Align(
-                  alignment: Alignment(-1.0, _textAlignVertical.y),
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-                ),
+        ),
+      },
+      child: Semantics(
+        enabled: enabled,
+        onTap: !enabled || widget.readOnly ? null : () {
+          if (!controller.selection.isValid) {
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          }
+          _requestKeyboard();
+        },
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: Container(
+            decoration: effectiveDecoration,
+            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Align(
+                alignment: Alignment(-1.0, _textAlignVertical.y),
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
               ),
             ),
           ),
         ),
       ),
     );
+
+    if (kIsWeb) {
+      return Shortcuts(
+        shortcuts: scrollShortcutOverrides,
+        child: child,
+      );
+    }
+    return child;
   }
 }

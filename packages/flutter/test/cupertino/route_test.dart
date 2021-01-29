@@ -1684,6 +1684,36 @@ void main() {
     navigator.removeRoute(r);
     await tester.pump();
   });
+
+  testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: _RestorableModalTestWidget(),
+      ),
+    );
+
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -1722,7 +1752,7 @@ class PopupObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       popupCount++;
     }
     super.didPush(route, previousRoute);
@@ -1746,7 +1776,7 @@ class RouteSettingsObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       routeName = route.settings.name;
     }
     super.didPush(route, previousRoute);
@@ -1865,6 +1895,48 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
           },
         );
       },
+    );
+  }
+}
+
+class _RestorableModalTestWidget extends StatelessWidget{
+  static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
+    return CupertinoModalPopupRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              child: const Text('Action One'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: const Text('Action Two'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Home'),
+      ),
+      child: Center(child: CupertinoButton(
+        onPressed: () {
+          Navigator.of(context).restorablePush(_modalBuilder);
+        },
+        child: const Text('X'),
+      )),
     );
   }
 }

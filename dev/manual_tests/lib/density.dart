@@ -53,7 +53,7 @@ class OptionModel extends ChangeNotifier {
   }
 
   VisualDensity get density => _density;
-  VisualDensity _density = const VisualDensity();
+  VisualDensity _density = VisualDensity.standard;
   set density(VisualDensity density) {
     if (density != _density) {
       _density = density;

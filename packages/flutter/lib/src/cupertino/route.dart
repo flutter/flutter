@@ -25,9 +25,10 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 // user releases a page mid swipe.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
-// Barrier color for a Cupertino modal barrier.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
+/// Barrier color for a Cupertino modal barrier.
+///
+/// Extracted from https://developer.apple.com/design/resources/.
+const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x33000000),
   darkColor: Color(0x7A000000),
 );
@@ -927,14 +928,46 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
-class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
-  _CupertinoModalPopupRoute({
-    required this.barrierColor,
-    required this.barrierLabel,
+/// A route that shows a modal iOS-style popup that slides up from the
+/// bottom of the screen.
+///
+/// Such a popup is an alternative to a menu or a dialog and prevents the user
+/// from interacting with the rest of the app.
+///
+/// It is used internally by [showCupertinoModalPopup] or can be directly pushed
+/// onto the [Navigator] stack to enable state restoration. See
+/// [showCupertinoModalPopup] for a state restoration app example.
+///
+/// The `barrierColor` argument determines the [Color] of the barrier underneath
+/// the popup. When unspecified, the barrier color defaults to a light opacity
+/// black scrim based on iOS's dialog screens. To correctly have iOS resolve
+/// to the appropriate modal colors, pass in
+/// `CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context)`.
+///
+/// The `barrierDismissible` argument determines whether clicking outside the
+/// popup results in dismissal. It is `true` by default.
+///
+/// The `semanticsDismissible` argument is used to determine whether the
+/// semantics of the modal barrier are included in the semantics tree.
+///
+/// The `routeSettings` argument is used to provide [RouteSettings] to the
+/// created Route.
+///
+/// See also:
+///
+///  * [CupertinoActionSheet], which is the widget usually returned by the
+///    `builder` argument.
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
+class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  /// A route that shows a modal iOS-style popup that slides up from the
+  /// bottom of the screen.
+  CupertinoModalPopupRoute({
     required this.builder,
-    bool? barrierDismissible,
+    this.barrierLabel = 'Dismiss',
+    this.barrierColor = kCupertinoModalBarrierColor,
+    bool barrierDismissible = true,
     bool? semanticsDismissible,
-    required ImageFilter? filter,
+    ImageFilter? filter,
     RouteSettings? settings,
   }) : super(
          filter: filter,
@@ -944,6 +977,14 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     _semanticsDismissible = semanticsDismissible;
   }
 
+  /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
+  ///
+  /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+  ///
+  /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
+  /// by the `builder` does not share a context with the route it was originally
+  /// built from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
+  /// widget needs to update dynamically.
   final WidgetBuilder builder;
 
   bool? _barrierDismissible;
@@ -1043,6 +1084,87 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
+/// ### State Restoration in Modals
+///
+/// Using this method will not enable state restoration for the modal. In order
+/// to enable state restoration for a modal, use [Navigator.restorablePush]
+/// or [Navigator.restorablePushNamed] with [CupertinoModalPopupRoute].
+///
+/// For more information about state restoration, see [RestorationManager].
+///
+/// {@tool sample --template=freeform}
+///
+/// This sample demonstrates how to create a restorable Cupertino modal route.
+/// This is accomplished by enabling state restoration by specifying
+/// [CupertinoApp.restorationScopeId] and using [Navigator.restorablePush] to
+/// push [CupertinoModalPopupRoute] when the [CupertinoButton] is tapped.
+///
+/// {@macro flutter.widgets.RestorationManager}
+///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoApp(
+///       restorationScopeId: 'app',
+///       home: MyHomePage(),
+///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatelessWidget {
+///   static Route _modalBuilder(BuildContext context, Object? arguments) {
+///     return CupertinoModalPopupRoute(
+///       builder: (BuildContext context) {
+///         return CupertinoActionSheet(
+///           title: const Text('Title'),
+///           message: const Text('Message'),
+///           actions: [
+///             CupertinoActionSheetAction(
+///               child: const Text('Action One'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///             CupertinoActionSheetAction(
+///               child: const Text('Action Two'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///           ],
+///         );
+///       },
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoPageScaffold(
+///       navigationBar: const CupertinoNavigationBar(
+///         middle: Text('Home'),
+///       ),
+///       child: Center(child: CupertinoButton(
+///         onPressed: () {
+///           Navigator.of(context).restorablePush(_modalBuilder);
+///         },
+///         child: const Text('Open Modal'),
+///       )),
+///     );
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
@@ -1052,7 +1174,7 @@ Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
-  Color barrierColor = _kModalBarrierColor,
+  Color barrierColor = kCupertinoModalBarrierColor,
   bool barrierDismissible = true,
   bool useRootNavigator = true,
   bool? semanticsDismissible,
@@ -1060,12 +1182,11 @@ Future<T?> showCupertinoModalPopup<T>({
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
-    _CupertinoModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
-      barrierDismissible: barrierDismissible,
-      barrierLabel: 'Dismiss',
+    CupertinoModalPopupRoute<T>(
       builder: builder,
       filter: filter,
+      barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
+      barrierDismissible: barrierDismissible,
       semanticsDismissible: semanticsDismissible,
       settings: routeSettings,
     ),
@@ -1219,7 +1340,7 @@ Future<T?> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
-    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+    barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
   ));
 }
@@ -1276,7 +1397,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         },
         barrierDismissible: barrierDismissible,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
-        barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
+        barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
         transitionDuration: transitionDuration,
         transitionBuilder: transitionBuilder,
         settings: settings,

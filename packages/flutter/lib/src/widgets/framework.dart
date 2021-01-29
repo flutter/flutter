@@ -9,6 +9,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
@@ -115,6 +116,7 @@ class ObjectKey extends LocalKey {
 /// global key. Attempting to do so will assert at runtime.
 ///
 /// ## Pitfalls
+///
 /// GlobalKeys should not be re-created on every build. They should usually be
 /// long-lived objects owned by a [State] object, for example.
 ///
@@ -147,170 +149,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// constructor.
   const GlobalKey.constructor() : super.empty();
 
-  static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
-  static final Set<Element> _debugIllFatedElements = HashSet<Element>();
-  // This map keeps track which child reserves the global key with the parent.
-  // Parent, child -> global key.
-  // This provides us a way to remove old reservation while parent rebuilds the
-  // child in the same slot.
-  static final Map<Element, Map<Element, GlobalKey>> _debugReservations = <Element, Map<Element, GlobalKey>>{};
-
-  static void _debugRemoveReservationFor(Element parent, Element child) {
-    assert(() {
-      assert(parent != null);
-      assert(child != null);
-      _debugReservations[parent]?.remove(child);
-      return true;
-    }());
-  }
-
-  void _register(Element element) {
-    assert(() {
-      if (_registry.containsKey(this)) {
-        assert(element.widget != null);
-        final Element oldElement = _registry[this]!;
-        assert(oldElement.widget != null);
-        assert(element.widget.runtimeType != oldElement.widget.runtimeType);
-        _debugIllFatedElements.add(oldElement);
-      }
-      return true;
-    }());
-    _registry[this] = element;
-  }
-
-  void _unregister(Element element) {
-    assert(() {
-      if (_registry.containsKey(this) && _registry[this] != element) {
-        assert(element.widget != null);
-        final Element oldElement = _registry[this]!;
-        assert(oldElement.widget != null);
-        assert(element.widget.runtimeType != oldElement.widget.runtimeType);
-      }
-      return true;
-    }());
-    if (_registry[this] == element)
-      _registry.remove(this);
-  }
-
-  void _debugReserveFor(Element parent, Element child) {
-    assert(() {
-      assert(parent != null);
-      assert(child != null);
-      _debugReservations[parent] ??= <Element, GlobalKey>{};
-      _debugReservations[parent]![child] = this;
-      return true;
-    }());
-  }
-
-  static void _debugVerifyGlobalKeyReservation() {
-    assert(() {
-      final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
-      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
-        // We ignore parent that are unmounted or detached.
-        if (parent._lifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
-          return;
-        childToKey.forEach((Element child, GlobalKey key) {
-          // If parent = null, the node is deactivated by its parent and is
-          // not re-attached to other part of the tree. We should ignore this
-          // node.
-          if (child._parent == null)
-            return;
-          // It is possible the same key registers to the same parent twice
-          // with different children. That is illegal, but it is not in the
-          // scope of this check. Such error will be detected in
-          // _debugVerifyIllFatedPopulation or
-          // _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.
-          if (keyToParent.containsKey(key) && keyToParent[key] != parent) {
-            // We have duplication reservations for the same global key.
-            final Element older = keyToParent[key]!;
-            final Element newer = parent;
-            final FlutterError error;
-            if (older.toString() != newer.toString()) {
-              error = FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Multiple widgets used the same GlobalKey.'),
-                ErrorDescription(
-                  'The key $key was used by multiple widgets. The parents of those widgets were:\n'
-                    '- ${older.toString()}\n'
-                    '- ${newer.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-                ),
-              ]);
-            } else {
-              error = FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Multiple widgets used the same GlobalKey.'),
-                ErrorDescription(
-                  'The key $key was used by multiple widgets. The parents of those widgets were '
-                    'different widgets that both had the following description:\n'
-                    '  ${parent.toString()}\n'
-                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-                ),
-              ]);
-            }
-            // Fix the tree by removing the duplicated child from one of its
-            // parents to resolve the duplicated key issue. This allows us to
-            // tear down the tree during testing without producing additional
-            // misleading exceptions.
-            if (child._parent != older) {
-              older.visitChildren((Element currentChild) {
-                if (currentChild == child)
-                  older.forgetChild(child);
-              });
-            }
-            if (child._parent != newer) {
-              newer.visitChildren((Element currentChild) {
-                if (currentChild == child)
-                  newer.forgetChild(child);
-              });
-            }
-            throw error;
-          } else {
-            keyToParent[key] = parent;
-          }
-        });
-      });
-      _debugReservations.clear();
-      return true;
-    }());
-  }
-
-  static void _debugVerifyIllFatedPopulation() {
-    assert(() {
-      Map<GlobalKey, Set<Element>>? duplicates;
-      for (final Element element in _debugIllFatedElements) {
-        if (element._lifecycleState != _ElementLifecycle.defunct) {
-          assert(element != null);
-          assert(element.widget != null);
-          assert(element.widget.key != null);
-          final GlobalKey key = element.widget.key! as GlobalKey;
-          assert(_registry.containsKey(key));
-          duplicates ??= <GlobalKey, Set<Element>>{};
-          // Uses ordered set to produce consistent error message.
-          final Set<Element> elements = duplicates.putIfAbsent(key, () => LinkedHashSet<Element>());
-          elements.add(element);
-          elements.add(_registry[key]!);
-        }
-      }
-      _debugIllFatedElements.clear();
-      if (duplicates != null) {
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-        information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
-        for (final GlobalKey key in duplicates.keys) {
-          final Set<Element> elements = duplicates[key]!;
-          // TODO(jacobr): this will omit the '- ' before each widget name and
-          // use the more standard whitespace style instead. Please let me know
-          // if the '- ' style is a feature we want to maintain and we can add
-          // another tree style that supports it. I also see '* ' in some places
-          // so it would be nice to unify and normalize.
-          information.add(Element.describeElements('The key $key was used by ${elements.length} widgets', elements));
-        }
-        information.add(ErrorDescription('A GlobalKey can only be specified on one widget at a time in the widget tree.'));
-        throw FlutterError.fromParts(information);
-      }
-      return true;
-    }());
-  }
-
-  Element? get _currentElement => _registry[this];
+  Element? get _currentElement => WidgetsBinding.instance!.buildOwner!._globalKeyRegistry[this];
 
   /// The build context in which the widget with this key builds.
   ///
@@ -2768,6 +2607,173 @@ class BuildOwner {
     _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans?.remove(node);
   }
 
+  final Map<GlobalKey, Element> _globalKeyRegistry = <GlobalKey, Element>{};
+  final Set<Element> _debugIllFatedElements = HashSet<Element>();
+  // This map keeps track which child reserves the global key with the parent.
+  // Parent, child -> global key.
+  // This provides us a way to remove old reservation while parent rebuilds the
+  // child in the same slot.
+  final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
+
+  /// The number of [GlobalKey] instances that are currently associated with
+  /// [Element]s that have been built by this build owner.
+  int get globalKeyCount => _globalKeyRegistry.length;
+
+  void _debugRemoveGlobalKeyReservationFor(Element parent, Element child) {
+    assert(() {
+      assert(parent != null);
+      assert(child != null);
+      _debugGlobalKeyReservations[parent]?.remove(child);
+      return true;
+    }());
+  }
+
+  void _registerGlobalKey(GlobalKey key, Element element) {
+    assert(() {
+      if (_globalKeyRegistry.containsKey(key)) {
+        assert(element.widget != null);
+        final Element oldElement = _globalKeyRegistry[key]!;
+        assert(oldElement.widget != null);
+        assert(element.widget.runtimeType != oldElement.widget.runtimeType);
+        _debugIllFatedElements.add(oldElement);
+      }
+      return true;
+    }());
+    _globalKeyRegistry[key] = element;
+  }
+
+  void _unregisterGlobalKey(GlobalKey key, Element element) {
+    assert(() {
+      if (_globalKeyRegistry.containsKey(key) && _globalKeyRegistry[key] != element) {
+        assert(element.widget != null);
+        final Element oldElement = _globalKeyRegistry[key]!;
+        assert(oldElement.widget != null);
+        assert(element.widget.runtimeType != oldElement.widget.runtimeType);
+      }
+      return true;
+    }());
+    if (_globalKeyRegistry[key] == element)
+      _globalKeyRegistry.remove(key);
+  }
+
+  void _debugReserveGlobalKeyFor(Element parent, Element child, GlobalKey key) {
+    assert(() {
+      assert(parent != null);
+      assert(child != null);
+      _debugGlobalKeyReservations[parent] ??= <Element, GlobalKey>{};
+      _debugGlobalKeyReservations[parent]![child] = key;
+      return true;
+    }());
+  }
+
+  void _debugVerifyGlobalKeyReservation() {
+    assert(() {
+      final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
+      _debugGlobalKeyReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
+        // We ignore parent that are unmounted or detached.
+        if (parent._lifecycleState == _ElementLifecycle.defunct || parent.renderObject?.attached == false)
+          return;
+        childToKey.forEach((Element child, GlobalKey key) {
+          // If parent = null, the node is deactivated by its parent and is
+          // not re-attached to other part of the tree. We should ignore this
+          // node.
+          if (child._parent == null)
+            return;
+          // It is possible the same key registers to the same parent twice
+          // with different children. That is illegal, but it is not in the
+          // scope of this check. Such error will be detected in
+          // _debugVerifyIllFatedPopulation or
+          // _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.
+          if (keyToParent.containsKey(key) && keyToParent[key] != parent) {
+            // We have duplication reservations for the same global key.
+            final Element older = keyToParent[key]!;
+            final Element newer = parent;
+            final FlutterError error;
+            if (older.toString() != newer.toString()) {
+              error = FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Multiple widgets used the same GlobalKey.'),
+                ErrorDescription(
+                    'The key $key was used by multiple widgets. The parents of those widgets were:\n'
+                    '- ${older.toString()}\n'
+                    '- ${newer.toString()}\n'
+                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+                ),
+              ]);
+            } else {
+              error = FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Multiple widgets used the same GlobalKey.'),
+                ErrorDescription(
+                    'The key $key was used by multiple widgets. The parents of those widgets were '
+                    'different widgets that both had the following description:\n'
+                    '  ${parent.toString()}\n'
+                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+                ),
+              ]);
+            }
+            // Fix the tree by removing the duplicated child from one of its
+            // parents to resolve the duplicated key issue. This allows us to
+            // tear down the tree during testing without producing additional
+            // misleading exceptions.
+            if (child._parent != older) {
+              older.visitChildren((Element currentChild) {
+                if (currentChild == child)
+                  older.forgetChild(child);
+              });
+            }
+            if (child._parent != newer) {
+              newer.visitChildren((Element currentChild) {
+                if (currentChild == child)
+                  newer.forgetChild(child);
+              });
+            }
+            throw error;
+          } else {
+            keyToParent[key] = parent;
+          }
+        });
+      });
+      _debugGlobalKeyReservations.clear();
+      return true;
+    }());
+  }
+
+  void _debugVerifyIllFatedPopulation() {
+    assert(() {
+      Map<GlobalKey, Set<Element>>? duplicates;
+      for (final Element element in _debugIllFatedElements) {
+        if (element._lifecycleState != _ElementLifecycle.defunct) {
+          assert(element != null);
+          assert(element.widget != null);
+          assert(element.widget.key != null);
+          final GlobalKey key = element.widget.key! as GlobalKey;
+          assert(_globalKeyRegistry.containsKey(key));
+          duplicates ??= <GlobalKey, Set<Element>>{};
+          // Uses ordered set to produce consistent error message.
+          final Set<Element> elements = duplicates.putIfAbsent(key, () => LinkedHashSet<Element>());
+          elements.add(element);
+          elements.add(_globalKeyRegistry[key]!);
+        }
+      }
+      _debugIllFatedElements.clear();
+      if (duplicates != null) {
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+        information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
+        for (final GlobalKey key in duplicates.keys) {
+          final Set<Element> elements = duplicates[key]!;
+          // TODO(jacobr): this will omit the '- ' before each widget name and
+          // use the more standard whitespace style instead. Please let me know
+          // if the '- ' style is a feature we want to maintain and we can add
+          // another tree style that supports it. I also see '* ' in some places
+          // so it would be nice to unify and normalize.
+          information.add(Element.describeElements('The key $key was used by ${elements.length} widgets', elements));
+        }
+        information.add(ErrorDescription('A GlobalKey can only be specified on one widget at a time in the widget tree.'));
+        throw FlutterError.fromParts(information);
+      }
+      return true;
+    }());
+  }
+
   /// Complete the element build pass by unmounting any elements that are no
   /// longer active.
   ///
@@ -2786,8 +2792,8 @@ class BuildOwner {
       });
       assert(() {
         try {
-          GlobalKey._debugVerifyGlobalKeyReservation();
-          GlobalKey._debugVerifyIllFatedPopulation();
+          _debugVerifyGlobalKeyReservation();
+          _debugVerifyIllFatedPopulation();
           if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
               _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.isNotEmpty) {
             final Set<GlobalKey> keys = HashSet<GlobalKey>();
@@ -3311,7 +3317,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         _debugRemoveGlobalKeyReservation(child);
       final Key? key = newWidget.key;
       if (key is GlobalKey) {
-        key._debugReserveFor(this, newChild);
+        assert(owner != null);
+        owner!._debugReserveGlobalKeyFor(this, newChild, key);
       }
       return true;
     }());
@@ -3344,17 +3351,23 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
     _depth = _parent != null ? _parent!.depth + 1 : 1;
-    if (parent != null) // Only assign ownership if the parent is non-null
+    if (parent != null) {
+      // Only assign ownership if the parent is non-null. If parent is null
+      // (the root node), the owner should have already been assigned.
+      // See RootRenderObjectElement.assignOwner().
       _owner = parent.owner;
+    }
+    assert(owner != null);
     final Key? key = widget.key;
     if (key is GlobalKey) {
-      key._register(this);
+      owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
   }
 
   void _debugRemoveGlobalKeyReservation(Element child) {
-    GlobalKey._debugRemoveReservationFor(this, child);
+    assert(owner != null);
+    owner!._debugRemoveGlobalKeyReservationFor(this, child);
   }
 
   /// Change the widget used to configure this element.
@@ -3720,10 +3733,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
+    assert(owner != null);
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget.key;
     if (key is GlobalKey) {
-      key._unregister(this);
+      owner!._unregisterGlobalKey(key, this);
     }
     _lifecycleState = _ElementLifecycle.defunct;
   }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -23,7 +25,6 @@ class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockUsage extends Mock implements Usage {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -87,6 +88,7 @@ void setupReadMocks({
 }) {
   final MockFile mockFile = MockFile();
   when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFileSystem.currentDirectory).thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockFile.readAsStringSync(
     encoding: anyNamed('encoding'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
@@ -345,7 +347,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    testWithoutContext('When reading from a file or directory without permission', () {
       setupReadMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
@@ -357,6 +359,8 @@ void main() {
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => fs.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -579,7 +583,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    testWithoutContext('When reading from a file or directory without permission', () {
       setupReadMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
@@ -591,6 +595,8 @@ void main() {
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => fs.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -920,9 +926,11 @@ void main() {
       fileSystem.file('source').copySync('dest');
 
       expect(memoryDest.readAsBytesSync(), expectedBytes);
-      verify(globals.flutterUsage.sendEvent('error-handling', 'copy-fallback')).called(1);
+      expect((globals.flutterUsage as TestUsage).events, contains(
+        const TestUsageEvent('error-handling', 'copy-fallback'),
+      ));
     }, overrides: <Type, Generator>{
-      Usage: () => MockUsage(),
+      Usage: () => TestUsage(),
     });
 
     // Uses context for analytics.
@@ -956,7 +964,7 @@ void main() {
 
       verify(dest.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
-      Usage: () => MockUsage(),
+      Usage: () => TestUsage(),
     });
   });
 }

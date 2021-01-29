@@ -131,6 +131,7 @@ class OutlinedButton extends ButtonStyleButton {
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
+    Size? fixedSize,
     BorderSide? side,
     OutlinedBorder? shape,
     MouseCursor? enabledMouseCursor,
@@ -160,6 +161,7 @@ class OutlinedButton extends ButtonStyleButton {
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -210,6 +212,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
+  /// * `fixedSize` - null
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
