@@ -242,9 +242,19 @@ class CanvasParagraph implements EngineParagraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    // TODO(mdebbar): After layout, line metrics should be available and can be
-    // used to determine the line boundary of the given `position`.
-    return ui.TextRange.empty;
+    final int index = position.offset;
+    final List<EngineLineMetrics> lines = computeLineMetrics();
+
+    int i;
+    for (i = 0; i < lines.length - 1; i++) {
+      final EngineLineMetrics line = lines[i];
+      if (index >= line.startIndex && index < line.endIndex) {
+        break;
+      }
+    }
+
+    final EngineLineMetrics line = lines[i];
+    return ui.TextRange(start: line.startIndex, end: line.endIndex);
   }
 
   @override
