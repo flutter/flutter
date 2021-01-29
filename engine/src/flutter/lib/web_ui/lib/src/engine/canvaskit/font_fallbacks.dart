@@ -211,15 +211,19 @@ Future<void> _registerSymbolsAndEmoji() async {
   String? symbolsFontUrl = extractUrlFromCss(symbolsCss);
   String? emojiFontUrl = extractUrlFromCss(emojiCss);
 
-  if (symbolsFontUrl == null || emojiFontUrl == null) {
-    html.window.console
-        .warn('Error parsing CSS for Noto Emoji and Symbols font.');
+  if (symbolsFontUrl != null) {
+    notoDownloadQueue.add(_ResolvedNotoSubset(
+        symbolsFontUrl, 'Noto Sans Symbols', const <CodeunitRange>[]));
+  } else {
+    html.window.console.warn('Error parsing CSS for Noto Symbols font.');
   }
 
-  notoDownloadQueue.add(_ResolvedNotoSubset(
-      symbolsFontUrl!, 'Noto Sans Symbols', const <CodeunitRange>[]));
-  notoDownloadQueue.add(_ResolvedNotoSubset(
-      emojiFontUrl!, 'Noto Color Emoji Compat', const <CodeunitRange>[]));
+  if (emojiFontUrl != null) {
+    notoDownloadQueue.add(_ResolvedNotoSubset(
+        emojiFontUrl, 'Noto Color Emoji Compat', const <CodeunitRange>[]));
+  } else {
+    html.window.console.warn('Error parsing CSS for Noto Emoji font.');
+  }
 }
 
 /// Finds the minimum set of fonts which covers all of the [codeunits].
@@ -695,9 +699,10 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<ByteBuffer> result = html.window.fetch(url).then((dynamic fetchResult) => fetchResult
-        .arrayBuffer()
-        .then<ByteBuffer>((dynamic x) => x as ByteBuffer));
+    final Future<ByteBuffer> result = html.window.fetch(url).then(
+        (dynamic fetchResult) => fetchResult
+            .arrayBuffer()
+            .then<ByteBuffer>((dynamic x) => x as ByteBuffer));
     if (assertionsEnabled) {
       result.whenComplete(() {
         _debugActiveDownloadCount -= 1;
@@ -713,8 +718,9 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<String> result = html.window.fetch(url).then((dynamic response) =>
-        response.text().then<String>((dynamic x) => x as String));
+    final Future<String> result = html.window.fetch(url).then(
+        (dynamic response) =>
+            response.text().then<String>((dynamic x) => x as String));
     if (assertionsEnabled) {
       result.whenComplete(() {
         _debugActiveDownloadCount -= 1;

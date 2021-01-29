@@ -92,8 +92,7 @@ class TestCommand extends Command<bool> with ArgUtils {
         'fetch-goldens-repo',
         defaultsTo: true,
         negatable: true,
-        help:
-            'Whether to fetch the goldens repo. Set this to false to iterate '
+        help: 'Whether to fetch the goldens repo. Set this to false to iterate '
             'on golden tests without fearing that the fetcher will overwrite '
             'your local changes.',
       )
@@ -174,39 +173,41 @@ class TestCommand extends Command<bool> with ArgUtils {
       final FilePath dir = FilePath.fromWebUi('');
       print('');
       print('Initial test run is done!');
-      print('Watching ${dir.relativeToCwd}/lib and ${dir.relativeToCwd}/test to re-run tests');
+      print(
+          'Watching ${dir.relativeToCwd}/lib and ${dir.relativeToCwd}/test to re-run tests');
       print('');
       PipelineWatcher(
-        dir: dir.absolute,
-        pipeline: testPipeline,
-        ignore: (event) {
-          // Ignore font files that are copied whenever tests run.
-          if (event.path.endsWith('.ttf')) {
+          dir: dir.absolute,
+          pipeline: testPipeline,
+          ignore: (event) {
+            // Ignore font files that are copied whenever tests run.
+            if (event.path.endsWith('.ttf')) {
+              return true;
+            }
+
+            // Ignore auto-generated JS files.
+            // The reason we are using `.contains()` instead of `.endsWith()` is
+            // because the auto-generated files could end with any of the
+            // following:
+            //
+            // - browser_test.dart.js
+            // - browser_test.dart.js.map
+            // - browser_test.dart.js.deps
+            if (event.path.contains('browser_test.dart.js')) {
+              return true;
+            }
+
+            // React to changes in lib/ and test/ folders.
+            final String relativePath =
+                path.relative(event.path, from: dir.absolute);
+            if (relativePath.startsWith('lib/') ||
+                relativePath.startsWith('test/')) {
+              return false;
+            }
+
+            // Ignore anything else.
             return true;
-          }
-
-          // Ignore auto-generated JS files.
-          // The reason we are using `.contains()` instead of `.endsWith()` is
-          // because the auto-generated files could end with any of the
-          // following:
-          //
-          // - browser_test.dart.js
-          // - browser_test.dart.js.map
-          // - browser_test.dart.js.deps
-          if (event.path.contains('browser_test.dart.js')) {
-            return true;
-          }
-
-          // React to changes in lib/ and test/ folders.
-          final String relativePath = path.relative(event.path, from: dir.absolute);
-          if (relativePath.startsWith('lib/') || relativePath.startsWith('test/')) {
-            return false;
-          }
-
-          // Ignore anything else.
-          return true;
-        }
-      ).start();
+          }).start();
       // Return a never-ending future.
       return Completer<bool>().future;
     } else {
@@ -226,7 +227,8 @@ class TestCommand extends Command<bool> with ArgUtils {
             bool unitTestResult = await runUnitTests();
             bool integrationTestResult = await runIntegrationTests();
             if (integrationTestResult != unitTestResult) {
-              print('Tests run. Integration tests passed: $integrationTestResult '
+              print(
+                  'Tests run. Integration tests passed: $integrationTestResult '
                   'unit tests passed: $unitTestResult');
             }
             return integrationTestResult && unitTestResult;
@@ -234,7 +236,8 @@ class TestCommand extends Command<bool> with ArgUtils {
             return await runUnitTests();
           }
       }
-      throw UnimplementedError('Unknown test type requested: $testTypesRequested');
+      throw UnimplementedError(
+          'Unknown test type requested: $testTypesRequested');
     } on TestFailureException {
       return true;
     }
@@ -786,6 +789,7 @@ const List<String> _kTestFonts = <String>[
   'ahem.ttf',
   'Roboto-Regular.ttf',
   'NotoNaskhArabic-Regular.ttf',
+  'NotoColorEmoji.ttf',
 ];
 
 void _copyTestFontsIntoWebUi() {
