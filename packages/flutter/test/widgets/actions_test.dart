@@ -150,6 +150,84 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
+    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invoked = true;
+                return invoked;
+              },
+            ),
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.maybeInvoke(
+        containerKey.currentContext!,
+        const TestIntent(),
+      );
+      expect(result, isTrue);
+      expect(invoked, isTrue);
+    });
+    testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invoked = true;
+                return invoked;
+              },
+            ),
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.maybeInvoke(
+        containerKey.currentContext!,
+        DoNothingIntent(),
+      );
+      expect(result, isNull);
+      expect(invoked, isFalse);
+    });
+    testWidgets('invoke throws when no action is found', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
+                invoked = true;
+                return invoked;
+              },
+            ),
+          },
+          child: Container(key: containerKey),
+        ),
+      );
+
+      await tester.pump();
+      final Object? result = Actions.maybeInvoke(
+        containerKey.currentContext!,
+        DoNothingIntent(),
+      );
+      expect(result, isNull);
+      expect(invoked, isFalse);
+    });
     testWidgets('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;

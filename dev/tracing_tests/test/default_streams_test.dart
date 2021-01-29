@@ -12,7 +12,7 @@ import 'package:vm_service/vm_service_io.dart';
 // for "Dart", "Embedder", and "GC" recorded from startup.
 
 void main() {
-  VmService vmService;
+  late VmService vmService;
 
   setUpAll(() async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
@@ -22,12 +22,15 @@ void main() {
     }
 
     vmService = await vmServiceConnectUri(
-      'ws://localhost:${info.serverUri.port}${info.serverUri.path}ws',
+      'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
     );
   });
 
-  tearDownAll(() {
-    vmService.dispose();
+  tearDownAll(() async {
+    // TODO(dnfield): Remove ignore once internal repo is up to date
+    // https://github.com/flutter/flutter/issues/74518
+    // ignore: await_only_futures
+    await vmService.dispose();
   });
 
   test('Image cache tracing', () async {

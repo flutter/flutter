@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,7 +15,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -29,7 +30,6 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 };
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
@@ -129,13 +129,13 @@ void main() {
 
   group('Diagnose Xcode build failure', () {
     Map<String, String> buildSettings;
-    MockUsage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
       buildSettings = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
       };
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
     });
 
     testUsingContext('Sends analytics when bitcode fails', () async {
@@ -151,14 +151,18 @@ void main() {
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
-      verify(mockUsage.sendEvent('build',
-        any,
-        label: 'xcode-bitcode-failure',
-        parameters: <String, String>{
-          cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
-          cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
-      })).called(1);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      expect(testUsage.events, contains(
+        TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'xcode-bitcode-failure',
+          parameters: <String, String>{
+            cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
+            cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
+          },
+        ),
+      ));
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -227,7 +231,7 @@ Error launching application on iPhone.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
         contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
@@ -308,7 +312,7 @@ Could not build the precompiled application for the device.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
@@ -345,7 +349,7 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
         contains('Your Xcode project requires migration.'),
@@ -382,7 +386,7 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
       expect(
         logger.errorText,
         contains('Your Xcode project requires migration.'),
@@ -480,5 +484,3 @@ Exited (sigterm)''',
     });
   });
 }
-
-class MockUsage extends Mock implements Usage {}

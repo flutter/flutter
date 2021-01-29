@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -247,6 +249,79 @@ needs to be wrapped.
 
   01234567890123456789012345678901234567
         890123456789'''));
+    });
+
+    testWithoutContext('', () {
+      expect(wrapText(
+        ' ' * 7 + 'abc def ghi', columnWidth: 20, hangingIndent: 5, indent: 3, shouldWrap: true),
+        equals(
+          '          abc def\n'
+          '          ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: 0, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: 0, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth - 2, indent: 5, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth - 2, shouldWrap: true),
+        equals(
+          'abc def\n'
+          'ghi'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi jkl', columnWidth: kMinColumnWidth + 2, hangingIndent: 5, shouldWrap: true),
+        equals(
+          'abc def ghi\n'
+          '  jkl'
+        ),
+      );
+      expect(wrapText(
+        'abc def ghi', columnWidth: kMinColumnWidth + 2, indent: 5, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
+      );
+      expect(wrapText(
+        '     abc def ghi', columnWidth: kMinColumnWidth + 2, shouldWrap: true),
+        equals(
+          '  abc def\n'
+          '  ghi'
+        ),
+      );
     });
   });
 }

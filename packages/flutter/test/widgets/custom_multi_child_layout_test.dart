@@ -124,8 +124,8 @@ class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
 class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
-    positionChild(0, const Offset(0, 0));
-    positionChild(1, const Offset(0, 0));
+    positionChild(0, Offset.zero);
+    positionChild(1, Offset.zero);
   }
 
   @override

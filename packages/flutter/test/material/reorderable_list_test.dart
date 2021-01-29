@@ -1153,6 +1153,34 @@ void main() {
 
     });
 
+
+    testWidgets('ReorderableListView.builder asserts on negative childCount', (WidgetTester tester) async {
+      expect(() => ReorderableListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return const SizedBox();
+        },
+        itemCount: -1,
+        onReorder: (int from, int to) {},
+      ), throwsAssertionError);
+    });
+
+    testWidgets('ReorderableListView.builder only creates the children it needs', (WidgetTester tester) async {
+      final Set<int> itemsCreated = <int>{};
+      await tester.pumpWidget(MaterialApp(
+        home: ReorderableListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            itemsCreated.add(index);
+            return Text(index.toString(), key: ValueKey<int>(index));
+          },
+          itemCount: 1000,
+          onReorder: (int from, int to) {},
+        ),
+      ));
+
+      // Should have only created the first 18 items.
+      expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
+    });
+
     testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
       final Widget reorderableListView = ReorderableListView(
         children: const <Widget>[
@@ -1230,6 +1258,74 @@ void main() {
       expect(getTestItemPosition(), startPosition);
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
+  });
+
+  testWidgets('ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag', (WidgetTester tester) async {
+    // See https://github.com/flutter/flutter/issues/74840 for more details.
+    final List<int> items = List<int>.generate(100, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    // The list is 800x600, 8 items, each item is 800x100 with
+    // an "item $index" text widget at the item's origin.  Drags are initiated by
+    // a simple press on the text widget.
+    await tester.pumpWidget(MaterialApp(
+      home: ReorderableListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            key: ValueKey<int>(items[index]),
+            height: 100,
+            child: ReorderableDragStartListener(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('item ${items[index]}'),
+                ],
+              ),
+              index: index,
+            ),
+          );
+        },
+        itemCount: items.length,
+        onReorder: handleReorder,
+      ),
+    ));
+
+    // Drag item 0 downwards and force an auto scroll off the end of the list
+    // far enough that item zeros original entry in the list is unmounted.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+    // Off the bottom of the screen, which should autoscroll until we hit the
+    // end of the list
+    await drag.moveBy(const Offset(0, 700));
+    await tester.pump(const Duration(seconds: 30));
+    await tester.pumpAndSettle();
+    // Ensure we made it to the bottom (only 4 should be showing as there should
+    // be a gap at the end for the drop area of the dragged item.
+    for (final int i in <int>[95, 96, 97, 98, 99]) {
+      expect(find.text('item $i'), findsOneWidget);
+    }
+
+    // Drag back to off the top of the list, which should autoscroll until
+    // we hit the beginning of the list. This should cause the first item's
+    // entry to be rebuilt. However, the contents should not be in both places.
+    await drag.moveBy(const Offset(0, -1400));
+    await tester.pump(const Duration(seconds: 30));
+    await tester.pumpAndSettle();
+    // Release back at the top so item 0 should drop where it was
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    // Should not have changed anything
+    for (final int i in <int>[0, 1, 2, 3, 4, 5]) {
+      expect(find.text('item $i'), findsOneWidget);
+    }
+    expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
   });
 }
 

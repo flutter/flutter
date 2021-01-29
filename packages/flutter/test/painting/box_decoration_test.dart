@@ -19,7 +19,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },
@@ -32,7 +32,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.ltr),
         );
       },
@@ -61,7 +61,7 @@ void main() {
       (Canvas canvas) {
         painter.paint(
           canvas,
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
         );
       },

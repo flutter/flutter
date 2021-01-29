@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,14 +19,14 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 
 void main() {
-  MockUsage mockUsage;
+  TestUsage testUsage;
   MemoryFileSystem memoryFileSystem;
   BufferLogger testLogger;
   MockMacOSProject mockMacOSProject;
   File xcodeProjectInfoFile;
 
   setUp(() {
-    mockUsage = MockUsage();
+    testUsage = TestUsage();
     memoryFileSystem = MemoryFileSystem.test();
     xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
 
@@ -46,15 +48,10 @@ void main() {
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
     expect(macosProjectMigration.migrate(), isTrue);
-    verifyNever(mockUsage.sendEvent(
-      any,
-      any,
-      label: anyNamed('label'),
-      value: anyNamed('value'),
-    ));
+    expect(testUsage.events, isEmpty);
 
     expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -75,15 +72,10 @@ void main() {
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
     expect(macosProjectMigration.migrate(), isTrue);
-    verifyNever(mockUsage.sendEvent(
-      any,
-      any,
-      label: anyNamed('label'),
-      value: anyNamed('value'),
-    ));
+    expect(testUsage.events, isEmpty);
 
     expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
     expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -101,7 +93,7 @@ shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
     expect(macosProjectMigration.migrate(), isTrue);
     expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -124,15 +116,10 @@ keep this 2
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
     expect(macosProjectMigration.migrate(), isTrue);
-    verifyNever(mockUsage.sendEvent(
-      any,
-      any,
-      label: anyNamed('label'),
-      value: anyNamed('value'),
-    ));
+    expect(testUsage.events, isEmpty);
 
     expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -152,13 +139,14 @@ keep this 2
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
 
     expect(macosProjectMigration.migrate,
         throwsToolExit(message: 'Your Xcode project requires migration'));
-    verify(mockUsage.sendEvent('macos-migration', 'remove-frameworks',
-        label: 'failure', value: null));
+    expect(testUsage.events, contains(
+      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+    ));
   });
 
   testWithoutContext(
@@ -171,18 +159,17 @@ keep this 2
         RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       mockMacOSProject,
       testLogger,
-      mockUsage,
+      testUsage,
     );
     expect(macosProjectMigration.migrate,
         throwsToolExit(message: 'Your Xcode project requires migration'));
-    verify(mockUsage.sendEvent('macos-migration', 'remove-frameworks',
-        label: 'failure', value: null));
+    expect(testUsage.events, contains(
+      const TestUsageEvent('macos-migration', 'remove-frameworks', label: 'failure'),
+    ));
   });
 }
 
 class MockMacOSProject extends Mock implements MacOSProject {}
-
-class MockUsage extends Mock implements Usage {}
 
 class FakeMacOSMigrator extends ProjectMigrator {
   FakeMacOSMigrator({@required this.succeeds}) : super(null);

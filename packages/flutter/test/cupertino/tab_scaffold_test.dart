@@ -1031,7 +1031,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: CupertinoApp(
           home: CupertinoTabScaffold(

@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 /// Applies a chip theme to descendant [RawChip]-based widgets, like [Chip],
 /// [InputChip], [ChoiceChip], [FilterChip], and [ActionChip].

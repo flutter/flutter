@@ -328,7 +328,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           0.0,
           panelTop - panelSize.height,
         ),
-        end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        end: RelativeRect.fill,
       ),
     );
 
