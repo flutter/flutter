@@ -13,7 +13,7 @@ Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
-  final String dartDefines = Platform.environment['DART_DEFINES'];
+  final String dartDefines = Platform.environment['DART_DEFINES']?.replaceAll('=', '%3D');
   final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
   final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
   final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
@@ -56,7 +56,35 @@ or
   ]);
   final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
-
+  print(    <String>[
+      if (verbose)
+        '--verbose',
+      if (prefixedErrors)
+        '--prefixed-errors',
+      if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
+      if (localEngine != null) '--local-engine=$localEngine',
+      'assemble',
+      '--output=build',
+      '-dTargetPlatform=$targetPlatform',
+      '-dTrackWidgetCreation=$trackWidgetCreation',
+      '-dBuildMode=$buildMode',
+      '-dTargetFile=$flutterTarget',
+      '-dTreeShakeIcons="$treeShakeIcons"',
+      '-dDartObfuscation=$dartObfuscation',
+      if (bundleSkSLPath != null)
+        '-iBundleSkSLPath=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-dCodeSizeDirectory=$codeSizeDirectory',
+      if (splitDebugInfo != null)
+        '-dSplitDebugInfo=$splitDebugInfo',
+      if (dartDefines != null)
+        '--DartDefines=$dartDefines',
+      if (extraGenSnapshotOptions != null)
+        '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+      if (extraFrontEndOptions != null)
+        '--ExtraFrontEndOptions=$extraFrontEndOptions',
+      target,
+    ]);
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

@@ -22,7 +22,7 @@ String getCmakeExecutableName(CmakeBasedProject project) {
 }
 
 String _escapeBackslashes(String s) {
-  return s.replaceAll(r'\', r'\\');
+  return s.replaceAll(r'\', r'\\').replaceAll('%3D', '=');
 }
 
 /// Writes a generated CMake configuration file for [project], including
@@ -40,12 +40,10 @@ file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
-  "FLUTTER_ROOT=$escapedFlutterRoot"
-  "PROJECT_DIR=$escapedProjectDir"
 ''');
   for (final String key in environment.keys) {
     final String value = _escapeBackslashes(environment[key]);
-    buffer.writeln('  "$key=$value"');
+    buffer.writeln('  $key=$value');
   }
   buffer.writeln(')');
 
