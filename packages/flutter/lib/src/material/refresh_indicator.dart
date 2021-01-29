@@ -142,13 +142,14 @@ class RefreshIndicator extends StatefulWidget {
   /// its actual displacement may significantly exceed this value.
   final double displacement;
 
-  /// The distance of [RefreshProgressIndicator] from the edge of the screen.
+  /// The distance of [RefreshProgressIndicator] from the top or bottom edge of
+  /// its parent.
   ///
-  /// Depending whether the indicator is showing on the top or bottom edges of
-  /// child widget, the value of this variable controls how far from the edges
-  /// will the progress indicator start to appear. This may come in handy if,
-  /// for example, the UI contains a top [Widget] which covers the edge where
-  /// the progress indicator would otherwise appear.
+  /// Depending whether the indicator is showing on the top or bottom, the value
+  /// of this variable controls how far from the target edge will the progress
+  /// indicator start to appear. This may come in handy when, for example, the
+  /// UI contains a top [Widget] which covers the edge where the progress
+  /// indicator would otherwise appear.
   ///
   /// By default, the edge distance is set to 0.
   final double edgeDistance;
