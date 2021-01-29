@@ -529,7 +529,7 @@ void main() {
         MaterialApp(
           home: RefreshIndicator(
             onRefresh: () async {},
-            strokeWidth: kToolbarHeight,
+            edgeDistance: kToolbarHeight,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
