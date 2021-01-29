@@ -6,17 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// The signature of a callback accepted by [TextEditingAction].
-typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
-  T intent,
-  EditableTextState editableTextState,
-);
-
 /// An [Action] related to editing text.
 ///
-/// If an [EditableText] is currently focused, the given [onInvoke] callback
-/// will be called with the [EditableTextState]. If not, then [isEnabled] will
-/// be false and [onInvoke] will not be called.
+/// If an [EditableText] is currently focused, then
+/// [TextEditingIntent.editableTextState] will be set and the given [onInvoke]
+/// callback will be called. If not, then [isEnabled] will be false and
+/// [onInvoke] will not be called.
 ///
 /// The focused [EditableText] must have a [Key]. This is handled automatically
 /// by built-in text editing widgets like [TextField], [CupertinoTextField],
@@ -27,11 +22,10 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
 ///
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
-class TextEditingAction<T extends Intent> extends Action<T> {
+class TextEditingAction<T extends TextEditingIntent> extends Action<T> {
   /// A constructor for a [TextEditingAction].
   ///
   /// The [onInvoke] parameter must not be null.
-  /// The [onInvoke] parameter is required.
   TextEditingAction({required this.onInvoke}) : assert(onInvoke != null);
 
   EditableTextState? get _editableTextState {
@@ -54,14 +48,15 @@ class TextEditingAction<T extends Intent> extends Action<T> {
   ///
   /// Must not be null.
   @protected
-  final _OnInvokeTextEditingCallback<T> onInvoke;
+  final OnInvokeCallback<T> onInvoke;
 
   @override
   Object? invoke(covariant T intent) {
     // _editableTextState shouldn't be null because isEnabled will return false
     // and invoke shouldn't be called if so.
     assert(_editableTextState != null);
-    return onInvoke(intent, _editableTextState!);
+    intent.editableTextState = _editableTextState!;
+    return onInvoke(intent);
   }
 
   @override
