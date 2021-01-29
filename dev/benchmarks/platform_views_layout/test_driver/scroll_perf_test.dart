@@ -7,17 +7,17 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    FlutterDriver? driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
-      await driver.waitUntilFirstFrameRasterized();
+      await driver!.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {
       if (driver != null)
-        driver.close();
+        driver!.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
@@ -27,22 +27,22 @@ void main() {
       // See: https://github.com/flutter/flutter/issues/19434
       await Future<void>.delayed(const Duration(milliseconds: 250));
 
-      await driver.forceGC();
+      await driver!.forceGC();
 
-      final Timeline timeline = await driver.traceAction(() async {
+      final Timeline timeline = await driver!.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);
         expect(list, isNotNull);
 
         // Scroll down
         for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
+          await driver!.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
+          await driver!.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });
@@ -54,7 +54,7 @@ void main() {
 
     test('platform_views_scroll_perf', () async {
       // Disable frame sync, since there are ongoing animations.
-      await driver.runUnsynchronized(() async {
+      await driver!.runUnsynchronized(() async {
         await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
       });
     });
