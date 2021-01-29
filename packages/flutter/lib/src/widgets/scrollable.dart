@@ -980,8 +980,7 @@ class ScrollAction extends Action<ScrollIntent> {
   bool isEnabled(ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
     final bool contextIsValid = focus != null && focus.context != null;
-    //had to check for focus!=null because it was giving error
-    if (contextIsValid && focus!=null) {
+    if (contextIsValid) {
       // Check for primary scrollable within the current context
       if (Scrollable.of(focus.context!) != null)
         return true;

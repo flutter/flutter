@@ -327,8 +327,8 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomRight = Radius.zero,
   });
 
-  /// Creates a border radius by overriding the previous values and
-  /// returing a new object
+  /// Returns a copy of this BorderRadius with the given fields replaced with
+  /// the new values.
   BorderRadius copyWith({
     Radius? topLeft,
     Radius? topRight,
@@ -336,10 +336,10 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius? bottomRight,
   }) {
     return BorderRadius.only(
-      topLeft: topLeft ?? _topLeft,
-      topRight: topRight ?? _topRight,
-      bottomLeft: bottomLeft ?? _bottomLeft,
-      bottomRight: bottomRight ?? _bottomRight,
+      topLeft: topLeft ?? this.topLeft,
+      topRight: topRight ?? this.topRight,
+      bottomLeft: bottomLeft ?? this.bottomLeft,
+      bottomRight: bottomRight ?? this.bottomRight,
     );
   }
   /// A border radius with all zero radii.
