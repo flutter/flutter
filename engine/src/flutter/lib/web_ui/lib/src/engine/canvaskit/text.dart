@@ -20,7 +20,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) : skParagraphStyle = toSkParagraphStyle(
+  })  : skParagraphStyle = toSkParagraphStyle(
           textAlign,
           textDirection,
           maxLines,
@@ -34,11 +34,11 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           ellipsis,
           locale,
         ),
-      _textDirection = textDirection ?? ui.TextDirection.ltr,
-      _fontFamily = fontFamily,
-      _fontSize = fontSize,
-      _fontWeight = fontWeight,
-      _fontStyle = fontStyle;
+        _textDirection = textDirection ?? ui.TextDirection.ltr,
+        _fontFamily = fontFamily,
+        _fontSize = fontSize,
+        _fontWeight = fontWeight,
+        _fontStyle = fontStyle;
 
   final SkParagraphStyle skParagraphStyle;
   final ui.TextDirection? _textDirection;
@@ -276,13 +276,14 @@ class CkTextStyle implements ui.TextStyle {
   }
 
   /// Lazy-initialized list of font families sent to Skia.
-  late final List<String> effectiveFontFamilies = _getEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+  late final List<String> effectiveFontFamilies =
+      _getEffectiveFontFamilies(fontFamily, fontFamilyFallback);
 
   /// Lazy-initialized Skia style used to pass the style to Skia.
   ///
   /// This is lazy because not every style ends up being passed to Skia, so the
   /// conversion would be wasteful.
-  late final SkTextStyle  skTextStyle = () {
+  late final SkTextStyle skTextStyle = () {
     // Write field values to locals so null checks promote types to non-null.
     final ui.Color? color = this.color;
     final ui.TextDecoration? decoration = this.decoration;
@@ -695,14 +696,14 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
         typefaces.addAll(typefacesForFamily);
       }
     }
-    List<bool> codeUnitsSupported = List<bool>.filled(text.length, false);
+    List<int> codeUnits = text.runes.toList();
+    List<bool> codeUnitsSupported = List<bool>.filled(codeUnits.length, false);
     for (SkTypeface typeface in typefaces) {
       SkFont font = SkFont(typeface);
       Uint8List glyphs = font.getGlyphIDs(text);
       assert(glyphs.length == codeUnitsSupported.length);
       for (int i = 0; i < glyphs.length; i++) {
-        codeUnitsSupported[i] |=
-            glyphs[i] != 0 || _isControlCode(text.codeUnitAt(i));
+        codeUnitsSupported[i] |= glyphs[i] != 0 || _isControlCode(codeUnits[i]);
       }
     }
 
@@ -710,7 +711,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       List<int> missingCodeUnits = <int>[];
       for (int i = 0; i < codeUnitsSupported.length; i++) {
         if (!codeUnitsSupported[i]) {
-          missingCodeUnits.add(text.codeUnitAt(i));
+          missingCodeUnits.add(codeUnits[i]);
         }
       }
       _findFontsForMissingCodeunits(missingCodeUnits);
@@ -778,7 +779,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   // This object is never deleted. It is effectively a static global constant.
   // Therefore it doesn't need to be wrapped in CkPaint.
   static final SkPaint _defaultTextForeground = SkPaint();
-  static final SkPaint _defaultTextBackground = SkPaint()..setColorInt(0x00000000);
+  static final SkPaint _defaultTextBackground = SkPaint()
+    ..setColorInt(0x00000000);
 
   @override
   void pushStyle(ui.TextStyle style) {
@@ -796,7 +798,8 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
         foreground = _defaultTextForeground;
       }
 
-      final SkPaint background = skStyle.background?.skiaObject ?? _defaultTextBackground;
+      final SkPaint background =
+          skStyle.background?.skiaObject ?? _defaultTextBackground;
       _paragraphBuilder.pushPaintStyle(
           skStyle.skTextStyle, foreground, background);
     } else {
