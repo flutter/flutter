@@ -1895,7 +1895,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
     );
     if (child == null) {
-      geometry = const SliverGeometry();
+      geometry = SliverGeometry.zero;
       return;
     }
     child!.layout(constraints, parentUsesSize: true);

@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "Frissítés",
   "moreButtonTooltip": "Több",
   "dateSeparator": ".",
-  "dateHelpText": "hh.nn.éééé",
+  "dateHelpText": "éééé. hh. nn.",
   "selectYearSemanticsLabel": "Válassza ki az évet",
   "unspecifiedDate": "Dátum",
   "unspecifiedDateRange": "Dátumtartomány",

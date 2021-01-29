@@ -14,7 +14,7 @@ void main() {
       maxWidth: 100.0,
       minHeight: 0.0,
       maxHeight: 100.0,
-      alignment: const Alignment(-1.0, -1.0),
+      alignment: Alignment.topLeft,
       child: Center(
         child: FractionallySizedBox(
           widthFactor: 0.5,
@@ -71,7 +71,7 @@ void main() {
         maxWidth: 100.0,
         minHeight: 0.0,
         maxHeight: 100.0,
-        alignment: const AlignmentDirectional(1.0, -1.0),
+        alignment: AlignmentDirectional.topEnd,
         child: Center(
           child: FractionallySizedBox(
             widthFactor: 0.5,

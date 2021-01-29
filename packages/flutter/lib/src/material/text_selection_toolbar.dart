@@ -504,7 +504,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   // offset that painted children will be placed at.
   void _placeChildren() {
     int i = -1;
-    Size nextSize = const Size(0.0, 0.0);
+    Size nextSize = Size.zero;
     double fitWidth = 0.0;
     final RenderBox navButton = firstChild!;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;

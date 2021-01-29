@@ -707,7 +707,7 @@ void main() {
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
@@ -781,7 +781,7 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
     );
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -852,7 +852,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();

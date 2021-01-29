@@ -14,10 +14,10 @@ class DriverError extends Error {
   final String message;
 
   /// The error object that was caught and wrapped by this error object, if any.
-  final dynamic originalError;
+  final Object? originalError;
 
   /// The stack trace that was caught and wrapped by this error object, if any.
-  final dynamic originalStackTrace;
+  final Object? originalStackTrace;
 
   @override
   String toString() {

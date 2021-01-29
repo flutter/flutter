@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
@@ -24,7 +26,7 @@ class FakeCommand {
     this.workingDirectory,
     this.environment,
     this.encoding,
-    this.duration = const Duration(),
+    this.duration = Duration.zero,
     this.onRun,
     this.exitCode = 0,
     this.stdout = '',
@@ -329,7 +331,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: const Duration(),
+      duration: Duration.zero,
       exitCode: 0,
       stdout: '',
       stderr: '',

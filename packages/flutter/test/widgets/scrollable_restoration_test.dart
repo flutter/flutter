@@ -234,7 +234,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, 0));
+    expect(tester.getTopLeft(find.text('Tile 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, 50));
 
     tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(525);
@@ -253,7 +253,7 @@ void main() {
     tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, 0));
+    expect(tester.getTopLeft(find.text('Tile 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, 50));
 
     await tester.restoreFrom(data);

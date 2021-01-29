@@ -65,7 +65,7 @@ class GalleryVisualDensityValue {
 }
 
 const List<GalleryVisualDensityValue> kAllGalleryVisualDensityValues = <GalleryVisualDensityValue>[
-  GalleryVisualDensityValue(VisualDensity(), 'System Default'),
+  GalleryVisualDensityValue(VisualDensity.standard, 'System Default'),
   GalleryVisualDensityValue(VisualDensity.comfortable, 'Comfortable'),
   GalleryVisualDensityValue(VisualDensity.compact, 'Compact'),
   GalleryVisualDensityValue(VisualDensity(horizontal: -3, vertical: -3), 'Very Compact'),

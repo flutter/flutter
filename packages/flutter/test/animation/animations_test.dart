@@ -269,7 +269,7 @@ FlutterError
     final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear);
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(curved.value, moreOrLessEquals(0.1));
     tick(const Duration(milliseconds: 20));
@@ -320,7 +320,7 @@ FlutterError
     );
 
     controller.forward();
-    tick(const Duration(milliseconds: 0));
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 10));
     expect(reversed.value, moreOrLessEquals(0.9));
     tick(const Duration(milliseconds: 20));

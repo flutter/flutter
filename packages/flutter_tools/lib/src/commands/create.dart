@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
@@ -236,6 +238,8 @@ class CreateCommand extends CreateBase {
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
+      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -296,13 +300,19 @@ class CreateCommand extends CreateBase {
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         _printNoPluginMessage();
       }
-      _printAddPlatformMessage(relativePluginPath);
+
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
+      }
+      _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
+      final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
@@ -318,7 +328,13 @@ To enable null safety, type:
 
 Your $application code is in $relativeAppMain.
 ''');
+      // Show warning if any selected platform is not enabled
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
+      }
     }
+
     return FlutterCommandResult.success();
   }
 
@@ -496,21 +512,64 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
   globals.printStatus('''
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-
 ''', emphasis: true, color: TerminalColor.red);
 }
 
 void _printNoPluginMessage() {
     globals.printError('''
 You've created a plugin project that doesn't yet support any platforms.
-
 ''');
 }
 
-void _printAddPlatformMessage(String pluginPath) {
+void _printPluginAddPlatformMessage(String pluginPath) {
   globals.printStatus('''
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
+}
+
+// returns a list disabled, but requested platforms
+List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+  final List<String> platformsToWarn = <String>[
+  if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
+    'web',
+  if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled)
+    'macos',
+  if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled)
+    'windows',
+  if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled)
+    'linux',
+  ];
+
+  return platformsToWarn;
+}
+
+void _printWarningDisabledPlatform(List<String> platforms) {
+  final List<String> desktop = <String>[];
+  final List<String> web = <String>[];
+
+  for (final String platform in platforms) {
+    if (platform == 'web') {
+      web.add(platform);
+    } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
+      desktop.add(platform);
+    }
+  }
+
+  if (desktop.isNotEmpty) {
+    final String platforms = desktop.length > 1 ? 'platforms' : 'platform';
+    final String verb = desktop.length > 1 ? 'are' : 'is';
+
+    globals.printStatus('''
+The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
+For more details, see: https://flutter.dev/desktop
+''');
+  }
+  if (web.isNotEmpty) {
+    globals.printStatus('''
+The web is currently not supported on your local environment.
+For more details, see: https://flutter.dev/docs/get-started/web
+''');
+  }
 }

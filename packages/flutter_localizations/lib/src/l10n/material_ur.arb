@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "ریفریش کریں",
   "moreButtonTooltip": "مزید",
   "dateSeparator": "/",
-  "dateHelpText": "dd/mm/yy",
+  "dateHelpText": "dd/mm/yyyy",
   "selectYearSemanticsLabel": "سال منتخب کریں",
   "unspecifiedDate": "تاریخ",
   "unspecifiedDateRange": "تاریخ کی حد",

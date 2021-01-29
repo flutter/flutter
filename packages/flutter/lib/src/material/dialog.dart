@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
@@ -128,7 +127,7 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
+    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -736,6 +735,8 @@ class SimpleDialog extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
+    this.insetPadding = _defaultInsetPadding,
+    this.clipBehavior = Clip.none,
     this.shape,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
@@ -803,6 +804,12 @@ class SimpleDialog extends StatelessWidget {
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String? semanticLabel;
+
+  /// {@macro flutter.material.dialog.insetPadding}
+  final EdgeInsets insetPadding;
+
+  /// {@macro flutter.material.dialog.clipBehavior}
+  final Clip clipBehavior;
 
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder? shape;
@@ -890,6 +897,8 @@ class SimpleDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      insetPadding: insetPadding,
+      clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
     );

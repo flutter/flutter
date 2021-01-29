@@ -633,7 +633,7 @@ void main() {
       );
     }
 
-    await buildTest(const VisualDensity());
+    await buildTest(VisualDensity.standard);
     final RenderBox box = tester.renderObject(find.byKey(key));
     Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
@@ -652,7 +652,7 @@ void main() {
     expect(box.size, equals(const Size(108, 100)));
     expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
-    await buildTest(const VisualDensity(), useText: true);
+    await buildTest(VisualDensity.standard, useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));
@@ -1038,6 +1038,39 @@ void main() {
     );
 
     expect(find.byType(ElevatedButton), paints ..path(strokeWidth: 4) ..drrect(color: borderColor));
+  });
+
+  testWidgets('Fixed size ElevatedButtons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size(100, 100)),
+                onPressed: () {},
+                child: const Text('100x100'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromWidth(200)),
+                onPressed: () {},
+                child: const Text('200xh'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(fixedSize: const Size.fromHeight(200)),
+                onPressed: () {},
+                child: const Text('wx200'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '100x100')), const Size(100, 100));
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, '200xh')).width, 200);
+    expect(tester.getSize(find.widgetWithText(ElevatedButton, 'wx200')).height, 200);
   });
 }
 

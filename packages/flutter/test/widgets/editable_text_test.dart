@@ -639,7 +639,7 @@ void main() {
     await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 18));
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.longPress,
     );
     await tester.pumpAndSettle();
@@ -1126,7 +1126,7 @@ void main() {
 
     // Can show the toolbar when focused even though there's no text.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1171,16 +1171,14 @@ void main() {
     controller.text = 'blah';
     await tester.pump();
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
 
     // Clear the text and selection.
     expect(find.text('Paste'), findsNothing);
-    state.updateEditingValue(const TextEditingValue(
-      text: '',
-    ));
+    state.updateEditingValue(TextEditingValue.empty);
     await tester.pump();
 
     // Should be able to show the toolbar.
@@ -1213,7 +1211,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1281,7 +1279,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1320,7 +1318,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -5812,6 +5810,25 @@ void main() {
         }),
       );
     });
+
+    testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
+      final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
+      const Color color = Color.fromARGB(255, 1, 2, 3);
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(accentColor: color),
+        home: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ));
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextSpan textSpan = renderEditable.text!;
+      expect(textSpan.style!.color, color);
+    });
   });
 
   testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
@@ -5879,7 +5896,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals(''));
     expect(state.wantKeepAlive, true);
 
-    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(TextEditingValue.empty);
     state.updateEditingValue(const TextEditingValue(text: 'a'));
     state.updateEditingValue(const TextEditingValue(text: 'aa'));
     state.updateEditingValue(const TextEditingValue(text: 'aaa'));
@@ -5977,13 +5994,13 @@ void main() {
     // Composing changes should not trigger reformat, as it could cause infinite loops on some IMEs.
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
     expect(formatter.formatCallCount, 3);
-    expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
-    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1)); // The new composing was registered in formatter.
+    expect(formatter.lastOldValue.composing, TextRange.empty);
+    expect(formatter.lastNewValue.composing, TextRange.empty); // The new composing was registered in formatter.
     // Clearing composing region should trigger reformat.
     state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
     expect(formatter.formatCallCount, 4);
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
-    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, TextRange.empty);
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
@@ -6519,7 +6536,7 @@ void main() {
       expect(updateException?.toString(), shouldAssert ? contains('composing range'): isNull);
     }
 
-    expectToAssert(const TextEditingValue(text: ''), false);
+    expectToAssert(TextEditingValue.empty, false);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)), true);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 9)), true);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
@@ -7287,4 +7304,14 @@ class SkipPainting extends SingleChildRenderObjectWidget {
 class SkipPaintingRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) { }
+}
+
+class _AccentColorTextEditingController extends TextEditingController {
+  _AccentColorTextEditingController(String text) : super(text: text);
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    final Color color = Theme.of(context).accentColor;
+    return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
+  }
 }
