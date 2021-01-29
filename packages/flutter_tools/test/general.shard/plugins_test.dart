@@ -1409,10 +1409,10 @@ void main() {
     group('resolvePlatformImplementation', () {
       test('selects implementation from direct dependency', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'url_launcher_linux',
           'url_launcher_macos',
-        ];
+        };
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
             'url_launcher_linux',
@@ -1498,7 +1498,7 @@ void main() {
 
       test('selects default implementation', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[];
+        final Set<String> directDependencies = <String>{};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -1543,7 +1543,7 @@ void main() {
 
       test('selects default implementation if interface is direct dependency', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>['url_launcher'];
+        final Set<String> directDependencies = <String>{'url_launcher'};
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -1588,10 +1588,10 @@ void main() {
 
       test('selects user selected implementation despites default implementation', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
-        ];
+        };
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -1651,10 +1651,10 @@ void main() {
 
       test('selects user selected implementation despites default implementation', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
-        ];
+        };
 
         final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
           Plugin.fromYaml(
@@ -1714,10 +1714,10 @@ void main() {
 
       testUsingContext('provides error when user selected multiple implementations', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'url_launcher_linux_1',
           'url_launcher_linux_2',
-        ];
+        };
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(
@@ -1766,10 +1766,10 @@ void main() {
 
       testUsingContext('provides all errors when user selected multiple implementations', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'url_launcher_linux_1',
           'url_launcher_linux_2',
-        ];
+        };
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(
@@ -1818,9 +1818,9 @@ void main() {
 
       testUsingContext('provides error when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'url_launcher_linux_1',
-        ];
+        };
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(
@@ -1863,10 +1863,10 @@ void main() {
 
       testUsingContext('provides all errors when plugin pubspec.yaml doesn\'t have "implementation" nor "default_implementation"', () async {
         final FileSystem fs = MemoryFileSystem();
-        final List<String> directDependencies = <String>[
+        final Set<String> directDependencies = <String>{
           'url_launcher_linux',
           'url_launcher_windows',
-        ];
+        };
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(

@@ -78,7 +78,7 @@ class Plugin {
     YamlMap pluginYaml,
     List<String> dependencies, {
     @required FileSystem fileSystem,
-    List<String> appDependencies,
+    Set<String> appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
@@ -358,7 +358,7 @@ class Plugin {
   final bool isDirectDependency;
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot, List<String> appDependencies) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies) {
   final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
@@ -397,23 +397,6 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     project.directory.path,
     '.packages',
   );
-  final String pubspec = globals.fs.path.join(
-    project.directory.path,
-    'pubspec.yaml',
-  );
-  YamlMap appDependencies;
-  try {
-    final File pubspecFile = globals.fs.file(pubspec);
-    if (pubspecFile.existsSync()) {
-      final dynamic pubspec = loadYaml(pubspecFile.readAsStringSync());
-      appDependencies = pubspec != null ? pubspec['dependencies'] as YamlMap : null;
-    }
-  } on YamlException catch (err) {
-    if (throwOnError) {
-      throwToolExit('Failed to parse pubspec.yaml $err');
-    }
-    globals.printTrace('Failed to parse pubspec.yaml $err');
-  }
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
@@ -424,7 +407,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
     final Plugin plugin = _pluginFromPackage(
       package.name,
       packageRoot,
-      appDependencies != null ? <String>[...appDependencies.keys.cast<String>()] : <String>[],
+      project.manifest.dependencies,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -908,7 +891,6 @@ Future<bool> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    defaultLanguageVersion: optOutNullSafeVersion,
   );
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'mainEntrypoint': currentMainUri,
