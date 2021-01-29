@@ -6,9 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-// TODO(justinmc): Instead of passing in editableTextState like this, should I
-// create a hardcoded Intent type that has it?
-// Or, should _editableTextState be public but protected?
 /// The signature of a callback accepted by [TextEditingAction].
 typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
   T intent,
@@ -20,6 +17,11 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
 /// If an [EditableText] is currently focused, the given [onInvoke] callback
 /// will be called with the [EditableTextState]. If not, then [isEnabled] will
 /// be false and [onInvoke] will not be called.
+///
+/// The focused [EditableText] must have a [Key]. This is handled automatically
+/// by built-in text editing widgets like [TextField], [CupertinoTextField],
+/// and [SelectableText], but for custom usage of [EditableText], it is
+/// necessary to explicitly pass in a key.
 ///
 /// See also:
 ///
@@ -38,9 +40,6 @@ class TextEditingAction<T extends Intent> extends Action<T> {
       return null;
     }
     final EditableText editableText = primaryFocus!.context!.widget as EditableText;
-    // TODO(justinmc): I seem to need the EditableText to have a key for
-    // this. Is there another way to get EditableTextState, or should I
-    // force EditableText to have a key?
     if (editableText.key == null
         || (editableText.key! as GlobalKey).currentState == null) {
       return null;
