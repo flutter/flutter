@@ -373,10 +373,22 @@
          "flaky": false
       },
       {
-         "name": "Linux tool_tests",
+         "name": "Linux tool_general_tests",
          "repo": "flutter",
-         "task_name": "linux_tool_tests",
-         "flaky": false
+         "task_name": "linux_tool_general_tests",
+         "flaky": true
+      },
+      {
+         "name": "Linux tool_command_tests",
+         "repo": "flutter",
+         "task_name": "linux_tool_command_tests",
+         "flaky": true
+      },
+      {
+         "name": "Linux tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "linux_tool_integration_tests",
+         "flaky": true
       },
       {
          "name": "Linux web_tool_tests",
@@ -757,10 +769,22 @@
          "flaky": false
       },
       {
-         "name": "Mac tool_tests",
+         "name": "Mac tool_general_tests",
          "repo": "flutter",
-         "task_name": "mac_tool_tests",
-         "flaky": false
+         "task_name": "mac_tool_general_tests",
+         "flaky": true
+      },
+      {
+         "name": "Mac tool_command_tests",
+         "repo": "flutter",
+         "task_name": "mac_tool_command_tests",
+         "flaky": true
+      },
+      {
+         "name": "Mac tool_command_tests",
+         "repo": "flutter",
+         "task_name": "mac_tool_command_tests",
+         "flaky": true
       },
       {
          "name": "Windows build_aar_module_test",
@@ -835,10 +859,22 @@
          "flaky": false
       },
       {
-         "name": "Windows tool_tests",
+         "name": "Windows tool_general_tests",
          "repo": "flutter",
-         "task_name": "win_tool_tests",
-         "flaky": false
+         "task_name": "win_tool_general_tests",
+         "flaky": true
+      },
+      {
+         "name": "Windows tool_command_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_command_tests",
+         "flaky": true
+      },
+      {
+         "name": "Windows tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_integration_tests",
+         "flaky": true
       },
       {
          "name": "Windows web_tool_tests",

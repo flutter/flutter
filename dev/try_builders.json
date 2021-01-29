@@ -127,9 +127,23 @@
          "run_if": ["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
-         "name":"Linux tool_tests",
+         "name":"Linux tool_general_tests",
          "repo":"flutter",
-         "task_name":"linux_tool_tests",
+         "task_name":"linux_tool_general_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
+      },
+      {
+         "name":"Linux tool_command_tests",
+         "repo":"flutter",
+         "task_name":"linux_tool_command_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
+      },
+      {
+         "name":"Linux tool_integration_tests",
+         "repo":"flutter",
+         "task_name":"linux_tool_integration_tests",
          "enabled":true,
          "run_if":["dev/", "packages/flutter_tools/", "bin/"]
       },
@@ -292,9 +306,23 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
-         "name":"Mac tool_tests",
+         "name":"Mac tool_general_tests",
          "repo":"flutter",
-         "task_name":"mac_tool_tests",
+         "task_name":"mac_tool_general_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
+         "name":"Mac tool_command_tests",
+         "repo":"flutter",
+         "task_name":"mac_tool_command_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
+         "name":"Mac tool_integration_tests",
+         "repo":"flutter",
+         "task_name":"mac_tool_integration_tests",
          "enabled":true,
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
@@ -381,10 +409,22 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
-        "name": "Windows tool_tests",
-        "repo": "flutter",
-        "task_name": "win_tool_tests",
-        "enabled":true
+         "name": "Windows tool_general_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_general_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows tool_command_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_command_tests",
+         "enabled":true
+      },
+      {
+         "name": "Windows tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_integration_tests",
+         "enabled":true
       },
       {
          "name": "Windows web_tool_tests",
