@@ -46,7 +46,8 @@ assignees: ''
      and Read Timeline Traces" on this blog post:
        https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
      Make sure the performance overlay is turned OFF when recording the
-     trace (Pressing ‘P’ on the command line toggles the overlay).
+     trace as that may affects the performance of the profile run. 
+     (Pressing ‘P’ on the command line toggles the overlay.)
 -->
 
 <!--
