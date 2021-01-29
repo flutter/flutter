@@ -1894,11 +1894,11 @@ void main() {
 Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) async {
   await tester.binding.setSurfaceSize(const ui.Size(3, 3));
   // A 3x3 image encoded as PNG with white background and black pixels on the diagonal:
-  // ┌───┐
-  // │▓  │
-  // │ ▓ │
-  // │  ▓│
-  // └───┘
+  // ┌──────┐
+  // │▓▓    │
+  // │  ▓▓  │
+  // │    ▓▓│
+  // └──────┘
   // At different levels of quality these pixels are blurred differently.
   final Uint8List test3x3Image = Uint8List.fromList(<int>[
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
