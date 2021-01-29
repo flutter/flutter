@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
-
 import 'common.dart';
 
 /// The dart:html implementation of [CallbackManager].
