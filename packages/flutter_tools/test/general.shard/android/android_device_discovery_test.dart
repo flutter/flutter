@@ -58,6 +58,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk('adb'),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
