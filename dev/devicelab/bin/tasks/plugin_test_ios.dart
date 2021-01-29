@@ -9,5 +9,6 @@ Future<void> main() async {
   await task(combine(<TaskFunction>[
     PluginTest('ios', <String>['-i', 'objc', '--platforms=ios']),
     PluginTest('ios', <String>['-i', 'swift', '--platforms=ios']),
+    PluginTest('macos', <String>['--platforms=macos']),
   ]));
 }

@@ -60,7 +60,7 @@
   "refreshIndicatorSemanticLabel": "Osveži",
   "moreButtonTooltip": "Več",
   "dateSeparator": ". ",
-  "dateHelpText": "dd/mm/llll",
+  "dateHelpText": "dd. mm. llll",
   "selectYearSemanticsLabel": "Izberite leto",
   "unspecifiedDate": "Datum",
   "unspecifiedDateRange": "Časovno obdobje",

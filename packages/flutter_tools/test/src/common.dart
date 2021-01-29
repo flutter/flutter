@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/args.dart';
@@ -301,7 +303,7 @@ class FakeVmServiceHost {
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
-        _vmService.dispose();
+        unawaited(_vmService.dispose());
         expect(_requests, isEmpty);
         return;
       }

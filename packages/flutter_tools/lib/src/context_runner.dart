@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -184,6 +186,8 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
         logger: globals.logger,
+        platform: globals.platform,
+        persistentToolState: globals.persistentToolState,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,

@@ -12,6 +12,7 @@ import 'src/color_filter_and_fade.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/filtered_child_animation.dart';
+import 'src/fullscreenTextField.dart';
 import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
@@ -45,6 +46,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
         kTextRouteName: (BuildContext context) => TextPage(),
+        kFullscreenTextRouteName: (BuildContext context) => TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
@@ -121,6 +123,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Text'),
             onPressed: () {
               Navigator.pushNamed(context, kTextRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kFullscreenTextRouteName),
+            child: const Text('Fullscreen Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kFullscreenTextRouteName);
             },
           ),
           ElevatedButton(

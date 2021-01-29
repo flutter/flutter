@@ -22,10 +22,6 @@ import 'scroll_view.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
-// Examples can assume:
-// // @dart = 2.9
-// List<String> _tabs;
-
 /// Signature used by [NestedScrollView] for building its header.
 ///
 /// The `innerBoxIsScrolled` argument is typically used to control the
@@ -1899,7 +1895,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
     );
     if (child == null) {
-      geometry = const SliverGeometry();
+      geometry = SliverGeometry.zero;
       return;
     }
     child!.layout(constraints, parentUsesSize: true);

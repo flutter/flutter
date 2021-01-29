@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
@@ -258,10 +260,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      // Should be 1 instead of 2, but integration_test is always included.
-      // https://github.com/flutter/flutter/issues/56591
       expect(await getCommand.usageValues,
-          containsPair(CustomDimensions.commandPackagesNumberPlugins, '2'));
+          containsPair(CustomDimensions.commandPackagesNumberPlugins, '1'));
     }, overrides: <Type, Generator>{
       Pub: () => Pub(
         fileSystem: globals.fs,
@@ -376,6 +376,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
+      Stdio: () => MockStdio()..stdout.terminalColumns = 80,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,

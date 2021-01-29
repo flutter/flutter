@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -852,6 +854,7 @@ class DebuggingOptions {
     this.disablePortPublication = false,
     this.deviceVmServicePort,
     this.ddsPort,
+    this.devToolsServerAddress,
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
@@ -895,6 +898,7 @@ class DebuggingOptions {
       disablePortPublication = false,
       deviceVmServicePort = null,
       ddsPort = null,
+      devToolsServerAddress = null,
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
@@ -924,6 +928,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final bool disablePortPublication;
   final int ddsPort;
+  final Uri devToolsServerAddress;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;

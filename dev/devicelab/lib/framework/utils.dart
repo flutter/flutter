@@ -456,6 +456,8 @@ List<String> flutterCommandArgs(String command, List<String> options) {
   ];
 }
 
+/// Runs the flutter `command`, and returns the exit code.
+/// If `canFail` is `false`, the future completes with an error.
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.

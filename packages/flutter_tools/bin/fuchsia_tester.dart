@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert' show json;
 import 'dart:math' as math;
 
@@ -140,7 +142,6 @@ Future<void> run(List<String> args) async {
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.toList(),
-      workDir: testDirectory,
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,

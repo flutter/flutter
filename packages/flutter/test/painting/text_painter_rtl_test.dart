@@ -69,11 +69,11 @@ void main() {
 
     expect(
       painter.getOffsetForCaret(const TextPosition(offset: 0, affinity: TextAffinity.upstream), Rect.zero),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     );
     expect(
       painter.getOffsetForCaret(const TextPosition(offset: 0, affinity: TextAffinity.downstream), Rect.zero),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     );
     expect(
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.upstream), Rect.zero),
@@ -278,11 +278,11 @@ void main() {
 
     expect( // before the A
       painter.getOffsetForCaret(const TextPosition(offset: 0, affinity: TextAffinity.upstream), Rect.zero),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     );
     expect( // before the A
       painter.getOffsetForCaret(const TextPosition(offset: 0, affinity: TextAffinity.downstream), Rect.zero),
-      const Offset(0.0, 0.0),
+      Offset.zero,
     );
 
     expect( // between A and Alef, after the A

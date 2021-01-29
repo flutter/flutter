@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
@@ -44,6 +46,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.\n'
               'If used with --help, shows hidden options.');
+    argParser.addFlag('prefixed-errors',
+        negatable: false,
+        hide: true,
+        defaultsTo: false);
     argParser.addFlag('quiet',
         negatable: false,
         hide: !verboseHelp,
