@@ -1,4 +1,4 @@
-Signature: bf724f05983dcbeb317f4dfd83379630
+Signature: eee4ade6d3355f8e651afc2da4e34f18
 
 UNUSED LICENSES:
 
@@ -223,7 +223,7 @@ LIBRARY: angle
 LIBRARY: boringssl
 LIBRARY: khronos
 LIBRARY: vulkan
-LIBRARY: vulkan-headers
+LIBRARY: vulkan-deps
 LIBRARY: wuffs
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
@@ -847,8 +847,14 @@ FILE: ../../../third_party/abseil-cpp/absl/utility/BUILD.bazel
 FILE: ../../../third_party/abseil-cpp/absl/utility/utility.h
 FILE: ../../../third_party/abseil-cpp/absl/utility/utility_test.cc
 FILE: ../../../third_party/abseil-cpp/ci/absl_alternate_options.h
+FILE: ../../../third_party/angle/include/EGL/egl.h
+FILE: ../../../third_party/angle/include/EGL/eglext.h
+FILE: ../../../third_party/angle/include/EGL/eglplatform.h
 FILE: ../../../third_party/angle/include/GLES/egl.h
 FILE: ../../../third_party/angle/include/GLES/glplatform.h
+FILE: ../../../third_party/angle/include/GLES2/gl2platform.h
+FILE: ../../../third_party/angle/include/GLES3/gl3platform.h
+FILE: ../../../third_party/angle/scripts/egl.xml
 FILE: ../../../third_party/angle/scripts/gl.xml
 FILE: ../../../third_party/angle/scripts/wgl.xml
 FILE: ../../../third_party/angle/src/android_system_settings/res/layout/fragment.xml
@@ -951,30 +957,30 @@ FILE: ../../../third_party/angle/src/android_system_settings/src/com/android/ang
 FILE: ../../../third_party/angle/src/android_system_settings/src/com/android/angle/common/SearchProvider.java
 FILE: ../../../third_party/angle/src/common/vulkan/vk_ext_provoking_vertex.h
 FILE: ../../../third_party/angle/src/common/vulkan/vk_google_filtering_precision.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/cmake/cmake_uninstall.cmake.in
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vk_icd.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vk_layer.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vk_platform.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vk_sdk_platform.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan.hpp
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_android.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_beta.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_core.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_directfb.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_fuchsia.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_ggp.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_ios.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_macos.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_metal.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_vi.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_wayland.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_win32.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_xcb.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_xlib.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/include/vulkan/vulkan_xlib_xrandr.h
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/registry/validusage.json
-FILE: ../../../third_party/angle/third_party/vulkan-headers/src/registry/vk.xml
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/cmake/cmake_uninstall.cmake.in
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_icd.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_layer.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_platform.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vk_sdk_platform.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan.hpp
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_android.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_beta.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_core.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_directfb.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_fuchsia.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_ggp.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_ios.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_macos.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_metal.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_vi.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_wayland.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_win32.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xlib.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_xlib_xrandr.h
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/registry/validusage.json
+FILE: ../../../third_party/angle/third_party/vulkan-deps/vulkan-headers/src/registry/vk.xml
 FILE: ../../../third_party/angle/util/android/third_party/android_native_app_glue.c
 FILE: ../../../third_party/angle/util/android/third_party/android_native_app_glue.h
 FILE: ../../../third_party/boringssl/src/third_party/wycheproof_testvectors/METADATA
@@ -1750,8 +1756,6 @@ FILE: ../../../third_party/angle/src/compiler/translator/Symbol.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/Symbol.h
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeclareAndInitBuiltinsForInstancedMultiview.cpp
@@ -1760,10 +1764,12 @@ FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLen
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLengthMethod.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/WrapSwitchStatementsInBlocks.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/WrapSwitchStatementsInBlocks.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/ClampFragDepth.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/ClampFragDepth.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/VectorizeVectorScalarArithmetic.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/VectorizeVectorScalarArithmetic.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNode_util.cpp
@@ -1865,30 +1871,30 @@ FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.h
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UseInterfaceBlockFields.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UseInterfaceBlockFields.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AddDefaultReturnStatements.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/AddDefaultReturnStatements.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/BreakVariableAliasingInInnerLoops.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/BreakVariableAliasingInInnerLoops.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/ExpandIntegerPowExpressions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/ExpandIntegerPowExpressions.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteUnaryMinusOperatorInt.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteUnaryMinusOperatorInt.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/UseInterfaceBlockFields.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/UseInterfaceBlockFields.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/AddAndTrueToLoopCondition.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/AddAndTrueToLoopCondition.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteUnaryMinusOperatorFloat.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteUnaryMinusOperatorFloat.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.h
 FILE: ../../../third_party/angle/src/image_util/imageformats.cpp
@@ -2092,76 +2098,9 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: angle
 LIBRARY: khronos
-ORIGIN: ../../../third_party/angle/include/EGL/egl.h
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/angle/include/EGL/egl.h
-FILE: ../../../third_party/angle/include/EGL/eglext.h
-FILE: ../../../third_party/angle/include/GLES/glext.h
-FILE: ../../../third_party/angle/include/GLES2/gl2.h
-FILE: ../../../third_party/angle/scripts/egl.xml
-FILE: ../../../third_party/khronos/EGL/egl.h
-FILE: ../../../third_party/khronos/EGL/eglext.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2013-2017 The Khronos Group Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and/or associated documentation files (the
-"Materials"), to deal in the Materials without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Materials, and to
-permit persons to whom the Materials are furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Materials.
-
-THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-LIBRARY: khronos
-ORIGIN: ../../../third_party/angle/include/EGL/eglplatform.h
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/angle/include/EGL/eglplatform.h
-FILE: ../../../third_party/khronos/EGL/eglplatform.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2007-2016 The Khronos Group Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and/or associated documentation files (the
-"Materials"), to deal in the Materials without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Materials, and to
-permit persons to whom the Materials are furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Materials.
-
-THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-LIBRARY: khronos
 ORIGIN: ../../../third_party/angle/include/GLES/gl.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/angle/include/GLES/gl.h
-FILE: ../../../third_party/angle/include/GLES2/gl2ext.h
-FILE: ../../../third_party/angle/include/GLES3/gl3.h
 FILE: ../../../third_party/angle/include/WGL/wgl.h
 FILE: ../../../third_party/khronos/GLES2/gl2.h
 FILE: ../../../third_party/khronos/GLES2/gl2ext.h
@@ -2192,14 +2131,13 @@ MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 ====================================================================================================
 LIBRARY: angle
 LIBRARY: khronos
-ORIGIN: ../../../third_party/angle/include/GLES3/gl31.h
+ORIGIN: ../../../third_party/angle/include/GLES/glext.h
 TYPE: LicenseType.unknown
-FILE: ../../../third_party/angle/include/GLES3/gl31.h
-FILE: ../../../third_party/angle/include/GLES3/gl32.h
-FILE: ../../../third_party/khronos/GLES3/gl31.h
-FILE: ../../../third_party/khronos/GLES3/gl32.h
+FILE: ../../../third_party/angle/include/GLES/glext.h
+FILE: ../../../third_party/khronos/EGL/egl.h
+FILE: ../../../third_party/khronos/EGL/eglext.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2013-2016 The Khronos Group Inc.
+Copyright (c) 2013-2017 The Khronos Group Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and/or associated documentation files (the
@@ -2254,6 +2192,58 @@ MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 
 ====================================================================================================
 LIBRARY: angle
+LIBRARY: rapidjson
+ORIGIN: ../../../third_party/angle/include/GLES2/gl2.h
+TYPE: LicenseType.mit
+FILE: ../../../third_party/angle/include/GLES2/gl2.h
+FILE: ../../../third_party/angle/include/GLES2/gl2ext.h
+FILE: ../../../third_party/angle/include/GLES3/gl3.h
+FILE: ../../../third_party/angle/include/GLES3/gl31.h
+FILE: ../../../third_party/angle/include/GLES3/gl32.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/allocators.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/cursorstreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/document.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodedstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/encodings.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/en.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/error/error.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filereadstream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/filewritestream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/fwd.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/biginteger.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/diyfp.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/dtoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/ieee754.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/itoa.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/meta.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/pow10.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/regex.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/stack.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strfunc.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strtod.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/internal/swap.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/istreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorybuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/memorystream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/ostreamwrapper.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/pointer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/prettywriter.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/rapidjson.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/reader.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/schema.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stream.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/stringbuffer.h
+FILE: ../../../third_party/rapidjson/include/rapidjson/writer.h
+----------------------------------------------------------------------------------------------------
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
 LIBRARY: xxhash
 ORIGIN: ../../../third_party/angle/include/platform/Feature.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
@@ -2288,16 +2278,17 @@ FILE: ../../../third_party/angle/src/compiler/translator/glslang_tab_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/span_unittest.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateMultiDrawShaderBuiltins.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateMultiDrawShaderBuiltins.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInactiveInterfaceVariables.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInactiveInterfaceVariables.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicCounters.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicCounters.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteCubeMapSamplersAs2DArray.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteCubeMapSamplersAs2DArray.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDfdy.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDfdy.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRowMajorMatrices.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRowMajorMatrices.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteRowMajorMatrices.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteRowMajorMatrices.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RemoveInactiveInterfaceVariables.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RemoveInactiveInterfaceVariables.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteArrayOfArrayOfOpaqueUniforms.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteAtomicCounters.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteAtomicCounters.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteCubeMapSamplersAs2DArray.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteCubeMapSamplersAs2DArray.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteDfdy.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteDfdy.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/BuiltIn.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindFunction.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindFunction.h
@@ -2448,24 +2439,9 @@ FILE: ../../../third_party/angle/src/libANGLE/validationES32.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationES32.h
 FILE: ../../../third_party/angle/src/libANGLE/validationESEXT.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationGL1.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL12.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL13.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL14.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL15.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationGL2.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL21.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationGL3.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL31.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL32.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL33.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationGL4.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL41.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL42.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL43.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL44.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL45.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationGL46.cpp
 FILE: ../../../third_party/angle/src/libGL/entry_points_wgl.cpp
 FILE: ../../../third_party/angle/src/libGL/entry_points_wgl.h
 FILE: ../../../third_party/angle/util/Timer.cpp
@@ -2527,15 +2503,12 @@ FILE: ../../../third_party/angle/doc/img/JobUnit.png
 FILE: ../../../third_party/angle/doc/img/RegressionTestingArchitecture.png
 FILE: ../../../third_party/angle/doc/img/StateChangeNotificationFlow.svg
 FILE: ../../../third_party/angle/doc/img/StateNotificationExample.svg
-FILE: ../../../third_party/angle/include/GLES2/gl2platform.h
-FILE: ../../../third_party/angle/include/GLES3/gl3platform.h
 FILE: ../../../third_party/angle/infra/config/global/commit-queue.cfg
 FILE: ../../../third_party/angle/infra/config/global/cr-buildbucket.cfg
 FILE: ../../../third_party/angle/infra/config/global/luci-logdog.cfg
 FILE: ../../../third_party/angle/infra/config/global/luci-milo.cfg
 FILE: ../../../third_party/angle/infra/config/global/luci-scheduler.cfg
 FILE: ../../../third_party/angle/infra/config/global/project.cfg
-FILE: ../../../third_party/angle/infra/config/global/refs.cfg
 FILE: ../../../third_party/angle/samples/multi_texture/basemap.tga
 FILE: ../../../third_party/angle/samples/multi_texture/lightmap.tga
 FILE: ../../../third_party/angle/samples/multiple_draw_buffers/multiple_draw_buffers_copy_fs.glsl
@@ -2560,6 +2533,7 @@ FILE: ../../../third_party/angle/scripts/code_generation_hashes/GLenum_value_to_
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/Metal_default_shaders.json
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/Metal_format_table.json
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/OpenGL_dispatch_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/SPIR-V_helpers.json
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/Static_builtins.json
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/Vulkan_format.json
 FILE: ../../../third_party/angle/scripts/code_generation_hashes/Vulkan_internal_shader_programs.json
@@ -2786,7 +2760,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/doc/img/LineRaster
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/doc/img/LineRasterPixelExample.png
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/doc/img/VulkanShaderTranslation.svg
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mandatory_format_support_data.json
-FILE: ../../../third_party/angle/src/libEGL/libEGL.def
 FILE: ../../../third_party/angle/src/libEGL/libEGL.rc
 FILE: ../../../third_party/angle/src/libEGL/resource.h
 FILE: ../../../third_party/angle/src/libGL/libGL.rc
@@ -2796,6 +2769,7 @@ FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.rc
 FILE: ../../../third_party/angle/src/libGLESv1_CM/resource.h
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2.rc
 FILE: ../../../third_party/angle/src/libGLESv2/resource.h
+FILE: ../../../third_party/angle/util/ios/Info.plist
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The ANGLE Project Authors.
 All rights reserved.
@@ -2873,21 +2847,20 @@ FILE: ../../../third_party/angle/src/compiler/translator/ShaderStorageBlockOutpu
 FILE: ../../../third_party/angle/src/compiler/translator/builtin_variables.json
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/NameEmbeddedUniformStructs.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/NameEmbeddedUniformStructs.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteExpressionsWithShaderStorageBlock.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteExpressionsWithShaderStorageBlock.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteStructSamplers.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteStructSamplers.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteStructSamplersOld.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteAtomicFunctionExpressions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteAtomicFunctionExpressions.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteExpressionsWithShaderStorageBlock.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteExpressionsWithShaderStorageBlock.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateArrayConstructorStatements.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateArrayConstructorStatements.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RewriteRepeatedAssignToSwizzled.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RewriteRepeatedAssignToSwizzled.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/NameEmbeddedUniformStructs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/NameEmbeddedUniformStructs.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteStructSamplers.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteStructSamplers.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/Visit.h
@@ -3009,12 +2982,17 @@ FILE: ../../../third_party/angle/include/GLES3/gl3ext_explicit_context_autogen.i
 FILE: ../../../third_party/angle/include/platform/Platform.h
 FILE: ../../../third_party/angle/infra/gn_isolate_map.pyl
 FILE: ../../../third_party/angle/samples/capture_replay/angle_trace_gl.h
+FILE: ../../../third_party/angle/scripts/entry_point_packed_egl_enums.json
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.cpp
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.h
 FILE: ../../../third_party/angle/src/common/PackedGLEnums_autogen.cpp
 FILE: ../../../third_party/angle/src/common/PackedGLEnums_autogen.h
+FILE: ../../../third_party/angle/src/common/apple/SoftLinking.h
 FILE: ../../../third_party/angle/src/common/entry_points_enum_autogen.cpp
 FILE: ../../../third_party/angle/src/common/entry_points_enum_autogen.h
+FILE: ../../../third_party/angle/src/common/gl/cgl/FunctionsCGL.cpp
+FILE: ../../../third_party/angle/src/common/gl/cgl/FunctionsCGL.h
+FILE: ../../../third_party/angle/src/common/system_utils_apple.cpp
 FILE: ../../../third_party/angle/src/common/uniform_type_info_autogen.cpp
 FILE: ../../../third_party/angle/src/common/vulkan/vulkan_icd.cpp
 FILE: ../../../third_party/angle/src/common/vulkan/vulkan_icd.h
@@ -3025,41 +3003,45 @@ FILE: ../../../third_party/angle/src/compiler/translator/ParseContext_complete_a
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable_ESSL_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable_autogen.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EarlyFragmentTestsOptimization.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EarlyFragmentTestsOptimization.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FlagSamplersWithTexelFetch.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FlagSamplersWithTexelFetch.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveAtomicCounterBuiltins.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveAtomicCounterBuiltins.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateBarrierFunctionCall.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateBarrierFunctionCall.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateClipCullDistance.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateClipCullDistance.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ForcePrecisionQualifier.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ForcePrecisionQualifier.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RecordUniformBlocksWithLargeArrayMember.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RecordUniformBlocksWithLargeArrayMember.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EarlyFragmentTestsOptimization.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/EarlyFragmentTestsOptimization.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/FlagSamplersWithTexelFetch.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/FlagSamplersWithTexelFetch.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RemoveAtomicCounterBuiltins.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RemoveAtomicCounterBuiltins.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteInterpolateAtOffset.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteInterpolateAtOffset.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/BuiltIn_ESSL_autogen.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/BuiltIn_complete_autogen.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/DriverUniform.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/DriverUniform.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceArrayOfMatrixVarying.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceArrayOfMatrixVarying.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceClipDistanceVariable.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceClipDistanceVariable.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceClipCullDistanceVariable.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceClipCullDistanceVariable.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RewriteSampleMaskVariable.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RewriteSampleMaskVariable.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheBeginningOfShader.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheBeginningOfShader.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/SpecializationConstant.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/SpecializationConstant.h
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_apple.mm
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_fuchsia.cpp
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_ios.cpp
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_vulkan.cpp
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_vulkan.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_0_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_1_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_2_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_3_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_4_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_5_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_2_0_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_2_1_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_0_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_1_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_2_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_3_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_0_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_1_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_2_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_3_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_4_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_5_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_6_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_2_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/Context_gles_1_0_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/Context_gles_2_0_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/Context_gles_3_0_autogen.h
@@ -3091,8 +3073,6 @@ FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils.cpp
 FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils_autogen.h
-FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.cpp
-FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/BufferImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/EGLReusableSync.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/EGLReusableSync.h
@@ -3108,12 +3088,16 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/dxgi_format_map.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/dxgi_format_map_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DispatchTableGL_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/apple/DisplayApple_api.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/apple/DisplayApple_api.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/ContextEAGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/ContextEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/DeviceEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/DisplayEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/FunctionsEAGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/FunctionsEAGL.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp
@@ -3137,6 +3121,7 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/SyncMtl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/SyncMtl.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/TransformFeedbackMtl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/TransformFeedbackMtl.mm
+FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/file_hooking/shader_cache_file_hooking.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_format_table_autogen.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_occlusion_query_pool.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/metal/mtl_occlusion_query_pool.mm
@@ -3148,10 +3133,16 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/DebugAnnotatorVk.c
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/DebugAnnotatorVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramExecutableVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramExecutableVk.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/vk_android_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/vk_android_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/display/DisplayVkSimple.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/display/DisplayVkSimple.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/display/WindowSurfaceVkSimple.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/display/WindowSurfaceVkSimple.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/headless/DisplayVkHeadless.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/headless/DisplayVkHeadless.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/headless/WindowSurfaceVkHeadless.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/headless/WindowSurfaceVkHeadless.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/mac/IOSurfaceSurfaceVkMac.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/mac/IOSurfaceSurfaceVkMac.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/BlitResolve.frag.00000000.inc
@@ -3302,6 +3293,7 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_internal_shader
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mandatory_format_support_table_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mem_alloc_wrapper.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mem_alloc_wrapper.h
+FILE: ../../../third_party/angle/src/libANGLE/validationEGL_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES1_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES2_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES31_autogen.h
@@ -3327,49 +3319,27 @@ FILE: ../../../third_party/angle/src/libANGLE/validationGL44_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationGL45_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationGL46_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationGL4_autogen.h
-FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.cpp
-FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_0_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_0_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_1_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_1_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_2_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_2_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_3_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_3_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_4_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_4_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_5_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_5_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_0_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_0_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_1_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_1_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_0_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_0_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_1_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_1_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_2_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_2_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_3_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_3_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_0_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_0_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_1_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_1_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_2_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_2_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_3_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_3_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_4_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_4_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_5_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_5_autogen.h
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_6_autogen.cpp
-FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_6_autogen.h
+FILE: ../../../third_party/angle/src/libEGL/libEGL_autogen.cpp
+FILE: ../../../third_party/angle/src/libEGL/libEGL_autogen.def
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_autogen.h
 FILE: ../../../third_party/angle/src/libGL/libGL_autogen.cpp
 FILE: ../../../third_party/angle/src/libGL/libGL_autogen.def
-FILE: ../../../third_party/angle/src/libGL/proc_table_wgl_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/egl_ext_stubs.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/egl_ext_stubs_autogen.h
+FILE: ../../../third_party/angle/src/libGLESv2/egl_get_labeled_object_data.json
+FILE: ../../../third_party/angle/src/libGLESv2/egl_stubs.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/egl_stubs_autogen.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_autogen.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_1_0_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_1_0_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_2_0_autogen.cpp
@@ -3386,19 +3356,17 @@ FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_no_capture_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_with_capture_autogen.def
-FILE: ../../../third_party/angle/src/libGLESv2/proc_table_egl_autogen.cpp
 FILE: ../../../third_party/angle/util/display/DisplayPixmap.cpp
 FILE: ../../../third_party/angle/util/display/DisplayWindow.cpp
 FILE: ../../../third_party/angle/util/display/DisplayWindow.h
-FILE: ../../../third_party/angle/util/egl_loader_autogen.cpp
-FILE: ../../../third_party/angle/util/egl_loader_autogen.h
 FILE: ../../../third_party/angle/util/frame_capture_test_utils.h
-FILE: ../../../third_party/angle/util/gles_loader_autogen.cpp
-FILE: ../../../third_party/angle/util/gles_loader_autogen.h
+FILE: ../../../third_party/angle/util/ios/IOSPixmap.h
+FILE: ../../../third_party/angle/util/ios/IOSPixmap.mm
+FILE: ../../../third_party/angle/util/ios/IOSWindow.h
+FILE: ../../../third_party/angle/util/ios/IOSWindow.mm
+FILE: ../../../third_party/angle/util/ios/ios_main.mm
 FILE: ../../../third_party/angle/util/png_utils.cpp
 FILE: ../../../third_party/angle/util/png_utils.h
-FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.cpp
-FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 The ANGLE Project Authors. All rights reserved.
 
@@ -3511,8 +3479,6 @@ FILE: ../../../third_party/angle/src/compiler/translator/VersionGLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/VersionGLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/glslang.l
 FILE: ../../../third_party/angle/src/compiler/translator/glslang.y
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulatePrecision.cpp
@@ -3521,28 +3487,30 @@ FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/InitializeVari
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/InitializeVariables.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitAST.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitAST.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/ArrayReturnValueToOutParameter.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/ArrayReturnValueToOutParameter.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RemoveSwitchFallThrough.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RemoveSwitchFallThrough.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateArrayInitialization.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateArrayInitialization.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateExpressionsReturningArrays.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/SeparateExpressionsReturningArrays.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/UnfoldShortCircuitToIf.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/UnfoldShortCircuitToIf.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RecordConstantPrecision.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RecordConstantPrecision.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RegenerateStructNames.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/RegenerateStructNames.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/UnfoldShortCircuitAST.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/UnfoldShortCircuitAST.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermTraverse.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/NodeSearch.h
 FILE: ../../../third_party/angle/src/compiler/translator/util.h
@@ -3598,7 +3566,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexBuffer9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/vertexconversion.h
-FILE: ../../../third_party/angle/src/libEGL/libEGL.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2002 The ANGLE Project Authors. All rights reserved.
 
@@ -3806,8 +3773,8 @@ FILE: ../../../third_party/angle/src/compiler/translator/StructureHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/StructureHLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/UtilsHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/UtilsHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteElseBlocks.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteElseBlocks.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteElseBlocks.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/d3d/RewriteElseBlocks.h
 FILE: ../../../third_party/angle/src/image_util/copyimage.inc
 FILE: ../../../third_party/angle/src/image_util/loadimage.inc
 FILE: ../../../third_party/angle/src/libANGLE/AttributeMap.cpp
@@ -3897,10 +3864,6 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Framebuffer9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexArray9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.cpp
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.cpp
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.h
 FILE: ../../../third_party/angle/src/libGLESv2/global_state.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/global_state.h
 FILE: ../../../third_party/angle/util/EGLWindow.h
@@ -3976,13 +3939,14 @@ FILE: ../../../third_party/angle/src/common/matrix_utils_unittest.cpp
 FILE: ../../../third_party/angle/src/common/string_utils.cpp
 FILE: ../../../third_party/angle/src/common/string_utils.h
 FILE: ../../../third_party/angle/src/common/string_utils_unittest.cpp
+FILE: ../../../third_party/angle/src/common/system_utils_ios.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_linux.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_mac.cpp
 FILE: ../../../third_party/angle/src/common/utilities_unittest.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ExtensionGLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ExtensionGLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDoWhile.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDoWhile.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteDoWhile.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/gl/mac/RewriteDoWhile.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindSymbolNode.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindSymbolNode.h
 FILE: ../../../third_party/angle/src/image_util/generatemip.inc
@@ -4294,6 +4258,66 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: angle
+ORIGIN: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.cpp + ../../../third_party/angle/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.cpp
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_builder_autogen.h
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.cpp
+FILE: ../../../third_party/angle/src/common/spirv/spirv_instruction_parser_autogen.h
+FILE: ../../../third_party/angle/src/common/spirv/spirv_types.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/MonomorphizeUnsupportedFunctionsInVulkanGLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteArrayOfArrayOfOpaqueUniforms.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/vulkan/RewriteR32fImages.h
+FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.h
+FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.cpp
+FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.h
+FILE: ../../../third_party/angle/src/libGL/proc_table_wgl_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/proc_table_egl_autogen.cpp
+FILE: ../../../third_party/angle/util/egl_loader_autogen.cpp
+FILE: ../../../third_party/angle/util/egl_loader_autogen.h
+FILE: ../../../third_party/angle/util/gles_loader_autogen.cpp
+FILE: ../../../third_party/angle/util/gles_loader_autogen.h
+FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.cpp
+FILE: ../../../third_party/angle/util/windows/wgl_loader_autogen.h
+----------------------------------------------------------------------------------------------------
+Copyright 2021 The ANGLE Project Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
+    Ltd., nor the names of their contributors may be used to endorse
+    or promote products derived from this software without specific
+    prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
@@ -19583,6 +19607,63 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: khronos
+ORIGIN: ../../../third_party/khronos/EGL/eglplatform.h
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/khronos/EGL/eglplatform.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2007-2016 The Khronos Group Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and/or associated documentation files (the
+"Materials"), to deal in the Materials without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Materials, and to
+permit persons to whom the Materials are furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Materials.
+
+THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: khronos
+ORIGIN: ../../../third_party/khronos/GLES3/gl31.h
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/khronos/GLES3/gl31.h
+FILE: ../../../third_party/khronos/GLES3/gl32.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013-2016 The Khronos Group Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and/or associated documentation files (the
+"Materials"), to deal in the Materials without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Materials, and to
+permit persons to whom the Materials are furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Materials.
+
+THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: khronos
 ORIGIN: ../../../third_party/khronos/KHR/khrplatform.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/khronos/KHR/khrplatform.h
@@ -22608,52 +22689,6 @@ SOFTWARE.
 
 ====================================================================================================
 LIBRARY: rapidjson
-ORIGIN: ../../../third_party/rapidjson/include/rapidjson/error/en.h
-TYPE: LicenseType.mit
-FILE: ../../../third_party/rapidjson/include/rapidjson/allocators.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/cursorstreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/document.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/encodedstream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/encodings.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/error/en.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/error/error.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/filereadstream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/filewritestream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/fwd.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/biginteger.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/diyfp.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/dtoa.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/ieee754.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/itoa.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/meta.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/pow10.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/regex.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/stack.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strfunc.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/strtod.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/internal/swap.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/istreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/memorybuffer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/memorystream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/ostreamwrapper.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/pointer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/prettywriter.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/rapidjson.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/reader.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/schema.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/stream.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/stringbuffer.h
-FILE: ../../../third_party/rapidjson/include/rapidjson/writer.h
-----------------------------------------------------------------------------------------------------
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: rapidjson
 ORIGIN: ../../../third_party/rapidjson/include/rapidjson/msinttypes/inttypes.h
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/rapidjson/include/rapidjson/msinttypes/inttypes.h
@@ -24523,4 +24558,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 375
+Total license count: 376
