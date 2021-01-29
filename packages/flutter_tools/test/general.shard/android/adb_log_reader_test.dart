@@ -195,6 +195,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   final String _lastLogcatTimestamp;
   final String _apiVersion;
+  
+  @override
+  String get name => 'test-device';
 
   @override
   Future<String> get apiVersion => Future<String>.value(_apiVersion);
