@@ -23,10 +23,10 @@ class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     @required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
-  }) {
+  }) : _operatingSystemUtils = operatingSystemUtils {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     final String defaultTargetPlatform =
-        (operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
+        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
             'linux-arm64' : 'linux-x64';
     argParser.addOption('target-platform',
       defaultsTo: defaultTargetPlatform,
@@ -40,6 +40,8 @@ class BuildLinuxCommand extends BuildSubCommand {
             'if the current host and target architectures are different.',
     );
   }
+
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   final String name = 'linux';
@@ -59,11 +61,22 @@ class BuildLinuxCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
+    final TargetPlatform targetPlatform =
+        getTargetPlatformForName(stringArg('target-platform'));
+    final bool needCrossBuild =
+        getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform)
+            != getNameForTargetPlatformArch(targetPlatform);
+
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported.');
     }
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
+    }
+    // Cross-building for x64 targets on arm64 hosts is not supported.
+    if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_x64 &&
+        targetPlatform != TargetPlatform.linux_arm64) {
+      throwToolExit('"cross-building" only supported on Linux x64 hosts.');
     }
     displayNullSafetyMode(buildInfo);
     await buildLinux(
@@ -75,7 +88,8 @@ class BuildLinuxCommand extends BuildSubCommand {
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
       ),
-      targetPlatform: getTargetPlatformForName(stringArg('target-platform')),
+      needCrossBuild: needCrossBuild,
+      targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot'),
     );
     return FlutterCommandResult.success();

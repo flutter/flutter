@@ -33,6 +33,7 @@ Future<void> buildLinux(
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
     SizeAnalyzer sizeAnalyzer,
+    bool needCrossBuild = false,
     TargetPlatform targetPlatform = TargetPlatform.linux_x64,
     String targetSysroot = '/',
   }) async {
@@ -72,7 +73,8 @@ Future<void> buildLinux(
     final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
     final Directory buildDirectory =
         globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
-    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory, targetPlatform, targetSysroot);
+    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
+                    needCrossBuild, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
@@ -112,13 +114,15 @@ Future<void> buildLinux(
   }
 }
 
-Future<void> _runCmake(String buildModeName, Directory sourceDir,
-    Directory buildDir, TargetPlatform targetPlatform, String targetSysroot) async {
+Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
+    bool needCrossBuild, TargetPlatform targetPlatform, String targetSysroot) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
 
   final String buildFlag = toTitleCase(buildModeName);
+  final bool needCrossBuildOptionsForArm64 = needCrossBuild
+      && targetPlatform == TargetPlatform.linux_arm64;
   int result;
   try {
     result = await globals.processUtils.stream(
@@ -128,11 +132,13 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir,
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
         '-DFLUTTER_TARGET_PLATFORM=' + getNameForTargetPlatform(targetPlatform),
-        if (targetPlatform == TargetPlatform.linux_arm64)
+        // Support cross-building for arm64 targets on x64 hosts.
+        // (Cross-building for x64 on arm64 hosts isn't supported now.)
+        if (needCrossBuild)
           '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
-        if (targetPlatform == TargetPlatform.linux_arm64)
+        if (needCrossBuildOptionsForArm64)
           '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
-        if (targetPlatform == TargetPlatform.linux_arm64)
+        if (needCrossBuildOptionsForArm64)
           '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
         sourceDir.path,
       ],
