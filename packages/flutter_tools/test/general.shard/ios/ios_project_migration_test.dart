@@ -23,9 +23,9 @@ import '../../src/common.dart';
 
 void main () {
   group('iOS migration', () {
-    MockUsage mockUsage;
+    TestUsage testUsage;
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
     });
 
     testWithoutContext('migrators succeed', () {
@@ -61,10 +61,10 @@ void main () {
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage
+          testUsage
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
@@ -81,10 +81,10 @@ void main () {
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -102,7 +102,7 @@ shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
         expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -130,10 +130,10 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), r'''
 keep this 1
@@ -154,11 +154,13 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
 
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails with leftover Flutter.framework reference', () {
@@ -172,10 +174,12 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails without Xcode installed', () {
@@ -188,10 +192,12 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails on Xcode < 11.4', () {
@@ -205,10 +211,10 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-        verifyNever(mockUsage.sendEvent(any, any, label: anyNamed('label'), value: anyNamed('value')));
+        expect(testUsage.events, isEmpty);
         expect(testLogger.errorText, isEmpty);
       });
 
@@ -223,10 +229,12 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
 
       testWithoutContext('migration fails on Xcode 12,0', () {
@@ -240,10 +248,12 @@ keep this 2
           mockIosProject,
           testLogger,
           mockXcode,
-          mockUsage,
+          testUsage,
         );
         expect(iosProjectMigration.migrate, throwsToolExit(message: 'Your Xcode project requires migration'));
-        verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+        expect(testUsage.events, contains(
+          const TestUsageEvent('ios-migration', 'remove-frameworks', label: 'failure'),
+        ));
       });
     });
 
@@ -556,7 +566,6 @@ keep this 3
 
 class MockIosProject extends Mock implements IosProject {}
 class MockXcode extends Mock implements Xcode {}
-class MockUsage extends Mock implements Usage {}
 
 class FakeIOSMigrator extends ProjectMigrator {
   FakeIOSMigrator({@required this.succeeds})

@@ -48,7 +48,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -86,7 +86,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -124,7 +124,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -162,7 +162,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -199,7 +199,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -238,7 +238,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -279,7 +279,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -304,7 +304,7 @@ void main() {
       fileSystem: MockFileSystem(),
       logger: logger,
       processManager: processMock,
-      usage: MockUsage(),
+      usage: TestUsage(),
       platform: FakePlatform(
         environment: const <String, String>{},
       ),
@@ -374,7 +374,7 @@ void main() {
       platform: FakePlatform(environment: const <String, String>{}),
       fileSystem: MockFileSystem(),
       logger: logger,
-      usage: MockUsage(),
+      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       processManager: MockProcessManager(66, stderr: 'err1\nerr2\nerr3\n', stdout: 'out1\nout2\nout3\n'),
     );
@@ -403,7 +403,7 @@ void main() {
     final MockFileSystem fsMock = MockFileSystem();
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
-      usage: MockUsage(),
+      usage: TestUsage(),
       fileSystem: fsMock,
       logger: BufferLogger.test(),
       processManager: processMock,
@@ -432,7 +432,7 @@ void main() {
       fileSystem: MockFileSystem(),
       logger: BufferLogger.test(),
       processManager: processMock,
-      usage: MockUsage(),
+      usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
       platform: FakePlatform(
         environment: const <String, String>{
@@ -461,7 +461,7 @@ void main() {
 
   testWithoutContext('analytics sent on success', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -484,13 +484,14 @@ void main() {
       context: PubContext.flutterTests,
       generateSyntheticPackage: true,
     );
-
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'success'),
+    ));
   });
 
   testWithoutContext('package_config_subset file is generated from packages and not timestamp', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -536,7 +537,7 @@ void main() {
 
   testWithoutContext('analytics sent on failure', () async {
     MockDirectory.findCache = true;
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final Pub pub = Pub(
       usage: usage,
       fileSystem: MockFileSystem(),
@@ -555,11 +556,13 @@ void main() {
       // Ignore.
     }
 
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure'),
+    ));
   });
 
   testWithoutContext('analytics sent on failed version solve', () async {
-    final MockUsage usage = MockUsage();
+    final TestUsage usage = TestUsage();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Pub pub = Pub(
       fileSystem: fileSystem,
@@ -584,7 +587,9 @@ void main() {
       // Ignore.
     }
 
-    verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    expect(usage.events, contains(
+      const TestUsageEvent('pub-result', 'flutter-tests', label: 'version-solving-failed'),
+    ));
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -633,7 +638,7 @@ void main() {
       ),
     ]);
     final Pub pub = Pub(
-      usage: MockUsage(),
+      usage: TestUsage(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -763,5 +768,3 @@ class MockDirectory implements Directory {
 }
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
-
-class MockUsage extends Mock implements Usage {}
