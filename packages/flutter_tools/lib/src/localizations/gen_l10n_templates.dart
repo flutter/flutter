@@ -112,6 +112,11 @@ abstract class @(class) {
 @(delegateClass)
 ''';
 
+const String numberFormatPositionalTemplate = '''
+    final @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+''';
+
 const String numberFormatTemplate = '''
     final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
