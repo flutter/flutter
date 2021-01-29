@@ -24,6 +24,7 @@ void main() {
       'example/txt_benchmarks.json',
     ], environment: <String, String>{
       'BENCHMARK_GCP_CREDENTIALS': testCred,
+      'IS_TESTING': 'true',
     });
   });
 
@@ -44,6 +45,7 @@ void main() {
     ], environment: <String, String>{
       'TOKEN_PATH': tokenPath,
       'GCP_PROJECT': testCred['project_id'] as String,
+      'IS_TESTING': 'true',
     });
     expect(result.exitCode, 0);
   });

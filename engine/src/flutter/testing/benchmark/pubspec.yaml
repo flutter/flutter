@@ -3,7 +3,7 @@ name: flutter_engine_benchmark
 dependencies:
   git: any
 
-  metrics_center: 0.0.4
+  metrics_center: 0.0.8
 
 dev_dependencies:
   test: any
