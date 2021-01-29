@@ -437,7 +437,6 @@ void main() {
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
-      verify(clock.now()).called(2);
 
       expect(
         verify(usage.sendTiming(
@@ -459,7 +458,6 @@ void main() {
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
-      verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
                    any, any, any,
                    label: anyNamed('label')));
@@ -480,7 +478,6 @@ void main() {
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
-      verify(clock.now()).called(2);
       expect(
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
@@ -509,8 +506,6 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        // Should have still checked time twice.
-        verify(clock.now()).called(2);
 
         expect(
           verify(usage.sendTiming(

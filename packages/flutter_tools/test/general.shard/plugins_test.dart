@@ -37,7 +37,7 @@ void main() {
     MockWebProject webProject;
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
-    SystemClock systemClock;
+    FakeSystemClock systemClock;
     FlutterVersion mockVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
@@ -112,7 +112,8 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
-      systemClock = SystemClock.fixed(DateTime(1970, 1, 1));
+      systemClock = FakeSystemClock()
+        ..currentTime = DateTime(1970, 1, 1);
       mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
@@ -422,9 +423,7 @@ dependencies:
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
-        when(systemClock.now()).thenAnswer(
-          (Invocation _) => dateCreated
-        );
+        systemClock.currentTime = dateCreated;
         const String version = '1.0.0';
         when(mockVersion.frameworkVersion).thenAnswer(
           (Invocation _) => version
@@ -1407,3 +1406,12 @@ class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeSystemClock extends Fake implements SystemClock {
+  DateTime currentTime;
+
+  @override
+  DateTime now() {
+    return currentTime;
+  }
+}
