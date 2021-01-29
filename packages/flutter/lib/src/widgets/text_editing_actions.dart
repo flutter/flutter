@@ -56,9 +56,6 @@ class ControlShiftArrowLeftTextIntent extends Intent {
 class ControlShiftArrowRightTextIntent extends Intent {
   const ControlShiftArrowRightTextIntent();
 }
-class DoubleTapDownTextIntent extends Intent {
-  const DoubleTapDownTextIntent();
-}
 class DragSelectionEndTextIntent extends Intent {
   const DragSelectionEndTextIntent();
 }
@@ -144,13 +141,6 @@ class ShiftEndTextIntent extends Intent {
 class ShiftHomeTextIntent extends Intent {
   const ShiftHomeTextIntent();
 }
-class TapDownTextIntent extends Intent {
-  const TapDownTextIntent({
-    required this.details,
-  });
-
-  final TapDownDetails details;
-}
 
 /// The map of [Action]s that correspond to the default text editing behavior
 /// for Flutter on the current platform.
@@ -178,7 +168,6 @@ class TextEditingActions extends StatelessWidget {
   /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
 
-  // TODO(justinmc): Should be public for users to be able to use/remap them?
   static final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
     onInvoke: (SingleTapUpTextIntent intent, EditableTextState editableTextState) {
       editableTextState.hideToolbar();
@@ -210,33 +199,6 @@ class TextEditingActions extends StatelessWidget {
         }
       }
       editableTextState.requestKeyboard();
-    },
-  );
-
-  /// Handler for [TextSelectionGestureDetector.onTapDown].
-  ///
-  /// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
-  /// [shouldShowSelectionToolbar] to true if the tap was initiated by a finger or stylus.
-  ///
-  /// See also:
-  ///
-  ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
-  static final TextEditingAction<TapDownTextIntent> _tapDownTextAction = TextEditingAction<TapDownTextIntent>(
-    onInvoke: (TapDownTextIntent intent, EditableTextState editableTextState) {
-      // TODO(justinmc): Should be no handling anything in renderEditable, it
-      // should just receive commands to do specific things.
-      editableTextState.renderEditable.handleTapDown(intent.details);
-      // The selection overlay should only be shown when the user is interacting
-      // through a touch screen (via either a finger or a stylus). A mouse shouldn't
-      // trigger the selection overlay.
-      // For backwards-compatibility, we treat a null kind the same as touch.
-      //final PointerDeviceKind? kind = intent.details.kind;
-      // TODO(justinmc): What about _shouldShowSelectionToolbar?
-      /*
-      _shouldShowSelectionToolbar = kind == null
-        || kind == PointerDeviceKind.touch
-        || kind == PointerDeviceKind.stylus;
-        */
     },
   );
 
@@ -304,8 +266,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  // TODO(justinmc): This is nearly identical to altShiftArrowLeft. A reason to
-  // reuse actions?
   static final TextEditingAction<ControlShiftArrowLeftTextIntent> _controlShiftArrowLeftTextAction = TextEditingAction<ControlShiftArrowLeftTextIntent>(
     onInvoke: (ControlShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -322,8 +282,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  // TODO(justinmc): This is nearly identical to altShiftArrowRight. A reason to
-  // reuse actions?
   static final TextEditingAction<ControlShiftArrowRightTextIntent> _controlShiftArrowRightTextAction = TextEditingAction<ControlShiftArrowRightTextIntent>(
     onInvoke: (ControlShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -689,7 +647,6 @@ class TextEditingActions extends StatelessWidget {
         SingleTapUpTextIntent: _singleTapUpTextAction,
         ShiftHomeTextIntent: _shiftHomeTextAction,
         ShiftEndTextIntent: _shiftEndTextAction,
-        TapDownTextIntent: _tapDownTextAction,
       },
       child: child,
     );
