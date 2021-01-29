@@ -1492,6 +1492,58 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
                                   "running Flutter application.");
 }
 
+static inline flutter::KeyEventType MapKeyEventType(
+    FlutterKeyEventType event_kind) {
+  switch (event_kind) {
+    case kFlutterKeyEventTypeUp:
+      return flutter::KeyEventType::kUp;
+    case kFlutterKeyEventTypeDown:
+      return flutter::KeyEventType::kDown;
+    case kFlutterKeyEventTypeRepeat:
+      return flutter::KeyEventType::kRepeat;
+  }
+  return flutter::KeyEventType::kUp;
+}
+
+FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                  engine,
+                                              const FlutterKeyEvent* event,
+                                              FlutterKeyEventCallback callback,
+                                              void* user_data) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (event == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid key event.");
+  }
+
+  const char* character = SAFE_ACCESS(event, character, nullptr);
+
+  flutter::KeyData key_data;
+  key_data.Clear();
+  key_data.timestamp = (uint64_t)SAFE_ACCESS(event, timestamp, 0);
+  key_data.type = MapKeyEventType(
+      SAFE_ACCESS(event, type, FlutterKeyEventType::kFlutterKeyEventTypeUp));
+  key_data.physical = SAFE_ACCESS(event, physical, 0);
+  key_data.logical = SAFE_ACCESS(event, logical, 0);
+  key_data.synthesized = SAFE_ACCESS(event, synthesized, false);
+
+  auto packet = std::make_unique<flutter::KeyDataPacket>(key_data, character);
+
+  auto response = [callback, user_data](bool handled) {
+    if (callback != nullptr)
+      callback(handled, user_data);
+  };
+
+  return reinterpret_cast<flutter::EmbedderEngine*>(engine)
+                 ->DispatchKeyDataPacket(std::move(packet), response)
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                  "Could not dispatch the key event to the "
+                                  "running Flutter application.");
+}
+
 FlutterEngineResult FlutterEngineSendPlatformMessage(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessage* flutter_message) {
@@ -2166,6 +2218,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(RunInitialized, FlutterEngineRunInitialized);
   SET_PROC(SendWindowMetricsEvent, FlutterEngineSendWindowMetricsEvent);
   SET_PROC(SendPointerEvent, FlutterEngineSendPointerEvent);
+  SET_PROC(SendKeyEvent, FlutterEngineSendKeyEvent);
   SET_PROC(SendPlatformMessage, FlutterEngineSendPlatformMessage);
   SET_PROC(PlatformMessageCreateResponseHandle,
            FlutterPlatformMessageCreateResponseHandle);

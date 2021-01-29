@@ -319,6 +319,7 @@ FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.h
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h
+FILE: ../../../flutter/lib/ui/key.dart
 FILE: ../../../flutter/lib/ui/lerp.dart
 FILE: ../../../flutter/lib/ui/natives.dart
 FILE: ../../../flutter/lib/ui/painting.dart
@@ -406,6 +407,10 @@ FILE: ../../../flutter/lib/ui/ui_dart_state.h
 FILE: ../../../flutter/lib/ui/volatile_path_tracker.cc
 FILE: ../../../flutter/lib/ui/volatile_path_tracker.h
 FILE: ../../../flutter/lib/ui/window.dart
+FILE: ../../../flutter/lib/ui/window/key_data.cc
+FILE: ../../../flutter/lib/ui/window/key_data.h
+FILE: ../../../flutter/lib/ui/window/key_data_packet.cc
+FILE: ../../../flutter/lib/ui/window/key_data_packet.h
 FILE: ../../../flutter/lib/ui/window/platform_configuration.cc
 FILE: ../../../flutter/lib/ui/window/platform_configuration.h
 FILE: ../../../flutter/lib/ui/window/platform_configuration_unittests.cc
@@ -500,7 +505,9 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
@@ -560,6 +567,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/ui/compositing.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/geometry.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/hash_codes.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/initialization.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/ui/key.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/lerp.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/natives.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/ui/painting.dart

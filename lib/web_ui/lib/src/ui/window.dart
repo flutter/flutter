@@ -81,6 +81,11 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
     platformDispatcher.onPointerDataPacket = callback;
   }
 
+  KeyDataCallback? get onKeyData => platformDispatcher.onKeyData;
+  set onKeyData(KeyDataCallback? callback) {
+    platformDispatcher.onKeyData = callback;
+  }
+
   String get defaultRouteName => platformDispatcher.defaultRouteName;
 
   void scheduleFrame() => platformDispatcher.scheduleFrame();

@@ -495,6 +495,47 @@ Picture CreateGradientBox(Size size) {
   return baseRecorder.endRecording();
 }
 
+void _echoKeyEvent(
+    int change,
+    int timestamp,
+    int physical,
+    int logical,
+    int charCode,
+    bool synthesized)
+  native 'EchoKeyEvent';
+
+// Convert `kind` in enum form to its integer form.
+//
+// It performs a revesed mapping from `unserializeKeyEventKind`
+// in shell/platform/embedder/tests/embedder_unittests.cc.
+int _serializeKeyEventType(KeyEventType change) {
+  switch(change) {
+    case KeyEventType.up:
+      return 1;
+    case KeyEventType.down:
+      return 2;
+    case KeyEventType.repeat:
+      return 3;
+  }
+}
+
+// Echo the event data with `_echoKeyEvent`, and returns synthesized as handled.
+@pragma('vm:entry-point')
+void key_data_echo() async { // ignore: non_constant_identifier_names
+  PlatformDispatcher.instance.onKeyData = (KeyData data) {
+    _echoKeyEvent(
+      _serializeKeyEventType(data.type),
+      data.timeStamp.inMicroseconds,
+      data.physical,
+      data.logical,
+      data.character == null ? 0 : data.character!.codeUnitAt(0),
+      data.synthesized,
+    );
+    return data.synthesized;
+  };
+  signalNativeTest();
+}
+
 @pragma('vm:entry-point')
 void render_gradient() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
