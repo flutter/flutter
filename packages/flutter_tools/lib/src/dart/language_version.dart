@@ -13,9 +13,6 @@ const String _blockCommentEnd = '*/';
 /// The first language version where null safety was available by default.
 final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
 
-/// The last language version that doesn't support null safety by default.
-final LanguageVersion optOutNullSafeVersion = LanguageVersion(2, 8);
-
 /// Attempts to read the language version of a dart [file].
 ///
 /// If this is not present, falls back to the language version defined in
@@ -25,13 +22,7 @@ final LanguageVersion optOutNullSafeVersion = LanguageVersion(2, 8);
 ///
 /// The specification for the language version tag is defined at:
 /// https://github.com/dart-lang/language/blob/master/accepted/future-releases/language-versioning/feature-specification.md#individual-library-language-version-override
-LanguageVersion determineLanguageVersion(
-  File file,
-  Package package, {
-  LanguageVersion defaultLanguageVersion,
-}) {
-  defaultLanguageVersion ??= nullSafeVersion;
-
+LanguageVersion determineLanguageVersion(File file, Package package) {
   int blockCommentDepth = 0;
   // If reading the file fails, default to a null-safe version. The
   // command will likely fail later in the process with a better error
@@ -40,7 +31,7 @@ LanguageVersion determineLanguageVersion(
   try {
     lines = file.readAsLinesSync();
   } on FileSystemException {
-    return defaultLanguageVersion;
+    return nullSafeVersion;
   }
 
   for (final String line in lines) {
@@ -95,5 +86,6 @@ LanguageVersion determineLanguageVersion(
   if (package != null) {
     return package.languageVersion;
   }
-  return defaultLanguageVersion;
+  // Default to 2.12
+  return nullSafeVersion;
 }

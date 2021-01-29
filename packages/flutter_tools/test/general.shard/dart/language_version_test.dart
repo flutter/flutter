@@ -237,23 +237,6 @@ library funstuff;
     expect(determineLanguageVersion(file, null), LanguageVersion(2, 12));
   });
 
-  testWithoutContext('defaults to the selected default language version', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final File file = fileSystem.file('example.dart')
-      ..writeAsStringSync('''
-import 'dart:ui' as ui;
-''');
-
-    expect(
-      determineLanguageVersion(
-        file,
-        null,
-        defaultLanguageVersion: LanguageVersion(1, 0),
-      ),
-      LanguageVersion(1, 0),
-    );
-  });
-
   testWithoutContext('looks up language version from package if not found in file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
