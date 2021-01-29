@@ -55,10 +55,12 @@ final Platform macPlatform = FakePlatform(
 void main() {
   MockFlutterVersion mockFlutterVersion;
   BufferLogger logger;
+  FakeProcessManager fakeProcessManager;
 
   setUp(() {
     mockFlutterVersion = MockFlutterVersion();
     logger = BufferLogger.test();
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
@@ -597,7 +599,6 @@ void main() {
     }, overrides: noColorTerminalOverride);
   });
 
-
   group('grouped validator merging results', () {
     final PassingGroupedValidator installed = PassingGroupedValidator('Category');
     final PartialGroupedValidator partial = PartialGroupedValidator('Category');
@@ -650,14 +651,12 @@ void main() {
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    when(globals.processManager.canRun(any)).thenReturn(true);
-
     expect(DoctorValidatorsProvider.defaultInstance.workflows,
       contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => fakeProcessManager,
   });
 
   testUsingContext('Fetches tags to get the right version', () async {
@@ -1046,7 +1045,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
