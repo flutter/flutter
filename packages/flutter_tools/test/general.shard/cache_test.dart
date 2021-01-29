@@ -763,11 +763,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
 }
 
 class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
-class MockDirectory extends Mock implements Directory {}
-class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}

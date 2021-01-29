@@ -34,7 +34,7 @@ void main() {
   CocoaPods cocoaPodsUnderTest;
   InvokeProcess resultOfPodVersion;
   BufferLogger logger;
-  Usage usage;
+  TestUsage usage;
 
   void pretendPodVersionFails() {
     resultOfPodVersion = () async => exitsWithError();
@@ -71,7 +71,7 @@ void main() {
     projectUnderTest = FlutterProject.fromDirectory(fileSystem.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
-    usage = Usage.test();
+    usage = TestUsage();
     cocoaPodsUnderTest = CocoaPods(
       fileSystem: fileSystem,
       processManager: mockProcessManager,
@@ -486,21 +486,18 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
             'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
           ));
 
-      // Capture Usage.test() events.
-      final StringBuffer buffer =
-          await capturedConsolePrint(() => expectToolExitLater(
-                cocoaPodsUnderTest.processPods(
-                  xcodeProject: projectUnderTest.ios,
-                  buildMode: BuildMode.debug,
-                ),
-                equals('Error running pod install'),
-              ));
+      await expectToolExitLater(
+        cocoaPodsUnderTest.processPods(
+          xcodeProject: projectUnderTest.ios,
+          buildMode: BuildMode.debug,
+        ),
+        equals('Error running pod install'),
+      );
       expect(
         logger.errorText,
         contains('set up CocoaPods for ARM macOS'),
       );
-      expect(buffer.toString(),
-          contains('event {category: pod-install-failure, action: arm-ffi'));
+      expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
     });
 
     testWithoutContext('ffi failure on x86 macOS does not prompt gem install', () async {

@@ -226,7 +226,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -430,7 +430,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -457,7 +457,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(

@@ -249,10 +249,16 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   void validateProjectDir({bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
-      throwToolExit(
-          'Cannot create a project within the Flutter SDK. '
-          "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
-          exitCode: 2);
+      // Make exception for dev and examples to facilitate example project development.
+      final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
+      final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
+      if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
+          !globals.fs.path.isWithin(devDirectory, projectDirPath)) {
+        throwToolExit(
+            'Cannot create a project within the Flutter SDK. '
+                "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
+            exitCode: 2);
+      }
     }
 
     // If the destination directory is actually a file, then we refuse to

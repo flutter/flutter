@@ -225,9 +225,7 @@ autoUpdateGoldenFiles = $updateGoldens;
   return buffer.toString();
 }
 
-enum InitialResult { crashed, connected }
-
-enum TestResult { crashed, harnessBailed, testBailed }
+enum _TestHarnessStatus { testerCrashed, finished }
 
 typedef Finalizer = Future<void> Function();
 
@@ -466,7 +464,7 @@ class FlutterPlatform extends PlatformPlugin {
             // We expect SIGKILL (9) because we tried to terminate it.
             // It's negative because signals are returned as negative exit codes.
             final String message = _getErrorMessage(
-                _getExitCodeMessage(exitCode, 'after tests finished'),
+                _getExitCodeMessage(exitCode),
                 testPath,
                 shellPath);
             controller.sink.addError(message);
@@ -474,21 +472,22 @@ class FlutterPlatform extends PlatformPlugin {
         }
       });
 
-      final Completer<void> gotProcessObservatoryUri = Completer<void>();
+      final Completer<Uri> gotProcessObservatoryUri = Completer<Uri>();
       if (!enableObservatory) {
         gotProcessObservatoryUri.complete();
       }
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
-      Uri processObservatoryUri;
       final Uri ddsServiceUri = getDdsServiceUri();
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) async {
-          assert(processObservatoryUri == null);
+          assert(!gotProcessObservatoryUri.isCompleted);
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
+
+          Uri forwardingUri;
           if (!disableDds) {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
@@ -496,30 +495,26 @@ class FlutterPlatform extends PlatformPlugin {
               enableAuthCodes: !disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
-            processObservatoryUri = dds.uri;
+            forwardingUri = dds.uri;
             globals.printTrace('Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
           } else {
-            processObservatoryUri = detectedUri;
+            forwardingUri = detectedUri;
           }
           {
-            globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
+            globals.printTrace('Connecting to service protocol: $forwardingUri');
+            final Future<vm_service.VmService> localVmService = connectToVmService(forwardingUri,
               compileExpression: _compileExpressionService);
             unawaited(localVmService.then((vm_service.VmService vmservice) {
-              globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
+              globals.printTrace('Successfully connected to service protocol: $forwardingUri');
             }));
           }
           if (startPaused && !machine) {
             globals.printStatus('The test process has been started.');
             globals.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
-            globals.printStatus('  $processObservatoryUri');
+            globals.printStatus('  $forwardingUri');
             globals.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
-          } else {
-            globals.printTrace('test $ourTestCount: using observatory uri $processObservatoryUri from pid ${process.pid}');
           }
-          gotProcessObservatoryUri.complete();
-          watcher?.handleStartedProcess(
-              ProcessEvent(ourTestCount, process, processObservatoryUri));
+          gotProcessObservatoryUri.complete(forwardingUri);
         },
       );
 
@@ -527,124 +522,52 @@ class FlutterPlatform extends PlatformPlugin {
       // The engine could crash, in which case process.exitCode will complete.
       // The engine could connect to us, in which case webSocket.future will complete.
       // The local test harness could get bored of us.
-      globals.printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final InitialResult initialResult = await Future.any<InitialResult>(<Future<InitialResult>>[
-        process.exitCode.then<InitialResult>((int exitCode) => InitialResult.crashed),
-        gotProcessObservatoryUri.future.then<InitialResult>((void value) {
-          return webSocket.future.then<InitialResult>(
-            (WebSocket webSocket) => InitialResult.connected,
-          );
-        }),
+      globals.printTrace('test $ourTestCount: awaiting connection to result for test process at pid ${process.pid}');
+      final _TestHarnessStatus testHarnessStatus = await Future.any<_TestHarnessStatus>(<Future<_TestHarnessStatus>>[
+        process.exitCode.then<_TestHarnessStatus>((int exitCode) => _TestHarnessStatus.testerCrashed),
+        gotProcessObservatoryUri.future.then<_TestHarnessStatus>((Uri processObservatoryUri) {
+          if (processObservatoryUri != null) {
+            globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
+          }
+          watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
+
+          return webSocket.future.then<_TestHarnessStatus>((WebSocket remoteSocket) async {
+            globals.printTrace('test $ourTestCount: connected to test harness, now awaiting test result');
+            await _controlTests(
+              controller: controller,
+              remoteSocket: remoteSocket,
+              onError: (dynamic error, StackTrace stackTrace) {
+                // If you reach here, it's unlikely we're going to be able to really handle this well.
+                globals.printError('test: $testPath\nerror: $error');
+                if (!controllerSinkClosed) {
+                  controller.sink.addError(error, stackTrace);
+                  controller.sink.close();
+                } else {
+                  globals.printError('unexpected error: $error');
+                }
+              }
+            );
+
+            await watcher?.handleFinishedTest(ProcessEvent(ourTestCount, process, processObservatoryUri));
+            return _TestHarnessStatus.finished;
+          });
+        })
       ]);
 
-      switch (initialResult) {
-        case InitialResult.crashed:
-          globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
-          final int exitCode = await process.exitCode;
-          subprocessActive = false;
-          final String message = _getErrorMessage(
-              _getExitCodeMessage(
-                  exitCode, 'before connecting to test harness'),
-              testPath,
-              shellPath);
-          controller.sink.addError(message);
-          // Awaited for with 'sink.done' below.
-          unawaited(controller.sink.close());
-          globals.printTrace('test $ourTestCount: waiting for controller sink to close');
-          await controller.sink.done;
-          await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
-          break;
-        case InitialResult.connected:
-          globals.printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
-          final WebSocket testSocket = await webSocket.future;
-
-          final Completer<void> harnessDone = Completer<void>();
-          final StreamSubscription<dynamic> harnessToTest =
-              controller.stream.listen(
-            (dynamic event) {
-              testSocket.add(json.encode(event));
-            },
-            onDone: harnessDone.complete,
-            onError: (dynamic error, StackTrace stack) {
-              // If you reach here, it's unlikely we're going to be able to really handle this well.
-              globals.printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
-              if (!controllerSinkClosed) {
-                controller.sink.addError(error, stack);
-                controller.sink.close();
-              } else {
-                globals.printError('unexpected error from test harness controller stream: $error');
-              }
-            },
-            cancelOnError: true,
-          );
-
-          final Completer<void> testDone = Completer<void>();
-          final StreamSubscription<dynamic> testToHarness = testSocket.listen(
-            (dynamic encodedEvent) {
-              assert(encodedEvent is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent as String));
-            },
-            onDone: testDone.complete,
-            onError: (dynamic error, StackTrace stack) {
-              // If you reach here, it's unlikely we're going to be able to really handle this well.
-              globals.printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
-              if (!controllerSinkClosed) {
-                controller.sink.addError(error, stack);
-                controller.sink.close();
-              } else {
-                globals.printError('unexpected error from test socket stream: $error');
-              }
-            },
-            cancelOnError: true,
-          );
-
-          globals.printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final TestResult testResult = await Future.any<TestResult>(<Future<TestResult>>[
-            process.exitCode.then<TestResult>((int exitCode) {
-              return TestResult.crashed;
-            }),
-            harnessDone.future.then<TestResult>((void value) {
-              return TestResult.harnessBailed;
-            }),
-            testDone.future.then<TestResult>((void value) {
-              return TestResult.testBailed;
-            }),
-          ]);
-
-          await Future.wait<void>(<Future<void>>[
-            harnessToTest.cancel(),
-            testToHarness.cancel(),
-          ]);
-
-          switch (testResult) {
-            case TestResult.crashed:
-              globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
-              final int exitCode = await process.exitCode;
-              subprocessActive = false;
-              final String message = _getErrorMessage(
-                  _getExitCodeMessage(
-                      exitCode, 'before test harness closed its WebSocket'),
-                  testPath,
-                  shellPath);
-              controller.sink.addError(message);
-              // Awaited for with 'sink.done' below.
-              unawaited(controller.sink.close());
-              globals.printTrace('test $ourTestCount: waiting for controller sink to close');
-              await controller.sink.done;
-              break;
-            case TestResult.harnessBailed:
-            case TestResult.testBailed:
-              if (testResult == TestResult.harnessBailed) {
-                globals.printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
-              } else {
-                assert(testResult == TestResult.testBailed);
-                globals.printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
-              }
-              await watcher?.handleFinishedTest(
-                  ProcessEvent(ourTestCount, process, processObservatoryUri));
-              break;
-          }
-          break;
+      if (testHarnessStatus == _TestHarnessStatus.testerCrashed) {
+        globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
+        final int exitCode = await process.exitCode;
+        subprocessActive = false;
+        final String message = _getErrorMessage(
+            _getExitCodeMessage(exitCode),
+            testPath,
+            shellPath);
+        controller.sink.addError(message);
+        // Awaited for with 'sink.done' below in `finally`.
+        unawaited(controller.sink.close());
+        globals.printTrace('test $ourTestCount: waiting for controller sink to close');
+        await controller.sink.done;
+        await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
       }
     } on Exception catch (error, stack) {
       globals.printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
@@ -878,22 +801,22 @@ class FlutterPlatform extends PlatformPlugin {
     return '$what\nTest: $testPath\nShell: $shellPath\n\n';
   }
 
-  String _getExitCodeMessage(int exitCode, String when) {
+  String _getExitCodeMessage(int exitCode) {
     switch (exitCode) {
       case 1:
-        return 'Shell subprocess cleanly reported an error $when. Check the logs above for an error message.';
+        return 'Shell subprocess cleanly reported an error. Check the logs above for an error message.';
       case 0:
-        return 'Shell subprocess ended cleanly $when. Did main() call exit()?';
+        return 'Shell subprocess ended cleanly. Did main() call exit()?';
       case -0x0f: // ProcessSignal.SIGTERM
-        return 'Shell subprocess crashed with SIGTERM ($exitCode) $when.';
+        return 'Shell subprocess crashed with SIGTERM ($exitCode).';
       case -0x0b: // ProcessSignal.SIGSEGV
-        return 'Shell subprocess crashed with segmentation fault $when.';
+        return 'Shell subprocess crashed with segmentation fault.';
       case -0x06: // ProcessSignal.SIGABRT
-        return 'Shell subprocess crashed with SIGABRT ($exitCode) $when.';
+        return 'Shell subprocess crashed with SIGABRT ($exitCode).';
       case -0x02: // ProcessSignal.SIGINT
-        return 'Shell subprocess terminated by ^C (SIGINT, $exitCode) $when.';
+        return 'Shell subprocess terminated by ^C (SIGINT, $exitCode).';
       default:
-        return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
+        return 'Shell subprocess crashed with unexpected exit code $exitCode.';
     }
   }
 
@@ -969,4 +892,62 @@ class _AsyncError {
   const _AsyncError(this.error, this.stack);
   final dynamic error;
   final StackTrace stack;
+}
+
+/// Bridges the package:test controller and the remote tester.
+///
+/// Sets up a that allows the package:test test [controller] to communicate with
+/// a [remoteSocket] that runs the test. The returned future completes when
+/// either side is closed, which also indicates when the tests have finished.
+Future<void> _controlTests({
+  @required
+  StreamChannel<dynamic> controller,
+  @required
+  WebSocket remoteSocket,
+  @required
+  void Function(dynamic, StackTrace) onError,
+}) async {
+  final Completer<void> harnessDone = Completer<void>();
+  final StreamSubscription<dynamic> harnessToTest =
+      controller.stream.listen(
+    (dynamic event) {
+      remoteSocket.add(json.encode(event));
+    },
+    onDone: harnessDone.complete,
+    onError: (dynamic error, StackTrace stack) {
+      globals.printError('test harness controller stream experienced an unexpected error');
+      onError(error, stack);
+    },
+    cancelOnError: true,
+  );
+
+  final Completer<void> testDone = Completer<void>();
+  final StreamSubscription<dynamic> testToHarness = remoteSocket.listen(
+    (dynamic encodedEvent) {
+      assert(encodedEvent is String); // we shouldn't ever get binary messages
+      controller.sink.add(json.decode(encodedEvent as String));
+    },
+    onDone: testDone.complete,
+    onError: (dynamic error, StackTrace stack) {
+      globals.printError('test socket stream experienced an unexpected error');
+      onError(error, stack);
+    },
+    cancelOnError: true,
+  );
+
+  globals.printTrace('waiting for test harness or tests to finish');
+
+  await Future.any<void>(<Future<void>>[
+    harnessDone.future.then<void>((void value) {
+      globals.printTrace('test process is no longer needed by test harness');
+    }),
+    testDone.future.then<void>((void value) {
+      globals.printTrace('test harness is no longer needed by test process');
+    }),
+  ]);
+
+  await Future.wait<void>(<Future<void>>[
+    harnessToTest.cancel(),
+    testToHarness.cancel(),
+  ]);
 }

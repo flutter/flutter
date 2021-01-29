@@ -546,16 +546,18 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
+    expect((globals.flutterUsage as TestUsage).events, contains(
+      TestUsageEvent('hot', 'exception', parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-    })).called(1);
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      }),
+    ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -633,16 +635,19 @@ void main() {
     expect(result.fatal, true);
     expect(result.code, kIsolateReloadBarred);
     expect(result.message, contains('Unable to hot reload application due to an unrecoverable error'));
-    verify(globals.flutterUsage.sendEvent('hot', 'reload-barred', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
+
+    expect((globals.flutterUsage as TestUsage).events, contains(
+      TestUsageEvent('hot', 'reload-barred', parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-    })).called(1);
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      }),
+    ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -700,17 +705,20 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
+
+    expect((globals.flutterUsage as TestUsage).events, contains(
+      TestUsageEvent('hot', 'exception', parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-    })).called(1);
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      }),
+    ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }));
 
   testUsingContext('ResidentRunner does not reload sources if no sources changed', () => testbed.run(() async {
@@ -1021,13 +1029,16 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(globals.flutterUsage.sendEvent('hot', 'reload',
-                  parameters: captureAnyNamed('parameters'))).captured[0],
-      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm)),
-    );
+
+    final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
+    expect(event.category, 'hot');
+    expect(event.parameter, 'reload');
+    expect(event.parameters, containsPair(
+                  cdKey(CustomDimensions.hotEventTargetPlatform),
+                  getNameForTargetPlatform(TargetPlatform.android_arm),
+                ));
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -1134,15 +1145,18 @@ void main() {
 
     expect(result.fatal, false);
     expect(result.code, 0);
-    verify(globals.flutterUsage.sendEvent('hot', 'reload', parameters: argThat(
-      containsPair('cd48', 'true'),
-      named: 'parameters',
-    ))).called(1);
+
+    final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
+    expect(event.category, 'hot');
+    expect(event.parameter, 'reload');
+    expect(event.parameters, containsPair(
+      cdKey(CustomDimensions.fastReassemble), 'true',
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
     FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
@@ -1208,14 +1222,16 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(globals.flutterUsage.sendEvent('hot', 'restart',
-                  parameters: captureAnyNamed('parameters'))).captured[0],
-      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm)),
-    );
+
+    final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
+    expect(event.category, 'hot');
+    expect(event.parameter, 'restart');
+    expect(event.parameters, containsPair(
+      cdKey(CustomDimensions.hotEventTargetPlatform), getNameForTargetPlatform(TargetPlatform.android_arm),
+    ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -1473,16 +1489,19 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
+
+    expect((globals.flutterUsage as TestUsage).events, contains(
+      TestUsageEvent('hot', 'exception', parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'true',
-    })).called(1);
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'true',
+      }),
+    ));
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
-    Usage: () => MockUsage(),
+    Usage: () => TestUsage(),
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
   });
@@ -3134,7 +3153,6 @@ class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
-class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 

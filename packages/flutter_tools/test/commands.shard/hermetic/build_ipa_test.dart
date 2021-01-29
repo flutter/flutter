@@ -48,7 +48,7 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   FileSystem fileSystem;
-  Usage usage;
+  TestUsage usage;
   BufferLogger logger;
 
   setUpAll(() {
@@ -57,7 +57,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    usage = Usage.test();
+    usage = TestUsage();
     logger = BufferLogger.test();
   });
 
@@ -242,16 +242,15 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['build', 'ipa', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
     expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: ios, label: null, value: null, cd33: '));
+    expect(usage.events, contains(
+      const TestUsageEvent('code-size-analysis', 'ios'),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

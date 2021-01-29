@@ -64,7 +64,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
@@ -76,7 +76,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: logger,
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final Uri uri = await portDiscovery.getObservatoryUri(
         '',
@@ -101,7 +101,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
@@ -127,7 +127,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final MDnsObservatoryDiscoveryResult result = await portDiscovery.query();
       expect(result?.port, 123);
@@ -153,7 +153,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       expect(portDiscovery.query, throwsToolExit());
     });
@@ -177,7 +177,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
@@ -204,7 +204,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
@@ -219,7 +219,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
@@ -234,7 +234,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       expect(
         () async => await portDiscovery.query(),
@@ -259,7 +259,7 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
-        flutterUsage: Usage.test(),
+        flutterUsage: TestUsage(),
       );
       final Uri uri = await portDiscovery.getObservatoryUri('bar', mockDevice, hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');

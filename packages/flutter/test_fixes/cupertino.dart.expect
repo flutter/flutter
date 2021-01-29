@@ -5,6 +5,9 @@
 import 'package:flutter/cupertino.dart';
 
 void main() {
+  // Generic reference variables.
+  BuildContext context;
+
   // Change made in https://github.com/flutter/flutter/pull/41859
   const CupertinoTextThemeData themeData = CupertinoTextThemeData();
   themeData.copyWith();
@@ -52,4 +55,64 @@ void main() {
   const FormField formField = FormField(autovalidateMode: AutoValidateMode.always);
   const FormField formField = FormField(autovalidateMode: AutoValidateMode.disabled);
   final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.maybeOf(context);
+  Router.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.maybeLocaleOf(context);
+  Localizations.localeOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Actions.maybeFind(context);
+  Actions.find(context);
+  Actions.handler(context);
+  Actions.handler(context);
+  Actions.maybeInvoke(context);
+  Actions.invoke(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoDynamicColor.maybeResolve(Color(0), context);
+  CupertinoDynamicColor.resolve(Color(0), context);
+  CupertinoDynamicColor.resolveFrom(context);
+  CupertinoDynamicColor.resolveFrom(context);
+  CupertinoUserInterfaceLevel.maybeOf(context);
+  CupertinoUserInterfaceLevel.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  CupertinoTheme.maybeBrightnessOf(context);
+  CupertinoTheme.brightnessOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoThemeData.resolveFrom(context);
+  CupertinoThemeData.resolveFrom(context);
+  NoDefaultCupertinoThemeData.resolveFrom(context);
+  NoDefaultCupertinoThemeData.resolveFrom(context);
+  CupertinoTextThemeData.resolveFrom(context);
+  CupertinoTextThemeData.resolveFrom(context);
 }
