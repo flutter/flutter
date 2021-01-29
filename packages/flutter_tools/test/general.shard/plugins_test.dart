@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -1193,15 +1194,10 @@ flutter:
           directories.add(pluginDirectory);
         }
 
-        final File pubspecFile = flutterProject.directory.childFile('pubspec.yaml');
-        final String pluginDependencies = plugins.keys.map((String pluginName) => '  $pluginName:').join('\n');
-        pubspecFile.writeAsStringSync('''
-name: app
-dependencies:
-$pluginDependencies
-flutter:
-  uses-material-design: true
-''');
+        final FlutterManifest manifest = MockFlutterManifest();
+        when(manifest.dependencies).thenReturn(<String>{...plugins.keys});
+        when(flutterProject.manifest).thenReturn(manifest);
+
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
 
@@ -2036,6 +2032,7 @@ void main() {
 
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFeatureFlags extends Mock implements FeatureFlags {}
+class MockFlutterManifest extends Mock implements FlutterManifest {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
