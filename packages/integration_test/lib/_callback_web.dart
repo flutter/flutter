@@ -75,13 +75,14 @@ class WebCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> callback(
       Map<String, String> params, IntegrationTestResults testRunner) async {
-    final String command = params['command']!;
+    final String command = params['command'];
     Map<String, String> response;
     switch (command) {
       case 'request_data':
         return params['message'] == null
             ? _requestData(testRunner)
-            : _requestDataWithMessage(params['message']!, testRunner);
+            : _requestDataWithMessage(params['message'], testRunner);
+        break;
       case 'get_health':
         response = <String, String>{'status': 'ok'};
         break;
