@@ -104,10 +104,10 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   Future<ByteData?>? send(String channel, ByteData? message) {
     final Future<ByteData?>? resultFuture = delegate.send(channel, message);
     if (resultFuture != null) {
-      // Removes the future itself from the [_pendingMessages] list when it
-      // completes.
       _pendingMessages.add(resultFuture);
-      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
+      resultFuture
+        .catchError((Object error) { /* errors are the responsibility of the caller */ })
+        .whenComplete(() => _pendingMessages.remove(resultFuture));
     }
     return resultFuture;
   }

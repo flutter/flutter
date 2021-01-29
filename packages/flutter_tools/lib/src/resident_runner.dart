@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
@@ -1304,6 +1306,9 @@ abstract class ResidentRunner {
     }
     await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
     try {
+      if (_devToolsLauncher == null) {
+        return;
+      }
       unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
         'ext.flutter.activeDevToolsServerAddress',
         device: device,

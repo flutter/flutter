@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 void main() {
+  // Generic reference variables.
+  BuildContext context;
 
   // Changes made in https://github.com/flutter/flutter/pull/26259
   const Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
@@ -114,4 +116,54 @@ void main() {
   style = textTheme.button;
   style = textTheme.subtitle2;
   style = textTheme.overline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68908
+  ScaffoldMessenger.maybeOf(context);
+  ScaffoldMessenger.of(context);
+  Scaffold.maybeOf(context);
+  Scaffold.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.maybeOf(context);
+  Router.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.maybeLocaleOf(context);
+  Localizations.localeOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Actions.maybeFind(context);
+  Actions.find(context);
+  Actions.handler(context);
+  Actions.handler(context);
+  Actions.maybeInvoke(context);
+  Actions.invoke(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
 }

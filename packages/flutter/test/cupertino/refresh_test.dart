@@ -53,7 +53,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -117,7 +117,7 @@ void main() {
 
         expect(
           tester.getTopLeft(find.widgetWithText(Container, '0')),
-          const Offset(0.0, 0.0),
+          Offset.zero,
         );
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -168,7 +168,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 0.0),
+        Offset.zero,
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -194,7 +194,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 99.0));
       await tester.pump();
       await gesture.moveBy(const Offset(0.0, -30.0));
@@ -705,7 +705,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         // Start a refresh.
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
@@ -1030,7 +1030,7 @@ void main() {
         ),
       );
 
-      final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+      final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 79.0));
       await tester.pump();
       expect(
@@ -1066,7 +1066,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 90.0)); // Arm it.
         await tester.pump();
         expect(
@@ -1151,7 +1151,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(
@@ -1209,7 +1209,7 @@ void main() {
           ),
         );
 
-        final TestGesture gesture = await tester.startGesture(const Offset(0.0, 0.0));
+        final TestGesture gesture = await tester.startGesture(Offset.zero);
         await gesture.moveBy(const Offset(0.0, 150.0));
         await tester.pump();
         expect(

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -80,7 +82,7 @@ void main() {
     FileSystem fileSystem;
     FakeProcessManager processManager;
     BufferLogger logger;
-    MockXcode mockXcode;
+    Xcode xcode;
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
 
     setUp(() {
@@ -90,6 +92,8 @@ void main() {
 
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+      when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
       when(mockXcodeProjectInterpreter.getInfo(any, projectFilename: anyNamed('projectFilename'))).thenAnswer(
           (_) {
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(
@@ -100,9 +104,7 @@ void main() {
           ));
         }
       );
-      mockXcode = MockXcode();
-      when(mockXcode.isRequiredVersionSatisfactory).thenReturn(true);
-      when(mockXcode.xcrunCommand()).thenReturn(<String>['xcrun']);
+      xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: mockXcodeProjectInterpreter);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
@@ -153,7 +155,7 @@ void main() {
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('with flaky buildSettings call', () async {
@@ -227,7 +229,7 @@ void main() {
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     });
 
     testUsingContext('with concurrent build failures', () async {
@@ -292,7 +294,7 @@ void main() {
       Logger: () => logger,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Xcode: () => mockXcode,
+      Xcode: () => xcode,
     }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
   });
 }
@@ -347,6 +349,5 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockVmService extends Mock implements VmService {}

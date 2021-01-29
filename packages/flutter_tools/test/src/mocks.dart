@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
@@ -18,7 +20,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
@@ -580,17 +581,6 @@ class MockIOSDevice extends Mock implements IOSDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
-class MockIOSSimulator extends Mock implements IOSSimulator {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
 /// Common functionality for tracking mock interaction.
 class BasicMock {
   final List<String> messages = <String>[];
@@ -709,9 +699,6 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
-
-class MockDevToolsServer extends Mock implements HttpServer {}
-class MockInternetAddress extends Mock implements InternetAddress {}
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();

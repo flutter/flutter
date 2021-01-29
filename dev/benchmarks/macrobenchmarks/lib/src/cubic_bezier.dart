@@ -4,8 +4,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
 // Based on https://github.com/eseidelGoogle/bezier_perf/blob/master/lib/main.dart

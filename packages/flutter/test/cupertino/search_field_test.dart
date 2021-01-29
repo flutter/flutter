@@ -423,8 +423,8 @@ void main() {
           home: Center(
             child: CupertinoSearchTextField(
               suffixMode: OverlayVisibilityMode.always,
-              prefixInsets: EdgeInsets.all(0),
-              suffixInsets: EdgeInsets.all(0),
+              prefixInsets: EdgeInsets.zero,
+              suffixInsets: EdgeInsets.zero,
             ),
           ),
         ),

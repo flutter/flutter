@@ -1228,7 +1228,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           child: Placeholder(),
@@ -1254,7 +1254,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.all(0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           child: Placeholder(),
@@ -1269,7 +1269,7 @@ void main() {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
-          viewInsets: EdgeInsets.all(0.0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: Dialog(
           insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
@@ -1639,7 +1639,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     // Should take up the whole screen
-    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
     expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
   });
 

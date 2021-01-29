@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -10,7 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -45,15 +47,16 @@ void main() {
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager.excludedExecutables.add('adb');
     final AndroidDevices androidDevices = AndroidDevices(
-      androidSdk: FakeAndroidSdk(null),
+      androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk('adb'),
         featureFlags: TestFeatureFlags(),
       ),
-      // Will throw an exception if anything other than canRun is invoked
-      processManager: FakeProcessManger(),
+      processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),
@@ -61,6 +64,7 @@ void main() {
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
     expect(await androidDevices.getDiagnostics(), isEmpty);
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
@@ -236,11 +240,4 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final String adbPath;
-}
-
-class FakeProcessManger extends Fake implements ProcessManager {
-  @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
-    return false;
-  }
 }

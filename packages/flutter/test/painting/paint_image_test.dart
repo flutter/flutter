@@ -37,7 +37,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image300x300,
       fit: BoxFit.cover,
-      alignment: const Alignment(-1.0, 0.0),
+      alignment: Alignment.centerLeft,
     );
 
     final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {

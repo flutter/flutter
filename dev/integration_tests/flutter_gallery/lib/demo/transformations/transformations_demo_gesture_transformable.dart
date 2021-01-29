@@ -350,7 +350,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     assert(scale != 0);
 
     // Don't allow a scale that moves the viewport outside of _boundaryRect.
-    final Offset tl = fromViewport(const Offset(0, 0), _transform);
+    final Offset tl = fromViewport(Offset.zero, _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
     final Offset br = fromViewport(
