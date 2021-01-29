@@ -100,7 +100,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'e664d190b83ba911194a8a9517ae5f8bba3fcfaa',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7565131390a39d9d6c460545d7992d76a0faa262',
 
    # Fuchsia compatibility
    #
@@ -386,9 +386,9 @@ deps = {
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5d1e8540407c138f47028d64684f3da599430aa4',
 
    'src/third_party/angle':
-   Var('github_git') + '/google/angle.git' + '@' + 'ed90c9917b1b7fc6def319184b10609c11b2bd84',
+   Var('github_git') + '/google/angle.git' + '@' + 'ea0f3496436ec49f32576bba8d2c4c03467fbf96',
 
-   'src/third_party/angle/third_party/vulkan-headers/src':
+   'src/third_party/angle/third_party/vulkan-deps/vulkan-headers/src':
    Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '5de4e8fab88ef0bd6994d9ddbcc864e3179b9e79',
 
    'src/third_party/abseil-cpp':
@@ -515,7 +515,7 @@ deps = {
     'packages': [
       {
         'package': 'fuchsia/third_party/clang/linux-amd64',
-        'version': '8LaTdqf7wY_sjaptz0DIIKx9_Nxaoh3YgDEPgnfxzOEC' 
+        'version': '8LaTdqf7wY_sjaptz0DIIKx9_Nxaoh3YgDEPgnfxzOEC'
       }
     ],
     'condition': 'host_os == "linux"',

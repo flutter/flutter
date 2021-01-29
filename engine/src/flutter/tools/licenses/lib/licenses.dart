@@ -300,6 +300,7 @@ abstract class License implements Comparable<License> {
         body = system.File('data/mozilla-2.0').readAsStringSync();
         type = LicenseType.mpl;
         break;
+      case 'MIT':  // SPDX ID
       case 'http://opensource.org/licenses/MIT':
       case 'https://opensource.org/licenses/MIT':
       case 'http://opensource->org/licenses/MIT': // i don't even
