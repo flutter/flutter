@@ -171,8 +171,7 @@ class TextEditingActions extends StatelessWidget {
   /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
 
-  // TODO(justinmc): All of these can be static. Should be public for users to
-  // be able to use/remap them.
+  // TODO(justinmc): Should be public for users to be able to use/remap them?
   static final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
     onInvoke: (SingleTapUpTextIntent intent, EditableTextState editableTextState) {
       print('justin TEB singleTapUp action invoked');
@@ -222,7 +221,7 @@ class TextEditingActions extends StatelessWidget {
   /// See also:
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
-  final TextEditingAction<TapDownTextIntent> _tapDownTextAction = TextEditingAction<TapDownTextIntent>(
+  static final TextEditingAction<TapDownTextIntent> _tapDownTextAction = TextEditingAction<TapDownTextIntent>(
     onInvoke: (TapDownTextIntent intent, EditableTextState editableTextState) {
       // TODO(justinmc): Should be no handling anything in renderEditable, it
       // should just receive commands to do specific things.
@@ -241,7 +240,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEditingAction<AltArrowLeftTextIntent>(
+  static final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEditingAction<AltArrowLeftTextIntent>(
     onInvoke: (AltArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -257,7 +256,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<AltArrowRightTextIntent> _altArrowRightTextAction = TextEditingAction<AltArrowRightTextIntent>(
+  static final TextEditingAction<AltArrowRightTextIntent> _altArrowRightTextAction = TextEditingAction<AltArrowRightTextIntent>(
     onInvoke: (AltArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -273,7 +272,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<AltShiftArrowLeftTextIntent> _altShiftArrowLeftTextAction = TextEditingAction<AltShiftArrowLeftTextIntent>(
+  static final TextEditingAction<AltShiftArrowLeftTextIntent> _altShiftArrowLeftTextAction = TextEditingAction<AltShiftArrowLeftTextIntent>(
     onInvoke: (AltShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -289,7 +288,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<AltShiftArrowRightTextIntent> _altShiftArrowRightTextAction = TextEditingAction<AltShiftArrowRightTextIntent>(
+  static final TextEditingAction<AltShiftArrowRightTextIntent> _altShiftArrowRightTextAction = TextEditingAction<AltShiftArrowRightTextIntent>(
     onInvoke: (AltShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -307,7 +306,7 @@ class TextEditingActions extends StatelessWidget {
 
   // TODO(justinmc): This is nearly identical to altShiftArrowLeft. A reason to
   // reuse actions?
-  final TextEditingAction<ControlShiftArrowLeftTextIntent> _controlShiftArrowLeftTextAction = TextEditingAction<ControlShiftArrowLeftTextIntent>(
+  static final TextEditingAction<ControlShiftArrowLeftTextIntent> _controlShiftArrowLeftTextAction = TextEditingAction<ControlShiftArrowLeftTextIntent>(
     onInvoke: (ControlShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -325,7 +324,7 @@ class TextEditingActions extends StatelessWidget {
 
   // TODO(justinmc): This is nearly identical to altShiftArrowRight. A reason to
   // reuse actions?
-  final TextEditingAction<ControlShiftArrowRightTextIntent> _controlShiftArrowRightTextAction = TextEditingAction<ControlShiftArrowRightTextIntent>(
+  static final TextEditingAction<ControlShiftArrowRightTextIntent> _controlShiftArrowRightTextAction = TextEditingAction<ControlShiftArrowRightTextIntent>(
     onInvoke: (ControlShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -341,7 +340,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaArrowDownTextIntent> _metaArrowDownTextAction = TextEditingAction<MetaArrowDownTextIntent>(
+  static final TextEditingAction<MetaArrowDownTextIntent> _metaArrowDownTextAction = TextEditingAction<MetaArrowDownTextIntent>(
     onInvoke: (MetaArrowDownTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -357,7 +356,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaArrowLeftTextIntent> _metaArrowLeftTextAction = TextEditingAction<MetaArrowLeftTextIntent>(
+  static final TextEditingAction<MetaArrowLeftTextIntent> _metaArrowLeftTextAction = TextEditingAction<MetaArrowLeftTextIntent>(
     onInvoke: (MetaArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -373,7 +372,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaArrowRightTextIntent> _metaArrowRightTextAction = TextEditingAction<MetaArrowRightTextIntent>(
+  static final TextEditingAction<MetaArrowRightTextIntent> _metaArrowRightTextAction = TextEditingAction<MetaArrowRightTextIntent>(
     onInvoke: (MetaArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -389,7 +388,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaArrowUpTextIntent> _metaArrowUpTextAction = TextEditingAction<MetaArrowUpTextIntent>(
+  static final TextEditingAction<MetaArrowUpTextIntent> _metaArrowUpTextAction = TextEditingAction<MetaArrowUpTextIntent>(
     onInvoke: (MetaArrowUpTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -405,7 +404,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaShiftArrowDownTextIntent> _metaShiftArrowDownTextAction = TextEditingAction<MetaShiftArrowDownTextIntent>(
+  static final TextEditingAction<MetaShiftArrowDownTextIntent> _metaShiftArrowDownTextAction = TextEditingAction<MetaShiftArrowDownTextIntent>(
     onInvoke: (MetaShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -421,7 +420,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaShiftArrowLeftTextIntent> _metaShiftArrowLeftTextAction = TextEditingAction<MetaShiftArrowLeftTextIntent>(
+  static final TextEditingAction<MetaShiftArrowLeftTextIntent> _metaShiftArrowLeftTextAction = TextEditingAction<MetaShiftArrowLeftTextIntent>(
     onInvoke: (MetaShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -437,7 +436,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaShiftArrowRightTextIntent> _metaShiftArrowRightTextAction = TextEditingAction<MetaShiftArrowRightTextIntent>(
+  static final TextEditingAction<MetaShiftArrowRightTextIntent> _metaShiftArrowRightTextAction = TextEditingAction<MetaShiftArrowRightTextIntent>(
     onInvoke: (MetaShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -453,7 +452,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaShiftArrowUpTextIntent> _metaShiftArrowUpTextAction = TextEditingAction<MetaShiftArrowUpTextIntent>(
+  static final TextEditingAction<MetaShiftArrowUpTextIntent> _metaShiftArrowUpTextAction = TextEditingAction<MetaShiftArrowUpTextIntent>(
     onInvoke: (MetaShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -469,7 +468,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
+  static final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
     onInvoke: (MetaCTextIntent intent, EditableTextState editableTextState) {
       // TODO(justinmc): This needs to be deduplicated with text_selection.dart.
       final TextSelectionDelegate delegate = editableTextState.renderEditable.textSelectionDelegate;
@@ -489,7 +488,7 @@ class TextEditingActions extends StatelessWidget {
 
   // TODO(justinmc): Notice that this does nearly the same thing as
   // MetaArrowLeftTextIntent, but for different platforms.
-  final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
+  static final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
     onInvoke: (HomeTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
@@ -505,7 +504,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<EndTextIntent> _endTextAction = TextEditingAction<EndTextIntent>(
+  static final TextEditingAction<EndTextIntent> _endTextAction = TextEditingAction<EndTextIntent>(
     onInvoke: (EndTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
@@ -521,43 +520,43 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<ArrowDownTextIntent> _arrowDownTextAction = TextEditingAction<ArrowDownTextIntent>(
+  static final TextEditingAction<ArrowDownTextIntent> _arrowDownTextAction = TextEditingAction<ArrowDownTextIntent>(
     onInvoke: (ArrowDownTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
+  static final TextEditingAction<ArrowLeftTextIntent> _arrowLeftTextAction = TextEditingAction<ArrowLeftTextIntent>(
     onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
+  static final TextEditingAction<ArrowRightTextIntent> _arrowRightTextAction = TextEditingAction<ArrowRightTextIntent>(
     onInvoke: (ArrowRightTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ArrowUpTextIntent> _arrowUpTextAction = TextEditingAction<ArrowUpTextIntent>(
+  static final TextEditingAction<ArrowUpTextIntent> _arrowUpTextAction = TextEditingAction<ArrowUpTextIntent>(
     onInvoke: (ArrowUpTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ControlCTextIntent> _controlCTextAction = TextEditingAction<ControlCTextIntent>(
+  static final TextEditingAction<ControlCTextIntent> _controlCTextAction = TextEditingAction<ControlCTextIntent>(
     onInvoke: (ControlCTextIntent intent, EditableTextState editableTextState) {
       print('justin copy (with control, not command)');
     },
   );
 
-  final TextEditingAction<ControlATextIntent> _controlATextAction = TextEditingAction<ControlATextIntent>(
+  static final TextEditingAction<ControlATextIntent> _controlATextAction = TextEditingAction<ControlATextIntent>(
     onInvoke: (ControlATextIntent intent, EditableTextState editableTextState) {
       // TODO(justinmc): Select all.
     },
   );
 
-  final TextEditingAction<ControlArrowLeftTextIntent> _controlArrowLeftTextAction = TextEditingAction<ControlArrowLeftTextIntent>(
+  static final TextEditingAction<ControlArrowLeftTextIntent> _controlArrowLeftTextAction = TextEditingAction<ControlArrowLeftTextIntent>(
     onInvoke: (ControlArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -573,7 +572,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<ControlArrowRightTextIntent> _controlArrowRightTextAction = TextEditingAction<ControlArrowRightTextIntent>(
+  static final TextEditingAction<ControlArrowRightTextIntent> _controlArrowRightTextAction = TextEditingAction<ControlArrowRightTextIntent>(
     onInvoke: (ControlArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
@@ -589,31 +588,31 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<ShiftArrowDownTextIntent> _shiftArrowDownTextAction = TextEditingAction<ShiftArrowDownTextIntent>(
+  static final TextEditingAction<ShiftArrowDownTextIntent> _shiftArrowDownTextAction = TextEditingAction<ShiftArrowDownTextIntent>(
     onInvoke: (ShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
+  static final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
     onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ShiftArrowRightTextIntent> _shiftArrowRightTextAction = TextEditingAction<ShiftArrowRightTextIntent>(
+  static final TextEditingAction<ShiftArrowRightTextIntent> _shiftArrowRightTextAction = TextEditingAction<ShiftArrowRightTextIntent>(
     onInvoke: (ShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ShiftArrowUpTextIntent> _shiftArrowUpTextAction = TextEditingAction<ShiftArrowUpTextIntent>(
+  static final TextEditingAction<ShiftArrowUpTextIntent> _shiftArrowUpTextAction = TextEditingAction<ShiftArrowUpTextIntent>(
     onInvoke: (ShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
     },
   );
 
-  final TextEditingAction<ShiftHomeTextIntent> _shiftHomeTextAction = TextEditingAction<ShiftHomeTextIntent>(
+  static final TextEditingAction<ShiftHomeTextIntent> _shiftHomeTextAction = TextEditingAction<ShiftHomeTextIntent>(
     onInvoke: (ShiftHomeTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
@@ -629,7 +628,7 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  final TextEditingAction<ShiftEndTextIntent> _shiftEndTextAction = TextEditingAction<ShiftEndTextIntent>(
+  static final TextEditingAction<ShiftEndTextIntent> _shiftEndTextAction = TextEditingAction<ShiftEndTextIntent>(
     onInvoke: (ShiftEndTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.windows:
