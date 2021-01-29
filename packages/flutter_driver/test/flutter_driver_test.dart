@@ -1014,7 +1014,7 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
     connectionLog.add('dispose');
   }
 
