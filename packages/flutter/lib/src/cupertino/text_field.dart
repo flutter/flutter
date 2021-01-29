@@ -6,7 +6,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -93,8 +92,6 @@ enum OverlayVisibilityMode {
   always,
 }
 
-// TODO(justinmc): Do all of this via Intents and then remove this subclass.
-// https://github.com/flutter/flutter/issues/75004
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
@@ -102,6 +99,25 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
        super(delegate: state);
 
   final _CupertinoTextFieldState _state;
+
+  @override
+  void onSingleTapUp(TapUpDetails details) {
+    // Because TextSelectionGestureDetector listens to taps that happen on
+    // widgets in front of it, tapping the clear button will also trigger
+    // this handler. If the clear button widget recognizes the up event,
+    // then do not handle it.
+    if (_state._clearGlobalKey.currentContext != null) {
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+      final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
+      if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+        return;
+      }
+    }
+    super.onSingleTapUp(details);
+    _state._requestKeyboard();
+    if (_state.widget.onTap != null)
+      _state.widget.onTap!();
+  }
 
   @override
   void onDragSelectionEnd(DragEndDetails details) {
@@ -1185,49 +1201,25 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    final Widget child = Actions(
-      actions: <Type, Action<Intent>>{
-        SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
-          onInvoke: (SingleTapUpTextIntent intent) {
-            // Because TextSelectionGestureDetector listens to taps that happen on
-            // widgets in front of it, tapping the clear button will also trigger
-            // this handler. If the clear button widget recognizes the up event,
-            // then do not handle it.
-            if (_clearGlobalKey.currentContext != null) {
-              final RenderBox renderBox = _clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
-              final Offset localOffset = renderBox.globalToLocal(intent.details.globalPosition);
-              if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-                return;
-              }
-            }
-            // Call through to the default SingleTapUpTextIntent Action.
-            Actions.invoke<SingleTapUpTextIntent>(context, intent);
-            _requestKeyboard();
-            if (widget.onTap != null)
-              widget.onTap!();
-          },
-        ),
+    final Widget child = Semantics(
+      enabled: enabled,
+      onTap: !enabled || widget.readOnly ? null : () {
+        if (!controller.selection.isValid) {
+          controller.selection = TextSelection.collapsed(offset: controller.text.length);
+        }
+        _requestKeyboard();
       },
-      child: Semantics(
-        enabled: enabled,
-        onTap: !enabled || widget.readOnly ? null : () {
-          if (!controller.selection.isValid) {
-            controller.selection = TextSelection.collapsed(offset: controller.text.length);
-          }
-          _requestKeyboard();
-        },
-        child: IgnorePointer(
-          ignoring: !enabled,
-          child: Container(
-            decoration: effectiveDecoration,
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: Align(
-                alignment: Alignment(-1.0, _textAlignVertical.y),
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-              ),
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: Container(
+          decoration: effectiveDecoration,
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: Align(
+              alignment: Alignment(-1.0, _textAlignVertical.y),
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
             ),
           ),
         ),

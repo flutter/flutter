@@ -39,8 +39,6 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required bool isFocused,
 });
 
-// TODO(justinmc): Do all of this via Intents and then remove this subclass.
-// https://github.com/flutter/flutter/issues/75004
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,
@@ -85,6 +83,41 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
       }
     }
+  }
+
+  @override
+  void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
+    if (delegate.selectionEnabled) {
+      switch (Theme.of(_state.context).platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              // Precise devices should place the cursor at a precise position.
+              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+              // of the word.
+              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              break;
+          }
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+      }
+    }
+    _state._requestKeyboard();
+    if (_state.widget.onTap != null)
+      _state.widget.onTap!();
   }
 
   @override
@@ -933,9 +966,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(
-      state: this,
-    );
+    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1263,36 +1294,25 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
-            onInvoke: (SingleTapUpTextIntent intent) {
-              Actions.invoke<SingleTapUpTextIntent>(context, intent);
-              if (widget.onTap != null)
-                widget.onTap!();
-            },
-          ),
-        },
-        child: IgnorePointer(
-          ignoring: !_isEnabled,
-          child: AnimatedBuilder(
-            animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
-              return Semantics(
-                maxValueLength: semanticsMaxValueLength,
-                currentValueLength: _currentLength,
-                onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid)
-                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                  _requestKeyboard();
-                },
-                child: child,
-              );
-            },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
+      child: IgnorePointer(
+        ignoring: !_isEnabled,
+        child: AnimatedBuilder(
+          animation: controller, // changes the _currentLength
+          builder: (BuildContext context, Widget? child) {
+            return Semantics(
+              maxValueLength: semanticsMaxValueLength,
+              currentValueLength: _currentLength,
+              onTap: widget.readOnly ? null : () {
+                if (!_effectiveController.selection.isValid)
+                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                _requestKeyboard();
+              },
               child: child,
-            ),
+            );
+          },
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: child,
           ),
         ),
       ),
