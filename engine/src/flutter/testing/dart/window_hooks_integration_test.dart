@@ -24,6 +24,7 @@ part '../../lib/ui/compositing.dart';
 part '../../lib/ui/geometry.dart';
 part '../../lib/ui/hash_codes.dart';
 part '../../lib/ui/hooks.dart';
+part '../../lib/ui/key.dart';
 part '../../lib/ui/lerp.dart';
 part '../../lib/ui/natives.dart';
 part '../../lib/ui/painting.dart';

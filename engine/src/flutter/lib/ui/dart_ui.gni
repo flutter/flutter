@@ -10,6 +10,7 @@ dart_ui_files = [
   "//flutter/lib/ui/hash_codes.dart",
   "//flutter/lib/ui/hooks.dart",
   "//flutter/lib/ui/isolate_name_server.dart",
+  "//flutter/lib/ui/key.dart",
   "//flutter/lib/ui/lerp.dart",
   "//flutter/lib/ui/natives.dart",
   "//flutter/lib/ui/painting.dart",

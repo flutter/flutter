@@ -24,6 +24,7 @@ part 'src/ui/compositing.dart';
 part 'src/ui/geometry.dart';
 part 'src/ui/hash_codes.dart';
 part 'src/ui/initialization.dart';
+part 'src/ui/key.dart';
 part 'src/ui/lerp.dart';
 part 'src/ui/natives.dart';
 part 'src/ui/painting.dart';

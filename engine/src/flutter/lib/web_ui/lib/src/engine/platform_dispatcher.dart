@@ -10,6 +10,8 @@ part of engine;
 /// This may be overridden in tests, for example, to pump fake frames.
 ui.VoidCallback? scheduleFrameCallback;
 
+typedef _KeyDataResponseCallback = void Function(bool handled);
+
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -168,6 +170,34 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnPointerDataPacket(ui.PointerDataPacket dataPacket) {
     invoke1<ui.PointerDataPacket>(_onPointerDataPacket, _onPointerDataPacketZone, dataPacket);
+  }
+
+  /// A callback that is invoked when key data is available.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureBinding], the Flutter framework class which manages pointer
+  ///    events.
+  @override
+  ui.KeyDataCallback? get onKeyData => _onKeyData;
+  ui.KeyDataCallback? _onKeyData;
+  Zone? _onKeyDataZone;
+  @override
+  set onKeyData(ui.KeyDataCallback? callback) {
+    _onKeyData = callback;
+    _onKeyDataZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnKeyData(ui.KeyData data, _KeyDataResponseCallback callback) {
+    invoke(
+      () { callback(onKeyData == null ? false : onKeyData!(data)); },
+      _onKeyDataZone,
+    );
   }
 
   /// A callback that is invoked to report the [FrameTiming] of recently
@@ -947,4 +977,3 @@ void invoke3<A1, A2, A3>(void Function(A1 a1, A2 a2, A3 a3)? callback, Zone? zon
     });
   }
 }
-
