@@ -549,6 +549,41 @@ void main() {
     );
   });
 
+  testWidgets('RefreshIndicator appears at edgeDistance', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: RefreshIndicator(
+        edgeDistance: kToolbarHeight,
+        displacement: kToolbarHeight,
+        onRefresh: () async {
+          await Future<void>.delayed(const Duration(seconds: 1), () { });
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+            return SizedBox(
+              height: 200.0,
+              child: Text(item),
+            );
+          }).toList(),
+        ),
+      ),
+    ));
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, 2.0 * kToolbarHeight), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    //Resting position.
+    final Offset positionedTopLeft = tester.getTopLeft(find.byType(RefreshProgressIndicator));
+
+    //The Y position of RefreshIndicator should now be displacement + edgeDistance = 2.0 * kToolbarHeight.
+    expect(
+      positionedTopLeft.dy,
+      2.0 * kToolbarHeight,
+    );
+  });
+
   testWidgets('Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
     refreshCalled = false;
     final ScrollController scrollController = ScrollController();
