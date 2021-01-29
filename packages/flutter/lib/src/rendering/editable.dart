@@ -1215,8 +1215,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  // TODO(justinmc): This doesn't do exactly what native does. Same with left
-  // and with extend.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
@@ -1518,13 +1516,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _hasFocus = value;
     if (_hasFocus) {
       assert(!_listenerAttached);
-      // TODO(justinmc): Get rid of this key listener altogether.
-      //RawKeyboard.instance.addListener(_handleKeyEvent);
+      // TODO(justinmc): This listener should be ported to Actions and removed.
+      // https://github.com/flutter/flutter/issues/75004
+      RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     } else {
       assert(_listenerAttached);
-      // TODO(justinmc): Get rid of this key listener altogether.
-      //RawKeyboard.instance.removeListener(_handleKeyEvent);
+      // TODO(justinmc): This listener should be ported to Actions and removed.
+      // https://github.com/flutter/flutter/issues/75004
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
     markNeedsSemanticsUpdate();
@@ -2055,9 +2055,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
-    // TODO(justinmc): Get rid of this key listener altogether.
-    //if (_listenerAttached)
-      //RawKeyboard.instance.removeListener(_handleKeyEvent);
+    // TODO(justinmc): This listener should be ported to Actions and removed.
+    // https://github.com/flutter/flutter/issues/75004
+    if (_listenerAttached)
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
   }
 
@@ -2479,8 +2480,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
       final TextRange? previousWord = _getPreviousWord(word.start);
-      // TODO(justinmc): New refactor should remove this use of
-      // defaultTargetPlatform.
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
           return TextSelection(
