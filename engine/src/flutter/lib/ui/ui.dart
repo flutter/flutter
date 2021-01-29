@@ -12,7 +12,6 @@
 // @dart = 2.12
 library dart.ui;
 
-import 'dart:_internal' hide Symbol; // ignore: unused_import
 import 'dart:async';
 import 'dart:collection' as collection;
 import 'dart:convert';
@@ -30,6 +29,7 @@ part 'geometry.dart';
 part 'hash_codes.dart';
 part 'hooks.dart';
 part 'isolate_name_server.dart';
+part 'key.dart';
 part 'lerp.dart';
 part 'natives.dart';
 part 'painting.dart';

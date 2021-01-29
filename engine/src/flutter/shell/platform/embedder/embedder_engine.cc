@@ -136,6 +136,22 @@ bool EmbedderEngine::DispatchPointerDataPacket(
   return true;
 }
 
+bool EmbedderEngine::DispatchKeyDataPacket(
+    std::unique_ptr<flutter::KeyDataPacket> packet,
+    KeyDataResponse callback) {
+  if (!IsValid() || !packet) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->DispatchKeyDataPacket(std::move(packet), std::move(callback));
+  return true;
+}
+
 bool EmbedderEngine::SendPlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   if (!IsValid() || !message) {

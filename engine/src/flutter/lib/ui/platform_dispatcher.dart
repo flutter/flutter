@@ -28,6 +28,12 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 /// Signature for [PlatformDispatcher.onPointerDataPacket].
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 
+// Signature for the response to KeyDataCallback.
+typedef _KeyDataResponseCallback = void Function(int responseId, bool handled);
+
+/// Signature for [PlatformDispatcher.onKeyData].
+typedef KeyDataCallback = bool Function(KeyData data);
+
 /// Signature for [PlatformDispatcher.onSemanticsAction].
 typedef SemanticsActionCallback = void Function(int id, SemanticsAction action, ByteData? args);
 
@@ -330,6 +336,63 @@ class PlatformDispatcher {
       assert(offset == (i + 1) * _kPointerDataFieldCount);
     }
     return PointerDataPacket(data: data);
+  }
+
+  /// Called by [_dispatchKeyData].
+  void _respondToKeyData(int responseId, bool handled)
+      native 'PlatformConfiguration_respondToKeyData';
+
+  /// A callback that is invoked when key data is available.
+  ///
+  /// The framework invokes this callback in the same zone in which the callback
+  /// was set.
+  KeyDataCallback? get onKeyData => _onKeyData;
+  KeyDataCallback? _onKeyData;
+  Zone _onKeyDataZone = Zone.root;
+  set onKeyData(KeyDataCallback? callback) {
+    _onKeyData = callback;
+    _onKeyDataZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  void _dispatchKeyData(ByteData packet, int responseId) {
+    _invoke2<KeyData, _KeyDataResponseCallback>(
+      (KeyData data, _KeyDataResponseCallback callback) {
+        callback(responseId, onKeyData == null ? false : onKeyData!(data));
+      },
+      _onKeyDataZone,
+      _unpackKeyData(packet),
+      _respondToKeyData,
+    );
+  }
+
+  // If this value changes, update the encoding code in the following files:
+  //
+  //  * key_data.h
+  //  * key.dart (ui)
+  //  * key.dart (web_ui)
+  //  * HardwareKeyboard.java
+  static const int _kKeyDataFieldCount = 5;
+
+  // The packet structure is described in `key_data_packet.h`.
+  static KeyData _unpackKeyData(ByteData packet) {
+    const int kStride = Int64List.bytesPerElement;
+
+    int offset = 0;
+    final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
+    final String? character = charDataSize == 0 ? null : utf8.decoder.convert(
+          packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize));
+
+    final KeyData keyData = KeyData(
+      timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
+      type: KeyEventType.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
+      physical: packet.getUint64(kStride * offset++, _kFakeHostEndian),
+      logical: packet.getUint64(kStride * offset++, _kFakeHostEndian),
+      character: character,
+      synthesized: packet.getUint64(kStride * offset++, _kFakeHostEndian) != 0,
+    );
+
+    return keyData;
   }
 
   /// A callback that is invoked to report the [FrameTiming] of recently
