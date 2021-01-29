@@ -45,7 +45,8 @@ assignees: ''
      so we know which functions might be causing it. See "How to Collect
      and Read Timeline Traces" on this blog post:
        https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
-     Make sure the performance overlay is turned OFF when recording the trace.
+     Make sure the performance overlay is turned OFF when recording the
+     trace (Pressing ‘P’ on the command line toggles the overlay).
 -->
 
 <!--
