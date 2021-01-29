@@ -24,7 +24,7 @@ import '../../src/mocks.dart';
 
 void main() {
   group('gradleErrors', () {
-    test('list of errors', () {
+    testWithoutContext('list of errors', () {
       // If you added a new Gradle error, please update this test.
       expect(gradleErrors,
         equals(<GradleHandledError>[
@@ -325,9 +325,9 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('AndroidX', () {
-    final Usage mockUsage = MockUsage();
+    final TestUsage testUsage = TestUsage();
 
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(androidXFailureHandler.test(
         'AAPT: error: resource android:attr/fontVariationSettings not found.'
       ), isTrue);
@@ -357,20 +357,22 @@ Command: /home/android/gradlew assembleRelease
       final GradleBuildStatus status = await androidXFailureHandler
         .handler(line: '', project: FlutterProject.current());
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'app-not-using-plugins',
-        },
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'app-not-using-plugins',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins and no AndroidX', () async {
@@ -389,20 +391,23 @@ Command: /home/android/gradlew assembleRelease
           'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'app-not-using-androidx',
-        },
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'app-not-using-androidx',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and AAR', () async {
@@ -415,20 +420,22 @@ Command: /home/android/gradlew assembleRelease
         shouldBuildPluginAsAar: true,
       );
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'using-jetifier',
-        },
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'using-jetifier',
+          },
+        ),
+      ));
 
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('handler - plugins, AndroidX, and no AAR', () async {
@@ -447,19 +454,22 @@ Command: /home/android/gradlew assembleRelease
           'The tool is about to try using Jetifier to solve the incompatibility.'
         )
       );
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-android-x-failure',
-        parameters: <String, String>{
-          'cd43': 'not-using-jetifier',
-        },
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-android-x-failure',
+          parameters: <String, String>{
+            'cd43': 'not-using-jetifier',
+          },
+        ),
+      ));
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => MockProcessManager(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -490,7 +500,7 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('license not accepted', () {
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(
         licenseNotAcceptedHandler.test(
           'You have not accepted the license agreements of the following SDK components'
@@ -525,7 +535,7 @@ Command: /home/android/gradlew assembleRelease
       mockProcessManager = MockProcessManager();
     });
 
-    test('pattern', () {
+    testWithoutContext('pattern', () {
       expect(
         flavorUndefinedHandler.test(
           'Task assembleFooRelease not found in root project.'
@@ -656,8 +666,6 @@ assembleProfile
     });
   });
 }
-
-class MockUsage extends Mock implements Usage {}
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
   return errorMessage
