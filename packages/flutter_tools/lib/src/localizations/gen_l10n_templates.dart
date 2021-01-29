@@ -117,12 +117,12 @@ const String numberFormatPositionalTemplate = '''
     final @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
-const String numberFormatTemplate = '''
-    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
+const String numberFormatNamedTemplate = '''
+    final @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
       @(parameters)
     );
-    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+    final @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
 const String dateFormatTemplate = '''
