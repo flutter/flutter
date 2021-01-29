@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -52,7 +50,7 @@ const double _kInnerRadius = 4.5;
 /// ```
 ///
 /// ```dart
-/// SingingCharacter _character = SingingCharacter.lafayette;
+/// SingingCharacter? _character = SingingCharacter.lafayette;
 ///
 /// Widget build(BuildContext context) {
 ///   return Column(
@@ -62,7 +60,7 @@ const double _kInnerRadius = 4.5;
 ///         leading: Radio(
 ///           value: SingingCharacter.lafayette,
 ///           groupValue: _character,
-///           onChanged: (SingingCharacter value) {
+///           onChanged: (SingingCharacter? value) {
 ///             setState(() { _character = value; });
 ///           },
 ///         ),
@@ -72,7 +70,7 @@ const double _kInnerRadius = 4.5;
 ///         leading: Radio(
 ///           value: SingingCharacter.jefferson,
 ///           groupValue: _character,
-///           onChanged: (SingingCharacter value) {
+///           onChanged: (SingingCharacter? value) {
 ///             setState(() { _character = value; });
 ///           },
 ///         ),
@@ -207,7 +205,7 @@ class Radio<T> extends StatefulWidget {
   /// [toggleable] attribute.
   ///
   /// ```dart
-  /// int groupValue;
+  /// int? groupValue;
   /// static const List<String> selections = <String>[
   ///   'Hercules Mulligan',
   ///   'Eliza Hamilton',
@@ -231,7 +229,7 @@ class Radio<T> extends StatefulWidget {
   ///                 // TRY THIS: Try setting the toggleable value to false and
   ///                 // see how that changes the behavior of the widget.
   ///                 toggleable: true,
-  ///                 onChanged: (int value) {
+  ///                 onChanged: (int? value) {
   ///                   setState(() {
   ///                     groupValue = value;
   ///                   });

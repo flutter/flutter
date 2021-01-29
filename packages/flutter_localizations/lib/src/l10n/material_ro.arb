@@ -58,7 +58,7 @@
   "refreshIndicatorSemanticLabel": "Actualizați",
   "moreButtonTooltip": "Mai multe",
   "dateSeparator": ".",
-  "dateHelpText": "zz/ll/aaaa",
+  "dateHelpText": "zz.ll.aaaa",
   "selectYearSemanticsLabel": "Selectați anul",
   "unspecifiedDate": "Data",
   "unspecifiedDateRange": "Interval de date",

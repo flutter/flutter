@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -15,7 +17,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,16 +25,14 @@ import '../src/testbed.dart';
 void main() {
   BufferLogger logger;
   FileSystem fs;
-  MockUsage mockUsage;
+  TestUsage testUsage;
   Platform platform;
   OperatingSystemUtils operatingSystemUtils;
 
   setUp(() async {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
-
-    mockUsage = MockUsage();
-    when(mockUsage.clientId).thenReturn('00000000-0000-4000-0000-000000000000');
+    testUsage = TestUsage();
 
     platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
     operatingSystemUtils = OperatingSystemUtils(
@@ -61,7 +60,7 @@ void main() {
         'version': 'test-version',
       },
     ));
-    expect(crashInfo.fields['uuid'], '00000000-0000-4000-0000-000000000000');
+    expect(crashInfo.fields['uuid'], testUsage.clientId);
     expect(crashInfo.fields['product'], 'Flutter_Tools');
     expect(crashInfo.fields['version'], 'test-version');
     expect(crashInfo.fields['osName'], 'linux');
@@ -99,11 +98,11 @@ void main() {
   });
 
   testWithoutContext('suppress analytics', () async {
-    when(mockUsage.suppressAnalytics).thenReturn(true);
+    testUsage.suppressAnalytics = true;
 
     final CrashReportSender crashReportSender = CrashReportSender(
       client: CrashingCrashReportSender(const SocketException('no internets')),
-      usage: mockUsage,
+      usage: testUsage,
       platform: platform,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -121,7 +120,7 @@ void main() {
 
   group('allow analytics', () {
     setUp(() async {
-      when(mockUsage.suppressAnalytics).thenReturn(false);
+      testUsage.suppressAnalytics = false;
     });
 
     testWithoutContext('should send crash reports', () async {
@@ -129,7 +128,7 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -148,7 +147,7 @@ void main() {
     testWithoutContext('should print an explanatory message when there is a SocketException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const SocketException('no internets')),
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -167,7 +166,7 @@ void main() {
     testWithoutContext('should print an explanatory message when there is an HttpException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const HttpException('no internets')),
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -186,7 +185,7 @@ void main() {
     testWithoutContext('should print an explanatory message when there is a ClientException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const HttpException('no internets')),
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -207,7 +206,7 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -261,7 +260,7 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
-        usage: mockUsage,
+        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -299,7 +298,7 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
-        usage: mockUsage,
+        usage: testUsage,
         platform: environmentPlatform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -390,5 +389,3 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<Workflow> get workflows => <Workflow>[];
 }
-
-class MockUsage extends Mock implements Usage {}

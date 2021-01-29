@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/executable.dart';
@@ -36,36 +38,49 @@ void main() {
 
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: false,
     ), isA<StdoutLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: true,
     ), isA<WindowsStdoutLogger>());
     expect(loggerFactory.createLogger(
       verbose: true,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: true,
     ), isA<VerboseLogger>());
     expect(loggerFactory.createLogger(
       verbose: true,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: false,
     ), isA<VerboseLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: true,
+      machine: false,
+      daemon: false,
+      windows: false,
+    ), isA<PrefixedErrorLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: true,
       windows: false,
     ), isA<NotifyingLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: true,
       daemon: false,
       windows: false,

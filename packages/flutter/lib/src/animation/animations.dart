@@ -12,7 +12,7 @@ import 'curves.dart';
 import 'listener_helpers.dart';
 
 // Examples can assume:
-// AnimationController controller;
+// late AnimationController controller;
 
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();

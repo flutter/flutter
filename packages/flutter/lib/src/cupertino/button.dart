@@ -40,9 +40,11 @@ class CupertinoButton extends StatefulWidget {
     this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert(alignment != null),
        _filled = false,
        super(key: key);
 
@@ -60,9 +62,11 @@ class CupertinoButton extends StatefulWidget {
     this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
+       assert(alignment != null),
        color = null,
        _filled = true,
        super(key: key);
@@ -115,6 +119,16 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Defaults to round corners of 8 logical pixels.
   final BorderRadius? borderRadius;
+
+  /// The alignment of the button's [child].
+  ///
+  /// Typically buttons are sized to be just big enough to contain the child and its
+  /// [padding]. If the button's size is constrained to a fixed size, for example by
+  /// enclosing it with a [SizedBox], this property defines how the child is aligned
+  /// within the available space.
+  ///
+  /// Always defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   final bool _filled;
 
@@ -252,7 +266,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 padding: widget.padding ?? (backgroundColor != null
                   ? _kBackgroundButtonPadding
                   : _kButtonPadding),
-                child: Center(
+                child: Align(
+                  alignment: widget.alignment,
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: DefaultTextStyle(

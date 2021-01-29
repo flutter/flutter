@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -338,10 +335,23 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
 
+    // Visit the children of the scope.
     visitGroups(groups[scopeGroupMarker?.focusNode]!);
+
+    // Remove the FocusTraversalGroup nodes themselves, which aren't focusable.
+    // They were left in above because they were needed to find their members
+    // during sorting.
+    sortedDescendants.removeWhere((FocusNode node) {
+      return !node.canRequestFocus || node.skipTraversal;
+    });
+
+    // Sanity check to make sure that the algorithm above doesn't diverge from
+    // the one in FocusScopeNode.traversalDescendants in terms of which nodes it
+    // finds.
     assert(
       sortedDescendants.length <= scope.traversalDescendants.length && sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
+      'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
+      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}'
     );
     return sortedDescendants;
   }
@@ -1263,7 +1273,11 @@ class _OrderedFocusInfo {
 ///
 /// ```dart preamble
 /// class DemoButton extends StatelessWidget {
-///   const DemoButton({this.name, this.autofocus = false, this.order});
+///   const DemoButton({
+///     required this.name,
+///     this.autofocus = false,
+///     required this.order,
+///   });
 ///
 ///   final String name;
 ///   final bool autofocus;
@@ -1479,10 +1493,10 @@ class FocusTraversalOrder extends InheritedWidget {
 /// /// the type of T.
 /// class OrderedButton<T> extends StatefulWidget {
 ///   const OrderedButton({
-///     this.name,
+///     required this.name,
 ///     this.canRequestFocus = true,
 ///     this.autofocus = false,
-///     this.order,
+///     required this.order,
 ///   });
 ///
 ///   final String name;
@@ -1495,7 +1509,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
-///   FocusNode focusNode;
+///   late FocusNode focusNode;
 ///
 ///   @override
 ///   void initState() {
@@ -1508,12 +1522,12 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 ///   @override
 ///   void dispose() {
-///     focusNode?.dispose();
+///     focusNode.dispose();
 ///     super.dispose();
 ///   }
 ///
 ///   @override
-///   void didUpdateWidget(OrderedButton oldWidget) {
+///   void didUpdateWidget(OrderedButton<T> oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
 ///     focusNode.canRequestFocus = widget.canRequestFocus;
 ///   }
@@ -1533,7 +1547,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       order = LexicalFocusOrder(widget.order.toString());
 ///     }
 ///
-///     Color overlayColor(Set<MaterialState> states) {
+///     Color? overlayColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused)) {
 ///         return Colors.red;
 ///       }
@@ -1543,7 +1557,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       return null;  // defer to the default overlayColor
 ///     }
 ///
-///     Color foregroundColor(Set<MaterialState> states) {
+///     Color? foregroundColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
 ///         return Colors.white;
 ///       }
@@ -1558,8 +1572,8 @@ class FocusTraversalOrder extends InheritedWidget {
 ///           focusNode: focusNode,
 ///           autofocus: widget.autofocus,
 ///           style: ButtonStyle(
-///             overlayColor: MaterialStateProperty.resolveWith<Color>(overlayColor),
-///             foregroundColor: MaterialStateProperty.resolveWith<Color>(foregroundColor),
+///             overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
+///             foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
 ///           ),
 ///           onPressed: () => _handleOnPressed(),
 ///           child: Text(widget.name),

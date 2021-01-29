@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -62,17 +64,17 @@ void main() {
 
     group('Observatory and DDS setup', () {
       Platform fakePlatform;
-      ProcessManager mockProcessManager;
+      ProcessManager fakeProcessManager;
       FlutterPlatform flutterPlatform;
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => fakePlatform,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
       };
 
       setUp(() {
         fakePlatform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
-        mockProcessManager = FakeProcessManager.list(<FakeCommand>[
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
               '/',
@@ -223,6 +225,43 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
   });
+
+  FakeProcessManager fakeProcessManager;
+
+  testUsingContext('Can pass additional arguments to tester binary', () async {
+    final TestFlutterPlatform platform = TestFlutterPlatform(<String>['--foo', '--bar']);
+    platform.loadChannel('test1.dart', MockSuitePlatform());
+    await null;
+
+    expect(fakeProcessManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () {
+      return fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--disable-observatory',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--packages=.dart_tool/package_config.json',
+            '--foo',
+            '--bar',
+            'example.dill'
+          ],
+          stdout: 'success',
+          stderr: 'failure',
+          exitCode: 0,
+        )
+      ]);
+    }
+  });
 }
 
 class MockSuitePlatform extends Mock implements SuitePlatform {}
@@ -239,7 +278,7 @@ class MockHttpServer extends Mock implements HttpServer {}
 //
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
-  TestFlutterPlatform() : super(
+  TestFlutterPlatform([List<String> additionalArguments]) : super(
     buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
     shellPath: '/',
     precompiledDillPath: 'example.dill',
@@ -250,6 +289,7 @@ class TestFlutterPlatform extends FlutterPlatform {
     enableObservatory: false,
     buildTestAssets: false,
     disableDds: true,
+    additionalArguments: additionalArguments,
   );
 
   @override
@@ -274,6 +314,7 @@ class TestObservatoryFlutterPlatform extends FlutterPlatform {
     buildTestAssets: false,
     disableServiceAuthCodes: false,
     disableDds: false,
+    additionalArguments: null,
   );
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();

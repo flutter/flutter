@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -540,6 +542,14 @@ Future<void> _performCodeSizeAnalysis(
   globals.printStatus(
     'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
   );
+
+  // DevTools expects a file path relative to the .flutter-devtools/ dir.
+  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+  globals.printStatus(
+    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+    'flutter pub global activate devtools; flutter pub global run devtools '
+    '--appSizeBase=$relativeAppSizePath'
+  );
 }
 
 /// Builds AAR and POM files.
@@ -713,7 +723,7 @@ void printHowToConsumeAar({
             url '${repoDirectory.path}'
         }
         maven {
-            url '\$storageUrl/download.flutter.io'
+            url "\$storageUrl/download.flutter.io"
         }
       }
 

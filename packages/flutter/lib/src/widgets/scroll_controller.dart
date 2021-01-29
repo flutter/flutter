@@ -275,7 +275,7 @@ class ScrollController extends ChangeNotifier {
 }
 
 // Examples can assume:
-// TrackingScrollController _trackingScrollController;
+// TrackingScrollController? _trackingScrollController;
 
 /// A [ScrollController] whose [initialScrollOffset] tracks its most recently
 /// updated [ScrollPosition].

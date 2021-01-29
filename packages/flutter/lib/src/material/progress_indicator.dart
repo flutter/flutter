@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 import 'theme.dart';
@@ -248,7 +247,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ```dart
-///  AnimationController controller;
+///  late AnimationController controller;
 ///
 ///  @override
 ///  void initState() {
@@ -486,7 +485,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ```dart
-///  AnimationController controller;
+///  late AnimationController controller;
 ///
 ///  @override
 ///  void initState() {

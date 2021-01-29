@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -183,11 +185,11 @@ void main() {
       ];
       final MockTerminal mockTerminal = MockTerminal();
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),
-      )).thenAnswer((Invocation invocation) async => '0');
+      )).thenAnswer((Invocation invocation) async => '1');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -209,11 +211,11 @@ void main() {
       final MockTerminal mockTerminal = MockTerminal();
 
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),
-      )).thenAnswer((Invocation invocation) async => '1');
+      )).thenAnswer((Invocation invocation) async => '2');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -236,11 +238,11 @@ void main() {
       final MockTerminal mockTerminal = MockTerminal();
 
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),
-      )).thenAnswer((Invocation invocation) async => '0');
+      )).thenAnswer((Invocation invocation) async => '1');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -262,11 +264,11 @@ void main() {
       final MockTerminal mockTerminal = MockTerminal();
 
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),
-      )).thenAnswer((Invocation invocation) async => '1');
+      )).thenAnswer((Invocation invocation) async => '2');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -291,11 +293,11 @@ void main() {
       final MockTerminal mockTerminal = MockTerminal();
 
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', '2', '3', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', '3', '4', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),
-      )).thenAnswer((Invocation invocation) async => '2');
+      )).thenAnswer((Invocation invocation) async => '3');
 
       final DeviceManager deviceManager = TestDeviceManager(
         devices,
@@ -319,7 +321,7 @@ void main() {
       final MockTerminal mockTerminal = MockTerminal();
 
       when(mockTerminal.stdinHasTerminal).thenReturn(true);
-      when(mockTerminal.promptForCharInput(<String>['0', '1', 'q', 'Q'],
+      when(mockTerminal.promptForCharInput(<String>['1', '2', 'q', 'Q'],
         displayAcceptedCharacters: false,
         logger: anyNamed('logger'),
         prompt: anyNamed('prompt'),

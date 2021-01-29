@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
-
 import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.
@@ -110,7 +108,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// using an integer for the specific color desired, as follows:
 ///
 /// ```dart
-/// Color selection = Colors.green[400]; // Selects a mid-range green.
+/// Color selection = Colors.green[400]!; // Selects a mid-range green.
 /// ```
 /// {@end-tool}
 /// {@tool snippet}

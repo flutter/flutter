@@ -109,7 +109,7 @@ void main() {
     await tester.tap(find.byKey(noCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pump();
     expect(cancels, equals(0));
 
@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pump();
     expect(cancels, equals(1));
 
@@ -182,7 +182,7 @@ void main() {
     // Try to bring up the popup menu and tap outside it to cancel the menu
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
     expect(onCanceledCalled, isFalse);
@@ -203,7 +203,7 @@ void main() {
     // Try to bring up the popup menu and tap outside it to cancel the menu
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
     expect(onCanceledCalled, isFalse);
@@ -763,7 +763,7 @@ void main() {
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
+    PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
       return  PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
@@ -1514,7 +1514,7 @@ void main() {
                 onPressed: () {
                   showMenu<int>(
                     context: context,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1, child: Text('1'),
@@ -1553,7 +1553,7 @@ void main() {
                   showMenu<int>(
                     context: context,
                     useRootNavigator: true,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1, child: Text('1'),
@@ -1875,6 +1875,34 @@ void main() {
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
     });
+  });
+
+  testWidgets('iconSize parameter tests', (WidgetTester tester) async {
+    Future<void> buildFrame({double? iconSize}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                iconSize: iconSize,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildFrame();
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
+
+    await buildFrame(iconSize: 50);
+    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
   });
 }
 

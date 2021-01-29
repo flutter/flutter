@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -45,12 +47,12 @@ void main() {
 
   FileSystem fileSystem;
   ProcessManager processManager;
-  Usage usage;
+  TestUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -224,12 +226,14 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 [3/6] Building CXX object CMakeFiles/foo_bar.dir/flutter/generated_plugin_registrant.cc.o
 [4/6] Building CXX object CMakeFiles/foo_bar.dir/my_application.cc.o
 [5/6] Linking CXX executable intermediates_do_not_run/foo_bar
 main.cc:(.text+0x13): undefined reference to `Foo::bar()'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.
+ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 ''';
 
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -249,7 +253,9 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
 /foo/linux/main.cc:10:3: error: unknown type name 'UnknownType'
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
+/foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 ''');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -362,17 +368,17 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      r'  "DART_DEFINES=\"foo.bar%3D2,fizz.far%3D3\""',
-      r'  "DART_OBFUSCATION=\"true\""',
-      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "SPLIT_DEBUG_INFO=\"foo/\""',
-      r'  "TRACK_WIDGET_CREATION=\"true\""',
-      r'  "TREE_SHAKE_ICONS=\"true\""',
-      '  "FLUTTER_ROOT=\\"$_kTestFlutterRoot\\""',
-      '  "PROJECT_DIR=\\"${fileSystem.currentDirectory.path}\\""',
-      r'  "FLUTTER_TARGET=\"lib/other.dart\""',
-      r'  "BUNDLE_SKSL_PATH=\"foo/bar.sksl.json\""',
+      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_OBFUSCATION=true"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "SPLIT_DEBUG_INFO=foo/"',
+      '  "TRACK_WIDGET_CREATION=true"',
+      '  "TREE_SHAKE_ICONS=true"',
+      '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
+      '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+      '  "FLUTTER_TARGET=lib/other.dart"',
+      '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -451,15 +457,15 @@ set(BINARY_NAME "fizz_bar")
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage.events, contains(
+      const TestUsageEvent('code-size-analysis', 'linux'),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

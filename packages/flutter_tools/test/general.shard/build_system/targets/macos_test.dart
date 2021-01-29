@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -44,13 +46,17 @@ void main() {
   });
 
   testUsingContext('Copies files to correct cache directory', () async {
+    final Directory outputDir = fileSystem.directory('output');
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
+      FakeCommand(
         command: <String>[
-          'cp',
-          '-R',
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
           'Artifact.flutterMacOSFramework.debug',
-          '/FlutterMacOS.framework',
+          outputDir.path,
         ],
       ),
     ]);
@@ -65,18 +71,9 @@ void main() {
       processManager: processManager,
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
-      engineVersion: '2'
+      engineVersion: '2',
+      outputDir: outputDir,
     );
-
-    final Directory cacheDirectory = fileSystem.directory(
-      artifacts.getArtifactPath(
-        Artifact.flutterMacOSFramework,
-        mode: BuildMode.debug,
-      ))
-      ..createSync();
-    cacheDirectory.childFile('dummy').createSync();
-    environment.buildDir.createSync(recursive: true);
-    environment.outputDir.createSync(recursive: true);
 
     await const DebugUnpackMacOS().build(environment);
 

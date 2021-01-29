@@ -801,7 +801,7 @@ void main() {
   //
   //   final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
   //   final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
-  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, const Duration(milliseconds: 0));
+  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, Duration.zero);
   //
   //   mockCodec.completeNextFrame(frame1);
   //   await tester.idle(); // let nextFrameFuture complete

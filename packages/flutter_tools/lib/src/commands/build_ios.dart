@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -110,6 +112,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
     final BuildInfo buildInfo = await getBuildInfo();
+    displayNullSafetyMode(buildInfo);
 
     if (exportOptionsPlist == null) {
       return xcarchiveResult;
@@ -293,6 +296,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       // This message is used as a sentinel in analyze_apk_size_test.dart
       globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
+      );
+
+      // DevTools expects a file path relative to the .flutter-devtools/ dir.
+      final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
+      globals.printStatus(
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+        'flutter pub global activate devtools; flutter pub global run devtools '
+        '--appSizeBase=$relativeAppSizePath'
       );
     }
 

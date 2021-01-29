@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -190,6 +192,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     BuildInfo buildInfo,
     String reporter,
     String timeout,
+    List<String> additionalArguments,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

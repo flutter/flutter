@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -181,17 +184,6 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
-  if (!project.isModule && useMacOSConfig) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
-    // explicitly. Rather we rely on the xcode backend script and the Podfile
-    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular macOS projects using Cocoapods.
-    final String frameworkDir =
-        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
-    xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
-  }
-
-
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
@@ -202,7 +194,9 @@ List<String> _xcodeBuildSettingsLines({
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+
+    final String localEngineName = globals.fs.path.basename(engineOutPath);
+    xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -213,9 +207,21 @@ List<String> _xcodeBuildSettingsLines({
     //
     // Skip this step for macOS builds.
     if (!useMacOSConfig) {
-      final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+      String arch;
+      if (localEngineName.endsWith('_arm')) {
+        arch = 'armv7';
+      } else if (localEngineName.contains('_sim')) {
+        // Apple Silicon ARM simulators not yet supported.
+        arch = 'x86_64';
+      } else {
+        arch = 'arm64';
+      }
       xcodeBuildSettings.add('ARCHS=$arch');
     }
+  }
+  if (useMacOSConfig) {
+    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
+    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
@@ -226,25 +232,78 @@ List<String> _xcodeBuildSettingsLines({
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
-  XcodeProjectInterpreter({
+  factory XcodeProjectInterpreter({
     @required Platform platform,
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Terminal terminal,
     @required Usage usage,
+  }) {
+    return XcodeProjectInterpreter._(
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      terminal: terminal,
+      usage: usage,
+    );
+  }
+
+  XcodeProjectInterpreter._({
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required Terminal terminal,
+    @required Usage usage,
+    int majorVersion,
+    int minorVersion,
+    int patchVersion,
   }) : _platform = platform,
-      _fileSystem = fileSystem,
-      _terminal = terminal,
-      _logger = logger,
-      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-      _operatingSystemUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
-      _usage = usage;
+        _fileSystem = fileSystem,
+        _terminal = terminal,
+        _logger = logger,
+        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+        _operatingSystemUtils = OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+        _majorVersion = majorVersion,
+        _minorVersion = minorVersion,
+        _patchVersion = patchVersion,
+        _usage = usage;
+
+  /// Create an [XcodeProjectInterpreter] for testing.
+  ///
+  /// Defaults to installed with sufficient version,
+  /// a memory file system, fake platform, buffer logger,
+  /// test [Usage], and test [Terminal].
+  /// Set [majorVersion] to null to simulate Xcode not being installed.
+  factory XcodeProjectInterpreter.test({
+    @required ProcessManager processManager,
+    int majorVersion = 1000,
+    int minorVersion = 0,
+    int patchVersion = 0,
+  }) {
+    final Platform platform = FakePlatform(
+      operatingSystem: 'macos',
+      environment: <String, String>{},
+    );
+    return XcodeProjectInterpreter._(
+      fileSystem: MemoryFileSystem.test(),
+      platform: platform,
+      processManager: processManager,
+      usage: TestUsage(),
+      logger: BufferLogger.test(),
+      terminal: Terminal.test(),
+      majorVersion: majorVersion,
+      minorVersion: minorVersion,
+      patchVersion: patchVersion,
+    );
+  }
 
   final Platform _platform;
   final FileSystem _fileSystem;

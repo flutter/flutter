@@ -1495,43 +1495,25 @@ void main() {
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
 
-  testWidgets('Errors in build', (WidgetTester tester) async {
-    final ErrorWidgetBuilder oldErrorBuilder = ErrorWidget.builder;
-    ErrorWidget.builder = (FlutterErrorDetails detail) => throw AssertionError();
-    try {
-      final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails detail) {};
-      try {
-        int buildCount = 0;
-        void handleBuild() => buildCount++;
-        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
-        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild));
-        expect(buildCount, 1);
-        await tester.pumpWidget(_WidgetThatCanThrowInBuild(onBuild: handleBuild, shouldThrow: true));
-        tester.takeException();
-        expect(buildCount, 2);
-        expect(tester.binding.buildOwner!.debugCurrentBuildTarget, isNull);
-      } finally {
-        FlutterError.onError = oldErrorHandler;
-      }
-    } finally {
-      ErrorWidget.builder = oldErrorBuilder;
-    }
+  testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    TestRenderObjectElement().debugFillProperties(builder);
+    expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
   });
-}
 
-class _WidgetThatCanThrowInBuild extends StatelessWidget {
-  const _WidgetThatCanThrowInBuild({required this.onBuild, this.shouldThrow = false});
-
-  final VoidCallback onBuild;
-  final bool shouldThrow;
-
-  @override
-  Widget build(BuildContext context) {
-    onBuild();
-    assert(!shouldThrow);
-    return Container();
-  }
+  testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
+    final int initialCount = tester.binding.buildOwner!.globalKeyCount;
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    await tester.pumpWidget(Container(key: key1));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container()));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container(key: key2)));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 2);
+    await tester.pumpWidget(Container());
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
+  });
 }
 
 class _FakeFocusManager implements FocusManager {
@@ -1874,4 +1856,8 @@ class FakeLeafRenderObject extends RenderBox {
   void performLayout() {
     size = constraints.biggest;
   }
+}
+
+class TestRenderObjectElement extends RenderObjectElement {
+  TestRenderObjectElement() : super(Table());
 }

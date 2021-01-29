@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -258,9 +260,6 @@ class CrashingUsage implements Usage {
     }
     _sentException = exception;
   }
-
-  @override
-  bool get isFirstRun => _impl.isFirstRun;
 
   @override
   bool get suppressAnalytics => _impl.suppressAnalytics;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/user_messages.dart';
@@ -29,18 +31,20 @@ class XcodeValidator extends DoctorValidator {
       xcodeStatus = ValidationType.installed;
 
       messages.add(ValidationMessage(_userMessages.xcodeLocation(_xcode.xcodeSelectPath)));
-
-      xcodeVersionInfo = _xcode.versionText;
-      if (xcodeVersionInfo.contains(',')) {
-        xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      }
       messages.add(ValidationMessage(_xcode.versionText));
 
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-          _userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor, kXcodeRequiredVersionPatch)
-        ));
+        messages.add(ValidationMessage.error(_userMessages.xcodeOutdated(
+          _xcode.currentVersion.toString(),
+          xcodeRecommendedVersion.toString(),
+        )));
+      } else if (!_xcode.isRecommendedVersionSatisfactory) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(ValidationMessage.hint(_userMessages.xcodeOutdated(
+          _xcode.currentVersion.toString(),
+          xcodeRecommendedVersion.toString(),
+        )));
       }
 
       if (!_xcode.eulaSigned) {

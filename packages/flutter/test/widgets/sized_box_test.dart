@@ -46,7 +46,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -56,7 +56,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -67,7 +67,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -107,7 +107,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -144,7 +144,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -188,25 +188,6 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
-  });
-
-  testWidgets('SizedBox constrains intrinsics', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/27293.
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: IntrinsicHeight(
-            child: SizedBox(
-              width: 100,
-              child: Text('This is a multi-line text.', style: TextStyle(height: 1.0, fontSize: 16)),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.getSize(find.text('This is a multi-line text.')).height, greaterThan(16));
+    expect(patient.currentContext!.size, equals(Size.zero));
   });
 }
