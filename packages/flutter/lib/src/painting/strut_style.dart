@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextHeightBehavior, LeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -300,6 +301,7 @@ class StrutStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     this.fontSize,
     this.height,
+    this.leadingDistribution,
     this.leading,
     this.fontWeight,
     this.fontStyle,
@@ -338,6 +340,7 @@ class StrutStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
+    LeadingDistribution? leadingDistribution,
     this.leading, // TextStyle does not have an equivalent (yet).
     FontWeight? fontWeight,
     FontStyle? fontStyle,
@@ -351,6 +354,7 @@ class StrutStyle with Diagnosticable {
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
+       leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
        fontSize = fontSize ?? textStyle.fontSize,
        fontWeight = fontWeight ?? textStyle.fontWeight,
        fontStyle = fontStyle ?? textStyle.fontStyle,
@@ -447,6 +451,8 @@ class StrutStyle with Diagnosticable {
   ///
   /// The default height is null.
   final double? height;
+
+  final LeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
   ///
