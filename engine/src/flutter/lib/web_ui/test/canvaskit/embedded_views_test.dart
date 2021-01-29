@@ -287,9 +287,79 @@ void testMain() {
       } on AssertionError catch (error) {
         expect(
           error.toString(),
-          'Assertion failed: "Cannot render platform view 0. It has not been created, or it has been deleted."',
+          'Assertion failed: "Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. These views have not been created, or they have been deleted."',
         );
       }
+
+      // Frame 7:
+      //   Render: a platform view after error.
+      //   Expect: success. Just checking the system is not left in a corrupted state.
+      await _createPlatformView(0, 'test-platform-view');
+      renderTestScene(viewCount: 0);
+    });
+
+    test('embeds and disposes of a platform view', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+        domRenderer.sceneElement!.querySelectorAll('#view-0'),
+        hasLength(1),
+      );
+
+      await _disposePlatformView(0);
+
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+        domRenderer.sceneElement!.querySelectorAll('#view-0'),
+        hasLength(0),
+      );
+    });
+
+    test('removed the DOM node of an unrendered platform view', () async {
+      ui.platformViewRegistry.registerViewFactory(
+        'test-platform-view',
+        (viewId) => html.DivElement()..id = 'view-0',
+      );
+      await _createPlatformView(0, 'test-platform-view');
+
+      final EnginePlatformDispatcher dispatcher =
+          ui.window.platformDispatcher as EnginePlatformDispatcher;
+
+      LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      sb.addPlatformView(0, width: 10, height: 10);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+        domRenderer.sceneElement!.querySelectorAll('#view-0'),
+        hasLength(1),
+      );
+
+      // Render a frame without a platform view, but also without disposing of
+      // the platform view.
+      sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      dispatcher.rasterizer!.draw(sb.build().layerTree);
+
+      expect(
+        domRenderer.sceneElement!.querySelectorAll('#view-0'),
+        hasLength(0),
+      );
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
@@ -307,6 +377,16 @@ Future<void> _createPlatformView(int id, String viewType) {
         'viewType': viewType,
       },
     )),
+    (dynamic _) => completer.complete(),
+  );
+  return completer.future;
+}
+
+Future<void> _disposePlatformView(int id) {
+  final completer = Completer<void>();
+  window.sendPlatformMessage(
+    'flutter/platform_views',
+    codec.encodeMethodCall(MethodCall('dispose', id)),
     (dynamic _) => completer.complete(),
   );
   return completer.future;
