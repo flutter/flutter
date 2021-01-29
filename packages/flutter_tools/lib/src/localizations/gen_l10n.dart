@@ -149,7 +149,7 @@ String generateNumberFormattingLogic(Message message) {
           return '${parameter.name}: ${parameter.value}';
         },
       );
-      return numberFormatTemplate
+      return numberFormatNamedTemplate
         .replaceAll('@(placeholder)', placeholder.name)
         .replaceAll('@(format)', placeholder.format)
         .replaceAll('@(parameters)', parameters.join(',    \n'));
