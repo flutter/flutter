@@ -26,7 +26,7 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
 class TextEditingAction<T extends Intent> extends Action<T> {
-  ///   /// A constructor for a [TextEditingAction].
+  /// A constructor for a [TextEditingAction].
   ///
   /// The [onInvoke] parameter must not be null.
   /// The [onInvoke] parameter is required.

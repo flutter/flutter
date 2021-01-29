@@ -39,8 +39,8 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required bool isFocused,
 });
 
-// TODO(justinmc): https://github.com/flutter/flutter/issues/75004
-// Do all of this via Intents and then remove this subclass.
+// TODO(justinmc): Do all of this via Intents and then remove this subclass.
+// https://github.com/flutter/flutter/issues/75004
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,

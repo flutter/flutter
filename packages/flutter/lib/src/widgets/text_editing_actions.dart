@@ -29,14 +29,26 @@ class AltShiftArrowRightTextIntent extends Intent {
 class ArrowDownTextIntent extends Intent {
   const ArrowDownTextIntent();
 }
+class ArrowLeftTextIntent extends Intent {
+  const ArrowLeftTextIntent();
+}
+class ArrowRightTextIntent extends Intent {
+  const ArrowRightTextIntent();
+}
 class ArrowUpTextIntent extends Intent {
   const ArrowUpTextIntent();
+}
+class ControlATextIntent extends Intent {
+  const ControlATextIntent();
 }
 class ControlArrowLeftTextIntent extends Intent {
   const ControlArrowLeftTextIntent();
 }
 class ControlArrowRightTextIntent extends Intent {
   const ControlArrowRightTextIntent();
+}
+class ControlCTextIntent extends Intent {
+  const ControlCTextIntent();
 }
 class ControlShiftArrowLeftTextIntent extends Intent {
   const ControlShiftArrowLeftTextIntent();
@@ -107,6 +119,13 @@ class SingleLongTapStartTextIntent extends Intent {
 class SingleTapCancelTextIntent extends Intent {
   const SingleTapCancelTextIntent();
 }
+class SingleTapUpTextIntent extends Intent {
+  const SingleTapUpTextIntent({
+    required this.details,
+  });
+
+  final TapUpDetails details;
+}
 class ShiftArrowDownTextIntent extends Intent {
   const ShiftArrowDownTextIntent();
 }
@@ -125,17 +144,6 @@ class ShiftEndTextIntent extends Intent {
 class ShiftHomeTextIntent extends Intent {
   const ShiftHomeTextIntent();
 }
-class ArrowLeftTextIntent extends Intent {}
-class ArrowRightTextIntent extends Intent {}
-class ControlATextIntent extends Intent {}
-class ControlCTextIntent extends Intent {}
-class SingleTapUpTextIntent extends Intent {
-  const SingleTapUpTextIntent({
-    required this.details,
-  });
-
-  final TapUpDetails details;
-}
 class TapDownTextIntent extends Intent {
   const TapDownTextIntent({
     required this.details,
@@ -144,13 +152,12 @@ class TapDownTextIntent extends Intent {
   final TapDownDetails details;
 }
 
-// TODO(justinmc): Document.
-/// The map of [Action]s that correspond to the default behavior for Flutter on
-/// the current platform.
+/// The map of [Action]s that correspond to the default text editing behavior
+/// for Flutter on the current platform.
 ///
 /// See also:
 ///
-/// * [Actions], the widget that accepts a map like this.
+/// * [Actions], which can be used to override this behavior.
 class TextEditingActions extends StatelessWidget {
   /// Creates an instance of TextEditingActions.
   TextEditingActions({

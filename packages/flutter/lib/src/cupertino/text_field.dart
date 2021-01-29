@@ -93,8 +93,8 @@ enum OverlayVisibilityMode {
   always,
 }
 
-// TODO(justinmc): https://github.com/flutter/flutter/issues/75004
-// Do all of this via Intents and then remove this subclass.
+// TODO(justinmc): Do all of this via Intents and then remove this subclass.
+// https://github.com/flutter/flutter/issues/75004
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
