@@ -30,6 +30,7 @@ void main() {
   group('plugins', () {
     FileSystem fs;
     MockFlutterProject flutterProject;
+    MockFlutterManifest flutterManifest;
     MockIosProject iosProject;
     MockMacOSProject macosProject;
     MockAndroidProject androidProject;
@@ -46,6 +47,12 @@ void main() {
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(FileSystem fileSystem) {
       flutterProject = MockFlutterProject();
+
+      flutterManifest = MockFlutterManifest();
+      when(flutterManifest.dependencies).thenReturn(<String>{});
+
+      when(flutterProject.manifest).thenReturn(flutterManifest);
+
       when(flutterProject.directory).thenReturn(fileSystem.systemTempDirectory.childDirectory('app'));
       // TODO(franciscojma): Remove logic for .flutter-plugins once it's deprecated.
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
