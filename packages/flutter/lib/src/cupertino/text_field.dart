@@ -93,7 +93,8 @@ enum OverlayVisibilityMode {
   always,
 }
 
-// TODO(justinmc): remove this and replace it with one in EditableText.
+// TODO(justinmc): https://github.com/flutter/flutter/issues/75004
+// Do all of this via Intents and then remove this subclass.
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
     required _CupertinoTextFieldState state,
@@ -1190,7 +1191,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         actions: <Type, Action<Intent>>{
           SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
             onInvoke: (SingleTapUpTextIntent intent) {
-              print('justin Cupertino\'s SingleTapUpTextIntent action was invoked');
               // Because TextSelectionGestureDetector listens to taps that happen on
               // widgets in front of it, tapping the clear button will also trigger
               // this handler. If the clear button widget recognizes the up event,
@@ -1202,9 +1202,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                   return;
                 }
               }
+              // Call through to the default SingleTapUpTextIntent Action.
               Actions.invoke<SingleTapUpTextIntent>(context, intent);
-              // TODO(justinmc): I'm still figuring out how we'll handle
-              // requesting the keyboard and the onTap param.
               _requestKeyboard();
               if (widget.onTap != null)
                 widget.onTap!();

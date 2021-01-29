@@ -39,6 +39,8 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required bool isFocused,
 });
 
+// TODO(justinmc): https://github.com/flutter/flutter/issues/75004
+// Do all of this via Intents and then remove this subclass.
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,
@@ -931,7 +933,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void initState() {
     super.initState();
-    // TODO(justinmc): I hope to get rid of this selectiongesturedetector.
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(
       state: this,
     );
@@ -1014,7 +1015,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    // TODO(justinmc): Another reason to get rid of shouldShowSelectionToolbar.
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
@@ -1265,25 +1265,36 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: Shortcuts(
         shortcuts: scrollShortcutOverrides,
-        child: IgnorePointer(
-          ignoring: !_isEnabled,
-          child: AnimatedBuilder(
-            animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
-              return Semantics(
-                maxValueLength: semanticsMaxValueLength,
-                currentValueLength: _currentLength,
-                onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid)
-                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                  _requestKeyboard();
-                },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            SingleTapUpTextIntent: CallbackAction<SingleTapUpTextIntent>(
+              onInvoke: (SingleTapUpTextIntent intent) {
+                Actions.invoke<SingleTapUpTextIntent>(context, intent);
+                if (widget.onTap != null)
+                  widget.onTap!();
+              },
+            ),
+          },
+          child: IgnorePointer(
+            ignoring: !_isEnabled,
+            child: AnimatedBuilder(
+              animation: controller, // changes the _currentLength
+              builder: (BuildContext context, Widget? child) {
+                return Semantics(
+                  maxValueLength: semanticsMaxValueLength,
+                  currentValueLength: _currentLength,
+                  onTap: widget.readOnly ? null : () {
+                    if (!_effectiveController.selection.isValid)
+                      _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                    _requestKeyboard();
+                  },
+                  child: child,
+                );
+              },
+              child: _selectionGestureDetectorBuilder.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
                 child: child,
-              );
-            },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: child,
+              ),
             ),
           ),
         ),

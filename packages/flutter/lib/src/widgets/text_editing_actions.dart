@@ -174,7 +174,6 @@ class TextEditingActions extends StatelessWidget {
   // TODO(justinmc): Should be public for users to be able to use/remap them?
   static final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
     onInvoke: (SingleTapUpTextIntent intent, EditableTextState editableTextState) {
-      print('justin TEB singleTapUp action invoked');
       editableTextState.hideToolbar();
       if (editableTextState.widget.selectionEnabled) {
         switch (defaultTargetPlatform) {
@@ -203,13 +202,7 @@ class TextEditingActions extends StatelessWidget {
             break;
         }
       }
-      // TODO(justinmc): State of keyboard visibility should be controllable here
-      // too.
-      //_state._requestKeyboard();
-
-      // TODO(justinmc): Still need to handle calling of onTap.
-      //if (_state.widget.onTap != null)
-      //  _state.widget.onTap!();
+      editableTextState.requestKeyboard();
     },
   );
 
