@@ -1203,9 +1203,7 @@ flutter:
           directories.add(pluginDirectory);
         }
 
-        final FlutterManifest manifest = MockFlutterManifest();
-        when(manifest.dependencies).thenReturn(<String>{...plugins.keys});
-        when(flutterProject.manifest).thenReturn(manifest);
+        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
         libDir.createSync(recursive: true);
