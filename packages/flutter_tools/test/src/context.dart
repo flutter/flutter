@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -420,8 +419,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
-
-class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
