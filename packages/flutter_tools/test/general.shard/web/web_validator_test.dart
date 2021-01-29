@@ -50,7 +50,7 @@ void main() {
   });
 
   testWithoutContext('WebValidator Can notice missing macOS executable ', () async {
-    fakeProcessManager.canRunSucceeds = false;
+    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
     final ValidationResult result = await webValidator.validate();
 
@@ -58,7 +58,7 @@ void main() {
   });
 
   testWithoutContext('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
-    fakeProcessManager.canRunSucceeds = false;
+    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
     final ValidationResult result = await webValidator.validate();
 

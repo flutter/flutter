@@ -48,9 +48,9 @@ void main() {
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-    fakeProcessManager.canRunSucceeds = false;
+    fakeProcessManager.excludedExecutables.add('adb');
     final AndroidDevices androidDevices = AndroidDevices(
-      androidSdk: FakeAndroidSdk(null),
+      androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk('adb'),
