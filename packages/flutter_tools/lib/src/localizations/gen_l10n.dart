@@ -146,7 +146,13 @@ String generateNumberFormattingLogic(Message message) {
       }
       final Iterable<String> parameters =
         placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
-          return '${parameter.name}: ${parameter.value}';
+          if (parameter.value is num) {
+            return '${parameter.name}: ${parameter.value}';
+          } else {
+            return '${parameter.name}: ${_generateStringParameterValue(
+              parameter.value.toString(),
+            )}';
+          }
         },
       );
 
@@ -154,7 +160,7 @@ String generateNumberFormattingLogic(Message message) {
         return numberFormatNamedTemplate
             .replaceAll('@(placeholder)', placeholder.name)
             .replaceAll('@(format)', placeholder.format)
-            .replaceAll('@(parameters)', parameters.join(',    \n'));
+            .replaceAll('@(parameters)', parameters.join(',\n      '));
       } else {
         return numberFormatPositionalTemplate
             .replaceAll('@(placeholder)', placeholder.name)
@@ -471,6 +477,18 @@ String _generateDelegateClass({
     .replaceAll('@(loadBody)', loadBody)
     .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
     .replaceAll('@(lookupFunction)', lookupFunction);
+}
+
+String _generateStringParameterValue(String value) {
+  if (value.contains("'")) {
+    if (value.contains('"')) {
+      return "'${value.replaceAll("'", r"\'")}'";
+    } else {
+      return '"$value"';
+    }
+  } else {
+    return "'$value'";
+  }
 }
 
 class LocalizationsGenerator {
