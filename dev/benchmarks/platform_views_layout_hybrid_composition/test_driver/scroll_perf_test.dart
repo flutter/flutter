@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    late FlutterDriver driver;
+    FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -16,7 +16,8 @@ void main() {
     });
 
     tearDownAll(() async {
-      driver.close();
+      if (driver != null)
+        driver.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
