@@ -149,10 +149,17 @@ String generateNumberFormattingLogic(Message message) {
           return '${parameter.name}: ${parameter.value}';
         },
       );
-      return numberFormatNamedTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format)
-        .replaceAll('@(parameters)', parameters.join(',    \n'));
+
+      if (placeholder.hasNumberFormatWithParameters) {
+        return numberFormatNamedTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(parameters)', parameters.join(',    \n'));
+      } else {
+        return numberFormatPositionalTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format);
+      }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
