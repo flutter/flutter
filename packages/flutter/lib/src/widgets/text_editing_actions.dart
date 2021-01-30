@@ -83,7 +83,6 @@ class TextEditingActions extends StatelessWidget {
   /// Creates an instance of TextEditingActions.
   TextEditingActions({
     Key? key,
-    // TODO(justinmc): Is additionalActions a good way to do this?
     Map<Type, Action<Intent>>? additionalActions,
     required this.child,
   }) : additionalActions = additionalActions ?? <Type, Action<Intent>>{},
