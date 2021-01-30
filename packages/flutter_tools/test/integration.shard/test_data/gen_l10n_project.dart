@@ -199,6 +199,10 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
               '${localizations.helloFor(123)}',
               '${localizations.helloCost("price", 123)}',
+              '${localizations.helloCostWithOptionalParam("price", .5)}',
+              '${localizations.helloDecimalPattern(1200000)}',
+              '${localizations.helloPercentPattern(1200000)}',
+              '${localizations.helloScientificPattern(1200000)}',
               '${localizations.helloWorlds(0)}',
               '${localizations.helloWorlds(1)}',
               '${localizations.helloWorlds(2)}',
@@ -407,6 +411,54 @@ void main() {
       "value": {
         "type": "int",
         "format": "currency"
+      }
+    }
+  },
+  
+  "helloCostWithOptionalParam": "Hello for {price} {value} (with optional param)",
+  "@helloCostWithOptionalParam": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC"
+        }
+      }
+    }
+  },
+  
+  "helloDecimalPattern": "Hello for Decimal Pattern {value}",
+  "@helloDecimalPattern": {
+    "description": "A message which displays a number in decimal pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  
+  "helloPercentPattern": "Hello for Percent Pattern {value}",
+  "@helloPercentPattern": {
+    "description": "A message which displays a number in percent pattern",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  },
+  
+  "helloScientificPattern": "Hello for Scientific Pattern {value}",
+  "@helloScientificPattern": {
+    "description": "A message which displays scientific notation of a number",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "scientificPattern"
       }
     }
   },
