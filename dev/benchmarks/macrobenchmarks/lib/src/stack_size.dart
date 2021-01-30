@@ -40,9 +40,8 @@ class ChildWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int myStackSize = 100; //io.ProcessInfo.currentStackSize;
-    // The stack difference should capture the stack increment during the build
-    // pipeline between parent widget and child widget, i. e. one layer of
-    // stateless widget.
+    // Captures the stack size difference between parent widget and child widget
+    // during the rendering pipeline, i.e. one layer of stateless widget.
     return Text(
       '${myStackSize - parentStackSize}',
       key: const ValueKey<String>(kStackSizeKey),
