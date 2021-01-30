@@ -63,21 +63,23 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
           .expand((String text) => text.split('\n'))
           .map<dynamic>((String line) {
             try {
-              return jsonDecode(line) as Map<String, dynamic>?;
+              return jsonDecode(line);
             } on FormatException {
               // Only interested in test events which are JSON.
             }
           })
           .expand<Map<String, dynamic>>((dynamic json) {
-            return json is List<dynamic>
-                ? json.cast()
-                : <Map<String, dynamic>>[json as Map<String, dynamic>];
+            if (json is List<dynamic>) {
+              return json.cast();
+            }
+            return <Map<String, dynamic>>[
+              if (json != null)
+                json as Map<String, dynamic>
+            ];
           })
-          .where((Map<String, dynamic>? testEvent) =>
-              testEvent != null && testEvent['type'] == 'print')
-          .map((Map<String, dynamic>? printEvent) => printEvent!['message'] as String?)
-          .firstWhere((String? message) =>
-              message!.startsWith(_integrationResultsPrefix)))!
+          .where((Map<String, dynamic> testEvent) => testEvent['type'] == 'print')
+          .map((Map<String, dynamic> printEvent) => printEvent['message'] as String)
+          .firstWhere((String message) => message.startsWith(_integrationResultsPrefix)))
       .replaceAll(_integrationResultsPrefix, '');
 
   return jsonDecode(testResults) as Map<String, dynamic>?;
