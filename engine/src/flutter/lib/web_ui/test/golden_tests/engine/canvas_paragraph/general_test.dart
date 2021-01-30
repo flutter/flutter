@@ -4,6 +4,7 @@
 
 // @dart = 2.6
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -151,6 +152,50 @@ void testMain() async {
     offset = offset.translate(0, paragraph.height + 10);
 
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_dom');
+  });
+
+  void testAlignAndTransform(EngineCanvas canvas) {
+    CanvasParagraph paragraph;
+
+    void build(CanvasParagraphBuilder builder) {
+      builder.pushStyle(EngineTextStyle.only(color: white));
+      builder.addText('Lorem ');
+      builder.pushStyle(EngineTextStyle.only(color: red));
+      builder.addText('ipsum\n');
+      builder.pushStyle(EngineTextStyle.only(color: yellow));
+      builder.addText('dolor');
+    }
+
+    void drawParagraphAt(Offset offset, TextAlign align) {
+      paragraph = rich(
+        ParagraphStyle(fontFamily: 'Roboto', fontSize: 20.0, textAlign: align),
+        build,
+      )..layout(constrain(150.0));
+      canvas.save();
+      canvas.translate(offset.dx, offset.dy);
+      canvas.rotate(math.pi / 4);
+      final Rect rect =
+          Rect.fromLTRB(0.0, 0.0, 150.0, paragraph.height);
+      canvas.drawRect(rect, SurfacePaintData()..color = black);
+      canvas.drawParagraph(paragraph, Offset.zero);
+      canvas.restore();
+    }
+
+    drawParagraphAt(Offset(50.0, 0.0), TextAlign.left);
+    drawParagraphAt(Offset(150.0, 0.0), TextAlign.center);
+    drawParagraphAt(Offset(250.0, 0.0), TextAlign.right);
+  }
+
+  test('alignment and transform', () {
+    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    testAlignAndTransform(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_transform');
+  });
+
+  test('alignment and transform (DOM)', () {
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testAlignAndTransform(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_transform_dom');
   });
 
   test('paints spans with varying heights/baselines', () {
