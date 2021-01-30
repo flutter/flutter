@@ -128,14 +128,6 @@ class CanvasParagraph implements EngineParagraph {
     return domElement.clone(true) as html.HtmlElement;
   }
 
-  double _getParagraphAlignOffset() {
-    final EngineLineMetrics? longestLine = _layoutService.longestLine;
-    if (longestLine != null) {
-      return longestLine.left;
-    }
-    return 0.0;
-  }
-
   html.HtmlElement _createDomElement() {
     final html.HtmlElement rootElement =
         domRenderer.createElement('p') as html.HtmlElement;
@@ -149,9 +141,13 @@ class CanvasParagraph implements EngineParagraph {
       // to insert our own <BR> breaks based on layout results.
       ..whiteSpace = 'pre';
 
-    final double alignOffset = _getParagraphAlignOffset();
-    if (alignOffset != 0.0) {
-      cssStyle.marginLeft = '${alignOffset}px';
+    if (width > longestLine) {
+      // In this case, we set the width so that the CSS text-align property
+      // works correctly.
+      // When `longestLine` is >= `paragraph.width` that means the DOM element
+      // will automatically size itself to fit the longest line, so there's no
+      // need to set an explicit width.
+      cssStyle.width = '${width}px';
     }
 
     if (paragraphStyle._maxLines != null || paragraphStyle._ellipsis != null) {
