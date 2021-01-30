@@ -259,6 +259,24 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
+  // TODO(justinmc): Should this logic for these 2 actions be in rendereditable?
+  // See also _metaCTextAction, which is similar.
+  static final TextEditingAction<ContextMenuCopyTextIntent> _contextMenuCopyTextIntent = TextEditingAction<ContextMenuCopyTextIntent>(
+    onInvoke: (ContextMenuCopyTextIntent intent) {
+      final TextSelectionDelegate delegate = intent.editableTextState.renderEditable.textSelectionDelegate;
+      final TextEditingValue value = delegate.textEditingValue;
+      Clipboard.setData(ClipboardData(
+        text: value.selection.textInside(value.text),
+      ));
+      delegate.textEditingValue = TextEditingValue(
+        text: value.text,
+        selection: TextSelection.collapsed(offset: value.selection.end),
+      );
+      delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+      delegate.hideToolbar();
+    },
+  );
+
   static final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
     onInvoke: (MetaCTextIntent intent) {
       // TODO(justinmc): This needs to be deduplicated with text_selection.dart.
@@ -267,13 +285,14 @@ class TextEditingActions extends StatelessWidget {
       Clipboard.setData(ClipboardData(
         text: value.selection.textInside(value.text),
       ));
-      //clipboardStatus?.update();
       delegate.textEditingValue = TextEditingValue(
         text: value.text,
         selection: TextSelection.collapsed(offset: value.selection.end),
       );
       delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-      //delegate.hideToolbar();
+      // TODO(justinmc): This hideToolbar DOES need to be here to hide the right
+      // click menu. So it's identical to contextmenucopy I think.
+      delegate.hideToolbar();
     },
   );
 

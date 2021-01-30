@@ -19,6 +19,7 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
+import 'text_editing_intent.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';
@@ -223,6 +224,10 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+    // TODO(justinmc): How to get context here?
+    //Actions.invoke<ContextMenuCopyTextIntent>(context, ContextMenuCopyTextIntent());
+
+    /*
     final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(ClipboardData(
       text: value.selection.textInside(value.text),
@@ -234,6 +239,7 @@ abstract class TextSelectionControls {
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
+    */
   }
 
   /// Paste the current clipboard selection (obtained from [Clipboard]) into

@@ -777,6 +777,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
+  // TODO(justinmc): Should this copy logic exist here, or in the actions?
+  void something() {
+    final TextEditingValue value = textSelectionDelegate.textEditingValue;
+    Clipboard.setData(ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+    //clipboardStatus?.update();
+    textSelectionDelegate.textEditingValue = TextEditingValue(
+      text: value.text,
+      selection: TextSelection.collapsed(offset: value.selection.end),
+    );
+    textSelectionDelegate.bringIntoView(textSelectionDelegate.textEditingValue.selection.extent);
+    textSelectionDelegate.hideToolbar();
+  }
+
   // Extend the current selection to the end of the field.
   //
   // See also:

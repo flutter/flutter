@@ -12,6 +12,9 @@ import 'editable_text.dart';
 ///   * [TextEditingAction], which is intended to be used with
 ///     TextEditingIntents.
 abstract class TextEditingIntent extends Intent {
+  // TODO(justinmc): This maybe can't be final, because it can be invoked
+  // multiple times. Maybe it shouldn't be set the second time? But couldn't the
+  // focused field change?
   /// The [EditableTextState] that is currently focused.
   ///
   /// When used with [TextEditingAction], this is set automatically.
@@ -49,6 +52,10 @@ class ArrowRightTextIntent extends TextEditingIntent {}
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-up key event.
 class ArrowUpTextIntent extends TextEditingIntent {}
+
+/// An [Intent] representing the default text editing behavior for the current
+/// platform for pressing the context menu's copy button.
+class ContextMenuCopyTextIntent extends TextEditingIntent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + a key event.
