@@ -4,74 +4,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
-import 'package:flutter/widgets.dart';
 
 import 'text_editing_action.dart';
-
-/// An [Intent] related to editing text.
-///
-/// See also:
-///
-///   * [TextEditingAction], which is intended to be used with
-///     TextEditingIntents.
-class TextEditingIntent extends Intent {
-  /// The [EditableTextState] that is currently focused.
-  ///
-  /// When used with [TextEditingAction], this is set automatically.
-  late final EditableTextState editableTextState;
-}
-
-// TODO(justinmc): Maybe move these to a text_editing_intents.dart?
-class AltArrowLeftTextIntent extends TextEditingIntent {}
-class AltArrowRightTextIntent extends TextEditingIntent {}
-class AltShiftArrowLeftTextIntent extends TextEditingIntent {}
-class AltShiftArrowRightTextIntent extends TextEditingIntent {}
-class ArrowDownTextIntent extends TextEditingIntent {}
-class ArrowLeftTextIntent extends TextEditingIntent {}
-class ArrowRightTextIntent extends TextEditingIntent {}
-class ArrowUpTextIntent extends TextEditingIntent {}
-class ControlATextIntent extends TextEditingIntent {}
-class ControlArrowLeftTextIntent extends TextEditingIntent {}
-class ControlArrowRightTextIntent extends TextEditingIntent {}
-class ControlCTextIntent extends TextEditingIntent {}
-class ControlShiftArrowLeftTextIntent extends TextEditingIntent {}
-class ControlShiftArrowRightTextIntent extends TextEditingIntent {}
-class DragSelectionEndTextIntent extends TextEditingIntent {}
-class DragSelectionStartTextIntent extends TextEditingIntent {}
-class DragSelectionUpdateTextIntent extends TextEditingIntent {}
-class ForcePressEndTextIntent extends TextEditingIntent {}
-class ForcePressStartTextIntent extends TextEditingIntent {}
-class EndTextIntent extends TextEditingIntent {}
-class HomeTextIntent extends TextEditingIntent {}
-class MetaArrowDownTextIntent extends TextEditingIntent {}
-class MetaArrowLeftTextIntent extends TextEditingIntent {}
-class MetaArrowRightTextIntent extends TextEditingIntent {}
-class MetaArrowUpTextIntent extends TextEditingIntent {}
-class MetaShiftArrowDownTextIntent extends TextEditingIntent {}
-class MetaShiftArrowLeftTextIntent extends TextEditingIntent {}
-class MetaShiftArrowRightTextIntent extends TextEditingIntent {}
-class MetaShiftArrowUpTextIntent extends TextEditingIntent {}
-class MetaCTextIntent extends TextEditingIntent {}
-class SingleLongTapEndTextIntent extends TextEditingIntent {}
-class SingleLongTapMoveUpdateTextIntent extends TextEditingIntent {}
-class SingleLongTapStartTextIntent extends TextEditingIntent {}
-class SingleTapCancelTextIntent extends TextEditingIntent {}
-class SingleTapUpTextIntent extends TextEditingIntent {
-  SingleTapUpTextIntent({
-    required this.details,
-  });
-
-  final TapUpDetails details;
-}
-class ShiftArrowDownTextIntent extends TextEditingIntent {}
-class ShiftArrowLeftTextIntent extends TextEditingIntent {}
-class ShiftArrowRightTextIntent extends TextEditingIntent {}
-class ShiftArrowUpTextIntent extends TextEditingIntent {}
-class ShiftEndTextIntent extends TextEditingIntent {}
-class ShiftHomeTextIntent extends TextEditingIntent {}
+import 'text_editing_intent.dart';
 
 /// The map of [Action]s that correspond to the default text editing behavior
 /// for Flutter on the current platform.
@@ -97,40 +34,6 @@ class TextEditingActions extends StatelessWidget {
   /// additionalActions. To override the default text editing actions, use an
   /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
-
-  static final TextEditingAction<SingleTapUpTextIntent> _singleTapUpTextAction = TextEditingAction<SingleTapUpTextIntent>(
-    onInvoke: (SingleTapUpTextIntent intent) {
-      intent.editableTextState.hideToolbar();
-      if (intent.editableTextState.widget.selectionEnabled) {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            switch (intent.details.kind) {
-              case PointerDeviceKind.mouse:
-              case PointerDeviceKind.stylus:
-              case PointerDeviceKind.invertedStylus:
-                // Precise devices should place the cursor at a precise position.
-                intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-                break;
-              case PointerDeviceKind.touch:
-              case PointerDeviceKind.unknown:
-                // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-                // of the word.
-                intent.editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-                break;
-            }
-            break;
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            intent.editableTextState.renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-            break;
-        }
-      }
-      intent.editableTextState.requestKeyboard();
-    },
-  );
 
   static final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEditingAction<AltArrowLeftTextIntent>(
     onInvoke: (AltArrowLeftTextIntent intent) {
@@ -374,8 +277,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  // TODO(justinmc): Notice that this does nearly the same thing as
-  // MetaArrowLeftTextIntent, but for different platforms.
   static final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
     onInvoke: (HomeTextIntent intent) {
       switch (defaultTargetPlatform) {
@@ -538,11 +439,6 @@ class TextEditingActions extends StatelessWidget {
       // TODO(justinmc): Should handle all actions from
       // TextSelectionGestureDetectorBuilder and from
       // _TextFieldSelectionGestureDetectorBuilder.
-      // TODO(justinmc): Alternative idea: These intents should map to actions
-      // that are named for what they do. The mapping is different depending on
-      // the platform. I guess I'd have a bunch of properties above like
-      // _androidTextEditingActionMap etc. But then, would each action just be
-      // a single call to a RenderEditable method?
       actions: <Type, Action<Intent>>{
         ...additionalActions,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
@@ -574,7 +470,6 @@ class TextEditingActions extends StatelessWidget {
         ShiftArrowLeftTextIntent: _shiftArrowLeftTextAction,
         ShiftArrowRightTextIntent: _shiftArrowRightTextAction,
         ShiftArrowUpTextIntent: _shiftArrowUpTextAction,
-        SingleTapUpTextIntent: _singleTapUpTextAction,
         ShiftHomeTextIntent: _shiftHomeTextAction,
         ShiftEndTextIntent: _shiftEndTextAction,
       },

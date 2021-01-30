@@ -118,6 +118,7 @@ export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_action.dart';
 export 'src/widgets/text_editing_actions.dart';
+export 'src/widgets/text_editing_intent.dart';
 export 'src/widgets/text_editing_shortcuts.dart';
 export 'src/widgets/text_selection.dart';
 export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
