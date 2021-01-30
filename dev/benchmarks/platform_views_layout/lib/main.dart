@@ -15,11 +15,13 @@ void main() {
 
 class PlatformViewApp extends StatefulWidget {
   const PlatformViewApp({
-    Key? key,
+    Key key
   }) : super(key: key);
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
+
+  static PlatformViewAppState of(BuildContext context) => context.findAncestorStateOfType<PlatformViewAppState>();
 }
 
 class PlatformViewAppState extends State<PlatformViewApp> {
@@ -40,7 +42,7 @@ class PlatformViewAppState extends State<PlatformViewApp> {
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ Key? key }) : super(key: key);
+  const PlatformViewLayout({ Key key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +72,12 @@ class PlatformViewLayout extends StatelessWidget {
 }
 
 class DummyPlatformView extends StatelessWidget {
-  const DummyPlatformView({Key? key}) : super(key: key);
+  const DummyPlatformView({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
-    late Widget nativeView;
+    Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(
         viewType: viewType,
@@ -96,7 +98,7 @@ class DummyPlatformView extends StatelessWidget {
 }
 
 class RotationContainer extends StatefulWidget {
-  const RotationContainer({Key? key}) : super(key: key);
+  const RotationContainer({Key key}) : super(key: key);
 
   @override
   _RotationContainerState createState() => _RotationContainerState();
@@ -104,7 +106,7 @@ class RotationContainer extends StatefulWidget {
 
 class _RotationContainerState extends State<RotationContainer>
   with SingleTickerProviderStateMixin {
-  late AnimationController _rotationController;
+  AnimationController _rotationController;
 
   @override
   void initState() {
