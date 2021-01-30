@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/gestures.dart';
 
 const double kTwoPi = 2 * math.pi;
 

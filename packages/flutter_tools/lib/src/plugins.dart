@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
@@ -345,7 +347,7 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project) async {
+Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = true}) async {
   final List<Plugin> plugins = <Plugin>[];
   final String packagesFile = globals.fs.path.join(
     project.directory.path,
@@ -354,6 +356,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
+    throwOnError: throwOnError,
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');

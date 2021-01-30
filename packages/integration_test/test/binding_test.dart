@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:integration_test/common.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
 vm.Timeline _kTimelines = vm.Timeline(
@@ -26,20 +25,14 @@ Future<void> main() async {
     assert(binding is IntegrationTestWidgetsFlutterBinding);
     final IntegrationTestWidgetsFlutterBinding integrationBinding = binding as IntegrationTestWidgetsFlutterBinding;
 
-    MockVM mockVM;
-    final List<int> clockTimes = <int>[100, 200];
+    FakeVM fakeVM;
 
     setUp(() {
       request = integrationBinding.callback(<String, String>{
         'command': 'request_data',
       });
-      mockVM = MockVM();
-      when(mockVM.getVMTimeline(
-        timeOriginMicros: anyNamed('timeOriginMicros'),
-        timeExtentMicros: anyNamed('timeExtentMicros'),
-      )).thenAnswer((_) => Future<vm.Timeline>.value(_kTimelines));
-      when(mockVM.getVMTimelineMicros()).thenAnswer(
-        (_) => Future<vm.Timestamp>.value(vm.Timestamp(timestamp: clockTimes.removeAt(0))),
+      fakeVM = FakeVM(
+        timeline: _kTimelines,
       );
     });
 
@@ -78,7 +71,7 @@ Future<void> main() async {
     });
 
     testWidgets('Test traceAction', (WidgetTester tester) async {
-      await integrationBinding.enableTimeline(vmService: mockVM);
+      await integrationBinding.enableTimeline(vmService: fakeVM);
       await integrationBinding.traceAction(() async {});
       expect(integrationBinding.reportData, isNotNull);
       expect(integrationBinding.reportData.containsKey('timeline'), true);
@@ -121,4 +114,32 @@ Future<void> main() async {
   });
 }
 
-class MockVM extends Mock implements vm.VmService {}
+class FakeVM extends Fake implements vm.VmService {
+  FakeVM({@required this.timeline});
+
+  vm.Timeline timeline;
+
+  @override
+  Future<vm.Timeline> getVMTimeline({int timeOriginMicros, int timeExtentMicros}) async {
+    return timeline;
+  }
+
+  int lastTimeStamp = 0;
+  @override
+  Future<vm.Timestamp> getVMTimelineMicros() async {
+    lastTimeStamp += 100;
+    return vm.Timestamp(timestamp: lastTimeStamp);
+  }
+
+  List<String> recordedStreams = <String>[];
+  @override
+  Future<vm.Success> setVMTimelineFlags(List<String> recordedStreams) async {
+    recordedStreams = recordedStreams;
+    return vm.Success();
+  }
+
+  @override
+  Future<vm.Success> clearVMTimeline() async {
+    return vm.Success();
+  }
+}

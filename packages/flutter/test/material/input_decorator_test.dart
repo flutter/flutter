@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1519,7 +1520,7 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1542,7 +1543,7 @@ void main() {
       buildInputDecorator(
         isEmpty: true,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1577,7 +1578,7 @@ void main() {
       buildInputDecorator(
         isEmpty: false,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -3811,7 +3812,7 @@ void main() {
           // is rounded.
 
           // Top-left
-          Offset(0.0, 0.0),
+          Offset.zero,
           // Top-right
           Offset(inputDecoratorWidth, 0.0),
           // Bottom-left
@@ -4419,5 +4420,43 @@ void main() {
     final double height = tester.getSize(find.byKey(key)).height;
     final double intrinsicHeight = tester.getSize(find.byKey(intrinsicHeightKey)).height;
     expect(intrinsicHeight, equals(height));
+  });
+
+  testWidgets('error message for negative baseline', (WidgetTester tester) async {
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails ??= details;
+    };
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: InputDecorator(
+                decoration: const InputDecoration(),
+                child: Stack(
+                  children: const <Widget>[
+                    SizedBox(height: 0),
+                    Positioned(
+                      bottom: 5,
+                      child: Text('ok'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        null,
+        EnginePhase.layout,
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
+    expect(errorDetails?.toString(), contains('RenderStack'));
   });
 }

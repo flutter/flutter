@@ -1059,4 +1059,66 @@ void main() {
     final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
     expect(scrollbar.controller, isNotNull);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    final GlobalKey outerKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Scrollbar(
+            key: key2,
+            notificationPredicate: null,
+            child: SingleChildScrollView(
+              key: outerKey,
+              child: SizedBox(
+                height: 1000.0,
+                width: double.infinity,
+                child: Column(
+                  children: <Widget>[
+                    Scrollbar(
+                      key: key1,
+                      notificationPredicate: null,
+                      child: SizedBox(
+                        height: 300.0,
+                        width: double.infinity,
+                        child: SingleChildScrollView(
+                          key: innerKey,
+                          child: const SizedBox(
+                            key: Key('Inner scrollable'),
+                            height: 1000.0,
+                            width: double.infinity,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the inner scrollable widget.
+    await tester.drag(find.byKey(innerKey), const Offset(0.0, -25.0));
+    await tester.pump();
+    // Scrollbar fully showing.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      tester.renderObject(find.byKey(key2)),
+      paintsExactlyCountTimes(#drawRect, 2), // Each bar will call [drawRect] twice.
+    );
+
+    expect(
+      tester.renderObject(find.byKey(key1)),
+      paintsExactlyCountTimes(#drawRect, 2),
+    );
+  }, variant: TargetPlatformVariant.all());
 }

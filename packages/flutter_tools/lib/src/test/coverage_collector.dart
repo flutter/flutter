@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -205,7 +207,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   final vm_service.VmService vmService = await connector(serviceUri);
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
-  vmService.dispose();
+  // TODO(dnfield): Remove ignore once internal repo is up to date
+  // https://github.com/flutter/flutter/issues/74518
+  // ignore: await_only_futures
+  await vmService.dispose();
   return result;
 }
 

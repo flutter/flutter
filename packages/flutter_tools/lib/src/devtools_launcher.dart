@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
@@ -53,9 +55,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       try {
         const String pubHostedUrlKey = 'PUB_HOSTED_URL';
         if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(_platform.environment[pubHostedUrlKey]);
+          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
         } else {
-          await http.head('https://pub.dev');
+          await http.head(Uri.https('pub.dev', ''));
         }
       } on Exception {
         offline = true;
@@ -172,7 +174,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<DevToolsServerAddress> serve() async {
-    await launch(null);
+    if (activeDevToolsServer == null) {
+      await launch(null);
+    }
     return activeDevToolsServer;
   }
 

@@ -165,7 +165,7 @@ void main() {
       expect(insideBox.size.width, 10.0);
       expect(insideBox.size.height, 10.0);
 
-      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideTopLeft = insideBox.localToGlobal(Offset.zero);
       final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(0.0, 90.0));
       final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
       final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(10.0, 100.0));
@@ -206,7 +206,7 @@ void main() {
       expect(insideBox.size.width, 10.0);
       expect(insideBox.size.height, 10.0);
 
-      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideTopLeft = insideBox.localToGlobal(Offset.zero);
       final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(90.0, 90.0));
       final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
       final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(100.0, 100.0));
@@ -247,7 +247,7 @@ void main() {
       expect(insideBox.size.width, 10.0);
       expect(insideBox.size.height, 10.0);
 
-      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideTopLeft = insideBox.localToGlobal(Offset.zero);
       final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(45.0, 45.0));
       final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
       final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(55.0, 55.0));
@@ -288,7 +288,7 @@ void main() {
       expect(insideBox.size.width, 30.0);
       expect(insideBox.size.height, 10.0);
 
-      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideTopLeft = insideBox.localToGlobal(Offset.zero);
       final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(35.0, 45.0));
       final Offset insideBottomRight = insideBox.localToGlobal(const Offset(30.0, 10.0));
       final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(65.0, 55.0));
@@ -329,8 +329,8 @@ void main() {
       expect(insideBox.size.width, 30.0);
       expect(insideBox.size.height, 10.0);
 
-      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
-      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideTopLeft = insideBox.localToGlobal(Offset.zero);
+      final Offset outsideTopLeft = outsideBox.localToGlobal(Offset.zero);
       final Offset insideBottomRight = insideBox.localToGlobal(const Offset(30.0, 10.0));
       final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(100.0, 100.0));
 
