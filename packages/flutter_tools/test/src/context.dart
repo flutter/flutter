@@ -87,7 +87,7 @@ void testUsingContext(
       'flutter_config_dir_test.',
     );
     return Config.test(
-      Config.kFlutterSettings,
+      name: Config.kFlutterSettings,
       directory: configDir,
       logger: globals.logger,
     );
