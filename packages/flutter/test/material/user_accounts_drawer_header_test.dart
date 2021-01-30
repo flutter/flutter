@@ -17,8 +17,8 @@ Future<void> pumpTestWidget(
       bool withName = true,
       bool withEmail = true,
       bool withOnDetailsPressedHandler = true,
-      Size otherAccountsPictureSize = const Size.square(40),
-      Size currentAccountPictureSize  = const Size.square(72),
+      Size otherAccountsPictureSize = const Size.square(40.0),
+      Size currentAccountPictureSize  = const Size.square(72.0),
     }) async {
   await tester.pumpWidget(
     MaterialApp(
