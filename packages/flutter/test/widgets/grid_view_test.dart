@@ -783,4 +783,16 @@ void main() {
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
   });
+
+  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0', (WidgetTester tester) async {
+    const double maxCrossAxisExtent = 0;
+
+    expect(() => Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.extent(
+        maxCrossAxisExtent: maxCrossAxisExtent,
+      ),
+    ), throwsA(isA<AssertionError>()));
+
+  });
 }
