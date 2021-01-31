@@ -22,7 +22,7 @@ String getCmakeExecutableName(CmakeBasedProject project) {
 }
 
 String _escapeBackslashes(String s) {
-  return s.replaceAll(r'\', r'\\').replaceAll('%3D', '=');
+  return s.replaceAll(r'\', r'\\');
 }
 
 /// Writes a generated CMake configuration file for [project], including
