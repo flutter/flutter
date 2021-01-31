@@ -1925,6 +1925,48 @@ void main() {
     ));
   });
 
+  testWidgets('AppBar draws a light system bar for a light theme with a dark background', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.deepOrange);
+    await tester.pumpWidget(MaterialApp(
+      theme: lightTheme,
+      home: Scaffold(
+        appBar: AppBar(
+          backwardsCompatibility: false,
+          title: const Text('test')
+        ),
+      ),
+    ));
+
+    expect(lightTheme.primaryColorBrightness, Brightness.dark);
+    expect(lightTheme.colorScheme.brightness, Brightness.light);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+    ));
+  });
+
+  testWidgets('AppBar draws a dark system bar for a dark theme with a light background', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, cardColor: Colors.white);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            title: const Text('test')
+          ),
+        ),
+      ),
+    );
+
+    expect(darkTheme.primaryColorBrightness, Brightness.dark);
+    expect(darkTheme.colorScheme.brightness, Brightness.dark);
+    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+    ));
+  });
+
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
     const double appBarHeight = 256.0;
