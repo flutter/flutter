@@ -2331,14 +2331,28 @@ Finder _opacityAboveLabel(String text) {
 }
 
 // Only valid when labelType != all.
-double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
-    find.ancestor(
-      of: find.text(text),
-      matching: find.byType(Opacity),
-    ),
-  );
-  return opacityWidget.opacity;
+double? _labelOpacity(WidgetTester tester, String text) {
+  // We search for both Opacity and FadeTransition since in some
+  // cases opacity is animated, in other it's not.
+  try {
+    final Opacity opacityWidget = tester.widget<Opacity>(
+      find.ancestor(
+        of: find.text(text),
+        matching: find.byType(Opacity),
+      ),
+    );
+    return opacityWidget.opacity;
+  } on StateError catch (error) {
+    if (error.message == 'No element') {
+      final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
+        find.ancestor(
+          of: find.text(text),
+          matching: find.byType(FadeTransition),
+        ).first, // first because there's also a FadeTransition from the MaterialPageRoute, which is up the tree
+      );
+      return fadeTransitionWidget.opacity.value;
+    }
+  }
 }
 
 Material _railMaterial(WidgetTester tester) {
