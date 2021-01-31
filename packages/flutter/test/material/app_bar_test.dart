@@ -1904,7 +1904,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
