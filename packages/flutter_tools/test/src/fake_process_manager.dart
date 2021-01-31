@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
@@ -299,8 +301,11 @@ abstract class FakeProcessManager implements ProcessManager {
     );
   }
 
+  /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) => true;
+  bool canRun(dynamic executable, {String workingDirectory}) => !excludedExecutables.contains(executable);
+
+  Set<String> excludedExecutables = <String>{};
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

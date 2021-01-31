@@ -33,8 +33,8 @@ void main() {
   });
 
   group('SshCommandRunner.run', () {
-    FakeProcessManager fakeProcessManager;
-    FakeProcessResult fakeProcessResult;
+    late FakeProcessManager fakeProcessManager;
+    late FakeProcessResult fakeProcessResult;
     SshCommandRunner runner;
 
     setUp(() {
@@ -103,10 +103,10 @@ void main() {
       );
       fakeProcessResult.stdout = 'somestuff';
       await runner.run('ls /whatever');
-      final List<String> passedCommand = fakeProcessManager.runCommands.single as List<String>;
+      final List<String?> passedCommand = fakeProcessManager.runCommands.single as List<String?>;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
-      final String passedConfig = passedCommand[indexOfFlag + 1];
+      final String? passedConfig = passedCommand[indexOfFlag + 1];
       expect(passedConfig, config);
     });
 
@@ -118,7 +118,7 @@ void main() {
       );
       fakeProcessResult.stdout = 'somestuff';
       await runner.run('ls /whatever');
-      final List<String> passedCommand = fakeProcessManager.runCommands.single as List<String>;
+      final List<String?> passedCommand = fakeProcessManager.runCommands.single as List<String?>;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });
@@ -126,21 +126,21 @@ void main() {
 }
 
 class FakeProcessManager extends Fake implements ProcessManager {
-  FakeProcessResult fakeResult;
+  FakeProcessResult? fakeResult;
 
   List<List<dynamic>> runCommands = <List<dynamic>>[];
 
   @override
   Future<ProcessResult> run(List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) async {
     runCommands.add(command);
-    return fakeResult;
+    return fakeResult!;
   }
 }
 

@@ -11,9 +11,9 @@ import 'common.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
-    List<FakePortForwarder> forwardedPorts;
+    late List<FakePortForwarder> forwardedPorts;
     List<FakeVmService> fakeVmServices;
-    List<Uri> uriConnections;
+    late List<Uri> uriConnections;
 
     setUp(() {
       final List<Map<String, dynamic>> flutterViewCannedResponses =
@@ -63,7 +63,7 @@ void main() {
       uriConnections = <Uri>[];
       Future<vms.VmService> fakeVmConnectionFunction(
         Uri uri, {
-        Duration timeout,
+        Duration? timeout,
       }) {
         return Future<vms.VmService>(() async {
           final FakeVmService service = FakeVmService();
@@ -89,8 +89,8 @@ void main() {
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -156,8 +156,8 @@ void main() {
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -223,8 +223,8 @@ void main() {
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
-        String interface = '',
-        String configFile,
+        String? interface = '',
+        String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -296,24 +296,24 @@ void main() {
 }
 
 class FakeSshCommandRunner extends Fake implements SshCommandRunner {
-  List<String> findResponse;
-  List<String> lsResponse;
+  List<String>? findResponse;
+  List<String>? lsResponse;
   @override
   Future<List<String>> run(String command) async {
     if (command.startsWith('/bin/find')) {
-      return findResponse;
+      return findResponse!;
     }
     if (command.startsWith('/bin/ls')) {
-      return lsResponse;
+      return lsResponse!;
     }
     throw UnimplementedError(command);
   }
 
   @override
-  String interface;
+  String interface = '';
 
   @override
-  String address;
+  String address = '';
 
   @override
   String get sshConfigPath => '~/.ssh';
@@ -321,13 +321,13 @@ class FakeSshCommandRunner extends Fake implements SshCommandRunner {
 
 class FakePortForwarder extends Fake implements PortForwarder {
   @override
-  int port;
+  int port = 0;
 
   @override
-  int remotePort;
+  int remotePort = 0;
 
   @override
-  String openPortAddress;
+  String? openPortAddress;
 
   bool stopped = false;
   @override
@@ -338,7 +338,7 @@ class FakePortForwarder extends Fake implements PortForwarder {
 
 class FakeVmService extends Fake implements vms.VmService {
   bool disposed = false;
-  vms.Response flutterListViews;
+  vms.Response? flutterListViews;
 
   @override
   Future<void> dispose() async {
@@ -346,15 +346,15 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method, {String isolateId, Map<String, dynamic> args}) async {
+  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
     if (method == '_flutter.listViews') {
-      return flutterListViews;
+      return flutterListViews!;
     }
     throw UnimplementedError(method);
   }
 
   @override
-  Future<void> onDone;
+  Future<void> onDone = Future<void>.value();
 
   @override
   Future<vms.Version> getVersion() async {

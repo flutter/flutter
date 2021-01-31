@@ -8574,6 +8574,51 @@ void main() {
     expect(scrollController.offset, 48.0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/74566
+  testWidgets('TextField and last input character are visible on the screen when the cursor is not shown', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final ScrollController textFieldScrollController = ScrollController();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Container(height: 579), // Push field almost off screen.
+              TextField(
+                scrollController: textFieldScrollController,
+                showCursor: false,
+              ),
+              Container(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the TextField to bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tapAt(tester.getTopLeft(find.byType(TextField)));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField visible.
+    expect(scrollController.offset, 48.0);
+    expect(textFieldScrollController.offset, 0.0);
+
+    // After entering some long text, the last input character remains on the screen.
+    final String testValue = 'I love Flutter!' * 10;
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: testValue,
+      selection: TextSelection.collapsed(offset: testValue.length),
+    ));
+    await tester.pump();
+    await tester.pumpAndSettle(); // Text scroll animation.
+
+    expect(textFieldScrollController.offset, 1602.0);
+  });
+
   group('height', () {
     testWidgets('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
