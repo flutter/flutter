@@ -73,8 +73,8 @@ void main() {
       final List<Device> devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
       expect(devices, hasLength(1));
     });
-
   });
+
   group('startApp', () {
     FlutterTesterDevice device;
     List<String> logLines;
@@ -111,7 +111,7 @@ void main() {
         buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: MockFlutterVersion(),
-        operatingSystemUtils: MockOperatingSystemUtils(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -189,19 +189,9 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
       logger: logger,
     ),
     flutterVersion: MockFlutterVersion(),
-    operatingSystemUtils: MockOperatingSystemUtils(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
 class MockFlutterVersion extends Mock implements FlutterVersion {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
-  MockOperatingSystemUtils({
-    HostPlatform hostPlatform = HostPlatform.linux_x64
-  })  : _hostPlatform = hostPlatform;
-
-  final HostPlatform _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform => _hostPlatform;
-}

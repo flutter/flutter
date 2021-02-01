@@ -34,13 +34,13 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         logger: BufferLogger.test(),
-        osUtils: MockOperatingSystemUtils(),
+        osUtils: FakeOperatingSystemUtils(),
       );
       artifacts = CachedArtifacts(
         fileSystem: fileSystem,
         cache: cache,
         platform: platform,
-        operatingSystemUtils: MockOperatingSystemUtils(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
     });
 
@@ -184,7 +184,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         logger: BufferLogger.test(),
-        osUtils: MockOperatingSystemUtils(),
+        osUtils: FakeOperatingSystemUtils(),
       );
       artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
@@ -193,7 +193,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: FakeProcessManager.any(),
-        operatingSystemUtils: MockOperatingSystemUtils(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
     });
 
@@ -304,7 +304,7 @@ void main() {
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
         processManager: FakeProcessManager.any(),
-        operatingSystemUtils: MockOperatingSystemUtils(hostPlatform: HostPlatform.windows_x64),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
       expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
@@ -314,15 +314,4 @@ void main() {
       expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
     });
   });
-}
-
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
-  MockOperatingSystemUtils({
-    HostPlatform hostPlatform = HostPlatform.linux_x64
-  })  : _hostPlatform = hostPlatform;
-
-  final HostPlatform _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform => _hostPlatform;
 }
