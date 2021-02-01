@@ -2945,6 +2945,7 @@ void main() {
     await tester.pumpAndSettle();
 
     scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    // The scrollbar is shown when the list is longer than the height of the screen.
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
   });
