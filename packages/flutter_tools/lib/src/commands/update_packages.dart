@@ -27,7 +27,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Dart analyzer does not catch renamed or deleted files.
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
-  'flutter_gallery_assets': '^0.2.0',
+  'flutter_gallery_assets': '^1.0.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'mockito': '4.1.1', // Prevent mockito from upgrading to the source gen version.
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
