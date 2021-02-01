@@ -19,7 +19,6 @@ import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
-import 'text_editing_intent.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'visibility.dart';

@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'text_editing_action.dart';
-import 'text_editing_intent.dart';
+import 'text_editing_intents.dart';
 
 /// An [Actions] Widget that handles the default  text editing behavior for
 /// Flutter on the current platform.
@@ -364,6 +364,7 @@ class TextEditingActions extends StatelessWidget {
 
   static final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
     onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
+      print('justin shift arrow left');
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
     },
   );

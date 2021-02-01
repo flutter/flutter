@@ -820,6 +820,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _textPainter.getPositionForOffset(caretOffsetTranslated);
   }
 
+  // Returns the TextPosition above the given offset into _plainText.
+  //
+  // If the offset is already on the first line, the given offset will be
+  // returned.
   TextPosition _getTextPositionAbove(int offset) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
@@ -829,6 +833,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  // Returns the TextPosition below the given offset into _plainText.
+  //
+  // If the offset is already on the last line, the given offset will be
+  // returned.
   TextPosition _getTextPositionBelow(int offset) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
@@ -838,6 +846,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
+  /// Keeping the current baseOffset fixed, move the extentOffset down by one
+  /// line.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionUp]
   void extendSelectionDown(SelectionChangedCause cause) {
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
@@ -849,18 +863,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
-    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
-
     late TextSelection nextSelection;
     if (positionBelow.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(
-        baseOffset: upperOffset,
         extentOffset: _plainText.length,
       );
       _wasSelectingVerticallyWithKeyboard = true;
     } else if (_wasSelectingVerticallyWithKeyboard) {
       nextSelection = selection!.copyWith(
-        baseOffset: selection!.baseOffset,
         extentOffset: _cursorResetLocation,
       );
       _wasSelectingVerticallyWithKeyboard = false;
@@ -902,7 +912,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Keeping the current baseOffset fixed, move the extentOffset left.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionRight]
   void extendSelectionLeft(SelectionChangedCause cause) {
+    print('justin extend left');
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
@@ -919,6 +935,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+
+  /// Keeping the current baseOffset fixed, move the extentOffset left.
+  ///
+  /// See also:
+  ///
+  ///   * [expandSelectionLeft]
   void extendSelectionRight(SelectionChangedCause cause) {
     if (!selectionEnabled) {
       return moveSelectionRight(cause);
@@ -936,6 +958,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Keeping the current baseOffset fixed, move the extentOffset up by one
+  /// line.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionDown]
   void extendSelectionUp(SelectionChangedCause cause) {
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
@@ -947,12 +975,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
-    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
-
     late TextSelection nextSelection;
     if (positionAbove.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(
-        baseOffset: lowerOffset,
         extentOffset: 0,
       );
       _wasSelectingVerticallyWithKeyboard = true;
