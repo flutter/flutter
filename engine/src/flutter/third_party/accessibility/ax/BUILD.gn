@@ -16,8 +16,6 @@ source_set("ax") {
     "platform/ax_platform_node_delegate.h",
     "platform/ax_platform_node_delegate_base.cc",
     "platform/ax_platform_node_delegate_base.h",
-    "platform/ax_platform_text_boundary.cc",
-    "platform/ax_platform_text_boundary.h",
     "platform/ax_unique_id.cc",
     "platform/ax_unique_id.h",
     "platform/compute_attributes.cc",
