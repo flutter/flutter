@@ -22,7 +22,10 @@ source_set("base") {
     "string_utils.cc",
     "string_utils.h",
   ]
-
+  if (is_win) {
+    # TODO: codecvt_utf8_utf16 is deprecated in C++17
+    defines = [ "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS" ]
+  }
   if (is_mac) {
     sources += [
       "platform/darwin/scoped_nsobject.h",

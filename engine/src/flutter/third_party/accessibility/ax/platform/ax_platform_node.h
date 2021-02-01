@@ -5,6 +5,7 @@
 #ifndef UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_H_
 #define UI_ACCESSIBILITY_PLATFORM_AX_PLATFORM_NODE_H_
 
+#include <functional>
 #include <ostream>
 #include <string>
 
