@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
@@ -18,7 +20,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
+import '../../src/fakes.dart';
+import '../../src/mocks.dart' show MockProcessManager, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
 import '../../src/testbed.dart';
 
 void main() {
@@ -374,7 +377,7 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
-      Stdio: () => MockStdio()..stdout.terminalColumns = 80,
+      Stdio: () => FakeStdio()..stdout.terminalColumns = 80,
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -436,11 +439,11 @@ void main() {
 
   group('packages test/pub', () {
     MockProcessManager mockProcessManager;
-    MockStdio mockStdio;
+    FakeStdio mockStdio;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      mockStdio = MockStdio()..stdout.terminalColumns = 80;
+      mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {

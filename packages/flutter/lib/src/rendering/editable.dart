@@ -407,6 +407,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double? _textLayoutLastMinWidth;
 
   Rect? _lastCaretRect;
+  // TODO(LongCatIsLooong): currently EditableText uses this callback to keep
+  // the text field visible. But we don't always paint the caret, for example
+  // when the selection is not collapsed.
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler? onCaretChanged;
   void _onCaretChanged(Rect caretRect) {
@@ -2704,28 +2707,30 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     caretRect = caretRect.shift(renderEditable._paintOffset);
     final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
-    final Radius? radius = cursorRadius;
-    caretPaint.color = caretColor;
-    if (radius == null) {
-      canvas.drawRect(integralRect, caretPaint);
-    } else {
-      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
-      canvas.drawRRect(caretRRect, caretPaint);
+
+    if (shouldPaint) {
+      final Radius? radius = cursorRadius;
+      caretPaint.color = caretColor;
+      if (radius == null) {
+        canvas.drawRect(integralRect, caretPaint);
+      } else {
+        final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+        canvas.drawRRect(caretRRect, caretPaint);
+      }
     }
     caretPaintCallback(integralRect);
   }
 
   @override
   void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
-    if (!shouldPaint)
-      return;
+    // Compute the caret location even when `shouldPaint` is false.
 
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): avoid painting the caret when the selection is
+    // TODO(LongCatIsLooong): skip painting the caret when the selection is
     // (-1, -1).
-    if (selection == null || !selection.isCollapsed /* || !selection.isValid*/)
+    if (selection == null || !selection.isCollapsed)
       return;
 
     final Rect? floatingCursorRect = this.floatingCursorRect;
@@ -2743,12 +2748,11 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
     // Floating Cursor.
-    if (floatingCursorRect == null || floatingCursorColor == null)
+    if (floatingCursorRect == null || floatingCursorColor == null || !shouldPaint)
       return;
 
-    floatingCursorRect.shift(renderEditable._paintOffset);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect.shift(renderEditable._paintOffset), _kFloatingCaretRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }

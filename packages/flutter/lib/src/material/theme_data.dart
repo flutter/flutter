@@ -6,8 +6,6 @@ import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
@@ -2062,7 +2060,7 @@ class VisualDensity with Diagnosticable {
       case TargetPlatform.windows:
         return compact;
     }
-    return const VisualDensity();
+    return VisualDensity.standard;
   }
 
   /// Copy the current [VisualDensity] with the given values replacing the

@@ -16,7 +16,7 @@ import 'rendering_tester.dart';
 
 class FakeEditableTextState with TextSelectionDelegate {
   @override
-  TextEditingValue textEditingValue = const TextEditingValue();
+  TextEditingValue textEditingValue = TextEditingValue.empty;
 
   @override
   void hideToolbar() { }
@@ -446,7 +446,7 @@ void main() {
       paints..paragraph(offset: Offset.zero),
     );
 
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selectPositionAt(from: Offset.zero, cause: SelectionChangedCause.tap);
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
@@ -779,7 +779,7 @@ void main() {
     layout(editable);
     editable.hasFocus = true;
 
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selectPositionAt(from: Offset.zero, cause: SelectionChangedCause.tap);
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
@@ -936,7 +936,7 @@ void main() {
     layout(editable);
     editable.hasFocus = true;
 
-    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selectPositionAt(from: Offset.zero, cause: SelectionChangedCause.tap);
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 

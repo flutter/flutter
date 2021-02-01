@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -14,12 +16,12 @@ import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('BotDetector', () {
     FakePlatform fakePlatform;
-    MockStdio mockStdio;
+    FakeStdio fakeStdio;
     MockHttpClient mockHttpClient;
     MockHttpClientRequest mockHttpClientRequest;
     MockHttpHeaders mockHttpHeaders;
@@ -28,7 +30,7 @@ void main() {
 
     setUp(() {
       fakePlatform = FakePlatform()..environment = <String, String>{};
-      mockStdio = MockStdio();
+      fakeStdio = FakeStdio();
       mockHttpClient = MockHttpClient();
       mockHttpClientRequest = MockHttpClientRequest();
       mockHttpHeaders = MockHttpHeaders();
@@ -64,9 +66,9 @@ void main() {
         when(mockHttpClient.getUrl(any)).thenAnswer((_) {
           throw const SocketException('HTTP connection timed out');
         });
-        mockStdio.stdout.hasTerminal = true;
+        fakeStdio.stdout.hasTerminal = true;
         expect(await botDetector.isRunningOnBot, isFalse);
-        mockStdio.stdout.hasTerminal = false;
+        fakeStdio.stdout.hasTerminal = false;
         expect(await botDetector.isRunningOnBot, isFalse);
         expect(persistentToolState.isRunningOnBot, isFalse);
       });

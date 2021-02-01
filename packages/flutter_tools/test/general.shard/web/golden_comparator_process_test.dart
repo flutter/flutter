@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 

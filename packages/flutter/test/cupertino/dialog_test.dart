@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -797,7 +796,7 @@ void main() {
     // issue for our use-case, so we don't worry about it.
     expect(actionsSectionBox, paints..path(
       includes: <Offset>[
-        const Offset(0.0, 0.0),
+        Offset.zero,
         Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
       ],
     ));
