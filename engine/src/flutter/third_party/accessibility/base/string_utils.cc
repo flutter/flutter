@@ -4,6 +4,7 @@
 
 #include "string_utils.h"
 
+#include <cctype>
 #include <codecvt>
 #include <locale>
 #include <regex>

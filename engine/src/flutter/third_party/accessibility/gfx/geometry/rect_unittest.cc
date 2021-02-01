@@ -818,8 +818,8 @@ TEST(RectTest, BoundingRect) {
 TEST(RectTest, IsExpressibleAsRect) {
   EXPECT_TRUE(RectF().IsExpressibleAsRect());
 
-  float min = std::numeric_limits<int>::min();
-  float max = std::numeric_limits<int>::max();
+  float min = static_cast<float>(std::numeric_limits<int>::min());
+  float max = static_cast<float>(std::numeric_limits<int>::max());
   float infinity = std::numeric_limits<float>::infinity();
 
   EXPECT_TRUE(
@@ -1133,6 +1133,7 @@ TEST(RectTest, IntegerOverflow) {
 TEST(RectTest, ScaleToEnclosingRectSafe) {
   const int max_int = std::numeric_limits<int>::max();
   const int min_int = std::numeric_limits<int>::min();
+  const float max_float = std::numeric_limits<float>::max();
 
   Rect xy_underflow(-100000, -123456, 10, 20);
   EXPECT_EQ(ScaleToEnclosingRectSafe(xy_underflow, 100000, 100000),
@@ -1159,13 +1160,13 @@ TEST(RectTest, ScaleToEnclosingRectSafe) {
             Rect(100000, 200000, max_int - 100000, max_int - 200000));
 
   Rect max_rect(max_int, max_int, max_int, max_int);
-  EXPECT_EQ(ScaleToEnclosingRectSafe(max_rect, max_int, max_int),
+  EXPECT_EQ(ScaleToEnclosingRectSafe(max_rect, max_float, max_float),
             Rect(max_int, max_int, 0, 0));
 
   Rect min_rect(min_int, min_int, max_int, max_int);
   // Min rect can't be scaled up any further in any dimension.
   EXPECT_EQ(ScaleToEnclosingRectSafe(min_rect, 2, 3.5), min_rect);
-  EXPECT_EQ(ScaleToEnclosingRectSafe(min_rect, max_int, max_int), min_rect);
+  EXPECT_EQ(ScaleToEnclosingRectSafe(min_rect, max_float, max_float), min_rect);
   // Min rect scaled by min is an empty rect at (max, max)
   EXPECT_EQ(ScaleToEnclosingRectSafe(min_rect, min_int, min_int), max_rect);
 }
