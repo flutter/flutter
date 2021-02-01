@@ -58,11 +58,11 @@ class Response {
   static Response fromJson(String source) {
     final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
     if ((responseJson['result'] as String?) == 'true') {
-      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>);
+      return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
     } else {
       return Response.someTestsFailed(
         _failureDetailsFromJson(responseJson['failureDetails'] as List<dynamic>),
-        data: responseJson['data'] as Map<String, dynamic>,
+        data: responseJson['data'] as Map<String, dynamic>?,
       );
     }
   }
