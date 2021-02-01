@@ -2930,6 +2930,7 @@ void main() {
     await tester.pumpAndSettle();
 
     ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    // The scrollbar shouldn't show if the list fits into the screen.
     expect(scrollController.position.maxScrollExtent, 0);
     expect(find.byType(Scrollbar), isNot(paints..rect()));
 
