@@ -14,8 +14,8 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 void main() {
-  VmService vmService;
-  LiveTestWidgetsFlutterBinding binding;
+  late VmService vmService;
+  late LiveTestWidgetsFlutterBinding binding;
   setUpAll(() async {
     final developer.ServiceProtocolInfo info =
         await developer.Service.getInfo();
@@ -24,7 +24,7 @@ void main() {
       fail('This test _must_ be run with --enable-vmservice.');
     }
 
-    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri.port}${info.serverUri.path}ws');
+    vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await vmService.streamListen(EventStreams.kExtension);
 
     // Initialize bindings
@@ -37,8 +37,11 @@ void main() {
     await binding.endOfFrame;
   });
 
-  tearDownAll(() {
-    vmService.dispose();
+  tearDownAll(() async {
+    // TODO(dnfield): Remove ignore once internal repo is up to date
+    // https://github.com/flutter/flutter/issues/74518
+    // ignore: await_only_futures
+    await vmService.dispose();
   });
 
   test('Image painting events - deduplicates across frames', () async {
@@ -69,7 +72,7 @@ void main() {
     final Event event = await completer.future;
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
-      jsonEncode(event.extensionData.data),
+      jsonEncode(event.extensionData!.data),
       '{"test.png":{"source":"test.png","displaySize":{"width":200.0,"height":100.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":106666,"decodedSizeInBytes":480000}}',
     );
   }, skip: isBrowser); // uses dart:isolate and io
@@ -98,7 +101,7 @@ void main() {
     final Event event = await completer.future;
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
-      jsonEncode(event.extensionData.data),
+      jsonEncode(event.extensionData!.data),
       '{"test.png":{"source":"test.png","displaySize":{"width":300.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":480000,"decodedSizeInBytes":480000}}',
     );
   }, skip: isBrowser); // uses dart:isolate and io

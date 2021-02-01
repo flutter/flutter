@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{

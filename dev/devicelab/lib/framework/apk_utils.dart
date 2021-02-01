@@ -115,12 +115,14 @@ String get _androidHome {
 /// Executes an APK analyzer subcommand.
 Future<String> _evalApkAnalyzer(
   List<String> args, {
-  bool printStdout = true,
+  bool printStdout = false,
   String workingDirectory,
 }) async {
   final String javaHome = await findJavaHome();
-
-   final String apkAnalyzer = path
+  if (javaHome == null || javaHome.isEmpty) {
+    throw Exception('No JAVA_HOME set.');
+  }
+  final String apkAnalyzer = path
      .join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
    if (canRun(apkAnalyzer)) {
      return eval(
@@ -165,6 +167,7 @@ class ApkExtractor {
   bool _extracted = false;
 
   Set<String> _classes = const <String>{};
+  Set<String> _methods = const <String>{};
 
   Future<void> _extractDex() async {
     if (_extracted) {
@@ -177,22 +180,17 @@ class ApkExtractor {
         apkFile.path,
       ],
     );
+    final List<String> lines = packages.split('\n');
     _classes = Set<String>.from(
-      packages
-        .split('\n')
-        .where((String line) => line.startsWith('C'))
-        .map<String>((String line) => line.split('\t').last),
+      lines.where((String line) => line.startsWith('C'))
+           .map<String>((String line) => line.split('\t').last),
     );
     assert(_classes.isNotEmpty);
-    _extracted = true;
-  }
-
-  // Removes any temporary directory.
-  void dispose() {
-    if (!_extracted) {
-      return;
-    }
-    _classes = const <String>{};
+    _methods = Set<String>.from(
+      lines.where((String line) => line.startsWith('M'))
+           .map<String>((String line) => line.split('\t').last)
+    );
+    assert(_methods.isNotEmpty);
     _extracted = true;
   }
 
@@ -200,6 +198,13 @@ class ApkExtractor {
   Future<bool> containsClass(String className) async {
     await _extractDex();
     return _classes.contains(className);
+  }
+
+  /// Returns true if the APK contains a given method.
+  /// For example: io.flutter.plugins.googlemaps.GoogleMapController void onFlutterViewAttached(android.view.View)
+  Future<bool> containsMethod(String methodName) async {
+    await _extractDex();
+    return _methods.contains(methodName);
   }
 }
 
@@ -223,7 +228,16 @@ Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
       throw Exception("APK doesn't contain class `$className`.");
     }
   }
-  extractor.dispose();
+}
+
+/// Checks that the methods are defined in the APK, throws otherwise.
+Future<void> checkApkContainsMethods(File apk, List<String> methods) async {
+  final ApkExtractor extractor = ApkExtractor(apk);
+  for (final String method in methods) {
+    if (!(await extractor.containsMethod(method))) {
+      throw Exception("APK doesn't contain method `$method`.");
+    }
+  }
 }
 
 class FlutterProject {
@@ -288,7 +302,7 @@ subprojects {
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '${platformLineSep}dependencies:$platformLineSep',
-      '${platformLineSep}dependencies:$platformLineSep  $plugin:$value$platformLineSep',
+      '${platformLineSep}dependencies:$platformLineSep  $plugin: $value$platformLineSep',
     );
     await pubspec.writeAsString(content, flush: true);
   }

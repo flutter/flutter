@@ -64,7 +64,7 @@
   "refreshIndicatorSemanticLabel": "إعادة تحميل",
   "moreButtonTooltip": "المزيد",
   "dateSeparator": "/",
-  "dateHelpText": "dd/mm/yyyy",
+  "dateHelpText": "yyyy/mm/dd",
   "selectYearSemanticsLabel": "اختيار العام",
   "unspecifiedDate": "التاريخ",
   "unspecifiedDateRange": "النطاق الزمني",

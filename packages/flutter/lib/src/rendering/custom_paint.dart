@@ -488,6 +488,34 @@ class RenderCustomPaint extends RenderProxyBox {
   bool willChange;
 
   @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child == null)
+      return preferredSize.width.isFinite ? preferredSize.width : 0;
+    return super.computeMinIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child == null)
+      return preferredSize.width.isFinite ? preferredSize.width : 0;
+    return super.computeMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child == null)
+      return preferredSize.height.isFinite ? preferredSize.height : 0;
+    return super.computeMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child == null)
+      return preferredSize.height.isFinite ? preferredSize.height : 0;
+    return super.computeMaxIntrinsicHeight(width);
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _painter?.addListener(markNeedsPaint);

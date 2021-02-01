@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -46,6 +48,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
@@ -183,6 +186,8 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
         logger: globals.logger,
+        platform: globals.platform,
+        persistentToolState: globals.persistentToolState,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -278,6 +283,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
+        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState),
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(

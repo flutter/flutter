@@ -57,7 +57,7 @@ void main() {
       bottomRight: radius2,
     ));
 
-    borderRadius = const BorderRadius.only();
+    borderRadius = BorderRadius.zero;
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, Radius.zero);
     expect(borderRadius.topRight, Radius.zero);
@@ -228,7 +228,7 @@ void main() {
       bottomRight: radius1,
     ));
 
-    borderRadius = const BorderRadiusDirectional.only();
+    borderRadius = BorderRadiusDirectional.zero;
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, Radius.zero);
     expect(borderRadius.topEnd, Radius.zero);

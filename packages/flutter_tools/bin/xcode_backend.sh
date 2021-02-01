@@ -279,13 +279,13 @@ EmbedFlutterFrameworks() {
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --delete --filter "- .DS_Store/" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
 
   # Copy Xcode behavior and don't copy over headers or modules.
-  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
+  RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/Flutter.framework" "${xcode_frameworks_dir}/"
   if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
     # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
     RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${BUILT_PRODUCTS_DIR}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"

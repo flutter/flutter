@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -34,6 +36,22 @@ void main() {
         expect(
           () => FlutterProject.fromDirectory(null),
           throwsAssertionError,
+        );
+      });
+
+      testWithoutContext('invalid utf8 throws a tool exit', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final FlutterProjectFactory projectFactory = FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+        );
+        fileSystem.file('pubspec.yaml').writeAsBytesSync(<int>[0xFFFE]);
+
+        /// Technically this should throw a FileSystemException but this is
+        /// currently a bug in package:file.
+        expect(
+          () => projectFactory.fromDirectory(fileSystem.currentDirectory),
+          throwsToolExit(),
         );
       });
 
@@ -290,12 +308,12 @@ void main() {
     });
 
     group('language', () {
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      XcodeProjectInterpreter xcodeProjectInterpreter;
       MemoryFileSystem fs;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: FakeProcessManager.any());
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,
           fileSystem: fs,
@@ -321,7 +339,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
     });

@@ -151,8 +151,8 @@ class KeySet<T extends KeyboardKey> {
 /// A key set contains the keys that are down simultaneously to represent a
 /// shortcut.
 ///
-/// This is mainly used by [ShortcutManager] to allow the definition of shortcut
-/// mappings.
+/// This is mainly used by [ShortcutManager] and [Shortcuts] widget to allow the
+/// definition of shortcut mappings.
 ///
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
@@ -213,8 +213,9 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable {
   }
 }
 
-/// Diagnostics property which handles formatting a `Map<LogicalKeySet, Intent>`
-/// (the same type as the [Shortcuts.shortcuts] property) so that it is human-readable.
+/// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet,
+/// Intent>` (the same type as the [Shortcuts.shortcuts] property) so that its
+/// diagnostic output is human-readable.
 class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>> {
   /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
@@ -269,8 +270,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// in the [shortcuts] map.
   ///
   /// The net effect of setting `modal` to true is to return
-  /// [KeyEventResult.skipRemainingHandlers] from [handleKeypress] if it does not
-  /// exist in the shortcut map, instead of returning [KeyEventResult.ignored].
+  /// [KeyEventResult.skipRemainingHandlers] from [handleKeypress] if it does
+  /// not exist in the shortcut map, instead of returning
+  /// [KeyEventResult.ignored].
   final bool modal;
 
   /// Returns the shortcut map.
@@ -293,8 +295,8 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// Returns null if no intent matches the current set of pressed keys.
   ///
-  /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed` is
-  /// not supplied.
+  /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
+  /// is not supplied.
   Intent? _find({ LogicalKeySet? keysPressed }) {
     if (keysPressed == null && RawKeyboard.instance.keysPressed.isEmpty) {
       return null;
@@ -334,9 +336,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// focused widget's context (from [FocusManager.primaryFocus]).
   ///
   /// Returns a [KeyEventResult.handled] if an action was invoked, otherwise a
-  /// [KeyEventResult.skipRemainingHandlers] if [modal] is true, or if it maps to a
-  /// [DoNothingAction] with [DoNothingAction.consumesKey] set to false, and
-  /// in all other cases returns [KeyEventResult.ignored].
+  /// [KeyEventResult.skipRemainingHandlers] if [modal] is true, or if it maps
+  /// to a [DoNothingAction] with [DoNothingAction.consumesKey] set to false,
+  /// and in all other cases returns [KeyEventResult.ignored].
   ///
   /// In order for an action to be invoked (and [KeyEventResult.handled]
   /// returned), a pressed [KeySet] must be mapped to an [Intent], the [Intent]
@@ -382,59 +384,171 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   }
 }
 
-/// A widget that establishes a [ShortcutManager] to be used by its descendants
+/// A widget to that creates key bindings to specific actions for its
+/// descendants.
+///
+/// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
-/// Here, we will use a [Shortcuts] and [Actions] widget to add and remove from a counter.
-/// This can be done by creating a child widget that is focused and pressing the logical key
-/// sets that have been defined in [Shortcuts] and defining the actions that each key set
-/// performs.
+/// Here, we will use the [Shortcuts] and [Actions] widgets to add and subtract
+/// from a counter. When the child widget has keyboard focus, and a user presses
+/// the keys that have been defined in [Shortcuts], the action that is bound
+/// to the appropriate [Intent] for the key is invoked.
+///
+/// It also shows the use of a [CallbackAction] to avoid creating a new [Action]
+/// subclass.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
 /// ```
 ///
 /// ```dart preamble
-/// class Increment extends Intent {}
+/// class IncrementIntent extends Intent {
+///   const IncrementIntent();
+/// }
 ///
-/// class Decrement extends Intent {}
+/// class DecrementIntent extends Intent {
+///   const DecrementIntent();
+/// }
 /// ```
 ///
 /// ```dart
 /// int count = 0;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Shortcuts(
-///     shortcuts: <LogicalKeySet, Intent> {
-///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyK): Increment(),
-///       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.keyL): Decrement(),
+///     shortcuts: <LogicalKeySet, Intent>{
+///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(),
+///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(),
 ///     },
 ///     child: Actions(
-///       actions: <Type, Action<Intent>> {
-///         Increment: CallbackAction<Increment>(
-///           onInvoke: (Increment intent) => setState(() { count = count + 1; }),
+///       actions: <Type, Action<Intent>>{
+///         IncrementIntent: CallbackAction<IncrementIntent>(
+///           onInvoke: (IncrementIntent intent) => setState(() {
+///             count = count + 1;
+///           }),
 ///         ),
-///         Decrement: CallbackAction<Decrement>(
-///           onInvoke: (Decrement intent) => setState(() { count = count - 1; }),
+///         DecrementIntent: CallbackAction<DecrementIntent>(
+///           onInvoke: (DecrementIntent intent) => setState(() {
+///             count = count - 1;
+///           }),
 ///         ),
 ///       },
 ///       child: Focus(
-///         autofocus:true,
+///         autofocus: true,
 ///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             Text('Add: keyboard Shift + "k"'),
-///             Text('Subtract: keyboard Shift + "l"'),
-///             SizedBox(height: 10.0),
-///             ColoredBox(
-///               color: Colors.yellow,
-///               child: Padding(
-///                 padding: EdgeInsets.all(4.0),
-///                 child: Text('count: $count'),
-///               ),
+///             const Text('Add to the counter by pressing the up arrow key'),
+///             const Text(
+///                 'Subtract from the counter by pressing the down arrow key'),
+///             Text('count: $count'),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This slightly more complicated, but more flexible, example creates a custom
+/// [Action] subclass to increment and decrement within a widget (a [Column])
+/// that has keyboard focus. When the user presses the up and down arrow keys,
+/// the counter will increment and decrement a data model using the custom
+/// actions.
+///
+/// One thing that this demonstrates is passing arguments to the [Intent] to be
+/// carried to the [Action]. This shows how actions can get data either from
+/// their own construction (like the `model` in this example), or from the
+/// intent passed to them when invoked (like the increment `amount` in this
+/// example).
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class Model with ChangeNotifier {
+///   int count = 0;
+///   void incrementBy(int amount) {
+///     count += amount;
+///     notifyListeners();
+///   }
+///
+///   void decrementBy(int amount) {
+///     count -= amount;
+///     notifyListeners();
+///   }
+/// }
+///
+/// class IncrementIntent extends Intent {
+///   const IncrementIntent(this.amount);
+///
+///   final int amount;
+/// }
+///
+/// class DecrementIntent extends Intent {
+///   const DecrementIntent(this.amount);
+///
+///   final int amount;
+/// }
+///
+/// class IncrementAction extends Action<IncrementIntent> {
+///   IncrementAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   void invoke(covariant IncrementIntent intent) {
+///     model.incrementBy(intent.amount);
+///   }
+/// }
+///
+/// class DecrementAction extends Action<DecrementIntent> {
+///   DecrementAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   void invoke(covariant DecrementIntent intent) {
+///     model.decrementBy(intent.amount);
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Model model = Model();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Shortcuts(
+///     shortcuts: <LogicalKeySet, Intent>{
+///       LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(2),
+///       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DecrementIntent(2),
+///     },
+///     child: Actions(
+///       actions: <Type, Action<Intent>>{
+///         IncrementIntent: IncrementAction(model),
+///         DecrementIntent: DecrementAction(model),
+///       },
+///       child: Focus(
+///         autofocus: true,
+///         child: Column(
+///           children: <Widget>[
+///             const Text('Add to the counter by pressing the up arrow key'),
+///             const Text(
+///                 'Subtract from the counter by pressing the down arrow key'),
+///             AnimatedBuilder(
+///               animation: model,
+///               builder: (BuildContext context, Widget? child) {
+///                 return Text('count: ${model.count}');
+///               },
 ///             ),
 ///           ],
 ///         ),
@@ -450,6 +564,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///  * [Intent], a class for containing a description of a user action to be
 ///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
+///  * [CallbackAction], a class for creating an action from a callback.
 class Shortcuts extends StatefulWidget {
   /// Creates a const [Shortcuts] widget.
   ///
@@ -493,10 +608,10 @@ class Shortcuts extends StatefulWidget {
   /// map when logged.
   ///
   /// This allows simplifying the diagnostic output to avoid cluttering it
-  /// unnecessarily with the default shortcut map.
+  /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
 
-  /// Returns the [ActionDispatcher] that most tightly encloses the given
+  /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
@@ -526,7 +641,7 @@ class Shortcuts extends StatefulWidget {
     return inherited!.manager;
   }
 
-  /// Returns the [ActionDispatcher] that most tightly encloses the given
+  /// Returns the [ShortcutManager] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.

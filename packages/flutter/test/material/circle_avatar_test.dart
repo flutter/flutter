@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
+import '../painting/mocks_for_image_cache.dart';
 
 void main() {
   testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
@@ -70,6 +71,51 @@ void main() {
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
+  });
+
+  testWidgets('CircleAvatar with image foreground', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: CircleAvatar(
+          foregroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          radius: 50.0,
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(BoxFit.cover));
+  });
+
+  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+    final ErrorImageProvider errorImage = ErrorImageProvider();
+    bool caughtForegroundImageError = false;
+    await tester.pumpWidget(
+      wrap(
+        child: RepaintBoundary(
+          child: CircleAvatar(
+          foregroundImage: errorImage,
+          backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          radius: 50.0,
+          onForegroundImageError: (_,__) => caughtForegroundImageError = true,
+          ),
+        ),
+      ),
+    );
+
+    expect(caughtForegroundImageError, true);
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size, equals(const Size(100.0, 100.0)));
+    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
+    final BoxDecoration decoration = child.decoration as BoxDecoration;
+    expect(decoration.image!.fit, equals(BoxFit.cover));
+    await expectLater(
+      find.byType(CircleAvatar),
+      matchesGoldenFile('circle_avatar.fallback.png'),
+    );
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {

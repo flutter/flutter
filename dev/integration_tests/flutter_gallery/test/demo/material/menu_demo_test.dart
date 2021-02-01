@@ -29,4 +29,23 @@ void main() {
 
     await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: find.byWidgetPredicate((Widget widget) => widget is Icon))));
   });
+
+  testWidgets('The selected menu item update test', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: kDarkGalleryTheme,
+      home: const MenuDemo(),
+    ));
+
+    // Popup the menu.
+    await tester.tap(find.text('An item with a simple menu'));
+    await tester.pumpAndSettle();
+
+    // Select one item.
+    await tester.tap(find.text('Menu item value three'));
+    await tester.pumpAndSettle();
+
+    // The subtitle updated with the selected item.
+    expect(find.text('Menu item value three'), findsOneWidget);
+
+  });
 }

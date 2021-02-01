@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'form_row.dart';
 import 'text_field.dart';
-import 'theme.dart';
 
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].

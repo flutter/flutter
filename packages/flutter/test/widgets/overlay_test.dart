@@ -1039,7 +1039,7 @@ void main() {
     final dynamic renderObject = tester.renderObject(find.byType(Overlay));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

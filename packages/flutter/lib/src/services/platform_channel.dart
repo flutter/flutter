@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -46,7 +45,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -140,7 +139,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   @optionalTypeArgs
@@ -510,7 +509,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance!.defaultBinaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
