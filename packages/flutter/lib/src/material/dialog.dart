@@ -129,8 +129,8 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets +
-        (insetPadding ?? const EdgeInsets.all(0.0));
+    final EdgeInsets effectivePadding =
+        MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -1128,19 +1128,18 @@ Future<T?> showDialog<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final CapturedThemes themes = InheritedTheme.capture(
-      from: context,
-      to: Navigator.of(context, rootNavigator: useRootNavigator).context);
-  return showGeneralDialog(
+    from: context,
+    to: Navigator.of(
+      context,
+      rootNavigator: useRootNavigator,
+    ).context,
+  );
+
+  return Navigator.of(context, rootNavigator: useRootNavigator)
+      .push<T>(DialogRoute<T>(
     context: context,
-    pageBuilder: (BuildContext buildContext, Animation<double> animation,
-        Animation<double> secondaryAnimation) {
-      final Widget pageChild = Builder(builder: builder!);
-      Widget dialog = themes.wrap(pageChild);
-      if (useSafeArea) {
-        dialog = SafeArea(child: dialog);
-      }
-      return dialog;
-    },
+    builder: builder,
+    barrierColor: barrierColor,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
@@ -1202,23 +1201,25 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
-  }) : assert(barrierDismissible != null),
-       super(
-         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-           final Widget pageChild = Builder(builder: builder);
-           Widget dialog = themes?.wrap(pageChild) ?? pageChild;
-           if (useSafeArea) {
-             dialog = SafeArea(child: dialog);
-           }
-           return dialog;
-         },
-         barrierDismissible: barrierDismissible,
-         barrierColor: barrierColor,
-         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
-         transitionBuilder: _buildMaterialDialogTransitions,
-         settings: settings,
-       );
+  })  : assert(barrierDismissible != null),
+        super(
+          pageBuilder: (BuildContext buildContext, Animation<double> animation,
+              Animation<double> secondaryAnimation) {
+            final Widget pageChild = Builder(builder: builder);
+            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
+            if (useSafeArea) {
+              dialog = SafeArea(child: dialog);
+            }
+            return dialog;
+          },
+          barrierDismissible: barrierDismissible,
+          barrierColor: barrierColor,
+          barrierLabel: barrierLabel ??
+              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          transitionDuration: const Duration(milliseconds: 150),
+          transitionBuilder: _buildMaterialDialogTransitions,
+          settings: settings,
+        );
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
