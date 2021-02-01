@@ -597,7 +597,7 @@ class _PopupMenu<T> extends StatelessWidget {
       animation: route.animation!,
       builder: (BuildContext context, Widget? child) {
         return FadeTransition(
-          opacity: route.animation!,
+          opacity: opacity.animate(route.animation!),
           child: Material(
             shape: route.shape ?? popupMenuTheme.shape,
             color: route.color ?? popupMenuTheme.color,
