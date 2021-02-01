@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -422,12 +424,6 @@ end
       ' ├─Building plugins...'
     );
     try {
-      // Regardless of the last "flutter build" build mode,
-      // copy the corresponding engine.
-      // A plugin framework built with bitcode must link against the bitcode version
-      // of Flutter.framework (Release).
-      _project.ios.copyEngineArtifactToProject(mode, EnvironmentType.physical);
-
       final String bitcodeGenerationMode = mode == BuildMode.release ?
           'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
 

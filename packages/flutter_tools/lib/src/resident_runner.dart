@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
@@ -222,7 +224,7 @@ class FlutterDevice {
     int ddsPort,
     bool disableServiceAuthCodes = false,
     bool disableDds = false,
-    bool allowExistingDdsInstance = false,
+    @required bool allowExistingDdsInstance,
     bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
@@ -242,6 +244,23 @@ class FlutterDevice {
             completer.completeError('failed to connect to $observatoryUri', st);
           }
         }
+        // First check if the VM service is actually listening on observatoryUri as
+        // this may not be the case when scraping logcat for URIs. If this URI is
+        // from an old application instance, we shouldn't try and start DDS.
+        try {
+          service = await connectToVmService(observatoryUri);
+          // TODO(dnfield): Remove ignore once internal repo is up to date
+          // https://github.com/flutter/flutter/issues/74518
+          // ignore: await_only_futures
+          await service.dispose();
+        } on Exception catch (exception) {
+          globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+          if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+            completer.completeError('failed to connect to $observatoryUri');
+          }
+          return;
+        }
+
         // This first try block is meant to catch errors that occur during DDS startup
         // (e.g., failure to bind to a port, failure to connect to the VM service,
         // attaching to a VM service with existing clients, etc.).
@@ -260,6 +279,8 @@ class FlutterDevice {
           } else {
             existingDds = true;
           }
+        } on ToolExit {
+          rethrow;
         } on Exception catch (e, st) {
           handleError(e, st);
           return;
@@ -832,13 +853,12 @@ abstract class ResidentRunner {
   // runner to support a single flutter device.
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
     String method, {
+    FlutterDevice device,
     Map<String, dynamic> params,
   }) async {
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
-    return flutterDevices
-      .first
+    device ??= flutterDevices.first;
+    final List<FlutterView> views = await device.vmService.getFlutterViews();
+    return device
       .vmService
       .invokeFlutterExtensionRpcRaw(
         method,
@@ -1217,7 +1237,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     GetSkSLMethod getSkSLMethod,
-    bool allowExistingDdsInstance,
+    @required bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1267,6 +1287,69 @@ abstract class ResidentRunner {
       _devToolsLauncher.devToolsUri = devToolsServerAddress;
     } else {
       await _devToolsLauncher.serve();
+    }
+  }
+
+  Future<void> maybeCallDevToolsUriServiceExtension() async {
+    _devToolsLauncher ??= DevtoolsLauncher.instance;
+    if (_devToolsLauncher?.activeDevToolsServer != null) {
+      await Future.wait(<Future<void>>[
+        for (final FlutterDevice device in flutterDevices)
+          _callDevToolsUriExtension(device),
+      ]);
+    }
+  }
+
+  Future<void> _callDevToolsUriExtension(FlutterDevice device) async {
+    if (_devToolsLauncher == null) {
+      return;
+    }
+    await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
+    try {
+      if (_devToolsLauncher == null) {
+        return;
+      }
+      unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
+        'ext.flutter.activeDevToolsServerAddress',
+        device: device,
+        params: <String, dynamic>{
+          'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
+        },
+      ));
+    } on Exception catch (e) {
+      globals.printError(
+        'Failed to set DevTools server address: ${e.toString()}. Deep links to'
+        ' DevTools will not show in Flutter errors.',
+      );
+    }
+  }
+
+  Future<void> callConnectedVmServiceUriExtension() async {
+    await Future.wait(<Future<void>>[
+      for (final FlutterDevice device in flutterDevices)
+        _callConnectedVmServiceExtension(device),
+    ]);
+  }
+
+  Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
+    if (device.vmService.httpAddress != null || device.vmService.wsAddress != null) {
+      final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
+      await waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri');
+      try {
+        unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
+          'ext.flutter.connectedVmServiceUri',
+          device: device,
+          params: <String, dynamic>{
+            'value': uri.toString(),
+          },
+        ));
+      } on Exception catch (e) {
+        globals.printError(e.toString());
+        globals.printError(
+          'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
+          ' will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -1377,6 +1460,36 @@ abstract class ResidentRunner {
 
   // Clears the screen.
   void clearScreen() => globals.logger.clear();
+}
+
+@visibleForTesting
+Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
+  final Completer<void> completer = Completer<void>();
+  try {
+    await vmService.streamListen(vm_service.EventStreams.kExtension);
+  } on Exception {
+    // do nothing
+  }
+  StreamSubscription<vm_service.Event> extensionStream;
+  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
+    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
+      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
+      // as well, so make sure we don't try to complete this twice.
+      if (!completer.isCompleted) {
+        completer.complete();
+        extensionStream.cancel();
+      }
+    }
+  });
+  final vm_service.VM vm = await vmService.getVM();
+  if (vm.isolates.isNotEmpty) {
+    final vm_service.IsolateRef isolateRef = vm.isolates.first;
+    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
+    if (isolate.extensionRPCs.contains(extension)) {
+      return;
+    }
+  }
+  await completer.future;
 }
 
 class OperationResult {

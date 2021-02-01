@@ -440,7 +440,7 @@ void main() {
     final PaintingContext context = _MockPaintingContext();
     late FlutterError error;
     try {
-      decoratedBox.paint(context, const Offset(0, 0));
+      decoratedBox.paint(context, Offset.zero);
     } on FlutterError catch (e) {
       error = e;
     }
@@ -493,7 +493,7 @@ void main() {
                 height: 100.0,
                 key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                transformAlignment: const Alignment(1.0, 0.0),
+                transformAlignment: Alignment.centerRight,
                 child: Container(
                   color: const Color(0xFF00FFFF),
                 ),

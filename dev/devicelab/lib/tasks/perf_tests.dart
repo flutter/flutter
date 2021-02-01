@@ -172,16 +172,6 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'animated_placeholder_perf',
-    measureCpuGpu: measureCpuGpu,
-    testDriver: 'test_driver/animated_placeholder_perf_test.dart',
-  ).run;
-}
-
 TaskFunction createAnimatedPlaceholderPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -331,15 +321,6 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
-  ).run;
-}
-
-TaskFunction createsMultiWidgetConstructPerfTest() {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'multi_widget_construction_perf',
-    testDriver: 'test_driver/multi_widget_construction_perf_test.dart',
   ).run;
 }
 

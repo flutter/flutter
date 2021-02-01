@@ -55,7 +55,7 @@
   "refreshIndicatorSemanticLabel": "Жаңыртуу",
   "moreButtonTooltip": "Дагы",
   "dateSeparator": ".",
-  "dateHelpText": "аа/кк/жжжж",
+  "dateHelpText": "кк.аа.жжжж",
   "selectYearSemanticsLabel": "Жылды тандоо",
   "unspecifiedDate": "Күн",
   "unspecifiedDateRange": "Даталар диапазону",

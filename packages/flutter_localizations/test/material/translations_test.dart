@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_utils.dart';
 
-final String rootDirectoryPath = Directory.current.parent.path;
+final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {

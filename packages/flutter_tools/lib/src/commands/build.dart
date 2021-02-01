@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../build_info.dart';
@@ -67,7 +69,7 @@ abstract class BuildSubCommand extends FlutterCommand {
       globals.printStatus('💪 Building with sound null safety 💪', emphasis: true);
     } else {
       globals.printStatus(
-        'Building with unsound null safety',
+        'Building without sound null safety',
         emphasis: true,
       );
       globals.printStatus(

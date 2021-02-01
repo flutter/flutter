@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -214,6 +217,10 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
+
+    unawaited(maybeCallDevToolsUriServiceExtension());
+    unawaited(callConnectedVmServiceUriExtension());
+
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -630,6 +637,8 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
+      unawaited(maybeCallDevToolsUriServiceExtension());
+      unawaited(callConnectedVmServiceUriExtension());
       return result;
     }
     final OperationResult result = await _hotReloadHelper(

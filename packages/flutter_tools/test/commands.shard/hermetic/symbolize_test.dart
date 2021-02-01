@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -15,12 +17,11 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
+import '../../src/fakes.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
-  MockStdio stdio;
+  FakeStdio stdio;
   SymbolizeCommand command;
   MockDwarfSymbolizationService mockDwarfSymbolizationService;
 
@@ -30,7 +31,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    stdio = MockStdio();
+    stdio = FakeStdio();
     mockDwarfSymbolizationService = MockDwarfSymbolizationService();
     command = SymbolizeCommand(
       stdio: stdio,

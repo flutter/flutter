@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
@@ -161,6 +163,12 @@ class FlutterProject {
 
   /// The `.packages` file of this project.
   File get packagesFile => directory.childFile('.packages');
+
+  /// The `package_config.json` file of the project.
+  ///
+  /// This is the replacement for .packages which contains language
+  /// version information.
+  File get packageConfigFile => directory.childDirectory('.dart_tool').childFile('package_config.json');
 
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
@@ -662,11 +670,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug, EnvironmentType.physical);
+      // Use release mode so host project can link on bitcode variant.
+      _copyEngineArtifactToProject(BuildMode.release, EnvironmentType.physical);
     }
   }
 
-  void copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
+  void _copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
     // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something

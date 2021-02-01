@@ -46,7 +46,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -56,7 +56,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -67,7 +67,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -107,7 +107,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -144,7 +144,7 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
 
     await tester.pumpWidget(
       Center(
@@ -188,6 +188,6 @@ void main() {
         ),
       ),
     );
-    expect(patient.currentContext!.size, equals(const Size(0.0, 0.0)));
+    expect(patient.currentContext!.size, equals(Size.zero));
   });
 }

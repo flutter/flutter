@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/executable.dart';
@@ -16,7 +18,7 @@ import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' as mocks;
+import '../../src/fakes.dart';
 
 final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 final String red = RegExp.escape(AnsiTerminal.red);
@@ -30,42 +32,55 @@ void main() {
   testWithoutContext('correct logger instance is created', () {
     final LoggerFactory loggerFactory = LoggerFactory(
       terminal: Terminal.test(),
-      stdio: mocks.MockStdio(),
+      stdio: FakeStdio(),
       outputPreferences: OutputPreferences.test(),
     );
 
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: false,
     ), isA<StdoutLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: true,
     ), isA<WindowsStdoutLogger>());
     expect(loggerFactory.createLogger(
       verbose: true,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: true,
     ), isA<VerboseLogger>());
     expect(loggerFactory.createLogger(
       verbose: true,
+      prefixedErrors: false,
       machine: false,
       daemon: false,
       windows: false,
     ), isA<VerboseLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: true,
+      machine: false,
+      daemon: false,
+      windows: false,
+    ), isA<PrefixedErrorLogger>());
+    expect(loggerFactory.createLogger(
+      verbose: false,
+      prefixedErrors: false,
       machine: false,
       daemon: true,
       windows: false,
     ), isA<NotifyingLogger>());
     expect(loggerFactory.createLogger(
       verbose: false,
+      prefixedErrors: false,
       machine: true,
       daemon: false,
       windows: false,
@@ -225,7 +240,7 @@ void main() {
     testWithoutContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio:  mocks.MockStdio(),
+          stdio:  FakeStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
@@ -360,7 +375,7 @@ void main() {
   });
 
   group('Spinners', () {
-    mocks.MockStdio mockStdio;
+    FakeStdio mockStdio;
     FakeStopwatch mockStopwatch;
     FakeStopwatchFactory stopwatchFactory;
     int called;
@@ -395,7 +410,7 @@ void main() {
 
     setUp(() {
       mockStopwatch = FakeStopwatch();
-      mockStdio = mocks.MockStdio();
+      mockStdio = FakeStdio();
       called = 0;
       stopwatchFactory = FakeStopwatchFactory(mockStopwatch);
     });
@@ -633,32 +648,32 @@ void main() {
   });
 
   group('Output format', () {
-    mocks.MockStdio mockStdio;
+    FakeStdio fakeStdio;
     SummaryStatus summaryStatus;
     int called;
 
     setUp(() {
-      mockStdio = mocks.MockStdio();
+      fakeStdio = FakeStdio();
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
         padding: 20,
         onFinish: () => called++,
-        stdio: mockStdio,
+        stdio: fakeStdio,
         stopwatch: FakeStopwatch(),
       );
     });
 
-    List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
-    List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
+    List<String> outputStdout() => fakeStdio.writtenToStdout.join('').split('\n');
+    List<String> outputStderr() => fakeStdio.writtenToStderr.join('').split('\n');
 
     testWithoutContext('Error logs are wrapped', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15);
@@ -684,10 +699,10 @@ void main() {
     testWithoutContext('Error logs are wrapped and can be indented.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 5);
@@ -707,10 +722,10 @@ void main() {
     testWithoutContext('Error logs are wrapped and can have hanging indent.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, hangingIndent: 5);
@@ -730,10 +745,10 @@ void main() {
     testWithoutContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
@@ -753,10 +768,10 @@ void main() {
     testWithoutContext('Stdout logs are wrapped', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15);
@@ -773,10 +788,10 @@ void main() {
     testWithoutContext('Stdout logs are wrapped and can be indented.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15, indent: 5);
@@ -796,10 +811,10 @@ void main() {
     testWithoutContext('Stdout logs are wrapped and can have hanging indent.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false)
       );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
@@ -819,10 +834,10 @@ void main() {
     testWithoutContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
       );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
@@ -842,10 +857,10 @@ void main() {
     testWithoutContext('Error logs are red', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printError('Pants on fire!');
@@ -859,10 +874,10 @@ void main() {
     testWithoutContext('Stdout logs are not colored', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: FakePlatform(),
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences:  OutputPreferences.test(showColor: true),
       );
       logger.printStatus('All good.');
@@ -876,10 +891,10 @@ void main() {
     testWithoutContext('Stdout printStatus handle null inputs on colored terminal', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: FakePlatform(),
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
       );
       logger.printStatus(
@@ -899,10 +914,10 @@ void main() {
     testWithoutContext('Stdout printStatus handle null inputs on non-color terminal', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
       );
       logger.printStatus(
@@ -922,10 +937,10 @@ void main() {
       final FakeStopwatch fakeStopwatch = FakeStopwatch();
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
         stopwatchFactory: FakeStopwatchFactory(fakeStopwatch),
       );
@@ -950,7 +965,7 @@ void main() {
         message: 'Hello world',
         padding: 20,
         onFinish: () => called++,
-        stdio: mockStdio,
+        stdio: fakeStdio,
         stopwatch: FakeStopwatch(),
       );
       summaryStatus.start();
@@ -992,10 +1007,10 @@ void main() {
     testWithoutContext('sequential startProgress calls with StdoutLogger', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
-        stdio: mockStdio,
+        stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
       );
       logger.startProgress('AAA').stop();
@@ -1015,10 +1030,10 @@ void main() {
       final Logger logger = VerboseLogger(
         StdoutLogger(
           terminal: AnsiTerminal(
-            stdio: mockStdio,
+            stdio: fakeStdio,
             platform: _kNoAnsiPlatform,
           ),
-          stdio: mockStdio,
+          stdio: fakeStdio,
           outputPreferences: OutputPreferences.test(),
         ),
         stopwatchFactory: FakeStopwatchFactory(),
@@ -1038,7 +1053,7 @@ void main() {
     testWithoutContext('sequential startProgress calls with BufferLogger', () async {
       final BufferLogger logger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: mockStdio,
+          stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
         ),
         outputPreferences: OutputPreferences.test(),

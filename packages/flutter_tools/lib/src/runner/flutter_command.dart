@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -476,6 +478,7 @@ abstract class FlutterCommand extends Command<void> {
             'and double.fromEnvironment constructors.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
       valueHelp: 'foo=bar',
+      splitCommas: false,
     );
   }
 

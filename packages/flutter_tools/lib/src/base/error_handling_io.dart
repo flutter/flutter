@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
 import 'dart:typed_data';
@@ -102,7 +104,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   static bool _noExitOnFailure = false;
 
   @override
-  Directory get currentDirectory => directory(delegate.currentDirectory);
+  Directory get currentDirectory {
+    return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
+  }
 
   @override
   File file(dynamic path) => ErrorHandlingFile(
@@ -710,7 +714,7 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   switch (errorCode) {
     case kAccessDenied:
       errorMessage =
-        '$message. The flutter tool cannot access the file.\n'
+        '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.';
       break;
