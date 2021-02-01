@@ -234,6 +234,17 @@ class ButtonStyle with Diagnosticable {
 
   /// Creates the [InkWell] splash factory, which defines the appearance of
   /// "ink" splashes that occur in response to taps.
+  ///
+  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example:
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ElevatedButton.styleFrom(
+  ///     splashFactory: NoSplash.splashFactory,
+  ///   ),
+  ///   onPressed: () { },
+  ///   child: Text('No Splash'),
+  /// )
+  /// ```
   final InteractiveInkFeatureFactory? splashFactory;
 
   /// Returns a copy of this ButtonStyle with the given fields replaced with

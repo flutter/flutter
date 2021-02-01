@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'ink_well.dart';
 import 'material.dart';
 
 const Duration _kUnconfirmedRippleDuration = Duration(seconds: 1);
