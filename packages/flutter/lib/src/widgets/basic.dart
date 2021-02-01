@@ -424,6 +424,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
+  /// Backdrop filter will not apply when there is no [child] with a size.
   const BackdropFilter({
     Key? key,
     required this.filter,
