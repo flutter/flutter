@@ -414,7 +414,7 @@ void main() {
       }
     }
   },
-  
+
   "helloCostWithOptionalParam": "Hello for {price} {value} (with optional param)",
   "@helloCostWithOptionalParam": {
     "description": "A message with string and int (currency) parameters",
@@ -429,7 +429,7 @@ void main() {
       }
     }
   },
-  
+
   "helloDecimalPattern": "Hello for Decimal Pattern {value}",
   "@helloDecimalPattern": {
     "description": "A message which displays a number in decimal pattern",
@@ -440,7 +440,7 @@ void main() {
       }
     }
   },
-  
+
   "helloPercentPattern": "Hello for Percent Pattern {value}",
   "@helloPercentPattern": {
     "description": "A message which displays a number in percent pattern",
@@ -451,7 +451,7 @@ void main() {
       }
     }
   },
-  
+
   "helloScientificPattern": "Hello for Scientific Pattern {value}",
   "@helloScientificPattern": {
     "description": "A message which displays scientific notation of a number",
