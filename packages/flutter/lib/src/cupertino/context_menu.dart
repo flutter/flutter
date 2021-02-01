@@ -758,8 +758,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
             children: <Widget>[
               Positioned.fromRect(
                 rect: sheetRect,
-                child: Opacity(
-                  opacity: _sheetOpacity.value,
+                child: FadeTransition(
+                  opacity: _sheetOpacity,
                   child: Transform.scale(
                     alignment: getSheetAlignment(_contextMenuLocation),
                     scale: sheetScale,
@@ -1028,8 +1028,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     return Transform.scale(
       alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuLocation),
       scale: _sheetScaleAnimation.value,
-      child: Opacity(
-        opacity: _sheetOpacityAnimation.value,
+      child: FadeTransition(
+        opacity: _sheetOpacityAnimation,
         child: child,
       ),
     );
