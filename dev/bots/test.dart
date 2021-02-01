@@ -119,8 +119,6 @@ Future<void> main(List<String> args) async {
       'framework_tests': _runFrameworkTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
-      'tool_general_tests': _runGeneralToolTests,
-      'tool_command_tests': _runCommandsToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
@@ -348,39 +346,11 @@ Future<void> _runIntegrationToolTests() async {
   );
 }
 
-// TODO(jmagman): Remove once LUCI configs are migrated to tool_tests_general, tool_tests_command, and tool_tests_integration.
 Future<void> _runToolTests() async {
-  const String kDotShard = '.shard';
-  const String kWeb = 'web';
-  const String kTest = 'test';
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-
-  final Map<String, ShardRunner> subshards = Map<String, ShardRunner>.fromIterable(
-    Directory(path.join(toolsPath, kTest))
-      .listSync()
-      .map<String>((FileSystemEntity entry) => entry.path)
-      .where((String name) => name.endsWith(kDotShard))
-      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
-      .map<String>((String name) => path.basenameWithoutExtension(name)),
-    // The `dynamic` on the next line is because Map.fromIterable isn't generic.
-    value: (dynamic subshard) => () async {
-      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
-      // on Windows.
-      final String suffix = Platform.isWindows && subshard == 'commands'
-        ? 'permeable'
-        : '';
-      await _pubRunTest(
-        toolsPath,
-        forceSingleCore: subshard != 'general',
-        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-        enableFlutterToolAsserts: subshard != 'general',
-        // Detect unit test time regressions (poor time delay handling, etc).
-        perTestTimeout: (subshard == 'general') ? const Duration(seconds: 2) : null,
-      );
-    },
-  );
-
-  await selectSubshard(subshards);
+  await selectSubshard(<String, ShardRunner>{
+    'general': _runGeneralToolTests,
+    'commands': _runCommandsToolTests,
+  });
 }
 
 Future<void> _runWebToolTests() async {

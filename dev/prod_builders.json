@@ -373,16 +373,10 @@
          "flaky": false
       },
       {
-         "name": "Linux tool_general_tests",
+         "name": "Linux tool_tests",
          "repo": "flutter",
-         "task_name": "linux_tool_general_tests",
-         "flaky": true
-      },
-      {
-         "name": "Linux tool_command_tests",
-         "repo": "flutter",
-         "task_name": "linux_tool_command_tests",
-         "flaky": true
+         "task_name": "linux_tool_tests",
+         "flaky": false
       },
       {
          "name": "Linux tool_integration_tests",
@@ -769,21 +763,15 @@
          "flaky": false
       },
       {
-         "name": "Mac tool_general_tests",
+         "name": "Mac tool_tests",
          "repo": "flutter",
-         "task_name": "mac_tool_general_tests",
-         "flaky": true
+         "task_name": "mac_tool_tests",
+         "flaky": false
       },
       {
-         "name": "Mac tool_command_tests",
+         "name": "Mac tool_integration_tests",
          "repo": "flutter",
-         "task_name": "mac_tool_command_tests",
-         "flaky": true
-      },
-      {
-         "name": "Mac tool_command_tests",
-         "repo": "flutter",
-         "task_name": "mac_tool_command_tests",
+         "task_name": "mac_tool_integration_tests",
          "flaky": true
       },
       {
@@ -859,16 +847,10 @@
          "flaky": false
       },
       {
-         "name": "Windows tool_general_tests",
+         "name": "Windows tool_tests",
          "repo": "flutter",
-         "task_name": "win_tool_general_tests",
-         "flaky": true
-      },
-      {
-         "name": "Windows tool_command_tests",
-         "repo": "flutter",
-         "task_name": "win_tool_command_tests",
-         "flaky": true
+         "task_name": "win_tool_tests",
+         "flaky": false
       },
       {
          "name": "Windows tool_integration_tests",
