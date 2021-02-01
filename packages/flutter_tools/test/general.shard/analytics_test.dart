@@ -26,7 +26,7 @@ import 'package:usage/usage_io.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   setUpAll(() {
@@ -152,25 +152,21 @@ void main() {
 
   group('analytics with mocks', () {
     MemoryFileSystem memoryFileSystem;
-    MockStdio mockStdio;
+    FakeStdio fakeStdio;
     TestUsage testUsage;
-    SystemClock mockClock;
+    FakeClock fakeClock;
     Doctor mockDoctor;
-    List<int> mockTimes;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      mockStdio = MockStdio();
+      fakeStdio = FakeStdio();
       testUsage = TestUsage();
-      mockClock = MockClock();
+      fakeClock = FakeClock();
       mockDoctor = MockDoctor();
-      when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
     });
 
     testUsingContext('flutter commands send timing events', () async {
-      mockTimes = <int>[1000, 2000];
+      fakeClock.times = <int>[1000, 2000];
       when(mockDoctor.diagnose(
         androidLicenses: false,
         verbose: false,
@@ -180,28 +176,25 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-      verify(mockClock.now()).called(2);
-
       expect(testUsage.timings, contains(
         const TestTimingEvent(
             'flutter', 'doctor', Duration(milliseconds: 1000), label: 'success',
         ),
       ));
     }, overrides: <Type, Generator>{
-      SystemClock: () => mockClock,
+      SystemClock: () => fakeClock,
       Doctor: () => mockDoctor,
       Usage: () => testUsage,
     });
 
     testUsingContext('doctor fail sends warning', () async {
-      mockTimes = <int>[1000, 2000];
+      fakeClock.times = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false, androidLicenseValidator: anyNamed('androidLicenseValidator')))
         .thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
-      verify(mockClock.now()).called(2);
 
       expect(testUsage.timings, contains(
         const TestTimingEvent(
@@ -209,7 +202,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
-      SystemClock: () => mockClock,
+      SystemClock: () => fakeClock,
       Doctor: () => mockDoctor,
       Usage: () => testUsage,
     });
@@ -233,7 +226,7 @@ void main() {
 
     testUsingContext('command sends localtime', () async {
       const int kMillis = 1000;
-      mockTimes = <int>[kMillis];
+      fakeClock.times = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
       final Usage usage = Usage(
@@ -252,18 +245,18 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      SystemClock: () => mockClock,
+      SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },
       ),
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
 
     testUsingContext('event sends localtime', () async {
       const int kMillis = 1000;
-      mockTimes = <int>[kMillis];
+      fakeClock.times = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
       final Usage usage = Usage(
@@ -282,13 +275,13 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      SystemClock: () => mockClock,
+      SystemClock: () => fakeClock,
       Platform: () => FakePlatform(
         environment: <String, String>{
           'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
         },
       ),
-      Stdio: () => mockStdio,
+      Stdio: () => fakeStdio,
     });
   });
 
@@ -378,3 +371,12 @@ class FakeFlutterCommand extends FlutterCommand {
 class MockDoctor extends Mock implements Doctor {}
 
 class MockFlutterConfig extends Mock implements Config {}
+
+class FakeClock extends Fake implements SystemClock {
+  List<int> times = <int>[];
+
+  @override
+  DateTime now() {
+    return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
+  }
+}

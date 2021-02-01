@@ -227,7 +227,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => mockDeviceManager,
-        Stdio: () => MockStdio(),
+        Stdio: () => FakeStdio(),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
