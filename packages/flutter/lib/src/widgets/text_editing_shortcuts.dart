@@ -43,7 +43,6 @@ class TextEditingShortcuts extends StatelessWidget {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  ControlArrowRightTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ControlShiftArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ControlShiftArrowRightTextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyA): ControlATextIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyC): ControlCTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.end):  EndTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.home):  HomeTextIntent(),

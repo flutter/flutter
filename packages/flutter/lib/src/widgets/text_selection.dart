@@ -217,6 +217,9 @@ abstract class TextSelectionControls {
     delegate.hideToolbar();
   }
 
+  // TODO(justinmc): This should be ported to Actions, deduplicated with
+  // shortcuts like meta-c, and removed.
+  // https://github.com/flutter/flutter/issues/75004
   /// Copy the current selection of the text field managed by the given
   /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
   /// text (collapsing the selection in the process), and hide the toolbar.
@@ -224,10 +227,6 @@ abstract class TextSelectionControls {
   /// This is called by subclasses when their copy affordance is activated by
   /// the user.
   void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    // TODO(justinmc): How to get context here?
-    //Actions.invoke<ContextMenuCopyTextIntent>(context, ContextMenuCopyTextIntent());
-
-    /*
     final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(ClipboardData(
       text: value.selection.textInside(value.text),
@@ -239,7 +238,6 @@ abstract class TextSelectionControls {
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
-    */
   }
 
   /// Paste the current clipboard selection (obtained from [Clipboard]) into
