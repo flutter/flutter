@@ -406,7 +406,8 @@ bool RuntimeController::LaunchRootIsolate(
           dart_entrypoint,                                //
           dart_entrypoint_library,                        //
           std::move(isolate_configuration),               //
-          volatile_path_tracker_                          //
+          volatile_path_tracker_,                         //
+          spawning_isolate_.lock().get()                  //
           )
           .lock();
 
@@ -450,6 +451,17 @@ std::optional<std::string> RuntimeController::GetRootIsolateServiceID() const {
 
 std::optional<uint32_t> RuntimeController::GetRootIsolateReturnCode() {
   return root_isolate_return_code_;
+}
+
+uint64_t RuntimeController::GetRootIsolateGroup() const {
+  auto isolate = root_isolate_.lock();
+  if (isolate) {
+    auto isolate_scope = tonic::DartIsolateScope(isolate->isolate());
+    Dart_IsolateGroup isolate_group = Dart_CurrentIsolateGroup();
+    return reinterpret_cast<uint64_t>(isolate_group);
+  } else {
+    return 0;
+  }
 }
 
 void RuntimeController::LoadDartDeferredLibrary(

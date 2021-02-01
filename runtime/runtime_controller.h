@@ -508,6 +508,14 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   std::optional<uint32_t> GetRootIsolateReturnCode();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get an identifier that represents the Dart isolate group the
+  ///             root isolate is in.
+  ///
+  /// @return     The root isolate isolate group identifier, zero if one can't
+  ///             be established.
+  uint64_t GetRootIsolateGroup() const;
+
   //--------------------------------------------------------------------------
   /// @brief      Loads the Dart shared library into the Dart VM. When the
   ///             Dart library is loaded successfully, the Dart future
