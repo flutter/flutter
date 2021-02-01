@@ -55,7 +55,6 @@ final GetStackPointerCallback getStackPointer = () {
           0xe0, 0x03, 0x00, 0x91,
           // "ret"         in machine code: C0035FD6.
           0xc0, 0x03, 0x5f, 0xd6],
-        // ARM32: mov r0, sp; ret;
         'arm': <int>[
           // "mov r0, sp" in machine code: 0D00A0E1.
           0x0d, 0x00, 0xa0, 0xe1,
