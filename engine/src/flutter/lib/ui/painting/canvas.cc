@@ -311,6 +311,12 @@ void Canvas::drawPath(const CanvasPath* path,
   canvas_->drawPath(path->path(), *paint.paint());
 }
 
+static SkSamplingOptions paint_to_sampling(const SkPaint* paint) {
+  return SkSamplingOptions(
+      paint ? paint->getFilterQuality() : kNone_SkFilterQuality,
+      SkSamplingOptions::kMedium_asMipmapLinear);
+}
+
 void Canvas::drawImage(const CanvasImage* image,
                        double x,
                        double y,
@@ -324,7 +330,9 @@ void Canvas::drawImage(const CanvasImage* image,
         ToDart("Canvas.drawImage called with non-genuine Image."));
     return;
   }
-  canvas_->drawImage(image->image(), x, y, paint.paint());
+  // TODO: add filtering to public API, since paint's quality is deprecated
+  SkSamplingOptions sampling = paint_to_sampling(paint.paint());
+  canvas_->drawImage(image->image(), x, y, sampling, paint.paint());
 }
 
 void Canvas::drawImageRect(const CanvasImage* image,
@@ -348,7 +356,9 @@ void Canvas::drawImageRect(const CanvasImage* image,
   }
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
+  // TODO: add filtering to public API, since paint's quality is deprecated
+  SkSamplingOptions sampling = paint_to_sampling(paint.paint());
+  canvas_->drawImageRect(image->image(), src, dst, sampling, paint.paint(),
                          SkCanvas::kFast_SrcRectConstraint);
 }
 
@@ -356,12 +366,6 @@ static SkFilterMode paint_to_filter(const SkPaint* paint) {
   return paint && (paint->getFilterQuality() != kNone_SkFilterQuality)
              ? SkFilterMode::kLinear
              : SkFilterMode::kNearest;
-}
-
-static SkSamplingOptions paint_to_sampling(const SkPaint* paint) {
-  return SkSamplingOptions(
-      paint ? paint->getFilterQuality() : kNone_SkFilterQuality,
-      SkSamplingOptions::kMedium_asMipmapLinear);
 }
 
 void Canvas::drawImageNine(const CanvasImage* image,

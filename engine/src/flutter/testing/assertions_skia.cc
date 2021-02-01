@@ -110,5 +110,14 @@ std::ostream& operator<<(std::ostream& os, const SkPaint& r) {
             << ", AA: " << r.isAntiAlias() << ", Shader: " << r.getShader();
 }
 
+std::ostream& operator<<(std::ostream& os, const SkSamplingOptions& s) {
+  if (s.useCubic) {
+    return os << "CubicResampler: " << s.cubic.B << ", " << s.cubic.C;
+  } else {
+    return os << "Filter: " << static_cast<int>(s.filter)
+              << ", Mipmap: " << static_cast<int>(s.mipmap);
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter

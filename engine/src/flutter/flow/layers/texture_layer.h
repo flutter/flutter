@@ -18,7 +18,7 @@ class TextureLayer : public Layer {
                const SkSize& size,
                int64_t texture_id,
                bool freeze,
-               SkFilterQuality filter_quality);
+               const SkSamplingOptions& sampling);
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
@@ -28,7 +28,7 @@ class TextureLayer : public Layer {
   SkSize size_;
   int64_t texture_id_;
   bool freeze_;
-  SkFilterQuality filter_quality_;
+  SkSamplingOptions sampling_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureLayer);
 };
