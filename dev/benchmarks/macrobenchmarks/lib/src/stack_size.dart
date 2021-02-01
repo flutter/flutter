@@ -9,54 +9,62 @@ import 'package:flutter/material.dart';
 
 import '../common.dart';
 
-// void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
-typedef c_mmap = ffi.Pointer<ffi.Void> Function(
+typedef GetStackPointerCallback = int Function();
+
+// c interop function:
+// void* mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset);
+typedef CMmap = ffi.Pointer<ffi.Void> Function(
     ffi.Pointer<ffi.Void>, ffi.IntPtr, ffi.Int32, ffi.Int32, ffi.Int32, ffi.IntPtr);
-typedef dart_mmap = ffi.Pointer<ffi.Void> Function(
+typedef DartMmap = ffi.Pointer<ffi.Void> Function(
     ffi.Pointer<ffi.Void>, int, int, int, int, int);
-final mmap = ffi.DynamicLibrary.process().lookupFunction<c_mmap, dart_mmap>("mmap");
+final DartMmap mmap = ffi.DynamicLibrary.process().lookupFunction<CMmap, DartMmap>('mmap');
 
-// int mprotect(void *addr, size_t len, int prot);
-typedef c_mprotect = ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.IntPtr, ffi.Int32);
-typedef dart_mprotect = int Function(ffi.Pointer<ffi.Void>, int, int);
-final mprotect = ffi.DynamicLibrary.process()
-    .lookupFunction<c_mprotect, dart_mprotect>("mprotect");
+// c interop function:
+// int mprotect(void* addr, size_t len, int prot);
+typedef CMprotect = ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.IntPtr, ffi.Int32);
+typedef DartMprotect = int Function(ffi.Pointer<ffi.Void>, int, int);
+final DartMprotect mprotect = ffi.DynamicLibrary.process()
+    .lookupFunction<CMprotect, DartMprotect>('mprotect');
 
-const protRead = 1;
-const protWrite = 2;
-const protExec = 4;
+const int protRead = 1;
+const int protWrite = 2;
+const int protExec = 4;
 
-const mapPrivate = 0x02;
-final mapJit = io.Platform.isMacOS ? 0x0800 : 0x0;
-final mapAnon = io.Platform.isMacOS ? 0x1000 : 0x20;
+const int mapPrivate = 0x02;
+const int mapJit = 0x0;
+const int mapAnon = 0x20;
 
 String get currentArch {
-  // Can probably use uname from libc for better detection logic. For now
-  // just assume that we only expect to run this test on native hardware.
-  if (io.Platform.isMacOS || io.Platform.isLinux || io.Platform.isWindows) {
-    return 'x64'; // TODO: need to support Apple Silicon Macs as well
-  } else if (io.Platform.isAndroid) {
-    // Ignore x86 Android.
-    return ffi.sizeOf<ffi.IntPtr>() == 4 ? 'arm' : 'arm64';
-  }
-  throw 'Failed to detect current arch';
+  return ffi.sizeOf<ffi.IntPtr>() == 4 ? 'arm' : 'arm64';
 }
 
-final getStackPointer = () {
-  final region = mmap(ffi.nullptr, 4096, protRead | protWrite,
+final GetStackPointerCallback getStackPointer = () {
+  if (!io.Platform.isAndroid) {
+    throw 'This benchmark test can only be run on Android.';
+  }
+  // Creates a block of memory to store the assembly code.
+  final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, 4096, protRead | protWrite,
       mapPrivate | mapAnon | mapJit, -1, 0);
+  // Write the assembly code into the memory block. This assembly code returns
+  // the memory address of stack pointer.
   region.cast<ffi.Uint8>().asTypedList(4096).setAll(
       0,
-      const {
-        // X64: mov rax, rsp; ret;
-        'x64': [0x48, 0x89, 0xe0, 0xc3],
-        // ARM64: mov x0, sp; ret;
-        'arm64': [0xe0, 0x03, 0x00, 0x91, 0xc0, 0x03, 0x5f, 0xd6],
+      const <String, List<int>>{
+        'arm64': <int>[
+          // "mov x0, sp"  in machine code: E0030091.
+          0xe0, 0x03, 0x00, 0x91,
+          // "ret"         in machine code: C0035FD6.
+          0xc0, 0x03, 0x5f, 0xd6],
         // ARM32: mov r0, sp; ret;
-        'arm': [0x0d, 0x00, 0xa0, 0xe1, 0x1e, 0xff, 0x2f, 0xe1],
+        'arm': <int>[
+          // "mov r0, sp" in machine code: 0D00A0E1.
+          0x0d, 0x00, 0xa0, 0xe1,
+          // "bx lr"      in machine code: 1EFF2FE1.
+          0x1e, 0xff, 0x2f, 0xe1],
       }[currentArch]);
+  // Makes sure the memory block is executable.
   if (mprotect(region, 4096, protRead | protExec) != 0) {
-    throw "Failed to mark code as executable";
+    throw 'Failed to mark code as executable.';
   }
   return region
       .cast<ffi.NativeFunction<ffi.IntPtr Function()>>()
