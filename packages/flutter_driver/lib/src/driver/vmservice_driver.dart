@@ -626,18 +626,20 @@ Future<T> _warnIfSlow<T>({
   required Future<T> future,
   required Duration timeout,
   required String message,
-}) {
+}) async {
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  future
-    .timeout(timeout, onTimeout: () {
-      _log(message);
-      return future;
-    })
+  final Completer<void> completer = Completer<void>();
+  completer.future.timeout(timeout, onTimeout: () {
+    _log(message);
+    return null;
+  });
+  try {
+    await future.whenComplete(() { completer.complete(); return 1; });
+  } catch (e) {
     // Don't duplicate errors if [future] completes with an error.
-    .catchError((Object e, StackTrace s) => future);
-
+  }
   return future;
 }
 
