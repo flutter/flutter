@@ -3,148 +3,131 @@
 // found in the LICENSE file.
 
 import 'actions.dart';
-import 'editable_text.dart';
-
-/// An [Intent] related to editing text.
-///
-/// See also:
-///
-///   * [TextEditingAction], which is intended to be used with
-///     TextEditingIntents.
-abstract class TextEditingIntent extends Intent {
-  // TODO(justinmc): This maybe can't be final, because it can be invoked
-  // multiple times. Maybe it shouldn't be set the second time? But couldn't the
-  // focused field change?
-  /// The [EditableTextState] that is currently focused.
-  ///
-  /// When used with [TextEditingAction], this is set automatically.
-  late final EditableTextState editableTextState;
-}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + arrow left key event.
-class AltArrowLeftTextIntent extends TextEditingIntent {}
+class AltArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + arrow-right key event.
-class AltArrowRightTextIntent extends TextEditingIntent {}
+class AltArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + shift + arrow-left key event.
-class AltShiftArrowLeftTextIntent extends TextEditingIntent {}
+class AltShiftArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + shift + arrow-right key event.
-class AltShiftArrowRightTextIntent extends TextEditingIntent {}
+class AltShiftArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-down key event.
-class ArrowDownTextIntent extends TextEditingIntent {}
+class ArrowDownTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-left key event.
-class ArrowLeftTextIntent extends TextEditingIntent {}
+class ArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-right key event.
-class ArrowRightTextIntent extends TextEditingIntent {}
+class ArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-up key event.
-class ArrowUpTextIntent extends TextEditingIntent {}
+class ArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for pressing the context menu's copy button.
-class ContextMenuCopyTextIntent extends TextEditingIntent {}
+class ContextMenuCopyTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + a key event.
-class ControlATextIntent extends TextEditingIntent {}
+class ControlATextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + arrow-left key event.
-class ControlArrowLeftTextIntent extends TextEditingIntent {}
+class ControlArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + arrow-right key event.
-class ControlArrowRightTextIntent extends TextEditingIntent {}
+class ControlArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + c key event.
-class ControlCTextIntent extends TextEditingIntent {}
+class ControlCTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + shift + arrow-left key event.
-class ControlShiftArrowLeftTextIntent extends TextEditingIntent {}
+class ControlShiftArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + shift + arrow-right key event.
-class ControlShiftArrowRightTextIntent extends TextEditingIntent {}
+class ControlShiftArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the end key event.
-class EndTextIntent extends TextEditingIntent {}
+class EndTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the home key event.
-class HomeTextIntent extends TextEditingIntent {}
+class HomeTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + arrow-down key event.
-class MetaArrowDownTextIntent extends TextEditingIntent {}
+class MetaArrowDownTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + arrow-left key event.
-class MetaArrowLeftTextIntent extends TextEditingIntent {}
+class MetaArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + arrow-right key event.
-class MetaArrowRightTextIntent extends TextEditingIntent {}
+class MetaArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + arrow-up key event.
-class MetaArrowUpTextIntent extends TextEditingIntent {}
+class MetaArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + c key event.
-class MetaCTextIntent extends TextEditingIntent {}
+class MetaCTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + shift + arrow-down key event.
-class MetaShiftArrowDownTextIntent extends TextEditingIntent {}
+class MetaShiftArrowDownTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + shift + arrow-left key event.
-class MetaShiftArrowLeftTextIntent extends TextEditingIntent {}
+class MetaShiftArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + shift + arrow-right key event.
-class MetaShiftArrowRightTextIntent extends TextEditingIntent {}
+class MetaShiftArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + shift + arrow-up key event.
-class MetaShiftArrowUpTextIntent extends TextEditingIntent {}
+class MetaShiftArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + arrow-down key event.
-class ShiftArrowDownTextIntent extends TextEditingIntent {}
+class ShiftArrowDownTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + arrow-left key event.
-class ShiftArrowLeftTextIntent extends TextEditingIntent {}
+class ShiftArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + arrow-right key event.
-class ShiftArrowRightTextIntent extends TextEditingIntent {}
+class ShiftArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + arrow-up key event.
-class ShiftArrowUpTextIntent extends TextEditingIntent {}
+class ShiftArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + end key event.
-class ShiftEndTextIntent extends TextEditingIntent {}
+class ShiftEndTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + home key event.
-class ShiftHomeTextIntent extends TextEditingIntent {}
+class ShiftHomeTextIntent extends Intent {}

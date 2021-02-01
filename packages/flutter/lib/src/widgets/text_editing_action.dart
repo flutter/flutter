@@ -8,7 +8,9 @@ import 'actions.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
-import 'text_editing_intent.dart';
+
+// Similar to CallbackAction's OnInvokeCallback, but includes EditableTextState.
+typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T intent, EditableTextState editableTextState);
 
 /// An [Action] related to editing text.
 ///
@@ -26,7 +28,7 @@ import 'text_editing_intent.dart';
 ///
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
-class TextEditingAction<T extends TextEditingIntent> extends Action<T> {
+class TextEditingAction<T extends Intent> extends Action<T> {
   /// A constructor for a [TextEditingAction].
   ///
   /// The [onInvoke] parameter must not be null.
@@ -52,15 +54,14 @@ class TextEditingAction<T extends TextEditingIntent> extends Action<T> {
   ///
   /// Must not be null.
   @protected
-  final OnInvokeCallback<T> onInvoke;
+  final _OnInvokeTextEditingCallback<T> onInvoke;
 
   @override
   Object? invoke(covariant T intent) {
     // _editableTextState shouldn't be null because isEnabled will return false
     // and invoke shouldn't be called if so.
     assert(_editableTextState != null);
-    intent.editableTextState = _editableTextState!;
-    return onInvoke(intent);
+    return onInvoke(intent, _editableTextState!);
   }
 
   @override
