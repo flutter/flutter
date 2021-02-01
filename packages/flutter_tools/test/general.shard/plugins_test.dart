@@ -1217,7 +1217,7 @@ void main() {
         final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
         final bool didGenerate = await generateMainDartWithPluginRegistrant(
           flutterProject,
-          'main',
+          'package:app/main.dart',
           flutterBuild,
           mainFile,
         );
@@ -1229,7 +1229,7 @@ void main() {
             '\n'
             '// @dart = 2.8\n'
             '\n'
-            'import \'main\' as entrypoint;\n'
+            'import \'package:app/main.dart\' as entrypoint;\n'
             'import \'dart:io\'; // ignore: dart_io_import.\n'
             'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
             'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
