@@ -113,16 +113,16 @@ abstract class @(class) {
 ''';
 
 const String numberFormatPositionalTemplate = '''
-    final @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
-    final @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
 const String numberFormatNamedTemplate = '''
-    final @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
+    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
       locale: localeName,
       @(parameters)
     );
-    final @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
+    final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
 const String dateFormatTemplate = '''
