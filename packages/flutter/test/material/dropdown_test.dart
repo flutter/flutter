@@ -2938,6 +2938,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pumpWidget(buildFrame(
       value: '0',
+      // menu is too long to fit onto the screen.
       items: List<String>.generate(/*length=*/100, (int index) => index.toString()),
       onChanged: onChanged,
     ));
