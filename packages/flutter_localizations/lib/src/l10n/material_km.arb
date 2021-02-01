@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "ផ្ទុកឡើងវិញ",
   "moreButtonTooltip": "ច្រើន​ទៀត",
   "dateSeparator": "/",
-  "dateHelpText": "ខែ/ថ្ងៃ/ឆ្នាំ",
+  "dateHelpText": "ថ្ងៃ/ខែ/ឆ្នាំ",
   "selectYearSemanticsLabel": "ជ្រើសរើសឆ្នាំ",
   "unspecifiedDate": "កាលបរិច្ឆេទ",
   "unspecifiedDateRange": "ចន្លោះ​កាលបរិច្ឆេទ",

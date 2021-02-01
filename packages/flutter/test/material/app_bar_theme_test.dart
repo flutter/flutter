@@ -442,7 +442,7 @@ void main() {
     const AppBarTheme(
       backwardsCompatibility: false,
       brightness: Brightness.dark,
-      color: Color(0xff000001),
+      backgroundColor: Color(0xff000001),
       elevation: 8.0,
       shadowColor: Color(0xff000002),
       centerTitle: true,
@@ -456,7 +456,7 @@ void main() {
 
     expect(description, <String>[
       'brightness: Brightness.dark',
-      'color: Color(0xff000001)',
+      'backgroundColor: Color(0xff000001)',
       'elevation: 8.0',
       'shadowColor: Color(0xff000002)',
       'centerTitle: true',

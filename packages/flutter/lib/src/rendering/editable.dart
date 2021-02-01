@@ -383,6 +383,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextSelectionDelegate textSelectionDelegate;
 
   Rect? _lastCaretRect;
+  late Rect _currentCaretRect;
 
   /// Track whether position of the start of the selected text is within the viewport.
   ///
@@ -712,33 +713,57 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // case where the user moves the cursor to the end or beginning of the text
     // and then back up or down.
     if (downArrow || upArrow) {
-      // The caret offset gives a location in the upper left hand corner of
-      // the caret so the middle of the line above is a half line above that
-      // point and the line below is 1.5 lines below that point.
-      final double preferredLineHeight = _textPainter.preferredLineHeight;
-      final double verticalOffset = upArrow ? -0.5 * preferredLineHeight : 1.5 * preferredLineHeight;
-
-      final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: newSelection.extentOffset), _caretPrototype);
-      final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-      final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
-
-      // To account for the possibility where the user vertically highlights
-      // all the way to the top or bottom of the text, we hold the previous
-      // cursor location. This allows us to restore to this position in the
-      // case that the user wants to unhighlight some text.
-      if (position.offset == newSelection.extentOffset) {
-        if (downArrow) {
-          newSelection = newSelection.copyWith(extentOffset: _plainText.length);
-        } else if (upArrow) {
-          newSelection = newSelection.copyWith(extentOffset: 0);
+      if (lineModifier) {
+        if (upArrow) {
+          // Extend the selection to the beginning of the field.
+          final int upperOffset = math.max(0, math.max(
+            newSelection.baseOffset,
+            newSelection.extentOffset,
+          ));
+          newSelection = TextSelection(
+            baseOffset: shift ? upperOffset : 0,
+            extentOffset: 0,
+          );
+        } else {
+          // Extend the selection to the end of the field.
+          final int lowerOffset = math.max(0, math.min(
+            newSelection.baseOffset,
+            newSelection.extentOffset,
+          ));
+          newSelection = TextSelection(
+            baseOffset: shift ? lowerOffset : _plainText.length,
+            extentOffset: _plainText.length,
+          );
         }
-        _wasSelectingVerticallyWithKeyboard = shift;
-      } else if (_wasSelectingVerticallyWithKeyboard && shift) {
-        newSelection = newSelection.copyWith(extentOffset: _cursorResetLocation);
-        _wasSelectingVerticallyWithKeyboard = false;
       } else {
-        newSelection = newSelection.copyWith(extentOffset: position.offset);
-        _cursorResetLocation = newSelection.extentOffset;
+        // The caret offset gives a location in the upper left hand corner of
+        // the caret so the middle of the line above is a half line above that
+        // point and the line below is 1.5 lines below that point.
+        final double preferredLineHeight = _textPainter.preferredLineHeight;
+        final double verticalOffset = upArrow ? -0.5 * preferredLineHeight : 1.5 * preferredLineHeight;
+
+        final Offset caretOffset = _textPainter.getOffsetForCaret(TextPosition(offset: newSelection.extentOffset), _caretPrototype);
+        final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+        final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+
+        // To account for the possibility where the user vertically highlights
+        // all the way to the top or bottom of the text, we hold the previous
+        // cursor location. This allows us to restore to this position in the
+        // case that the user wants to unhighlight some text.
+        if (position.offset == newSelection.extentOffset) {
+          if (downArrow) {
+            newSelection = newSelection.copyWith(extentOffset: _plainText.length);
+          } else if (upArrow) {
+            newSelection = newSelection.copyWith(extentOffset: 0);
+          }
+          _wasSelectingVerticallyWithKeyboard = shift;
+        } else if (_wasSelectingVerticallyWithKeyboard && shift) {
+          newSelection = newSelection.copyWith(extentOffset: _cursorResetLocation);
+          _wasSelectingVerticallyWithKeyboard = false;
+        } else {
+          newSelection = newSelection.copyWith(extentOffset: position.offset);
+          _cursorResetLocation = newSelection.extentOffset;
+        }
       }
     }
 
@@ -1783,6 +1808,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   Offset? _lastTapDownPosition;
+  Offset? _lastSecondaryTapDownPosition;
+
+  /// The position of the most recent secondary tap down event on this text
+  /// input.
+  Offset? get lastSecondaryTapDownPosition => _lastSecondaryTapDownPosition;
+
+  /// Tracks the position of a secondary tap event.
+  ///
+  /// Should be called before attempting to change the selection based on the
+  /// position of a secondary tap.
+  void handleSecondaryTapDown(TapDownDetails details) {
+    _lastTapDownPosition = details.globalPosition;
+    _lastSecondaryTapDownPosition = details.globalPosition;
+  }
 
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
@@ -1950,33 +1989,26 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (obscureText) {
       return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     // If the word is a space, on iOS try to select the previous word instead.
-    } else if (text?.text != null
-        && _isWhitespace(text!.text!.codeUnitAt(position.offset))
+    // On Android try to select the previous word instead only if the text is read only.
+    } else if (text?.toPlainText() != null
+        && _isWhitespace(text!.toPlainText().codeUnitAt(position.offset))
         && position.offset > 0) {
       assert(defaultTargetPlatform != null);
+      final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          int startIndex = position.offset - 1;
-          while (startIndex > 0
-              && (_isWhitespace(text!.text!.codeUnitAt(startIndex))
-              || text!.text! == '\u200e' || text!.text! == '\u200f')) {
-            startIndex--;
-          }
-          if (startIndex > 0) {
-            final TextPosition positionBeforeSpace = TextPosition(
-              offset: startIndex,
-              affinity: position.affinity,
-            );
-            final TextRange wordBeforeSpace = _textPainter.getWordBoundary(
-              positionBeforeSpace,
-            );
-            startIndex = wordBeforeSpace.start;
-          }
           return TextSelection(
-            baseOffset: startIndex,
+            baseOffset: previousWord!.start,
             extentOffset: position.offset,
           );
         case TargetPlatform.android:
+          if (readOnly) {
+            return TextSelection(
+              baseOffset: previousWord!.start,
+              extentOffset: position.offset,
+            );
+          }
+          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -1984,6 +2016,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           break;
       }
     }
+
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
@@ -2092,7 +2125,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }
 
-  void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
+  void _paintCaretIfNeeded(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
@@ -2139,6 +2172,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
+    _currentCaretRect = caretRect;
+
+    if (!_showCursor.value)
+      return;
 
     if (cursorRadius == null) {
       canvas.drawRect(caretRect, paint);
@@ -2146,11 +2183,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final RRect caretRRect = RRect.fromRectAndRadius(caretRect, cursorRadius!);
       canvas.drawRRect(caretRRect, paint);
     }
+  }
 
-    if (caretRect != _lastCaretRect) {
-      _lastCaretRect = caretRect;
+  void _updateCaretRect() {
+    if (_currentCaretRect != _lastCaretRect) {
+      _lastCaretRect = _currentCaretRect;
       if (onCaretChanged != null)
-        onCaretChanged!(caretRect);
+        onCaretChanged!(_currentCaretRect);
     }
   }
 
@@ -2161,7 +2200,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(boundedOffset != null);
     assert(lastTextPosition != null);
     if (state == FloatingCursorDragState.Start) {
-      _relativeOrigin = const Offset(0, 0);
+      _relativeOrigin = Offset.zero;
       _previousOffset = null;
       _resetOriginOnBottom = false;
       _resetOriginOnTop = false;
@@ -2210,7 +2249,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // The relative origin in relation to the distance the user has theoretically
   // dragged the floating cursor offscreen. This value is used to account for the
   // difference in the rendering position and the raw offset value.
-  Offset _relativeOrigin = const Offset(0, 0);
+  Offset _relativeOrigin = Offset.zero;
   Offset? _previousOffset;
   bool _resetOriginOnLeft = false;
   bool _resetOriginOnRight = false;
@@ -2220,7 +2259,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Returns the position within the text field closest to the raw cursor offset.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
-    Offset deltaPosition = const Offset(0, 0);
+    Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
     final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;
@@ -2301,11 +2340,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final Offset effectiveOffset = offset + _paintOffset;
 
     bool showSelection = false;
-    bool showCaret = false;
+    bool canShowCaret = false;
 
     if (selection != null && !_floatingCursorOn) {
-      if (selection!.isCollapsed && _showCursor.value && cursorColor != null)
-        showCaret = true;
+      if (selection!.isCollapsed && cursorColor != null)
+        canShowCaret = true;
       else if (!selection!.isCollapsed && _selectionColor != null)
         showSelection = true;
       _updateSelectionExtentsVisibility(effectiveOffset);
@@ -2324,17 +2363,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
-    if (showCaret) {
+    if (canShowCaret) {
       assert(selection != null);
-      _paintCaret(context.canvas, effectiveOffset, selection!.extent);
+      _paintCaretIfNeeded(context.canvas, effectiveOffset, selection!.extent);
+      _updateCaretRect();
     }
 
     if (!paintCursorAboveText)
       _textPainter.paint(context.canvas, effectiveOffset);
 
     if (_floatingCursorOn) {
-      if (_resetFloatingCursorAnimationValue == null)
-        _paintCaret(context.canvas, effectiveOffset, _floatingCursorTextPosition);
+      if (_resetFloatingCursorAnimationValue == null) {
+        _paintCaretIfNeeded(context.canvas, effectiveOffset, _floatingCursorTextPosition);
+        _updateCaretRect();
+      }
       _paintFloatingCaret(context.canvas, _floatingCursorOffset);
     }
   }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:file/file.dart';
@@ -35,7 +37,7 @@ void main() {
     MockWebProject webProject;
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
-    SystemClock mockClock;
+    FakeSystemClock systemClock;
     FlutterVersion mockVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
@@ -110,16 +112,14 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
-      mockClock = MockClock();
+      systemClock = FakeSystemClock()
+        ..currentTime = DateTime(1970, 1, 1);
       mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
 
-      when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime(1970, 1, 1)
-      );
       when(mockVersion.frameworkVersion).thenAnswer(
         (Invocation _) => '1.0.0'
       );
@@ -390,14 +390,25 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () async {
-        createFakePlugin(fs);
+      testUsingContext('Refreshing the plugin list creates a sorted plugin directory when there are plugins', () async {
+        createFakePlugins(fs, <String>[
+          'plugin_d',
+          'plugin_a',
+          '/local_plugins/plugin_c',
+          '/local_plugins/plugin_b'
+        ]);
+
         when(iosProject.existsSync()).thenReturn(true);
 
         await refreshPluginsList(flutterProject);
 
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+
+        final String pluginsFileContents = flutterProject.flutterPluginsFile.readAsStringSync();
+        expect(pluginsFileContents.indexOf('plugin_a'), lessThan(pluginsFileContents.indexOf('plugin_b')));
+        expect(pluginsFileContents.indexOf('plugin_b'), lessThan(pluginsFileContents.indexOf('plugin_c')));
+        expect(pluginsFileContents.indexOf('plugin_c'), lessThan(pluginsFileContents.indexOf('plugin_d')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -412,9 +423,7 @@ dependencies:
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
-        when(mockClock.now()).thenAnswer(
-          (Invocation _) => dateCreated
-        );
+        systemClock.currentTime = dateCreated;
         const String version = '1.0.0';
         when(mockVersion.frameworkVersion).thenAnswer(
           (Invocation _) => version
@@ -503,7 +512,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
 
@@ -520,7 +529,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
 
@@ -543,7 +552,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
     });
@@ -1397,3 +1406,12 @@ class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeSystemClock extends Fake implements SystemClock {
+  DateTime currentTime;
+
+  @override
+  DateTime now() {
+    return currentTime;
+  }
+}

@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "刷新",
   "moreButtonTooltip": "更多",
   "dateSeparator": "/",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "yyyy/mm/dd",
   "selectYearSemanticsLabel": "选择年份",
   "unspecifiedDate": "日期",
   "unspecifiedDateRange": "日期范围",

@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,7 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
@@ -41,6 +44,35 @@ void main() {
     );
     expect(logger.statusText, contains('test message'));
     expect(fileSystem.file('out/test'), exists);
+  });
+
+  testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
+    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: MockHttpClient(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')
+        ..createSync(),
+    );
+    // Unrelated file from another cache.
+    fileSystem.file('out/bar').createSync(recursive: true);
+    // Stale file from current cache.
+    fileSystem.file('out/test/foo.txt').createSync(recursive: true);
+
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http:///test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(fileSystem.file('out/test'), exists);
+    expect(fileSystem.file('out/bar'), exists);
+    expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
   });
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
@@ -139,7 +171,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = StdoutLogger(
       terminal: Terminal.test(supportsColor: true),
-      stdio: MockStdio(),
+      stdio: FakeStdio(),
       outputPreferences: OutputPreferences.test(),
     );
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -246,7 +278,7 @@ void main() {
     expect(fileSystem.file('out/test'), isNot(exists));
   });
 
-  testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails', () async {
+  testWithoutContext('ArtifactUpdater will re-download a file if unzipping fails', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -294,7 +326,7 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
-  testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice', () async {
+  testWithoutContext('ArtifactUpdater will bail with a tool exit if unzipping fails more than twice', () async {
     final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
@@ -313,7 +345,7 @@ void main() {
       'test message',
       Uri.parse('http:///test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsA(isA<Exception>()));
+    ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });
@@ -337,7 +369,7 @@ void main() {
       'test message',
       Uri.parse('http:///test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
-    ), throwsA(isA<Exception>()));
+    ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
     expect(fileSystem.file('out/test'), isNot(exists));
   });

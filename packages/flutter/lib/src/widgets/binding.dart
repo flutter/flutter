@@ -703,7 +703,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   /// Whether the Flutter engine has rasterized the first frame.
   ///
-  /// {@macro flutter.flutter_driver.WaitUntilFirstFrameRasterized}
+  /// Usually, the time that a frame is rasterized is very close to the time that
+  /// it gets presented on the display. Specifically, rasterization is the last
+  /// expensive phase of a frame that's still in Flutter's control.
   ///
   /// See also:
   ///
@@ -714,7 +716,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.flutter_driver.WaitUntilFirstFrameRasterized}
+  /// Usually, the time that a frame is rasterized is very close to the time that
+  /// it gets presented on the display. Specifically, rasterization is the last
+  /// expensive phase of a frame that's still in Flutter's control.
   ///
   /// See also:
   ///

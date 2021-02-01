@@ -25,7 +25,7 @@
   "unspecifiedDateRange": "日期範圍",
   "unspecifiedDate": "日期",
   "selectYearSemanticsLabel": "揀年份",
-  "dateHelpText": "yyyy/mm/dd",
+  "dateHelpText": "dd/mm/yyyy",
   "moreButtonTooltip": "更多",
   "tabLabel": "第 $tabIndex 個標籤，總共 $tabCount 個",
   "showAccountsLabel": "顯示帳戶",

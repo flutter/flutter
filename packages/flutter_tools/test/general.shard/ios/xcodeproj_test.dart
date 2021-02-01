@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -224,7 +226,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -428,7 +430,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -455,7 +457,7 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       terminal: terminal,
-      usage: Usage.test(),
+      usage: TestUsage(),
     );
 
     expect(
@@ -562,7 +564,7 @@ Information about project "Runner":
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
     expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
     expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false)), 'Paid');
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(BuildInfo.debug), isNull);
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
   });
 
@@ -671,7 +673,7 @@ Information about project "Runner":
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -689,6 +691,34 @@ Information about project "Runner":
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
       expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
+    });
+
+    testUsingOsxContext('sets ARCHS=x86_64 when sim local engine is set', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios,
+          mode: anyNamed('mode'),
+          environmentType: anyNamed('environmentType')))
+          .thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_debug_sim_unopt'));
+
+      const BuildInfo buildInfo = BuildInfo.debug;
+      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+      );
+
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('ARCHS=x86_64'), isTrue);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('ARCHS=x86_64'), isTrue);
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
@@ -725,7 +755,7 @@ Information about project "Runner":
               environmentType: anyNamed('environmentType')))
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -752,7 +782,7 @@ Information about project "Runner":
               environmentType: anyNamed('environmentType')))
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+      const BuildInfo buildInfo = BuildInfo.debug;
 
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(

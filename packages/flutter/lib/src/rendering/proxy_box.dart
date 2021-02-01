@@ -1389,7 +1389,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     assert(() {
       _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(10.0, 10.0),
           <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
           <double>[0.25, 0.25, 0.75, 0.75],
@@ -2502,7 +2502,7 @@ class RenderFittedBox extends RenderProxyBox {
         assert(debugCannotComputeDryLayout(
           reason: 'Child provided invalid size of $childSize.',
         ));
-        return const Size(0, 0);
+        return Size.zero;
       }
 
       switch (fit) {

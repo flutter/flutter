@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -283,13 +285,6 @@ void main() {
       await terminalHandler.processTerminalInput('U');
 
       verify(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
-    });
-
-    testWithoutContext('v - launchDevTools', () async {
-      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-      await terminalHandler.processTerminalInput('v');
-
-      verify(mockResidentRunner.launchDevTools(openInBrowser: true)).called(1);
     });
 
     testWithoutContext('w,W - debugDumpApp with service protocol', () async {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import '../asset.dart';
@@ -219,18 +221,17 @@ class TestCommand extends FlutterCommand {
       );
     }
 
-    Directory workDir;
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
-      workDir = globals.fs.directory('test');
-      if (!workDir.existsSync()) {
-        throwToolExit('Test directory "${workDir.path}" not found.');
+      final Directory testDir = globals.fs.directory('test');
+      if (!testDir.existsSync()) {
+        throwToolExit('Test directory "${testDir.path}" not found.');
       }
-      files = _findTests(workDir).toList();
+      files = _findTests(testDir).toList();
       if (files.isEmpty) {
         throwToolExit(
-            'Test directory "${workDir.path}" does not appear to contain any test files.\n'
+            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
             'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
@@ -269,7 +270,6 @@ class TestCommand extends FlutterCommand {
     final int result = await testRunner.runTests(
       testWrapper,
       files,
-      workDir: workDir,
       names: names,
       plainNames: plainNames,
       tags: tags,
