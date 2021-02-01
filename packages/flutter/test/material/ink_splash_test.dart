@@ -58,7 +58,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();
