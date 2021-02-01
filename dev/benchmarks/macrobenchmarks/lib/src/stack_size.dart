@@ -90,7 +90,7 @@ class StackSizePage extends StatelessWidget {
 class ParentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final int myStackSize = getStackPointer();//io.ProcessInfo.currentStackSize;
+    final int myStackSize = getStackPointer();
     return ChildWidget(parentStackSize: myStackSize);
   }
 }
@@ -101,7 +101,7 @@ class ChildWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int myStackSize = getStackPointer(); //io.ProcessInfo.currentStackSize;
+    final int myStackSize = getStackPointer();
     // Captures the stack size difference between parent widget and child widget
     // during the rendering pipeline, i.e. one layer of stateless widget.
     // print('parentStackSize: $parentStackSize, myStackSize $myStackSize');
