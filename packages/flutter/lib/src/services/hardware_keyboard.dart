@@ -148,56 +148,56 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 }
 
 /// An interface to listen to hardware [KeyEvent]s and query key states.
-/// 
+///
 /// [HardwareKeyboard] dispatches key events from hardware keyboards (in contrast
 /// to on-screen keyboards) received from the native platform after
 /// normalization. To stay notified whenever keys are pressed and released, add a
 /// listener with [addListener]. Alternatively, you can listen to key events only
 /// when specific part of the app is focused with [Focus.onKeyEvent].
-/// 
+///
 /// [HardwareKeyboard] also offers basic state querying. Query whether a key is
 /// being held, or a lock key is enabled, with [physicalKeyPressed],
 /// [logicalKeyPressed], or [locked].
-/// 
+///
 /// The singleton [HardwareKeyboard] instance is held by the [ServicesBinding] as
 /// [ServicesBinding.hardwareKeyboard], and can be conveniently accessed using the
 /// [HardwareKeyboard.instance] static accessor.
-/// 
+///
 /// ## Event model
 ///
 /// Flutter normalizes hardware key events from the native platform in terms of
 /// event model and key options, while preserving platform-specific features as
 /// much as possible.
-/// 
+///
 /// [HardwareKeyboard] tries to dispatch events following the model as follows:
-/// 
+///
 ///  * At initialization, all keys are released.
-///  * A key press sequence always consists of one [KeyDownEvent], zero or more 
+///  * A key tap sequence always consists of one [KeyDownEvent], zero or more
 ///    [KeyRepeatEvent]s, and one [KeyUpEvent].
-///  * All events in the same key press sequence have the same physical key and
+///  * All events in the same key tap sequence have the same physical key and
 ///    logical key.
 ///  * Only [KeyDownEvent]s and [KeyRepeatEvent]s may have `character`, which
-///    might vary within the key press sequence.
+///    might vary within the key tap sequence.
 ///  * Lock state always toggles at a respetive [KeyDownEvent].
-/// 
+///
 /// However, this model might not be met on some platforms until the migration
 /// period is over, since the [KeyEvent]s on these platforms are still one-to-one
 /// mapped from [RawKeyEvent]s.
-/// 
+///
 /// The resulting events might not map one-to-one to native key events. A
 /// [KeyEvent] that does not correspond to a native event is marked as
 /// `synthesized`.
-/// 
+///
 /// ## Compared to [RawKeyboard]
-/// 
+///
 /// [RawKeyboard] is the legacy API, will be deprecated and removed in the
 /// future.
-/// 
+///
 /// [RawKeyboard] dispatches events that contain raw key event data and computes
 /// unified key information in the framework. [RawKeyboard] provides a less
 /// unified, less regular event model than [HardwareKeyboard], and includes
 /// unnecessary mapping data of other platforms in the app.
-/// 
+///
 /// It is recommended to always use [HardwareKeyboard] and [KeyEvent] APIs to
 /// handle key events.
 ///
@@ -227,16 +227,16 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   final Map<int, int> _physicalPressCount = <int, int>{};
   /// Returns true if the given [PhysicalKeyboardKey] is pressed.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
-  /// 
+  ///
   /// If multiple key down events with the same physical `usbHidUsage` have been
   /// observed, the result will turn false only with the same number of key up
   /// events.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
   ///  * [locked], which tells if a logical lock key is enabled.
   @override
@@ -249,16 +249,16 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   final Map<int, int> _logicalPressCount = <int, int>{};
   /// Returns true if the given [LogicalKeyboardKey] is pressed.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
-  /// 
+  ///
   /// If multiple key down events with the same logical `keyId` have been
   /// observed, the result will turn false only with the same number of key up
   /// events.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
   ///  * [locked], which tells if a logical lock key is enabled.
   @override
@@ -271,11 +271,11 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   late final Map<int, bool> _locked = <int, bool>{};
   /// Returns true if the lock flag of the given [LogicalKeyboardKey] is enabled.
-  /// 
+  ///
   /// Lock keys, such as CapsLock, are logical keys that toggle their
   /// respective boolean states on key down events. Such flags are usually used
   /// as modifier to other keys or events.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
   @override
@@ -331,108 +331,12 @@ abstract class HardwareKeyboard extends KeyboardState {
       assert(!receivingKeyData || _physicalPressCount.containsKey(event.physical.usbHidUsage));
       assert(!receivingKeyData || _logicalPressCount.containsKey(event.logical.keyId));
     }
-    return notifyListeners(event);
-  }
-
-  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
-
-  bool _debugAssertNotDisposed() {
-    assert(() {
-      if (_listeners == null) {
-        throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
-        );
-      }
-      return true;
-    }());
-    return true;
-  }
-
-  /// Register a listener that is called every time the user presses or releases
-  /// a hardware keyboard key.
-  ///
-  /// If the callback returns true, the event is considered handled by Flutter
-  /// and will not be propagated to other native components. If the callback
-  /// returns false, the native event (possibly a clone of the original one) will
-  /// be propagated to other native components.
-  ///
-  /// Most applications prefer to use the focus system (see [Focus] and
-  /// [FocusManager]) to receive key events to the focused control instead of
-  /// this kind of passive listener.
-  ///
-  /// Listeners can be removed with [removeListener].
-  void addListener(KeyEventCallback listener) {
-    assert(_debugAssertNotDisposed());
-    _listeners!.add(_ListenerEntry(listener));
-  }
-
-  /// Stop calling the given listener every time the user presses or releases a
-  /// hardware keyboard key.
-  ///
-  /// Listeners can be added with [addListener].
-  void removeListener(KeyEventCallback listener) {
-    assert(_debugAssertNotDisposed());
-    for (final _ListenerEntry entry in _listeners!) {
-      if (entry.listener == listener) {
-        entry.unlink();
-        return;
-      }
-    }
-  }
-
-  @mustCallSuper
-  void dispose() {
-    assert(_debugAssertNotDisposed());
-    _listeners = null;
-  }
-
-  /// Call all the registered listeners.
-  ///
-  /// Call this method whenever the object changes, to notify any clients the
-  /// object may have changed. Listeners that are added during this iteration
-  /// will not be visited. Listeners that are removed during this iteration will
-  /// not be visited after they are removed.
-  ///
-  /// Exceptions thrown by listeners will be caught and reported using
-  /// [FlutterError.reportError].
-  ///
-  /// This method must not be called after [dispose] has been called.
-  ///
-  /// Surprising behavior can result when reentrantly removing a listener (i.e.
-  /// in response to a notification) that has been registered multiple times.
-  /// See the discussion at [removeListener].
-  @protected
-  @visibleForTesting
-  bool notifyListeners(KeyEvent event) {
-    assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (onEvent == null) {
       return false;
-
-    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
-
-    for (final _ListenerEntry entry in localListeners) {
-      try {
-        if (entry.list != null) {
-          if (entry.listener(event))
-            return true;
-        }
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<HardwareKeyboard>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
-        ));
-      }
+    } else {
+      return onEvent!(event);
     }
-    return false;
   }
+
+  KeyEventCallback? onEvent;
 }

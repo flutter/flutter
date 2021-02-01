@@ -440,7 +440,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
   /// arguments must not be null.
-  /// 
+  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -587,7 +587,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
-  /// 
+  ///
   /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
   /// future. Prefer [onKeyEvent] instead.
   ///
@@ -1051,7 +1051,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// need to be attached. [FocusAttachment.detach] should be called on the old
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
-  /// 
+  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -1481,7 +1481,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
-    HardwareKeyboard.instance.addListener(_handleKeyEvent);
+    HardwareKeyboard.instance.onEvent = _handleKeyEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
@@ -1721,6 +1721,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
+    print('FocusManager._handleKeyEvent event $event');
     // Update highlightMode first, since things responding to the keys might
     // look at the highlight mode, and it should be accurate.
     _lastInteractionWasTouch = false;
@@ -1736,9 +1737,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // onKey on the way up, and if one responds that they handled it or want to
     // stop propagation, stop.
     bool handled = false;
+    print('Before for');
     for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
       if (node.onKeyEvent != null) {
         final KeyEventResult result = node.onKeyEvent!(node, event);
+        print('Node $node result $result');
         switch (result) {
           case KeyEventResult.handled:
             assert(_focusDebug('Node $node handled key event $event.'));
@@ -1751,6 +1754,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           case KeyEventResult.ignored:
             continue;
         }
+        break;
       }
     }
     if (!handled) {

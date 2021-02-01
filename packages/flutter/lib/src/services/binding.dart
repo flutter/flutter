@@ -67,8 +67,8 @@ KeyEvent _keyEventFromData(ui.KeyData keyData) {
       LogicalKeyboardKey.findKeyByKeyId(keyData.logical) ??
           LogicalKeyboardKey(keyData.logical);
   final Duration timeStamp = keyData.timeStamp;
-  switch (keyData.change) {
-    case ui.KeyChange.down:
+  switch (keyData.type) {
+    case ui.KeyEventType.down:
       return KeyDownEvent(
         physical: physicalKey,
         logical: logicalKey,
@@ -76,14 +76,14 @@ KeyEvent _keyEventFromData(ui.KeyData keyData) {
         character: keyData.character,
         synthesized: keyData.synthesized,
       );
-    case ui.KeyChange.up:
+    case ui.KeyEventType.up:
       return KeyUpEvent(
         physical: physicalKey,
         logical: logicalKey,
         timeStamp: timeStamp,
         synthesized: keyData.synthesized,
       );
-    case ui.KeyChange.repeat:
+    case ui.KeyEventType.repeat:
       return KeyRepeatEvent(
         physical: physicalKey,
         logical: logicalKey,
@@ -122,7 +122,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   static ServicesBinding? _instance;
 
   HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard;
-  late _ServiceHardwareKeyboard _hardwareKeyboard;
+  late final _ServiceHardwareKeyboard _hardwareKeyboard;
 
   bool _handleKeyData(ui.KeyData keyData) {
     return handleKeyEvent(_keyEventFromData(keyData));

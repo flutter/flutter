@@ -882,6 +882,144 @@ void main() {
       final FocusAttachment child3Attachment = child3.attach(context, onKey: handleEvent);
       final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
       final FocusAttachment child4Attachment = child4.attach(context, onKey: handleEvent);
+      // rootScope --- scope1 --- parent1 --- child1
+      //            |                      |- child2
+      //            |- scope2 --- parent2 --- child3
+      //                                   |- child4
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+      child4.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{child4}));
+      shouldHandle.remove(child4);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{parent2}));
+      shouldHandle.remove(parent2);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{scope2}));
+      shouldHandle.clear();
+      await sendEvent();
+      expect(receivedAnEvent, isEmpty);
+      child1.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      // Since none of the focused nodes handle this event, nothing should
+      // receive it.
+      expect(receivedAnEvent, isEmpty);
+    });
+    testWidgets('Key event (from RawKeyEvent) handling bubbles up and terminates when handled.', (WidgetTester tester) async {
+      final Set<FocusNode> receivedAnEvent = <FocusNode>{};
+      final Set<FocusNode> shouldHandle = <FocusNode>{};
+      KeyEventResult handleEvent(FocusNode node, KeyEvent event) {
+        if (shouldHandle.contains(node)) {
+          receivedAnEvent.add(node);
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      }
+
+      Future<void> sendEvent() async {
+        receivedAnEvent.clear();
+        await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+      final FocusAttachment scope1Attachment = scope1.attach(context, onKeyEvent: handleEvent);
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'Scope 2');
+      final FocusAttachment scope2Attachment = scope2.attach(context, onKeyEvent: handleEvent);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', onKeyEvent: handleEvent);
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', onKeyEvent: handleEvent);
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child3 = FocusNode(debugLabel: 'Child 3');
+      final FocusAttachment child3Attachment = child3.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
+      final FocusAttachment child4Attachment = child4.attach(context, onKeyEvent: handleEvent);
+      // rootScope --- scope1 --- parent1 --- child1
+      //            |                      |- child2
+      //            |- scope2 --- parent2 --- child3
+      //                                   |- child4
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+      child4.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{child4}));
+      shouldHandle.remove(child4);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{parent2}));
+      shouldHandle.remove(parent2);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{scope2}));
+      shouldHandle.clear();
+      await sendEvent();
+      expect(receivedAnEvent, isEmpty);
+      child1.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      // Since none of the focused nodes handle this event, nothing should
+      // receive it.
+      expect(receivedAnEvent, isEmpty);
+    });
+    testWidgets('Key event handling bubbles up and terminates when handled.', (WidgetTester tester) async {
+      final Set<FocusNode> receivedAnEvent = <FocusNode>{};
+      final Set<FocusNode> shouldHandle = <FocusNode>{};
+      KeyEventResult handleEvent(FocusNode node, KeyEvent event) {
+        if (shouldHandle.contains(node)) {
+          receivedAnEvent.add(node);
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      }
+
+      Future<void> sendEvent() async {
+        receivedAnEvent.clear();
+        await tester.sendKeyPress(PhysicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaLeft);
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+      final FocusAttachment scope1Attachment = scope1.attach(context, onKeyEvent: handleEvent);
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'Scope 2');
+      final FocusAttachment scope2Attachment = scope2.attach(context, onKeyEvent: handleEvent);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', onKeyEvent: handleEvent);
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', onKeyEvent: handleEvent);
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child3 = FocusNode(debugLabel: 'Child 3');
+      final FocusAttachment child3Attachment = child3.attach(context, onKeyEvent: handleEvent);
+      final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
+      final FocusAttachment child4Attachment = child4.attach(context, onKeyEvent: handleEvent);
+      // rootScope --- scope1 --- parent1 --- child1
+      //            |                      |- child2
+      //            |- scope2 --- parent2 --- child3
+      //                                   |- child4
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
       parent1Attachment.reparent(parent: scope1);
