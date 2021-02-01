@@ -129,12 +129,8 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
-<<<<<<< HEAD
-    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets +
-        (insetPadding ?? const EdgeInsets.all(0.0));
-=======
-    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
->>>>>>> 014e689087b8582163566d82307715c1511e4e1e
+    final EdgeInsets effectivePadding =
+        MediaQuery.of(context).viewInsets + (insetPadding ?? EdgeInsets.zero);
     return AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
@@ -1132,21 +1128,6 @@ Future<T?> showDialog<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final CapturedThemes themes = InheritedTheme.capture(
-<<<<<<< HEAD
-      from: context,
-      to: Navigator.of(context, rootNavigator: useRootNavigator).context);
-  return showGeneralDialog(
-    context: context,
-    pageBuilder: (BuildContext buildContext, Animation<double> animation,
-        Animation<double> secondaryAnimation) {
-      final Widget pageChild = Builder(builder: builder!);
-      Widget dialog = themes.wrap(pageChild);
-      if (useSafeArea) {
-        dialog = SafeArea(child: dialog);
-      }
-      return dialog;
-    },
-=======
     from: context,
     to: Navigator.of(
       context,
@@ -1154,11 +1135,11 @@ Future<T?> showDialog<T>({
     ).context,
   );
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator)
+      .push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
     barrierColor: barrierColor,
->>>>>>> 014e689087b8582163566d82307715c1511e4e1e
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
@@ -1220,23 +1201,25 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     RouteSettings? settings,
-  }) : assert(barrierDismissible != null),
-       super(
-         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-           final Widget pageChild = Builder(builder: builder);
-           Widget dialog = themes?.wrap(pageChild) ?? pageChild;
-           if (useSafeArea) {
-             dialog = SafeArea(child: dialog);
-           }
-           return dialog;
-         },
-         barrierDismissible: barrierDismissible,
-         barrierColor: barrierColor,
-         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
-         transitionBuilder: _buildMaterialDialogTransitions,
-         settings: settings,
-       );
+  })  : assert(barrierDismissible != null),
+        super(
+          pageBuilder: (BuildContext buildContext, Animation<double> animation,
+              Animation<double> secondaryAnimation) {
+            final Widget pageChild = Builder(builder: builder);
+            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
+            if (useSafeArea) {
+              dialog = SafeArea(child: dialog);
+            }
+            return dialog;
+          },
+          barrierDismissible: barrierDismissible,
+          barrierColor: barrierColor,
+          barrierLabel: barrierLabel ??
+              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          transitionDuration: const Duration(milliseconds: 150),
+          transitionBuilder: _buildMaterialDialogTransitions,
+          settings: settings,
+        );
 }
 
 double _paddingScaleFactor(double textScaleFactor) {
