@@ -257,7 +257,6 @@ void main() {
       .readAsLinesSync();
 
     expect(contents, containsAll(<String>[
-      'FLUTTER_ROOT=/tmp/flutter sdk',
       'FLUTTER_APPLICATION_PATH=/',
       'FLUTTER_TARGET=lib/other.dart',
       'FLUTTER_BUILD_DIR=build',
