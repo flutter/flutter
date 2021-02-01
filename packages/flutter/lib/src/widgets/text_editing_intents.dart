@@ -53,10 +53,6 @@ class ControlArrowLeftTextIntent extends Intent {}
 class ControlArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
-/// platform for the control + c key event.
-class ControlCTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
 /// platform for the control + shift + arrow-left key event.
 class ControlShiftArrowLeftTextIntent extends Intent {}
 

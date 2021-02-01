@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'actions.dart';
+import 'editable_text.dart';
+import 'framework.dart';
 import 'text_editing_action.dart';
 import 'text_editing_intents.dart';
 
@@ -318,12 +320,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  static final TextEditingAction<ControlCTextIntent> _controlCTextAction = TextEditingAction<ControlCTextIntent>(
-    onInvoke: (ControlCTextIntent intent, EditableTextState editableTextState) {
-      print('justin copy (with control, not command)');
-    },
-  );
-
   static final TextEditingAction<ControlArrowLeftTextIntent> _controlArrowLeftTextAction = TextEditingAction<ControlArrowLeftTextIntent>(
     onInvoke: (ControlArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
@@ -364,7 +360,6 @@ class TextEditingActions extends StatelessWidget {
 
   static final TextEditingAction<ShiftArrowLeftTextIntent> _shiftArrowLeftTextAction = TextEditingAction<ShiftArrowLeftTextIntent>(
     onInvoke: (ShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
-      print('justin shift arrow left');
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
     },
   );
@@ -428,7 +423,6 @@ class TextEditingActions extends StatelessWidget {
         ArrowUpTextIntent: _arrowUpTextAction,
         ControlArrowLeftTextIntent: _controlArrowLeftTextAction,
         ControlArrowRightTextIntent: _controlArrowRightTextAction,
-        ControlCTextIntent: _controlCTextAction,
         ControlShiftArrowLeftTextIntent: _controlShiftArrowLeftTextAction,
         ControlShiftArrowRightTextIntent: _controlShiftArrowRightTextAction,
         EndTextIntent: _endTextAction,
