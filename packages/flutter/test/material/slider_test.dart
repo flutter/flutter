@@ -1032,7 +1032,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1055,7 +1055,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-304.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1082,7 +1082,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1109,7 +1109,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),

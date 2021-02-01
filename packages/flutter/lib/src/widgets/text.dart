@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';

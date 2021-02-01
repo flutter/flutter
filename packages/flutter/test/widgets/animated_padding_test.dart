@@ -83,7 +83,7 @@ void main() {
         child: AnimatedPadding(
           curve: Curves.easeInOutBack,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.only(right: 0.0),
+          padding: EdgeInsets.zero,
           child: SizedBox.expand(key: target),
         ),
       ),

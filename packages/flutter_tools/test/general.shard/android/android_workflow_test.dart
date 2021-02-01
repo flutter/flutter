@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -16,7 +18,8 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+import '../../src/fakes.dart';
+import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager;
 import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
@@ -27,7 +30,7 @@ void main() {
   Logger logger;
   MemoryFileSystem fileSystem;
   MockProcessManager processManager;
-  MockStdio stdio;
+  FakeStdio stdio;
 
   setUp(() {
     sdk = MockAndroidSdk();
@@ -35,7 +38,7 @@ void main() {
     fileSystem.directory('/home/me').createSync(recursive: true);
     logger = BufferLogger.test();
     processManager = MockProcessManager();
-    stdio = MockStdio();
+    stdio = FakeStdio();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {

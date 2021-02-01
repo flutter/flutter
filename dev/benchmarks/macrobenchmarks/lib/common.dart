@@ -11,6 +11,7 @@ const String kPictureCacheRouteName = '/picture_cache';
 const String kLargeImageChangerRouteName = '/large_image_changer';
 const String kLargeImagesRouteName = '/large_images';
 const String kTextRouteName = '/text';
+const String kFullscreenTextRouteName = '/fullscreen_text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
 const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
 const String kFadingChildAnimationRouteName = '/fading_child_animation';

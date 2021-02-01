@@ -217,13 +217,13 @@ class _SliderDemoState extends State<SliderDemo> {
         tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
         demoWidget: _Sliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Slider-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RANGE',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/RangeSlider-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/RangeSlider-class.html',
       ),
     ];
 

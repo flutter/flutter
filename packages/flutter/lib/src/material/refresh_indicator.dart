@@ -239,6 +239,22 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   @override
+  void didUpdateWidget(covariant RefreshIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.color != widget.color) {
+      final ThemeData theme = Theme.of(context);
+      _valueColor = _positionController.drive(
+        ColorTween(
+          begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+          end: (widget.color ?? theme.accentColor).withOpacity(1.0),
+        ).chain(CurveTween(
+            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+        )),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _positionController.dispose();
     _scaleController.dispose();

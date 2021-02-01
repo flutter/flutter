@@ -575,7 +575,7 @@ void main() {
             context: context,
             child: Builder(
               builder: (BuildContext context) {
-                final Locale locale = Localizations.localeOf(context)!;
+                final Locale locale = Localizations.localeOf(context);
                 final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
                 return Text('$locale $direction');
               },
@@ -616,7 +616,7 @@ void main() {
             ],
             child: Builder(
               builder: (BuildContext context) {
-                final Locale locale = Localizations.localeOf(context)!;
+                final Locale locale = Localizations.localeOf(context);
                 final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
                 return Text('$locale $direction');
               },
@@ -652,7 +652,7 @@ void main() {
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
           return Text('$locale $direction');
         },
@@ -760,7 +760,7 @@ void main() {
           Locale('ja'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -783,7 +783,7 @@ void main() {
           Locale('zh', 'TW'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -815,7 +815,7 @@ void main() {
           Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -956,7 +956,7 @@ void main() {
           Locale.fromSubtags(languageCode: 'zh'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1096,7 +1096,7 @@ void main() {
           Locale('it', 'IT'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1119,7 +1119,7 @@ void main() {
           Locale('it', 'IT'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1152,7 +1152,7 @@ void main() {
           Locale('pt', 'PT'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1219,7 +1219,7 @@ void main() {
           Locale('de', 'DE'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1283,7 +1283,7 @@ void main() {
           Locale('vi'),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )
@@ -1435,7 +1435,7 @@ void main() {
           return const Locale('en', 'US');
         },
         buildContent: (BuildContext context) {
-          final Locale locale = Localizations.localeOf(context)!;
+          final Locale locale = Localizations.localeOf(context);
           return Text('$locale');
         },
       )

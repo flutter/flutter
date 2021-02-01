@@ -104,7 +104,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 100.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -163,7 +163,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 100.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -222,7 +222,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: false,
             ),
@@ -292,7 +292,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: false,
           ),
@@ -362,7 +362,7 @@ void main() {
           data: ThemeData(
             tooltipTheme: const TooltipThemeData(
               height: 190.0,
-              padding: EdgeInsets.all(0.0),
+              padding: EdgeInsets.zero,
               verticalOffset: 100.0,
               preferBelow: true,
             ),
@@ -420,7 +420,7 @@ void main() {
         child: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
-            padding: EdgeInsets.all(0.0),
+            padding: EdgeInsets.zero,
             verticalOffset: 100.0,
             preferBelow: true,
           ),
@@ -481,7 +481,7 @@ void main() {
                 return Theme(
                   data: ThemeData(
                     tooltipTheme: const TooltipThemeData(
-                      padding: EdgeInsets.all(0.0),
+                      padding: EdgeInsets.zero,
                       margin: EdgeInsets.all(_customPaddingValue),
                     ),
                   ),
@@ -538,7 +538,7 @@ void main() {
               builder: (BuildContext context) {
                 return TooltipTheme(
                   data: const TooltipThemeData(
-                    padding: EdgeInsets.all(0.0),
+                    padding: EdgeInsets.zero,
                     margin: EdgeInsets.all(_customPaddingValue),
                   ),
                   child: Tooltip(
@@ -866,7 +866,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(Duration.zero); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -910,7 +910,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    await tester.pump(Duration.zero); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
   });
 

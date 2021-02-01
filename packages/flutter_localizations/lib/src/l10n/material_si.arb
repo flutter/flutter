@@ -53,7 +53,7 @@
   "refreshIndicatorSemanticLabel": "නැවුම් කරන්න",
   "moreButtonTooltip": "තව",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "mm.dd.yyyy",
   "selectYearSemanticsLabel": "වර්ෂය තෝරන්න",
   "unspecifiedDate": "දිනය",
   "unspecifiedDateRange": "දින පරාසය",

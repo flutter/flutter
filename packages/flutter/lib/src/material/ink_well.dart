@@ -285,7 +285,7 @@ class InkResponse extends StatelessWidget {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [mouseCursor], [containedInkWell], [highlightShape], [enableFeedback],
+  /// The [containedInkWell], [highlightShape], [enableFeedback],
   /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     Key? key,
@@ -1216,7 +1216,7 @@ class InkWell extends InkResponse {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [mouseCursor], [enableFeedback], and [excludeFromSemantics] arguments
+  /// The [enableFeedback], and [excludeFromSemantics] arguments
   /// must not be null.
   const InkWell({
     Key? key,

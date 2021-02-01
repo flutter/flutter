@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -58,6 +59,7 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
+  Timeout timeout,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
@@ -174,7 +176,7 @@ void testUsingContext(
       // BotDetector implementation in the overrides.
       BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
     });
-  }, testOn: testOn, skip: skip);
+  }, testOn: testOn, skip: skip, timeout: timeout);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -332,9 +334,6 @@ class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
 class FakeUsage implements Usage {
   @override
-  bool get isFirstRun => false;
-
-  @override
   bool get suppressAnalytics => false;
 
   @override
@@ -420,8 +419,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
-
-class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 

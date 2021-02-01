@@ -12,10 +12,12 @@
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     app.main();
@@ -28,7 +30,7 @@ void main() {
       find.byWidgetPredicate(
         (Widget widget) =>
             widget is Text &&
-            widget.data
+            widget.data!
                 .startsWith('Platform: ${html.window.navigator.platform}\n'),
       ),
       findsOneWidget,

@@ -26,7 +26,7 @@
   "unspecifiedDateRange": "Period",
   "unspecifiedDate": "Datum",
   "selectYearSemanticsLabel": "Izaberite godinu",
-  "dateHelpText": "dd/mm/gggg",
+  "dateHelpText": "dd.mm.gggg.",
   "moreButtonTooltip": "Još",
   "remainingTextFieldCharacterCountFew": "Preostala su $remainingCount znaka",
   "scriptCategory": "English-like",
