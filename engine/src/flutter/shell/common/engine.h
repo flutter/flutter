@@ -886,6 +886,13 @@ class Engine final : public RuntimeDelegate,
                                     const std::string error_message,
                                     bool transient);
 
+  //--------------------------------------------------------------------------
+  /// @brief      Accessor for the RuntimeController.
+  ///
+  const RuntimeController* GetRuntimeController() const {
+    return runtime_controller_.get();
+  }
+
  private:
   Engine::Delegate& delegate_;
   const Settings settings_;
