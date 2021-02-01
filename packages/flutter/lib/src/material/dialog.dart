@@ -217,7 +217,7 @@ class Dialog extends StatelessWidget {
 /// }
 /// ```
 /// {@end-tool}
-/// 
+///
 /// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ```dart
