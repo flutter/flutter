@@ -14,7 +14,6 @@
 #include "ax_build/build_config.h"
 #include "ax_platform_node.h"
 #include "ax_platform_node_delegate.h"
-#include "ax_platform_text_boundary.h"
 #include "base/macros.h"
 #include "gfx/geometry/point.h"
 #include "gfx/native_widget_types.h"
