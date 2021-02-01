@@ -149,9 +149,7 @@ String generateNumberFormattingLogic(Message message) {
           if (parameter.value is num) {
             return '${parameter.name}: ${parameter.value}';
           } else {
-            return '${parameter.name}: ${_generateStringParameterValue(
-              parameter.value.toString(),
-            )}';
+            return '${parameter.name}: ${generateString(parameter.value.toString())}';
           }
         },
       );
@@ -477,18 +475,6 @@ String _generateDelegateClass({
     .replaceAll('@(loadBody)', loadBody)
     .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
     .replaceAll('@(lookupFunction)', lookupFunction);
-}
-
-String _generateStringParameterValue(String value) {
-  if (value.contains("'")) {
-    if (value.contains('"')) {
-      return "'${value.replaceAll("'", r"\'")}'";
-    } else {
-      return '"$value"';
-    }
-  } else {
-    return "'$value'";
-  }
 }
 
 class LocalizationsGenerator {
