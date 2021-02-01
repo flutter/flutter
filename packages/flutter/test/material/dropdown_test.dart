@@ -2923,6 +2923,7 @@ void main() {
   testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(
       value: '0',
+      // menu is short enough to fit onto the screen.
       items: List<String>.generate(/*length=*/10, (int index) => index.toString()),
       onChanged: onChanged,
     ));
