@@ -430,6 +430,7 @@ class DataTable extends StatelessWidget {
     this.showCheckboxColumn = true,
     this.showBottomBorder = false,
     this.dividerThickness,
+    this.border,
     required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -640,6 +641,9 @@ class DataTable extends StatelessWidget {
   /// By default, a border is not shown at the bottom to allow for a border
   /// around the table defined by [decoration].
   final bool showBottomBorder;
+
+  /// The style to use when painting the boundary and interior divisions of the table.
+  final TableBorder? border;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -1015,6 +1019,7 @@ class DataTable extends StatelessWidget {
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,
+          border: border,
         ),
       ),
     );
