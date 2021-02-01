@@ -21,7 +21,7 @@ class MockTexture : public Texture {
     SkRect bounds;
     bool freeze;
     GrDirectContext* context;
-    SkFilterQuality filter_quality;
+    SkSamplingOptions sampling;
   };
 
   explicit MockTexture(int64_t textureId);
@@ -31,7 +31,7 @@ class MockTexture : public Texture {
              const SkRect& bounds,
              bool freeze,
              GrDirectContext* context,
-             SkFilterQuality filter_quality) override;
+             const SkSamplingOptions& sampling) override;
 
   void OnGrContextCreated() override { gr_context_created_ = true; }
   void OnGrContextDestroyed() override { gr_context_destroyed_ = true; }

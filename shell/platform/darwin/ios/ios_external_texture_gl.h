@@ -34,7 +34,7 @@ class IOSExternalTextureGL final : public Texture {
              const SkRect& bounds,
              bool freeze,
              GrDirectContext* context,
-             SkFilterQuality filter_quality) override;
+             const SkSamplingOptions& sampling) override;
 
   // |Texture|
   void OnGrContextCreated() override;

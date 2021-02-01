@@ -30,7 +30,7 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
                                     const SkRect& bounds,
                                     bool freeze,
                                     GrDirectContext* context,
-                                    SkFilterQuality filter_quality) {
+                                    const SkSamplingOptions& sampling) {
   const bool needs_updated_texture = (!freeze && texture_frame_available_) || !external_image_;
 
   if (needs_updated_texture) {
@@ -51,12 +51,11 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
   }
 
   if (external_image_) {
-    SkPaint paint;
-    paint.setFilterQuality(filter_quality);
-    canvas.drawImageRect(external_image_,                                      // image
-                         external_image_->bounds(),                            // source rect
-                         bounds,                                               // destination rect
-                         &paint,                                               // paint
+    canvas.drawImageRect(external_image_,                          // image
+                         SkRect::Make(external_image_->bounds()),  // source rect
+                         bounds,                                   // destination rect
+                         sampling,
+                         nullptr,                                              // paint
                          SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
     );
   }
