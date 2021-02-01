@@ -777,20 +777,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return selection.copyWith(extentOffset: nextExtent);
   }
 
-  /// Copy whatever is currently selected to the clipboard.
-  void copyCurrentSelection() {
-    final TextEditingValue value = textSelectionDelegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    textSelectionDelegate.textEditingValue = TextEditingValue(
-      text: value.text,
-      selection: TextSelection.collapsed(offset: value.selection.end),
-    );
-    textSelectionDelegate.bringIntoView(textSelectionDelegate.textEditingValue.selection.extent);
-    textSelectionDelegate.hideToolbar();
-  }
-
   // Extend the current selection to the end of the field.
   //
   // See also:

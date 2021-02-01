@@ -195,6 +195,9 @@ abstract class TextSelectionControls {
     return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
+  // TODO(justinmc): This and other methods should be ported to Actions and
+  // removed, along with their keyboard shortcut equivalents.
+  // https://github.com/flutter/flutter/issues/75004
   /// Copy the current selection of the text field managed by the given
   /// `delegate` to the [Clipboard]. Then, remove the selected text from the
   /// text field and hide the toolbar.
@@ -217,9 +220,6 @@ abstract class TextSelectionControls {
     delegate.hideToolbar();
   }
 
-  // TODO(justinmc): This should be ported to Actions, deduplicated with
-  // shortcuts like meta-c, and removed.
-  // https://github.com/flutter/flutter/issues/75004
   /// Copy the current selection of the text field managed by the given
   /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
   /// text (collapsing the selection in the process), and hide the toolbar.

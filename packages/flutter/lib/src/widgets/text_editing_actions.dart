@@ -5,17 +5,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 
 import 'text_editing_action.dart';
 import 'text_editing_intent.dart';
 
-/// The map of [Action]s that correspond to the default text editing behavior
-/// for Flutter on the current platform.
+/// An [Actions] Widget that handles the default  text editing behavior for
+/// Flutter on the current platform.
+///
+/// This default behavior can be overridden by placing an [Actions] widget lower
+/// in the Widget tree than this.
 ///
 /// See also:
 ///
-/// * [Actions], which can be used to override this behavior.
+///   * [TextEditingIntent] and all of its subclasses, which comprise all of the
+///     [Intent]s that are handle here.
 class TextEditingActions extends StatelessWidget {
   /// Creates an instance of TextEditingActions.
   TextEditingActions({
@@ -259,12 +262,6 @@ class TextEditingActions extends StatelessWidget {
     },
   );
 
-  static final TextEditingAction<MetaCTextIntent> _metaCTextAction = TextEditingAction<MetaCTextIntent>(
-    onInvoke: (MetaCTextIntent intent) {
-      intent.editableTextState.renderEditable.copyCurrentSelection();
-    },
-  );
-
   static final TextEditingAction<HomeTextIntent> _homeTextAction = TextEditingAction<HomeTextIntent>(
     onInvoke: (HomeTextIntent intent) {
       switch (defaultTargetPlatform) {
@@ -418,9 +415,6 @@ class TextEditingActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Actions(
-      // TODO(justinmc): Should handle all actions from
-      // TextSelectionGestureDetectorBuilder and from
-      // _TextFieldSelectionGestureDetectorBuilder.
       actions: <Type, Action<Intent>>{
         ...additionalActions,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
@@ -438,7 +432,6 @@ class TextEditingActions extends StatelessWidget {
         ControlShiftArrowRightTextIntent: _controlShiftArrowRightTextAction,
         EndTextIntent: _endTextAction,
         HomeTextIntent: _homeTextAction,
-        MetaCTextIntent: _metaCTextAction,
         MetaArrowDownTextIntent: _metaArrowDownTextAction,
         MetaArrowRightTextIntent: _metaArrowRightTextAction,
         MetaArrowLeftTextIntent: _metaArrowLeftTextAction,
