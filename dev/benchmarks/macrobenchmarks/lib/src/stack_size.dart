@@ -45,8 +45,8 @@ final GetStackPointerCallback getStackPointer = () {
   // Creates a block of memory to store the assembly code.
   final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, 4096, protRead | protWrite,
       mapPrivate | mapAnon | mapJit, -1, 0);
-  // Write the assembly code into the memory block. This assembly code returns
-  // the memory address of stack pointer.
+  // Writes the assembly code into the memory block. This assembly code returns
+  // the memory address of the stack pointer.
   region.cast<ffi.Uint8>().asTypedList(4096).setAll(
       0,
       const <String, List<int>>{
