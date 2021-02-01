@@ -195,6 +195,13 @@ constexpr NativeWindow kNullNativeWindow = nullptr;
 // TODO(chunhtai): Figures out what is the correct type for Linux
 // https://github.com/flutter/flutter/issues/74270
 typedef void* NativeCursor;
+#elif defined(OS_WIN)
+typedef void* NativeCursor;
+typedef void* NativeView;
+typedef void* NativeWindow;
+typedef void* NativeEvent;
+constexpr NativeView kNullNativeView = nullptr;
+constexpr NativeWindow kNullNativeWindow = nullptr;
 #else
 #error Unknown build environment.
 #endif
