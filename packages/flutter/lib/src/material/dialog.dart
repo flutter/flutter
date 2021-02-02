@@ -220,7 +220,7 @@ class Dialog extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
-/// This demo shows a [TextButton] which ontap calls [showDialog] method, when called,
+/// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
 /// displays a Material dialog above the current contents of the app and returns
 /// a [Future] that completes when the dialog is dismissed.
 ///
