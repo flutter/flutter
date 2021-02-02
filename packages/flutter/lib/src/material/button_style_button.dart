@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'ink_ripple.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -285,6 +284,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
+    final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -370,7 +370,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,
           autofocus: widget.autofocus,
-          splashFactory: InkRipple.splashFactory,
+          splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
           customBorder: resolvedShape,

@@ -58,8 +58,8 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button with text 'Update' in it:
-  /// new Button(
-  ///   child: new Text('Update')
+  /// Button(
+  ///   child: Text('Update')
   /// )
   ///
   /// // You can find and tap on it like this:
@@ -125,8 +125,8 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button with icon 'arrow_forward' in it:
-  /// new Button(
-  ///   child: new Icon(Icons.arrow_forward)
+  /// Button(
+  ///   child: Icon(Icons.arrow_forward)
   /// )
   ///
   /// // You can find and tap on it like this:
@@ -167,8 +167,8 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button created like this:
-  /// Widget myButton = new Button(
-  ///   child: new Text('Update')
+  /// Widget myButton = Button(
+  ///   child: Text('Update')
   /// );
   ///
   /// // You can find and tap on it like this:
