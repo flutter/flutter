@@ -236,7 +236,7 @@ class Divider extends StatelessWidget {
 /// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 /// horizontally centered black line that is 1 logical pixels thick. The black
 /// line is indented by 20 logical pixels.
-/// 
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Container(
