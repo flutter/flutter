@@ -14,7 +14,7 @@ import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:vm_service/vm_service.dart' as vms;
 
-import 'common.dart';
+import '../../common.dart';
 
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
