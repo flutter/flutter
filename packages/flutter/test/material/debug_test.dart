@@ -187,6 +187,7 @@ void main() {
       '     FocusTraversalGroup\n'
       '     _ActionsMarker\n'
       '     Actions\n'
+      '     TextEditingActions\n'
       '     _ShortcutsMarker\n'
       '     Semantics\n'
       '     _FocusMarker\n'

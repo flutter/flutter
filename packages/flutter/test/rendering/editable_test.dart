@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' show Platform;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -447,11 +448,11 @@ void main() {
     pumpFrame();
 
     if(kIsWeb) {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
+      editable.moveSelectionRight(SelectionChangedCause.keyboard);
       expect(currentSelection.isCollapsed, true);
       expect(currentSelection.baseOffset, 0);
     } else {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+      editable.moveSelectionRight(SelectionChangedCause.keyboard);
       expect(currentSelection.isCollapsed, true);
       expect(currentSelection.baseOffset, 1);
     }
@@ -747,6 +748,7 @@ void main() {
         );
     final ViewportOffset viewportOffset = ViewportOffset.zero();
     late TextSelection currentSelection;
+
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
       selectionColor: Colors.black,
@@ -777,15 +779,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 1);
+    editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -829,14 +831,12 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
     editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
     editable.selection = currentSelection;
@@ -883,14 +883,12 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 12);
     editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
     editable.selection = currentSelection;
@@ -934,15 +932,15 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
+    editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
+    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -980,34 +978,34 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
+    editable.selection = currentSelection;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('arrow keys with selection text and shift', () async {
@@ -1041,46 +1039,38 @@ void main() {
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.shift);
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.shift);
+    editable.extendSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 5);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.shift);
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.shift);
+    editable.extendSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 3);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.shift);
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.shift);
+    editable.extendSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 3);
+    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.shift);
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.shift);
+    editable.extendSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 1);
+    editable.selection = currentSelection;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('respects enableInteractiveSelection', () async {
@@ -1117,14 +1107,12 @@ void main() {
 
     await simulateKeyDownEvent(LogicalKeyboardKey.shift);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 3);
     editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
     editable.selection = currentSelection;
@@ -1134,14 +1122,12 @@ void main() {
 
     await simulateKeyDownEvent(wordModifier);
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    editable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
     editable.selection = currentSelection;
 
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    editable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
     editable.selection = currentSelection;

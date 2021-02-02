@@ -918,7 +918,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionRight]
   void extendSelectionLeft(SelectionChangedCause cause) {
-    print('justin extend left');
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
