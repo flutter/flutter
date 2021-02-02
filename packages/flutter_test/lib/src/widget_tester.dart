@@ -100,7 +100,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(new MyWidget());
+///   await tester.pumpWidget(MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
@@ -371,8 +371,8 @@ const String kDebugWarning = '''
 ///     main() async {
 ///       assert(false); // fail in checked mode
 ///       await benchmarkWidgets((WidgetTester tester) async {
-///         await tester.pumpWidget(new MyWidget());
-///         final Stopwatch timer = new Stopwatch()..start();
+///         await tester.pumpWidget(MyWidget());
+///         final Stopwatch timer = Stopwatch()..start();
 ///         for (int index = 0; index < 10000; index += 1) {
 ///           await tester.tap(find.text('Tap me'));
 ///           await tester.pump();
