@@ -636,7 +636,7 @@ Future<T> _warnIfSlow<T>({
     return null;
   });
   try {
-    await future.whenComplete(() { completer.complete(); return 1; });
+    await future.whenComplete(() { completer.complete(); });
   } catch (e) {
     // Don't duplicate errors if [future] completes with an error.
   }
