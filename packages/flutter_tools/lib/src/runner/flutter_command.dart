@@ -357,6 +357,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'disable-dds', // TODO(ianh): this should be called `dds` and default to true (see style guide about double negatives)
       hide: !verboseHelp,
+      defaultsTo: true,
       help: 'Disable the Dart Developer Service (DDS). This flag should only be provided '
             'when attaching to an application with an existing DDS instance (e.g., '
             'attaching to an application currently connected to by "flutter run") or '
