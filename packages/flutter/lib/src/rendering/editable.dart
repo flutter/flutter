@@ -780,7 +780,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Extend the current selection to the end of the field.
   //
   // See also:
-  //   * [extendSelectionToStart]
+  //   * [_extendSelectionToStart]
   void _extendSelectionToEnd(SelectionChangedCause cause) {
     if (selection!.extentOffset == _plainText.length) {
       return;
@@ -798,7 +798,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Extend the current selection to the start of the field.
   //
   // See also:
-  //   * [expandSelectionToEnd]
+  //   * [_expandSelectionToEnd]
   void _extendSelectionToStart(SelectionChangedCause cause) {
     if (selection!.extentOffset == 0) {
       return;
@@ -934,6 +934,36 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Extend the current selection to the start of extentOffset's line.
+  ///
+  /// Uses baseOffset as a pivot point and doesn't change it. If extentOffset is
+  /// right of baseOffset, then collapses the selection.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionRightByLine]
+  ///   * [expandSelectionRightByLine]
+  void extendSelectionLeftByLine(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionLeftByLine(cause);
+    }
+
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+
+    late TextSelection nextSelection;
+    if (selection!.extentOffset > selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selection!.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.baseOffset,
+      );
+    }
+
+    _updateSelection(nextSelection, cause);
+  }
 
   /// Keeping the current baseOffset fixed, move the extentOffset left.
   ///
@@ -954,6 +984,37 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     final int distance = nextSelection.extentOffset - selection!.extentOffset;
     _cursorResetLocation += distance;
+    _updateSelection(nextSelection, cause);
+  }
+
+  /// Extend the current selection to the end of extentOffset's line.
+  ///
+  /// Uses baseOffset as a pivot point and doesn't change it. If extentOffset is
+  /// left of baseOffset, then collapses the selection.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionLeftByLine]
+  ///   * [expandSelectionRightByLine]
+  void extendSelectionRightByLine(SelectionChangedCause cause) {
+    if (!selectionEnabled) {
+      return moveSelectionRightByLine(cause);
+    }
+
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+
+    late TextSelection nextSelection;
+    if (selection!.extentOffset < selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
+        extentOffset: selection!.baseOffset,
+      );
+    } else {
+      nextSelection = selection!.copyWith(
+        extentOffset: selectedLine.extentOffset,
+      );
+    }
+
     _updateSelection(nextSelection, cause);
   }
 
@@ -1027,9 +1088,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Expand the current selection to the start of the line.
   ///
-  /// The selection will never shrink. The extentOffset will always be at the
-  /// start of the line, regardless of the original order of baseOffset and
-  /// extentOffset.
+  /// The selection will never shrink. The upper offset will be expanded to the
+  /// beginning of its line, and the original order of baseOffset and
+  /// extentOffset will be preserved.
   ///
   /// See also:
   ///
@@ -1039,19 +1100,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionLeftByLine(cause);
     }
 
-    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = previousCharacter(upperOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
-    if (selection!.isCollapsed || selection!.extentOffset < selection!.baseOffset) {
-      nextSelection = TextSelection(
-        baseOffset: selection!.baseOffset,
+    if (selection!.extentOffset <= selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
         extentOffset: selectedLine.baseOffset,
       );
     } else {
-      nextSelection = TextSelection(
+      nextSelection = selection!.copyWith(
         baseOffset: selectedLine.baseOffset,
-        extentOffset: selection!.extentOffset,
       );
     }
 
@@ -1110,9 +1170,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Expand the current selection to the end of the line.
   ///
-  /// The selection will never shrink. The extentOffset will always be at the
-  /// end of the line, regardless of the original order of baseOffset and
-  /// extentOffset.
+  /// The selection will never shrink. The lower offset will be expanded to the
+  /// end of its line and the original order of baseOffset and extentOffset will
+  /// be preserved.
   ///
   /// See also:
   ///
@@ -1122,19 +1182,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionRightByLine(cause);
     }
 
-    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = nextCharacter(lowerOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
-    if (selection!.isCollapsed || selection!.baseOffset < selection!.extentOffset) {
-      nextSelection = TextSelection(
-        baseOffset: selection!.baseOffset,
+    if (selection!.extentOffset >= selection!.baseOffset) {
+      nextSelection = selection!.copyWith(
         extentOffset: selectedLine.extentOffset,
       );
     } else {
-      nextSelection = TextSelection(
+      nextSelection = selection!.copyWith(
         baseOffset: selectedLine.extentOffset,
-        extentOffset: selection!.extentOffset,
       );
     }
 
@@ -1187,31 +1246,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the end of the field.
+  /// Move the current selection to the start of the current line.
   ///
   /// See also:
   ///
-  ///   * [moveSelectionToStart]
-  void moveSelectionToEnd(SelectionChangedCause cause) {
-    if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
-      return;
-    }
+  ///   * [moveSelectionRightByLine]
+  void moveSelectionLeftByLine(SelectionChangedCause cause) {
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since _selectLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
-      offset: _plainText.length,
+      offset: selectedLine.baseOffset,
     );
-    _updateSelection(nextSelection, cause);
-  }
 
-  /// Move the current selection to the start of the field.
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionToEnd]
-  void moveSelectionToStart(SelectionChangedCause cause) {
-    if (selection!.isCollapsed && selection!.extentOffset == 0) {
-      return;
-    }
-    const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
     _updateSelection(nextSelection, cause);
   }
 
@@ -1240,6 +1290,41 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the right by one character.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeft]
+  void moveSelectionRight(SelectionChangedCause cause) {
+    final TextSelection nextSelection = _moveGivenSelectionRight(
+      selection!,
+      _plainText,
+    );
+    if (nextSelection == selection) {
+      return;
+    }
+    _updateSelection(nextSelection, cause);
+  }
+
+  /// Move the current selection to the end of the current line.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeftByLine]
+  void moveSelectionRightByLine(SelectionChangedCause cause) {
+    // When going right, we want to skip over any whitespace after the line,
+    // so we go forward to the first non-whitespace character before asking
+    // for the line bounds, since _selectLineAtOffset finds the line
+    // boundaries without including whitespace (like the newline).
+    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: selectedLine.extentOffset,
+    );
+
+    _updateSelection(nextSelection, cause);
+  }
+
   /// Move the current selection to the next end of a word.
   ///
   /// See also:
@@ -1265,57 +1350,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the start of the current line.
+  /// Move the current selection to the end of the field.
   ///
   /// See also:
   ///
-  ///   * [moveSelectionRightByLine]
-  void moveSelectionLeftByLine(SelectionChangedCause cause) {
-    // When going left, we want to skip over any whitespace before the line,
-    // so we go back to the first non-whitespace before asking for the line
-    // bounds, since _selectLineAtOffset finds the line boundaries without
-    // including whitespace (like the newline).
-    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
-    final TextSelection nextSelection = TextSelection.collapsed(
-      offset: selectedLine.baseOffset,
-    );
-
-    _updateSelection(nextSelection, cause);
-  }
-
-  /// Move the current selection to the end of the current line.
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionLeftByLine]
-  void moveSelectionRightByLine(SelectionChangedCause cause) {
-    // When going right, we want to skip over any whitespace after the line,
-    // so we go forward to the first non-whitespace character before asking
-    // for the line bounds, since _selectLineAtOffset finds the line
-    // boundaries without including whitespace (like the newline).
-    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
-    final TextSelection nextSelection = TextSelection.collapsed(
-      offset: selectedLine.extentOffset,
-    );
-
-    _updateSelection(nextSelection, cause);
-  }
-
-  /// Move the current selection to the right by one character.
-  ///
-  /// See also:
-  ///
-  ///   * [moveSelectionLeft]
-  void moveSelectionRight(SelectionChangedCause cause) {
-    final TextSelection nextSelection = _moveGivenSelectionRight(
-      selection!,
-      _plainText,
-    );
-    if (nextSelection == selection) {
+  ///   * [moveSelectionToStart]
+  void moveSelectionToEnd(SelectionChangedCause cause) {
+    if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
       return;
     }
+    final TextSelection nextSelection = TextSelection.collapsed(
+      offset: _plainText.length,
+    );
+    _updateSelection(nextSelection, cause);
+  }
+
+  /// Move the current selection to the start of the field.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionToEnd]
+  void moveSelectionToStart(SelectionChangedCause cause) {
+    if (selection!.isCollapsed && selection!.extentOffset == 0) {
+      return;
+    }
+    const TextSelection nextSelection = TextSelection.collapsed(offset: 0);
     _updateSelection(nextSelection, cause);
   }
 

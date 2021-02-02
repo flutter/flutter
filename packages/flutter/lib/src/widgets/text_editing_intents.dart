@@ -5,6 +5,10 @@
 import 'actions.dart';
 
 /// An [Intent] representing the default text editing behavior for the current
+/// platform for the alt + arrow down key event.
+class AltArrowDownTextIntent extends Intent {}
+
+/// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + arrow left key event.
 class AltArrowLeftTextIntent extends Intent {}
 
@@ -13,12 +17,24 @@ class AltArrowLeftTextIntent extends Intent {}
 class AltArrowRightTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
+/// platform for the alt + arrow up key event.
+class AltArrowUpTextIntent extends Intent {}
+
+/// An [Intent] representing the default text editing behavior for the current
+/// platform for the alt + shift + arrow down key event.
+class AltShiftArrowDownTextIntent extends Intent {}
+
+/// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + shift + arrow-left key event.
 class AltShiftArrowLeftTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the alt + shift + arrow-right key event.
 class AltShiftArrowRightTextIntent extends Intent {}
+
+/// An [Intent] representing the default text editing behavior for the current
+/// platform for the alt + shift + arrow up key event.
+class AltShiftArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the arrow-down key event.

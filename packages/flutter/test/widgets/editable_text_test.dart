@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
@@ -3765,6 +3767,7 @@ void main() {
         bool shortcutModifier = false,
         required String platform,
       }) async {
+    // TODO(justinmc): platform is not actually changing the real platform...
     if (shift) {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
@@ -3819,17 +3822,19 @@ void main() {
     );
     late TextSelection selection;
     late SelectionChangedCause cause;
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: 400,
           child: EditableText(
+            key: GlobalKey(),
             maxLines: 10,
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
@@ -3846,6 +3851,8 @@ void main() {
     ));
 
     await tester.pump(); // Wait for autofocus to take effect.
+    //await tester.tap(find.byType(EditableText));
+    focusNode.requestFocus();
 
     // Select a few characters using shift right arrow
     await sendKeys(
@@ -4099,7 +4106,7 @@ void main() {
       reason: 'on $platform',
     );
 
-    // Select to the beginning of the line.
+    // Select to the beginning of the first line.
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[
@@ -4114,8 +4121,8 @@ void main() {
       selection,
       equals(
         const TextSelection(
-          baseOffset: 20,
-          extentOffset: 55,
+          baseOffset: 0,
+          extentOffset: 72,
           affinity: TextAffinity.downstream,
         ),
       ),
@@ -4480,25 +4487,12 @@ void main() {
     expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
-  testWidgets('keyboard text selection works as expected on linux', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'linux');
+  testWidgets('keyboard text selection works', (WidgetTester tester) async {
+    final String targetPlatform = defaultTargetPlatform.toString();
+    final String platform = targetPlatform.substring(targetPlatform.indexOf('.') + 1).toLowerCase();
+    await testTextEditing(tester, platform: platform);
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on android', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'android');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on fuchsia', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'fuchsia');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
-
-  testWidgets('keyboard text selection works as expected on macos', (WidgetTester tester) async {
-    await testTextEditing(tester, platform: 'macos');
-    // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb);
+  }, skip: kIsWeb, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard shortcuts respect read-only', (WidgetTester tester) async {
     final String platform = describeEnum(defaultTargetPlatform).toLowerCase();

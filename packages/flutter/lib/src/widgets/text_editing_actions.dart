@@ -40,17 +40,35 @@ class TextEditingActions extends StatelessWidget {
   /// [Actions] Widget in the tree below this Widget.
   final Map<Type, Action<Intent>> additionalActions;
 
+  static final TextEditingAction<AltArrowDownTextIntent> _altArrowDownTextAction = TextEditingAction<AltArrowDownTextIntent>(
+    onInvoke: (AltArrowDownTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+          break;
+      }
+    },
+  );
+
   static final TextEditingAction<AltArrowLeftTextIntent> _altArrowLeftTextAction = TextEditingAction<AltArrowLeftTextIntent>(
     onInvoke: (AltArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
-          editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+          editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
       }
     },
@@ -60,13 +78,48 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (AltArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard, false);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+      }
+    },
+  );
+
+  static final TextEditingAction<AltArrowUpTextIntent> _altArrowUpTextAction = TextEditingAction<AltArrowUpTextIntent>(
+    onInvoke: (AltArrowUpTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+          editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+          break;
+      }
+    },
+  );
+
+  static final TextEditingAction<AltShiftArrowDownTextIntent> _altShiftArrowDownTextAction = TextEditingAction<AltShiftArrowDownTextIntent>(
+    onInvoke: (AltShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+          editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
           break;
       }
     },
@@ -76,13 +129,14 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (AltShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          editableTextState.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
       }
     },
@@ -92,13 +146,31 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (AltShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+          editableTextState.renderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+          break;
+      }
+    },
+  );
+
+  static final TextEditingAction<AltShiftArrowUpTextIntent> _altShiftArrowUpTextAction = TextEditingAction<AltShiftArrowUpTextIntent>(
+    onInvoke: (AltShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.macOS:
+          editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          editableTextState.renderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
           break;
       }
     },
@@ -108,10 +180,10 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (ControlShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
@@ -124,10 +196,10 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (ControlShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
@@ -140,11 +212,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaArrowDownTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -156,11 +228,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -172,11 +244,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -188,11 +260,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaArrowUpTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -204,11 +276,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaShiftArrowDownTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -220,11 +292,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaShiftArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -236,11 +308,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaShiftArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -252,11 +324,11 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (MetaShiftArrowUpTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           editableTextState.renderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           break;
@@ -324,10 +396,10 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (ControlArrowLeftTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
@@ -340,10 +412,10 @@ class TextEditingActions extends StatelessWidget {
     onInvoke: (ControlArrowRightTextIntent intent, EditableTextState editableTextState) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
@@ -413,10 +485,14 @@ class TextEditingActions extends StatelessWidget {
     return Actions(
       actions: <Type, Action<Intent>>{
         ...additionalActions,
+        AltArrowDownTextIntent: _altArrowDownTextAction,
         AltArrowLeftTextIntent: _altArrowLeftTextAction,
         AltArrowRightTextIntent: _altArrowRightTextAction,
+        AltArrowUpTextIntent: _altArrowUpTextAction,
+        AltShiftArrowDownTextIntent: _altShiftArrowDownTextAction,
         AltShiftArrowLeftTextIntent: _altShiftArrowLeftTextAction,
         AltShiftArrowRightTextIntent: _altShiftArrowRightTextAction,
+        AltShiftArrowUpTextIntent: _altShiftArrowUpTextAction,
         ArrowDownTextIntent: _arrowDownTextAction,
         ArrowLeftTextIntent: _arrowLeftTextAction,
         ArrowRightTextIntent: _arrowRightTextAction,
