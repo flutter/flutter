@@ -34,10 +34,6 @@ const int mapPrivate = 0x02;
 const int mapJit = 0x0;
 const int mapAnon = 0x20;
 
-String get currentArch {
-  return ffi.sizeOf<ffi.IntPtr>() == 4 ? 'arm' : 'arm64';
-}
-
 final GetStackPointerCallback getStackPointer = () {
   if (!io.Platform.isAndroid) {
     throw 'This benchmark test can only be run on Android.';
@@ -49,18 +45,12 @@ final GetStackPointerCallback getStackPointer = () {
   // the memory address of the stack pointer.
   region.cast<ffi.Uint8>().asTypedList(4096).setAll(
       0,
-      const <String, List<int>>{
-        'arm64': <int>[
-          // "mov x0, sp"  in machine code: E0030091.
-          0xe0, 0x03, 0x00, 0x91,
-          // "ret"         in machine code: C0035FD6.
-          0xc0, 0x03, 0x5f, 0xd6],
-        'arm': <int>[
-          // "mov r0, sp" in machine code: 0D00A0E1.
-          0x0d, 0x00, 0xa0, 0xe1,
-          // "bx lr"      in machine code: 1EFF2FE1.
-          0x1e, 0xff, 0x2f, 0xe1],
-      }[currentArch]);
+      <int>[
+        // "mov x0, sp"  in machine code: E0030091.
+        0xe0, 0x03, 0x00, 0x91,
+        // "ret"         in machine code: C0035FD6.
+        0xc0, 0x03, 0x5f, 0xd6
+      ]);
   // Makes sure the memory block is executable.
   if (mprotect(region, 4096, protRead | protExec) != 0) {
     throw 'Failed to mark code as executable.';

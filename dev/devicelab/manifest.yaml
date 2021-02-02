@@ -344,6 +344,7 @@ tasks:
   android_stack_size_test:
     description: >
       Measures increased stack size for one stateless widget during the rendering pipeline.
+      This test can only be run on arm64 devices.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
