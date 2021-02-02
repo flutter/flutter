@@ -312,10 +312,9 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  /// {@template flutter.widgets.image.filterQualityParameter}
+  /// Use [filterQuality] to specify the rendering quality of the image.
+  /// {@endtemplate}
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
@@ -360,10 +359,7 @@ class Image extends StatefulWidget {
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
   ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  /// {@macro flutter.widgets.image.filterQualityParameter}
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
@@ -424,10 +420,7 @@ class Image extends StatefulWidget {
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
   ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  /// {@macro flutter.widgets.image.filterQualityParameter}
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
@@ -520,10 +513,7 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  /// {@macro flutter.widgets.image.filterQualityParameter}
   ///
   /// {@tool snippet}
   ///
@@ -667,10 +657,7 @@ class Image extends StatefulWidget {
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
   ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
+  /// {@macro flutter.widgets.image.filterQualityParameter}
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
@@ -930,11 +917,22 @@ class Image extends StatefulWidget {
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
 
-  /// Used to set the [FilterQuality] of the image.
+  /// The rendering quality of the image.
   ///
-  /// Use the [FilterQuality.low] quality setting to scale the image with
-  /// bilinear interpolation, or the [FilterQuality.none] which corresponds
-  /// to nearest-neighbor.
+  /// If the image is of a high quality and its pixels are perfectly aligned
+  /// with the physical screen pixels, extra quality enhancement may not be
+  /// necessary. If so, then [FilterQuality.none] would be the most efficient.
+  ///
+  /// If the pixels are not perfectly aligned with the screen pixels, or if the
+  /// image itself is of a low quality, [FilterQuality.none] may produce
+  /// undesirable artifacts. Consider using other [FilterQuality] values to
+  /// improve the rendered image quality in this case. Pixels may be misaligned
+  /// with the screen pixels as a result of transforms or scaling.
+  ///
+  /// See also:
+  ///
+  ///  * [FilterQuality], the enum containing all possible filter quality
+  ///    options.
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.

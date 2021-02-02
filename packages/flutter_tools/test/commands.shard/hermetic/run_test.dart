@@ -227,7 +227,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => mockDeviceManager,
-        Stdio: () => MockStdio(),
+        Stdio: () => FakeStdio(),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
@@ -484,7 +484,6 @@ void main() {
 }
 
 class MockCache extends Mock implements Cache {}
-class MockUsage extends Mock implements Usage {}
 
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {

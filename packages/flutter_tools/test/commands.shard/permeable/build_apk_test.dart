@@ -30,10 +30,10 @@ void main() {
 
   group('Usage', () {
     Directory tempDir;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -103,17 +103,17 @@ void main() {
 
       await runBuildApkCommand(projectPath);
 
-      verify(mockUsage.sendEvent(
-        'tool-command-result',
-        'apk',
-        label: 'success',
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'tool-command-result',
+          'apk',
+          label: 'success',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -122,10 +122,10 @@ void main() {
     ProcessManager mockProcessManager;
     String gradlew;
     AndroidSdk mockAndroidSdk;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
 
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
@@ -390,18 +390,20 @@ void main() {
         containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
       );
 
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'gradle-r8-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'gradle-r8-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
@@ -452,18 +454,21 @@ void main() {
         'following the steps on https://goo.gl/CP92wY'
         ),
       );
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'app-not-using-android-x',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'app-not-using-android-x',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
@@ -505,18 +510,21 @@ void main() {
         ),
         isFalse,
       );
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'app-using-android-x',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'app-using-android-x',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 }
@@ -539,4 +547,3 @@ Future<BuildApkCommand> runBuildApkCommand(
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
-class MockUsage extends Mock implements Usage {}

@@ -473,9 +473,7 @@ void paintImage({
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  if (sourceSize != destinationSize) {
-    paint.filterQuality = filterQuality;
-  }
+  paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;

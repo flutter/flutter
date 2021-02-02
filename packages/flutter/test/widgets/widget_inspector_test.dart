@@ -1044,6 +1044,101 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
     }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --no-track-widget-creation flag.
 
+    testWidgets('test transformDebugCreator will add DevToolsDeepLinkProperty for overflow errors', (WidgetTester tester) async {
+      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('A RenderFlex overflowed by 273 pixels on the bottom'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 6);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, DevToolsDeepLinkProperty);
+      expect(nodes[4].runtimeType, ErrorSpacer);
+      expect(nodes[5].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+
+    testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty for non-overflow errors', (WidgetTester tester) async {
+      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('some other error'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 4);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+
+    testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty if devtoolsServerAddress is unavailable', (WidgetTester tester) async {
+      activeDevToolsServerAddress = null;
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('A RenderFlex overflowed by 273 pixels on the bottom'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 4);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(

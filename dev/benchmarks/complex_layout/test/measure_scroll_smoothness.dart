@@ -9,7 +9,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:e2e/e2e.dart';
+import 'package:integration_test/integration_test.dart';
 
 import 'package:complex_layout/main.dart' as app;
 
@@ -62,7 +62,7 @@ enum TestScenario {
 
 class ResampleFlagVariant extends TestVariant<TestScenario> {
   ResampleFlagVariant(this.binding);
-  final E2EWidgetsFlutterBinding binding;
+  final IntegrationTestWidgetsFlutterBinding binding;
 
   @override
   final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
@@ -124,9 +124,9 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 }
 
 Future<void> main() async {
-  final WidgetsBinding _binding = E2EWidgetsFlutterBinding.ensureInitialized();
-  assert(_binding is E2EWidgetsFlutterBinding);
-  final E2EWidgetsFlutterBinding binding = _binding as E2EWidgetsFlutterBinding;
+  final WidgetsBinding _binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  assert(_binding is IntegrationTestWidgetsFlutterBinding);
+  final IntegrationTestWidgetsFlutterBinding binding = _binding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);

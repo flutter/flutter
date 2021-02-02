@@ -473,6 +473,7 @@ class TestUsage implements Usage {
   final List<TestUsageEvent> events = <TestUsageEvent>[];
   final List<dynamic> exceptions = <dynamic>[];
   final List<TestTimingEvent> timings = <TestTimingEvent>[];
+  int ensureAnalyticsSentCalls = 0;
 
   @override
   bool enabled = true;
@@ -484,8 +485,8 @@ class TestUsage implements Usage {
   String get clientId => 'test-client';
 
   @override
-  Future<void> ensureAnalyticsSent() {
-    throw UnimplementedError();
+  Future<void> ensureAnalyticsSent() async {
+    ensureAnalyticsSentCalls++;
   }
 
   @override
