@@ -14,6 +14,8 @@
   "nextMonthTooltip": "Наступны месяц",
   "previousMonthTooltip": "Папярэдні месяц",
   "nextPageTooltip": "Наступная старонка",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "previousPageTooltip": "Папярэдняя старонка",
   "showMenuTooltip": "Паказаць меню",
   "aboutListTileTitle": "Інфармацыя пра праграму \"$applicationName\"",
