@@ -7,13 +7,15 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 struct _FlViewAccessible {
-  GtkWidgetAccessible parent_instance;
+  GtkContainerAccessible parent_instance;
 
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
 };
 
-G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, GTK_TYPE_WIDGET_ACCESSIBLE)
+G_DEFINE_TYPE(FlViewAccessible,
+              fl_view_accessible,
+              GTK_TYPE_CONTAINER_ACCESSIBLE)
 
 // Gets the ATK node for the given id.
 // If the node doesn't exist it will be created.

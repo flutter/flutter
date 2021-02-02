@@ -10,28 +10,44 @@ struct _FlMockRenderer {
 
 G_DEFINE_TYPE(FlMockRenderer, fl_mock_renderer, fl_renderer_get_type())
 
-// Implements FlRenderer::create_display.
-static EGLDisplay fl_mock_renderer_create_display(FlRenderer* renderer) {
-  return eglGetDisplay(EGL_DEFAULT_DISPLAY);
+// Implements FlRenderer::create_contexts.
+static gboolean fl_mock_renderer_create_contexts(FlRenderer* renderer,
+                                                 GtkWidget* widget,
+                                                 GdkGLContext** visible,
+                                                 GdkGLContext** resource,
+                                                 GError** error) {
+  return TRUE;
 }
 
-// Implements FlRenderer::create_surfaces.
-static gboolean fl_mock_renderer_create_surfaces(FlRenderer* renderer,
-                                                 GtkWidget* widget,
-                                                 EGLDisplay display,
-                                                 EGLConfig config,
-                                                 EGLSurface* visible,
-                                                 EGLSurface* resource,
-                                                 GError** error) {
-  *visible = eglCreateWindowSurface(display, config, 0, nullptr);
-  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-  *resource = eglCreatePbufferSurface(display, config, attribs);
+// Implements FlRenderer::create_backing_store.
+static gboolean fl_mock_renderer_create_backing_store(
+    FlRenderer* renderer,
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out) {
+  return TRUE;
+}
+
+// Implements FlRenderer::collect_backing_store.
+static gboolean fl_mock_renderer_collect_backing_store(
+    FlRenderer* self,
+    const FlutterBackingStore* backing_store) {
+  return TRUE;
+}
+
+// Implements FlRenderer::present_layers.
+static gboolean fl_mock_renderer_present_layers(FlRenderer* self,
+                                                const FlutterLayer** layers,
+                                                size_t layers_count) {
   return TRUE;
 }
 
 static void fl_mock_renderer_class_init(FlMockRendererClass* klass) {
-  FL_RENDERER_CLASS(klass)->create_display = fl_mock_renderer_create_display;
-  FL_RENDERER_CLASS(klass)->create_surfaces = fl_mock_renderer_create_surfaces;
+  FL_RENDERER_CLASS(klass)->create_contexts = fl_mock_renderer_create_contexts;
+  FL_RENDERER_CLASS(klass)->create_backing_store =
+      fl_mock_renderer_create_backing_store;
+  FL_RENDERER_CLASS(klass)->collect_backing_store =
+      fl_mock_renderer_collect_backing_store;
+  FL_RENDERER_CLASS(klass)->present_layers = fl_mock_renderer_present_layers;
 }
 
 static void fl_mock_renderer_init(FlMockRenderer* self) {}

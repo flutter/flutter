@@ -82,21 +82,19 @@ source_set("flutter_linux_sources") {
              "fl_standard_message_codec_private.h",
            ]
 
-  configs += [
-    "//flutter/shell/platform/linux/config:gtk",
-    "//flutter/shell/platform/linux/config:wayland-client",
-  ]
+  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
   sources = [
-    "egl_utils.cc",
     "fl_accessibility_plugin.cc",
     "fl_accessible_node.cc",
+    "fl_backing_store_provider.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
     "fl_dart_project.cc",
     "fl_engine.cc",
     "fl_event_channel.cc",
+    "fl_gl_area.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
     "fl_key_event_plugin.cc",
@@ -110,9 +108,8 @@ source_set("flutter_linux_sources") {
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_renderer.cc",
+    "fl_renderer_gl.cc",
     "fl_renderer_headless.cc",
-    "fl_renderer_wayland.cc",
-    "fl_renderer_x11.cc",
     "fl_settings_plugin.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
@@ -140,10 +137,7 @@ source_set("flutter_linux_sources") {
 source_set("flutter_linux") {
   configs += [
     "//flutter/shell/platform/linux/config:gtk",
-    "//flutter/shell/platform/linux/config:egl",
-    "//flutter/shell/platform/linux/config:wayland-egl",
-    "//flutter/shell/platform/linux/config:x11",
-    "//third_party/khronos:khronos_headers",
+    "//flutter/shell/platform/linux/config:epoxy",
   ]
 
   defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
@@ -161,7 +155,6 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
-    "egl_utils_test.cc",
     "fl_accessible_node_test.cc",
     "fl_basic_message_channel_test.cc",
     "fl_binary_codec_test.cc",
@@ -181,19 +174,15 @@ executable("flutter_linux_unittests") {
     "fl_string_codec_test.cc",
     "fl_value_test.cc",
     "testing/fl_test.cc",
-    "testing/mock_egl.cc",
     "testing/mock_engine.cc",
+    "testing/mock_epoxy.cc",
     "testing/mock_renderer.cc",
     "testing/mock_text_input_plugin.cc",
   ]
 
   public_configs = [ "//flutter:config" ]
 
-  configs += [
-    "//flutter/shell/platform/linux/config:gtk",
-    "//flutter/shell/platform/linux/config:wayland-egl",
-    "//flutter/shell/platform/linux/config:x11",
-  ]
+  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
   defines = [
     "FLUTTER_ENGINE_NO_PROTOTYPES",

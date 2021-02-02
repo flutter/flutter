@@ -19,7 +19,7 @@ G_DECLARE_FINAL_TYPE(FlViewAccessible,
                      fl_view_accessible,
                      FL,
                      VIEW_ACCESSIBLE,
-                     GtkWidgetAccessible)
+                     GtkContainerAccessible)
 
 /**
  * FlViewAccessible:
