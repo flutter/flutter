@@ -55,13 +55,6 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-
-/// The number of Cirrus jobs that run build tests in parallel.
-///
-/// WARNING: if you change this number, also change .cirrus.yml
-/// and make sure it runs _all_ shards.
-const int kBuildTestShardCount = 2;
-
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
 
@@ -77,12 +70,6 @@ const String kSubshardKey = 'SUBSHARD';
 int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
   ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
   : 8;
-
-/// The number of shards the long-running Web tests are split into.
-///
-/// WARNING: this number must match the shard count in LUCI configs.
-const int kWebLongRunningTestShardCount = 3;
-
 /// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
@@ -405,10 +392,7 @@ Future<void> _runBuildTests() async {
       ],
   ]..shuffle(math.Random(0));
 
-  if (!await _runShardRunnerIndexOfTotalSubshard(tests)) {
-    // TODO(jmagman): Remove fallback once LUCI configs are migrated to d+_d+ subshard format.
-    await _selectIndexedSubshard(tests, kBuildTestShardCount);
-  }
+  await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
 Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
@@ -844,8 +828,6 @@ Future<void> _runWebUnitTests() async {
 }
 
 /// Coarse-grained integration tests running on the Web.
-///
-/// These tests are sharded into [kWebLongRunningTestShardCount] shards.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     () => _runGalleryE2eWebTest('debug'),
@@ -856,10 +838,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('release', canvasKit: true),
   ];
   await _ensureChromeDriverIsRunning();
-  if (!await _runShardRunnerIndexOfTotalSubshard(tests)) {
-    // TODO(jmagman): Remove fallback once LUCI configs are migrated to d+_d+ subshard format.
-    await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
-  }
+  await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
 }
 
@@ -1475,37 +1454,6 @@ Future<String> verifyVersion(File file) async {
   return null;
 }
 
-/// Parse (zero-)index-named subshards and equally distribute [tests]
-/// between them. Last shard should end in "_last" to catch mismatches
-/// between `.cirrus.yml` and `test.dart`. See [selectShard] for naming details.
-///
-/// Examples:
-/// build_tests-0-linux
-/// build_tests-1-linux
-/// build_tests-2_last-linux
-Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards) async {
-  final int testsPerShard = tests.length ~/ numberOfShards;
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
-
-  for (int subshard = 0; subshard < numberOfShards; subshard += 1) {
-    String last = '';
-    List<ShardRunner> sublist;
-    if (subshard < numberOfShards - 1) {
-      sublist = tests.sublist(subshard * testsPerShard, (subshard + 1) * testsPerShard);
-    } else {
-      sublist = tests.sublist(subshard * testsPerShard, tests.length);
-      // We make sure the last shard ends in _last.
-      last = '_last';
-    }
-    subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist)
-        await test();
-    };
-  }
-
-  await selectSubshard(subshards);
-}
-
 /// Parse (one-)index/total-named subshards from environment variable SUBSHARD
 /// and equally distribute [tests] between them.
 /// Subshard format is "{index}_{total number of shards}".
@@ -1529,8 +1477,7 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   final Match match = pattern.firstMatch(subshardName);
   if (match == null || match.groupCount != 2) {
     print('${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"');
-    // TODO(jmagman): exit(1) here instead once LUCI configs are migrated to d+_d+ subshard format.
-    return null;
+    exit(1);
   }
   // One-indexed.
   final int index = int.parse(match.group(1));
@@ -1548,25 +1495,25 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   return tests.sublist(start, end);
 }
 
-Future<bool> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+Future<void> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
   final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
-  // TODO(jmagman): Remove the boolean return to indicate fallback to unsharded variant once LUCI configs are migrated to d+_d+ subshard format.
-  if (sublist == null) {
-    return false;
-  }
   for (final ShardRunner test in sublist) {
     await test();
   }
-  return true;
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
 /// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
-/// However, for local testing you can just set the SHARD and SUBSHARD
+/// For local testing you can just set the SHARD and SUBSHARD
 /// environment variables. For example, to run all the framework tests you can
-/// just set SHARD=framework_tests. To run specifically the third subshard of
+/// just set SHARD=framework_tests. Some shards support named subshards, like
+/// SHARD=framework_tests SUBSHARD=widgets. Others support arbitrary numbered
+/// subsharding, like SHARD=build_tests SUBSHARD=1_2 (where 1_2 means "one of two"
+/// as in run the first half of the tests).
+///
+/// To run specifically the third subshard of
 /// the Web tests you can set SHARD=web_tests SUBSHARD=2 (it's zero-based).
 Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
 Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, kSubshardKey, 'subshard', 1);
