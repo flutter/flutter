@@ -88,7 +88,7 @@ void main() {
     expect(
       editable.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE DETACHED\n'
         ' │ parentData: MISSING\n'
         ' │ constraints: MISSING\n'
         ' │ size: MISSING\n'
@@ -134,10 +134,12 @@ void main() {
         offset: 0,
       ),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 10.0)),
     );
   });
 
@@ -169,6 +171,9 @@ void main() {
     layout(editable);
 
     editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
+
     expect(
       editable,
       // Draw no cursor by default.
@@ -176,7 +181,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -187,7 +192,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -198,7 +203,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -211,7 +216,7 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   });
@@ -265,9 +270,8 @@ void main() {
       ),
     );
 
-    layout(editable);
-
-    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+    pumpFrame(phase: EnginePhase.compositingBits);
     expect(
       editable,
       // Draw no cursor by default.
@@ -275,7 +279,7 @@ void main() {
     );
 
     editable.showCursor = showCursor;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
@@ -286,7 +290,7 @@ void main() {
     editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
     editable.cursorWidth = 4;
     editable.cursorRadius = const Radius.circular(3);
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
@@ -297,7 +301,7 @@ void main() {
     ));
 
     editable.textScaleFactor = 2;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
     expect(editable, paints..rrect(
@@ -310,7 +314,7 @@ void main() {
 
     // Can turn off caret.
     showCursor.value = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61024
@@ -393,7 +397,7 @@ void main() {
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
 
     editable.paintCursorAboveText = false;
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -501,7 +505,7 @@ void main() {
 
     viewportOffset.correctBy(10);
 
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       editable,
@@ -654,7 +658,9 @@ void main() {
       promptRectColor: promptRectColor,
       promptRectRange: const TextRange(start: 0, end: 1),
     );
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
+    layout(editable, constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
@@ -664,9 +670,9 @@ void main() {
     editable.promptRectColor = null;
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
-    pumpFrame();
+    pumpFrame(phase: EnginePhase.compositingBits);
 
-    expect(editable.promptRectColor, promptRectColor);
+    expect(editable.promptRectColor, null);
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       isNot(paints..rect(color: promptRectColor)),
@@ -1658,4 +1664,261 @@ void main() {
       expect(RenderEditable.previousCharacter(4, '0123👨‍👩‍👦2345'), 3);
     });
   });
+
+  group('custom painters', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+
+    final _TestRenderEditable editable = _TestRenderEditable(
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0,
+          fontSize: 10.0,
+          fontFamily: 'Ahem',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    setUp(() { EditableText.debugDeterministicCursor = true; });
+    tearDown(() {
+      EditableText.debugDeterministicCursor = false;
+      _TestRenderEditablePainter.paintHistory.clear();
+      editable.foregroundPainter = null;
+      editable.painter = null;
+      editable.paintCount = 0;
+
+      final AbstractNode? parent = editable.parent;
+      if (parent is RenderConstrainedBox)
+        parent.child = null;
+    });
+
+    test('paints in the correct order', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      // Foreground painter.
+      editable.foregroundPainter = _TestRenderEditablePainter();
+      pumpFrame(phase: EnginePhase.compositingBits);
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+
+      // Background painter.
+      editable.foregroundPainter = null;
+      editable.painter = _TestRenderEditablePainter();
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph(),
+      );
+
+      editable.foregroundPainter = _TestRenderEditablePainter();
+      editable.painter = _TestRenderEditablePainter();
+
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+    });
+
+    test('changing foreground painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.foregroundPainter = currentPainter;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+    });
+
+    test('changing background painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+      // Prepare for painting after layout.
+
+      _TestRenderEditablePainter currentPainter = _TestRenderEditablePainter();
+      // Foreground painter.
+      editable.painter = currentPainter;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 0);
+
+      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(currentPainter.paintCount, 1);
+    });
+
+    test('swapping painters', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter();
+      final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter();
+
+      editable.painter = painter1;
+      editable.foregroundPainter = painter2;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter1, painter2],
+      );
+
+      _TestRenderEditablePainter.paintHistory.clear();
+      editable.painter = painter2;
+      editable.foregroundPainter = painter1;
+      pumpFrame(phase: EnginePhase.paint);
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter2, painter1],
+      );
+    });
+
+    test('reusing the same painter', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      FlutterErrorDetails? errorDetails;
+      editable.painter = painter;
+      editable.foregroundPainter = painter;
+      pumpFrame(phase: EnginePhase.paint, onErrors: () {
+        errorDetails = renderer.takeFlutterErrorDetails();
+      });
+      expect(errorDetails, isNull);
+
+      expect(
+        _TestRenderEditablePainter.paintHistory,
+        <_TestRenderEditablePainter>[painter, painter],
+      );
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
+      );
+    });
+    test('does not repaint the render editable when custom painters need repaint', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      painter.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 0);
+      expect(painter.paintCount, 1);
+    });
+
+    test('repaints when its RenderEditable repaints', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      pumpFrame(phase: EnginePhase.paint);
+      editable.paintCount = 0;
+      painter.paintCount = 0;
+
+      editable.markNeedsPaint();
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(editable.paintCount, 1);
+      expect(painter.paintCount, 1);
+    });
+
+    test('correct coordinate space', () {
+      layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
+
+      final _TestRenderEditablePainter painter = _TestRenderEditablePainter();
+      editable.painter = painter;
+      editable.offset = ViewportOffset.fixed(1000);
+
+      pumpFrame(phase: EnginePhase.compositingBits);
+      expect(
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
+          ..paragraph()
+      );
+    });
+  });
+}
+
+class _TestRenderEditable extends RenderEditable {
+  _TestRenderEditable({
+    required TextDirection textDirection,
+    required ViewportOffset offset,
+    required TextSelectionDelegate textSelectionDelegate,
+    TextSpan? text,
+    required LayerLink startHandleLayerLink,
+    required LayerLink endHandleLayerLink,
+    TextSelection? selection,
+  }) : super(
+      textDirection: textDirection,
+      offset: offset,
+      textSelectionDelegate: textSelectionDelegate,
+      text: text,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      selection: selection,
+    );
+
+  int paintCount = 0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    paintCount += 1;
+  }
+}
+
+class _TestRenderEditablePainter extends RenderEditablePainter {
+  bool repaint = true;
+  int paintCount = 0;
+  static final List<_TestRenderEditablePainter> paintHistory = <_TestRenderEditablePainter>[];
+
+  @override
+  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+    paintCount += 1;
+    canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = const Color(0x12345678));
+    paintHistory.add(this);
+  }
+
+  @override
+  bool shouldRepaint(RenderEditablePainter? oldDelegate) => repaint;
+
+  void markNeedsPaint() {
+    notifyListeners();
+  }
 }

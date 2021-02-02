@@ -174,21 +174,17 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
-      await Future.wait(<Future<void>>[
-        connectToServiceProtocol(
-          reloadSources: _reloadSourcesService,
-          restart: _restartService,
-          compileExpression: _compileExpressionService,
-          getSkSLMethod: writeSkSL,
-          allowExistingDdsInstance: allowExistingDdsInstance,
-        ),
-        serveDevToolsGracefully(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        ),
-      ]);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        restart: _restartService,
+        compileExpression: _compileExpressionService,
+        getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
+      );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
@@ -196,6 +192,13 @@ class HotRunner extends ResidentRunner {
       }
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
+    }
+
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+      ));
     }
 
     for (final FlutterDevice device in flutterDevices) {
@@ -218,7 +221,6 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
-    unawaited(maybeCallDevToolsUriServiceExtension());
     unawaited(callConnectedVmServiceUriExtension());
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
@@ -306,6 +308,7 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
     firstBuildTime = DateTime.now();
@@ -356,6 +359,7 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: enableDevTools,
     );
   }
 
@@ -1086,7 +1090,7 @@ class HotRunner extends ResidentRunner {
     if (canHotRestart) {
       commandHelp.R.print();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
     if (_didAttach) {
       commandHelp.d.print();
     }
@@ -1094,26 +1098,6 @@ class HotRunner extends ResidentRunner {
     commandHelp.q.print();
     if (details) {
       printHelpDetails();
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      // Caution: This log line is parsed by device lab tests.
-      globals.printStatus(
-        'An Observatory debugger and profiler on ${device.device.name} is available at: '
-        '${device.vmService.httpAddress}',
-      );
-
-      final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
-      if (devToolsServerAddress != null) {
-        final Uri uri = devToolsServerAddress.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
-        );
-        if (uri != null) {
-          globals.printStatus(
-            '\nFlutter DevTools, a Flutter debugger and profiler, on '
-            '${device.device.name} is available at: $uri',
-          );
-        }
-      }
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
@@ -1127,6 +1111,8 @@ class HotRunner extends ResidentRunner {
         'For more information see https://dart.dev/null-safety/unsound-null-safety',
       );
     }
+    globals.printStatus('');
+    printDebuggerList();
   }
 
   Future<void> _evictDirtyAssets() async {

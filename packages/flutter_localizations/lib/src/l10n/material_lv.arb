@@ -9,6 +9,8 @@
   "previousMonthTooltip": "Iepriekšējais mēnesis",
   "nextPageTooltip": "Nākamā lapa",
   "previousPageTooltip": "Iepriekšējā lapa",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "Rādīt izvēlni",
   "aboutListTileTitle": "Par $applicationName",
   "licensesPageTitle": "Licences",
