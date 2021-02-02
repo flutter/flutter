@@ -13,6 +13,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 
@@ -130,9 +131,10 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
     if (canvas) {
       SkBitmap bitmap;
       if (bitmap.installPixels(pixmap)) {
-        canvas->drawBitmapRect(
-            bitmap, SkRect::MakeIWH(native_buffer.width, native_buffer.height),
-            nullptr);
+        canvas->drawImageRect(
+            bitmap.asImage(),
+            SkRect::MakeIWH(native_buffer.width, native_buffer.height),
+            SkSamplingOptions());
       }
     }
   }
