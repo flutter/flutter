@@ -200,6 +200,9 @@ class Home extends StatelessWidget {
               '${localizations.helloFor(123)}',
               '${localizations.helloCost("price", 123)}',
               '${localizations.helloCostWithOptionalParam("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter1("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter2("price", .5)}',
+              '${localizations.helloCostWithSpecialCharacter3("price", .5)}',
               '${localizations.helloDecimalPattern(1200000)}',
               '${localizations.helloPercentPattern(1200000)}',
               '${localizations.helloScientificPattern(1200000)}',
@@ -425,6 +428,51 @@ void main() {
         "format": "currency",
         "optionalParameters": {
           "name": "BTC"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter1": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter1": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC'"
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter2": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter2": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\""
+        }
+      }
+    }
+  },
+
+  "helloCostWithSpecialCharacter3": "Hello for {price} {value} (with special character)",
+  "@helloCostWithSpecialCharacter3": {
+    "description": "A message with string and int (currency) parameters",
+    "placeholders": {
+      "price": {},
+      "value": {
+        "type": "double",
+        "format": "currency",
+        "optionalParameters": {
+          "name": "BTC\"'"
         }
       }
     }
