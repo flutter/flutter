@@ -1190,7 +1190,14 @@ flutter:
         windows:
           dartPluginClass: WindowsPlugin
 ''';
-
+        plugins['awesome_macos'] = '''
+  flutter:
+    plugin:
+      implements: awesome
+      platforms:
+        macos:
+          dartPluginClass: AwesomeMacOS
+''';
         for (final MapEntry<String, String> entry in plugins.entries) {
           final String name = fs.path.basename(entry.key);
           final Directory pluginDirectory = fakePubCache.childDirectory(name);
@@ -1232,6 +1239,7 @@ void main() {
             'import \'package:app/main.dart\' as entrypoint;\n'
             'import \'dart:io\'; // ignore: dart_io_import.\n'
             'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
+            'import \'package:awesome_macos/awesome_macos.dart\';\n'
             'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
             'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
             '\n'
@@ -1240,6 +1248,7 @@ void main() {
             '  if (Platform.isLinux) {\n'
             '      LinuxPlugin.registerWith();\n'
             '  } else if (Platform.isMacOS) {\n'
+            '      AwesomeMacOS.registerWith();\n'
             '      MacOSPlugin.registerWith();\n'
             '  } else if (Platform.isWindows) {\n'
             '      WindowsPlugin.registerWith();\n'
