@@ -144,7 +144,7 @@ class AOTSnapshotter {
 
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      for (String option in extraGenSnapshotOptions) {
+      for (final String option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {
           shouldStrip = false;
           continue;
