@@ -41,6 +41,9 @@ final GetStackPointerCallback getStackPointer = () {
   // Creates a block of memory to store the assembly code.
   final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, 4096, protRead | protWrite,
       mapPrivate | mapAnon | mapJit, -1, 0);
+  if (region == ffi.nullptr) {
+    throw 'Failed to acquire memory for the test.';
+  }
   // Writes the assembly code into the memory block. This assembly code returns
   // the memory address of the stack pointer.
   region.cast<ffi.Uint8>().asTypedList(4096).setAll(
@@ -53,7 +56,7 @@ final GetStackPointerCallback getStackPointer = () {
       ]);
   // Makes sure the memory block is executable.
   if (mprotect(region, 4096, protRead | protExec) != 0) {
-    throw 'Failed to mark code as executable.';
+    throw 'Failed to write executable code to the memory.';
   }
   return region
       .cast<ffi.NativeFunction<ffi.IntPtr Function()>>()
