@@ -26,29 +26,37 @@ typedef DartMprotect = int Function(ffi.Pointer<ffi.Void>, int, int);
 final DartMprotect mprotect = ffi.DynamicLibrary.process()
     .lookupFunction<CMprotect, DartMprotect>('mprotect');
 
-const int protRead = 1;
-const int protWrite = 2;
-const int protExec = 4;
+const int kProtRead = 1;
+const int kProtWrite = 2;
+const int kProtExec = 4;
 
-const int mapPrivate = 0x02;
-const int mapJit = 0x0;
-const int mapAnon = 0x20;
+const int kMapPrivate = 0x02;
+const int kMapJit = 0x0;
+const int kMapAnon = 0x20;
+
+const int kMemorySize = 4096;
+const int kInvalidFileDescriptor = -1;
+const int kkFileMappingOffset = 0;
+
+const int kMemoryStartingIndex = 0;
+
+const int kExitCodeSuccess = 0;
 
 final GetStackPointerCallback getStackPointer = () {
   if (!io.Platform.isAndroid) {
     throw 'This benchmark test can only be run on Android.';
   }
   // Creates a block of memory to store the assembly code.
-  final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, 4096, protRead | protWrite,
-      mapPrivate | mapAnon | mapJit, -1, 0);
+  final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, kMemorySize, kProtRead | kProtWrite,
+      kMapPrivate | kMapAnon | kMapJit, kInvalidFileDescriptor, kkFileMappingOffset);
   if (region == ffi.nullptr) {
     throw 'Failed to acquire memory for the test.';
   }
-  // Writes the assembly code into the memory block. This assembly assuming we
-  // are running on arm64 devices, and it returns the memory address of the
+  // Writes the assembly code into the memory block. This assume we are running
+  // on arm64 devices. This assembly code returns the memory address of the
   // stack pointer.
-  region.cast<ffi.Uint8>().asTypedList(4096).setAll(
-      0,
+  region.cast<ffi.Uint8>().asTypedList(kMemorySize).setAll(
+      kMemoryStartingIndex,
       <int>[
         // "mov x0, sp"  in machine code: E0030091.
         0xe0, 0x03, 0x00, 0x91,
@@ -56,7 +64,7 @@ final GetStackPointerCallback getStackPointer = () {
         0xc0, 0x03, 0x5f, 0xd6
       ]);
   // Makes sure the memory block is executable.
-  if (mprotect(region, 4096, protRead | protExec) != 0) {
+  if (mprotect(region, kMemorySize, kProtRead | kProtExec) != kExitCodeSuccess) {
     throw 'Failed to write executable code to the memory.';
   }
   return region
