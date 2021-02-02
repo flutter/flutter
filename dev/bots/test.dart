@@ -435,7 +435,10 @@ Future<void> _runBuildTests() async {
       ],
   ]..shuffle(math.Random(0));
 
-  await _selectIndexedSubshard(tests, kBuildTestShardCount);
+  if (!await _runShardRunnerIndexOfTotalSubshard(tests)) {
+    // TODO(jmagman): Remove fallback once LUCI configs are migrated to d+_d+ subshard format.
+    await _selectIndexedSubshard(tests, kBuildTestShardCount);
+  }
 }
 
 Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
