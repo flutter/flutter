@@ -503,6 +503,15 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.androidArm64:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
         case DeviceOperatingSystem.ios:
           await flutter('build', options: <String>[
             'ios',
@@ -1022,6 +1031,7 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         options.add('--tree-shake-icons');
@@ -1060,6 +1070,10 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');

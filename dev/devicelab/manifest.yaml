@@ -341,13 +341,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
-  android_stack_size_test:
-    description: >
-      Measures increased stack size for one stateless widget during the rendering pipeline.
-      This test can only be run on arm64 devices.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   # android_splash_screen_integration_test:
   #   description: >
   #     Runs end-to-end test of Flutter's Android splash behavior.

@@ -200,6 +200,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       case _AndroidCPU.arm64:
         return device.isArm64();
     }
+    return true;
   }
 
   /// Picks a random Android device out of connected devices and sets it as
