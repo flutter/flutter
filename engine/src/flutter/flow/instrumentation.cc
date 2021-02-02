@@ -225,8 +225,7 @@ void Stopwatch::Visualize(SkCanvas* canvas, const SkRect& rect) const {
   prev_drawn_sample_index_ = current_sample_;
 
   // Draw the cached surface onto the output canvas.
-  paint.reset();
-  visualize_cache_surface_->draw(canvas, rect.x(), rect.y(), &paint);
+  visualize_cache_surface_->draw(canvas, rect.x(), rect.y());
 }
 
 CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
