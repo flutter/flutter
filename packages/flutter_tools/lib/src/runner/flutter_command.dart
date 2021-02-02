@@ -133,6 +133,9 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
 
+  /// The flag name for whether to launch the DevTools or not.
+  static const String kEnableDevTools = 'devtools';
+
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
@@ -327,27 +330,39 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
-  void addDevToolsOptions() {
-    argParser.addOption(kDevToolsServerAddress,
+  void addDevToolsOptions({@required bool verboseHelp}) {
+    argParser.addFlag(
+      kEnableDevTools,
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Enable (or disable, with --no-$kEnableDevTools) the launching of the '
+            'Flutter DevTools debugger and profiler. '
+            'If specified, --$kDevToolsServerAddress is ignored.'
+    );
+    argParser.addOption(
+      kDevToolsServerAddress,
+      hide: !verboseHelp,
       help: 'When this value is provided, the Flutter tool will not spin up a '
-          'new DevTools server instance, but instead will use the one provided '
-          'at this address.');
+            'new DevTools server instance, and will instead use the one provided '
+            'at the given address. Ignored if --no-$kEnableDevTools is specified.'
+    );
   }
 
   void addDdsOptions({@required bool verboseHelp}) {
     argParser.addOption('dds-port',
       help: 'When this value is provided, the Dart Development Service (DDS) will be '
-            'bound to the provided port.\nSpecifying port 0 (the default) will find '
-            'a random free port.');
+            'bound to the provided port.\n'
+            'Specifying port 0 (the default) will find a random free port.'
+    );
     argParser.addFlag(
-      'disable-dds',
+      'disable-dds', // TODO(ianh): this should be called `dds` and default to true (see style guide about double negatives)
       hide: !verboseHelp,
-      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
-            ' when attaching to an application with an existing DDS instance (e.g.,'
-            ' attaching to an application currently connected to by "flutter run") or'
-            ' when running certain tests.\n'
-            'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
-            ' already connected to the target application.'
+      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided '
+            'when attaching to an application with an existing DDS instance (e.g., '
+            'attaching to an application currently connected to by "flutter run") or '
+            'when running certain tests.\n'
+            'Passing this flag may degrade IDE functionality if a DDS instance is not '
+            'already connected to the target application.'
     );
   }
 

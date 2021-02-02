@@ -795,6 +795,8 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
+  @visibleForTesting
+  DevtoolsLauncher get devToolsLauncher => _devToolsLauncher;
   DevtoolsLauncher _devToolsLauncher;
 
   bool _exited = false;
@@ -878,6 +880,7 @@ abstract class ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   });
 
@@ -885,6 +888,7 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   });
 
   bool get supportsRestart => false;
@@ -1275,19 +1279,26 @@ abstract class ResidentRunner {
     return _devToolsLauncher.activeDevToolsServer;
   }
 
-  Future<void> serveDevToolsGracefully({
-    Uri devToolsServerAddress
+  // This must be guaranteed not to return a Future that fails.
+  Future<void> serveAndAnnounceDevTools({
+    Uri devToolsServerAddress,
   }) async {
     if (!supportsServiceProtocol) {
       return;
     }
-
     _devToolsLauncher ??= DevtoolsLauncher.instance;
     if (devToolsServerAddress != null) {
-      _devToolsLauncher.devToolsUri = devToolsServerAddress;
+      _devToolsLauncher.devToolsUrl = devToolsServerAddress;
     } else {
-      await _devToolsLauncher.serve();
+      unawaited(_devToolsLauncher.serve());
     }
+    await _devToolsLauncher.ready;
+    if (_reportedDebuggers) {
+      // Since the DevTools only just became available, we haven't had a chance to
+      // report their URLs yet. Do so now.
+      printDebuggerList(includeObservatory: false);
+    }
+    await maybeCallDevToolsUriServiceExtension();
   }
 
   Future<void> maybeCallDevToolsUriServiceExtension() async {
@@ -1415,6 +1426,39 @@ abstract class ResidentRunner {
     ];
     await Future.wait(futures);
     appFinished();
+  }
+
+  bool _reportedDebuggers = false;
+
+  void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
+    final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
+    if (devToolsServerAddress == null) {
+      includeDevtools = false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
+        continue;
+      }
+      if (includeObservatory) {
+        // Caution: This log line is parsed by device lab tests.
+        globals.printStatus(
+          'An Observatory debugger and profiler on ${device.device.name} is available at: '
+          '${device.vmService.httpAddress}',
+        );
+      }
+      if (includeDevtools) {
+        final Uri uri = devToolsServerAddress.uri?.replace(
+          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+        );
+        if (uri != null) {
+          globals.printStatus(
+            'The Flutter DevTools debugger and profiler '
+            'on ${device.device.name} is available at: $uri',
+          );
+        }
+      }
+    }
+    _reportedDebuggers = true;
   }
 
   /// Called to print help to the terminal.
@@ -1763,24 +1807,51 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Uri devToolsUri;
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
+
+  /// Serve Dart DevTools and return the host and port they are available on.
+  ///
+  /// This method must return a future that is guaranteed not to fail, because it
+  /// will be used in unawaited contexts. It may, however, return null.
+  Future<DevToolsServerAddress> serve();
 
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
+  ///
+  /// This method must return a future that is guaranteed not to fail, because it
+  /// will be used in unawaited contexts.
+  @visibleForTesting
   Future<void> launch(Uri vmServiceUri);
-
-  /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve();
 
   Future<void> close();
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
+  /// Returns a future that completes when the DevTools server is ready.
+  ///
+  /// Completes when [devToolsUrl] is set. That can be set either directly, or
+  /// by calling [serve].
+  Future<void> get ready => _readyCompleter.future;
+  Completer<void> _readyCompleter = Completer<void>();
 
+  Uri get devToolsUrl => _devToolsUrl;
+  Uri _devToolsUrl;
+  set devToolsUrl(Uri value) {
+    assert((_devToolsUrl == null) != (value == null));
+    _devToolsUrl = value;
+    if (_devToolsUrl != null) {
+      _readyCompleter.complete();
+    } else {
+      _readyCompleter = Completer<void>();
+    }
+  }
+
+  /// The URL of the current DevTools server.
+  ///
+  /// Returns null if [ready] is not complete.
   DevToolsServerAddress get activeDevToolsServer {
-    if (devToolsUri == null) {
+    if (_devToolsUrl == null) {
       return null;
     }
-    return DevToolsServerAddress(devToolsUri.host, devToolsUri.port);
+    return DevToolsServerAddress(devToolsUrl.host, devToolsUrl.port);
   }
 }
 
