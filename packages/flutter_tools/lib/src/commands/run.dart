@@ -159,8 +159,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   String get traceAllowlist => stringArg('trace-allowlist');
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
-  Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+  Future<DebuggingOptions> createDebuggingOptions() async {
+    final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
@@ -322,7 +322,6 @@ class RunCommand extends RunCommandBase {
   final String description = 'Run your Flutter app on an attached device.';
 
   List<Device> devices;
-  bool webMode = false;
 
   String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -394,7 +393,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+    final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
@@ -449,18 +448,13 @@ class RunCommand extends RunCommandBase {
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
     }
-    // Only support "web mode" with a single web device due to resident runner
-    // refactoring required otherwise.
-    webMode = featureFlags.isWebEnabled &&
-      devices.length == 1  &&
-      await devices.single.targetPlatform == TargetPlatform.web_javascript;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+    final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String applicationBinaryPath = stringArg('use-application-binary');
 
@@ -482,7 +476,7 @@ class RunCommand extends RunCommandBase {
       try {
         app = await daemon.appDomain.startApp(
           devices.first, globals.fs.currentDirectory.path, targetFile, route,
-          await createDebuggingOptions(webMode), hotMode,
+          await createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
@@ -556,13 +550,18 @@ class RunCommand extends RunCommandBase {
           platform: globals.platform,
         ),
     ];
+    // Only support "web mode" with a single web device due to resident runner
+    // refactoring required otherwise.
+    final bool webMode = featureFlags.isWebEnabled &&
+                         devices.length == 1  &&
+                         await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     if (hotMode && !webMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: await createDebuggingOptions(),
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -578,7 +577,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: await createDebuggingOptions(),
         stayResident: stayResident,
         urlTunneller: null,
       );
@@ -586,7 +585,7 @@ class RunCommand extends RunCommandBase {
       runner = ColdRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: await createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null
