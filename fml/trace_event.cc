@@ -19,6 +19,7 @@ namespace tracing {
 
 namespace {
 AsciiTrie gAllowlist;
+TimelineEventHandler gTimelineEventHandler;
 
 inline void FlutterTimelineEvent(const char* label,
                                  int64_t timestamp0,
@@ -27,15 +28,19 @@ inline void FlutterTimelineEvent(const char* label,
                                  intptr_t argument_count,
                                  const char** argument_names,
                                  const char** argument_values) {
-  if (gAllowlist.Query(label)) {
-    Dart_TimelineEvent(label, timestamp0, timestamp1_or_async_id, type,
-                       argument_count, argument_names, argument_values);
+  if (gTimelineEventHandler && gAllowlist.Query(label)) {
+    gTimelineEventHandler(label, timestamp0, timestamp1_or_async_id, type,
+                          argument_count, argument_names, argument_values);
   }
 }
 }  // namespace
 
 void TraceSetAllowlist(const std::vector<std::string>& allowlist) {
   gAllowlist.Fill(allowlist);
+}
+
+void TraceSetTimelineEventHandler(TimelineEventHandler handler) {
+  gTimelineEventHandler = handler;
 }
 
 size_t TraceNonce() {
@@ -287,6 +292,8 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
 #else  // FLUTTER_TIMELINE_ENABLED
 
 void TraceSetAllowlist(const std::vector<std::string>& allowlist) {}
+
+void TraceSetTimelineEventHandler(TimelineEventHandler handler) {}
 
 size_t TraceNonce() {
   return 0;
