@@ -290,19 +290,13 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
               behavior: const _DropdownScrollBehavior(),
               child: PrimaryScrollController(
                 controller: widget.route.scrollController!,
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final double menuTotalHeight = widget.route.itemHeights.reduce((double total, double height) => total + height);
-                    final bool isScrollable =  kMaterialListPadding.vertical + menuTotalHeight > constraints.maxHeight;
-                    return Scrollbar(
-                      isAlwaysShown: isScrollable,
-                      child: ListView(
-                        padding: kMaterialListPadding,
-                        shrinkWrap: true,
-                        children: children,
-                      ),
-                    );
-                  },
+                child: Scrollbar(
+                  isAlwaysShown: true,
+                  child: ListView(
+                    padding: kMaterialListPadding,
+                    shrinkWrap: true,
+                    children: children,
+                  ),
                 ),
               ),
             ),
