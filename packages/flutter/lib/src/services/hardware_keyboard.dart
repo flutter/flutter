@@ -11,67 +11,120 @@ import 'binding.dart';
 import 'keyboard_key.dart';
 import 'keyboard_keys.dart';
 
-class LockKeyboardKey implements KeyboardStateCriterion {
-  // LockKeyboardKey has a fixed pool of supported keys, enumerated as static
-  // members of this class.
-  LockKeyboardKey._(this.logical);
 
+/// Represents a lock mode of a keyboard, such as [capsLock].
+///
+/// A lock mode locks part of a keyboard keys into a distinct mode of operation,
+/// depending on the lock settings selected. The status of the mode is toggled
+/// with each key down of its corresponding logical key. A [KeyboardLockMode]
+/// object is used to query whether this mode is enabled on the keyboard.
+///
+/// Only a limited number of modes are supported, which are enumerated as static
+/// members of this class. Manual constructing of this class is prohibited.
+class KeyboardLockMode implements KeyboardStateCriterion {
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  KeyboardLockMode._(this.logical);
+
+  /// The logical key that triggers this lock mode.
   final LogicalKeyboardKey logical;
 
   @override
-  bool pressedIn(KeyboardState state) {
-    return state.locked(logical);
+  bool active(KeyboardState state) {
+    return state.modeEnabled(this);
   }
 
-  /// Represents the logical "numLock" key on the keyboard is in effect.
-  static final LockKeyboardKey numLock = LockKeyboardKey._(LogicalKeyboardKey.numLock);
+  /// Represents the number lock mode on the keyboard.
+  ///
+  /// On supporting systems, enabling number lock mode usually allows key
+  /// presses of the number pad to input numbers, instead of acting as up, down,
+  /// left, right, page up, end, etc.
+  static final KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
 
-  /// Represents the logical "scrollLock" key on the keyboard is in effect.
-  static final LockKeyboardKey scrollLock = LockKeyboardKey._(LogicalKeyboardKey.scrollLock);
+  /// Represents the scrolling lock mode on the keyboard.
+  ///
+  /// On supporting systems and applications (such as spreadsheet), enabling
+  /// scrolling lock mode usually allows key presses of the cursor keys to
+  /// scroll the document instead of the cursor.
+  static final KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
 
-  /// Represents the logical "capsLock" key on the keyboard is in effect.
-  static final LockKeyboardKey capsLock = LockKeyboardKey._(LogicalKeyboardKey.capsLock);
+  /// Represents the capital lock mode on the keyboard.
+  ///
+  /// On supporting systems, enabling capital lock mode usually allows key
+  /// presses of the letter keys to input upper cases.
+  static final KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
 
-  static bool isLockKey(LogicalKeyboardKey logical) => _knownLockKeys.containsKey(logical.keyId);
+  /// Whether a logical key corresponds to a valid lock mode.
+  static bool isLock(LogicalKeyboardKey logical) => _knownLockModes.containsKey(logical.keyId);
 
-  static final Map<int, LockKeyboardKey> _knownLockKeys = <int, LockKeyboardKey>{
+  static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logical.keyId: numLock,
     scrollLock.logical.keyId: scrollLock,
     capsLock.logical.keyId: capsLock,
   };
 }
 
-class UnionKeyboardKey extends KeyboardKey {
+/// A virtual keyboard key that represents any of several keys.
+///
+/// [UnionKeyboardKey] takes multiple keys, and when tested against a keyboard
+/// state or a key event, it is satisfied if any of its keys are satisifed.
+/// This is useful when the application does not distinguish certain sets of
+/// keys, such as a pair of left and right modifiers.
+class UnionKeyboardKey implements KeyboardStateCriterion, KeyboardEventCriterion {
+  /// Construct a virtual keyboard key that represents any of the provided keys.
   const UnionKeyboardKey(this.keys);
 
+  /// The list of keys that this virtual key represents.
   final List<KeyboardKey> keys;
 
   @override
-  bool pressedIn(KeyboardState state) {
-    return keys.any((KeyboardKey key) => key.pressedIn(state));
+  bool active(KeyboardState state) {
+    return keys.any((KeyboardKey key) => key.active(state));
   }
 
   @override
-  bool triggeredIn(KeyEvent event) {
-    return keys.any((KeyboardKey key) => key.triggeredIn(event));
+  bool fulfilled(KeyEvent event) {
+    return keys.any((KeyboardKey key) => key.fulfilled(event));
   }
 
-  static const UnionKeyboardKey shift = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical shift key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
+  static const UnionKeyboardKey shiftLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.shiftLeft,
     LogicalKeyboardKey.shiftRight,
   ]);
 
-  static const UnionKeyboardKey alt = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical alt key.
+  ///
+  /// Does not include AltGr key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
+  static const UnionKeyboardKey altLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.altLeft,
     LogicalKeyboardKey.altRight,
   ]);
 
-  static const UnionKeyboardKey meta = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical meta key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  static const UnionKeyboardKey metaLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.metaLeft,
     LogicalKeyboardKey.metaRight,
   ]);
 
-  static const UnionKeyboardKey control = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical control key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  static const UnionKeyboardKey controlLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.controlLeft,
     LogicalKeyboardKey.controlRight,
   ]);
@@ -140,6 +193,7 @@ class KeyRepeatEvent extends KeyEvent {
        );
 }
 
+///
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
 class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -148,56 +202,56 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 }
 
 /// An interface to listen to hardware [KeyEvent]s and query key states.
-/// 
+///
 /// [HardwareKeyboard] dispatches key events from hardware keyboards (in contrast
 /// to on-screen keyboards) received from the native platform after
 /// normalization. To stay notified whenever keys are pressed and released, add a
 /// listener with [addListener]. Alternatively, you can listen to key events only
 /// when specific part of the app is focused with [Focus.onKeyEvent].
-/// 
+///
 /// [HardwareKeyboard] also offers basic state querying. Query whether a key is
 /// being held, or a lock key is enabled, with [physicalKeyPressed],
 /// [logicalKeyPressed], or [locked].
-/// 
+///
 /// The singleton [HardwareKeyboard] instance is held by the [ServicesBinding] as
 /// [ServicesBinding.hardwareKeyboard], and can be conveniently accessed using the
 /// [HardwareKeyboard.instance] static accessor.
-/// 
+///
 /// ## Event model
 ///
 /// Flutter normalizes hardware key events from the native platform in terms of
 /// event model and key options, while preserving platform-specific features as
 /// much as possible.
-/// 
+///
 /// [HardwareKeyboard] tries to dispatch events following the model as follows:
-/// 
+///
 ///  * At initialization, all keys are released.
-///  * A key press sequence always consists of one [KeyDownEvent], zero or more 
+///  * A key press sequence always consists of one [KeyDownEvent], zero or more
 ///    [KeyRepeatEvent]s, and one [KeyUpEvent].
 ///  * All events in the same key press sequence have the same physical key and
 ///    logical key.
 ///  * Only [KeyDownEvent]s and [KeyRepeatEvent]s may have `character`, which
 ///    might vary within the key press sequence.
 ///  * Lock state always toggles at a respetive [KeyDownEvent].
-/// 
+///
 /// However, this model might not be met on some platforms until the migration
 /// period is over, since the [KeyEvent]s on these platforms are still one-to-one
 /// mapped from [RawKeyEvent]s.
-/// 
+///
 /// The resulting events might not map one-to-one to native key events. A
 /// [KeyEvent] that does not correspond to a native event is marked as
 /// `synthesized`.
-/// 
+///
 /// ## Compared to [RawKeyboard]
-/// 
+///
 /// [RawKeyboard] is the legacy API, will be deprecated and removed in the
 /// future.
-/// 
+///
 /// [RawKeyboard] dispatches events that contain raw key event data and computes
 /// unified key information in the framework. [RawKeyboard] provides a less
 /// unified, less regular event model than [HardwareKeyboard], and includes
 /// unnecessary mapping data of other platforms in the app.
-/// 
+///
 /// It is recommended to always use [HardwareKeyboard] and [KeyEvent] APIs to
 /// handle key events.
 ///
@@ -227,16 +281,16 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   final Map<int, int> _physicalPressCount = <int, int>{};
   /// Returns true if the given [PhysicalKeyboardKey] is pressed.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
-  /// 
+  ///
   /// If multiple key down events with the same physical `usbHidUsage` have been
   /// observed, the result will turn false only with the same number of key up
   /// events.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
   ///  * [locked], which tells if a logical lock key is enabled.
   @override
@@ -249,16 +303,16 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   final Map<int, int> _logicalPressCount = <int, int>{};
   /// Returns true if the given [LogicalKeyboardKey] is pressed.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
-  /// 
+  ///
   /// If multiple key down events with the same logical `keyId` have been
   /// observed, the result will turn false only with the same number of key up
   /// events.
   ///
   /// See also:
-  /// 
+  ///
   ///  * [physicalKeyPressed], which tells if a physical key is being pressed.
   ///  * [locked], which tells if a logical lock key is enabled.
   @override
@@ -271,11 +325,11 @@ abstract class HardwareKeyboard extends KeyboardState {
 
   late final Map<int, bool> _locked = <int, bool>{};
   /// Returns true if the lock flag of the given [LogicalKeyboardKey] is enabled.
-  /// 
+  ///
   /// Lock keys, such as CapsLock, are logical keys that toggle their
   /// respective boolean states on key down events. Such flags are usually used
   /// as modifier to other keys or events.
-  /// 
+  ///
   /// If used during a key event listener, the result will have taken the event
   /// into account.
   @override
@@ -284,7 +338,7 @@ abstract class HardwareKeyboard extends KeyboardState {
     return _locked[logical.keyId] ?? false;
   }
 
-  bool isPressed(KeyboardStateCriterion criterion) => criterion.pressedIn(this);
+  bool isPressed(KeyboardStateCriterion criterion) => criterion.active(this);
 
   /// Updates states with `event`, and sends the `event` to listeners.
   ///

@@ -440,7 +440,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
   /// arguments must not be null.
-  /// 
+  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -587,7 +587,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
-  /// 
+  ///
   /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
   /// future. Prefer [onKeyEvent] instead.
   ///
@@ -1051,7 +1051,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// need to be attached. [FocusAttachment.detach] should be called on the old
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
-  /// 
+  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
