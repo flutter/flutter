@@ -220,8 +220,9 @@ class Dialog extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
-/// This demo shows a method in a [State] which, when called, displays a dialog box
-/// and returns a [Future] that completes when the dialog is dismissed.
+/// This demo shows a [TextButton] which ontap calls [showDialog] method, when called,
+/// displays a Material dialog above the current contents of the app and returns
+/// a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
