@@ -49,6 +49,8 @@ source_set("runtime") {
     "dart_vm.h",
     "dart_vm_data.cc",
     "dart_vm_data.h",
+    "dart_vm_initializer.cc",
+    "dart_vm_initializer.h",
     "dart_vm_lifecycle.cc",
     "dart_vm_lifecycle.h",
     "embedder_resources.cc",

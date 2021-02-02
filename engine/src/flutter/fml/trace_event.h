@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FML_TRACE_EVENT_H_
 #define FLUTTER_FML_TRACE_EVENT_H_
 
+#include <functional>
+
 #include "flutter/fml/build_config.h"
 
 #if defined(OS_FUCHSIA)
@@ -144,6 +146,16 @@ using TraceArg = const char*;
 using TraceIDArg = int64_t;
 
 void TraceSetAllowlist(const std::vector<std::string>& allowlist);
+
+using TimelineEventHandler = std::function<void(const char*,
+                                                int64_t,
+                                                int64_t,
+                                                Dart_Timeline_Event_Type,
+                                                intptr_t,
+                                                const char**,
+                                                const char**)>;
+
+void TraceSetTimelineEventHandler(TimelineEventHandler handler);
 
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
