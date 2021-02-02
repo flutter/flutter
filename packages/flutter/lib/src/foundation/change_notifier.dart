@@ -92,13 +92,6 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-class _ListenerEntry {
-  _ListenerEntry(this.callback);
-
-  final VoidCallback callback;
-  bool disposed = false;
-}
-
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -109,7 +102,7 @@ class _ListenerEntry {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  final List<_ListenerEntry> _listeners = <_ListenerEntry>[];
+  final List<VoidCallback?> _listeners = <VoidCallback?>[];
   bool _disposed = false;
   int _currentRemovedCount = 0;
 
@@ -176,7 +169,7 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners.add(_ListenerEntry(listener));
+    _listeners.add(listener);
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -196,11 +189,12 @@ class ChangeNotifier implements Listenable {
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
     bool removedListener = false;
-    for (final _ListenerEntry currentListener in _listeners) {
-      if (!removedListener && !currentListener.disposed && currentListener.callback == listener) {
-        currentListener.disposed = true;
+    for (int i = 0; i < _listeners.length; i++) {
+      final VoidCallback? current = _listeners[i];
+      if (current == listener) {
+        _listeners[i] = null;
         removedListener = true;
-        continue;
+        break;
       }
     }
     if (removedListener) {
@@ -247,13 +241,13 @@ class ChangeNotifier implements Listenable {
     final int currentLength = _listeners.length;
     bool encounteredDisposed = false;
     for (int i = 0; i < currentLength; i += 1) {
-      final _ListenerEntry entry = _listeners[i];
+      final VoidCallback? entry = _listeners[i];
       try {
-        if (entry.disposed) {
+        if (entry == null) {
           encounteredDisposed = true;
           continue;
         }
-        entry.callback();
+        entry();
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -271,10 +265,12 @@ class ChangeNotifier implements Listenable {
       }
     }
     if (encounteredDisposed) {
-      _listeners.removeWhere((_ListenerEntry entry) => entry.disposed);
+      _listeners.removeWhere(_nullCallback);
       _currentRemovedCount = 0;
     }
   }
+
+  static bool _nullCallback(VoidCallback? entry) => entry == null;
 }
 
 class _MergingListenable extends Listenable {
