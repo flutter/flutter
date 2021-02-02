@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:test/fake.dart';
 
 /// A fake implementation of the [DeviceLogReader].
 class FakeDeviceLogReader extends DeviceLogReader {
@@ -400,7 +399,7 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool get canListAnything => true;
 }
 
-class FakePlistParser extends Fake implements PlistParser {
+class FakePlistParser implements PlistParser {
   final Map<String, dynamic> _underlyingValues = <String, String>{};
 
   void setProperty(String key, dynamic value) {
