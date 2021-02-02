@@ -14,6 +14,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'outlined_button_theme.dart';
 import 'theme.dart';
@@ -141,6 +143,7 @@ class OutlinedButton extends ButtonStyleButton {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
@@ -170,6 +173,7 @@ class OutlinedButton extends ButtonStyleButton {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -223,6 +227,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -256,6 +261,7 @@ class OutlinedButton extends ButtonStyleButton {
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 
