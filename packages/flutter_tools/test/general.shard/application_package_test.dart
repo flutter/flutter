@@ -248,7 +248,7 @@ void main() {
 
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
-    TestPlistParser testPlistParser;
+    FakePlistParser testPlistParser;
 
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
@@ -260,7 +260,7 @@ void main() {
 
     setUp(() {
       os = MockOperatingSystemUtils();
-      testPlistParser = TestPlistParser();
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext('Error on non-existing file', () {

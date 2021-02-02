@@ -860,14 +860,14 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('startApp', () {
-    TestPlistParser testPlistParser;
+    FakePlistParser testPlistParser;
     SimControl simControl;
     Xcode xcode;
 
     setUp(() {
       simControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
-      testPlistParser = TestPlistParser();
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {

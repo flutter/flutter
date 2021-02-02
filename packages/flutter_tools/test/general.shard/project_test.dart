@@ -347,12 +347,12 @@ apply plugin: 'kotlin-android'
 
     group('product bundle identifier', () {
       MemoryFileSystem fs;
-      TestPlistParser testPlistUtils;
+      FakePlistParser testPlistUtils;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
-        testPlistUtils = TestPlistParser();
+        testPlistUtils = FakePlistParser();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
           fileSystem: fs,
@@ -622,12 +622,12 @@ apply plugin: 'kotlin-android'
   });
   group('watch companion', () {
     MemoryFileSystem fs;
-    TestPlistParser testPlistParser;
+    FakePlistParser testPlistParser;
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
     FlutterProjectFactory flutterProjectFactory;
     setUp(() {
       fs = MemoryFileSystem.test();
-      testPlistParser = TestPlistParser();
+      testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       flutterProjectFactory = FlutterProjectFactory(
         fileSystem: fs,
