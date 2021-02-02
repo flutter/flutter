@@ -549,17 +549,17 @@ void main() {
 
     expect(tester.getSemantics(find.text('B')), matchesSemantics(
       label: 'B',
-      size: const Size(40.0, 40.0),
+      size: const Size(48.0, 48.0),
     ));
 
     expect(tester.getSemantics(find.text('C')), matchesSemantics(
       label: 'C',
-      size: const Size(40.0, 40.0),
+      size: const Size(48.0, 48.0),
     ));
 
     expect(tester.getSemantics(find.text('D')), matchesSemantics(
       label: 'D',
-      size: const Size(40.0, 40.0),
+      size: const Size(48.0, 48.0),
     ));
     handle.dispose();
   });
