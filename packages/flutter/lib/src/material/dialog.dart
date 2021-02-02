@@ -224,16 +224,13 @@ class Dialog extends StatelessWidget {
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// @override
 /// Widget build(BuildContext context) {
-///   Future<void> _showMyDialog() async {
-///     return showDialog<String>(
+///   return TextButton(
+///     onPressed: () => showDialog<String>(
 ///       context: context,
 ///       builder: (BuildContext context) => AlertDialog(
-///         title: const Text('AlertDialog tilte'),
-///         content: const Text(
-///           'AlertDialog description',
-///         ),
+///         title: const Text('AlertDialog Tilte'),
+///         content: const Text('AlertDialog description'),
 ///         actions: <Widget>[
 ///           TextButton(
 ///             onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -245,29 +242,8 @@ class Dialog extends StatelessWidget {
 ///           ),
 ///         ],
 ///       ),
-///     ).then((returnVal) {
-///       if (returnVal != null) {
-///         ScaffoldMessenger.of(context).showSnackBar(
-///           SnackBar(
-///             duration: Duration(seconds: 2),
-///             content: Text('You clicked: $returnVal'),
-///             action: SnackBarAction(label: 'OK', onPressed: () {}),
-///           ),
-///         );
-///       }
-///     });
-///   }
-///
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: Text('AlertDialog Demo'),
 ///     ),
-///     body: Center(
-///       child: TextButton(
-///         onPressed: _showMyDialog,
-///         child: Text('Show Dialog'),
-///       ),
-///     ),
+///     child: Text('Show Dialog'),
 ///   );
 /// }
 ///
