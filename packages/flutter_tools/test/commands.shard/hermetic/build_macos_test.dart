@@ -257,16 +257,21 @@ void main() {
       .readAsLinesSync();
 
     expect(contents, containsAll(<String>[
-      'DART_DEFINES=foo.bar%3D2,fizz.far%3D3',
+      'FLUTTER_APPLICATION_PATH=/',
+      'FLUTTER_TARGET=lib/other.dart',
+      'FLUTTER_BUILD_DIR=build',
+      'FLUTTER_BUILD_NAME=1.0.0',
+      'FLUTTER_BUILD_NUMBER=1',
+      'EXCLUDED_ARCHS=arm64',
+      'DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==',
       'DART_OBFUSCATION=true',
-      'EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable',
-      'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable',
+      'EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable',
+      'EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable',
       'SPLIT_DEBUG_INFO=foo/',
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
-      'FLUTTER_TARGET=lib/other.dart',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
-      'EXCLUDED_ARCHS=arm64',
+      'PACKAGE_CONFIG=/.dart_tool/package_config.json'
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

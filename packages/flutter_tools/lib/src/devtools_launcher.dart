@@ -48,8 +48,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   @override
   Future<void> launch(Uri vmServiceUri) async {
     // Place this entire method in a try/catch that swallows exceptions because
-    // we do not want to block Flutter run/attach operations on a DevTools
-    // failure.
+    // this method is guaranteed not to return a Future that throws.
     try {
       bool offline = false;
       try {
@@ -109,8 +108,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
-      devToolsUri = await completer.future
-        .timeout(const Duration(seconds: 10));
+      devToolsUrl = await completer.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
@@ -124,7 +122,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       'global',
       'list',
     ]);
-
     if (_pubGlobalListProcess.stdout.toString().contains('devtools ')) {
       return true;
     }
@@ -144,7 +141,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     if (!shouldActivate) {
       return false;
     }
-
     final Status status = _logger.startProgress(
       'Activating Dart DevTools...',
     );
@@ -182,7 +178,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> close() async {
-    devToolsUri = null;
+    devToolsUrl = null;
     if (_devToolsProcess != null) {
       _devToolsProcess.kill();
       await _devToolsProcess.exitCode;
