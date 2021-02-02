@@ -34,7 +34,7 @@ const int kMapPrivate = 0x02;
 const int kMapJit = 0x0;
 const int kMapAnon = 0x20;
 
-const int kMemorySize = 4096;
+const int kMemorySize = 16;
 const int kInvalidFileDescriptor = -1;
 const int kkFileMappingOffset = 0;
 
@@ -43,26 +43,35 @@ const int kMemoryStartingIndex = 0;
 const int kExitCodeSuccess = 0;
 
 final GetStackPointerCallback getStackPointer = () {
+  // Makes sure we are running on an Android arm64 device.
   if (!io.Platform.isAndroid) {
     throw 'This benchmark test can only be run on Android.';
   }
+  final io.ProcessResult result = io.Process.runSync('getprop', <String>['ro.product.cpu.abi']);
+  if (result.exitCode != 0)
+    throw 'Failed to retrieve CPU information';
+  if (!result.stdout.toString().contains('arm64'))
+    throw 'This benchmark test can only be run on arm64 device';
+
   // Creates a block of memory to store the assembly code.
   final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, kMemorySize, kProtRead | kProtWrite,
       kMapPrivate | kMapAnon | kMapJit, kInvalidFileDescriptor, kkFileMappingOffset);
   if (region == ffi.nullptr) {
     throw 'Failed to acquire memory for the test.';
   }
-  // Writes the assembly code into the memory block. This assume we are running
-  // on arm64 devices. This assembly code returns the memory address of the
-  // stack pointer.
+
+  // Writes the assembly code into the memory block. This assembly code returns
+  // the memory address of the stack pointer.
   region.cast<ffi.Uint8>().asTypedList(kMemorySize).setAll(
-      kMemoryStartingIndex,
-      <int>[
-        // "mov x0, sp"  in machine code: E0030091.
-        0xe0, 0x03, 0x00, 0x91,
-        // "ret"         in machine code: C0035FD6.
-        0xc0, 0x03, 0x5f, 0xd6
-      ]);
+    kMemoryStartingIndex,
+    <int>[
+      // "mov x0, sp"  in machine code: E0030091.
+      0xe0, 0x03, 0x00, 0x91,
+      // "ret"         in machine code: C0035FD6.
+      0xc0, 0x03, 0x5f, 0xd6
+    ]
+  );
+
   // Makes sure the memory block is executable.
   if (mprotect(region, kMemorySize, kProtRead | kProtExec) != kExitCodeSuccess) {
     throw 'Failed to write executable code to the memory.';
