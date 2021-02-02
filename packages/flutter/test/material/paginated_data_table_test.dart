@@ -63,6 +63,7 @@ void main() {
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
+        showFirstLastButtons: true,
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
@@ -97,6 +98,42 @@ void main() {
     log.clear();
 
     await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    final Finder lastPageButton = find.ancestor(of: find.byTooltip('Last page'),
+        matching: find.byWidgetPredicate((Widget widget) => widget is IconButton));
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+
+    expect(log, <String>['page-changed: 498']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNull);
+
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Donut (49)'), findsOneWidget);
+    expect(find.text('KitKat (49)'), findsOneWidget);
+
+    final Finder firstPageButton = find.ancestor(of: find.byTooltip('First page'),
+        matching: find.byWidgetPredicate((Widget widget) => widget is IconButton));
+
+    expect(tester.widget<IconButton>(firstPageButton).onPressed, isNotNull);
+
+    await tester.tap(firstPageButton);
+
+    expect(log, <String>['page-changed: 0']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(tester.widget<IconButton>(firstPageButton).onPressed, isNull);
 
     expect(find.text('Frozen yogurt (0)'), findsOneWidget);
     expect(find.text('Eclair (0)'), findsNothing);

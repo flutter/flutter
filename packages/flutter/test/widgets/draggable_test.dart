@@ -2452,6 +2452,73 @@ void main() {
     expect(onDragStartedCalled, isTrue);
   });
 
+  testWidgets('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        delay: const Duration(seconds: 2),
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Halfway into the long press duration.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Long press draggable should be showing.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
+  });
+
+  testWidgets('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: LongPressDraggable<int>(
+        data: 1,
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Halfway into the long press duration.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+    // Long press draggable should be showing.
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
+  });
+
   testWidgets('long-press draggable calls Haptic Feedback onStart', (WidgetTester tester) async {
     await _testLongPressDraggableHapticFeedback(tester: tester, hapticFeedbackOnStart: true, expectedHapticFeedbackCount: 1);
   });

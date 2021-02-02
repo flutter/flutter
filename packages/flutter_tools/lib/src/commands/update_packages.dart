@@ -71,10 +71,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'process_runner': '">=4.0.0-nullsafety.5"',
   'url_launcher': '">=6.0.0-nullsafety.1"',
   'video_player': '">=2.0.0-nullsafety.2"',
-  // MYSTERIES
-  'path_provider': '1.6.14',
-  'camera': '0.6.4+5',
-  'shelf': '0.7.5',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

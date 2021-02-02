@@ -136,7 +136,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
-    addDevToolsOptions();
+    addDevToolsOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
   }
 
@@ -621,6 +621,7 @@ class RunCommand extends RunCommandBase {
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
+      enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
       route: route,
     );
     if (result != 0) {
