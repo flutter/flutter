@@ -98,7 +98,6 @@ class ChildWidget extends StatelessWidget {
     final int myStackSize = getStackPointer();
     // Captures the stack size difference between parent widget and child widget
     // during the rendering pipeline, i.e. one layer of stateless widget.
-    // print('parentStackSize: $parentStackSize, myStackSize $myStackSize');
     return Text(
       '${parentStackSize - myStackSize}',
       key: const ValueKey<String>(kStackSizeKey),
