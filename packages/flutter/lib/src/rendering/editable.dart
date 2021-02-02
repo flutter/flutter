@@ -1058,6 +1058,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Extend the current selection to the previous start of a word.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionRightByWord]
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -1078,6 +1083,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Extend the current selection to the next end of a word.
+  ///
+  /// See also:
+  ///
+  ///   * [extendSelectionLeftByWord]
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -1131,6 +1141,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the next line.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionUp]
   void moveSelectionDown(SelectionChangedCause cause) {
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
@@ -1155,6 +1170,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection left by one character.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRight]
   void moveSelectionLeft(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionLeft(
       selection!,
@@ -1167,6 +1187,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the end of the field.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionToStart]
   void moveSelectionToEnd(SelectionChangedCause cause) {
     if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
       return;
@@ -1177,6 +1202,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the start of the field.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionToEnd]
   void moveSelectionToStart(SelectionChangedCause cause) {
     if (selection!.isCollapsed && selection!.extentOffset == 0) {
       return;
@@ -1185,6 +1215,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the previous start of a word.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRightByWord]
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -1205,6 +1240,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the next end of a word.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeftByWord]
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
@@ -1225,6 +1265,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the start of the current line.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionRightByLine]
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
@@ -1239,6 +1284,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the end of the current line.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeftByLine]
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
@@ -1253,6 +1303,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection to the right by one character.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionLeft]
   void moveSelectionRight(SelectionChangedCause cause) {
     final TextSelection nextSelection = _moveGivenSelectionRight(
       selection!,
@@ -1264,6 +1319,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
+  /// Move the current selection up by one line.
+  ///
+  /// See also:
+  ///
+  ///   * [moveSelectionDown]
   void moveSelectionUp(SelectionChangedCause cause) {
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
