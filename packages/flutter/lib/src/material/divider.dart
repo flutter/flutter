@@ -242,7 +242,7 @@ class Divider extends StatelessWidget {
 ///   return Container(
 ///     padding: const EdgeInsets.all(10),
 ///     child: Row(
-///       children: [
+///       children: <Widget>[
 ///         Expanded(
 ///           child: Container(
 ///             decoration: BoxDecoration(
