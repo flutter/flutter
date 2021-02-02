@@ -156,12 +156,12 @@ class LogicalKeyboardKey extends KeyboardKey {
   final String keyLabel;
 
   @override
-  bool pressedIn(KeyboardState state) {
+  bool active(KeyboardState state) {
     return state.logicalPressed(this);
   }
 
   @override
-  bool triggeredIn(KeyEvent event) {
+  bool fulfilled(KeyEvent event) {
     return event.logical == this;
   }
 
@@ -3122,12 +3122,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   final String? debugName;
 
   @override
-  bool pressedIn(KeyboardState state) {
+  bool active(KeyboardState state) {
     return state.physicalPressed(this);
   }
 
   @override
-  bool triggeredIn(KeyEvent event) {
+  bool fulfilled(KeyEvent event) {
     return event.physical == this;
   }
 

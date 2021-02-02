@@ -11,67 +11,120 @@ import 'binding.dart';
 import 'keyboard_key.dart';
 import 'keyboard_keys.dart';
 
-class LockKeyboardKey implements KeyboardStateCriterion {
-  // LockKeyboardKey has a fixed pool of supported keys, enumerated as static
-  // members of this class.
-  LockKeyboardKey._(this.logical);
 
+/// Represents a lock mode of a keyboard, such as [capsLock].
+///
+/// A lock mode locks part of a keyboard keys into a distinct mode of operation,
+/// depending on the lock settings selected. The status of the mode is toggled
+/// with each key down of its corresponding logical key. A [KeyboardLockMode]
+/// object is used to query whether this mode is enabled on the keyboard.
+///
+/// Only a limited number of modes are supported, which are enumerated as static
+/// members of this class. Manual constructing of this class is prohibited.
+class KeyboardLockMode implements KeyboardStateCriterion {
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  KeyboardLockMode._(this.logical);
+
+  /// The logical key that triggers this lock mode.
   final LogicalKeyboardKey logical;
 
   @override
-  bool pressedIn(KeyboardState state) {
-    return state.locked(logical);
+  bool active(KeyboardState state) {
+    return state.modeEnabled(this);
   }
 
-  /// Represents the logical "numLock" key on the keyboard is in effect.
-  static final LockKeyboardKey numLock = LockKeyboardKey._(LogicalKeyboardKey.numLock);
+  /// Represents the number lock mode on the keyboard.
+  ///
+  /// On supporting systems, enabling number lock mode usually allows key
+  /// presses of the number pad to input numbers, instead of acting as up, down,
+  /// left, right, page up, end, etc.
+  static final KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
 
-  /// Represents the logical "scrollLock" key on the keyboard is in effect.
-  static final LockKeyboardKey scrollLock = LockKeyboardKey._(LogicalKeyboardKey.scrollLock);
+  /// Represents the scrolling lock mode on the keyboard.
+  ///
+  /// On supporting systems and applications (such as spreadsheet), enabling
+  /// scrolling lock mode usually allows key presses of the cursor keys to
+  /// scroll the document instead of the cursor.
+  static final KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
 
-  /// Represents the logical "capsLock" key on the keyboard is in effect.
-  static final LockKeyboardKey capsLock = LockKeyboardKey._(LogicalKeyboardKey.capsLock);
+  /// Represents the capital lock mode on the keyboard.
+  ///
+  /// On supporting systems, enabling capital lock mode usually allows key
+  /// presses of the letter keys to input upper cases.
+  static final KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
 
-  static bool isLockKey(LogicalKeyboardKey logical) => _knownLockKeys.containsKey(logical.keyId);
+  /// Whether a logical key corresponds to a valid lock mode.
+  static bool isLock(LogicalKeyboardKey logical) => _knownLockModes.containsKey(logical.keyId);
 
-  static final Map<int, LockKeyboardKey> _knownLockKeys = <int, LockKeyboardKey>{
+  static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logical.keyId: numLock,
     scrollLock.logical.keyId: scrollLock,
     capsLock.logical.keyId: capsLock,
   };
 }
 
-class UnionKeyboardKey extends KeyboardKey {
+/// A virtual keyboard key that represents any of several keys.
+///
+/// [UnionKeyboardKey] takes multiple keys, and when tested against a keyboard
+/// state or a key event, it is satisfied if any of its keys are satisifed.
+/// This is useful when the application does not distinguish certain sets of
+/// keys, such as a pair of left and right modifiers.
+class UnionKeyboardKey implements KeyboardStateCriterion, KeyboardEventCriterion {
+  /// Construct a virtual keyboard key that represents any of the provided keys.
   const UnionKeyboardKey(this.keys);
 
+  /// The list of keys that this virtual key represents.
   final List<KeyboardKey> keys;
 
   @override
-  bool pressedIn(KeyboardState state) {
-    return keys.any((KeyboardKey key) => key.pressedIn(state));
+  bool active(KeyboardState state) {
+    return keys.any((KeyboardKey key) => key.active(state));
   }
 
   @override
-  bool triggeredIn(KeyEvent event) {
-    return keys.any((KeyboardKey key) => key.triggeredIn(event));
+  bool fulfilled(KeyEvent event) {
+    return keys.any((KeyboardKey key) => key.fulfilled(event));
   }
 
-  static const UnionKeyboardKey shift = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical shift key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
+  static const UnionKeyboardKey shiftLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.shiftLeft,
     LogicalKeyboardKey.shiftRight,
   ]);
 
-  static const UnionKeyboardKey alt = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical alt key.
+  ///
+  /// Does not include AltGr key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
+  static const UnionKeyboardKey altLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.altLeft,
     LogicalKeyboardKey.altRight,
   ]);
 
-  static const UnionKeyboardKey meta = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical meta key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  static const UnionKeyboardKey metaLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.metaLeft,
     LogicalKeyboardKey.metaRight,
   ]);
 
-  static const UnionKeyboardKey control = UnionKeyboardKey(<KeyboardKey>[
+  /// Represents either the left or the right logical control key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  static const UnionKeyboardKey controlLogical = UnionKeyboardKey(<KeyboardKey>[
     LogicalKeyboardKey.controlLeft,
     LogicalKeyboardKey.controlRight,
   ]);
@@ -140,6 +193,7 @@ class KeyRepeatEvent extends KeyEvent {
        );
 }
 
+///
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
 class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -284,7 +338,7 @@ abstract class HardwareKeyboard extends KeyboardState {
     return _locked[logical.keyId] ?? false;
   }
 
-  bool isPressed(KeyboardStateCriterion criterion) => criterion.pressedIn(this);
+  bool isPressed(KeyboardStateCriterion criterion) => criterion.active(this);
 
   /// Updates states with `event`, and sends the `event` to listeners.
   ///

@@ -6,12 +6,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/services/keyboard_keys.dart';
 
+/// An interface that allows querying the state of a keyboard.
+///
+/// [KeyboardState] is typically used by [KeyboardStateCriterion.state], to test
+/// whether the keyboard is at a state that meets certain conditions.
+///
+/// [KeyboardState] objects are actually [HardwareKeyboard] objects (typically
+/// the global singleton). The [KeyboardState] interface is used to discourage
+/// side effects during criterion testing.
 abstract class KeyboardState {
+  /// Returns true if the keyboard has the given physical key pressed.
   bool physicalPressed(PhysicalKeyboardKey key);
 
+  /// Returns true if the keyboard has the given logical key pressed.
   bool logicalPressed(LogicalKeyboardKey key);
 
-  bool locked(LogicalKeyboardKey key);
+  /// Returns true if the keyboard has the given lock mode enabled.
+  bool modeEnabled(KeyboardLockMode lockMode);
 }
 
 /// Defines the interface for keyboard key events.
@@ -147,17 +158,34 @@ abstract class KeyEvent with Diagnosticable {
   }
 }
 
+/// An interface to define whether the keyboard is at a desired state.
+///
+/// This is usually used to check whether a key is pressed (or not pressed) at
+/// the moment, or the combination of such conditions from multiple keys.
+///
+/// Subclasses should implement this class and overwride [active].
 abstract class KeyboardStateCriterion {
   const KeyboardStateCriterion._();
 
-  bool pressedIn(KeyboardState state);
+  /// Returns true when the keyboard is at a `state` that fully satisfies the
+  /// conditions intended by this class.
+  bool active(KeyboardState state);
 }
 
+/// An interface to define whether the keyboard event meets desired conditions.
+///
+/// This is usually used to check whether the event is triggered by a certain
+/// key (physical or logical), inputs certain character, or the combination of
+/// such conditions.
+///
+/// Subclasses should implement this class and overwride [fulfilled].
 abstract class KeyboardEventCriterion {
   /// A const constructor so that subclasses may be const.
   const KeyboardEventCriterion._();
 
-  bool triggeredIn(KeyEvent event);
+  /// Returns true when all the keyboard event fully satisfies the conditions
+  /// intended by this class.
+  bool fulfilled(KeyEvent event);
 }
 
 /// A base class for all keyboard key types.
