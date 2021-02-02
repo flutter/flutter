@@ -166,8 +166,8 @@ class InkSplash extends InteractiveInkFeature {
   late Animation<int> _alpha;
   AnimationController? _alphaController;
 
-  /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
-  /// material [Theme], or [ButtonStyle].
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
   static const InteractiveInkFeatureFactory splashFactory = _InkSplashFactory();
 
   @override

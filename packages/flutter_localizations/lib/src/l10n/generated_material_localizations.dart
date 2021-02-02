@@ -131,9 +131,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Vou in';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Versteek rekeninge';
 
   @override
@@ -150,9 +147,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => "Voer 'n geldige tyd in";
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -443,9 +437,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ሰብስብ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'መለያዎችን ደብቅ';
 
   @override
@@ -462,9 +453,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'የሚሠራ ሰዓት ያስገቡ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -755,9 +743,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'تصغير';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'إخفاء الحسابات';
 
   @override
@@ -774,9 +759,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'يُرجى إدخال وقت صالح.';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount تراخيص';
@@ -1067,9 +1049,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'সংকোচন কৰক';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'একাউণ্টসমূহ লুকুৱাওক';
 
   @override
@@ -1086,9 +1065,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'এটা মান্য সময় দিয়ক';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -1379,9 +1355,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Yığcamlaşdırın';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Hesabları gizlədin';
 
   @override
@@ -1398,9 +1371,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Düzgün vaxt daxil edin';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -1691,9 +1661,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Згарнуць';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Схаваць уліковыя запісы';
 
   @override
@@ -1710,9 +1677,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Увядзіце дапушчальны час';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount ліцэнзіі';
@@ -2003,9 +1967,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Свиване';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Скриване на профилите';
 
   @override
@@ -2022,9 +1983,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Въведете валиден час';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -2315,9 +2273,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'আড়াল করুন';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'অ্যাকাউন্টগুলি লুকান';
 
   @override
@@ -2334,9 +2289,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'সঠিক সময় লিখুন';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -2627,9 +2579,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Suzi';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Sakrij račune';
 
   @override
@@ -2646,9 +2595,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Unesite ispravno vrijeme';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licence';
@@ -2939,9 +2885,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Replega';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Amaga els comptes';
 
   @override
@@ -2958,9 +2901,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Introdueix una hora vàlida';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -3251,9 +3191,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sbalit';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skrýt účty';
 
   @override
@@ -3270,9 +3207,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Zadejte platný čas';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licence';
@@ -3563,9 +3497,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skjul konti';
 
   @override
@@ -3582,9 +3513,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Angiv et gyldigt tidspunkt';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -3875,9 +3803,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Konten ausblenden';
 
   @override
@@ -3894,9 +3819,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -4226,9 +4148,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Σύμπτυξη';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Απόκρυψη λογαριασμών';
 
   @override
@@ -4245,9 +4164,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Εισαγάγετε μια έγκυρη ώρα';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -4538,9 +4454,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Hide accounts';
 
   @override
@@ -4557,9 +4470,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Enter a valid time';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -5411,9 +5321,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ocultar';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ocultar cuentas';
 
   @override
@@ -5430,9 +5337,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Indica una hora válida';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -8306,9 +8210,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ahenda';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Peida kontod';
 
   @override
@@ -8325,9 +8226,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Sisestage sobiv kellaaeg';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -8618,9 +8516,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tolestu';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ezkutatu kontuak';
 
   @override
@@ -8637,9 +8532,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Idatzi balio duen ordu bat';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -8930,9 +8822,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'کوچک کردن';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'پنهان کردن حساب‌ها';
 
   @override
@@ -8949,9 +8838,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'زمان معتبری وارد کنید';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -9242,9 +9128,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Tiivistä';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Piilota tilit';
 
   @override
@@ -9261,9 +9144,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Lisää kelvollinen aika';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -9554,9 +9434,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Itago ang mga account';
 
   @override
@@ -9573,9 +9450,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Maglagay ng valid na oras';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -9866,9 +9740,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Réduire';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Masquer les comptes';
 
   @override
@@ -9885,9 +9756,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Veuillez indiquer une heure valide';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -10280,9 +10148,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Contraer';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ocultar contas';
 
   @override
@@ -10299,9 +10164,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Escribe unha hora válida';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -10592,9 +10454,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Minimieren';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Konten ausblenden';
 
   @override
@@ -10611,9 +10470,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -10904,9 +10760,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'સંકુચિત કરો';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'એકાઉન્ટ છુપાવો';
 
   @override
@@ -10923,9 +10776,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'માન્ય સમય દાખલ કરો';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -11216,9 +11066,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'כיווץ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'הסתרת החשבונות';
 
   @override
@@ -11235,9 +11082,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'יש להזין שעה תקינה';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -11528,9 +11372,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'छोटा करें';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'खाते छिपाएं';
 
   @override
@@ -11547,9 +11388,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'मान्य समय डालें';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -11840,9 +11678,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sažmi';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Sakrijte račune';
 
   @override
@@ -11859,9 +11694,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Unesite važeće vrijeme';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licence';
@@ -12152,9 +11984,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Összecsukás';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Fiókok elrejtése';
 
   @override
@@ -12171,9 +12000,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Érvényes formátumban adja meg az időt';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -12464,9 +12290,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ծալել';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Թաքցնել հաշիվները';
 
   @override
@@ -12483,9 +12306,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Մուտքագրեք վավեր ժամ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -12776,9 +12596,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Ciutkan';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Sembunyikan akun';
 
   @override
@@ -12795,9 +12612,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Masukkan waktu yang valid';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -13088,9 +12902,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Draga saman';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Fela reikninga';
 
   @override
@@ -13107,9 +12918,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Færðu inn gildan tíma';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -13400,9 +13208,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Comprimi';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Nascondi account';
 
   @override
@@ -13419,9 +13224,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Inserisci un orario valido';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -13712,9 +13514,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '折りたたむ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'アカウントを非表示';
 
   @override
@@ -13731,9 +13530,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => '有効な時刻を入力してください';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -14024,9 +13820,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ჩაკეცვა';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ანგარიშების დამალვა';
 
   @override
@@ -14043,9 +13836,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'შეიყვანეთ სწორი დრო';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -14336,9 +14126,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Жию';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Есептік жазбаларды жасыру';
 
   @override
@@ -14355,9 +14142,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Жарамды уақыт мәліметін енгізіңіз.';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -14648,9 +14432,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'បង្រួម';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'លាក់គណនី';
 
   @override
@@ -14667,9 +14448,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'បញ្ចូលពេលវេលា​ដែល​ត្រឹមត្រូវ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -14960,9 +14738,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get firstPageTooltip => 'First Page';
-
-  @override
   String get hideAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
@@ -14979,9 +14754,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
-
-  @override
-  String get lastPageTooltip => 'Last Page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -15272,9 +15044,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '접기';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => '계정 숨기기';
 
   @override
@@ -15291,9 +15060,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => '유효한 시간을 입력하세요.';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -15584,9 +15350,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Жыйыштыруу';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Аккаунттарды жашыруу';
 
   @override
@@ -15603,9 +15366,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Убакытты туура көрсөтүңүз';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -15896,9 +15656,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ຫຍໍ້ເຂົ້າ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ເຊື່ອງບັນຊີ';
 
   @override
@@ -15915,9 +15672,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'ລະບຸເວລາທີ່ຖືກຕ້ອງ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -16208,9 +15962,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sutraukti';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Slėpti paskyras';
 
   @override
@@ -16227,9 +15978,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Įveskite tinkamą laiką';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licencijos';
@@ -16520,9 +16268,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sakļaut';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Slēpt kontus';
 
   @override
@@ -16539,9 +16284,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Ievadiet derīgu laiku.';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -16832,9 +16574,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Собери';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Сокриј сметки';
 
   @override
@@ -16851,9 +16590,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Внесете важечко време';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -17144,9 +16880,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ചുരുക്കുക';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'അക്കൗണ്ടുകൾ മറയ്‌ക്കുക';
 
   @override
@@ -17163,9 +16896,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'സാധുവായ സമയം നൽകുക';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -17456,9 +17186,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Буулгах';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Бүртгэлүүдийг нуух';
 
   @override
@@ -17475,9 +17202,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Цагийг зөв оруулна уу';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -17768,9 +17492,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'कोलॅप्स करा';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'खाती लपवा';
 
   @override
@@ -17787,9 +17508,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'योग्य वेळ एंटर करा';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -18080,9 +17798,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Runtuhkan';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Sembunyikan akaun';
 
   @override
@@ -18099,9 +17814,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Masukkan masa yang sah';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -18392,9 +18104,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'လျှော့ပြရန်';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'အကောင့်များကို ဝှက်ရန်';
 
   @override
@@ -18411,9 +18120,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'မှန်ကန်သည့်အချိန် ထည့်ပါ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -18704,9 +18410,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skjul kontoer';
 
   @override
@@ -18723,9 +18426,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Angi et gyldig klokkeslett';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -19016,9 +18716,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'खाताहरू लुकाउनुहोस्';
 
   @override
@@ -19035,9 +18732,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'वैध समय प्रविष्टि गर्नुहोस्';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -19328,9 +19022,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Samenvouwen';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Accounts verbergen';
 
   @override
@@ -19347,9 +19038,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Geef een geldige tijd op';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -19640,9 +19328,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Skjul';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skjul kontoer';
 
   @override
@@ -19659,9 +19344,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Angi et gyldig klokkeslett';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -19952,9 +19634,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଲୁଚାନ୍ତୁ';
 
   @override
@@ -19971,9 +19650,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'ଏକ ବୈଧ ସମୟ ଲେଖନ୍ତୁ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -20264,9 +19940,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ਸਮੇਟੋ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ਖਾਤੇ ਲੁਕਾਓ';
 
   @override
@@ -20283,9 +19956,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'ਵੈਧ ਸਮਾਂ ਦਾਖਲ ਕਰੋ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -20576,9 +20246,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Zwiń';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ukryj konta';
 
   @override
@@ -20595,9 +20262,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Wpisz prawidłową godzinę';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licencje';
@@ -20888,9 +20552,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Collapse';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'حسابونه پټ کړئ';
 
   @override
@@ -20907,9 +20568,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Enter a valid time';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -21200,9 +20858,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Recolher';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ocultar contas';
 
   @override
@@ -21219,9 +20874,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Insira um horário válido';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -21638,9 +21290,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Restrângeți';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ascundeți conturile';
 
   @override
@@ -21657,9 +21306,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Introduceți o oră validă';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licențe';
@@ -21950,9 +21596,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Свернуть';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Скрыть аккаунты';
 
   @override
@@ -21969,9 +21612,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Указано недопустимое время.';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount лицензии';
@@ -22262,9 +21902,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'හකුළන්න';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ගිණුම් සඟවන්න';
 
   @override
@@ -22281,9 +21918,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'වලංගු වේලාවක් ඇතුළු කරන්න';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -22574,9 +22208,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Zbaliť';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skryť účty';
 
   @override
@@ -22593,9 +22224,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Zadajte platný čas';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licencie';
@@ -22886,9 +22514,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Strniti';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Skrivanje računov';
 
   @override
@@ -22905,9 +22530,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Vnesite veljaven čas';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licence';
@@ -23198,9 +22820,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Palos';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Fshih llogaritë';
 
   @override
@@ -23217,9 +22836,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Fut një kohë të vlefshme';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -23510,9 +23126,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Скупи';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Сакриј налоге';
 
   @override
@@ -23529,9 +23142,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Унесите важеће време';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount лиценце';
@@ -24122,9 +23732,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Dölj';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Dölj konton';
 
   @override
@@ -24141,9 +23748,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Ange en giltig tid';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -24434,9 +24038,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kunja';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ficha akaunti';
 
   @override
@@ -24453,9 +24054,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Weka saa sahihi';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -24746,9 +24344,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'சுருக்கும்';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'கணக்குகளை மறைக்கும்';
 
   @override
@@ -24765,9 +24360,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'சரியான நேரத்தை உள்ளிடவும்';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25058,9 +24650,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'కుదించు';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ఖాతాలను దాచు';
 
   @override
@@ -25077,9 +24666,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'చెల్లుబాటు అయ్యే సమయాన్ని ఎంటర్ చేయండి';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25370,9 +24956,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ยุบ';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'ซ่อนบัญชี';
 
   @override
@@ -25389,9 +24972,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'ป้อนเวลาที่ถูกต้อง';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25682,9 +25262,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'I-collapse';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Itago ang mga account';
 
   @override
@@ -25701,9 +25278,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Maglagay ng valid na oras';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25994,9 +25568,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Daralt';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Hesapları gizle';
 
   @override
@@ -26013,9 +25584,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Geçerli bir saat girin';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -26306,9 +25874,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Згорнути';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Сховати облікові записи';
 
   @override
@@ -26325,9 +25890,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Введіть дійсний час';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount ліцензії';
@@ -26618,9 +26180,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'سکیڑیں';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'اکاؤنٹس چھپائیں';
 
   @override
@@ -26637,9 +26196,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'درست وقت درج کریں';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -26930,9 +26486,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Kichraytirish';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Hisoblarni berkitish';
 
   @override
@@ -26949,9 +26502,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Vaqt xato kiritildi';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -27242,9 +26792,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Thu gọn';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Ẩn tài khoản';
 
   @override
@@ -27261,9 +26808,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Nhập thời gian hợp lệ';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -27554,9 +27098,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => '收起';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => '隐藏帐号';
 
   @override
@@ -27573,9 +27114,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => '请输入有效的时间';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -28274,9 +27812,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Goqa';
 
   @override
-  String get firstPageTooltip => 'First page';
-
-  @override
   String get hideAccountsLabel => 'Fihla ama-akhawunti';
 
   @override
@@ -28293,9 +27828,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get invalidTimeLabel => 'Faka igama elivumelekile';
-
-  @override
-  String get lastPageTooltip => 'Last page';
 
   @override
   String? get licensesPackageDetailTextFew => null;
