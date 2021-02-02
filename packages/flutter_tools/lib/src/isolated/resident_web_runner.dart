@@ -454,7 +454,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
     String route,
   }) async {
     firstBuildTime = DateTime.now();
@@ -532,7 +531,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: enableDevTools,
         );
       });
     } on WebSocketException {
@@ -747,7 +745,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher.connectedInstance;

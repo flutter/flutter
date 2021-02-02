@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
 
@@ -117,7 +116,6 @@ class ButtonStyle with Diagnosticable {
     this.animationDuration,
     this.enableFeedback,
     this.alignment,
-    this.splashFactory,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -232,21 +230,6 @@ class ButtonStyle with Diagnosticable {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry? alignment;
 
-  /// Creates the [InkWell] splash factory, which defines the appearance of
-  /// "ink" splashes that occur in response to taps.
-  ///
-  /// Use [NoSplash.splashFactory] to defeat ink splash rendering. For example:
-  /// ```dart
-  /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(
-  ///     splashFactory: NoSplash.splashFactory,
-  ///   ),
-  ///   onPressed: () { },
-  ///   child: Text('No Splash'),
-  /// )
-  /// ```
-  final InteractiveInkFeatureFactory? splashFactory;
-
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
@@ -267,7 +250,6 @@ class ButtonStyle with Diagnosticable {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
-    InteractiveInkFeatureFactory? splashFactory,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -287,7 +269,6 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? this.animationDuration,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       alignment: alignment ?? this.alignment,
-      splashFactory: splashFactory ?? this.splashFactory,
     );
   }
 
@@ -317,7 +298,6 @@ class ButtonStyle with Diagnosticable {
       animationDuration: animationDuration ?? style.animationDuration,
       enableFeedback: enableFeedback ?? style.enableFeedback,
       alignment: alignment ?? style.alignment,
-      splashFactory: splashFactory ?? style.splashFactory,
     );
   }
 
@@ -341,7 +321,6 @@ class ButtonStyle with Diagnosticable {
       animationDuration,
       enableFeedback,
       alignment,
-      splashFactory,
     );
   }
 
@@ -368,8 +347,7 @@ class ButtonStyle with Diagnosticable {
         && other.tapTargetSize == tapTargetSize
         && other.animationDuration == animationDuration
         && other.enableFeedback == enableFeedback
-        && other.alignment == alignment
-        && other.splashFactory == splashFactory;
+        && other.alignment == alignment;
   }
 
   @override
@@ -417,7 +395,6 @@ class ButtonStyle with Diagnosticable {
       animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
-      splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
     );
   }
 
