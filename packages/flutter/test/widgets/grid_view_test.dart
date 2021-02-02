@@ -315,6 +315,30 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
+  testWidgets('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (WidgetTester tester) async {
+    const SliverGridDelegateWithMaxCrossAxisExtent delegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      childAspectRatio: 1e300,
+      maxCrossAxisExtent: 500.0,
+    );
+    final SliverGridLayout layout = delegate.getLayout(
+      const SliverConstraints(
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        userScrollDirection: ScrollDirection.forward,
+        scrollOffset: 100.0,
+        precedingScrollExtent: 0.0,
+        overlap: 0.0,
+        remainingPaintExtent: 0.0,
+        crossAxisExtent: 500,
+        crossAxisDirection: AxisDirection.right,
+        viewportMainAxisExtent: 100.0,
+        remainingCacheExtent: 0.0,
+        cacheOrigin: 0.0,
+      )
+    );
+    expect(layout.getMinChildIndexForScrollOffset(1000.0), 0.0);
+  });
+
   testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
