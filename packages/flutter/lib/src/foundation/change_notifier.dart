@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -94,9 +92,11 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
-  _ListenerEntry(this.listener);
-  final VoidCallback listener;
+class _ListenerEntry {
+  _ListenerEntry(this.callback);
+
+  final VoidCallback callback;
+  bool disposed = false;
 }
 
 /// A class that can be extended or mixed in that provides a change notification
@@ -109,11 +109,13 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier implements Listenable {
-  LinkedList<_ListenerEntry>? _listeners = LinkedList<_ListenerEntry>();
+  final List<_ListenerEntry> _listeners = <_ListenerEntry>[];
+  bool _disposed = false;
+  int _currentRemovedCount = 0;
 
   bool _debugAssertNotDisposed() {
     assert(() {
-      if (_listeners == null) {
+      if (_disposed) {
         throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
           'Once you have called dispose() on a $runtimeType, it can no longer be used.'
@@ -142,7 +144,7 @@ class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners {
     assert(_debugAssertNotDisposed());
-    return _listeners!.isNotEmpty;
+    return _listeners.length - _currentRemovedCount > 0;
   }
 
   /// Register a closure to be called when the object changes.
@@ -174,7 +176,7 @@ class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    _listeners!.add(_ListenerEntry(listener));
+    _listeners.add(_ListenerEntry(listener));
   }
 
   /// Remove a previously registered closure from the list of closures that are
@@ -193,11 +195,16 @@ class ChangeNotifier implements Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed());
-    for (final _ListenerEntry entry in _listeners!) {
-      if (entry.listener == listener) {
-        entry.unlink();
-        return;
+    bool removedListener = false;
+    for (final _ListenerEntry currentListener in _listeners) {
+      if (!removedListener && !currentListener.disposed && currentListener.callback == listener) {
+        currentListener.disposed = true;
+        removedListener = true;
+        continue;
       }
+    }
+    if (removedListener) {
+      _currentRemovedCount += 1;
     }
   }
 
@@ -210,7 +217,9 @@ class ChangeNotifier implements Listenable {
   @mustCallSuper
   void dispose() {
     assert(_debugAssertNotDisposed());
-    _listeners = null;
+    _disposed = true;
+    _currentRemovedCount = 0;
+    _listeners.clear();
   }
 
   /// Call all the registered listeners.
@@ -232,15 +241,19 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (_listeners.isEmpty)
       return;
 
-    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.from(_listeners!);
-
-    for (final _ListenerEntry entry in localListeners) {
+    final int currentLength = _listeners.length;
+    bool encounteredDisposed = false;
+    for (int i = 0; i < currentLength; i += 1) {
+      final _ListenerEntry entry = _listeners[i];
       try {
-        if (entry.list != null)
-          entry.listener();
+        if (entry.disposed) {
+          encounteredDisposed = true;
+          continue;
+        }
+        entry.callback();
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -256,6 +269,10 @@ class ChangeNotifier implements Listenable {
           },
         ));
       }
+    }
+    if (encounteredDisposed) {
+      _listeners.removeWhere((_ListenerEntry entry) => entry.disposed);
+      _currentRemovedCount = 0;
     }
   }
 }
