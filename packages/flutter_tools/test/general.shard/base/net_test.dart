@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,23 +14,15 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart' show MockStdio;
 
 void main() {
   BufferLogger testLogger;
 
   setUp(() {
-    testLogger = BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: MockStdio(),
-        platform: FakePlatform(stdoutSupportsAnsi: false),
-      ),
-      outputPreferences: OutputPreferences.test(),
-    );
+    testLogger = BufferLogger.test();
   });
 
   Net createNet(io.HttpClient client) {

@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "Uppdatera",
   "moreButtonTooltip": "Mer",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/åååå",
+  "dateHelpText": "åååå-mm-dd",
   "selectYearSemanticsLabel": "Välj år",
   "unspecifiedDate": "Datum",
   "unspecifiedDateRange": "Datumintervall",

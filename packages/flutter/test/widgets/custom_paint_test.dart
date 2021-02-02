@@ -29,7 +29,7 @@ class TestCustomPainterWithCustomSemanticsBuilder extends TestCustomPainter {
   @override
   SemanticsBuilderCallback get semanticsBuilder => (Size size) {
     const Key key = Key('0');
-    const Rect rect = Rect.fromLTRB(0, 0, 0, 0);
+    const Rect rect = Rect.zero;
     const SemanticsProperties semanticsProperties = SemanticsProperties();
     return <CustomPainterSemantics>[
       const CustomPainterSemantics(key: key, rect: rect, properties: semanticsProperties),
@@ -95,7 +95,7 @@ void main() {
     FlutterError getError() {
       late FlutterError error;
       try {
-        renderCustom.paint(paintingContext, const Offset(0, 0));
+        renderCustom.paint(paintingContext, Offset.zero);
       } on FlutterError catch (e) {
         error = e;
       }
@@ -208,7 +208,7 @@ void main() {
   });
 
   test('RenderCustomPaint does not return infinity for its intrinsics', () {
-    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size.square(double.infinity));
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: Size.infinite);
     expect(inner.getMinIntrinsicWidth(double.infinity), 0);
     expect(inner.getMaxIntrinsicWidth(double.infinity), 0);
     expect(inner.getMinIntrinsicHeight(double.infinity), 0);

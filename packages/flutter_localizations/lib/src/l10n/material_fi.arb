@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "Päivitys",
   "moreButtonTooltip": "Lisää",
   "dateSeparator": "/",
-  "dateHelpText": "kk/pp/vvvv",
+  "dateHelpText": "pp/kk/vvvv",
   "selectYearSemanticsLabel": "Valitse vuosi",
   "unspecifiedDate": "Päivämäärä",
   "unspecifiedDateRange": "Ajanjakso",

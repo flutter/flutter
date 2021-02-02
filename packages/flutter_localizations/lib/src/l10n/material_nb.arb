@@ -36,7 +36,7 @@
   "timePickerMinuteModeAnnouncement": "Angi minutter",
   "modalBarrierDismissLabel": "Avvis",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/åååå",
+  "dateHelpText": "dd.mm.åååå",
   "selectYearSemanticsLabel": "Velg året",
   "unspecifiedDate": "Dato",
   "unspecifiedDateRange": "Datoperiode",

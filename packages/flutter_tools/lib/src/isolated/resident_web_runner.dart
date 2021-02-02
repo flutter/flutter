@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
@@ -131,6 +133,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   @override
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
     String method, {
+    FlutterDevice device,
     Map<String, dynamic> params,
   }) async {
     final vmservice.Response response =
@@ -184,14 +187,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
       fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    if (!flutterNext) {
-      globals.printStatus(
-          "Warning: Flutter's support for web development is not stable yet and hasn't");
-      globals.printStatus('been thoroughly tested in production environments.');
-      globals.printStatus('For more information see https://flutter.dev/web');
-      globals.printStatus('');
-      globals.printStatus(message);
-    }
+    globals.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     if (device.device is! WebServerDevice) {
       globals.printStatus('For a more detailed help message, press "h". $quitMessage');
