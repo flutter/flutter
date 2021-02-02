@@ -193,6 +193,7 @@ void main() {
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
+      '     TextEditingShortcuts\n'
       '     UnmanagedRestorationScope\n'
       '     RestorationScope\n'
       '     UnmanagedRestorationScope\n'
