@@ -174,12 +174,18 @@ Hello!
 }
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
+  final FileSystem fileSystem = MemoryFileSystem.test();
+  final Logger logger = BufferLogger.test();
   return FlutterTesterDevices(
-    logger: BufferLogger.test(),
+    logger: logger,
     artifacts: Artifacts.test(),
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
-    config: Config.test(),
+    config: Config.test(
+      'test',
+      directory: fileSystem.currentDirectory,
+      logger: logger,
+    ),
     flutterVersion: MockFlutterVersion(),
   );
 }

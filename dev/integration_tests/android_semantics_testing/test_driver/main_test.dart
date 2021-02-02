@@ -409,14 +409,8 @@ void main() {
       });
 
       test('Popup Menu has correct Android semantics', () async {
-        final SerializableFinder button = find.descendant(
-          of: find.byValueKey(popupButtonKeyValue),
-          matching: find.byType('Semantics'),
-          firstMatchOnly: true,
-        );
-
         expect(
-          await getSemantics(button),
+          await getSemantics(find.byValueKey(popupButtonKeyValue)),
           hasAndroidSemantics(
             className: AndroidClassName.button,
             isChecked: false,
@@ -438,21 +432,20 @@ void main() {
 
           for (final String item in popupItems) {
             expect(
-              await getSemantics(find.byValueKey('$popupKeyValue.$item')),
-              hasAndroidSemantics(
-                className: AndroidClassName.button,
-                isChecked: false,
-                isCheckable: false,
-                isEnabled: true,
-                isFocusable: true,
-                actions: <AndroidSemanticsAction>[
-                  if (item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                  if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
-                  AndroidSemanticsAction.click,
-                ],
-              ),
-              reason: "Popup $item doesn't have the right semantics",
-            );
+                await getSemantics(find.byValueKey('$popupKeyValue.$item')),
+                hasAndroidSemantics(
+                  className: AndroidClassName.button,
+                  isChecked: false,
+                  isCheckable: false,
+                  isEnabled: true,
+                  isFocusable: true,
+                  actions: <AndroidSemanticsAction>[
+                    if (item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
+                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
+                    AndroidSemanticsAction.click,
+                  ],
+                ),
+                reason: "Popup $item doesn't have the right semantics");
           }
           await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
 

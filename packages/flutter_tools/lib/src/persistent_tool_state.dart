@@ -76,7 +76,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
     @required Directory directory,
     @required Logger logger,
   }) : _config = Config.test(
-      name: _kFileName,
+      _kFileName,
       directory: directory,
       logger: logger,
     );

@@ -504,7 +504,7 @@ abstract class FlutterDriver {
   /// It's expected that the application has registered a [DataHandler]
   /// callback in [enableFlutterDriverExtension] that can successfully handle
   /// these requests.
-  Future<String> requestData(String? message, { Duration? timeout }) async {
+  Future<String> requestData(String message, { Duration? timeout }) async {
     return RequestDataResult.fromJson(await sendCommand(RequestData(message, timeout: timeout))).message;
   }
 

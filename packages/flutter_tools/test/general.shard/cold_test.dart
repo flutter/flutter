@@ -42,9 +42,7 @@ void main() {
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
-    ).attach(
-      enableDevTools: false,
-    );
+    ).attach();
     expect(exitCode, 2);
   });
 
@@ -92,9 +90,7 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).run(
-        enableDevTools: false,
-      );
+      ).run();
 
       expect(result, 1);
       verify(mockFlutterDevice.runCold(

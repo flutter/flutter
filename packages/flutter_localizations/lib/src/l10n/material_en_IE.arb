@@ -56,8 +56,6 @@
   "nextPageTooltip": "Next page",
   "openAppDrawerTooltip": "Open navigation menu",
   "previousPageTooltip": "Previous page",
-  "firstPageTooltip": "First page",
-  "lastPageTooltip": "Last page",
   "cancelButtonLabel": "CANCEL",
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "selectedRowCountTitleOne": "1 item selected",
