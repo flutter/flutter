@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:file/file.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -77,25 +80,41 @@ void main() {
     await _flutterRun.run(
       startPaused: true,
       withDebugger: true,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9105'],
     );
     await _flutterRun.resume();
-    await pollForServiceExtensionValue(
+    await pollForServiceExtensionValue<String>(
       testDriver: _flutterRun,
       extension: 'ext.flutter.activeDevToolsServerAddress',
       continuePollingValue: '',
-      expectedValue: 'http://127.0.0.1:9100',
+      matches: equals('http://127.0.0.1:9105'),
     );
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.connectedVmServiceUri',
+      continuePollingValue: '',
+      matches: isNotEmpty,
+    );
+
+    final Response response = await _flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
+    final String vmServiceUri = response.json['value'] as String;
 
     // Attach with a different DevTools server address.
     await _flutterAttach.attach(
       _flutterRun.vmServicePort,
       additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
     );
-    await pollForServiceExtensionValue(
+    await pollForServiceExtensionValue<String>(
       testDriver: _flutterAttach,
       extension: 'ext.flutter.activeDevToolsServerAddress',
       continuePollingValue: '',
-      expectedValue: 'http://127.0.0.1:9110',
+      matches: equals('http://127.0.0.1:9110'),
     );
-  });
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutterRun,
+      extension: 'ext.flutter.connectedVmServiceUri',
+      continuePollingValue: '',
+      matches: equals(vmServiceUri),
+    );
+  }, timeout: const Timeout.factor(4));
 }

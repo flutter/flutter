@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
@@ -27,7 +26,6 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'snack_bar_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // late TabController tabController;
@@ -67,6 +65,12 @@ enum _ScaffoldSlot {
 /// To display a snack bar, obtain the [ScaffoldMessengerState] for the current
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
+///
+/// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
+/// ScaffoldMessenger will only present a [SnackBar] to the root Scaffold of
+/// the subtree of Scaffolds. In order to show SnackBars in the inner, nested
+/// Scaffolds, set a new scope for your SnackBars by instantiating a new
+/// ScaffoldMessenger in between the levels of nesting.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
@@ -377,8 +381,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   void _updateScaffolds() {
     for (final ScaffoldState scaffold in _scaffolds) {
-      scaffold._updateSnackBar();
+      if (_isRoot(scaffold))
+        scaffold._updateSnackBar();
     }
+  }
+
+  // Nested Scaffolds are handled by the ScaffoldMessenger by only presenting a
+  // SnackBar in the root Scaffold of the nested set.
+  bool _isRoot(ScaffoldState scaffold) {
+    final ScaffoldState? parent = scaffold.context.findAncestorStateOfType<ScaffoldState>();
+    return parent == null || !_scaffolds.contains(parent);
   }
 
   /// Removes the current [SnackBar] (if any) immediately from registered
@@ -2620,6 +2632,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    AnimationController? transitionAnimationController,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2634,7 +2647,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = BottomSheet.createAnimationController(this)..forward();
+    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
@@ -2781,8 +2794,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   @override
   void didChangeDependencies() {
-    // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
-    // currently available for managing SnackBars.
+    // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
+    // are currently available for managing SnackBars.
     final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&

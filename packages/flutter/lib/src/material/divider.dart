@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/painting.dart';
 
 import 'divider_theme.dart';
 import 'theme.dart';

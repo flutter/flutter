@@ -882,35 +882,24 @@ class Actions extends StatefulWidget {
   /// Invokes the action associated with the given [Intent] using the
   /// [Actions] widget that most tightly encloses the given [BuildContext].
   ///
-  /// The `context`, `intent` and `nullOk` arguments must not be null.
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method.
+  ///
+  /// The `context` and `intent` arguments must not be null.
   ///
   /// If the given `intent` doesn't map to an action, or doesn't map to one that
   /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
   /// then it will look to the next ancestor [Actions] widget in the hierarchy
   /// until it reaches the root.
   ///
-  /// In debug mode, if `nullOk` is false, this method will throw an exception
-  /// if no ambient [Actions] widget is found, or if the given `intent` doesn't
-  /// map to an action in any of the [Actions.actions] maps that are found. In
-  /// release mode, this method will return null if no matching enabled action
-  /// is found, regardless of the setting of `nullOk`.
-  ///
-  /// Setting `nullOk` to true indicates that if no ambient [Actions] widget is
-  /// found, then in debug mode, this method should return null instead of
-  /// throwing an exception.
-  ///
-  /// This method returns the result of invoking the action's [Action.invoke]
-  /// method. If no action mapping was found for the specified intent (and
-  /// `nullOk` is true), or if the actions that were found were disabled, or the
-  /// action itself returns null from [Action.invoke], then this method returns
-  /// null.
+  /// This method will throw an exception if no ambient [Actions] widget is
+  /// found, or if the given `intent` doesn't map to an enabled action in any of
+  /// the [Actions.actions] maps that are found.
   static Object? invoke<T extends Intent>(
     BuildContext context,
-    T intent, {
-    bool nullOk = false,
-  }) {
+    T intent,
+  ) {
     assert(intent != null);
-    assert(nullOk != null);
     assert(context != null);
     Action<T>? action;
     InheritedElement? actionElement;
@@ -929,7 +918,7 @@ class Actions extends StatefulWidget {
     });
 
     assert(() {
-      if (!nullOk && actionElement == null) {
+      if (actionElement == null) {
         throw FlutterError('Unable to find an action for an Intent with type '
             '${intent.runtimeType} in an $Actions widget in the given context.\n'
             '$Actions.invoke() was unable to find an $Actions widget that '
@@ -943,6 +932,50 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
+    if (actionElement == null || action == null) {
+      return null;
+    }
+    // Invoke the action we found using the relevant dispatcher from the Actions
+    // Element we found.
+    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+  }
+
+  /// Invokes the action associated with the given [Intent] using the
+  /// [Actions] widget that most tightly encloses the given [BuildContext].
+  ///
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method. If no action mapping was found for the specified intent, or if the
+  /// actions that were found were disabled, or the action itself returns null
+  /// from [Action.invoke], then this method returns null.
+  ///
+  /// The `context` and `intent` arguments must not be null.
+  ///
+  /// If the given `intent` doesn't map to an action, or doesn't map to one that
+  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
+  /// then it will look to the next ancestor [Actions] widget in the hierarchy
+  /// until it reaches the root.
+  static Object? maybeInvoke<T extends Intent>(
+    BuildContext context,
+    T intent,
+  ) {
+    assert(intent != null);
+    assert(context != null);
+    Action<T>? action;
+    InheritedElement? actionElement;
+
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      if (result != null) {
+        actionElement = element;
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
+      }
+      return false;
+    });
+
     if (actionElement == null || action == null) {
       return null;
     }

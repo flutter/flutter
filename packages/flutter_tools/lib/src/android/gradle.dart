@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -306,15 +308,8 @@ Future<void> buildGradleApp({
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  assert(buildInfo.trackWidgetCreation != null);
-  command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
+  command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
 
-  if (buildInfo.extraFrontEndOptions != null) {
-    command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
-  }
-  if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
-  }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   }
@@ -323,9 +318,6 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
-  }
-  if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
-    command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
@@ -336,24 +328,6 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
-  }
-  if (androidBuildInfo.buildInfo.splitDebugInfoPath != null) {
-    command.add('-Psplit-debug-info=${androidBuildInfo.buildInfo.splitDebugInfoPath}');
-  }
-  if (androidBuildInfo.buildInfo.treeShakeIcons) {
-    command.add('-Ptree-shake-icons=true');
-  }
-  if (androidBuildInfo.buildInfo.dartObfuscation) {
-    command.add('-Pdart-obfuscation=true');
-  }
-  if (androidBuildInfo.buildInfo.bundleSkSLPath != null) {
-    command.add('-Pbundle-sksl-path=${androidBuildInfo.buildInfo.bundleSkSLPath}');
-  }
-  if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
-    command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
-  }
-  if (buildInfo.codeSizeDirectory != null) {
-    command.add('-Pcode-size-directory=${buildInfo.codeSizeDirectory}');
   }
   command.add(assembleTask);
 
@@ -609,18 +583,12 @@ Future<void> buildGradleAar({
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.splitDebugInfoPath != null) {
-    command.add('-Psplit-debug-info=${buildInfo.splitDebugInfoPath}');
-  }
-  if (buildInfo.treeShakeIcons) {
-    command.add('-Pfont-subset=true');
-  }
-  if (buildInfo.dartObfuscation) {
-    if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
-      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as un-obfuscated.');
-    } else {
-      command.add('-Pdart-obfuscation=true');
-    }
+  command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+  if (buildInfo.dartObfuscation && buildInfo.mode !=  BuildMode.release) {
+    globals.printStatus(
+      'Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)}'
+      ' mode, building as un-obfuscated.',
+    );
   }
 
   if (globals.artifacts is LocalEngineArtifacts) {

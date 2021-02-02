@@ -633,7 +633,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
@@ -651,7 +651,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
@@ -670,7 +670,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
@@ -689,7 +689,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(64.0, 48.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with extendBody', (WidgetTester tester) async {

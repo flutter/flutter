@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -16,6 +18,7 @@ import 'package:fake_async/fake_async.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
+import '../src/fakes.dart';
 import '../src/mocks.dart';
 
 void main() {

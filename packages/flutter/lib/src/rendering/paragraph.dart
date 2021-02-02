@@ -637,7 +637,7 @@ class RenderParagraph extends RenderBox
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
       ));
-      return const Size(0, 0);
+      return Size.zero;
     }
     _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);

@@ -4,11 +4,9 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:characters/characters.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -1290,7 +1288,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       semanticsMaxValueLength = null;
     }
 
-    return MouseRegion(
+    child = MouseRegion(
       cursor: effectiveMouseCursor,
       onEnter: (PointerEnterEvent event) => _handleHover(true),
       onExit: (PointerExitEvent event) => _handleHover(false),
@@ -1317,5 +1315,13 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
       ),
     );
+
+    if (kIsWeb) {
+      return Shortcuts(
+        shortcuts: scrollShortcutOverrides,
+        child: child,
+      );
+    }
+    return child;
   }
 }

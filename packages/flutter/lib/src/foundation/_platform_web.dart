@@ -10,13 +10,16 @@ platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference
   // the window, but that won't be available until we fix the platforms
   // configuration for Flutter.
-  platform.TargetPlatform result = _browserPlatform();
-  if (platform.debugDefaultTargetPlatformOverride != null)
-    result = platform.debugDefaultTargetPlatformOverride!;
-  return result;
+  return platform.debugDefaultTargetPlatformOverride ?? _browserPlatform;
 }
 
-platform.TargetPlatform _browserPlatform() {
+// Lazy-initialized and forever cached current browser platform.
+//
+// Computing the platform is expensive as it uses `window.matchMedia`, which
+// needs to parse and evaluate a CSS selector. On some devices this takes up to
+// 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
+// frame this value should be cached.
+final platform.TargetPlatform _browserPlatform = () {
   final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
@@ -41,4 +44,4 @@ platform.TargetPlatform _browserPlatform() {
     return platform.TargetPlatform.linux;
   }
   return platform.TargetPlatform.android;
-}
+}();
