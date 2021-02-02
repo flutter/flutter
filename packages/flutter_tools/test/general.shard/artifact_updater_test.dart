@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 final Platform testPlatform = FakePlatform(environment: const <String, String>{});
 
@@ -171,7 +171,7 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = StdoutLogger(
       terminal: Terminal.test(supportsColor: true),
-      stdio: MockStdio(),
+      stdio: FakeStdio(),
       outputPreferences: OutputPreferences.test(),
     );
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(

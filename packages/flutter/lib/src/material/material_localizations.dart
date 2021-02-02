@@ -102,6 +102,12 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
 
+  /// The tooltip for the [PaginatedDataTable]'s "first page" button.
+  String get firstPageTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "last page" button.
+  String get lastPageTooltip;
+
   /// The tooltip for the [PaginatedDataTable]'s "next page" button.
   String get nextPageTooltip;
 
@@ -887,6 +893,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get previousPageTooltip => 'Previous page';
+
+  @override
+  String get firstPageTooltip => 'First page';
+
+  @override
+  String get lastPageTooltip => 'Last page';
 
   @override
   String get showMenuTooltip => 'Show menu';
