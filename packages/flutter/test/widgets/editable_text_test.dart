@@ -5792,7 +5792,7 @@ void main() {
       await tester.pump();
 
       // Nothing called when only the remote changes.
-      expect(log, isEmpty);
+      expect(log.length, 0);
 
       controller.clear();
 

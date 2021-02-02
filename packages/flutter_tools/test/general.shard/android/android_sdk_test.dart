@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -28,7 +29,11 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     processManager = MockProcessManager();
-    config = Config.test();
+    config = Config.test(
+      'test',
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
   });
 
   group('android_sdk AndroidSdk', () {

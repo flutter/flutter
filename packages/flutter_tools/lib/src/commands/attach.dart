@@ -103,7 +103,7 @@ class AttachCommand extends FlutterCommand {
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
-    addDevToolsOptions(verboseHelp: verboseHelp);
+    addDevToolsOptions();
     usesDeviceTimeoutOption();
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -207,8 +207,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
         Artifacts: () => overrideArtifacts,
-      },
-    );
+    });
 
     return FlutterCommandResult.success();
   }
@@ -328,7 +327,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
                 allowExistingDdsInstance: true,
-                enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
               );
             },
             device,
@@ -367,7 +365,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         result = await runner.attach(
           appStartedCompleter: onAppStart,
           allowExistingDdsInstance: true,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);
