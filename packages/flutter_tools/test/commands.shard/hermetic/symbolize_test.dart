@@ -96,7 +96,7 @@ void main() {
     command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
-      dwarfSymbolizationService: FakeDwarfSymbolizationService(),
+      dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
     );
 
     fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
@@ -110,7 +110,7 @@ void main() {
   });
 }
 
-class FakeDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
+class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
   @override
   Future<void> decode({
     @required Stream<List<int>> input,
