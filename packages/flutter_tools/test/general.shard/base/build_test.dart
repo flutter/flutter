@@ -687,7 +687,7 @@ void main() {
         bitcode: false,
         splitDebugInfo: null,
         dartObfuscation: false,
-        extraGenSnapshotOptions: const ['--no-strip'],
+        extraGenSnapshotOptions: const <String>['--no-strip'],
       );
 
       expect(genSnapshotExitCode, 0);
