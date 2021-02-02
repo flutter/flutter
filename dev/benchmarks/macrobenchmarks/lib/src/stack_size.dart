@@ -44,10 +44,12 @@ const int kExitCodeSuccess = 0;
 
 final GetStackPointerCallback getStackPointer = () {
   // Makes sure we are running on an Android arm64 device.
+  if (!io.Platform.isAndroid)
+    throw 'This benchmark test can only be run on Android arm64 devices.';
   final io.ProcessResult result = io.Process.runSync('getprop', <String>['ro.product.cpu.abi']);
   if (result.exitCode != 0)
     throw 'Failed to retrieve CPU information.';
-  if (!io.Platform.isAndroid || !result.stdout.toString().contains('arm64'))
+  if (!result.stdout.toString().contains('arm64'))
     throw 'This benchmark test can only be run on Android arm64 devices.';
 
   // Creates a block of memory to store the assembly code.
