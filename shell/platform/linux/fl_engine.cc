@@ -177,6 +177,33 @@ static void flutter_source_finalize(GSource* source) {
   }
 }
 
+// Called when engine needs a backing store for a specific #FlutterLayer.
+static bool compositor_create_backing_store_callback(
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out,
+    void* user_data) {
+  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
+  return fl_renderer_create_backing_store(FL_RENDERER(user_data), config,
+                                          backing_store_out);
+}
+
+// Called when the backing store is to be released.
+static bool compositor_collect_backing_store_callback(
+    const FlutterBackingStore* renderer,
+    void* user_data) {
+  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
+  return fl_renderer_collect_backing_store(FL_RENDERER(user_data), renderer);
+}
+
+// Called when embedder should composite contents of each layer onto the screen.
+static bool compositor_present_layers_callback(const FlutterLayer** layers,
+                                               size_t layers_count,
+                                               void* user_data) {
+  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
+  return fl_renderer_present_layers(FL_RENDERER(user_data), layers,
+                                    layers_count);
+}
+
 // Table of functions for Flutter GLib main loop integration.
 static GSourceFuncs flutter_source_funcs = {
     nullptr,                  // prepare
@@ -404,6 +431,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
+  custom_task_runners.render_task_runner = &platform_task_runner;
 
   g_autoptr(GPtrArray) command_line_args =
       fl_dart_project_get_switches(self->project);
@@ -430,6 +458,16 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
+
+  FlutterCompositor compositor = {};
+  compositor.struct_size = sizeof(FlutterCompositor);
+  compositor.user_data = self->renderer;
+  compositor.create_backing_store_callback =
+      compositor_create_backing_store_callback;
+  compositor.collect_backing_store_callback =
+      compositor_collect_backing_store_callback;
+  compositor.present_layers_callback = compositor_present_layers_callback;
+  args.compositor = &compositor;
 
   if (self->embedder_api.RunsAOTCompiledDartCode()) {
     FlutterEngineAOTDataSource source = {};
