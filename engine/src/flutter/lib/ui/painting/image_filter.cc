@@ -60,9 +60,10 @@ void ImageFilter::initBlur(double sigma_x,
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,
                              int filterQuality) {
-  filter_ = SkImageFilters::MatrixTransform(
-      ToSkMatrix(matrix4), static_cast<SkFilterQuality>(filterQuality),
-      nullptr);
+  auto sampling = SkSamplingOptions(static_cast<SkFilterQuality>(filterQuality),
+                                    SkSamplingOptions::kMedium_asMipmapLinear);
+  filter_ =
+      SkImageFilters::MatrixTransform(ToSkMatrix(matrix4), sampling, nullptr);
 }
 
 void ImageFilter::initColorFilter(ColorFilter* colorFilter) {
