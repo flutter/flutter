@@ -44,8 +44,9 @@ final GetStackPointerCallback getStackPointer = () {
   if (region == ffi.nullptr) {
     throw 'Failed to acquire memory for the test.';
   }
-  // Writes the assembly code into the memory block. This assembly code returns
-  // the memory address of the stack pointer.
+  // Writes the assembly code into the memory block. This assembly assuming we
+  // are running on arm64 devices, and it returns the memory address of the
+  // stack pointer.
   region.cast<ffi.Uint8>().asTypedList(4096).setAll(
       0,
       <int>[
