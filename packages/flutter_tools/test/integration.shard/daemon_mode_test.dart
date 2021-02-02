@@ -6,8 +6,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' hide Directory, File;
+import 'dart:io';
 
+import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
