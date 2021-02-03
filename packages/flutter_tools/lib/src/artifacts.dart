@@ -5,11 +5,11 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';

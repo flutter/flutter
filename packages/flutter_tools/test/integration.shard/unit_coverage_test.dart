@@ -6,7 +6,6 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -54,11 +53,7 @@ end_of_record
 
     final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
     final String coverageScript = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'tool', 'unit_coverage.dart');
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
-      dartScript,
-      coverageScript,
-      coverageFile.path,
-    ]);
+    final ProcessResult result = await Process.run(dartScript, <String>[coverageScript, coverageFile.path]);
 
     // May contain other output if building flutter tool.
     expect(result.stdout.toString().split('\n'), containsAll(<Matcher>[

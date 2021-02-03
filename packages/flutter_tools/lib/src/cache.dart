@@ -10,7 +10,6 @@ import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';

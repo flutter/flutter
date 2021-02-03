@@ -6,8 +6,6 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -263,7 +261,10 @@ Future<T> runInContext<T>(
       ),
       ProcessInfo: () => ProcessInfo(),
       ProcessManager: () => ErrorHandlingProcessManager(
-        delegate: const LocalProcessManager(),
+        delegate: LocalProcessManager(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        ),
         platform: globals.platform,
       ),
       ProcessUtils: () => ProcessUtils(
