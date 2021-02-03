@@ -65,6 +65,6 @@ class TextEditingAction<T extends Intent> extends Action<T> {
 
   @override
   bool isEnabled(Intent intent) {
-    return _editableTextState != null;
+    return !kIsWeb && _editableTextState != null;
   }
 }
