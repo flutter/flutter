@@ -66,7 +66,7 @@ abstract class Result {
 
   /// An empty responds that does not include any result data.
   ///
-  /// Consider using object as a result for [Command]s that do not return
+  /// Consider using this object as a result for [Command]s that do not return
   /// any data.
   static const Result empty = _EmptyResult();
 
