@@ -599,7 +599,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
 // Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection);
+  _PopupMenuRouteLayout(this.position, this.itemSizes, this.selectedItemIndex, this.textDirection, this.avoidBounds);
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
@@ -614,6 +614,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // Whether to prefer going to the left or to the right.
   final TextDirection textDirection;
+
+  // List of rectangles that we should avoid overlapping. Unusable screen area.
+  final List<Rect> avoidBounds;
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -664,19 +667,69 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           break;
       }
     }
+    final wantedPosition = Offset(x,y);
+    final correctedPositions =  _screens(size).map((e) => _fitInsideScreen(e, childSize, wantedPosition));
+    Offset closest = correctedPositions.first;
+    correctedPositions.forEach((Offset corrected) {
+      if ((corrected - wantedPosition).distance < (closest - wantedPosition).distance) {
+        closest = corrected;
+      }
+    });
+    return closest;
+  }
 
+  Offset _fitInsideScreen(Rect screen, Size childSize, Offset wantedPosition){
+    double x = wantedPosition.dx;
+    double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
-    if (x < _kMenuScreenPadding)
-      x = _kMenuScreenPadding;
-    else if (x + childSize.width > size.width - _kMenuScreenPadding)
-      x = size.width - childSize.width - _kMenuScreenPadding;
-    if (y < _kMenuScreenPadding)
+    if (x < screen.left + _kMenuScreenPadding)
+      x = screen.left + _kMenuScreenPadding;
+    else if (x + childSize.width > screen.right - _kMenuScreenPadding)
+      x = screen.right - childSize.width - _kMenuScreenPadding;
+    if (y < screen.top + _kMenuScreenPadding)
       y = _kMenuScreenPadding;
-    else if (y + childSize.height > size.height - _kMenuScreenPadding)
-      y = size.height - childSize.height - _kMenuScreenPadding;
-    return Offset(x, y);
+    else if (y + childSize.height > screen.bottom - _kMenuScreenPadding)
+      y = screen.bottom - childSize.height - _kMenuScreenPadding;
+
+    return Offset(x,y);
   }
+
+  /// Takes [avoidBounds] and the screen size and returns the areas of the screen
+  /// which are not split by any display feature.
+  /// If the device has a hinge, this returns the 2 screens
+  List<Rect> _screens(Size size) {
+    Iterable<Rect> areas = [Rect.fromLTWH(0, 0, size.width, size.height)];
+    avoidBounds.forEach((bounds) {
+      areas = areas.expand((area) sync* {
+        if (area.top >= bounds.top
+            && area.bottom <= bounds.bottom) {
+          // Display feature splits the area vertically
+          if (area.left < bounds.left) {
+            // There is a smaller area, left of the display feature
+            yield Rect.fromLTWH(area.left, area.top, bounds.left - area.left, area.height);
+          }
+          if (area.right > bounds.right) {
+            // There is a smaller area, right of the display feature
+            yield Rect.fromLTWH(bounds.right, area.top, area.right - bounds.right, area.height);
+          }
+        } else if (area.left >= bounds.left
+            && area.right <= bounds.right) {
+          // Display feature splits the area horizontally
+          if (area.top < bounds.top) {
+            // There is a smaller area, above the display feature
+            yield Rect.fromLTWH(area.left, area.top, area.width, bounds.top - area.top);
+          }
+          if (area.bottom > bounds.bottom) {
+            // There is a smaller area, below the display feature
+            yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
+          }
+        }
+      });
+    });
+    return areas.toList();
+  }
+
 
   @override
   bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
@@ -688,7 +741,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     return position != oldDelegate.position
         || selectedItemIndex != oldDelegate.selectedItemIndex
         || textDirection != oldDelegate.textDirection
-        || !listEquals(itemSizes, oldDelegate.itemSizes);
+        || !listEquals(itemSizes, oldDelegate.itemSizes)
+        || !listEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 }
 
@@ -758,12 +812,29 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
+              _displayFeaturesInNavigator(context),
             ),
             child: capturedThemes.wrap(menu),
           );
         },
       ),
     );
+  }
+
+  List<Rect> _displayFeaturesInNavigator(BuildContext context) {
+    Rect? rootRect;
+    final renderObject = navigator?.context.findRenderObject();
+    var translation = renderObject?.getTransformTo(null)?.getTranslation();
+    if (translation != null) {
+      rootRect = renderObject?.paintBounds?.shift(Offset(translation.x, translation.y));
+    }
+    if (rootRect == null) {
+      return MediaQuery.of(context).displayFeatures.map((e) => e.bounds).toList();
+    } else {
+      return MediaQuery.of(context).displayFeatures
+          .where((e) => e.bounds.overlaps(rootRect!))
+          .map((e) => e.bounds.shift(-rootRect!.topLeft)).toList();
+    }
   }
 }
 

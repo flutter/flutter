@@ -992,7 +992,9 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return CupertinoUserInterfaceLevel(
       data: CupertinoUserInterfaceLevelData.elevated,
-      child: Builder(builder: builder),
+      child: HingeAvoidingModalWrapper(
+        child: Builder(builder: builder),
+      ),
     );
   }
 

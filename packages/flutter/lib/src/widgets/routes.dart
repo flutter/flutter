@@ -22,6 +22,7 @@ import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
 import 'transitions.dart';
+import 'media_query.dart';
 
 // Examples can assume:
 // dynamic routeObserver;
@@ -1759,7 +1760,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return Semantics(
-      child: _pageBuilder(context, animation, secondaryAnimation),
+      child: HingeAvoidingModalWrapper(
+        child: _pageBuilder(context, animation, secondaryAnimation),
+      ),
       scopesRoute: true,
       explicitChildNodes: true,
     );
@@ -1778,6 +1781,76 @@ class _DialogRoute<T> extends PopupRoute<T> {
     return _transitionBuilder!(context, animation, secondaryAnimation, child);
   }
 }
+
+class HingeAvoidingModalWrapper extends StatelessWidget {
+  final Widget child;
+
+  HingeAvoidingModalWrapper({required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    final safeArea = _safeAreasInNavigator(context).first;
+
+    return Stack(
+      children: [
+        Positioned.fromRect(rect: safeArea, child: child),
+      ],
+    );
+  }
+
+  List<Rect> _safeAreasInNavigator(BuildContext context) {
+    final renderObject = Overlay.of(context)?.context.findRenderObject(); //navigatorRenderObject;
+    Rect? navigatorBounds;
+    var translation = renderObject?.getTransformTo(null)?.getTranslation();
+    if (translation != null) {
+      navigatorBounds = renderObject?.paintBounds?.shift(Offset(translation.x, translation.y));
+    }
+    List<Rect> avoidBounds;
+    if (navigatorBounds == null) {
+      final screenSize = MediaQuery.of(context).size;
+      navigatorBounds = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
+      avoidBounds = MediaQuery.of(context).displayFeatures.map((e) => e.bounds).toList();
+    } else {
+      avoidBounds = MediaQuery.of(context).displayFeatures
+          .where((e) => e.bounds.overlaps(navigatorBounds!))
+          .map((e) => e.bounds.shift(-navigatorBounds!.topLeft)).toList();
+    }
+    return _safeAreas(Rect.fromLTWH(0, 0, navigatorBounds.width, navigatorBounds.height), avoidBounds);
+  }
+
+  List<Rect> _safeAreas(Rect screen, List<Rect> avoidBounds) {
+    Iterable<Rect> areas = [screen];
+    avoidBounds.forEach((bounds) {
+      areas = areas.expand((area) sync* {
+        if (area.top >= bounds.top
+            && area.bottom <= bounds.bottom) {
+          // Display feature splits the area vertically
+          if (area.left < bounds.left) {
+            // There is a smaller area, left of the display feature
+            yield Rect.fromLTWH(area.left, area.top, bounds.left - area.left, area.height);
+          }
+          if (area.right > bounds.right) {
+            // There is a smaller area, right of the display feature
+            yield Rect.fromLTWH(bounds.right, area.top, area.right - bounds.right, area.height);
+          }
+        } else if (area.left >= bounds.left
+            && area.right <= bounds.right) {
+          // Display feature splits the area horizontally
+          if (area.top < bounds.top) {
+            // There is a smaller area, above the display feature
+            yield Rect.fromLTWH(area.left, area.top, area.width, bounds.top - area.top);
+          }
+          if (area.bottom > bounds.bottom) {
+            // There is a smaller area, below the display feature
+            yield Rect.fromLTWH(area.left, bounds.bottom, area.width, area.bottom - bounds.bottom);
+          }
+        }
+      });
+    });
+    return areas.toList();
+  }
+}
+
 
 /// Displays a dialog above the current contents of the app.
 ///

@@ -475,19 +475,21 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     final Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          return _ModalBottomSheet<T>(
-            route: this,
-            backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
-            elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            isScrollControlled: isScrollControlled,
-            enableDrag: enableDrag,
-          );
-        },
+      child: HingeAvoidingModalWrapper(
+        child: Builder(
+          builder: (BuildContext context) {
+            final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+            return _ModalBottomSheet<T>(
+              route: this,
+              backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
+              elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+              shape: shape,
+              clipBehavior: clipBehavior,
+              isScrollControlled: isScrollControlled,
+              enableDrag: enableDrag,
+            );
+          },
+        ),
       ),
     );
     return capturedThemes.wrap(bottomSheet);

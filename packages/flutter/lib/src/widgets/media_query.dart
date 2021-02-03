@@ -103,6 +103,7 @@ class MediaQueryData {
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
+    this.displayFeatures = const <ui.DisplayFeature>[],
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -117,7 +118,8 @@ class MediaQueryData {
        assert(highContrast != null),
        assert(disableAnimations != null),
        assert(boldText != null),
-       assert(navigationMode != null);
+       assert(navigationMode != null),
+       assert(displayFeatures != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -141,7 +143,9 @@ class MediaQueryData {
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional;
+      navigationMode = NavigationMode.traditional,
+      displayFeatures = window.displayFeatures.map(
+              (feature) => feature.withDevicePixelRatio(window.devicePixelRatio)).toList();
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -364,6 +368,30 @@ class MediaQueryData {
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
 
+  /// Areas of the display that are obstructed by hardware features.
+  ///
+  /// List of rectangle bounds, which the application can use to guide layout.
+  /// These areas may be obscured or not have touch capabilities. Each feature
+  /// has a type, which can be used to determine behaviour.
+  ///
+  /// For example, a hinge feature can be used to separate the layout into 2
+  /// logical areas or panels in the application.
+  final List<ui.DisplayFeature> displayFeatures;
+
+
+  /// Area of the display that is obstructed by the hinge.
+  ///
+  /// A hinge is the space between 2 physical displays. The size of the screen
+  /// in this case contains both screens and the area between them. The hinge
+  /// area can be used to separate the layout into 2 logical areas or panels in
+  /// the application.
+  ui.DisplayFeature? get hinge {
+    for (ui.DisplayFeature e in displayFeatures) {
+      if (e.type == ui.DisplayFeatureType.hinge) return e;
+    }
+    return null;
+  }
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -388,6 +416,7 @@ class MediaQueryData {
     bool? accessibleNavigation,
     bool? boldText,
     NavigationMode? navigationMode,
+    List<ui.DisplayFeature>? displayFeatures,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -405,6 +434,7 @@ class MediaQueryData {
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
       navigationMode: navigationMode ?? this.navigationMode,
+      displayFeatures: displayFeatures ?? this.displayFeatures,
     );
   }
 
@@ -455,6 +485,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -503,6 +534,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -551,6 +583,7 @@ class MediaQueryData {
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
+      displayFeatures: displayFeatures,
     );
   }
 
@@ -572,7 +605,8 @@ class MediaQueryData {
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
         && other.boldText == boldText
-        && other.navigationMode == navigationMode;
+        && other.navigationMode == navigationMode
+        && other.displayFeatures == displayFeatures;
   }
 
   @override
@@ -592,6 +626,7 @@ class MediaQueryData {
       accessibleNavigation,
       boldText,
       navigationMode,
+      displayFeatures,
     );
   }
 
@@ -612,6 +647,7 @@ class MediaQueryData {
       'invertColors: $invertColors',
       'boldText: $boldText',
       'navigationMode: ${describeEnum(navigationMode)}',
+      'displayFeatures: $displayFeatures',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
