@@ -822,6 +822,8 @@ class LocalProcessManager implements ProcessManager {
       includeParentEnvironment: includeParentEnvironment,
       stdoutEncoding: systemEncoding,
       stderrEncoding: systemEncoding,
+      workingDirectory: workingDirectory,
+      runInShell: runInShell,
     );
   }
 
@@ -845,6 +847,8 @@ class LocalProcessManager implements ProcessManager {
       includeParentEnvironment: includeParentEnvironment,
       stdoutEncoding: systemEncoding,
       stderrEncoding: systemEncoding,
+      workingDirectory: workingDirectory,
+      runInShell: runInShell,
     );
   }
 
