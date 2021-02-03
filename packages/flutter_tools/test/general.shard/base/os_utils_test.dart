@@ -8,10 +8,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('OperatingSystemUtils', () {
@@ -33,7 +33,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
-        processManager: FakeProcessManager.any(),
+        processManager: const LocalProcessManager(),
       );
       final File file = fileSystem.file(fileSystem.path.join(tempDir.path, 'foo.script'));
       file.writeAsStringSync('hello world');

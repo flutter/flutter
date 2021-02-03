@@ -672,10 +672,7 @@ void main() {
 
   test('skipCommandLookup invokes Process calls directly', () async {
     final ErrorHandlingProcessManager processManager = ErrorHandlingProcessManager(
-      delegate: LocalProcessManager(
-        platform: windowsPlatform,
-        fileSystem: MemoryFileSystem.test(),
-      ),
+      delegate: const LocalProcessManager(),
       platform: windowsPlatform,
     );
 
