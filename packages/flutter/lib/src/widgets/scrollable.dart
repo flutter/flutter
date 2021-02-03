@@ -91,11 +91,13 @@ class Scrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
+    this.autoScrollbar = true,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
        assert(semanticChildCount == null || semanticChildCount >= 0),
+       assert(autoScrollbar != null),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -247,6 +249,17 @@ class Scrollable extends StatefulWidget {
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
+
+  /// Whether a [Scrollbar] should automatically be applied to this Scrollable.
+  ///
+  /// Only applicable on Desktop and web platforms.
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollBehavior.buildViewportChrome], which builds a [Scrollbar],
+  ///     [CupertinoScrollbar] or [RawScrollbar] based on the current
+  ///     configuration.
+  final bool autoScrollbar;
 
   @override
   ScrollableState createState() => ScrollableState();
@@ -717,7 +730,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    return _configuration.buildViewportChrome(context, result, widget.axisDirection);
+    return _configuration.buildViewportChrome(
+      context,
+      result,
+      widget.axisDirection,
+      controller: widget.autoScrollbar ? widget.controller : null,
+    );
   }
 
   @override

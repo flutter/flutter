@@ -598,8 +598,8 @@ class RawScrollbar extends StatefulWidget {
   /// The [child], or a descendant of the [child], should be a source of
   /// [ScrollNotification] notifications, typically a [Scrollable] widget.
   ///
-  /// The [child], [thickness], [thumbColor], [isAlwaysShown], [fadeDuration],
-  /// and [timeToFade] arguments must not be null.
+  /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
+  /// must not be null.
   const RawScrollbar({
     Key? key,
     required this.child,
@@ -854,6 +854,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
         final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+        print('primary');
+        print(PrimaryScrollController.of(context));
         assert(
           scrollController != null,
           'A ScrollController is required when Scrollbar.isAlwaysShown is true. '

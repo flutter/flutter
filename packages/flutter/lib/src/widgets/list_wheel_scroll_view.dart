@@ -438,6 +438,7 @@ class _FixedExtentScrollable extends Scrollable {
     physics: physics,
     viewportBuilder: viewportBuilder,
     restorationId: restorationId,
+    autoScrollbar: false,
   );
 
   final double itemExtent;

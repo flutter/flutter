@@ -14,6 +14,7 @@ import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
+import 'scrollbar.dart';
 import 'theme.dart';
 
 /// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
@@ -664,23 +665,45 @@ class _MaterialScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportChrome(
+    BuildContext context,
+    Widget child,
+    AxisDirection axisDirection, {
+    ScrollController? controller,
+  }) {
+    final ThemeData theme = Theme.of(context);
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
+    // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
+    // On Web and Desktop, when a controller is provided, we add a Scrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+        if (kIsWeb)
+          continue isWeb;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        child = GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: axisDirection,
+          color: theme.accentColor,
+        );
+        if (kIsWeb)
+          continue isWeb;
+        break;
+      isWeb:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return child;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
+        if (!theme.autoScrollbars || controller == null)
+          break;
+        child = Scrollbar(
           child: child,
-          axisDirection: axisDirection,
-          color: Theme.of(context).accentColor,
+          controller: controller,
+          isAlwaysShown: theme.scrollbarTheme.isAlwaysShown ?? true,
         );
     }
+    return child;
   }
 }
 

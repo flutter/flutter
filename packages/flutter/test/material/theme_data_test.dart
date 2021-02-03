@@ -318,6 +318,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
+      autoScrollbars: true,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -411,6 +412,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: true,
       useTextSelectionTheme: true,
+      autoScrollbars: true,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(

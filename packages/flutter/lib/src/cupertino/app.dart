@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -10,6 +11,7 @@ import 'icons.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'route.dart';
+import 'scrollbar.dart';
 import 'theme.dart';
 
 /// An application that uses Cupertino design.
@@ -400,9 +402,35 @@ class CupertinoApp extends StatefulWidget {
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
-    // Never build any overscroll glow indicators.
-    return child;
+  Widget buildViewportChrome(
+    BuildContext context,
+    Widget child,
+    AxisDirection axisDirection, {
+    ScrollController? controller,
+  }) {
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
+    // GlowingOverscrollIndicator is not applicable.
+    // On Web and Desktop, when a controller is provided and the theme specifies,
+    // we add a CupertinoScrollbar.
+    switch (getPlatform(context)) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        if (kIsWeb)
+          continue isWeb;
+        return child;
+      isWeb:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        if (!theme.autoScrollbars || controller == null)
+          return child;
+        return CupertinoScrollbar(
+          child: child,
+          controller: controller,
+          isAlwaysShown: true,
+        );
+    }
   }
 
   @override

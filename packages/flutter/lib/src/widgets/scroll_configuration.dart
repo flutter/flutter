@@ -8,7 +8,9 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 import 'overscroll_indicator.dart';
+import 'scroll_controller.dart';
 import 'scroll_physics.dart';
+import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 
@@ -31,23 +33,44 @@ class ScrollBehavior {
   /// For example, on Android, this method wraps the given widget with a
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportChrome(
+    BuildContext context,
+    Widget child,
+    AxisDirection axisDirection, {
+    ScrollController? controller,
+  }) {
     // When modifying this function, consider modifying the implementation in
-    // _MaterialScrollBehavior as well.
+    // _MaterialScrollBehavior and _AlwaysCupertinoScrollBehavior as well.
+    // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
+    // On Web and Desktop, when a controller is provided, we add a RawScrollbar.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return child;
+        if (kIsWeb)
+          continue isWeb;
+        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
+        child = GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
           color: _kDefaultGlowColor,
         );
+        if (kIsWeb)
+          continue isWeb;
+        break;
+      isWeb:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        child = controller != null
+          ? RawScrollbar(
+            child: child,
+            controller: controller,
+            isAlwaysShown: true,
+          )
+          : child;
     }
+    return child;
   }
 
   /// Specifies the type of velocity tracker to use in the descendant

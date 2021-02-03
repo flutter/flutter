@@ -768,6 +768,7 @@ void main() {
       switchTheme: const SwitchThemeData(),
       fixTextFieldOutlineLabel: false,
       useTextSelectionTheme: false,
+      autoScrollbars: true,
     );
 
     ThemeData? themeBeforeSnackBar;

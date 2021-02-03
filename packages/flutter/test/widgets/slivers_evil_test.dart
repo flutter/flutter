@@ -34,7 +34,7 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
 
 class TestBehavior extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection, { ScrollController? controller }) {
     return GlowingOverscrollIndicator(
       child: child,
       axisDirection: axisDirection,
