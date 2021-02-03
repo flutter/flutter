@@ -401,9 +401,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      // Send both RawKeyEvent and KeyEvent; this is how it behaves during the deprecation period.
-      final bool handled = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a')
-                        || await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool handled = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a');
       expect(handled, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
     });
@@ -437,9 +435,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      // Send both RawKeyEvent and KeyEvent; this is how it behaves during the deprecation period.
-      final bool result = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a')
-                       || await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool result = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a');
       expect(result, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
@@ -518,9 +514,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      // Send both RawKeyEvent and KeyEvent; this is how it behaves during the deprecation period.
-      final bool result = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a')
-                       || await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool result = await tester.sendKeyTap(PhysicalKeyboardKey.keyA, LogicalKeyboardKey.keyA, character: 'a');
       expect(result, isFalse);
       expect(invoked, isFalse);
     });

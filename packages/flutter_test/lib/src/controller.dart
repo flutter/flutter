@@ -830,6 +830,7 @@ abstract class WidgetController {
     LogicalKeyboardKey logical, {
     String? character,
     Duration timeStamp = Duration.zero,
+    String platform = 'android',
   }) async {
     final bool handled = await sendKeyDown(
       physical,
@@ -837,12 +838,14 @@ abstract class WidgetController {
       character: character,
       timeStamp: timeStamp,
       synthesized: false,
+      platform: platform,
     );
     await sendKeyUp(
       physical,
       logical,
       timeStamp: timeStamp,
       synthesized: false,
+      platform: platform,
     );
     return handled;
   }
@@ -853,14 +856,17 @@ abstract class WidgetController {
     String? character,
     Duration timeStamp = Duration.zero,
     bool synthesized = false,
+    String platform = 'android',
   }) async {
-    return binding.handleKeyEvent(KeyDownEvent(
+    final bool fromKeyEvent = binding.handleKeyEvent(KeyDownEvent(
       physical: physical,
       logical: logical,
       character: character,
       timeStamp: timeStamp,
       synthesized: synthesized,
     ));
+    final bool fromRawEvent = await simulateKeyDownEvent(logical, platform: platform);
+    return fromKeyEvent || fromRawEvent;
   }
 
   Future<bool> sendKeyRepeat(
@@ -868,13 +874,16 @@ abstract class WidgetController {
     LogicalKeyboardKey logical, {
     String? character,
     Duration timeStamp = Duration.zero,
+    String platform = 'android',
   }) async {
-    return binding.handleKeyEvent(KeyRepeatEvent(
+    final bool fromKeyEvent = binding.handleKeyEvent(KeyRepeatEvent(
       physical: physical,
       logical: logical,
       character: character,
       timeStamp: timeStamp,
     ));
+    final bool fromRawEvent = await simulateKeyDownEvent(logical, platform: platform);
+    return fromKeyEvent || fromRawEvent;
   }
 
   Future<bool> sendKeyUp(
@@ -882,13 +891,16 @@ abstract class WidgetController {
     LogicalKeyboardKey logical, {
     Duration timeStamp = Duration.zero,
     bool synthesized = false,
+    String platform = 'android',
   }) async {
-    return binding.handleKeyEvent(KeyUpEvent(
+    final bool fromKeyEvent = binding.handleKeyEvent(KeyUpEvent(
       physical: physical,
       logical: logical,
       timeStamp: timeStamp,
       synthesized: synthesized,
     ));
+    final bool fromRawEvent = await simulateKeyDownEvent(logical, platform: platform);
+    return fromKeyEvent || fromRawEvent;
   }
 
   /// Simulates sending physical key down and up events through the system channel.
@@ -916,6 +928,7 @@ abstract class WidgetController {
   Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform);
+    print('*****');
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform);
     return handled;
