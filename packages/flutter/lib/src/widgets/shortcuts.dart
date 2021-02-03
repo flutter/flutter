@@ -199,10 +199,18 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   Iterable<LogicalKeyboardKey>? getTriggerKeys() => null;
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.alt,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.altSynonym,
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+    LogicalKeyboardKey.controlSynonym,
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+    LogicalKeyboardKey.metaSynonym,
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+    LogicalKeyboardKey.shiftSynonym,
   };
 
   /// Returns a description of the key set that is short and readable.
@@ -350,7 +358,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   }
 
   static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<LogicalKeySet, Intent> source) {
-    final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey, List<_PromptIntent>>{};
+    final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
     source.forEach((LogicalKeySet prompt, Intent intent) {
       final Iterable<LogicalKeyboardKey?> triggers = prompt.getTriggerKeys()
           ?? (() sync* { yield null; })();

@@ -2513,28 +2513,28 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x201000700e1, debugName: kReleaseMode ? null : 'Shift');
+  static const LogicalKeyboardKey shift = shiftLeft;
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x201000700e3, debugName: kReleaseMode ? null : 'Meta');
+  static const LogicalKeyboardKey meta = metaLeft;
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x201000700e2, debugName: kReleaseMode ? null : 'Alt');
+  static const LogicalKeyboardKey alt = altLeft;
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x201000700e0, debugName: kReleaseMode ? null : 'Control');
+  static const LogicalKeyboardKey control = controlLeft;
 
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
@@ -2980,22 +2980,23 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0400000105: controlRight,
     0x0400000109: metaRight,
     0x040000010d: shiftRight,
-    0x201000700e1: shift,
-    0x201000700e3: meta,
-    0x201000700e2: alt,
-    0x201000700e0: control,
   };
+
+  static const LogicalKeyboardKey shiftSynonym = LogicalKeyboardKey(0x201000700e1, debugName: kReleaseMode ? null : 'Shift');
+  static const LogicalKeyboardKey metaSynonym = LogicalKeyboardKey(0x201000700e3, debugName: kReleaseMode ? null : 'Meta');
+  static const LogicalKeyboardKey altSynonym = LogicalKeyboardKey(0x201000700e2, debugName: kReleaseMode ? null : 'Alt');
+  static const LogicalKeyboardKey controlSynonym = LogicalKeyboardKey(0x201000700e0, debugName: kReleaseMode ? null : 'Control');
 
   // A map of keys to the pseudo-key synonym for that key. Used by getSynonyms.
   static final Map<LogicalKeyboardKey, LogicalKeyboardKey> _synonyms = <LogicalKeyboardKey, LogicalKeyboardKey>{
-    shiftLeft: shift,
-    shiftRight: shift,
-    metaLeft: meta,
-    metaRight: meta,
-    altLeft: alt,
-    altRight: alt,
-    controlLeft: control,
-    controlRight: control,
+    shiftLeft: shiftSynonym,
+    shiftRight: shiftSynonym,
+    metaLeft: metaSynonym,
+    metaRight: metaSynonym,
+    altLeft: altSynonym,
+    altRight: altSynonym,
+    controlLeft: controlSynonym,
+    controlRight: controlSynonym,
   };
 }
 

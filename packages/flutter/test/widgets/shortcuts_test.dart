@@ -44,7 +44,7 @@ class TestShortcutManager extends ShortcutManager {
 
   @override
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    if (event is RawKeyDownEvent) {
+    if (event is KeyDownEvent) {
       keys.add(event.logical);
     }
     return super.handleKeypress(context, event);
@@ -540,7 +540,7 @@ void main() {
       expect(
           description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}'));
+              'shortcuts: {{Shift Left + Key A}: ActivateIntent#00000, {Shift Left + Arrow Right}: DirectionalFocusIntent#00000}'));
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

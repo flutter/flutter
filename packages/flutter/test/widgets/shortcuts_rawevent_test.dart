@@ -427,7 +427,9 @@ void main() {
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
       final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
-      expect(result, isTrue);
+      // Shortcurts don't cause the message channel API, but the embedder API,
+      // to return "handled".
+      expect(result, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
     });
@@ -534,7 +536,7 @@ void main() {
       expect(
           description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}'));
+              'shortcuts: {{Shift Left + Key A}: ActivateIntent#00000, {Shift Left + Arrow Right}: DirectionalFocusIntent#00000}'));
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

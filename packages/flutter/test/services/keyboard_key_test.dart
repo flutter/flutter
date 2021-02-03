@@ -70,10 +70,10 @@ void main() {
             LogicalKeyboardKey.metaLeft,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
       expect(
           LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
@@ -83,10 +83,10 @@ void main() {
             LogicalKeyboardKey.metaRight,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
       expect(
           LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
@@ -100,10 +100,10 @@ void main() {
             LogicalKeyboardKey.metaRight,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
     });
   });
