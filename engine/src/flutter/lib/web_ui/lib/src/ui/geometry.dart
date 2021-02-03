@@ -701,10 +701,12 @@ class RRect {
 
   RRect scaleRadii() {
     double scale = 1.0;
-    scale = _getMin(scale, blRadiusY, tlRadiusY, height);
-    scale = _getMin(scale, tlRadiusX, trRadiusX, width);
-    scale = _getMin(scale, trRadiusY, brRadiusY, height);
-    scale = _getMin(scale, brRadiusX, blRadiusX, width);
+    final double absWidth = width.abs();
+    final double absHeight = height.abs();
+    scale = _getMin(scale, blRadiusY, tlRadiusY, absHeight);
+    scale = _getMin(scale, tlRadiusX, trRadiusX, absWidth);
+    scale = _getMin(scale, trRadiusY, brRadiusY, absHeight);
+    scale = _getMin(scale, brRadiusX, blRadiusX, absWidth);
 
     if (scale < 1.0) {
       return RRect._raw(
