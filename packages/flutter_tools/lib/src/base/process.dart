@@ -693,9 +693,7 @@ abstract class ProcessManager {
   /// Starts a process and runs it non-interactively to completion.
   ///
   /// The first element in [command] will be treated as the executable to run,
-  /// with subsequent elements being passed as arguments to the executable. It
-  /// is left to implementations to decide what element types they support in
-  /// the [command] list.
+  /// with subsequent elements being passed as arguments to the executable.
   ///
   /// Use [workingDirectory] to set the working directory for the process. Note
   /// that the change of directory occurs before executing the process on some
