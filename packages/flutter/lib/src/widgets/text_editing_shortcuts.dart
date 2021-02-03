@@ -19,18 +19,33 @@ import 'text_editing_intents.dart';
 ///    behavior.
 class TextEditingShortcuts extends StatelessWidget {
   /// Creates an instance of TextEditingShortcuts.
-  const TextEditingShortcuts({
+  TextEditingShortcuts({
+    Map<LogicalKeySet, Intent>? additionalShortcuts,
+    this.debugLabel,
     Key? key,
     required this.child,
-  }) : super(key: key);
+  }) : additionalShortcuts = additionalShortcuts ?? <LogicalKeySet, Intent>{},
+       super(key: key);
+
+  /// The actions to be merged with the default text editing actions.
+  ///
+  /// The default text editing actions will override any conflicting keys in
+  /// additionalActions. To override the default text editing actions, use an
+  /// [Actions] Widget in the tree below this Widget.
+  final Map<LogicalKeySet, Intent> additionalShortcuts;
 
   /// The child [Widget].
   final Widget child;
 
+  /// Passed through to [Shortcuts.debugLabel].
+  final String? debugLabel;
+
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
+      debugLabel: debugLabel,
       shortcuts: <LogicalKeySet, Intent>{
+        ...additionalShortcuts,
         LogicalKeySet(LogicalKeyboardKey.arrowDown): ArrowDownTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowLeftTextIntent(),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): ArrowRightTextIntent(),
