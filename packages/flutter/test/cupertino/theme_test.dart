@@ -180,6 +180,7 @@ void main() {
           'primaryContrastingColor',
           'barBackgroundColor',
           'scaffoldBackgroundColor',
+          'autoScrollbars',
           'textStyle',
           'actionTextStyle',
           'tabLabelTextStyle',

@@ -21,6 +21,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
         home: Scrollbar(
           isAlwaysShown: true,
           showTrackOnHover: true,
@@ -109,7 +110,10 @@ void main() {
     final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(scrollbarTheme: scrollbarTheme),
+      theme: ThemeData(
+        scrollbarTheme: scrollbarTheme,
+        autoScrollbars: false,
+      ),
       home: Scrollbar(
         isAlwaysShown: true,
         controller: scrollController,
@@ -201,7 +205,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(),
+          autoScrollbars: false,
+        ),
         home: Scrollbar(
           thickness: thickness,
           hoverThickness: hoverThickness,
@@ -309,7 +316,10 @@ void main() {
 
     // Scrollbar defaults for light themes:
     // - coloring based on ColorScheme.onSurface
-    await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.light())));
+    await tester.pumpWidget(buildFrame(ThemeData(
+      colorScheme: const ColorScheme.light(),
+      autoScrollbars: false,
+    )));
     await tester.pumpAndSettle();
     // Idle scrollbar behavior
     expect(
@@ -380,7 +390,10 @@ void main() {
 
     // Scrollbar defaults for dark themes:
     // - coloring slightly different based on ColorScheme.onSurface
-    await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.dark())));
+    await tester.pumpWidget(buildFrame(ThemeData(
+      colorScheme: const ColorScheme.dark(),
+      autoScrollbars: false,
+    )));
     await tester.pumpAndSettle(); // Theme change animation
 
     // Idle scrollbar behavior

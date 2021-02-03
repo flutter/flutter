@@ -29,11 +29,14 @@ Widget _buildBoilerplate({
   EdgeInsets padding = EdgeInsets.zero,
   required Widget child,
 }) {
-  return Directionality(
-    textDirection: textDirection,
-    child: MediaQuery(
-      data: MediaQueryData(padding: padding),
-      child: child,
+  return Theme(
+    data: ThemeData(autoScrollbars: false),
+    child: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData(padding: padding),
+        child: child,
+      ),
     ),
   );
 }
@@ -621,8 +624,9 @@ void main() {
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scrollbar(
+       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
+        home: const Scrollbar(
           child: SingleChildScrollView(
             child: SizedBox(width: 4000.0, height: 4000.0)
           ),
@@ -704,6 +708,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -794,6 +799,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -848,6 +854,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -929,6 +936,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(autoScrollbars: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
