@@ -661,6 +661,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
          dragStartBehavior: dragStartBehavior,
          restorationId: restorationId,
          clipBehavior: clipBehavior,
+         autoScrollbar: false,
        );
 
   final SliverOverlapAbsorberHandle handle;

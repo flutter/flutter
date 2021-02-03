@@ -250,6 +250,7 @@ class Scrollable extends StatefulWidget {
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
 
+  /// {@template flutter.widgets.scrollable.autoScrollbar}
   /// Whether a [Scrollbar] should automatically be applied to this Scrollable.
   ///
   /// Only applicable on Desktop and web platforms.
@@ -259,6 +260,7 @@ class Scrollable extends StatefulWidget {
   ///   * [ScrollBehavior.buildViewportChrome], which builds a [Scrollbar],
   ///     [CupertinoScrollbar] or [RawScrollbar] based on the current
   ///     configuration.
+  /// {@endtemplate}
   final bool autoScrollbar;
 
   @override

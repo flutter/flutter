@@ -91,6 +91,7 @@ abstract class ScrollView extends StatelessWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
+    this.autoScrollbar = true,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
@@ -286,6 +287,9 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
+  /// {@macro flutter.widgets.scrollable.autoScrollbar}
+  final bool autoScrollbar;
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -382,6 +386,7 @@ abstract class ScrollView extends StatelessWidget {
       physics: physics,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
+      autoScrollbar: autoScrollbar,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -619,6 +624,7 @@ class CustomScrollView extends ScrollView {
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
+    bool autoScrollbar = true,
     Clip clipBehavior = Clip.hardEdge,
   }) : super(
     key: key,
@@ -635,6 +641,7 @@ class CustomScrollView extends ScrollView {
     dragStartBehavior: dragStartBehavior,
     keyboardDismissBehavior: keyboardDismissBehavior,
     restorationId: restorationId,
+    autoScrollbar: autoScrollbar,
     clipBehavior: clipBehavior,
   );
 

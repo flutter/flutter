@@ -854,8 +854,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         // thumb to show immediately when isAlwaysShown is true. A scroll
         // event is required in order to paint the thumb.
         final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-        print('primary');
-        print(PrimaryScrollController.of(context));
         assert(
           scrollController != null,
           'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
