@@ -22,7 +22,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/mocks.dart' as mocks;
+import '../../../src/fakes.dart';
 
 final Platform kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
@@ -68,7 +68,7 @@ void main() {
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
-    @required mocks.CompleterIOSink stdinSink,
+    @required CompleterIOSink stdinSink,
   }) {
     assert(stdinSink != null);
     stdinSink.writes.clear();
@@ -90,7 +90,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger(
       terminal: AnsiTerminal(
-        stdio: mocks.MockStdio(),
+        stdio: FakeStdio(),
         platform: kNoAnsiPlatform,
       ),
       outputPreferences: OutputPreferences.test(showColor: false),
@@ -248,7 +248,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    final CompleterIOSink stdinSink = CompleterIOSink();
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
@@ -290,7 +290,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    final CompleterIOSink stdinSink = CompleterIOSink();
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
@@ -325,7 +325,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    final CompleterIOSink stdinSink = CompleterIOSink();
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
@@ -396,7 +396,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    final CompleterIOSink stdinSink = CompleterIOSink();
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
@@ -430,7 +430,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink(throwOnAdd: true);
+    final CompleterIOSink stdinSink = CompleterIOSink(throwOnAdd: true);
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 

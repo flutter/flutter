@@ -317,10 +317,10 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     expect(configLines, containsAll(<String>[
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'  "DART_DEFINES=foo%3Da,bar%3Db"',
+      r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
       r'  "DART_OBFUSCATION=true"',
-      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
       r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
       r'  "TRACK_WIDGET_CREATION=true"',
       r'  "TREE_SHAKE_ICONS=true"',

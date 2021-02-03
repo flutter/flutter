@@ -198,7 +198,7 @@ class DriveCommand extends RunCommandBase {
     ) ?? PackageConfig.empty;
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions();
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
     final File applicationBinary = stringArg('use-application-binary') == null
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));
