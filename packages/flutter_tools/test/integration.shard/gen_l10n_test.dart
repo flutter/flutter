@@ -135,7 +135,7 @@ void main() {
       '#l10n 80 (ES - Hello nuevo World)\n'
       '#l10n 81 (ES - Hello two nuevo worlds)\n'
       '#l10n 82 (ES - Hello on viernes, 1 de enero de 1960)\n'
-      '#l10n 83 (ES - Hello World, o  n viernes, 1 de enero de 1960)\n'
+      '#l10n 83 (ES - Hello World, on viernes, 1 de enero de 1960)\n'
       '#l10n 84 (ES - Hello two worlds, on viernes, 1 de enero de 1960)\n'
       '#l10n 85 (ES - Hello other 0 worlds, with a total of 100 citizens)\n'
       '#l10n 86 (ES - Hello World of 101 citizens)\n'
