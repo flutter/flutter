@@ -5,6 +5,9 @@
 import 'package:flutter/cupertino.dart';
 
 void main() {
+  // Generic reference variables.
+  BuildContext context;
+
   // Change made in https://github.com/flutter/flutter/pull/41859
   const CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
   themeData.copyWith(brightness: Brightness.light);
@@ -52,4 +55,64 @@ void main() {
   const FormField formField = FormField(autovalidate: true);
   const FormField formField = FormField(autovalidate: false);
   final autoMode = formField.autovalidate;
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.of(context, nullOk: true);
+  Navigator.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.of(context, nullOk: true);
+  Router.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.localeOf(context, nullOk: true);
+  Localizations.localeOf(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.of(context, nullOk: true);
+  FocusTraversalOrder.of(context, nullOk: false);
+  FocusTraversalGroup.of(context, nullOk: true);
+  FocusTraversalGroup.of(context, nullOk: false);
+  Focus.of(context, nullOk: true);
+  Focus.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.of(context, nullOk: true);
+  Shortcuts.of(context, nullOk: false);
+  Actions.find(context, nullOk: true);
+  Actions.find(context, nullOk: false);
+  Actions.handler(context, nullOk: true);
+  Actions.handler(context, nullOk: false);
+  Actions.invoke(context, nullOk: true);
+  Actions.invoke(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.of(context, nullOk: true);
+  AnimatedList.of(context, nullOk: false);
+  SliverAnimatedList.of(context, nullOk: true);
+  SliverAnimatedList.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoDynamicColor.resolve(Color(0), context, nullOk: true);
+  CupertinoDynamicColor.resolve(Color(0), context, nullOk: false);
+  CupertinoDynamicColor.resolveFrom(context, nullOk: true);
+  CupertinoDynamicColor.resolveFrom(context, nullOk: false);
+  CupertinoUserInterfaceLevel.of(context, nullOk: true);
+  CupertinoUserInterfaceLevel.of(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  CupertinoTheme.brightnessOf(context, nullOk: true);
+  CupertinoTheme.brightnessOf(context, nullOk: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  CupertinoThemeData.resolveFrom(context, nullOk: true);
+  CupertinoThemeData.resolveFrom(context, nullOk: false);
+  NoDefaultCupertinoThemeData.resolveFrom(context, nullOk: true);
+  NoDefaultCupertinoThemeData.resolveFrom(context, nullOk: false);
+  CupertinoTextThemeData.resolveFrom(context, nullOk: true);
+  CupertinoTextThemeData.resolveFrom(context, nullOk: false);
 }
