@@ -779,7 +779,10 @@ extension FlutterVmService on vm_service.VmService {
         kListViewsMethod,
       );
       if (response == null) {
-        return null;
+        // The service may have disappeared mid-request.
+        // Return an empty list now, and let the shutdown logic elsewhere deal
+        // with cleaning up.
+        return <FlutterView>[];
       }
       final List<Object> rawViews = response.json['views'] as List<Object>;
       final List<FlutterView> views = <FlutterView>[

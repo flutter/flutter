@@ -22,9 +22,14 @@ import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/vmservice.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -542,6 +547,30 @@ void main() {
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
   });
+
+  testUsingContext('Flutter run catches service has disappear errors and throws a tool exit', () async {
+    final FakeResidentRunner residentRunner = FakeResidentRunner();
+    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
+    final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+    command.fakeResidentRunner = residentRunner;
+
+    await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+    ]), contains('Lost connection to device.'));
+  });
+
+  testUsingContext('Flutter run does not catch other RPC errors', () async {
+    final FakeResidentRunner residentRunner = FakeResidentRunner();
+    residentRunner.rpcError = RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+    final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+    command.fakeResidentRunner = residentRunner;
+
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '--no-pub',
+    ]), throwsA(isA<RPCError>()));
+  });
 }
 
 class MockCache extends Mock implements Cache {}
@@ -585,7 +614,7 @@ class FakeDevice extends Fake implements Device {
   bool supportsRuntimeMode(BuildMode mode) => true;
 
   @override
-  bool get supportsHotReload => false;
+  bool supportsHotReload = false;
 
   @override
   bool get supportsFastStart => false;
@@ -641,7 +670,7 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeApplicationPackageFactory extends Fake implements  ApplicationPackageFactory {
+class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
   ApplicationPackage package;
 
   @override
@@ -651,5 +680,43 @@ class FakeApplicationPackageFactory extends Fake implements  ApplicationPackageF
     File applicationBinary,
   }) async {
     return package;
+  }
+}
+
+class TestRunCommandWithFakeResidentRunner extends RunCommand {
+  FakeResidentRunner fakeResidentRunner;
+
+  @override
+  Future<ResidentRunner> createRunner({
+    @required bool hotMode,
+    @required List<FlutterDevice> flutterDevices,
+    @required String applicationBinaryPath,
+    @required FlutterProject flutterProject,
+  }) async {
+    return fakeResidentRunner;
+  }
+
+  @override
+  // ignore: must_call_super
+  Future<void> validateCommand() async {
+    devices = <Device>[FakeDevice()..supportsHotReload = true];
+  }
+}
+
+class FakeResidentRunner extends Fake implements ResidentRunner {
+  RPCError rpcError;
+
+  @override
+  Future<int> run({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
+    String route,
+  }) async {
+    await null;
+    if (rpcError != null) {
+      throw rpcError;
+    }
+    return 0;
   }
 }
