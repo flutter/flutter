@@ -416,6 +416,8 @@ config("compiler") {
       "-funwind-tables",
       "-fno-short-enums",
       "-nostdinc++",
+      # TODO (https://github.com/flutter/flutter/issues/75348).
+      "-mno-outline-atomics",
     ]
     if (!is_clang) {
       # Clang doesn't support these flags.
