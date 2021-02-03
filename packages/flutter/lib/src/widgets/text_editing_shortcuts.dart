@@ -14,7 +14,7 @@ import 'text_editing_intents.dart';
 ///
 /// See also:
 ///
-///  * [textEditingActionsMap], which contains all of the actions that respond
+///  * [TextEditingActions], which contains all of the [Action]s that respond
 ///    to the [Intent]s in these shortcuts with the default text editing
 ///    behavior.
 class TextEditingShortcuts extends StatelessWidget {

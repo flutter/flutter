@@ -11,16 +11,11 @@ import 'framework.dart';
 import 'text_editing_action.dart';
 import 'text_editing_intents.dart';
 
-/// An [Actions] Widget that handles the default  text editing behavior for
+/// An [Actions] Widget that handles the default text editing behavior for
 /// Flutter on the current platform.
 ///
 /// This default behavior can be overridden by placing an [Actions] widget lower
 /// in the Widget tree than this.
-///
-/// See also:
-///
-///   * [TextEditingIntent] and all of its subclasses, which comprise all of the
-///     [Intent]s that are handle here.
 class TextEditingActions extends StatelessWidget {
   /// Creates an instance of TextEditingActions.
   TextEditingActions({

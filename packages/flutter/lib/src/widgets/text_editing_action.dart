@@ -14,10 +14,9 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T inte
 
 /// An [Action] related to editing text.
 ///
-/// If an [EditableText] is currently focused, then
-/// [TextEditingIntent.editableTextState] will be set and the given [onInvoke]
-/// callback will be called. If not, then [isEnabled] will be false and
-/// [onInvoke] will not be called.
+/// If an [EditableText] is currently focused, then _editableTextState will be
+/// set and the given [onInvoke] callback will be called with it. If not, then
+/// [isEnabled] will be false and [onInvoke] will not be called.
 ///
 /// The focused [EditableText] must have a [Key]. This is handled automatically
 /// by built-in text editing widgets like [TextField], [CupertinoTextField],
