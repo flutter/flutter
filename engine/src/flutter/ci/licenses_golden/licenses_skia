@@ -1,4 +1,4 @@
-Signature: 4adf1ff9a764aa44446ebadcbf569e10
+Signature: eb0449cfccfed2cb80f91b56684b05a3
 
 UNUSED LICENSES:
 
@@ -5980,6 +5980,7 @@ ORIGIN: ../../../third_party/skia/gm/colorspace.cpp + ../../../third_party/skia/
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/colorspace.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeLightSource.h
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGMask.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGFeLightSource.cpp
@@ -7260,6 +7261,8 @@ FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC.
