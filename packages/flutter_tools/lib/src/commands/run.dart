@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -26,6 +25,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
+import '../vmservice.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 

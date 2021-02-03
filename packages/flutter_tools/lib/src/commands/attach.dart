@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -31,6 +30,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
