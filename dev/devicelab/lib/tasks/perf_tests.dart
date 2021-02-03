@@ -298,7 +298,7 @@ TaskFunction createStackSizeTest() {
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{
-        'increased_size_for_one_additional_stateless_widget': data['stack_size'],
+        'stack_size_per_nesting_level': data['stack_size'],
       };
       return TaskResult.success(
         result,
