@@ -12,6 +12,40 @@ import 'text_editing_intents.dart';
 /// A [Shortcuts] widget with the shortcuts used for the default text editing
 /// behavior.
 ///
+/// This default behavior can be overridden by placing a [Shortcuts] widget
+/// lower in the widget tree than this. See [TextEditingActions] for an example
+/// of remapping a text editing [Intent] to a custom [Action].
+///
+/// {@tool snippet}
+///
+/// This example shows how to use an additional [Shortcuts] widget to override
+/// the left arrow key [Intent] and map it to the right arrow key instead.
+///
+/// If
+///
+/// ```dart
+/// final TextEditingController controller = TextEditingController(
+///   text: "Try using the keyboard's arrow keys and notice that left moves right.",
+/// );
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Shortcuts(
+///         shortcuts: <LogicalKeySet, Intent>{
+///           LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowRightTextIntent(),
+///         },
+///         child: TextField(
+///           controller: controller,
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextEditingActions], which contains all of the [Action]s that respond
