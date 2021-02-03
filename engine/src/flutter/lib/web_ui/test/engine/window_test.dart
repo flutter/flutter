@@ -13,6 +13,9 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
+const int kPhysicalKeyA = 0x00070004;
+const int kLogicalKeyA = 0x00000000061;
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -144,6 +147,52 @@ void testMain() {
     });
 
     EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(null);
+  });
+
+  test('invokeOnKeyData returns normally when onKeyData is null', () {
+    final ui.KeyData keyData = ui.KeyData(
+      timeStamp: Duration(milliseconds: 1),
+      type: ui.KeyEventType.repeat,
+      physical: kPhysicalKeyA,
+      logical: kLogicalKeyA,
+      character: 'a',
+      synthesized: true,
+    );
+    expect(() {
+      EnginePlatformDispatcher.instance.invokeOnKeyData(keyData, (bool result) {
+        expect(result, isFalse);
+      });
+    }, returnsNormally);
+  });
+
+  test('onKeyData preserves the zone', () {
+    final Zone innerZone = Zone.current.fork();
+
+    innerZone.runGuarded(() {
+      final ui.KeyDataCallback onKeyData = (_) {
+        expect(Zone.current, innerZone);
+        return false;
+      };
+      window.onKeyData = onKeyData;
+
+      // Test that the getter returns the exact same onKeyData, e.g. it doesn't
+      // wrap it.
+      expect(window.onKeyData, same(onKeyData));
+    });
+
+    final ui.KeyData keyData = ui.KeyData(
+      timeStamp: Duration(milliseconds: 1),
+      type: ui.KeyEventType.repeat,
+      physical: kPhysicalKeyA,
+      logical: kLogicalKeyA,
+      character: 'a',
+      synthesized: true,
+    );
+    EnginePlatformDispatcher.instance.invokeOnKeyData(keyData, (bool result) {
+      expect(result, isFalse);
+    });
+
+    window.onKeyData = null;
   });
 
   test('onSemanticsEnabledChanged preserves the zone', () {
