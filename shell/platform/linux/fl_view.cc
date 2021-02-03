@@ -426,10 +426,6 @@ static void fl_view_draw_forall(GtkWidget* widget, gpointer user_data) {
 // Implements GtkWidget::draw.
 static gboolean fl_view_draw(GtkWidget* widget, cairo_t* cr) {
   FlView* self = FL_VIEW(widget);
-  // The engine doesn't support exposure events, so instead, force redraw by
-  // sending a window metrics event of the same geometry. Since the geometry
-  // didn't change, only a frame will be scheduled.
-  fl_view_geometry_changed(self);
 
   struct _DrawData data = {
       .parent_window = gtk_widget_get_window(GTK_WIDGET(self)),
@@ -744,5 +740,5 @@ void fl_view_end_frame(FlView* view) {
   g_list_free(view->children_list);
   view->children_list = view->pending_children_list;
   view->pending_children_list = nullptr;
-  gtk_widget_queue_resize(GTK_WIDGET(view));
+  gtk_widget_queue_draw(GTK_WIDGET(view));
 }
