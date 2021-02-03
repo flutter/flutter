@@ -3765,7 +3765,6 @@ void main() {
         bool shortcutModifier = false,
         required String platform,
       }) async {
-    // TODO(justinmc): platform is not actually changing the real platform...
     if (shift) {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
     }
@@ -3849,8 +3848,6 @@ void main() {
     ));
 
     await tester.pump(); // Wait for autofocus to take effect.
-    //await tester.tap(find.byType(EditableText));
-    focusNode.requestFocus();
 
     // Select a few characters using shift right arrow
     await sendKeys(
@@ -7079,6 +7076,117 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Shortcuts(
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowRightTextIntent(),
+            },
+            child: EditableText(
+              key: GlobalKey(),
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // The right arrow key moves to the right as usual.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 1);
+
+    // And the left arrow also moves to the right due to the Shortcuts override.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 2);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
+
+  testWidgets('can change behavior by overriding text editing actions', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late final bool myIntentWasCalled;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              ArrowLeftTextIntent: TextEditingAction<ArrowLeftTextIntent>(
+                onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
+                  myIntentWasCalled = true;
+                  editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+                },
+              ),
+            },
+            child: EditableText(
+              key: GlobalKey(),
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // The right arrow key moves to the right as usual.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 1);
+
+    // And the left arrow also moves to the right due to the Actions override.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 2);
+    expect(myIntentWasCalled, isTrue);
+
+    // On web, using keyboard for selection is handled by the browser.
+  }, skip: kIsWeb);
 }
 
 class UnsettableController extends TextEditingController {
