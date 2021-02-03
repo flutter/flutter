@@ -1481,7 +1481,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
-    HardwareKeyboard.instance.onEvent = _handleKeyEvent;
+    ServicesBinding.instance!.onKeyEvent = _handleKeyEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 

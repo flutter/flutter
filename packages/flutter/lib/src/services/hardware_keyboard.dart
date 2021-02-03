@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show LinkedList, LinkedListEntry;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -195,6 +193,9 @@ abstract class HardwareKeyboard extends KeyboardState {
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
   static HardwareKeyboard get instance => ServicesBinding.instance!.hardwareKeyboard;
+
+  @protected
+  KeyEventCallback? onEvent;
 
   /// Whether [HardwareKeyboard] is using data from [ui.KeyData], or
   /// [RawKeyEvent] otherwise.

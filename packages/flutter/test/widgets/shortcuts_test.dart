@@ -11,6 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
 
+class ShortcutsTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  void resetHardwareKeyboard() {
+    super.initHardwareKeyboard();
+  }
+}
+
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
     required OnInvokeCallback onInvoke,
@@ -51,7 +57,10 @@ class TestShortcutManager extends ShortcutManager {
   }
 }
 
+final ShortcutsTestBinding binding = ShortcutsTestBinding();
+
 void main() {
+  setUp(binding.resetHardwareKeyboard);
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
