@@ -3819,7 +3819,6 @@ void main() {
     );
     late TextSelection selection;
     late SelectionChangedCause cause;
-    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
@@ -3831,7 +3830,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             autofocus: true,
-            focusNode: focusNode,
+            focusNode: FocusNode(),
             style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
