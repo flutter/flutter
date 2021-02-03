@@ -212,3 +212,69 @@ class NegateStateCriterion implements KeyboardStateCriterion {
   @override
   bool active(KeyboardState state) => base.active(state) ^ negate;
 }
+
+/// A virtual keyboard key that represents any of several keys.
+///
+/// [UnionKeyboardKey] takes multiple keys, and when tested against a keyboard
+/// state or a key event, it is satisfied if any of its keys are satisifed.
+/// This is useful when the application does not distinguish certain sets of
+/// keys, such as a pair of left and right modifiers.
+class UnionKeyboardKey implements KeyboardStateCriterion, KeyboardEventCriterion {
+  /// Construct a virtual keyboard key that represents any of the provided keys.
+  const UnionKeyboardKey(this.keys);
+
+  /// The list of keys that this virtual key represents.
+  final List<KeyboardKey> keys;
+
+  @override
+  bool active(KeyboardState state) {
+    return keys.any((KeyboardKey key) => key.active(state));
+  }
+
+  @override
+  bool fulfilled(KeyEvent event) {
+    return keys.any((KeyboardKey key) => key.fulfilled(event));
+  }
+
+  /// Represents either the left or the right logical shift key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.shiftLeft], [LogicalKeyboardKey.shiftRight].
+  static const UnionKeyboardKey shiftLogical = UnionKeyboardKey(<KeyboardKey>[
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+  ]);
+
+  /// Represents either the left or the right logical alt key.
+  ///
+  /// Does not include AltGr key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.altLeft], [LogicalKeyboardKey.altRight].
+  static const UnionKeyboardKey altLogical = UnionKeyboardKey(<KeyboardKey>[
+    LogicalKeyboardKey.altLeft,
+    LogicalKeyboardKey.altRight,
+  ]);
+
+  /// Represents either the left or the right logical meta key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
+  static const UnionKeyboardKey metaLogical = UnionKeyboardKey(<KeyboardKey>[
+    LogicalKeyboardKey.metaLeft,
+    LogicalKeyboardKey.metaRight,
+  ]);
+
+  /// Represents either the left or the right logical control key.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.controlLeft], [LogicalKeyboardKey.controlRight].
+  static const UnionKeyboardKey controlLogical = UnionKeyboardKey(<KeyboardKey>[
+    LogicalKeyboardKey.controlLeft,
+    LogicalKeyboardKey.controlRight,
+  ]);
+}

@@ -312,7 +312,7 @@ class Focus extends StatefulWidget {
 
   /// Handler for keys pressed when this object or one of its children has
   /// focus.
-  /// 
+  ///
   /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
   /// future. Prefer [onKeyEvent] instead.
   ///
@@ -592,7 +592,7 @@ class _FocusState extends State<Focus> {
     _canRequestFocus = focusNode.canRequestFocus;
     _descendantsAreFocusable = focusNode.descendantsAreFocusable;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey, onKeyEvent: widget.onKeyEvent);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
