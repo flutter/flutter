@@ -37,7 +37,18 @@
          "repo":"flutter",
          "task_name":"linux_framework_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+         "run_if":[
+            "dev/",
+            "packages/flutter/",
+            "packages/flutter_driver/",
+            "packages/integration_test/",
+            "packages/flutter_localizations/",
+            "packages/fuchsia_remote_debug_protocol/",
+            "packages/flutter_test/",
+            "packages/flutter_goldens/",
+            "packages/flutter_tools/lib/src/test/",
+            "bin/"
+         ]
       },
       {
          "name":"Linux firebase_abstract_method_smoke_test",
@@ -226,7 +237,18 @@
          "repo":"flutter",
          "task_name":"mac_framework_tests",
          "enabled":true,
-         "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
+         "run_if":[
+            "dev/**",
+            "packages/flutter/**",
+            "packages/flutter_driver/**",
+            "packages/integration_test/**",
+            "packages/flutter_localizations/**",
+            "packages/fuchsia_remote_debug_protocol/**",
+            "packages/flutter_test/**",
+            "packages/flutter_goldens/**",
+            "packages/flutter_tools/lib/src/test/**",
+            "bin/**"
+         ]
       },
       {
          "name":"Mac gradle_non_android_plugin_test",
@@ -343,7 +365,18 @@
          "repo": "flutter",
          "task_name": "win_framework_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+         "run_if":[
+            "dev/",
+            "packages/flutter/",
+            "packages/flutter_driver/",
+            "packages/integration_test/",
+            "packages/flutter_localizations/",
+            "packages/fuchsia_remote_debug_protocol/",
+            "packages/flutter_test/",
+            "packages/flutter_goldens/",
+            "packages/flutter_tools/lib/src/test/",
+            "bin/"
+         ]
       },
       {
          "name": "Windows gradle_non_android_plugin_test",

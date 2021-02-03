@@ -382,7 +382,7 @@
          "name": "Linux tool_integration_tests",
          "repo": "flutter",
          "task_name": "linux_tool_integration_tests",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux web_tool_tests",
@@ -772,7 +772,7 @@
          "name": "Mac tool_integration_tests",
          "repo": "flutter",
          "task_name": "mac_tool_integration_tests",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Windows build_aar_module_test",
@@ -856,7 +856,7 @@
          "name": "Windows tool_integration_tests",
          "repo": "flutter",
          "task_name": "win_tool_integration_tests",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Windows web_tool_tests",

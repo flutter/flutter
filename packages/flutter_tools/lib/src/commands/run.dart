@@ -6,6 +6,9 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart';
+
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -22,6 +25,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
+import '../vmservice.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -456,6 +460,52 @@ class RunCommand extends RunCommandBase {
       await devices.single.targetPlatform == TargetPlatform.web_javascript;
   }
 
+  @visibleForTesting
+  Future<ResidentRunner> createRunner({
+    @required bool hotMode,
+    @required List<FlutterDevice> flutterDevices,
+    @required String applicationBinaryPath,
+    @required FlutterProject flutterProject,
+  }) async {
+    if (hotMode && !webMode) {
+      return HotRunner(
+        flutterDevices,
+        target: targetFile,
+        debuggingOptions: await createDebuggingOptions(webMode),
+        benchmarkMode: boolArg('benchmark'),
+        applicationBinary: applicationBinaryPath == null
+            ? null
+            : globals.fs.file(applicationBinaryPath),
+        projectRootPath: stringArg('project-root'),
+        dillOutputPath: stringArg('output-dill'),
+        stayResident: stayResident,
+        ipv6: ipv6,
+      );
+    } else if (webMode) {
+      return webRunnerFactory.createWebRunner(
+        flutterDevices.single,
+        target: targetFile,
+        flutterProject: flutterProject,
+        ipv6: ipv6,
+        debuggingOptions: await createDebuggingOptions(webMode),
+        stayResident: stayResident,
+        urlTunneller: null,
+      );
+    }
+    return ColdRunner(
+      flutterDevices,
+      target: targetFile,
+      debuggingOptions: await createDebuggingOptions(webMode),
+      traceStartup: traceStartup,
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      applicationBinary: applicationBinaryPath == null
+          ? null
+          : globals.fs.file(applicationBinaryPath),
+      ipv6: ipv6,
+      stayResident: stayResident,
+    );
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -557,45 +607,12 @@ class RunCommand extends RunCommandBase {
         ),
     ];
 
-    ResidentRunner runner;
-    if (hotMode && !webMode) {
-      runner = HotRunner(
-        flutterDevices,
-        target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
-        benchmarkMode: boolArg('benchmark'),
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
-        stayResident: stayResident,
-        ipv6: ipv6,
-      );
-    } else if (webMode) {
-      runner = webRunnerFactory.createWebRunner(
-        flutterDevices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
-        ipv6: ipv6,
-        debuggingOptions: await createDebuggingOptions(webMode),
-        stayResident: stayResident,
-        urlTunneller: null,
-      );
-    } else {
-      runner = ColdRunner(
-        flutterDevices,
-        target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
-        traceStartup: traceStartup,
-        awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : globals.fs.file(applicationBinaryPath),
-        ipv6: ipv6,
-        stayResident: stayResident,
-      );
-    }
+    final ResidentRunner runner = await createRunner(
+      applicationBinaryPath: applicationBinaryPath,
+      flutterDevices: flutterDevices,
+      flutterProject: flutterProject,
+      hotMode: hotMode,
+    );
 
     DateTime appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
@@ -620,13 +637,20 @@ class RunCommand extends RunCommandBase {
       }
     ));
 
-    final int result = await runner.run(
-      appStartedCompleter: appStartedTimeRecorder,
-      enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
-      route: route,
-    );
-    if (result != 0) {
-      throwToolExit(null, exitCode: result);
+    try {
+      final int result = await runner.run(
+        appStartedCompleter: appStartedTimeRecorder,
+        enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
+        route: route,
+      );
+      if (result != 0) {
+        throwToolExit(null, exitCode: result);
+      }
+    } on RPCError catch (err) {
+      if (err.code == RPCErrorCodes.kServiceDisappeared) {
+        throwToolExit('Lost connection to device.');
+      }
+      rethrow;
     }
     return FlutterCommandResult(
       ExitStatus.success,

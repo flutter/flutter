@@ -642,6 +642,84 @@ void main() {
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Catches service disappeared error', () async {
+      final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(const NoOpDevicePortForwarder());
+
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async {
+        await null;
+        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
+      });
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
+
+      testDeviceManager.addDevice(device);
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) {
+          return NoOpDeviceLogReader('test');
+        });
+      testFileSystem.file('lib/main.dart').createSync();
+
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'attach',
+      ]), throwsToolExit(message: 'Lost connection to device.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Does not catch generic RPC error', () async {
+      final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(const NoOpDevicePortForwarder());
+
+      when(mockHotRunner.attach(
+        appStartedCompleter: anyNamed('appStartedCompleter'),
+        allowExistingDdsInstance: true,
+        enableDevTools: anyNamed('enableDevTools'),
+      )).thenAnswer((_) async {
+        await null;
+        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+      });
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
+
+      testDeviceManager.addDevice(device);
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) {
+          return NoOpDeviceLogReader('test');
+        });
+      testFileSystem.file('lib/main.dart').createSync();
+
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'attach',
+      ]), throwsA(isA<vm_service.RPCError>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 

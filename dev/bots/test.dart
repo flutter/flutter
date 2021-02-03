@@ -104,7 +104,6 @@ Future<void> main(List<String> args) async {
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'web_tool_tests': _runWebToolTests,
@@ -272,30 +271,6 @@ Future<void> _runSmokeTests() async {
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
   if (versionError != null)
     exitWithError(<String>[versionError]);
-}
-
-Future<void> _runToolCoverage() async {
-  await _pubRunTest(
-    toolRoot,
-    testPaths: <String>[
-      path.join('test', 'general.shard'),
-      path.join('test', 'commands.shard', 'hermetic'),
-    ],
-    coverage: 'coverage',
-  );
-  await runCommand(pub,
-    <String>[
-      'run',
-      'coverage:format_coverage',
-      '--lcov',
-      '--in=coverage',
-      '--out=coverage/lcov.info',
-      '--packages=.packages',
-      '--report-on=lib/'
-    ],
-    workingDirectory: toolRoot,
-    outputMode: OutputMode.capture,
-  );
 }
 
 Future<void> _runGeneralToolTests() async {
