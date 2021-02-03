@@ -2,19 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(goderbauer): migrate this file to null-safety when flutter_driver is null-safe.
+// @dart = 2.9
+
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('button tap test', () {
-    late FlutterDriver driver;
+    FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      driver.close();
+      if (driver != null)
+        driver.close();
     });
 
     test('tap on the button, verify result', () async {
@@ -26,7 +30,7 @@ void main() {
       await driver.waitFor(button);
       await driver.tap(button);
 
-      String? batteryLevel;
+      String batteryLevel;
       while (batteryLevel == null || batteryLevel.contains('unknown')) {
         batteryLevel = await driver.getText(batteryLevelLabel);
       }

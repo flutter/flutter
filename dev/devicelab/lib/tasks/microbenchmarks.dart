@@ -30,6 +30,7 @@ TaskFunction createMicrobenchmarkTask() {
             '-v',
             // --release doesn't work on iOS due to code signing issues
             '--profile',
+            '--no-publish-port',
             '-d',
             device.deviceId,
           ];
