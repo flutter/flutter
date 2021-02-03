@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../artifacts.dart';
@@ -29,6 +30,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -379,6 +381,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         }
         globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
+    } on RPCError catch (err) {
+      if (err.code == RPCErrorCodes.kServiceDisappeared) {
+        throwToolExit('Lost connection to device.');
+      }
+      rethrow;
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (final ForwardedPort port in ports) {
