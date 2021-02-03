@@ -113,9 +113,9 @@ void main() {
     const Size otherAccountsPictureSize = Size.square(30.0);
 
     await pumpTestWidget(
-        tester,
-        currentAccountPictureSize: currentAccountPictureSize,
-        otherAccountsPictureSize: otherAccountsPictureSize
+      tester,
+      currentAccountPictureSize: currentAccountPictureSize,
+      otherAccountsPictureSize: otherAccountsPictureSize,
     );
 
     final RenderBox currentAccountRenderBox = tester.renderObject(find.byKey(avatarA));
