@@ -4,13 +4,14 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
 
+/// Command to print the status of the current Flutter release.
 class StatusCommand extends Command<void> {
   StatusCommand({
     @required this.checkouts,
@@ -36,14 +37,19 @@ class StatusCommand extends Command<void> {
 
   @override
   void run() {
-    bool persistentStateFileFound = false;
-    stdio.printStatus('Conductor Status');
-
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (stateFile.existsSync()) {
       final State state = State.fromFile(stateFile);
+      presentState(state);
     } else {
-
+      stdio.printStatus('No persistent state file found at ${argResults['state-file']}.');
     }
+  }
+
+  @visibleForTesting
+  void presentState(State state) {
+    stdio.printStatus('\nFlutter Conductor Status\n');
+    stdio.printStatus('Release channel:\t\t${state.releaseChannel}');
+    stdio.printStatus('Release candidate branch:\t${state.candidateBranch}');
   }
 }

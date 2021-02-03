@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package conductor_state;
+
+message Repository {
+  
+}
+message ConductorState {
+  string releaseChannel = 1;
+}
