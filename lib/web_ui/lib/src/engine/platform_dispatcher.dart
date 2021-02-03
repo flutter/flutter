@@ -194,10 +194,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnKeyData(ui.KeyData data, _KeyDataResponseCallback callback) {
-    invoke(
-      () { callback(onKeyData == null ? false : onKeyData!(data)); },
-      _onKeyDataZone,
-    );
+    final ui.KeyDataCallback? onKeyData = _onKeyData;
+    if (onKeyData != null) {
+      invoke(
+        () => callback(onKeyData(data)),
+        _onKeyDataZone,
+      );
+    } else {
+      callback(false);
+    }
   }
 
   /// A callback that is invoked to report the [FrameTiming] of recently
