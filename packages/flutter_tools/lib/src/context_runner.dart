@@ -261,10 +261,7 @@ Future<T> runInContext<T>(
       ),
       ProcessInfo: () => ProcessInfo(),
       ProcessManager: () => ErrorHandlingProcessManager(
-        delegate: LocalProcessManager(
-          fileSystem: globals.fs,
-          platform: globals.platform,
-        ),
+        delegate: const LocalProcessManager(),
         platform: globals.platform,
       ),
       ProcessUtils: () => ProcessUtils(

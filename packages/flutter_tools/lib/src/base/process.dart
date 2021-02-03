@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:file/local.dart' as local_fs;
 
 import '../convert.dart';
 import 'common.dart';
@@ -780,10 +781,11 @@ abstract class ProcessManager {
   bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]);
 }
 
+/// A process manager that delegates directly to the dart:io Process class.
 class LocalProcessManager implements ProcessManager {
-  LocalProcessManager({
-    @required FileSystem fileSystem,
-    @required Platform platform,
+  const LocalProcessManager({
+    @visibleForTesting FileSystem fileSystem = const local_fs.LocalFileSystem(),
+    @visibleForTesting Platform platform = const LocalPlatform(),
   }) : _platform = platform,
        _fileSystem = fileSystem;
 
@@ -814,7 +816,7 @@ class LocalProcessManager implements ProcessManager {
         command,
         workingDirectory,
         runInShell,
-      )),
+      ), platform: _platform),
       _getArguments(command),
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
@@ -837,7 +839,7 @@ class LocalProcessManager implements ProcessManager {
         command,
         workingDirectory,
         runInShell,
-      )),
+      ), platform: _platform),
       _getArguments(command),
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
@@ -860,7 +862,7 @@ class LocalProcessManager implements ProcessManager {
         command,
         workingDirectory,
         runInShell,
-      )),
+      ), platform: _platform),
       _getArguments(command),
       workingDirectory: workingDirectory,
       environment: environment,
@@ -881,9 +883,7 @@ class LocalProcessManager implements ProcessManager {
     }
     final String executable = getExecutablePath(commandName, workingDirectory, platform: _platform, fileSystem: _fileSystem);
     if (executable == null) {
-      // Executable was null. Fall back to attempting to run original
-      // path.
-      return commandName;
+      throw ArgumentError('Could not resolve $commandName to executablePath in $workingDirectory');
     }
     return executable;
   }
@@ -897,7 +897,7 @@ class LocalProcessManager implements ProcessManager {
 
 /// Sanatizes the executable path on Windows.
 /// https://github.com/dart-lang/sdk/issues/37751
-String sanitizeExecutablePath(String executable, {Platform platform }) {
+String sanitizeExecutablePath(String executable, {@required Platform platform }) {
   if (executable.isEmpty) {
     return executable;
   }

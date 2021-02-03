@@ -22,7 +22,7 @@ const FileSystem fileSystem = LocalFileSystem();
 const Platform platform = LocalPlatform();
 
 /// The [ProcessManager] for the integration test environment.
-final ProcessManager processManager = LocalProcessManager(
+const ProcessManager processManager = LocalProcessManager(
   platform: platform,
   fileSystem: fileSystem,
 );
