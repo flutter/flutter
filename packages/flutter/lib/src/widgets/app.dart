@@ -1625,18 +1625,20 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(_debugCheckLocalizations(appLocale));
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: TextEditingShortcuts(
-        additionalShortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      child: Shortcuts(
         debugLabel: '<Default WidgetsApp Shortcuts>',
-        child: TextEditingActions(
-          additionalActions: widget.actions ?? WidgetsApp.defaultActions,
-          child: FocusTraversalGroup(
-            policy: ReadingOrderTraversalPolicy(),
-            child: _MediaQueryFromWindow(
-              child: Localizations(
-                locale: appLocale,
-                delegates: _localizationsDelegates.toList(),
-                child: title,
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        child: TextEditingShortcuts(
+          child: TextEditingActions(
+            additionalActions: widget.actions ?? WidgetsApp.defaultActions,
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: _MediaQueryFromWindow(
+                child: Localizations(
+                  locale: appLocale,
+                  delegates: _localizationsDelegates.toList(),
+                  child: title,
+                ),
               ),
             ),
           ),
