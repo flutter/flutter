@@ -14,6 +14,7 @@ import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/status.dart';
 import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -53,6 +54,10 @@ Future<void> main(List<String> args) async {
     CodesignCommand(
       checkouts: checkouts,
       flutterRoot: localFlutterRoot,
+    ),
+    StatusCommand(
+      checkouts: checkouts,
+      stdio: stdio,
     ),
   ].forEach(runner.addCommand);
 
