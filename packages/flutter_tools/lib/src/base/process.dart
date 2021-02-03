@@ -945,9 +945,6 @@ String getExecutablePath(
     // the cwd path. In this case, fall back on '.'.
     workingDirectory ??= '.';
   }
-
-  // TODO(goderbauer): refactor when github.com/google/platform.dart/issues/2
-  //     is available.
   final String pathSeparator = platform.isWindows ? ';' : ':';
 
   List<String> extensions = <String>[];
