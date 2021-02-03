@@ -17,19 +17,19 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 void main() {
   test('stack_size', () async {
-    int stackSizeInByte;
+    int stackSizeInBytes;
     await runDriverTestForRoute(kStackSizeRouteName, (FlutterDriver driver) async {
       final String stackSize = await driver.getText(find.byValueKey(kStackSizeKey));
       expect(stackSize.isNotEmpty, isTrue);
-      stackSizeInByte= int.parse(stackSize);
+      stackSizeInBytes = int.parse(stackSize);
     });
 
-    expect(stackSizeInByte > 0, isTrue);
+    expect(stackSizeInBytes > 0, isTrue);
 
     await fs.directory(testOutputsDirectory).create(recursive: true);
     final File file = fs.file(path.join(testOutputsDirectory, 'stack_size.json'));
     await file.writeAsString(_encodeJson(<String, dynamic>{
-      'stack_size': stackSizeInByte
+      'stack_size': stackSizeInBytes,
     }));
   }, timeout: const Timeout(kTimeout));
 }

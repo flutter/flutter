@@ -1031,9 +1031,22 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
-      case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
+        releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromApk(apkPath));
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
