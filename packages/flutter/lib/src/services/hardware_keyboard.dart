@@ -193,13 +193,7 @@ class KeyRepeatEvent extends KeyEvent {
        );
 }
 
-///
 typedef KeyEventCallback = bool Function(KeyEvent event);
-
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
-  _ListenerEntry(this.listener);
-  final KeyEventCallback listener;
-}
 
 /// An interface to listen to hardware [KeyEvent]s and query key states.
 ///
@@ -334,8 +328,8 @@ abstract class HardwareKeyboard extends KeyboardState {
   /// into account.
   @override
   @protected
-  bool locked(LogicalKeyboardKey logical) {
-    return _locked[logical.keyId] ?? false;
+  bool modeEnabled(KeyboardLockMode lockMode) {
+    return _locked[lockMode.logical.keyId] ?? false;
   }
 
   bool isPressed(KeyboardStateCriterion criterion) => criterion.active(this);
@@ -356,7 +350,7 @@ abstract class HardwareKeyboard extends KeyboardState {
         (int count) => count + 1,
         ifAbsent: () => 1,
       );
-      if (LockKeyboardKey.isLockKey(event.logical)) {
+      if (KeyboardLockMode.isLock(event.logical)) {
         _locked.update(event.logical.keyId,
           (bool value) => !value,
           ifAbsent: () => true,

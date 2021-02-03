@@ -201,3 +201,14 @@ abstract class KeyboardKey with Diagnosticable
   /// A const constructor so that subclasses may be const.
   const KeyboardKey();
 }
+
+class NegateStateCriterion implements KeyboardStateCriterion {
+  const NegateStateCriterion(this.base, { this.negate = true });
+
+  final KeyboardStateCriterion base;
+
+  final bool negate;
+
+  @override
+  bool active(KeyboardState state) => base.active(state) ^ negate;
+}

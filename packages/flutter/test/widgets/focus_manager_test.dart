@@ -996,7 +996,7 @@ void main() {
 
       Future<void> sendEvent() async {
         receivedAnEvent.clear();
-        await tester.sendKeyPress(PhysicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaLeft);
+        await tester.sendKeyTap(PhysicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaLeft);
       }
 
       final BuildContext context = await setupWidget(tester);

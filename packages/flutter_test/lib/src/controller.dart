@@ -825,7 +825,7 @@ abstract class WidgetController {
     return box.size;
   }
 
-  Future<bool> sendKeyPress(
+  Future<bool> sendKeyTap(
     PhysicalKeyboardKey physical,
     LogicalKeyboardKey logical, {
     String? character,
