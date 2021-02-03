@@ -141,7 +141,7 @@ void main() {
     // Appends number to requests for service worker only
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
       contains('<script src="main.dart.js" type="application/javascript">'),
-      contains('flutter_service_worker.js?v='),
+      contains('flutter_service_worker.js'),
     ));
   }));
 

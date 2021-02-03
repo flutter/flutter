@@ -43,7 +43,7 @@ class BuildWebCommand extends BuildSubCommand {
       'application. Defaults to false (i.e. no sourcemaps produced).'
     );
     argParser.addOption('pwa-strategy',
-      defaultsTo: kOfflineFirst,
+      defaultsTo: kNoneWorker,
       help:
         'The caching strategy to be used by the PWA service worker.\n'
         'offline-first will attempt to cache the app shell eagerly and '

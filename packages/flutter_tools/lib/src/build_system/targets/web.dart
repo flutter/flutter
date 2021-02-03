@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:math';
-
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -350,19 +348,6 @@ class WebReleaseBundle extends Target {
         outputFile.parent.createSync(recursive: true);
       }
       outputResourcesFiles.add(outputFile);
-      // insert a random hash into the requests for service_worker.js. This is not a content hash,
-      // because it would need to be the hash for the entire bundle and not just the resource
-      // in question.
-      if (environment.fileSystem.path.basename(inputFile.path) == 'index.html') {
-        final String randomHash = Random().nextInt(4294967296).toString();
-        final String resultString = inputFile.readAsStringSync()
-          .replaceFirst(
-            "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
-          );
-        outputFile.writeAsStringSync(resultString);
-        continue;
-      }
       inputFile.copySync(outputFile.path);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
