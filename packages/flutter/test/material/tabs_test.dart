@@ -5,11 +5,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
