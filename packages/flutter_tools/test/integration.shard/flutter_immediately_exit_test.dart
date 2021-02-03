@@ -42,6 +42,5 @@ void main() {
         );
       }
     });
-  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/74052
-  );
+  });
 }
