@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/test/event_printer.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('EventPrinter handles a null parent', () {

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -35,9 +36,11 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if an '
       'explicitObservatoryPort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildInfo: BuildInfo.debug,
         shellPath: '/',
-        explicitObservatoryPort: 1234,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          hostVmServicePort: 1234,
+        ),
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -50,7 +53,7 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if a precompiled '
       'entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
-        buildInfo: BuildInfo.debug,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         shellPath: '/',
         precompiledDillPath: 'example.dill',
       );
@@ -173,35 +176,41 @@ void main() {
 
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
-        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+        ),
         enableObservatory: false,
-        startPaused: true,
       ), throwsAssertionError);
 
       expect(() => installHook(
-        buildInfo: BuildInfo.debug,
         shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+          hostVmServicePort: 123,
+        ),
         enableObservatory: false,
-        startPaused: false,
-        observatoryPort: 123,
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         shellPath: 'abc',
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          hostVmServicePort: 200,
+        ),
         enableObservatory: true,
         machine: true,
-        startPaused: true,
-        disableServiceAuthCodes: true,
         port: 100,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
-        buildInfo: BuildInfo.debug,
         updateGoldens: true,
         buildTestAssets: true,
-        observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
         platformPluginRegistration: (FlutterPlatform platform) {
@@ -210,16 +219,16 @@ void main() {
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
       expect(flutterPlatform.shellPath, equals('abc'));
+      expect(flutterPlatform.debuggingOptions.buildInfo, equals(BuildInfo.debug));
+      expect(flutterPlatform.debuggingOptions.startPaused, equals(true));
+      expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes, equals(true));
+      expect(flutterPlatform.debuggingOptions.hostVmServicePort, equals(200));
       expect(flutterPlatform.enableObservatory, equals(true));
       expect(flutterPlatform.machine, equals(true));
-      expect(flutterPlatform.startPaused, equals(true));
-      expect(flutterPlatform.disableServiceAuthCodes, equals(true));
       expect(flutterPlatform.port, equals(100));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
-      expect(flutterPlatform.explicitObservatoryPort, equals(200));
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
-      expect(flutterPlatform.buildInfo, equals(BuildInfo.debug));
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.buildTestAssets, equals(true));
       expect(flutterPlatform.icudtlPath, equals('ghi'));
@@ -278,18 +287,20 @@ class MockHttpServer extends Mock implements HttpServer {}
 //
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
-  TestFlutterPlatform([List<String> additionalArguments]) : super(
-    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
+  TestFlutterPlatform([List<String> dartEntrypointArgs = const <String>[]]) : super(
     shellPath: '/',
+    debuggingOptions: DebuggingOptions.enabled(
+      const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
+      startPaused: false,
+      disableDds: true,
+      dartEntrypointArgs: dartEntrypointArgs,
+    ),
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
     port: 0,
     updateGoldens: false,
-    startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
-    disableDds: true,
-    additionalArguments: additionalArguments,
   );
 
   @override
@@ -302,19 +313,20 @@ class TestFlutterPlatform extends FlutterPlatform {
 // Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestObservatoryFlutterPlatform extends FlutterPlatform {
   TestObservatoryFlutterPlatform() : super(
-    buildInfo: const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
     shellPath: '/',
+    debuggingOptions: DebuggingOptions.enabled(
+      const BuildInfo(BuildMode.debug, '', treeShakeIcons: false, packagesPath: '.dart_tool/package_config.json'),
+      startPaused: false,
+      disableDds: false,
+      disableServiceAuthCodes: false,
+      hostVmServicePort: 1234,
+    ),
     precompiledDillPath: 'example.dill',
     host: InternetAddress.loopbackIPv6,
     port: 0,
     updateGoldens: false,
-    startPaused: false,
     enableObservatory: true,
-    explicitObservatoryPort: 1234,
     buildTestAssets: false,
-    disableServiceAuthCodes: false,
-    disableDds: false,
-    additionalArguments: null,
   );
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();

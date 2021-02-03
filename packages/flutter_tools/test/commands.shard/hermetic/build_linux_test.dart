@@ -368,10 +368,10 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
-      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
       '  "SPLIT_DEBUG_INFO=foo/"',
       '  "TRACK_WIDGET_CREATION=true"',
       '  "TREE_SHAKE_ICONS=true"',
