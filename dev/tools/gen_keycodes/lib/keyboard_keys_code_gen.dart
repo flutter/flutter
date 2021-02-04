@@ -15,14 +15,6 @@ String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
-// class _ExplicitKeySpecification {
-//   const _ExplicitKeySpecification(this.code, this.name, [this.constantName]);
-
-//   final int code;
-//   final String name;
-//   final String constantName;
-// }
-
 /// Generates the keyboard_keys.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
