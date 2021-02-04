@@ -27,21 +27,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-const FakeCommand kDeployCommand = FakeCommand(
-  command: <String>[
-    'Artifact.iosDeploy.TargetPlatform.ios',
-    '--id',
-    '123',
-    '--bundle',
-    '/',
-    '--no-wifi',
-  ],
-  environment: <String, String>{
-    'PATH': '/usr/bin:null',
-    'DYLD_LIBRARY_PATH': '/path/to/libraries',
-  }
-);
-
 // The command used to actually launch the app with args in release/profile.
 const FakeCommand kLaunchReleaseCommand = FakeCommand(
   command: <String>[
@@ -123,7 +108,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp attaches in debug mode via log reading on iOS 13+', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kAttachDebuggerCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -160,7 +144,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp launches in debug mode via log reading on <iOS 13', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kLaunchDebugCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -198,7 +181,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       kLaunchReleaseCommand,
     ]);
     final IOSDevice device = setUpIOSDevice(
@@ -226,7 +208,6 @@ void main() {
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kDeployCommand,
       FakeCommand(
         command: <String>[
           'script',
