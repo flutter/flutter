@@ -111,7 +111,7 @@ void main() {
         path: 'path/to/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      expect(unit.toString(),'\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4'); 
+      expect(unit.toString(),'\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
     test('equalsIgnoringPath', () {
@@ -145,10 +145,10 @@ void main() {
         path: 'path/to/other/so.so',
         libraries: <String>['lib1', 'lib5'],
       );
-      expect(unit1.equalsIgnoringPath(unit2), true); 
-      expect(unit2.equalsIgnoringPath(unit3), false); 
-      expect(unit3.equalsIgnoringPath(unit4), false); 
-      expect(unit4.equalsIgnoringPath(unit5), false); 
+      expect(unit1.equalsIgnoringPath(unit2), true);
+      expect(unit2.equalsIgnoringPath(unit3), false);
+      expect(unit3.equalsIgnoringPath(unit4), false);
+      expect(unit4.equalsIgnoringPath(unit5), false);
       expect(unit5.equalsIgnoringPath(unit6), false);
     });
 
