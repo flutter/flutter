@@ -1832,7 +1832,7 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryLayout = true;
       return true;
     }());
-    final Size result =  computeDryLayout(constraints);
+    final Size result = computeDryLayout(constraints);
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
