@@ -517,30 +517,19 @@ class ArchivePublisher {
   /// This method will throw if the target archive already exists on cloud
   /// storage.
   Future<void> publishArchive([bool forceUpload = false]) async {
-    // Old bucket
-    String destGsPath = '$oldGsReleaseFolder/$destinationArchivePath';
-    if (!forceUpload) {
-      if (await _cloudPathExists(destGsPath) && !dryRun) {
-        throw PreparePackageException(
-          'File $destGsPath already exists on cloud storage!',
-        );
+    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
+      final String destGsPath = '$releaseFolder/$destinationArchivePath';
+      if (!forceUpload) {
+        if (await _cloudPathExists(destGsPath) && !dryRun) {
+          throw PreparePackageException(
+            'File $destGsPath already exists on cloud storage!',
+          );
+        }
       }
+      await _cloudCopy(outputFile.absolute.path, destGsPath);
+      assert(tempDir.existsSync());
+      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
     }
-    await _cloudCopy(outputFile.absolute.path, destGsPath);
-    assert(tempDir.existsSync());
-    await _updateMetadata('$oldGsReleaseFolder/${getMetadataFilename(platform)}', newBucket: false);
-    // New bucket
-    destGsPath = '$newGsReleaseFolder/$destinationArchivePath';
-    if (!forceUpload) {
-      if (await _cloudPathExists(destGsPath) && !dryRun) {
-        throw PreparePackageException(
-          'File $destGsPath already exists on cloud storage!',
-        );
-      }
-    }
-    await _cloudCopy(outputFile.absolute.path, destGsPath);
-    assert(tempDir.existsSync());
-    await _updateMetadata('$newGsReleaseFolder/${getMetadataFilename(platform)}', newBucket: true);
   }
 
   Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData, {bool newBucket=true}) async {
