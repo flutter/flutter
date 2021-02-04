@@ -9,11 +9,11 @@
 #include <map>
 #include <memory>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_channel.h"
-#include "flutter/shell/platform/common/cpp/geometry.h"
-#include "flutter/shell/platform/common/cpp/json_method_codec.h"
-#include "flutter/shell/platform/common/cpp/text_input_model.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
+#include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/platform/common/json_method_codec.h"
+#include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"

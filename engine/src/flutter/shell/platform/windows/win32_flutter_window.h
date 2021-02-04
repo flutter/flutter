@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "flutter/shell/platform/common/cpp/geometry.h"
+#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/win32_window.h"

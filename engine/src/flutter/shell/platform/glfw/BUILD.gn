@@ -19,14 +19,13 @@ config("relative_flutter_glfw_headers") {
 source_set("flutter_glfw_headers") {
   public = _public_headers
 
-  public_deps =
-      [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
+  public_deps = [ "//flutter/shell/platform/common:common_cpp_library_headers" ]
 
   configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+      [ "//flutter/shell/platform/common:desktop_library_implementation" ]
 
   public_configs =
-      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
+      [ "//flutter/shell/platform/common:relative_flutter_library_headers" ]
 }
 
 source_set("flutter_glfw") {
@@ -51,14 +50,14 @@ source_set("flutter_glfw") {
   ]
 
   configs +=
-      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+      [ "//flutter/shell/platform/common:desktop_library_implementation" ]
 
   deps = [
     ":flutter_glfw_headers",
     "//build/secondary/third_party/glfw",
-    "//flutter/shell/platform/common/cpp:common_cpp",
-    "//flutter/shell/platform/common/cpp:common_cpp_input",
-    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common:common_cpp",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
     "//third_party/rapidjson",
@@ -96,5 +95,5 @@ copy("publish_headers_glfw") {
   outputs = [ "$root_out_dir/{{source_file_part}}" ]
 
   # The GLFW header assumes the presence of the common headers.
-  deps = [ "//flutter/shell/platform/common/cpp:publish_headers" ]
+  deps = [ "//flutter/shell/platform/common:publish_headers" ]
 }

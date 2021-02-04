@@ -127,8 +127,8 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
-    "//flutter/shell/platform/common/cpp:common_cpp_input",
-    "//flutter/shell/platform/common/cpp:common_cpp_switches",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//third_party/rapidjson",
   ]

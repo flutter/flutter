@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "flutter/shell/platform/common/cpp/json_message_codec.h"
+#include "flutter/shell/platform/common/json_message_codec.h"
 
 static constexpr char kChannelName[] = "flutter/keyevent";
 

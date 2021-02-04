@@ -6,7 +6,7 @@
 
 #include <gtk/gtk.h>
 
-#include "flutter/shell/platform/common/cpp/text_input_model.h"
+#include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
 

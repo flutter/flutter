@@ -11,7 +11,7 @@
 #include <optional>
 #include <string>
 
-#include "flutter/shell/platform/common/cpp/geometry.h"
+#include "flutter/shell/platform/common/geometry.h"
 
 namespace flutter {
 

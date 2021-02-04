@@ -102,7 +102,7 @@ source_set("flutter_framework_source") {
     ":macos_gpu_configuration",
     "//flutter/flow:flow",
     "//flutter/fml",
-    "//flutter/shell/platform/common/cpp:common_cpp_switches",
+    "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//third_party/skia",

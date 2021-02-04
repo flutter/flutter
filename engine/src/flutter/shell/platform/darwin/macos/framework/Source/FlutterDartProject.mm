@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "flutter/shell/platform/common/cpp/engine_switches.h"
+#include "flutter/shell/platform/common/engine_switches.h"
 
 static NSString* const kICUBundlePath = @"icudtl.dat";
 static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
