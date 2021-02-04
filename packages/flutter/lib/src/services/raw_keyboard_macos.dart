@@ -112,8 +112,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
-        keyLabel: physicalKey.debugName ?? '',
-        debugName: physicalKey.debugName,
+        debugName: 'Physical ${physicalKey.debugName}',
       );
     }
 
