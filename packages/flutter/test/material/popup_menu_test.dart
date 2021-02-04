@@ -765,7 +765,6 @@ void main() {
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
     PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
       return PopupMenuButton<int>(
-        placement: PopupMenuPlacement.belowButton,
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
