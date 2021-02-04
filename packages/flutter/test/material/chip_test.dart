@@ -881,8 +881,8 @@ void main() {
   });
 
   testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
-    final UniqueKey labelKey = UniqueKey();
-    final UniqueKey deleteButtonKey = UniqueKey();
+    const Key labelKey = Key('label');
+    const Key deleteButtonKey = Key('delete');
     bool wasDeleted = false;
     Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
@@ -898,8 +898,8 @@ void main() {
                         });
                       }
                     : null,
-                  deleteIcon: Container(width: 40.0, height: 40.0, key: deleteButtonKey),
-                  label: Text('Chip', key: labelKey),
+                  deleteIcon: Container(width: 40.0, height: 40.0, color: Colors.blue, key: deleteButtonKey),
+                  label: const Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
                 );
               }),

@@ -701,12 +701,12 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
 
     // Tapping the "page" route's back button doesn't do anything either.
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Back'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));

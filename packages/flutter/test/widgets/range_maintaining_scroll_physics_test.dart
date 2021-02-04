@@ -256,7 +256,7 @@ void main() {
     // - scroll extents have changed
     // - position does not change at the same time
     // - old position is out of old range AND new range
-    await tester.drag(find.byType(Placeholder), const Offset(0.0, 100.0), touchSlopY: 0.0);
+    await tester.drag(find.byType(Placeholder), const Offset(0.0, 100.0), touchSlopY: 0.0, warnIfMissed: false); // it'll hit the scrollable
     await tester.pump();
     final Rect oldPosition = tester.getRect(find.byType(Placeholder));
     await tester.pumpWidget(build(220.0));
