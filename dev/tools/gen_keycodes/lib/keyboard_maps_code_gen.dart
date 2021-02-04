@@ -9,10 +9,18 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
+/// A utility class to build join a number of lines in a sorted order.
+///
+/// Use [add] to add a line and associate it with an index. Use [sortedJoin] to
+/// get the joined string of these lines joined sorting them in the order of the
+/// index.
 class _OutputLines<T extends Comparable<Object>> {
   final Map<T, String> lines = <T, String>{};
 
   void add(T code, String line) {
+    if (lines.containsKey(code)) {
+      print('Warn: $code already exists in output as follows:\n  ${lines[code]}');
+    }
     lines[code] = line;
   }
 
@@ -93,10 +101,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get gtkNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
-      if (entry.gtkValues != null) {
-        for (final int code in entry.gtkValues) {
-          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.gtkValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -106,10 +112,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get gtkKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      if (entry.gtkValues != null) {
-        for (final int code in entry.gtkValues) {
-          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.gtkValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -130,10 +134,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get androidKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      if (entry.androidValues != null) {
-        for (final int code in entry.androidValues) {
-          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.androidValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -143,10 +145,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get androidNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
-      if (entry.androidValues != null) {
-        for (final int code in entry.androidValues) {
-          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.androidValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -180,10 +180,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get windowsNumpadMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
-      if (entry.windowsValues != null){
-        for (final int code in entry.windowsValues) {
-          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.windowsValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -195,8 +193,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       // Letter keys on Windows are not recorded in logical_key_data.json,
       // because they are not used by the embedding. Add them manually.
-      final List<int> keyCodes = entry.windowsValues ??
-        (entry.keyLabel != null ? <int>[entry.keyLabel.toUpperCase().codeUnitAt(0)] : null);
+      final List<int> keyCodes = entry.windowsValues.isNotEmpty
+        ? entry.windowsValues
+        : (entry.keyLabel != null ? <int>[entry.keyLabel.toUpperCase().codeUnitAt(0)] : null);
       if (keyCodes != null) {
         for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
@@ -287,10 +286,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get webLogicalKeyMap {
     final _OutputLines<String> lines = _OutputLines<String>();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      if (entry.webNames != null) {
-        for (final String name in entry.webNames) {
-          lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
-        }
+      for (final String name in entry.webNames) {
+        lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();
@@ -311,10 +308,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get webNumpadMap {
     final _OutputLines<String> lines = _OutputLines<String>();
     for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
-      if (entry.webNames != null) {
-        for (final String name in entry.webNames) {
-          lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
-        }
+      for (final String name in entry.webNames) {
+        lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
       }
     }
     return lines.sortedJoin().trimRight();

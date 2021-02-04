@@ -16,11 +16,16 @@ const int kNumpadPlane = 0x00200000000;
 const int kLeftModifierPlane = 0x00300000000;
 const int kRightModifierPlane = 0x00400000000;
 
+/// A pair of strings that represents left and right modifiers.
 class _ModifierPair {
   const _ModifierPair(this.left, this.right);
 
   final String left;
   final String right;
+}
+
+List<T> _toNonEmptyArray<T>(dynamic source) {
+  return (source as List<dynamic> ?? <T>[])?.cast<T>();
 }
 
 /// The data structure used to manage keyboard key entries.
@@ -337,16 +342,16 @@ class LogicalKeyEntry {
     : value = map['value'] as int,
       constantName = map['constant'] as String,
       commentName = map['english'] as String,
-      webNames = (map['names']['web'] as List<dynamic>)?.cast<String>(),
-      webValues = (map['values']['web'] as List<dynamic>)?.cast<int>(),
-      macOsNames = (map['names']['macOs'] as List<dynamic>)?.cast<String>(),
-      macOsValues = (map['values']['macOs'] as List<dynamic>)?.cast<int>(),
-      gtkNames = (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
-      gtkValues = (map['values']['gtk'] as List<dynamic>)?.cast<int>(),
-      windowsNames = (map['names']['windows'] as List<dynamic>)?.cast<String>(),
-      windowsValues = (map['values']['windows'] as List<dynamic>)?.cast<int>(),
-      androidNames = (map['names']['android'] as List<dynamic>)?.cast<String>(),
-      androidValues = (map['values']['android'] as List<dynamic>)?.cast<int>(),
+      webNames = _toNonEmptyArray<String>(map['names']['web']),
+      webValues = _toNonEmptyArray<int>(map['values']['web']),
+      macOsNames = _toNonEmptyArray<String>(map['names']['macOs']),
+      macOsValues = _toNonEmptyArray<int>(map['values']['macOs']),
+      gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
+      gtkValues = _toNonEmptyArray<int>(map['values']['gtk']),
+      windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
+      windowsValues = _toNonEmptyArray<int>(map['values']['windows']),
+      androidNames = _toNonEmptyArray<String>(map['names']['android']),
+      androidValues = _toNonEmptyArray<int>(map['values']['android']),
       keyLabel = map['keyLabel'] as String;
 
   final int value;
