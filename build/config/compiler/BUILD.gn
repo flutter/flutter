@@ -416,12 +416,14 @@ config("compiler") {
       "-funwind-tables",
       "-fno-short-enums",
       "-nostdinc++",
-      # TODO (https://github.com/flutter/flutter/issues/75348).
-      "-mno-outline-atomics",
     ]
     if (!is_clang) {
       # Clang doesn't support these flags.
       cflags += [ "-finline-limit=64" ]
+    }
+    if (current_cpu == "arm64") {
+      # TODO (https://github.com/flutter/flutter/issues/75348).
+      cflags += [ "-mno-outline-atomics" ]
     }
 
     defines += [ "ANDROID" ]
