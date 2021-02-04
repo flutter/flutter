@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "flutter/shell/platform/common/cpp/json_method_codec.h"
+#include "flutter/shell/platform/common/json_method_codec.h"
 
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kClearClientMethod[] = "TextInput.clearClient";

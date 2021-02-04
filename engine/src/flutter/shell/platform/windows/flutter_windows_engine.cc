@@ -8,10 +8,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/binary_messenger_impl.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h"
-#include "flutter/shell/platform/common/cpp/json_message_codec.h"
-#include "flutter/shell/platform/common/cpp/path_utils.h"
+#include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
+#include "flutter/shell/platform/common/json_message_codec.h"
+#include "flutter/shell/platform/common/path_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/string_conversion.h"
 #include "flutter/shell/platform/windows/system_utils.h"

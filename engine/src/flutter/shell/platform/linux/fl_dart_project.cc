@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "flutter/shell/platform/common/cpp/engine_switches.h"
+#include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 
 struct _FlDartProject {

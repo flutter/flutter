@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "flutter/shell/platform/common/cpp/json_method_codec.h"
+#include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";

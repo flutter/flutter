@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 
 namespace flutter {
 

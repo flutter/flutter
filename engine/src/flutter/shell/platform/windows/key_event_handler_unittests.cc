@@ -6,7 +6,7 @@
 #include <rapidjson/document.h>
 #include <memory>
 
-#include "flutter/shell/platform/common/cpp/json_message_codec.h"
+#include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
 #include "gmock/gmock.h"
