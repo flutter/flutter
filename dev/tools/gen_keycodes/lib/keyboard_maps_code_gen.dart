@@ -149,9 +149,9 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   /// This generates the map of Android scan codes to physical keys.
   String get androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (final LogicalKeyEntry entry in logicalData.data.values) {
-      if (entry.androidValues != null) {
-        for (final int code in entry.androidValues) {
+    for (final PhysicalKeyEntry entry in keyData.data) {
+      if (entry.androidScanCodes != null) {
+        for (final int code in entry.androidScanCodes) {
           androidScanCodeMap.writeln('  $code: PhysicalKeyboardKey.${entry.constantName},');
         }
       }
