@@ -255,7 +255,7 @@ Future<void> main(List<String> rawArguments) async {
       await getAndroidKeyCodes() :
       File(parsedArguments['android-keycodes'] as String).readAsStringSync();
 
-    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey, androidKeyCodes, androidToDomKey);
+    logicalData = LogicalKeyData(webLogicalKeys, gtkKeyCodes, gtkToDomKey, windowsKeyCodes, windowsToDomKey, androidKeyCodes, androidToDomKey, physicalData);
 
     // Write data files
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');

@@ -10,6 +10,8 @@ import 'package:meta/meta.dart';
 
 import 'package:gen_keycodes/utils.dart';
 
+import 'physical_key_data.dart';
+
 const int kNumpadPlane = 0x00200000000;
 const int kLeftModifierPlane = 0x00300000000;
 const int kRightModifierPlane = 0x00400000000;
@@ -40,6 +42,7 @@ class LogicalKeyData {
     String windowsNameMap,
     String androidKeyCodeHeader,
     String androidNameMap,
+    PhysicalKeyData physicalKeyData,
   )   : assert(chromiumKeys != null),
         assert(gtkKeyCodeHeader != null),
         assert(gtkNameMap != null) {
@@ -48,6 +51,13 @@ class LogicalKeyData {
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
     _readGtkKeyCodes(data, gtkKeyCodeHeader, parseMapOfListOfString(gtkNameMap));
     _readAndroidKeyCodes(data, androidKeyCodeHeader, parseMapOfListOfString(androidNameMap));
+    _readMacOsKeyCodes(
+      data,
+      physicalKeyData,
+      parseMapOfListOfString(File(
+        path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'macos_logical_to_physical.json')
+      ).readAsStringSync()),
+    );
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) => a.value.value.compareTo(b.value.value)
@@ -147,6 +157,30 @@ class LogicalKeyData {
     // Make sure every Numpad keys that we care have been defined.
     unusedNumpad.forEach((String key, String value) {
       print('Unuadded numpad key $value');
+    });
+  }
+
+  void _readMacOsKeyCodes(
+    Map<String, LogicalKeyEntry> data,
+    PhysicalKeyData physicalKeyData,
+    Map<String, List<String>> logicalToPhysical,
+  ) {
+    final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
+        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
+
+    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
+      final PhysicalKeyEntry physicalEntry = physicalKeyData.getEntryByName(physicalKeyName);
+      final LogicalKeyEntry logicalEntry = data[logicalKeyName];
+      if (physicalEntry == null || physicalEntry.macOsScanCode == null) {
+        print('Unexpected physical key $physicalKeyName specified for macOS keyCodeToLogicalMap.');
+        return;
+      }
+      if (logicalEntry == null) {
+        print('Unexpected logical key $logicalKeyName specified for macOS keyCodeToLogicalMap.');
+        return;
+      }
+      logicalEntry.macOsNames.add(physicalEntry.name);
+      logicalEntry.macOsValues.add(physicalEntry.macOsScanCode);
     });
   }
 
@@ -278,6 +312,8 @@ class LogicalKeyEntry {
         assert(value != null),
         webNames = <String>[],
         webValues = <int>[],
+        macOsNames = <String>[],
+        macOsValues = <int>[],
         gtkNames = <String>[],
         gtkValues = <int>[],
         windowsNames = <String>[],
@@ -303,6 +339,8 @@ class LogicalKeyEntry {
       commentName = map['english'] as String,
       webNames = (map['names']['web'] as List<dynamic>)?.cast<String>(),
       webValues = (map['values']['web'] as List<dynamic>)?.cast<int>(),
+      macOsNames = (map['names']['macOs'] as List<dynamic>)?.cast<String>(),
+      macOsValues = (map['values']['macOs'] as List<dynamic>)?.cast<int>(),
       gtkNames = (map['names']['gtk'] as List<dynamic>)?.cast<String>(),
       gtkValues = (map['values']['gtk'] as List<dynamic>)?.cast<int>(),
       windowsNames = (map['names']['windows'] as List<dynamic>)?.cast<String>(),
@@ -325,6 +363,15 @@ class LogicalKeyEntry {
 
   /// The value of the key.
   final List<int> webValues;
+
+  /// The list of names that macOS gives to this key (symbol names minus the
+  /// prefix).
+  final List<String> macOsNames;
+
+  /// The list of macOS key codes matching this key, created by looking up the
+  /// Linux name in the macOS data, and substituting the macOS key code
+  /// value.
+  final List<int> macOsValues;
 
   /// The list of names that GTK gives to this key (symbol names minus the
   /// prefix).
@@ -364,12 +411,14 @@ class LogicalKeyEntry {
       'keyLabel': keyLabel,
       'names': removeEmptyValues(<String, dynamic>{
         'web': webNames,
+        'macOs': macOsNames,
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
       }),
       'values': removeEmptyValues(<String, List<int>>{
         'web': webValues,
+        'macOs': macOsValues,
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,

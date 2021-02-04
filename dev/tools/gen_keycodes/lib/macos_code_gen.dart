@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'mask_constants.dart';
 import 'logical_key_data.dart';
+import 'mask_constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
@@ -48,26 +46,12 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _keyCodeToLogicalMap {
-    final Map<String, List<String>> logicalToPhysical = parseMapOfListOfString(File(
-      path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'macos_logical_to_physical.json')
-    ).readAsStringSync());
-    final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
-        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
-
     final StringBuffer result = StringBuffer();
-    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
-      final PhysicalKeyEntry physicalEntry = keyData.getEntryByName(physicalKeyName);
-      final int logicalValue = logicalData.data[logicalKeyName]?.value;
-      if (physicalEntry == null || physicalEntry.macOsScanCode == null) {
-        print('Unexpected physical key $physicalKeyName specified for macOS keyCodeToLogicalMap.');
-        return;
-      }
-      if (logicalValue == null) {
-        print('Unexpected logical key $logicalKeyName specified for macOS keyCodeToLogicalMap.');
-        return;
-      }
-      result.writeln('  @${toHex(physicalEntry.macOsScanCode)} : @${toHex(logicalValue, digits: 10)},    // ${physicalEntry.name}');
-    });
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
+      zipStrict(entry.macOsValues, entry.macOsNames, (int macOsValue, String macOsName) {
+        result.writeln('  @${toHex(macOsValue)} : @${toHex(entry.value, digits: 10)},    // $macOsName');
+      });
+    }
     return result.toString().trimRight();
   }
 
