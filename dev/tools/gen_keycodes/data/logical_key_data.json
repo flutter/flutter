@@ -1676,6 +1676,9 @@
       "web": [
         "Delete"
       ],
+      "macOs": [
+        "Delete"
+      ],
       "gtk": [
         "Delete"
       ],
@@ -1689,6 +1692,9 @@
     "values": {
       "web": [
         127
+      ],
+      "macOs": [
+        117
       ],
       "gtk": [
         65535
@@ -5089,6 +5095,9 @@
       "web": [
         "AudioVolumeDown"
       ],
+      "macOs": [
+        "AudioVolumeDown"
+      ],
       "gtk": [
         "AudioLowerVolume"
       ],
@@ -5102,6 +5111,9 @@
     "values": {
       "web": [
         2575
+      ],
+      "macOs": [
+        73
       ],
       "gtk": [
         269025041
@@ -5122,6 +5134,9 @@
       "web": [
         "AudioVolumeUp"
       ],
+      "macOs": [
+        "AudioVolumeUp"
+      ],
       "gtk": [
         "AudioRaiseVolume"
       ],
@@ -5135,6 +5150,9 @@
     "values": {
       "web": [
         2576
+      ],
+      "macOs": [
+        72
       ],
       "gtk": [
         269025043
@@ -5155,6 +5173,9 @@
       "web": [
         "AudioVolumeMute"
       ],
+      "macOs": [
+        "AudioVolumeMute"
+      ],
       "gtk": [
         "AudioMute"
       ],
@@ -5168,6 +5189,9 @@
     "values": {
       "web": [
         2577
+      ],
+      "macOs": [
+        74
       ],
       "gtk": [
         269025042
@@ -8997,6 +9021,9 @@
       "web": [
         "IntlRo"
       ],
+      "macOs": [
+        "IntlRo"
+      ],
       "android": [
         "RO"
       ]
@@ -9004,6 +9031,9 @@
     "values": {
       "web": [
         4295426183
+      ],
+      "macOs": [
+        94
       ],
       "android": [
         217
@@ -9018,6 +9048,9 @@
       "web": [
         "IntlYen"
       ],
+      "macOs": [
+        "IntlYen"
+      ],
       "gtk": [
         "yen"
       ],
@@ -9028,6 +9061,9 @@
     "values": {
       "web": [
         4295426185
+      ],
+      "macOs": [
+        93
       ],
       "gtk": [
         165
@@ -9045,6 +9081,9 @@
       "web": [
         "Lang1"
       ],
+      "macOs": [
+        "Lang1"
+      ],
       "windows": [
         "KANA",
         "HANGEUL",
@@ -9054,6 +9093,9 @@
     "values": {
       "web": [
         4295426192
+      ],
+      "macOs": [
+        104
       ],
       "windows": [
         21,
@@ -9069,11 +9111,17 @@
     "names": {
       "web": [
         "Lang2"
+      ],
+      "macOs": [
+        "Lang2"
       ]
     },
     "values": {
       "web": [
         4295426193
+      ],
+      "macOs": [
+        102
       ]
     }
   },

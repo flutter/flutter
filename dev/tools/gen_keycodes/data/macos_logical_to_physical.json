@@ -14,6 +14,7 @@
   "pageDown": ["PageDown"],
   "pageUp": ["PageUp"],
   "insert": ["Insert"],
+  "delete": ["Delete"],
   "contextMenu": ["ContextMenu"],
   "f1": ["F1"],
   "f2": ["F2"],
@@ -60,5 +61,15 @@
   "altRight": ["AltRight"],
   "controlRight": ["ControlRight"],
   "metaRight": ["MetaRight"],
-  "shiftRight": ["ShiftRight"]
+  "shiftRight": ["ShiftRight"],
+  "lang1": ["Lang1"],
+  "lang2": ["Lang2"],
+  "lang3": ["Lang3"],
+  "lang4": ["Lang4"],
+  "lang5": ["Lang5"],
+  "intlYen": ["IntlYen"],
+  "intlRo": ["IntlRo"],
+  "audioVolumeUp": ["AudioVolumeUp"],
+  "audioVolumeDown": ["AudioVolumeDown"],
+  "audioVolumeMute": ["AudioVolumeMute"]
 }
