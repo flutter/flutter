@@ -111,12 +111,12 @@ class LogicalKeyData {
         data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry.fromName(
           value: value + kLeftModifierPlane,
           name: pair.left,
-          keyLabel: keyLabel,
+          keyLabel: null, // Modifier keys don't have keyLabels
         );
         data[LogicalKeyEntry.computeConstantName(pair.right)] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
           name: pair.right,
-          keyLabel: keyLabel,
+          keyLabel: null, // Modifier keys don't have keyLabels
         );
         return match.group(0);
       }
@@ -128,7 +128,7 @@ class LogicalKeyData {
         data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry.fromName(
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
-          keyLabel: keyLabel,
+          keyLabel: null, // Don't add keyLabel for numpad counterparts
         );
         unusedNumpad.remove(char);
       }

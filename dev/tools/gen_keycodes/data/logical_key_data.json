@@ -8931,7 +8931,6 @@
     "constant": "numpadEnter",
     "english": "Numpad Enter",
     "value": 8589934605,
-    "keyLabel": "\r",
     "names": {
       "gtk": [
         "KP_Enter"
@@ -8953,7 +8952,6 @@
     "constant": "numpadParenLeft",
     "english": "Numpad Paren Left",
     "value": 8589934632,
-    "keyLabel": "(",
     "names": {
       "android": [
         "NUMPAD_LEFT_PAREN"
@@ -8969,7 +8967,6 @@
     "constant": "numpadParenRight",
     "english": "Numpad Paren Right",
     "value": 8589934633,
-    "keyLabel": ")",
     "names": {
       "android": [
         "NUMPAD_RIGHT_PAREN"
@@ -8985,7 +8982,6 @@
     "constant": "numpadMultiply",
     "english": "Numpad Multiply",
     "value": 8589934634,
-    "keyLabel": "*",
     "names": {
       "gtk": [
         "KP_Multiply"
@@ -9013,7 +9009,6 @@
     "constant": "numpadAdd",
     "english": "Numpad Add",
     "value": 8589934635,
-    "keyLabel": "+",
     "names": {
       "gtk": [
         "KP_Add"
@@ -9041,7 +9036,6 @@
     "constant": "numpadComma",
     "english": "Numpad Comma",
     "value": 8589934636,
-    "keyLabel": ",",
     "names": {
       "android": [
         "NUMPAD_COMMA"
@@ -9057,7 +9051,6 @@
     "constant": "numpadSubtract",
     "english": "Numpad Subtract",
     "value": 8589934637,
-    "keyLabel": "-",
     "names": {
       "gtk": [
         "KP_Subtract"
@@ -9085,7 +9078,6 @@
     "constant": "numpadDecimal",
     "english": "Numpad Decimal",
     "value": 8589934638,
-    "keyLabel": ".",
     "names": {
       "gtk": [
         "KP_Delete"
@@ -9113,7 +9105,6 @@
     "constant": "numpadDivide",
     "english": "Numpad Divide",
     "value": 8589934639,
-    "keyLabel": "/",
     "names": {
       "gtk": [
         "KP_Divide"
@@ -9141,7 +9132,6 @@
     "constant": "numpad0",
     "english": "Numpad 0",
     "value": 8589934640,
-    "keyLabel": "0",
     "names": {
       "gtk": [
         "KP_Insert",
@@ -9171,7 +9161,6 @@
     "constant": "numpad1",
     "english": "Numpad 1",
     "value": 8589934641,
-    "keyLabel": "1",
     "names": {
       "gtk": [
         "KP_End",
@@ -9201,7 +9190,6 @@
     "constant": "numpad2",
     "english": "Numpad 2",
     "value": 8589934642,
-    "keyLabel": "2",
     "names": {
       "gtk": [
         "KP_Down",
@@ -9231,7 +9219,6 @@
     "constant": "numpad3",
     "english": "Numpad 3",
     "value": 8589934643,
-    "keyLabel": "3",
     "names": {
       "gtk": [
         "KP_Page_Down",
@@ -9261,7 +9248,6 @@
     "constant": "numpad4",
     "english": "Numpad 4",
     "value": 8589934644,
-    "keyLabel": "4",
     "names": {
       "gtk": [
         "KP_Left",
@@ -9291,7 +9277,6 @@
     "constant": "numpad5",
     "english": "Numpad 5",
     "value": 8589934645,
-    "keyLabel": "5",
     "names": {
       "gtk": [
         "KP_5"
@@ -9319,7 +9304,6 @@
     "constant": "numpad6",
     "english": "Numpad 6",
     "value": 8589934646,
-    "keyLabel": "6",
     "names": {
       "gtk": [
         "KP_Right",
@@ -9349,7 +9333,6 @@
     "constant": "numpad7",
     "english": "Numpad 7",
     "value": 8589934647,
-    "keyLabel": "7",
     "names": {
       "gtk": [
         "KP_Home",
@@ -9379,7 +9362,6 @@
     "constant": "numpad8",
     "english": "Numpad 8",
     "value": 8589934648,
-    "keyLabel": "8",
     "names": {
       "gtk": [
         "KP_Up",
@@ -9409,7 +9391,6 @@
     "constant": "numpad9",
     "english": "Numpad 9",
     "value": 8589934649,
-    "keyLabel": "9",
     "names": {
       "gtk": [
         "KP_Page_Up",
@@ -9439,7 +9420,6 @@
     "constant": "numpadEqual",
     "english": "Numpad Equal",
     "value": 8589934653,
-    "keyLabel": "=",
     "names": {
       "gtk": [
         "KP_Equal"
