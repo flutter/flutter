@@ -4,15 +4,13 @@
 
 // @dart = 2.8
 
-import 'dart:convert';
-import 'dart:io' as io;
-
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 
 /// Represents a configured deferred component as defined in
@@ -152,7 +150,7 @@ class LoadingUnit {
 
   /// Returns true if the other loading unit has the same [id] and the same set of [libraries],
   /// ignoring order.
-  bool equalsIgnorePath(LoadingUnit other) {
+  bool equalsIgnoringPath(LoadingUnit other) {
     return other.id == id && other.libraries.toSet().containsAll(libraries);
   }
 
@@ -197,19 +195,26 @@ class LoadingUnit {
     }
     // Read gen_snapshot manifest
     final String fileString = manifestFile.readAsStringSync();
-    final Map<String, dynamic> manifest = jsonDecode(fileString) as Map<String, dynamic>;
+    Map<String, dynamic> manifest;
+    try {
+      manifest = jsonDecode(fileString) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      globals.printError(e.toString());
+    }
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     // Setup android source directory
-    for (final dynamic loadingUnitMetadata in manifest['loadingUnits']) {
-      final Map<String, dynamic> loadingUnitMap = loadingUnitMetadata as Map<String, dynamic>;
-      if (loadingUnitMap['id'] == 1) {
-        continue; // Skip base unit
+    if (manifest != null) {
+      for (final dynamic loadingUnitMetadata in manifest['loadingUnits']) {
+        final Map<String, dynamic> loadingUnitMap = loadingUnitMetadata as Map<String, dynamic>;
+        if (loadingUnitMap['id'] == 1) {
+          continue; // Skip base unit
+        }
+        loadingUnits.add(LoadingUnit(
+          id: loadingUnitMap['id'] as int,
+          path: loadingUnitMap['path'] as String,
+          libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
+        );
       }
-      loadingUnits.add(LoadingUnit(
-        id: loadingUnitMap['id'] as int,
-        path: loadingUnitMap['path'] as String,
-        libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
-      );
     }
     return loadingUnits;
   }
@@ -240,7 +245,7 @@ Depfile copyDeferredComponentSoFiles(
       }
       for (final LoadingUnit unit in component.loadingUnits) {
         // ensure the abi for the unit is one of the abis we build for.
-        final List<String> splitPath = unit.path.split(io.Platform.pathSeparator);
+        final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
         if (splitPath[splitPath.length - 2] != abi) {
           continue;
         }
@@ -268,7 +273,7 @@ Depfile copyDeferredComponentSoFiles(
         continue;
       }
         // ensure the abi for the unit is one of the abis we build for.
-      final List<String> splitPath = unit.path.split(io.Platform.pathSeparator);
+      final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
       if (splitPath[splitPath.length - 2] != abi) {
         continue;
       }
