@@ -179,11 +179,9 @@ void main() {
     );
 
     await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
     expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
-
-    await tester.tap(find.text('bottomSheet')); // dismiss the bottom sheet
-    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {

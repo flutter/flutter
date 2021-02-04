@@ -56,6 +56,7 @@ $dartSdkZip = "$cachePath\$dartZipName"
 
 Try {
     Import-Module BitsTransfer
+    $ProgressPreference = 'SilentlyContinue'
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -ErrorAction Stop
 }
 Catch {
@@ -70,6 +71,7 @@ Catch {
     $ProgressPreference = $OriginalProgressPreference
 }
 
+Write-Host "Expanding downloaded archive..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
     & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
@@ -78,6 +80,7 @@ If (Get-Command 7z -errorAction SilentlyContinue) {
     & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
+    $global:ProgressPreference='SilentlyContinue'
     Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
 } Else {
     # As last resort: fall back to the Windows GUI.

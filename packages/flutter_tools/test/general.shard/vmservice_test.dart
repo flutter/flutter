@@ -356,7 +356,7 @@ void main() {
     expect(skSLs, isNull);
 
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
-    expect(views, isNull);
+    expect(views, isEmpty);
 
     final vm_service.Response screenshot = await fakeVmServiceHost.vmService.screenshot();
     expect(screenshot, isNull);

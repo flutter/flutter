@@ -13,10 +13,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -163,15 +165,13 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
+    @required DebuggingOptions debuggingOptions,
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
     String tags,
     String excludeTags,
     bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableDds = false,
-    bool disableServiceAuthCodes = false,
     bool ipv6 = false,
     bool machine = false,
     String precompiledDillPath,
@@ -188,16 +188,12 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool web = false,
     String randomSeed,
     @override List<String> extraFrontEndOptions,
-    bool nullAssertions = false,
-    BuildInfo buildInfo,
     String reporter,
     String timeout,
-    List<String> additionalArguments,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
   }
-
 }
 
 class FakePackageTest implements TestWrapper {
