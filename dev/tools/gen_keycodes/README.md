@@ -5,7 +5,7 @@ the `LogicalKeyboardKey` and `PhysicalKeyboardKey` classes. It draws information
 from both the Chromium and Android source bases and incorporates the
 information it finds in those sources into a single key database in JSON form.
 
-It then generates `keyboard_key.dart` (containing the `LogicalKeyboardKey` and
+It then generates `keyboard_keys.dart` (containing the `LogicalKeyboardKey` and
 `PhysicalKeyboardKey` classes), and `keyboard_maps.dart`, containing
 platform-specific immutable maps for translating platform keycodes and
 information into the pre-defined key values in the `LogicalKeyboardKey` and
@@ -29,7 +29,7 @@ it like so:
 $FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart bin/gen_keycodes.dart
 ```
 
-This will regenerate the `keyboard_key.dart` and `keyboard_maps.dart` files in
+This will regenerate the `keyboard_keys.dart` and `keyboard_maps.dart` files in
 place.
 
 If you wish to incorporate and parse changes from the Chromium and Android

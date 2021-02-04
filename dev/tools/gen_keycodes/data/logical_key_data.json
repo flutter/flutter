@@ -39,6 +39,7 @@
     "constant": "backspace",
     "english": "Backspace",
     "value": 8,
+    "keyLabel": "\b",
     "names": {
       "web": [
         "Backspace"
@@ -72,6 +73,7 @@
     "constant": "tab",
     "english": "Tab",
     "value": 9,
+    "keyLabel": "\t",
     "names": {
       "web": [
         "Tab"
@@ -109,6 +111,7 @@
     "constant": "enter",
     "english": "Enter",
     "value": 13,
+    "keyLabel": "\r",
     "names": {
       "web": [
         "Enter"
@@ -146,6 +149,7 @@
     "constant": "escape",
     "english": "Escape",
     "value": 27,
+    "keyLabel": "\u001b",
     "names": {
       "web": [
         "Escape"
@@ -179,6 +183,7 @@
     "constant": "space",
     "english": "Space",
     "value": 32,
+    "keyLabel": " ",
     "names": {
       "web": [
         "Space"
@@ -212,6 +217,7 @@
     "constant": "exclamation",
     "english": "Exclamation",
     "value": 33,
+    "keyLabel": "!",
     "names": {
       "web": [
         "Exclamation"
@@ -227,6 +233,7 @@
     "constant": "quote",
     "english": "Quote",
     "value": 34,
+    "keyLabel": "\"",
     "names": {
       "web": [
         "Quote"
@@ -254,6 +261,7 @@
     "constant": "numberSign",
     "english": "Number Sign",
     "value": 35,
+    "keyLabel": "#",
     "names": {
       "web": [
         "NumberSign"
@@ -269,6 +277,7 @@
     "constant": "dollar",
     "english": "Dollar",
     "value": 36,
+    "keyLabel": "$",
     "names": {
       "web": [
         "Dollar"
@@ -284,6 +293,7 @@
     "constant": "percent",
     "english": "Percent",
     "value": 37,
+    "keyLabel": "%",
     "names": {
       "web": [
         "Percent"
@@ -299,6 +309,7 @@
     "constant": "ampersand",
     "english": "Ampersand",
     "value": 38,
+    "keyLabel": "&",
     "names": {
       "web": [
         "Ampersand"
@@ -314,6 +325,7 @@
     "constant": "quoteSingle",
     "english": "Quote Single",
     "value": 39,
+    "keyLabel": "'",
     "names": {
       "web": [
         "QuoteSingle"
@@ -329,6 +341,7 @@
     "constant": "parenthesisLeft",
     "english": "Parenthesis Left",
     "value": 40,
+    "keyLabel": "(",
     "names": {
       "web": [
         "ParenthesisLeft"
@@ -344,6 +357,7 @@
     "constant": "parenthesisRight",
     "english": "Parenthesis Right",
     "value": 41,
+    "keyLabel": ")",
     "names": {
       "web": [
         "ParenthesisRight"
@@ -359,6 +373,7 @@
     "constant": "asterisk",
     "english": "Asterisk",
     "value": 42,
+    "keyLabel": "*",
     "names": {
       "web": [
         "Asterisk"
@@ -374,6 +389,7 @@
     "constant": "add",
     "english": "Add",
     "value": 43,
+    "keyLabel": "+",
     "names": {
       "web": [
         "Add"
@@ -389,6 +405,7 @@
     "constant": "comma",
     "english": "Comma",
     "value": 44,
+    "keyLabel": ",",
     "names": {
       "web": [
         "Comma"
@@ -416,6 +433,7 @@
     "constant": "minus",
     "english": "Minus",
     "value": 45,
+    "keyLabel": "-",
     "names": {
       "web": [
         "Minus"
@@ -443,6 +461,7 @@
     "constant": "period",
     "english": "Period",
     "value": 46,
+    "keyLabel": ".",
     "names": {
       "web": [
         "Period"
@@ -476,6 +495,7 @@
     "constant": "slash",
     "english": "Slash",
     "value": 47,
+    "keyLabel": "/",
     "names": {
       "web": [
         "Slash"
@@ -503,6 +523,7 @@
     "constant": "digit0",
     "english": "Digit 0",
     "value": 48,
+    "keyLabel": "0",
     "names": {
       "web": [
         "Digit0"
@@ -524,6 +545,7 @@
     "constant": "digit1",
     "english": "Digit 1",
     "value": 49,
+    "keyLabel": "1",
     "names": {
       "web": [
         "Digit1"
@@ -545,6 +567,7 @@
     "constant": "digit2",
     "english": "Digit 2",
     "value": 50,
+    "keyLabel": "2",
     "names": {
       "web": [
         "Digit2"
@@ -566,6 +589,7 @@
     "constant": "digit3",
     "english": "Digit 3",
     "value": 51,
+    "keyLabel": "3",
     "names": {
       "web": [
         "Digit3"
@@ -587,6 +611,7 @@
     "constant": "digit4",
     "english": "Digit 4",
     "value": 52,
+    "keyLabel": "4",
     "names": {
       "web": [
         "Digit4"
@@ -608,6 +633,7 @@
     "constant": "digit5",
     "english": "Digit 5",
     "value": 53,
+    "keyLabel": "5",
     "names": {
       "web": [
         "Digit5"
@@ -629,6 +655,7 @@
     "constant": "digit6",
     "english": "Digit 6",
     "value": 54,
+    "keyLabel": "6",
     "names": {
       "web": [
         "Digit6"
@@ -650,6 +677,7 @@
     "constant": "digit7",
     "english": "Digit 7",
     "value": 55,
+    "keyLabel": "7",
     "names": {
       "web": [
         "Digit7"
@@ -671,6 +699,7 @@
     "constant": "digit8",
     "english": "Digit 8",
     "value": 56,
+    "keyLabel": "8",
     "names": {
       "web": [
         "Digit8"
@@ -692,6 +721,7 @@
     "constant": "digit9",
     "english": "Digit 9",
     "value": 57,
+    "keyLabel": "9",
     "names": {
       "web": [
         "Digit9"
@@ -713,6 +743,7 @@
     "constant": "colon",
     "english": "Colon",
     "value": 58,
+    "keyLabel": ":",
     "names": {
       "web": [
         "Colon"
@@ -728,6 +759,7 @@
     "constant": "semicolon",
     "english": "Semicolon",
     "value": 59,
+    "keyLabel": ";",
     "names": {
       "web": [
         "Semicolon"
@@ -755,6 +787,7 @@
     "constant": "less",
     "english": "Less",
     "value": 60,
+    "keyLabel": "<",
     "names": {
       "web": [
         "Less"
@@ -770,6 +803,7 @@
     "constant": "equal",
     "english": "Equal",
     "value": 61,
+    "keyLabel": "=",
     "names": {
       "web": [
         "Equal"
@@ -797,6 +831,7 @@
     "constant": "greater",
     "english": "Greater",
     "value": 62,
+    "keyLabel": ">",
     "names": {
       "web": [
         "Greater"
@@ -812,6 +847,7 @@
     "constant": "question",
     "english": "Question",
     "value": 63,
+    "keyLabel": "?",
     "names": {
       "web": [
         "Question"
@@ -827,6 +863,7 @@
     "constant": "at",
     "english": "At",
     "value": 64,
+    "keyLabel": "@",
     "names": {
       "web": [
         "At"
@@ -842,6 +879,7 @@
     "constant": "bracketLeft",
     "english": "Bracket Left",
     "value": 91,
+    "keyLabel": "[",
     "names": {
       "web": [
         "BracketLeft"
@@ -869,6 +907,7 @@
     "constant": "backslash",
     "english": "Backslash",
     "value": 92,
+    "keyLabel": "\\",
     "names": {
       "web": [
         "Backslash"
@@ -896,6 +935,7 @@
     "constant": "bracketRight",
     "english": "Bracket Right",
     "value": 93,
+    "keyLabel": "]",
     "names": {
       "web": [
         "BracketRight"
@@ -923,6 +963,7 @@
     "constant": "caret",
     "english": "Caret",
     "value": 94,
+    "keyLabel": "^",
     "names": {
       "web": [
         "Caret"
@@ -938,6 +979,7 @@
     "constant": "underscore",
     "english": "Underscore",
     "value": 95,
+    "keyLabel": "_",
     "names": {
       "web": [
         "Underscore"
@@ -953,6 +995,7 @@
     "constant": "backquote",
     "english": "Backquote",
     "value": 96,
+    "keyLabel": "`",
     "names": {
       "web": [
         "Backquote"
@@ -980,6 +1023,7 @@
     "constant": "keyA",
     "english": "Key A",
     "value": 97,
+    "keyLabel": "a",
     "names": {
       "web": [
         "KeyA"
@@ -1001,6 +1045,7 @@
     "constant": "keyB",
     "english": "Key B",
     "value": 98,
+    "keyLabel": "b",
     "names": {
       "web": [
         "KeyB"
@@ -1022,6 +1067,7 @@
     "constant": "keyC",
     "english": "Key C",
     "value": 99,
+    "keyLabel": "c",
     "names": {
       "web": [
         "KeyC"
@@ -1043,6 +1089,7 @@
     "constant": "keyD",
     "english": "Key D",
     "value": 100,
+    "keyLabel": "d",
     "names": {
       "web": [
         "KeyD"
@@ -1064,6 +1111,7 @@
     "constant": "keyE",
     "english": "Key E",
     "value": 101,
+    "keyLabel": "e",
     "names": {
       "web": [
         "KeyE"
@@ -1085,6 +1133,7 @@
     "constant": "keyF",
     "english": "Key F",
     "value": 102,
+    "keyLabel": "f",
     "names": {
       "web": [
         "KeyF"
@@ -1106,6 +1155,7 @@
     "constant": "keyG",
     "english": "Key G",
     "value": 103,
+    "keyLabel": "g",
     "names": {
       "web": [
         "KeyG"
@@ -1127,6 +1177,7 @@
     "constant": "keyH",
     "english": "Key H",
     "value": 104,
+    "keyLabel": "h",
     "names": {
       "web": [
         "KeyH"
@@ -1148,6 +1199,7 @@
     "constant": "keyI",
     "english": "Key I",
     "value": 105,
+    "keyLabel": "i",
     "names": {
       "web": [
         "KeyI"
@@ -1169,6 +1221,7 @@
     "constant": "keyJ",
     "english": "Key J",
     "value": 106,
+    "keyLabel": "j",
     "names": {
       "web": [
         "KeyJ"
@@ -1190,6 +1243,7 @@
     "constant": "keyK",
     "english": "Key K",
     "value": 107,
+    "keyLabel": "k",
     "names": {
       "web": [
         "KeyK"
@@ -1211,6 +1265,7 @@
     "constant": "keyL",
     "english": "Key L",
     "value": 108,
+    "keyLabel": "l",
     "names": {
       "web": [
         "KeyL"
@@ -1232,6 +1287,7 @@
     "constant": "keyM",
     "english": "Key M",
     "value": 109,
+    "keyLabel": "m",
     "names": {
       "web": [
         "KeyM"
@@ -1253,6 +1309,7 @@
     "constant": "keyN",
     "english": "Key N",
     "value": 110,
+    "keyLabel": "n",
     "names": {
       "web": [
         "KeyN"
@@ -1274,6 +1331,7 @@
     "constant": "keyO",
     "english": "Key O",
     "value": 111,
+    "keyLabel": "o",
     "names": {
       "web": [
         "KeyO"
@@ -1295,6 +1353,7 @@
     "constant": "keyP",
     "english": "Key P",
     "value": 112,
+    "keyLabel": "p",
     "names": {
       "web": [
         "KeyP"
@@ -1316,6 +1375,7 @@
     "constant": "keyQ",
     "english": "Key Q",
     "value": 113,
+    "keyLabel": "q",
     "names": {
       "web": [
         "KeyQ"
@@ -1337,6 +1397,7 @@
     "constant": "keyR",
     "english": "Key R",
     "value": 114,
+    "keyLabel": "r",
     "names": {
       "web": [
         "KeyR"
@@ -1358,6 +1419,7 @@
     "constant": "keyS",
     "english": "Key S",
     "value": 115,
+    "keyLabel": "s",
     "names": {
       "web": [
         "KeyS"
@@ -1379,6 +1441,7 @@
     "constant": "keyT",
     "english": "Key T",
     "value": 116,
+    "keyLabel": "t",
     "names": {
       "web": [
         "KeyT"
@@ -1400,6 +1463,7 @@
     "constant": "keyU",
     "english": "Key U",
     "value": 117,
+    "keyLabel": "u",
     "names": {
       "web": [
         "KeyU"
@@ -1421,6 +1485,7 @@
     "constant": "keyV",
     "english": "Key V",
     "value": 118,
+    "keyLabel": "v",
     "names": {
       "web": [
         "KeyV"
@@ -1442,6 +1507,7 @@
     "constant": "keyW",
     "english": "Key W",
     "value": 119,
+    "keyLabel": "w",
     "names": {
       "web": [
         "KeyW"
@@ -1463,6 +1529,7 @@
     "constant": "keyX",
     "english": "Key X",
     "value": 120,
+    "keyLabel": "x",
     "names": {
       "web": [
         "KeyX"
@@ -1484,6 +1551,7 @@
     "constant": "keyY",
     "english": "Key Y",
     "value": 121,
+    "keyLabel": "y",
     "names": {
       "web": [
         "KeyY"
@@ -1505,6 +1573,7 @@
     "constant": "keyZ",
     "english": "Key Z",
     "value": 122,
+    "keyLabel": "z",
     "names": {
       "web": [
         "KeyZ"
@@ -1526,6 +1595,7 @@
     "constant": "braceLeft",
     "english": "Brace Left",
     "value": 123,
+    "keyLabel": "{",
     "names": {
       "web": [
         "BraceLeft"
@@ -1541,6 +1611,7 @@
     "constant": "bar",
     "english": "Bar",
     "value": 124,
+    "keyLabel": "|",
     "names": {
       "web": [
         "Bar"
@@ -1556,6 +1627,7 @@
     "constant": "braceRight",
     "english": "Brace Right",
     "value": 125,
+    "keyLabel": "}",
     "names": {
       "web": [
         "BraceRight"
@@ -1571,6 +1643,7 @@
     "constant": "tilde",
     "english": "Tilde",
     "value": 126,
+    "keyLabel": "~",
     "names": {
       "web": [
         "Tilde"
@@ -1586,6 +1659,7 @@
     "constant": "delete",
     "english": "Delete",
     "value": 127,
+    "keyLabel": "",
     "names": {
       "web": [
         "Delete"
@@ -8857,6 +8931,7 @@
     "constant": "numpadEnter",
     "english": "Numpad Enter",
     "value": 8589934605,
+    "keyLabel": "\r",
     "names": {
       "gtk": [
         "KP_Enter"
@@ -8878,6 +8953,7 @@
     "constant": "numpadParenLeft",
     "english": "Numpad Paren Left",
     "value": 8589934632,
+    "keyLabel": "(",
     "names": {
       "android": [
         "NUMPAD_LEFT_PAREN"
@@ -8893,6 +8969,7 @@
     "constant": "numpadParenRight",
     "english": "Numpad Paren Right",
     "value": 8589934633,
+    "keyLabel": ")",
     "names": {
       "android": [
         "NUMPAD_RIGHT_PAREN"
@@ -8908,6 +8985,7 @@
     "constant": "numpadMultiply",
     "english": "Numpad Multiply",
     "value": 8589934634,
+    "keyLabel": "*",
     "names": {
       "gtk": [
         "KP_Multiply"
@@ -8935,6 +9013,7 @@
     "constant": "numpadAdd",
     "english": "Numpad Add",
     "value": 8589934635,
+    "keyLabel": "+",
     "names": {
       "gtk": [
         "KP_Add"
@@ -8962,6 +9041,7 @@
     "constant": "numpadComma",
     "english": "Numpad Comma",
     "value": 8589934636,
+    "keyLabel": ",",
     "names": {
       "android": [
         "NUMPAD_COMMA"
@@ -8977,6 +9057,7 @@
     "constant": "numpadSubtract",
     "english": "Numpad Subtract",
     "value": 8589934637,
+    "keyLabel": "-",
     "names": {
       "gtk": [
         "KP_Subtract"
@@ -9004,6 +9085,7 @@
     "constant": "numpadDecimal",
     "english": "Numpad Decimal",
     "value": 8589934638,
+    "keyLabel": ".",
     "names": {
       "gtk": [
         "KP_Delete"
@@ -9031,6 +9113,7 @@
     "constant": "numpadDivide",
     "english": "Numpad Divide",
     "value": 8589934639,
+    "keyLabel": "/",
     "names": {
       "gtk": [
         "KP_Divide"
@@ -9058,6 +9141,7 @@
     "constant": "numpad0",
     "english": "Numpad 0",
     "value": 8589934640,
+    "keyLabel": "0",
     "names": {
       "gtk": [
         "KP_Insert",
@@ -9087,6 +9171,7 @@
     "constant": "numpad1",
     "english": "Numpad 1",
     "value": 8589934641,
+    "keyLabel": "1",
     "names": {
       "gtk": [
         "KP_End",
@@ -9116,6 +9201,7 @@
     "constant": "numpad2",
     "english": "Numpad 2",
     "value": 8589934642,
+    "keyLabel": "2",
     "names": {
       "gtk": [
         "KP_Down",
@@ -9145,6 +9231,7 @@
     "constant": "numpad3",
     "english": "Numpad 3",
     "value": 8589934643,
+    "keyLabel": "3",
     "names": {
       "gtk": [
         "KP_Page_Down",
@@ -9174,6 +9261,7 @@
     "constant": "numpad4",
     "english": "Numpad 4",
     "value": 8589934644,
+    "keyLabel": "4",
     "names": {
       "gtk": [
         "KP_Left",
@@ -9203,6 +9291,7 @@
     "constant": "numpad5",
     "english": "Numpad 5",
     "value": 8589934645,
+    "keyLabel": "5",
     "names": {
       "gtk": [
         "KP_5"
@@ -9230,6 +9319,7 @@
     "constant": "numpad6",
     "english": "Numpad 6",
     "value": 8589934646,
+    "keyLabel": "6",
     "names": {
       "gtk": [
         "KP_Right",
@@ -9259,6 +9349,7 @@
     "constant": "numpad7",
     "english": "Numpad 7",
     "value": 8589934647,
+    "keyLabel": "7",
     "names": {
       "gtk": [
         "KP_Home",
@@ -9288,6 +9379,7 @@
     "constant": "numpad8",
     "english": "Numpad 8",
     "value": 8589934648,
+    "keyLabel": "8",
     "names": {
       "gtk": [
         "KP_Up",
@@ -9317,6 +9409,7 @@
     "constant": "numpad9",
     "english": "Numpad 9",
     "value": 8589934649,
+    "keyLabel": "9",
     "names": {
       "gtk": [
         "KP_Page_Up",
@@ -9346,6 +9439,7 @@
     "constant": "numpadEqual",
     "english": "Numpad Equal",
     "value": 8589934653,
+    "keyLabel": "=",
     "names": {
       "gtk": [
         "KP_Equal"

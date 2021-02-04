@@ -13,7 +13,7 @@
 
 | File name | Explanation |
 | ---- | ---- |
-| `data/keyboard_key.tmpl` | The template for `keyboard_key.dart`. |
+| `data/keyboard_keys.tmpl` | The template for `keyboard_keys.dart`. |
 | `data/keyboard_maps.tmpl` | The template for `keyboard_maps.dart`. |
 
 

@@ -165,7 +165,7 @@ $otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboa
   }
 
   @override
-  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_key.tmpl');
+  String get templatePath => path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_keys.tmpl');
 
   @override
   Map<String, String> mappings() {
