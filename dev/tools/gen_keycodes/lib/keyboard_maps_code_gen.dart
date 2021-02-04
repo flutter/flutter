@@ -237,6 +237,19 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     return macOsFunctionKeyMap.toString().trimRight();
   }
 
+  /// This generates the map of macOS key codes to physical keys.
+  String get macOsKeyCodeMap {
+    final _OutputLines<int> lines = _OutputLines<int>();
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
+      if (entry.macOsValues != null) {
+        for (final int code in entry.macOsValues) {
+          lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+      }
+    }
+    return lines.sortedJoin().trimRight();
+  }
+
   /// This generates the map of iOS key codes to physical keys.
   String get iosScanCodeMap {
     final StringBuffer iosScanCodeMap = StringBuffer();
@@ -329,6 +342,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
       'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
+      'MACOS_KEY_CODE_MAP': macOsKeyCodeMap,
       'IOS_SCAN_CODE_MAP': iosScanCodeMap,
       'IOS_NUMPAD_MAP': iosNumpadMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,

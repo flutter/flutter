@@ -59,6 +59,13 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
 @@@MACOS_FUNCTION_KEY_MAP@@@
 };
 
+/// Maps macOS-specific key code values representing [LogicalKeyboardKey].
+///
+/// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
+const Map<int, LogicalKeyboardKey> kMacOsToLogicalKey = <int, LogicalKeyboardKey>{
+@@@MACOS_KEY_CODE_MAP@@@
+};
+
 /// Maps iOS-specific key code values representing [PhysicalKeyboardKey].
 ///
 /// iOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
