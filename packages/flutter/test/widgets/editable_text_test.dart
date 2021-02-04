@@ -18,6 +18,33 @@ import 'semantics_tester.dart';
 
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
 
+class KeyRequest {
+  const KeyRequest(
+    this.logical,
+    this.physical, {
+    this.character,
+    this.synthesized = false,
+    this.timeStamp = Duration.zero,
+  });
+
+  final LogicalKeyboardKey logical;
+  final PhysicalKeyboardKey physical;
+  final String? character;
+  final bool synthesized;
+  final Duration timeStamp;
+
+  static const KeyRequest arrowLeft = KeyRequest(LogicalKeyboardKey.arrowLeft, PhysicalKeyboardKey.arrowLeft);
+  static const KeyRequest arrowRight = KeyRequest(LogicalKeyboardKey.arrowRight, PhysicalKeyboardKey.arrowRight);
+  static const KeyRequest arrowDown = KeyRequest(LogicalKeyboardKey.arrowDown, PhysicalKeyboardKey.arrowDown);
+  static const KeyRequest arrowUp = KeyRequest(LogicalKeyboardKey.arrowUp, PhysicalKeyboardKey.arrowUp);
+  static const KeyRequest delete = KeyRequest(LogicalKeyboardKey.delete, PhysicalKeyboardKey.delete);
+  static const KeyRequest backspace = KeyRequest(LogicalKeyboardKey.backspace, PhysicalKeyboardKey.backspace);
+  static const KeyRequest keyLowerA = KeyRequest(LogicalKeyboardKey.keyA, PhysicalKeyboardKey.keyA, character: 'a');
+  static const KeyRequest keyLowerC = KeyRequest(LogicalKeyboardKey.keyC, PhysicalKeyboardKey.keyC, character: 'c');
+  static const KeyRequest keyLowerV = KeyRequest(LogicalKeyboardKey.keyV, PhysicalKeyboardKey.keyV, character: 'v');
+  static const KeyRequest keyLowerX = KeyRequest(LogicalKeyboardKey.keyX, PhysicalKeyboardKey.keyX, character: 'x');
+}
+
 class _MatchesMethodCall extends Matcher {
   const _MatchesMethodCall(this.name, {this.arguments});
 
@@ -3757,53 +3784,66 @@ void main() {
       'of their country.';
 
   Future<void> sendKeys(
-      WidgetTester tester,
-      List<LogicalKeyboardKey> keys, {
-        bool shift = false,
-        bool wordModifier = false,
-        bool lineModifier = false,
-        bool shortcutModifier = false,
-        required String platform,
-      }) async {
+    WidgetTester tester,
+    List<KeyRequest> keys, {
+    bool shift = false,
+    bool wordModifier = false,
+    bool lineModifier = false,
+    bool shortcutModifier = false,
+    required String platform,
+  }) async {
     if (shift) {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft, platform: platform);
     }
     if (shortcutModifier) {
       await tester.sendKeyDownEvent(
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.metaLeft : PhysicalKeyboardKey.controlLeft,
           platform: platform);
     }
     if (wordModifier) {
       await tester.sendKeyDownEvent(
           platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.altLeft : PhysicalKeyboardKey.controlLeft,
           platform: platform);
     }
     if (lineModifier) {
       await tester.sendKeyDownEvent(
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.metaLeft : PhysicalKeyboardKey.altLeft,
           platform: platform);
     }
-    for (final LogicalKeyboardKey key in keys) {
-      await tester.sendKeyEvent(key, platform: platform);
+    for (final KeyRequest key in keys) {
+      await tester.sendKeyEvent(
+        key.logical,
+        physicalKey: key.physical,
+        character: key.character,
+        synthesized: key.synthesized,
+        timeStamp: key.timeStamp,
+        platform: platform,
+      );
       await tester.pump();
     }
     if (lineModifier) {
       await tester.sendKeyUpEvent(
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.metaLeft : PhysicalKeyboardKey.altLeft,
           platform: platform);
     }
     if (wordModifier) {
       await tester.sendKeyUpEvent(
           platform == 'macos' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.altLeft : PhysicalKeyboardKey.controlLeft,
           platform: platform);
     }
     if (shortcutModifier) {
       await tester.sendKeyUpEvent(
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+          physicalKey: platform == 'macos' ? PhysicalKeyboardKey.metaLeft : PhysicalKeyboardKey.controlLeft,
           platform: platform);
     }
     if (shift) {
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft, platform: platform);
     }
     if (shift || wordModifier || lineModifier) {
       await tester.pump();
@@ -3850,10 +3890,10 @@ void main() {
     // Select a few characters using shift right arrow
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
       ],
       shift: true,
       platform: platform,
@@ -3875,10 +3915,10 @@ void main() {
     // Select fewer characters using shift left arrow
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
+        KeyRequest.arrowLeft,
+        KeyRequest.arrowLeft,
       ],
       shift: true,
       platform: platform,
@@ -3899,8 +3939,8 @@ void main() {
     // Try to select before the first character, nothing should change.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        const KeyRequest(LogicalKeyboardKey.arrowLeft, PhysicalKeyboardKey.arrowLeft),
       ],
       shift: true,
       platform: platform,
@@ -3921,9 +3961,9 @@ void main() {
     // Select the first two words.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
       ],
       shift: true,
       wordModifier: true,
@@ -3945,8 +3985,8 @@ void main() {
     // Unselect the second word.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
       ],
       shift: true,
       wordModifier: true,
@@ -3968,8 +4008,8 @@ void main() {
     // Select the next line.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowDown,
+      <KeyRequest>[
+        KeyRequest.arrowDown,
       ],
       shift: true,
       platform: platform,
@@ -3989,8 +4029,8 @@ void main() {
 
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
       ],
       platform: platform,
     );
@@ -4010,8 +4050,8 @@ void main() {
     // Select the next line.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowDown,
+      <KeyRequest>[
+        KeyRequest.arrowDown,
       ],
       shift: true,
       platform: platform,
@@ -4032,11 +4072,11 @@ void main() {
     // Select to the end of the string by going down.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowDown,
-        LogicalKeyboardKey.arrowDown,
-        LogicalKeyboardKey.arrowDown,
-        LogicalKeyboardKey.arrowDown,
+      <KeyRequest>[
+        KeyRequest.arrowDown,
+        KeyRequest.arrowDown,
+        KeyRequest.arrowDown,
+        KeyRequest.arrowDown,
       ],
       shift: true,
       platform: platform,
@@ -4057,8 +4097,8 @@ void main() {
     // Go back up one line to set selection up to part of the last line.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowUp,
+      <KeyRequest>[
+        KeyRequest.arrowUp,
       ],
       shift: true,
       platform: platform,
@@ -4079,8 +4119,8 @@ void main() {
     // Select to the end of the selection.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
       ],
       lineModifier: true,
       shift: true,
@@ -4102,8 +4142,8 @@ void main() {
     // Select to the beginning of the line.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
       ],
       lineModifier: true,
       shift: true,
@@ -4125,8 +4165,8 @@ void main() {
     // Select All
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyA,
+      <KeyRequest>[
+        KeyRequest.keyLowerA,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4147,8 +4187,8 @@ void main() {
     // Jump to beginning of selection.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
       ],
       platform: platform,
     );
@@ -4168,8 +4208,8 @@ void main() {
     // Jump to end.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowDown,
+      <KeyRequest>[
+        KeyRequest.arrowDown,
       ],
       shift: false,
       lineModifier: true,
@@ -4191,8 +4231,8 @@ void main() {
     // Jump to start.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowUp,
+      <KeyRequest>[
+        KeyRequest.arrowUp,
       ],
       shift: false,
       lineModifier: true,
@@ -4214,10 +4254,10 @@ void main() {
     // Move forward a few letters
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
       ],
       shift: false,
       lineModifier: false,
@@ -4238,8 +4278,8 @@ void main() {
     // Select to end.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowDown,
+      <KeyRequest>[
+        KeyRequest.arrowDown,
       ],
       shift: true,
       lineModifier: true,
@@ -4261,8 +4301,8 @@ void main() {
     // Select to start, which extends the selection.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowUp,
+      <KeyRequest>[
+        KeyRequest.arrowUp,
       ],
       shift: true,
       lineModifier: true,
@@ -4284,8 +4324,8 @@ void main() {
     // Move to start again.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowUp,
+      <KeyRequest>[
+        KeyRequest.arrowUp,
       ],
       shift: false,
       lineModifier: false,
@@ -4306,10 +4346,10 @@ void main() {
     // Jump forward three words.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowRight,
+      <KeyRequest>[
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
+        KeyRequest.arrowRight,
       ],
       wordModifier: true,
       platform: platform,
@@ -4330,10 +4370,10 @@ void main() {
     // Select some characters backward.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
+        KeyRequest.arrowLeft,
+        KeyRequest.arrowLeft,
       ],
       shift: true,
       platform: platform,
@@ -4354,8 +4394,8 @@ void main() {
     // Select a word backward.
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowLeft,
+      <KeyRequest>[
+        KeyRequest.arrowLeft,
       ],
       shift: true,
       wordModifier: true,
@@ -4378,8 +4418,8 @@ void main() {
     // Cut
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyX,
+      <KeyRequest>[
+        KeyRequest.keyLowerX,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4413,8 +4453,8 @@ void main() {
     // Paste
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyV,
+      <KeyRequest>[
+        KeyRequest.keyLowerV,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4436,9 +4476,9 @@ void main() {
     // Copy All
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyA,
-        LogicalKeyboardKey.keyC,
+      <KeyRequest>[
+        KeyRequest.keyLowerA,
+        KeyRequest.keyLowerC,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4461,8 +4501,8 @@ void main() {
     // Delete
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
+      <KeyRequest>[
+        KeyRequest.delete,
       ],
       platform: platform,
     );
@@ -4541,8 +4581,8 @@ void main() {
     // Paste
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyV,
+      <KeyRequest>[
+        KeyRequest.keyLowerV,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4554,8 +4594,8 @@ void main() {
     // Select All
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyA,
+      <KeyRequest>[
+        KeyRequest.keyLowerA,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4577,8 +4617,8 @@ void main() {
     // Cut
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyX,
+      <KeyRequest>[
+        KeyRequest.keyLowerX,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4605,8 +4645,8 @@ void main() {
     // Copy
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyC,
+      <KeyRequest>[
+        KeyRequest.keyLowerC,
       ],
       shortcutModifier: true,
       platform: platform,
@@ -4633,8 +4673,8 @@ void main() {
     // Delete
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
+      <KeyRequest>[
+        KeyRequest.delete,
       ],
       platform: platform,
     );
@@ -4654,8 +4694,8 @@ void main() {
     // Backspace
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
+      <KeyRequest>[
+        KeyRequest.backspace,
       ],
       platform: platform,
     );
@@ -7079,8 +7119,8 @@ void main() {
     // Delete
     await sendKeys(
       tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
+      <KeyRequest>[
+        KeyRequest.delete,
       ],
       platform: 'android',
     );

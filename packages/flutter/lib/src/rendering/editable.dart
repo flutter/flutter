@@ -619,21 +619,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   };
 
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.shiftRight,
-    LogicalKeyboardKey.controlLeft,
-    LogicalKeyboardKey.controlRight,
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.shiftSynonym,
+    LogicalKeyboardKey.controlSynonym,
+    LogicalKeyboardKey.altSynonym,
   };
 
   static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.shiftRight,
-    LogicalKeyboardKey.metaLeft,
-    LogicalKeyboardKey.metaRight,
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.altRight,
+    LogicalKeyboardKey.shiftSynonym,
+    LogicalKeyboardKey.metaSynonym,
+    LogicalKeyboardKey.altSynonym,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
@@ -643,6 +637,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   };
 
   void _handleKeyEvent(RawKeyEvent keyEvent) {
+    print('editable key event $keyEvent');
     if (kIsWeb) {
       // On web platform, we should ignore the key because it's processed already.
       return;

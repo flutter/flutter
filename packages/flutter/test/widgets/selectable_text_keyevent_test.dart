@@ -203,8 +203,8 @@ void main() {
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
-      await tester.sendKeyDown(PhysicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftLeft);
-      await tester.sendKeyDown(PhysicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft, physicalKey: PhysicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
 
