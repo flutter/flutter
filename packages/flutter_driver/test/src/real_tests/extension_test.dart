@@ -56,7 +56,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -81,7 +81,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -117,7 +117,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -142,7 +142,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -159,7 +159,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -182,7 +182,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -201,7 +201,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -230,7 +230,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -259,7 +259,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -277,7 +277,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -310,7 +310,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -359,7 +359,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -410,7 +410,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -460,7 +460,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1145,7 +1145,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1171,7 +1171,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1195,7 +1195,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });

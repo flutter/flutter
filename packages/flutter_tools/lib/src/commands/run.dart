@@ -164,7 +164,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+    final BuildInfo buildInfo = await getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
@@ -398,7 +398,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+    final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
@@ -510,7 +510,7 @@ class RunCommand extends RunCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
-    final BuildInfo buildInfo = await getBuildInfo(updateWebDefines: webMode);
+    final BuildInfo buildInfo = await getBuildInfo();
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String applicationBinaryPath = stringArg('use-application-binary');
 

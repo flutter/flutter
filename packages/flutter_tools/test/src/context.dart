@@ -37,6 +37,8 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
+import 'fake_process_manager.dart';
+import 'fakes.dart';
 import 'mocks.dart';
 import 'throwing_pub.dart';
 
@@ -381,14 +383,6 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockHttpClient extends Mock implements HttpClient {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
-
-class FakePlistParser implements PlistParser {
-  @override
-  Map<String, dynamic> parseFile(String plistFilePath) => const <String, dynamic>{};
-
-  @override
-  String getValueFromFile(String plistFilePath, String key) => null;
-}
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   LocalFileSystemBlockingSetCurrentDirectory() : super.test(
