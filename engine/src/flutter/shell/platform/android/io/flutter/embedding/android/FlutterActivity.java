@@ -532,26 +532,34 @@ public class FlutterActivity extends Activity
   protected void onStart() {
     super.onStart();
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START);
-    delegate.onStart();
+    if (stillAttachedForEvent("onStart")) {
+      delegate.onStart();
+    }
   }
 
   @Override
   protected void onResume() {
     super.onResume();
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);
-    delegate.onResume();
+    if (stillAttachedForEvent("onResume")) {
+      delegate.onResume();
+    }
   }
 
   @Override
   public void onPostResume() {
     super.onPostResume();
-    delegate.onPostResume();
+    if (stillAttachedForEvent("onPostResume")) {
+      delegate.onPostResume();
+    }
   }
 
   @Override
   protected void onPause() {
     super.onPause();
-    delegate.onPause();
+    if (stillAttachedForEvent("onPause")) {
+      delegate.onPause();
+    }
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);
   }
 
@@ -591,7 +599,7 @@ public class FlutterActivity extends Activity
 
   @Override
   public void detachFromFlutterEngine() {
-    Log.v(
+    Log.w(
         TAG,
         "FlutterActivity "
             + this
@@ -1036,7 +1044,7 @@ public class FlutterActivity extends Activity
 
   private boolean stillAttachedForEvent(String event) {
     if (delegate == null) {
-      Log.v(TAG, "FlutterActivity " + hashCode() + " " + event + " called after release.");
+      Log.w(TAG, "FlutterActivity " + hashCode() + " " + event + " called after release.");
       return false;
     }
     return true;

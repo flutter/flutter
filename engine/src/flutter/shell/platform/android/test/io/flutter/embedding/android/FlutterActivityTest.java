@@ -249,9 +249,16 @@ public class FlutterActivityTest {
     verify(mockDelegate, times(1)).onDetach();
 
     flutterActivity.onStop();
-    flutterActivity.onDestroy();
-
     verify(mockDelegate, never()).onStop();
+
+    // Simulate the disconnected activity resuming again.
+    flutterActivity.onStart();
+    flutterActivity.onResume();
+    // Shouldn't send more events to the delegates as before and shouldn't crash.
+    verify(mockDelegate, times(1)).onStart();
+    verify(mockDelegate, times(1)).onResume();
+
+    flutterActivity.onDestroy();
     // 1 time same as before.
     verify(mockDelegate, times(1)).onDestroyView();
     verify(mockDelegate, times(1)).onDetach();
