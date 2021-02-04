@@ -14,6 +14,7 @@ import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
+import 'package:dev_tools/start.dart';
 import 'package:dev_tools/status.dart';
 import 'package:dev_tools/stdio.dart';
 import 'package:file/file.dart';
@@ -59,6 +60,10 @@ Future<void> main(List<String> args) async {
       checkouts: checkouts,
       stdio: stdio,
     ),
+    StartCommand(
+      checkouts: checkouts,
+      stdio: stdio,
+    ),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
@@ -68,8 +73,8 @@ Future<void> main(List<String> args) async {
 
   try {
     await runner.run(args);
-  } on Exception catch (e) {
-    stdio.printError(e.toString());
+  } on Exception catch (e, stacktrace) {
+    stdio.printError('$e\n\n$stacktrace');
     io.exit(1);
   }
 }

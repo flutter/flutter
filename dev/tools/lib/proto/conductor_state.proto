@@ -3,8 +3,19 @@ syntax = "proto3";
 package conductor_state;
 
 message Repository {
-  
+  // The git branch used for applying cherrypicks before being pushed to the
+  // release branch.
+  string candidateBranch = 1;
+
+  // The commit hash at the tip of the branch before cherrypicks were applied.
+  string previousGitHead = 2;
+
+  // Path to the git checkout on local disk.
+  string checkoutPath = 3;
 }
+
 message ConductorState {
   string releaseChannel = 1;
+  Repository engine = 2;
+  Repository framework = 3;
 }

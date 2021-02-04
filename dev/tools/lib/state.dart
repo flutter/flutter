@@ -1,28 +1,23 @@
-import 'dart:convert' show jsonDecode;
+import 'package:platform/platform.dart';
 
-import 'package:file/file.dart';
-import 'package:meta/meta.dart' show required;
+import './proto/conductor_state.pb.dart' as pb;
+import './stdio.dart' show Stdio;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
-class State {
-  State._({
-    @required this.candidateBranch,
-    @required this.releaseChannel,
-  })  : assert(candidateBranch != null),
-        assert(releaseChannel != null);
+String defaultStateFilePath(Platform platform) {
+  assert(platform.environment['HOME'] != null);
+  return <String>[
+    platform.environment['HOME'],
+    kStateFileName,
+  ].join(platform.pathSeparator);
+}
 
-  /// Instantiate state from persistent file.
-  factory State.fromFile(File file) {
-    final String serializedState = file.readAsStringSync();
-    final Map<String, dynamic> json =
-        jsonDecode(serializedState) as Map<String, dynamic>;
-    return State._(
-      candidateBranch: json['candidateBranch'] as String,
-      releaseChannel: json['releaseChannel'] as String,
-    );
-  }
-
-  final String releaseChannel;
-  final String candidateBranch;
+void presentState(Stdio stdio, pb.ConductorState state) {
+  stdio.printStatus('\nFlutter Conductor Status\n');
+  stdio.printStatus('Release channel:\t\t${state.releaseChannel}\n');
+  stdio.printStatus('Engine Repo');
+  stdio.printStatus('\tCandidate branch${state.engine.candidateBranch}');
+  stdio.printStatus('Framework Repo');
+  stdio.printStatus('\tCandidate branch${state.framework.candidateBranch}');
 }

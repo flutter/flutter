@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
+import './proto/conductor_state.pb.dart' as pb;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
@@ -17,10 +18,11 @@ class StatusCommand extends Command<void> {
     @required this.checkouts,
     @required this.stdio,
     }) : platform = checkouts.platform, fileSystem = checkouts.fileSystem {
+    final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
         'state-file',
-        defaultsTo: fileSystem.path.join(platform.environment['HOME'], kStateFileName),
-        help: 'Path to persistent state file. Defaults to \$HOME/$kStateFileName',
+        defaultsTo: defaultPath,
+        help: 'Path to persistent state file. Defaults to $defaultPath',
     );
   }
 
@@ -39,17 +41,10 @@ class StatusCommand extends Command<void> {
   void run() {
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (stateFile.existsSync()) {
-      final State state = State.fromFile(stateFile);
-      presentState(state);
+      final pb.ConductorState state = pb.ConductorState.fromJson(stateFile.readAsStringSync());
+      presentState(stdio, state);
     } else {
       stdio.printStatus('No persistent state file found at ${argResults['state-file']}.');
     }
-  }
-
-  @visibleForTesting
-  void presentState(State state) {
-    stdio.printStatus('\nFlutter Conductor Status\n');
-    stdio.printStatus('Release channel:\t\t${state.releaseChannel}');
-    stdio.printStatus('Release candidate branch:\t${state.candidateBranch}');
   }
 }
