@@ -271,43 +271,6 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createStackSizeTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test_driver/run_app.dart';
-  const String testDriver = 'test_driver/stack_size_perf_test.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '--driver', testDriver,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/stack_size.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{
-        'stack_size_per_nesting_level': data['stack_size'],
-      };
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
-}
-
 TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -500,15 +463,6 @@ class StartupTest {
             '-v',
             '--profile',
             '--target-platform=android-arm,android-arm64',
-          ]);
-          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
-        case DeviceOperatingSystem.androidArm64:
-          await flutter('build', options: <String>[
-            'apk',
-            '-v',
-            '--profile',
-            '--target-platform=android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
@@ -1044,20 +998,6 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
-      case DeviceOperatingSystem.androidArm64:
-        options.insert(0, 'apk');
-        options.add('--target-platform=android-arm64');
-        options.add('--tree-shake-icons');
-        options.add('--split-debug-info=infos/');
-        watch.start();
-        await flutter('build', options: options);
-        watch.stop();
-        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
-        final File apk = file(apkPath);
-        releaseSizeInBytes = apk.lengthSync();
-        if (reportPackageContentSizes)
-          metrics.addAll(await getSizesFromApk(apkPath));
-        break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.fake:
@@ -1083,10 +1023,6 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
-        break;
-      case DeviceOperatingSystem.androidArm64:
-        options.insert(0, 'apk');
-        options.add('--target-platform=android-arm64');
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
