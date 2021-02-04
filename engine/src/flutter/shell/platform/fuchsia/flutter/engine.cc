@@ -340,8 +340,8 @@ Engine::Engine(Delegate& delegate,
   {
     TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
-        std::move(task_runners),             // host task runners
         flutter::PlatformData(),             // default window data
+        std::move(task_runners),             // host task runners
         std::move(settings),                 // shell launch settings
         std::move(on_create_platform_view),  // platform view create callback
         std::move(on_create_rasterizer)      // rasterizer create callback

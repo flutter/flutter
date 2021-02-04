@@ -8,8 +8,8 @@ namespace flutter {
 
 std::shared_ptr<const DartVMData> DartVMData::Create(
     Settings settings,
-    fml::RefPtr<DartSnapshot> vm_snapshot,
-    fml::RefPtr<DartSnapshot> isolate_snapshot) {
+    fml::RefPtr<const DartSnapshot> vm_snapshot,
+    fml::RefPtr<const DartSnapshot> isolate_snapshot) {
   if (!vm_snapshot || !vm_snapshot->IsValid()) {
     // Caller did not provide a valid VM snapshot. Attempt to infer one
     // from the settings.

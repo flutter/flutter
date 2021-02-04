@@ -245,8 +245,8 @@ static void EmbedderInformationCallback(Dart_EmbedderInformation* info) {
 
 std::shared_ptr<DartVM> DartVM::Create(
     Settings settings,
-    fml::RefPtr<DartSnapshot> vm_snapshot,
-    fml::RefPtr<DartSnapshot> isolate_snapshot,
+    fml::RefPtr<const DartSnapshot> vm_snapshot,
+    fml::RefPtr<const DartSnapshot> isolate_snapshot,
     std::shared_ptr<IsolateNameServer> isolate_name_server) {
   auto vm_data = DartVMData::Create(settings,                    //
                                     std::move(vm_snapshot),      //

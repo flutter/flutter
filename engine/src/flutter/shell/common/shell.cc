@@ -40,13 +40,14 @@ constexpr char kTypeKey[] = "type";
 constexpr char kFontChange[] = "fontsChange";
 
 namespace {
+
 std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     TaskRunners task_runners,
-    const PlatformData platform_data,
+    const PlatformData& platform_data,
     Settings settings,
     std::unique_ptr<Animator> animator,
     fml::WeakPtr<IOManager> io_manager,
@@ -66,12 +67,111 @@ std::unique_ptr<Engine> CreateEngine(
                                   snapshot_delegate,    //
                                   volatile_path_tracker);
 }
+
+void Tokenize(const std::string& input,
+              std::vector<std::string>* results,
+              char delimiter) {
+  std::istringstream ss(input);
+  std::string token;
+  while (std::getline(ss, token, delimiter)) {
+    results->push_back(token);
+  }
+}
+
+// Though there can be multiple shells, some settings apply to all components in
+// the process. These have to be setup before the shell or any of its
+// sub-components can be initialized. In a perfect world, this would be empty.
+// TODO(chinmaygarde): The unfortunate side effect of this call is that settings
+// that cause shell initialization failures will still lead to some of their
+// settings being applied.
+void PerformInitializationTasks(Settings& settings) {
+  {
+    fml::LogSettings log_settings;
+    log_settings.min_log_level =
+        settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
+    fml::SetLogSettings(log_settings);
+  }
+
+  static std::once_flag gShellSettingsInitialization = {};
+  std::call_once(gShellSettingsInitialization, [&settings] {
+    if (settings.engine_start_timestamp.count() == 0) {
+      settings.engine_start_timestamp =
+          std::chrono::microseconds(Dart_TimelineGetMicros());
+    }
+
+    tonic::SetLogHandler(
+        [](const char* message) { FML_LOG(ERROR) << message; });
+
+    if (settings.trace_skia) {
+      InitSkiaEventTracer(settings.trace_skia);
+    }
+
+    if (!settings.trace_allowlist.empty()) {
+      std::vector<std::string> prefixes;
+      Tokenize(settings.trace_allowlist, &prefixes, ',');
+      fml::tracing::TraceSetAllowlist(prefixes);
+    }
+
+    if (!settings.skia_deterministic_rendering_on_cpu) {
+      SkGraphics::Init();
+    } else {
+      FML_DLOG(INFO) << "Skia deterministic rendering is enabled.";
+    }
+
+    if (settings.icu_initialization_required) {
+      if (settings.icu_data_path.size() != 0) {
+        fml::icu::InitializeICU(settings.icu_data_path);
+      } else if (settings.icu_mapper) {
+        fml::icu::InitializeICUFromMapping(settings.icu_mapper());
+      } else {
+        FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
+      }
+    }
+  });
+
+  PersistentCache::SetCacheSkSL(settings.cache_sksl);
+}
+
 }  // namespace
+
+std::unique_ptr<Shell> Shell::Create(
+    const PlatformData& platform_data,
+    TaskRunners task_runners,
+    Settings settings,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
+  // This must come first as it initializes tracing.
+  PerformInitializationTasks(settings);
+
+  TRACE_EVENT0("flutter", "Shell::Create");
+
+  // Always use the `vm_snapshot` and `isolate_snapshot` provided by the
+  // settings to launch the VM.  If the VM is already running, the snapshot
+  // arguments are ignored.
+  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
+  auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
+  auto vm = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
+  FML_CHECK(vm) << "Must be able to initialize the VM.";
+
+  // If the settings did not specify an `isolate_snapshot`, fall back to the
+  // one the VM was launched with.
+  if (!isolate_snapshot) {
+    isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
+  }
+  return CreateWithSnapshot(std::move(platform_data),            //
+                            std::move(task_runners),             //
+                            std::move(settings),                 //
+                            std::move(vm),                       //
+                            std::move(isolate_snapshot),         //
+                            std::move(on_create_platform_view),  //
+                            std::move(on_create_rasterizer),     //
+                            CreateEngine);
+}
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
     TaskRunners task_runners,
-    const PlatformData platform_data,
+    const PlatformData& platform_data,
     Settings settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
@@ -207,123 +307,23 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   return shell;
 }
 
-static void Tokenize(const std::string& input,
-                     std::vector<std::string>* results,
-                     char delimiter) {
-  std::istringstream ss(input);
-  std::string token;
-  while (std::getline(ss, token, delimiter)) {
-    results->push_back(token);
-  }
-}
-
-// Though there can be multiple shells, some settings apply to all components in
-// the process. These have to be setup before the shell or any of its
-// sub-components can be initialized. In a perfect world, this would be empty.
-// TODO(chinmaygarde): The unfortunate side effect of this call is that settings
-// that cause shell initialization failures will still lead to some of their
-// settings being applied.
-static void PerformInitializationTasks(Settings& settings) {
-  {
-    fml::LogSettings log_settings;
-    log_settings.min_log_level =
-        settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
-    fml::SetLogSettings(log_settings);
-  }
-
-  static std::once_flag gShellSettingsInitialization = {};
-  std::call_once(gShellSettingsInitialization, [&settings] {
-    if (settings.engine_start_timestamp.count() == 0) {
-      settings.engine_start_timestamp =
-          std::chrono::microseconds(Dart_TimelineGetMicros());
-    }
-
-    tonic::SetLogHandler(
-        [](const char* message) { FML_LOG(ERROR) << message; });
-
-    if (settings.trace_skia) {
-      InitSkiaEventTracer(settings.trace_skia);
-    }
-
-    if (!settings.trace_allowlist.empty()) {
-      std::vector<std::string> prefixes;
-      Tokenize(settings.trace_allowlist, &prefixes, ',');
-      fml::tracing::TraceSetAllowlist(prefixes);
-    }
-
-    if (!settings.skia_deterministic_rendering_on_cpu) {
-      SkGraphics::Init();
-    } else {
-      FML_DLOG(INFO) << "Skia deterministic rendering is enabled.";
-    }
-
-    if (settings.icu_initialization_required) {
-      if (settings.icu_data_path.size() != 0) {
-        fml::icu::InitializeICU(settings.icu_data_path);
-      } else if (settings.icu_mapper) {
-        fml::icu::InitializeICUFromMapping(settings.icu_mapper());
-      } else {
-        FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
-      }
-    }
-  });
-}
-
-std::unique_ptr<Shell> Shell::Create(
+std::unique_ptr<Shell> Shell::CreateWithSnapshot(
+    const PlatformData& platform_data,
     TaskRunners task_runners,
     Settings settings,
-    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
-  return Shell::Create(std::move(task_runners),                    //
-                       PlatformData{/* default platform data */},  //
-                       std::move(settings),                        //
-                       std::move(on_create_platform_view),         //
-                       std::move(on_create_rasterizer)             //
-  );
-}
-
-std::unique_ptr<Shell> Shell::Create(
-    TaskRunners task_runners,
-    const PlatformData platform_data,
-    Settings settings,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
-  PerformInitializationTasks(settings);
-  PersistentCache::SetCacheSkSL(settings.cache_sksl);
-
-  TRACE_EVENT0("flutter", "Shell::Create");
-
-  auto vm = DartVMRef::Create(settings);
-  FML_CHECK(vm) << "Must be able to initialize the VM.";
-
-  auto vm_data = vm->GetVMData();
-
-  return Shell::Create(std::move(task_runners),        //
-                       std::move(platform_data),       //
-                       std::move(settings),            //
-                       vm_data->GetIsolateSnapshot(),  // isolate snapshot
-                       on_create_platform_view,        //
-                       on_create_rasterizer,           //
-                       std::move(vm),                  //
-                       CreateEngine);
-}
-
-std::unique_ptr<Shell> Shell::Create(
-    TaskRunners task_runners,
-    const PlatformData platform_data,
-    Settings settings,
+    DartVMRef vm,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    DartVMRef vm,
     const Shell::EngineCreateCallback& on_create_engine) {
+  // This must come first as it initializes tracing.
   PerformInitializationTasks(settings);
-  PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
-  TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
+  TRACE_EVENT0("flutter", "Shell::CreateWithSnapshot");
 
-  if (!task_runners.IsValid() || !on_create_platform_view ||
-      !on_create_rasterizer) {
+  const bool callbacks_valid =
+      on_create_platform_view && on_create_rasterizer && on_create_engine;
+  if (!task_runners.IsValid() || !callbacks_valid) {
     return nullptr;
   }
 
@@ -331,26 +331,28 @@ std::unique_ptr<Shell> Shell::Create(
   std::unique_ptr<Shell> shell;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetPlatformTaskRunner(),
-      fml::MakeCopyable([&latch,                                  //
-                         vm = std::move(vm),                      //
-                         &shell,                                  //
-                         task_runners = std::move(task_runners),  //
-                         platform_data,                           //
-                         settings,                                //
-                         on_create_platform_view,                 //
-                         on_create_rasterizer,                    //
-                         &on_create_engine]() mutable {
-        auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
-        shell = CreateShellOnPlatformThread(std::move(vm),
-                                            std::move(task_runners),      //
-                                            platform_data,                //
-                                            settings,                     //
-                                            std::move(isolate_snapshot),  //
-                                            on_create_platform_view,      //
-                                            on_create_rasterizer,         //
-                                            on_create_engine);
-        latch.Signal();
-      }));
+      fml::MakeCopyable(
+          [&latch,                                                        //
+           &shell,                                                        //
+           task_runners = std::move(task_runners),                        //
+           platform_data = std::move(platform_data),                      //
+           settings = std::move(settings),                                //
+           vm = std::move(vm),                                            //
+           isolate_snapshot = std::move(isolate_snapshot),                //
+           on_create_platform_view = std::move(on_create_platform_view),  //
+           on_create_rasterizer = std::move(on_create_rasterizer),        //
+           on_create_engine = std::move(on_create_engine)]() mutable {
+            shell = CreateShellOnPlatformThread(
+                std::move(vm),                       //
+                std::move(task_runners),             //
+                std::move(platform_data),            //
+                std::move(settings),                 //
+                std::move(isolate_snapshot),         //
+                std::move(on_create_platform_view),  //
+                std::move(on_create_rasterizer),     //
+                std::move(on_create_engine));
+            latch.Signal();
+          }));
   latch.Wait();
   return shell;
 }
@@ -479,15 +481,15 @@ std::unique_ptr<Shell> Shell::Spawn(
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
-  std::unique_ptr<Shell> result(Shell::Create(
-      task_runners_, PlatformData{}, GetSettings(),
+  std::unique_ptr<Shell> result(CreateWithSnapshot(
+      PlatformData{}, task_runners_, GetSettings(), vm_,
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
-      on_create_rasterizer, vm_,
+      on_create_rasterizer,
       [engine = this->engine_.get()](
           Engine::Delegate& delegate,
           const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
           fml::RefPtr<const DartSnapshot> isolate_snapshot,
-          TaskRunners task_runners, const PlatformData platform_data,
+          TaskRunners task_runners, const PlatformData& platform_data,
           Settings settings, std::unique_ptr<Animator> animator,
           fml::WeakPtr<IOManager> io_manager,
           fml::RefPtr<SkiaUnrefQueue> unref_queue,

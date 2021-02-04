@@ -144,7 +144,8 @@ int RunTester(const flutter::Settings& settings,
     return std::make_unique<Rasterizer>(shell);
   };
 
-  auto shell = Shell::Create(task_runners,             //
+  auto shell = Shell::Create(flutter::PlatformData(),  //
+                             task_runners,             //
                              settings,                 //
                              on_create_platform_view,  //
                              on_create_rasterizer      //

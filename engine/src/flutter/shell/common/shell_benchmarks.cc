@@ -54,7 +54,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
                              thread_host->io_thread->GetTaskRunner());
 
     shell = Shell::Create(
-        std::move(task_runners), settings,
+        flutter::PlatformData(), std::move(task_runners), settings,
         [](Shell& shell) {
           return std::make_unique<PlatformView>(shell, shell.GetTaskRunners());
         },

@@ -301,7 +301,7 @@ TEST_F(ShellTest,
                            thread_host.ui_thread->GetTaskRunner(),
                            thread_host.io_thread->GetTaskRunner());
   auto shell = Shell::Create(
-      std::move(task_runners), settings,
+      flutter::PlatformData(), std::move(task_runners), settings,
       [](Shell& shell) {
         // This is unused in the platform view as we are not using the simulated
         // vsync mechanism. We should have better DI in the tests.

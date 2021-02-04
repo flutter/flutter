@@ -124,8 +124,8 @@ AndroidShellHolder::AndroidShellHolder(
   });
 
   shell_ =
-      Shell::Create(task_runners,              // task runners
-                    GetDefaultPlatformData(),  // window data
+      Shell::Create(GetDefaultPlatformData(),  // window data
+                    task_runners,              // task runners
                     settings_,                 // settings
                     on_create_platform_view,   // platform view create callback
                     on_create_rasterizer       // rasterizer create callback
