@@ -79,7 +79,7 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   ///
   /// @return     A valid core snapshot or nullptr.
   ///
-  static fml::RefPtr<DartSnapshot> VMSnapshotFromSettings(
+  static fml::RefPtr<const DartSnapshot> VMSnapshotFromSettings(
       const Settings& settings);
 
   //----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   ///
   /// @return     A valid isolate snapshot or nullptr.
   ///
-  static fml::RefPtr<DartSnapshot> IsolateSnapshotFromSettings(
+  static fml::RefPtr<const DartSnapshot> IsolateSnapshotFromSettings(
       const Settings& settings);
 
   //----------------------------------------------------------------------------

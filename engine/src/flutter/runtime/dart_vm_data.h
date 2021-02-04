@@ -37,8 +37,8 @@ class DartVMData {
   ///
   static std::shared_ptr<const DartVMData> Create(
       Settings settings,
-      fml::RefPtr<DartSnapshot> vm_snapshot,
-      fml::RefPtr<DartSnapshot> isolate_snapshot);
+      fml::RefPtr<const DartSnapshot> vm_snapshot,
+      fml::RefPtr<const DartSnapshot> isolate_snapshot);
 
   //----------------------------------------------------------------------------
   /// @brief      Collect the DartVMData instance.

@@ -407,6 +407,11 @@ Application::Application(
         return std::make_unique<fml::NonOwnedMapping>(isolate_instructions, 0,
                                                       hold_snapshot);
       };
+      isolate_snapshot_ = fml::MakeRefCounted<flutter::DartSnapshot>(
+          std::make_shared<fml::NonOwnedMapping>(isolate_data, 0,
+                                                 hold_snapshot),
+          std::make_shared<fml::NonOwnedMapping>(isolate_instructions, 0,
+                                                 hold_snapshot));
     } else {
       const int namespace_fd = application_data_directory_.get();
       settings_.vm_snapshot_data = [namespace_fd]() {

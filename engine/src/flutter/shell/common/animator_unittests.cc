@@ -51,7 +51,7 @@ TEST_F(ShellTest, VSyncTargetTime) {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
 
     shell = Shell::Create(
-        task_runners, settings,
+        flutter::PlatformData(), task_runners, settings,
         [vsync_clock, &create_vsync_waiter](Shell& shell) {
           return ShellTestPlatformView::Create(
               shell, shell.GetTaskRunners(), vsync_clock,

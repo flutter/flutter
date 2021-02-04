@@ -29,8 +29,8 @@ class DartVMRef {
  public:
   [[nodiscard]] static DartVMRef Create(
       Settings settings,
-      fml::RefPtr<DartSnapshot> vm_snapshot = nullptr,
-      fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr);
+      fml::RefPtr<const DartSnapshot> vm_snapshot = nullptr,
+      fml::RefPtr<const DartSnapshot> isolate_snapshot = nullptr);
 
   DartVMRef(const DartVMRef&) = default;
 
