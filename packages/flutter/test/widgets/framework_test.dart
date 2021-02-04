@@ -1494,6 +1494,26 @@ void main() {
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
+
+  testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    TestRenderObjectElement().debugFillProperties(builder);
+    expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
+  });
+
+  testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
+    final int initialCount = tester.binding.buildOwner!.globalKeyCount;
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    await tester.pumpWidget(Container(key: key1));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container()));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container(key: key2)));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 2);
+    await tester.pumpWidget(Container());
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
+  });
 }
 
 class _FakeFocusManager implements FocusManager {
@@ -1836,4 +1856,8 @@ class FakeLeafRenderObject extends RenderBox {
   void performLayout() {
     size = constraints.biggest;
   }
+}
+
+class TestRenderObjectElement extends RenderObjectElement {
+  TestRenderObjectElement() : super(Table());
 }

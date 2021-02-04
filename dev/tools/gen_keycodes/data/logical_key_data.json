@@ -9472,7 +9472,8 @@
     "value": 17179869442,
     "names": {
       "gtk": [
-        "Alt_R"
+        "Alt_R",
+        "ISO_Level3_Shift"
       ],
       "windows": [
         "RMENU"
@@ -9483,7 +9484,8 @@
     },
     "values": {
       "gtk": [
-        65514
+        65514,
+        65027
       ],
       "windows": [
         165

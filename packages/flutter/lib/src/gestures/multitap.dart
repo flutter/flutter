@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Offset;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';

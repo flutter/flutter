@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -68,7 +70,7 @@ void main() {
         ),
         throwsToolExit(
             message:
-                'No xcframework found at $xcframeworkPath. Try running "flutter build ios".'),
+                'No xcframework found at $xcframeworkPath.'),
       );
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(
@@ -213,7 +215,7 @@ void main() {
         ),
         throwsToolExit(
             message:
-                'No xcframework found at /out/android_debug_unopt/Flutter.xcframework. Try running "flutter build ios".'),
+                'No xcframework found at /out/android_debug_unopt/Flutter.xcframework'),
       );
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(

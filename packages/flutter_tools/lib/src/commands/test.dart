@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import '../asset.dart';
@@ -11,6 +13,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -219,18 +222,17 @@ class TestCommand extends FlutterCommand {
       );
     }
 
-    Directory workDir;
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
-      workDir = globals.fs.directory('test');
-      if (!workDir.existsSync()) {
-        throwToolExit('Test directory "${workDir.path}" not found.');
+      final Directory testDir = globals.fs.directory('test');
+      if (!testDir.existsSync()) {
+        throwToolExit('Test directory "${testDir.path}" not found.');
       }
-      files = _findTests(workDir).toList();
+      files = _findTests(testDir).toList();
       if (files.isEmpty) {
         throwToolExit(
-            'Test directory "${workDir.path}" does not appear to contain any test files.\n'
+            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
             'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
@@ -264,31 +266,32 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      startPaused: startPaused,
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableDds: disableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+    );
 
     final int result = await testRunner.runTests(
       testWrapper,
       files,
-      workDir: workDir,
+      debuggingOptions: debuggingOptions,
       names: names,
       plainNames: plainNames,
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
-      startPaused: startPaused,
-      disableServiceAuthCodes: disableServiceAuthCodes,
-      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
-      buildInfo: buildInfo,
       updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       reporter: stringArg('reporter'),
       timeout: stringArg('timeout'),
     );

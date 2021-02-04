@@ -326,8 +326,8 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
+      await tester.pump(); // start theme animation
+      await tester.pump(const Duration(seconds: 5)); // end theme animation
       final Material themeDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
       expect(themeDialogMaterial.shape, customDialogTheme.shape);
       expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
@@ -1095,7 +1095,7 @@ class _DatePickerObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is DialogRoute) {
       datePickerCount++;
     }
     super.didPush(route, previousRoute);

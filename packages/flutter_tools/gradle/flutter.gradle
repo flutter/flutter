@@ -101,6 +101,19 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         this.project = project
 
+        // Configure the Maven repository.
+        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
+        String repository = useLocalEngine()
+            ? project.property('local-engine-repo')
+            : "$hostedRepository/download.flutter.io"
+        project.rootProject.allprojects {
+            repositories {
+                maven {
+                    url repository
+                }
+            }
+        }
+
         project.extensions.create("flutter", FlutterExtension)
         this.addFlutterTasks(project)
 
@@ -184,8 +197,7 @@ class FlutterPlugin implements Plugin<Project> {
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
         }
-        project.android.buildTypes.each this.&addFlutterDependencies
-        project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
+        project.android.buildTypes.all this.&addFlutterDependencies
     }
 
     /**
@@ -199,21 +211,16 @@ class FlutterPlugin implements Plugin<Project> {
         if (!supportsBuildMode(flutterBuildMode)) {
             return
         }
-        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
-        String repository = useLocalEngine()
-            ? project.property('local-engine-repo')
-            : "$hostedRepository/download.flutter.io"
-        project.rootProject.allprojects {
-            repositories {
-                maven {
-                    url repository
-                }
-            }
+        // The embedding is set as an API dependency in a Flutter plugin.
+        // Therefore, don't make the app project depend on the embedding if there are Flutter
+        // plugins.
+        // This prevents duplicated classes when using custom build types. That is, a custom build
+        // type like profile is used, and the plugin and app projects have API dependencies on the
+        // embedding.
+        if (!isFlutterAppProject() || getPluginList().size() == 0) {
+            addApiDependencies(project, buildType.name,
+                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
-        // Add the embedding dependency.
-        addApiDependencies(project, buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-
         List<String> platforms = getTargetPlatforms().collect()
         // Debug mode includes x86 and x64, which are commonly used in emulators.
         if (flutterBuildMode == "debug" && !useLocalEngine()) {
@@ -303,7 +310,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Add plugin dependency to the app project.
         project.dependencies {
-            implementation pluginProject
+            api pluginProject
         }
         Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
@@ -318,37 +325,21 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-            // The embedding is a compileOnly dependency of a Flutter plugin,
-            // however prior to Gradle 6.0.0, it must be an API dependency.
+            // The embedding is API dependency of the plugin, so the AGP is able to desugar
+            // default method implementations when the interface is implemented by a plugin.
             //
-            // Not doing so, causes transitive dependency resolution conflicts.
-            // That is, the embedding dependencies resolved in the plugin are
-            // different than the ones resolved in the app.
-            if (isGradleVersionGraterOrEqualThan('6.0.0')) {
-              addCompileOnlyDependency(
-                pluginProject,
-                buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-              )
-            } else {
-              addApiDependencies(
-                pluginProject,
-                buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-              )
-            }
+            // See https://issuetracker.google.com/139821726, and
+            // https://github.com/flutter/flutter/issues/72185 for more details.
+            addApiDependencies(
+              pluginProject,
+              buildType.name,
+              "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+            )
         }
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
-            project.android.buildTypes.each addEmbeddingDependencyToPlugin
-            project.android.buildTypes.whenObjectAdded addEmbeddingDependencyToPlugin
+            project.android.buildTypes.all addEmbeddingDependencyToPlugin
         }
-    }
-
-    // Returns `true` if the current Gradle version is greater or equal to the given version.
-    private isGradleVersionGraterOrEqualThan(String version) {
-      return VersionNumber.parse(project.gradle.gradleVersion)
-          .compareTo(VersionNumber.parse(version)) >= 0
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.
@@ -659,6 +650,10 @@ class FlutterPlugin implements Plugin<Project> {
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
 
+    private boolean isFlutterAppProject() {
+        return project.android.hasProperty("applicationVariants")
+    }
+
     private void addFlutterTasks(Project project) {
         if (project.state.failure) {
             return
@@ -816,8 +811,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         }
-        boolean isFlutterAppProject = project.android.hasProperty("applicationVariants")
-        if (isFlutterAppProject) {
+        if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
                 if (!shouldConfigureFlutterTask(assembleTask)) {

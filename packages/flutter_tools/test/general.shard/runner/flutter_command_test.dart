@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -29,20 +31,16 @@ void main() {
   group('Flutter Command', () {
     MockitoCache cache;
     MockitoUsage usage;
-    MockClock clock;
+    FakeClock clock;
     MockProcessInfo mockProcessInfo;
-    List<int> mockTimes;
 
     setUp(() {
       Cache.disableLocking();
       cache = MockitoCache();
       usage = MockitoUsage();
-      clock = MockClock();
+      clock = FakeClock();
       mockProcessInfo = MockProcessInfo();
 
-      when(clock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
       when(mockProcessInfo.maxRss).thenReturn(10);
     });
 
@@ -152,7 +150,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in success', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -183,7 +181,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in warning', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -214,7 +212,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in failure', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -248,7 +246,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in error', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -290,6 +288,48 @@ void main() {
       expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
     });
 
+    testUsingContext('devToolsServerAddress returns parsed uri', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+      await createTestCommandRunner(command).run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'http://127.0.0.1:9105',
+      ]);
+      expect(command.devToolsServerAddress.toString(), equals('http://127.0.0.1:9105'));
+    });
+
+    testUsingContext('devToolsServerAddress returns null for bad input', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'hello-world',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '127.0.0.1:9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
@@ -304,7 +344,7 @@ void main() {
 
       testUsingContext('reports command that is killed', () async {
         // Crash if called a third time which is unexpected.
-        mockTimes = <int>[1000, 2000];
+        clock.times = <int>[1000, 2000];
 
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
@@ -354,7 +394,7 @@ void main() {
       });
 
       testUsingContext('command release lock on kill signal', () async {
-        mockTimes = <int>[1000, 2000];
+        clock.times = <int>[1000, 2000];
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
           expect(exitCode, 0);
@@ -393,11 +433,10 @@ void main() {
 
     testUsingCommandContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
-      verify(clock.now()).called(2);
 
       expect(
         verify(usage.sendTiming(
@@ -414,12 +453,11 @@ void main() {
 
     testUsingCommandContext('no timing report without usagePath', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
-      verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
                    any, any, any,
                    label: anyNamed('label')));
@@ -427,7 +465,7 @@ void main() {
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
@@ -440,7 +478,6 @@ void main() {
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
-      verify(clock.now()).called(2);
       expect(
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
@@ -456,7 +493,7 @@ void main() {
 
     testUsingCommandContext('report failed execution timing too', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -469,8 +506,6 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        // Should have still checked time twice.
-        verify(clock.now()).called(2);
 
         expect(
           verify(usage.sendTiming(
@@ -649,4 +684,13 @@ class FakePub extends Fake implements Pub {
     String flutterRootOverride,
     bool checkUpToDate = false,
   }) async { }
+}
+
+class FakeClock extends Fake implements SystemClock {
+  List<int> times = <int>[];
+
+  @override
+  DateTime now() {
+    return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
+  }
 }

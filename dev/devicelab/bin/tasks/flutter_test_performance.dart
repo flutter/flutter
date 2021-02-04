@@ -51,7 +51,8 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   );
   int badLines = 0;
   TestStep step = TestStep.starting;
-  await for (final String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+
+  analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
@@ -83,11 +84,11 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
         }
       }
     }
-  }
-  await for (final String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  });
+  analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
     print('test stderr: $entry');
     badLines += 1;
-  }
+  });
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0)

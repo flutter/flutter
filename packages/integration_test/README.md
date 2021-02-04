@@ -18,9 +18,9 @@ assertions.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-void main() => run(_testMain);
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-void _testMain() {
   testWidgets("failing test example", (WidgetTester tester) async {
     expect(2 + 2, equals(5));
   });
@@ -182,8 +182,10 @@ devices you want to test on. See
 
 Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you
 do not already have one via `File > New > Target...` and select `Unit Testing Bundle`.
-Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner`.
+Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner` and language is set to `Objective-C`.
 Select `Finish`.
+Under **Runner** > **Info** > **Configurations** section, make sure, that `Runner` and `RunnerTests` have the same value under each configuration.
+Make sure that the **iOS Deployment Target** of `RunnerTests` within the **Build Settings** section is the same as `Runner`.
 
 Add the new test target to `ios/Podfile` by embedding in the existing `Runner` target.
 
@@ -216,4 +218,37 @@ To build `integration_test/foo_test.dart` from the command line, run:
 ```sh
 # Pass --simulator if building for the simulator.
 flutter build ios integration_test/foo_test.dart
+```
+
+To deploy it to Firebase Test Lab you can follow these steps:
+
+Execute this script at the root of your Flutter app:
+
+```sh
+output="../build/ios_integ"
+product="build/ios_integ/Build/Products"
+dev_target="14.3"
+
+# Pass --simulator if building for the simulator.
+flutter build ios integration_test/foo_test.dart -release
+
+pushd ios
+xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+popd
+
+pushd $product
+zip -r "ios_tests.zip" "Release-iphoneos" "Runner_iphoneos$dev_target-arm64.xctestrun"
+popd
+```
+
+You can verify locally that your tests are succesful by running the following command:
+
+```sh
+xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>
+```
+
+Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
+
+```sh
+gcloud firebase test ios run --test "build/ios_integ/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```

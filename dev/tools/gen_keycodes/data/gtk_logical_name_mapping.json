@@ -19,7 +19,7 @@
   "numpadDecimal": ["KP_Period", "KP_Delete"],
   "numpadEnter": ["KP_Enter"],
   "altLeft": ["Alt_L"],
-  "altRight": ["Alt_R"],
+  "altRight": ["Alt_R", "ISO_Level3_Shift"],
   "arrowDown": ["Down"],
   "arrowLeft": ["Left"],
   "arrowRight": ["Right"],

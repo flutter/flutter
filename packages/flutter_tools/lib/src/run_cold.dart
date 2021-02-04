@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -50,6 +53,7 @@ class ColdRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
     try {
@@ -69,10 +73,17 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+      ));
+    }
+
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
+    if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol();
+        await connectToServiceProtocol(allowExistingDdsInstance: false);
       } on String catch (message) {
         globals.printError(message);
         appFailedToStart();
@@ -113,9 +124,13 @@ class ColdRunner extends ResidentRunner {
       appFinished();
     }
 
+    if (debuggingEnabled) {
+      unawaited(callConnectedVmServiceUriExtension());
+    }
+
     appStartedCompleter?.complete();
 
-    writeVmserviceFile();
+    writeVmServiceFile();
 
     if (stayResident && !traceStartup) {
       return waitForAppToFinish();
@@ -129,6 +144,7 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
@@ -140,6 +156,14 @@ class ColdRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
+
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+      ));
+    }
+
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
@@ -149,6 +173,9 @@ class ColdRunner extends ResidentRunner {
         globals.printTrace('Connected to $view.');
       }
     }
+
+    unawaited(callConnectedVmServiceUriExtension());
+
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
@@ -181,22 +208,13 @@ class ColdRunner extends ResidentRunner {
     if (details) {
       printHelpDetails();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if details is false
     if (_didAttach) {
       commandHelp.d.print();
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    for (final FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
-      if (device.vmService != null) {
-        // Caution: This log line is parsed by device lab tests.
-        globals.printStatus(
-          'An Observatory debugger and profiler on $dname is available at: '
-          '${device.vmService.httpAddress}',
-        );
-      }
-    }
+    printDebuggerList();
   }
 
   @override
