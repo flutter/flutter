@@ -6,8 +6,8 @@
 
 import 'dart:convert';
 
-import 'package:process/process.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 
 bool containsBitcode(String pathToBinary, ProcessManager processManager) {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
