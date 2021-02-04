@@ -360,7 +360,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -416,7 +416,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -539,7 +539,7 @@ void main() {
     // Initial value of null displays hint
     expect(value, equals(null));
     expect(getIndex(), 4);
-    await tester.tap(find.text('Select Value'));
+    await tester.tap(find.text('Select Value'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
@@ -671,7 +671,7 @@ void main() {
     expect(tester.elementList(find.text('19')), hasLength(1));
 
     expect(value, 4);
-    await tester.tap(find.byWidget(button));
+    await tester.tap(find.byWidget(button), warnIfMissed: false);
     expect(value, 4);
     // this waits for the route's completer to complete, which calls handleChanged
     await tester.idle();
@@ -1095,7 +1095,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // Tap on item 'one', which must appear over the button.
-    await tester.tap(find.byKey(buttonKey));
+    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -1165,7 +1165,7 @@ void main() {
       await tester.pumpAndSettle();
       menuRect = getMenuRect();
       buttonRect = getExpandedButtonRect();
-      await tester.tap(find.byType(dropdownButtonType));
+      await tester.tap(find.byType(dropdownButtonType), warnIfMissed: false);
     }
 
     // Dropdown button is along the top of the app. The top of the menu is
@@ -2166,7 +2166,7 @@ void main() {
 
     // Initially shows the hint text
     expect(find.text('Please select an item'), findsOneWidget);
-    await tester.tap(find.text('Please select an item'));
+    await tester.tap(find.text('Please select an item'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
@@ -2392,7 +2392,7 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
 
     // Show the popup menu.
-    await tester.tap(find.text('-item0-'));
+    await tester.tap(find.text('-item0-'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
@@ -2773,7 +2773,7 @@ void main() {
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
@@ -2839,7 +2839,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -2855,7 +2855,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('two'));
+    await tester.tap(find.text('two'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
