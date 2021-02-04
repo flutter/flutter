@@ -326,7 +326,7 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
     }
   };
   return Shell::Create(
-      task_runners, settings,
+      flutter::PlatformData(), task_runners, settings,
       [vsync_clock, &create_vsync_waiter,
        shell_test_external_view_embedder](Shell& shell) {
         return ShellTestPlatformView::Create(

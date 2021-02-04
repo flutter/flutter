@@ -58,9 +58,9 @@ bool EmbedderEngine::LaunchShell() {
     FML_DLOG(ERROR) << "Shell already initialized";
   }
 
-  shell_ = Shell::Create(task_runners_, shell_args_->settings,
-                         shell_args_->on_create_platform_view,
-                         shell_args_->on_create_rasterizer);
+  shell_ = Shell::Create(
+      flutter::PlatformData(), task_runners_, shell_args_->settings,
+      shell_args_->on_create_platform_view, shell_args_->on_create_rasterizer);
 
   // Reset the args no matter what. They will never be used to initialize a
   // shell again.
