@@ -720,9 +720,7 @@ void main() {
       ),
     );
 
-    const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
-    const double additionalPadding = 40.0 - labelBottomMargin;
-    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
