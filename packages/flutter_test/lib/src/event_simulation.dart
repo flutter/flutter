@@ -688,8 +688,44 @@ class KeyEventSimulator {
 /// See also:
 ///
 ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
-  return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey);
+Future<bool> simulateKeyDownEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  bool synthesized = false,
+  String? platform,
+}) async {
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyDownEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         character: character,
+         timeStamp: timeStamp,
+         synthesized: synthesized,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyDownEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
+}
+
+Future<bool> simulateKeyRepeatEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  String? platform,
+}) async {
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyRepeatEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         character: character,
+         timeStamp: timeStamp,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyDownEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
 }
 
 /// Simulates sending a hardware key up event through the system channel.
@@ -710,6 +746,22 @@ Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, Phy
 /// See also:
 ///
 ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
-  return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+Future<bool> simulateKeyUpEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  bool synthesized = false,
+  String? platform,
+}) async {
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyUpEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         timeStamp: timeStamp,
+         synthesized: synthesized,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyUpEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
 }
