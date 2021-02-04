@@ -31,6 +31,12 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   final LogicalKeyData logicalData;
 
+  Set<String> get logicalKeyNames {
+    return _logicalKeyNames ??= Set<String>.from(
+      logicalData.data.values.map<String>((LogicalKeyEntry entry) => entry.constantName));
+  }
+  Set<String> _logicalKeyNames;
+
   List<PhysicalKeyEntry> get numpadKeyData {
     return keyData.data.where((PhysicalKeyEntry entry) {
       return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
@@ -187,8 +193,12 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get windowsKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      if (entry.windowsValues != null) {
-        for (final int code in entry.windowsValues) {
+      // Letter keys on Windows are not recorded in logical_key_data.json,
+      // because they are not used by the embedding. Add them manually.
+      final List<int> keyCodes = entry.windowsValues ??
+        (entry.keyLabel != null ? <int>[entry.keyLabel.toUpperCase().codeUnitAt(0)] : null);
+      if (keyCodes != null) {
+        for (final int code in keyCodes) {
           lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -255,7 +265,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.usbHidCode != null) {
-        fuchsiaKeyCodeMap.writeln('  ${toHex(entry.flutterId)}: LogicalKeyboardKey.${entry.constantName},');
+        if (logicalKeyNames.contains(entry.constantName))
+          fuchsiaKeyCodeMap.writeln('  ${toHex(entry.flutterId)}: LogicalKeyboardKey.${entry.constantName},');
       }
     }
     return fuchsiaKeyCodeMap.toString().trimRight();
