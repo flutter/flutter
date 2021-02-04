@@ -92,7 +92,7 @@ class LogicalKeyData {
     final Map<String, String> unusedNumpad = Map<String, String>.from(printableToNumpads);
 
     final RegExp domKeyRegExp = RegExp(
-        r'DOM_KEY_(?:UNI|MAP)\s*\(\s*"([^\s]+?)",\s*'
+        r'DOM_KEY_(UNI|MAP)\s*\(\s*"([^\s]+?)",\s*'
         r"([^\s]+?),\s*(?:0x([a-fA-F0-9]+)|'(.)')\s*\)",
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
@@ -101,8 +101,9 @@ class LogicalKeyData {
       if (match == null) {
         return match.group(0);
       }
-      final String name = match.group(1).replaceAll(RegExp('[^A-Za-z0-9]'), '');
-      final int value = match.group(3) != null ? getHex(match.group(3)) : match.group(4).codeUnitAt(0);
+      final String name = match.group(2).replaceAll(RegExp('[^A-Za-z0-9]'), '');
+      final int value = match.group(4) != null ? getHex(match.group(4)) : match.group(5).codeUnitAt(0);
+      final String keyLabel = match.group(1) == 'UNI' ? String.fromCharCode(value) : null;
       // If it's a modifier key, add left and right keys instead.
       // Don't add web names and values; they're solved with locations.
       if (chromeModifiers.containsKey(name)) {
@@ -110,10 +111,12 @@ class LogicalKeyData {
         data[LogicalKeyEntry.computeConstantName(pair.left)] = LogicalKeyEntry.fromName(
           value: value + kLeftModifierPlane,
           name: pair.left,
+          keyLabel: keyLabel,
         );
         data[LogicalKeyEntry.computeConstantName(pair.right)] = LogicalKeyEntry.fromName(
           value: value + kRightModifierPlane,
           name: pair.right,
+          keyLabel: keyLabel,
         );
         return match.group(0);
       }
@@ -125,6 +128,7 @@ class LogicalKeyData {
         data[LogicalKeyEntry.computeConstantName(numpadName)] = LogicalKeyEntry.fromName(
           value: char.codeUnitAt(0) + kNumpadPlane,
           name: numpadName,
+          keyLabel: keyLabel,
         );
         unusedNumpad.remove(char);
       }
@@ -132,6 +136,7 @@ class LogicalKeyData {
       final LogicalKeyEntry entry = data.putIfAbsent(LogicalKeyEntry.computeConstantName(name), () => LogicalKeyEntry.fromName(
         value: value,
         name: name,
+        keyLabel: keyLabel,
       ));
       entry
         ..webNames.add(name)
@@ -214,7 +219,6 @@ class LogicalKeyData {
     // Eliminate everything outside of the enum block.
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
     final RegExp enumEntry = RegExp(r'AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?');
-    final Map<String, int> result = <String, int>{};
     for (final Match match in enumEntry.allMatches(headerFile)) {
       final String androidName = match.group(1);
       final String name = nameToFlutterName[androidName];
@@ -268,6 +272,7 @@ class LogicalKeyEntry {
     @required this.value,
     @required this.constantName,
     @required this.commentName,
+    this.keyLabel,
   })  : assert(constantName != null),
         assert(commentName != null),
         assert(value != null),
@@ -283,10 +288,12 @@ class LogicalKeyEntry {
   LogicalKeyEntry.fromName({
     @required int value,
     @required String name,
+    String keyLabel,
   })  : this(
           value: value,
           commentName: LogicalKeyEntry.computeCommentName(name),
           constantName: LogicalKeyEntry.computeConstantName(name),
+          keyLabel: keyLabel,
         );
 
   /// Populates the key from a JSON map.
@@ -301,7 +308,8 @@ class LogicalKeyEntry {
       windowsNames = (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       windowsValues = (map['values']['windows'] as List<dynamic>)?.cast<int>(),
       androidNames = (map['names']['android'] as List<dynamic>)?.cast<String>(),
-      androidValues = (map['values']['android'] as List<dynamic>)?.cast<int>();
+      androidValues = (map['values']['android'] as List<dynamic>)?.cast<int>(),
+      keyLabel = map['keyLabel'] as String;
 
   final int value;
 
@@ -345,12 +353,15 @@ class LogicalKeyEntry {
   /// value.
   final List<int> androidValues;
 
+  final String keyLabel;
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return removeEmptyValues(<String, dynamic>{
       'constant': constantName,
       'english': commentName,
       'value': value,
+      'keyLabel': keyLabel,
       'names': removeEmptyValues(<String, dynamic>{
         'web': webNames,
         'gtk': gtkNames,

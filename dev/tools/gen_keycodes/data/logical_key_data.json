@@ -280,6 +280,21 @@
       ]
     }
   },
+  "percent": {
+    "constant": "percent",
+    "english": "Percent",
+    "value": 37,
+    "names": {
+      "web": [
+        "Percent"
+      ]
+    },
+    "values": {
+      "web": [
+        37
+      ]
+    }
+  },
   "ampersand": {
     "constant": "ampersand",
     "english": "Ampersand",

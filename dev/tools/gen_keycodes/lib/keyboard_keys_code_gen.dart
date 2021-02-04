@@ -5,8 +5,8 @@
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
-import 'physical_key_data.dart';
 import 'logical_key_data.dart';
+import 'physical_key_data.dart';
 import 'utils.dart';
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
@@ -83,7 +83,12 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
+    String escapeLabel(String label) {
+      label = label
+        .replaceAll('\n', r'\n')
+        .replaceAll('\r', r'\r');
+      return label.contains("'") ? 'r"$label"' : "r'$label'";
+    }
     final StringBuffer definitions = StringBuffer();
     void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
@@ -99,7 +104,7 @@ $otherCommentsStr  static const LogicalKeyboardKey $constantName = LogicalKeyboa
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       printKey(
         entry.value,
-        null,
+        entry.keyLabel,
         entry.constantName,
         entry.commentName,
       );

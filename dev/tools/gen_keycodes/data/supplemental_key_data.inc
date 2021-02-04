@@ -12,7 +12,7 @@
   DOM_KEY_UNI("Exclamation",            EXCLAMATION,            '!'),
   DOM_KEY_UNI("NumberSign",             NUMBER_SIGN,            '#'),
   DOM_KEY_UNI("Dollar",                 DOLLAR,                 '$'),
-  DOM_KEY_UNI("Percent",                PERCENT,                '%'k),
+  DOM_KEY_UNI("Percent",                PERCENT,                '%'),
   DOM_KEY_UNI("Ampersand",              AMPERSAND,              '&'),
   DOM_KEY_UNI("QuoteSingle",            QUOTE_SINGLE,           0x0027),
   DOM_KEY_UNI("Quote",                  QUOTE,                  '"')",
