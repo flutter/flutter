@@ -541,6 +541,18 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
             if (!(kvp.value[i] as YamlMap).containsKey('name') || kvp.value[i]['name'] is! String) {
               errors.add('Expected the $i element in "${kvp.key}" to have required key "name" of type String');
             }
+            if ((kvp.value[i] as YamlMap).containsKey('libraries')
+                  && (kvp.value[i]['libraries'] is! YamlList
+                      || (kvp.value[i]['libraries'].length != 0
+                          && kvp.value[i]['libraries'][0] is! String))) {
+              errors.add('Expected "libraries" key in the $i element of "${kvp.key}" to be a list of type String');
+            }
+            if ((kvp.value[i] as YamlMap).containsKey('assets') 
+                  && (kvp.value[i]['assets'] is! YamlList
+                       || (kvp.value[i]['assets'].length != 0
+                           && kvp.value[i]['assets'][0] is! String))) {
+              errors.add('Expected "assets" key in the $i element of "${kvp.key}" to be a list of type String');
+            }
           }
         }
         break;

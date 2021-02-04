@@ -1275,6 +1275,92 @@ flutter:
     expect(logger.errorText, 'Expected "deferred-components" to be a list, but got blah (String).\n');
   });
 
+  testWithoutContext('FlutterManifest deferred component libraries is list', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      libraries: blah
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of type String\n');
+  });
+
+  testWithoutContext('FlutterManifest deferred component libraries is string', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      libraries:
+        - not-a-string:
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of type String\n');
+  });
+
+  testWithoutContext('FlutterManifest deferred component assets is string', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      assets:
+        - not-a-string:
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of type String\n');
+  });
+
+  testWithoutContext('FlutterManifest deferred component assets is list', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      assets: blah
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of type String\n');
+  });
+
   testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
     const String manifest = '''
 name: test
