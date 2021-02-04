@@ -1144,6 +1144,166 @@ flutter:
     expect(flutterManifest, null);
     expect(logger.errorText, 'Expected "licenses" to be a list of files, but element 1 was a YamlMap\n');
   });
+
+  testWithoutContext('FlutterManifest parses deferred components', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: component1
+      libraries:
+        - lib1
+      assets:
+        - path/to/asset.jpg
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest == null, false);
+    expect(flutterManifest.deferredComponents.length, 1);
+    expect(flutterManifest.deferredComponents[0].name, 'component1');
+    expect(flutterManifest.deferredComponents[0].libraries.length, 1);
+    expect(flutterManifest.deferredComponents[0].libraries[0], 'lib1');
+    expect(flutterManifest.deferredComponents[0].assets.length, 1);
+    expect(flutterManifest.deferredComponents[0].assets[0].path, 'path/to/asset.jpg');
+  });
+
+  testWithoutContext('FlutterManifest parses multiple deferred components', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: component1
+      libraries:
+        - lib1
+      assets:
+        - path/to/asset.jpg
+    - name: component2
+      libraries:
+        - lib2
+        - lib3
+      assets:
+        - path/to/asset2.jpg
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest == null, false);
+    expect(flutterManifest.deferredComponents.length, 2);
+    expect(flutterManifest.deferredComponents[0].name, 'component1');
+    expect(flutterManifest.deferredComponents[0].libraries.length, 1);
+    expect(flutterManifest.deferredComponents[0].libraries[0], 'lib1');
+    expect(flutterManifest.deferredComponents[0].assets.length, 1);
+    expect(flutterManifest.deferredComponents[0].assets[0].path, 'path/to/asset.jpg');
+
+    expect(flutterManifest.deferredComponents[1].name, 'component2');
+    expect(flutterManifest.deferredComponents[1].libraries.length, 2);
+    expect(flutterManifest.deferredComponents[1].libraries[0], 'lib2');
+    expect(flutterManifest.deferredComponents[1].libraries[1], 'lib3');
+    expect(flutterManifest.deferredComponents[1].assets.length, 1);
+    expect(flutterManifest.deferredComponents[1].assets[0].path, 'path/to/asset2.jpg');
+  });
+
+  testWithoutContext('FlutterManifest parses empty deferred components', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest == null, false);
+    expect(flutterManifest.deferredComponents.length, 0);
+  });
+
+  testWithoutContext('FlutterManifest deferred component requires name', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - libraries:
+        - lib1
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected the 0 element in "deferred-components" to have required key "name" of type String\n');
+  });
+
+  testWithoutContext('FlutterManifest deferred component is list', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components: blah
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "deferred-components" to be a list, but got blah (String).\n');
+  });
+
+  testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: component1
+      assets:
+        - path/to/asset1.jpg
+        - path/to/asset2.jpg
+        - path/to/asset3.jpg
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest == null, false);
+    expect(flutterManifest.deferredComponents.length, 1);
+    expect(flutterManifest.deferredComponents[0].name, 'component1');
+    expect(flutterManifest.deferredComponents[0].libraries.length, 0);
+    expect(flutterManifest.deferredComponents[0].assets.length, 3);
+    expect(flutterManifest.deferredComponents[0].assets[0].path, 'path/to/asset1.jpg');
+    expect(flutterManifest.deferredComponents[0].assets[1].path, 'path/to/asset2.jpg');
+    expect(flutterManifest.deferredComponents[0].assets[2].path, 'path/to/asset3.jpg');
+  });
 }
 
 Matcher matchesManifest({
