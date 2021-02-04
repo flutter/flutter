@@ -1,4 +1,4 @@
-Signature: 1a2544109f68e8be008ce66351e81f5c
+Signature: cf5da21eafb2232bacb1d82e3c8aca33
 
 UNUSED LICENSES:
 
@@ -5471,8 +5471,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeHardwareTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStrokeTessellateShader.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
