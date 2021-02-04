@@ -1275,16 +1275,6 @@ abstract class ResidentRunner {
     }
   }
 
-  // DevToolsServerAddress activeDevToolsServer() {
-  //   _devToolsLauncher ??= DevtoolsLauncher.instance;
-  //   return _devToolsLauncher.activeDevToolsServer;
-  // }
-
-  // Future<void> shutdownDevTools() async {
-  //   await _devToolsLauncher?.close();
-  //   _devToolsLauncher = null;
-  // }
-
   Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
   }
