@@ -6,7 +6,10 @@
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
+
+FLUTTER_ASSERT_ARC
 
 static GrContextOptions CreateMetalGrContextOptions() {
   GrContextOptions options = {};
@@ -33,7 +36,6 @@ static GrContextOptions CreateMetalGrContextOptions() {
 
     if (!_device) {
       FML_DLOG(ERROR) << "Could not acquire Metal device.";
-      [self release];
       return nil;
     }
 
@@ -41,30 +43,52 @@ static GrContextOptions CreateMetalGrContextOptions() {
 
     if (!_commandQueue) {
       FML_DLOG(ERROR) << "Could not create Metal command queue.";
-      [self release];
       return nil;
     }
 
     [_commandQueue setLabel:@"Flutter Main Queue"];
 
+    CVReturn cvReturn = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
+                                                  nil,      // cache attributes (nil default)
+                                                  _device,  // metal device
+                                                  nil,      // texture attributes (nil default)
+                                                  &_textureCache  // [out] cache
+    );
+    if (cvReturn != kCVReturnSuccess) {
+      FML_DLOG(ERROR) << "Could not create Metal texture cache.";
+      return nil;
+    }
+
     auto contextOptions = CreateMetalGrContextOptions();
 
     // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
     // when the GrDirectContext is collected.
-    _mainContext =
-        GrDirectContext::MakeMetal([_device retain], [_commandQueue retain], contextOptions);
-    _resourceContext =
-        GrDirectContext::MakeMetal([_device retain], [_commandQueue retain], contextOptions);
+    _mainContext = GrDirectContext::MakeMetal(
+        (__bridge_retained void*)_device, (__bridge_retained void*)_commandQueue, contextOptions);
+    _resourceContext = _mainContext;
 
     if (!_mainContext || !_resourceContext) {
       FML_DLOG(ERROR) << "Could not create Skia Metal contexts.";
-      [self release];
       return nil;
     }
 
     _resourceContext->setResourceCacheLimits(0u, 0u);
   }
   return self;
+}
+
+- (void)dealloc {
+  if (_textureCache) {
+    CFRelease(_textureCache);
+  }
+}
+
+- (FlutterDarwinExternalTextureMetal*)
+    createExternalTextureWithIdentifier:(int64_t)textureID
+                                texture:(NSObject<FlutterTexture>*)texture {
+  return [[FlutterDarwinExternalTextureMetal alloc] initWithTextureCache:_textureCache
+                                                               textureID:textureID
+                                                                 texture:texture];
 }
 
 @end
