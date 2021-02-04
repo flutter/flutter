@@ -218,6 +218,39 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
+/// displays a Material dialog above the current contents of the app and returns
+/// a [Future] that completes when the dialog is dismissed.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextButton(
+///     onPressed: () => showDialog<String>(
+///       context: context,
+///       builder: (BuildContext context) => AlertDialog(
+///         title: const Text('AlertDialog Tilte'),
+///         content: const Text('AlertDialog description'),
+///         actions: [
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'Cancel'),
+///             child: const Text('Cancel'),
+///           ),
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'OK'),
+///             child: const Text('OK'),
+///           ),
+///         ],
+///       ),
+///     ),
+///     child: Text('Show Dialog'),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].

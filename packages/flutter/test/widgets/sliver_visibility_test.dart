@@ -260,7 +260,7 @@ void main() {
     expect(renderSliver.constraints.crossAxisExtent, 800.0);
     expect(semantics.nodesWith(label: 'a true'), hasLength(1));
     expect(log, <String>['created new state']);
-    await tester.tap(find.byKey(anchor));
+    await tester.tap(find.byKey(anchor), warnIfMissed: false);
     expect(log, <String>['created new state']);
     log.clear();
 
@@ -282,7 +282,7 @@ void main() {
     expect(renderSliver.constraints.crossAxisExtent, 800.0);
     expect(semantics.nodesWith(label: 'a true'), hasLength(0));
     expect(log, <String>[]);
-    await tester.tap(find.byKey(anchor));
+    await tester.tap(find.byKey(anchor), warnIfMissed: false);
     expect(log, <String>[]);
     log.clear();
 
