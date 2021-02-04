@@ -26,19 +26,18 @@ config("relative_flutter_windows_headers") {
 source_set("flutter_windows_headers") {
   public = _public_headers
 
-  public_deps =
-      [ "//flutter/shell/platform/common/cpp:common_cpp_library_headers" ]
+  public_deps = [ "//flutter/shell/platform/common:common_cpp_library_headers" ]
 
   if (target_os == "winuwp") {
     configs +=
-        [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+        [ "//flutter/shell/platform/common:desktop_library_implementation" ]
   } else {
     configs +=
-        [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
+        [ "//flutter/shell/platform/common:desktop_library_implementation" ]
   }
 
   public_configs =
-      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
+      [ "//flutter/shell/platform/common:relative_flutter_library_headers" ]
 }
 
 source_set("flutter_windows_source") {
@@ -114,7 +113,7 @@ source_set("flutter_windows_source") {
   }
 
   configs += [
-    "//flutter/shell/platform/common/cpp:desktop_library_implementation",
+    "//flutter/shell/platform/common:desktop_library_implementation",
     "//third_party/angle:gl_prototypes",
   ]
 
@@ -127,10 +126,10 @@ source_set("flutter_windows_source") {
 
   deps = [
     ":flutter_windows_headers",
-    "//flutter/shell/platform/common/cpp:common_cpp",
-    "//flutter/shell/platform/common/cpp:common_cpp_input",
-    "//flutter/shell/platform/common/cpp:common_cpp_switches",
-    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common:common_cpp",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_switches",
+    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
     "//third_party/angle:libEGL_static",  # the order of libEGL_static and
@@ -148,7 +147,7 @@ copy("publish_headers_windows") {
   outputs = [ "$root_out_dir/{{source_file_part}}" ]
 
   # The Windows header assumes the presence of the common headers.
-  deps = [ "//flutter/shell/platform/common/cpp:publish_headers" ]
+  deps = [ "//flutter/shell/platform/common:publish_headers" ]
 }
 
 shared_library("flutter_windows") {
@@ -213,7 +212,7 @@ executable("flutter_windows_unittests") {
     ":flutter_windows_fixtures",
     ":flutter_windows_headers",
     ":flutter_windows_source",
-    "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",

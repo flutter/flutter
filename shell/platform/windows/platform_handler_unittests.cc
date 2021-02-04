@@ -6,8 +6,8 @@
 
 #include <memory>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
-#include "flutter/shell/platform/common/cpp/json_method_codec.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

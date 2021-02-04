@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
 
 static constexpr char kChannelName[] = "flutter/mousecursor";
 

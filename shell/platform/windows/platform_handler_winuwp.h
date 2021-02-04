@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_PLATFORM_HANDLER_WINUWP_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_PLATFORM_HANDLER_WINUWP_H_
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_channel.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "rapidjson/document.h"
