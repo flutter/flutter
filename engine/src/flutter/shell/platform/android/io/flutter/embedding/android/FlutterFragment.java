@@ -624,13 +624,17 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   @Override
   public void onStart() {
     super.onStart();
-    delegate.onStart();
+    if (stillAttachedForEvent("onStart")) {
+      delegate.onStart();
+    }
   }
 
   @Override
   public void onResume() {
     super.onResume();
-    delegate.onResume();
+    if (stillAttachedForEvent("onResume")) {
+      delegate.onResume();
+    }
   }
 
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if
@@ -643,7 +647,9 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   @Override
   public void onPause() {
     super.onPause();
-    delegate.onPause();
+    if (stillAttachedForEvent("onPause")) {
+      delegate.onPause();
+    }
   }
 
   @Override
@@ -672,7 +678,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
 
   @Override
   public void detachFromFlutterEngine() {
-    Log.v(
+    Log.w(
         TAG,
         "FlutterFragment "
             + this
@@ -1118,7 +1124,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
 
   private boolean stillAttachedForEvent(String event) {
     if (delegate == null) {
-      Log.v(TAG, "FlutterFragment " + hashCode() + " " + event + " called after release.");
+      Log.w(TAG, "FlutterFragment " + hashCode() + " " + event + " called after release.");
       return false;
     }
     return true;
