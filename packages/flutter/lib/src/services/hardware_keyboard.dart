@@ -320,6 +320,4 @@ abstract class HardwareKeyboard extends KeyboardState {
       return onEvent!(event);
     }
   }
-
-  KeyEventCallback? onEvent;
 }
