@@ -103,6 +103,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
 
 void main() {
   task(() async {
+    await flutter('update-packages');
     final File nodeSourceFile = File(path.join(
       flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
