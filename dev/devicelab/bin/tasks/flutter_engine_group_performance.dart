@@ -14,20 +14,6 @@ const String _bundleName = 'dev.flutter.multipleflutters';
 const String _activityName = 'MainActivity';
 const int _numberOfIterations = 10;
 
-List<String> _addComponent(List<String> components, String value) {
-  final List<String> result = <String>[];
-  result.addAll(components);
-  result.add(value);
-  return result;
-}
-
-List<String> _addComponents(List<String> components, List<String> values) {
-  final List<String> result = <String>[];
-  result.addAll(components);
-  result.addAll(values);
-  return result;
-}
-
 Future<void> _run(String command, List<String> args, String cwd) async {
   print('$command: $args');
   final Process process =
@@ -62,9 +48,9 @@ Future<TaskResult> _doTest() async {
         scriptPathComponents.sublist(0, scriptPathComponents.length - 4);
     multipleFluttersPath.addAll(<String>['benchmarks', 'multiple_flutters']);
     final String modulePath =
-        path.joinAll(_addComponent(multipleFluttersPath, 'module'));
+        path.joinAll(multipleFluttersPath + <String>['module']);
     final String androidPath =
-        path.joinAll(_addComponent(multipleFluttersPath, 'android'));
+        path.joinAll(multipleFluttersPath + <String>['android']);
 
     final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final String gradlewExecutable =
@@ -76,16 +62,16 @@ Future<TaskResult> _doTest() async {
     await _run(flutterPath, <String>['pub', 'get'], modulePath);
     await _run(gradlewExecutable, <String>['assembleRelease'], androidPath);
 
-    final String apkPath = path.joinAll(_addComponents(
-        multipleFluttersPath, <String>[
-      'android',
-      'app',
-      'build',
-      'outputs',
-      'apk',
-      'release',
-      'app-release.apk'
-    ]));
+    final String apkPath = path.joinAll(multipleFluttersPath +
+        <String>[
+          'android',
+          'app',
+          'build',
+          'outputs',
+          'apk',
+          'release',
+          'app-release.apk'
+        ]);
 
     TaskResult result;
     await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
