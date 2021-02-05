@@ -547,7 +547,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
                           && kvp.value[i]['libraries'][0] is! String))) {
               errors.add('Expected "libraries" key in the $i element of "${kvp.key}" to be a list of type String');
             }
-            if ((kvp.value[i] as YamlMap).containsKey('assets') 
+            if ((kvp.value[i] as YamlMap).containsKey('assets')
                   && (kvp.value[i]['assets'] is! YamlList
                        || (kvp.value[i]['assets'].length != 0
                            && kvp.value[i]['assets'][0] is! String))) {
