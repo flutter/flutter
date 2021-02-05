@@ -38,7 +38,6 @@ import 'package:mockito/mockito.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
-import 'fake_process_manager.dart';
 import 'fakes.dart';
 import 'mocks.dart';
 import 'testbed.dart';
