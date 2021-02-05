@@ -6,8 +6,6 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
