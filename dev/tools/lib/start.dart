@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
@@ -45,10 +47,15 @@ class StartCommand extends Command<void> {
     );
     argParser.addOption(
       kEngineOption,
-      defaultsTo: defaultPath,
+      defaultsTo: EngineRepository.defaultUpstream,
       help: 'Configurable Engine repo upstream. Primarily for testing.',
     );
-  }
+    argParser.addOption(
+      kStateOption,
+      defaultsTo: defaultPath,
+      help: 'Path to persistent state file. Defaults to $defaultPath',
+    );
+}
 
   final Checkouts checkouts;
   final FileSystem fileSystem;
@@ -92,12 +99,14 @@ class StartCommand extends Command<void> {
     final FrameworkRepository framework = FrameworkRepository(checkouts);
     state.framework = pb.Repository(
       candidateBranch: argResults[kCandidateOption] as String,
-
     );
     final EngineRepository engine = EngineRepository(checkouts);
     state.engine = pb.Repository(candidateBranch: argResults[kCandidateOption] as String);
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
-    stateFile.writeAsStringSync(state.writeToJson(), flush: true);
+    stateFile.writeAsStringSync(
+      jsonEncode(state.toProto3Json()),
+      flush: true,
+    );
   }
 }

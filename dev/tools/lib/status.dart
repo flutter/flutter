@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonDecode;
+
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -41,7 +43,9 @@ class StatusCommand extends Command<void> {
   void run() {
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (stateFile.existsSync()) {
-      final pb.ConductorState state = pb.ConductorState.fromJson(stateFile.readAsStringSync());
+      final pb.ConductorState state = pb.ConductorState()..mergeFromProto3Json(
+        jsonDecode(stateFile.readAsStringSync()),
+      );
       presentState(stdio, state);
     } else {
       stdio.printStatus('No persistent state file found at ${argResults['state-file']}.');
