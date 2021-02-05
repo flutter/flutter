@@ -5,4 +5,4 @@ environment:
 dependencies:
   yaml: any
   pub_semver: any
-  package_config: any
+  package_config: 1.9.3
