@@ -2095,6 +2095,24 @@ void testMain() {
       );
     });
 
+    test('Fix flipped base and extent offsets', () {
+      expect(
+        EditingState(baseOffset: 10, extentOffset: 4),
+        EditingState(baseOffset: 4, extentOffset: 10),
+      );
+
+      expect(
+        EditingState.fromFrameworkMessage(<String, dynamic>{
+          'selectionBase': 10,
+          'selectionExtent': 4,
+        }),
+        EditingState.fromFrameworkMessage(<String, dynamic>{
+          'selectionBase': 4,
+          'selectionExtent': 10,
+        }),
+      );
+    });
+
     test('Configure input element from the editing state', () {
       final InputElement input = document.getElementsByTagName('input')[0];
       _editingState =
