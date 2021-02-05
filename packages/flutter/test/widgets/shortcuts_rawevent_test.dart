@@ -427,9 +427,7 @@ void main() {
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
       final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
-      // Shortcurts don't cause the message channel API, but the embedder API,
-      // to return "handled".
-      expect(result, isFalse);
+      expect(result, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
     });
