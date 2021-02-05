@@ -263,7 +263,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get macOsKeyCodeMap {
     final _OutputLines<int> lines = _OutputLines<int>('MacOS key code map');
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      for (final int code in entry.macOsValues) {
+      for (final int code in entry.macOsKeyCodeValues) {
         lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
       }
     }
@@ -290,6 +290,17 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       }
     }
     return iosNumPadMap.toString().trimRight();
+  }
+
+  /// This generates the map of macOS key codes to physical keys.
+  String get iosKeyCodeMap {
+    final _OutputLines<int> lines = _OutputLines<int>('iOS key code map');
+    for (final LogicalKeyEntry entry in logicalData.data.values) {
+      for (final int code in entry.iosKeyCodeValues) {
+        lines.add(code, '  $code: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return lines.sortedJoin().trimRight();
   }
 
   /// This generates the map of Fuchsia key codes to logical keys.
@@ -374,6 +385,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'MACOS_KEY_CODE_MAP': macOsKeyCodeMap,
       'IOS_SCAN_CODE_MAP': iosScanCodeMap,
       'IOS_NUMPAD_MAP': iosNumpadMap,
+      'IOS_KEY_CODE_MAP': iosKeyCodeMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'GTK_KEY_CODE_MAP': gtkKeyCodeMap,

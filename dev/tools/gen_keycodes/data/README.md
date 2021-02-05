@@ -26,6 +26,7 @@
 
 
 ### iOS
+| `ios_logical_to_physical.json` | Maps a logical key name to the names of its corresponding physical keys. This is used to derive logical keys (from `keyCode`) that can't or shouldn't be derived from `characterIgnoringModifiers`. |
 
 ### Web
 

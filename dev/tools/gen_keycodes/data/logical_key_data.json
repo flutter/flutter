@@ -47,6 +47,9 @@
       "macOs": [
         "Backspace"
       ],
+      "ios": [
+        "Backspace"
+      ],
       "gtk": [
         "BackSpace"
       ],
@@ -63,6 +66,9 @@
       ],
       "macOs": [
         51
+      ],
+      "ios": [
+        42
       ],
       "gtk": [
         65288
@@ -163,6 +169,9 @@
       "macOs": [
         "Escape"
       ],
+      "ios": [
+        "Escape"
+      ],
       "gtk": [
         "Escape"
       ],
@@ -179,6 +188,9 @@
       ],
       "macOs": [
         53
+      ],
+      "ios": [
+        41
       ],
       "gtk": [
         65307
@@ -1679,6 +1691,9 @@
       "macOs": [
         "Delete"
       ],
+      "ios": [
+        "Delete"
+      ],
       "gtk": [
         "Delete"
       ],
@@ -1695,6 +1710,9 @@
       ],
       "macOs": [
         117
+      ],
+      "ios": [
+        76
       ],
       "gtk": [
         65535
@@ -1748,6 +1766,9 @@
       "macOs": [
         "CapsLock"
       ],
+      "ios": [
+        "CapsLock"
+      ],
       "gtk": [
         "Caps_Lock"
       ],
@@ -1763,6 +1784,9 @@
         260
       ],
       "macOs": [
+        57
+      ],
+      "ios": [
         57
       ],
       "gtk": [
@@ -1852,6 +1876,9 @@
       "macOs": [
         "NumLock"
       ],
+      "ios": [
+        "NumLock"
+      ],
       "gtk": [
         "Num_Lock"
       ],
@@ -1868,6 +1895,9 @@
       ],
       "macOs": [
         71
+      ],
+      "ios": [
+        83
       ],
       "gtk": [
         65407
@@ -2013,6 +2043,9 @@
       "macOs": [
         "ArrowDown"
       ],
+      "ios": [
+        "ArrowDown"
+      ],
       "gtk": [
         "Down"
       ],
@@ -2029,6 +2062,9 @@
       ],
       "macOs": [
         125
+      ],
+      "ios": [
+        81
       ],
       "gtk": [
         65364
@@ -2052,6 +2088,9 @@
       "macOs": [
         "ArrowLeft"
       ],
+      "ios": [
+        "ArrowLeft"
+      ],
       "gtk": [
         "Left"
       ],
@@ -2068,6 +2107,9 @@
       ],
       "macOs": [
         123
+      ],
+      "ios": [
+        80
       ],
       "gtk": [
         65361
@@ -2091,6 +2133,9 @@
       "macOs": [
         "ArrowRight"
       ],
+      "ios": [
+        "ArrowRight"
+      ],
       "gtk": [
         "Right"
       ],
@@ -2107,6 +2152,9 @@
       ],
       "macOs": [
         124
+      ],
+      "ios": [
+        79
       ],
       "gtk": [
         65363
@@ -2130,6 +2178,9 @@
       "macOs": [
         "ArrowUp"
       ],
+      "ios": [
+        "ArrowUp"
+      ],
       "gtk": [
         "Up"
       ],
@@ -2146,6 +2197,9 @@
       ],
       "macOs": [
         126
+      ],
+      "ios": [
+        82
       ],
       "gtk": [
         65362
@@ -2169,6 +2223,9 @@
       "macOs": [
         "End"
       ],
+      "ios": [
+        "End"
+      ],
       "gtk": [
         "End"
       ],
@@ -2185,6 +2242,9 @@
       ],
       "macOs": [
         119
+      ],
+      "ios": [
+        77
       ],
       "gtk": [
         65367
@@ -2208,6 +2268,9 @@
       "macOs": [
         "Home"
       ],
+      "ios": [
+        "Home"
+      ],
       "gtk": [
         "Home"
       ],
@@ -2224,6 +2287,9 @@
       ],
       "macOs": [
         115
+      ],
+      "ios": [
+        74
       ],
       "gtk": [
         65360
@@ -2247,6 +2313,9 @@
       "macOs": [
         "PageDown"
       ],
+      "ios": [
+        "PageDown"
+      ],
       "gtk": [
         "Page_Down"
       ],
@@ -2263,6 +2332,9 @@
       ],
       "macOs": [
         121
+      ],
+      "ios": [
+        78
       ],
       "gtk": [
         65366
@@ -2286,6 +2358,9 @@
       "macOs": [
         "PageUp"
       ],
+      "ios": [
+        "PageUp"
+      ],
       "gtk": [
         "Page_Up"
       ],
@@ -2302,6 +2377,9 @@
       ],
       "macOs": [
         116
+      ],
+      "ios": [
+        75
       ],
       "gtk": [
         65365
@@ -2471,6 +2549,9 @@
       "macOs": [
         "Insert"
       ],
+      "ios": [
+        "Insert"
+      ],
       "gtk": [
         "Insert"
       ],
@@ -2487,6 +2568,9 @@
       ],
       "macOs": [
         114
+      ],
+      "ios": [
+        73
       ],
       "gtk": [
         65379
@@ -2669,6 +2753,9 @@
       "macOs": [
         "ContextMenu"
       ],
+      "ios": [
+        "ContextMenu"
+      ],
       "gtk": [
         "Menu"
       ],
@@ -2685,6 +2772,9 @@
       ],
       "macOs": [
         110
+      ],
+      "ios": [
+        101
       ],
       "gtk": [
         65383
@@ -3815,6 +3905,9 @@
       "macOs": [
         "F1"
       ],
+      "ios": [
+        "F1"
+      ],
       "gtk": [
         "KP_F1",
         "F1"
@@ -3832,6 +3925,9 @@
       ],
       "macOs": [
         122
+      ],
+      "ios": [
+        58
       ],
       "gtk": [
         65425,
@@ -3856,6 +3952,9 @@
       "macOs": [
         "F2"
       ],
+      "ios": [
+        "F2"
+      ],
       "gtk": [
         "KP_F2",
         "F2"
@@ -3873,6 +3972,9 @@
       ],
       "macOs": [
         120
+      ],
+      "ios": [
+        59
       ],
       "gtk": [
         65426,
@@ -3897,6 +3999,9 @@
       "macOs": [
         "F3"
       ],
+      "ios": [
+        "F3"
+      ],
       "gtk": [
         "KP_F3",
         "F3"
@@ -3914,6 +4019,9 @@
       ],
       "macOs": [
         99
+      ],
+      "ios": [
+        60
       ],
       "gtk": [
         65427,
@@ -3938,6 +4046,9 @@
       "macOs": [
         "F4"
       ],
+      "ios": [
+        "F4"
+      ],
       "gtk": [
         "KP_F4",
         "F4"
@@ -3955,6 +4066,9 @@
       ],
       "macOs": [
         118
+      ],
+      "ios": [
+        61
       ],
       "gtk": [
         65428,
@@ -3979,6 +4093,9 @@
       "macOs": [
         "F5"
       ],
+      "ios": [
+        "F5"
+      ],
       "gtk": [
         "F5"
       ],
@@ -3995,6 +4112,9 @@
       ],
       "macOs": [
         96
+      ],
+      "ios": [
+        62
       ],
       "gtk": [
         65474
@@ -4018,6 +4138,9 @@
       "macOs": [
         "F6"
       ],
+      "ios": [
+        "F6"
+      ],
       "gtk": [
         "F6"
       ],
@@ -4034,6 +4157,9 @@
       ],
       "macOs": [
         97
+      ],
+      "ios": [
+        63
       ],
       "gtk": [
         65475
@@ -4057,6 +4183,9 @@
       "macOs": [
         "F7"
       ],
+      "ios": [
+        "F7"
+      ],
       "gtk": [
         "F7"
       ],
@@ -4073,6 +4202,9 @@
       ],
       "macOs": [
         98
+      ],
+      "ios": [
+        64
       ],
       "gtk": [
         65476
@@ -4096,6 +4228,9 @@
       "macOs": [
         "F8"
       ],
+      "ios": [
+        "F8"
+      ],
       "gtk": [
         "F8"
       ],
@@ -4112,6 +4247,9 @@
       ],
       "macOs": [
         100
+      ],
+      "ios": [
+        65
       ],
       "gtk": [
         65477
@@ -4135,6 +4273,9 @@
       "macOs": [
         "F9"
       ],
+      "ios": [
+        "F9"
+      ],
       "gtk": [
         "F9"
       ],
@@ -4151,6 +4292,9 @@
       ],
       "macOs": [
         101
+      ],
+      "ios": [
+        66
       ],
       "gtk": [
         65478
@@ -4174,6 +4318,9 @@
       "macOs": [
         "F10"
       ],
+      "ios": [
+        "F10"
+      ],
       "gtk": [
         "F10"
       ],
@@ -4190,6 +4337,9 @@
       ],
       "macOs": [
         109
+      ],
+      "ios": [
+        67
       ],
       "gtk": [
         65479
@@ -4213,6 +4363,9 @@
       "macOs": [
         "F11"
       ],
+      "ios": [
+        "F11"
+      ],
       "gtk": [
         "F11"
       ],
@@ -4229,6 +4382,9 @@
       ],
       "macOs": [
         103
+      ],
+      "ios": [
+        68
       ],
       "gtk": [
         65480
@@ -4252,6 +4408,9 @@
       "macOs": [
         "F12"
       ],
+      "ios": [
+        "F12"
+      ],
       "gtk": [
         "F12"
       ],
@@ -4268,6 +4427,9 @@
       ],
       "macOs": [
         111
+      ],
+      "ios": [
+        69
       ],
       "gtk": [
         65481
@@ -4291,6 +4453,9 @@
       "macOs": [
         "F13"
       ],
+      "ios": [
+        "F13"
+      ],
       "gtk": [
         "F13"
       ],
@@ -4304,6 +4469,9 @@
       ],
       "macOs": [
         105
+      ],
+      "ios": [
+        104
       ],
       "gtk": [
         65482
@@ -4324,6 +4492,9 @@
       "macOs": [
         "F14"
       ],
+      "ios": [
+        "F14"
+      ],
       "gtk": [
         "F14"
       ],
@@ -4337,6 +4508,9 @@
       ],
       "macOs": [
         107
+      ],
+      "ios": [
+        105
       ],
       "gtk": [
         65483
@@ -4357,6 +4531,9 @@
       "macOs": [
         "F15"
       ],
+      "ios": [
+        "F15"
+      ],
       "gtk": [
         "F15"
       ],
@@ -4370,6 +4547,9 @@
       ],
       "macOs": [
         113
+      ],
+      "ios": [
+        106
       ],
       "gtk": [
         65484
@@ -4390,6 +4570,9 @@
       "macOs": [
         "F16"
       ],
+      "ios": [
+        "F16"
+      ],
       "gtk": [
         "F16"
       ],
@@ -4403,6 +4586,9 @@
       ],
       "macOs": [
         106
+      ],
+      "ios": [
+        107
       ],
       "gtk": [
         65485
@@ -4423,6 +4609,9 @@
       "macOs": [
         "F17"
       ],
+      "ios": [
+        "F17"
+      ],
       "gtk": [
         "F17"
       ],
@@ -4436,6 +4625,9 @@
       ],
       "macOs": [
         64
+      ],
+      "ios": [
+        108
       ],
       "gtk": [
         65486
@@ -4456,6 +4648,9 @@
       "macOs": [
         "F18"
       ],
+      "ios": [
+        "F18"
+      ],
       "gtk": [
         "F18"
       ],
@@ -4469,6 +4664,9 @@
       ],
       "macOs": [
         79
+      ],
+      "ios": [
+        109
       ],
       "gtk": [
         65487
@@ -4489,6 +4687,9 @@
       "macOs": [
         "F19"
       ],
+      "ios": [
+        "F19"
+      ],
       "gtk": [
         "F19"
       ],
@@ -4502,6 +4703,9 @@
       ],
       "macOs": [
         80
+      ],
+      "ios": [
+        110
       ],
       "gtk": [
         65488
@@ -4522,6 +4726,9 @@
       "macOs": [
         "F20"
       ],
+      "ios": [
+        "F20"
+      ],
       "gtk": [
         "F20"
       ],
@@ -4535,6 +4742,9 @@
       ],
       "macOs": [
         90
+      ],
+      "ios": [
+        111
       ],
       "gtk": [
         65489
@@ -5098,6 +5308,9 @@
       "macOs": [
         "AudioVolumeDown"
       ],
+      "ios": [
+        "AudioVolumeDown"
+      ],
       "gtk": [
         "AudioLowerVolume"
       ],
@@ -5114,6 +5327,9 @@
       ],
       "macOs": [
         73
+      ],
+      "ios": [
+        129
       ],
       "gtk": [
         269025041
@@ -5137,6 +5353,9 @@
       "macOs": [
         "AudioVolumeUp"
       ],
+      "ios": [
+        "AudioVolumeUp"
+      ],
       "gtk": [
         "AudioRaiseVolume"
       ],
@@ -5153,6 +5372,9 @@
       ],
       "macOs": [
         72
+      ],
+      "ios": [
+        128
       ],
       "gtk": [
         269025043
@@ -5176,6 +5398,9 @@
       "macOs": [
         "AudioVolumeMute"
       ],
+      "ios": [
+        "AudioVolumeMute"
+      ],
       "gtk": [
         "AudioMute"
       ],
@@ -5192,6 +5417,9 @@
       ],
       "macOs": [
         74
+      ],
+      "ios": [
+        127
       ],
       "gtk": [
         269025042
@@ -9024,6 +9252,9 @@
       "macOs": [
         "IntlRo"
       ],
+      "ios": [
+        "IntlRo"
+      ],
       "android": [
         "RO"
       ]
@@ -9034,6 +9265,9 @@
       ],
       "macOs": [
         94
+      ],
+      "ios": [
+        135
       ],
       "android": [
         217
@@ -9051,6 +9285,9 @@
       "macOs": [
         "IntlYen"
       ],
+      "ios": [
+        "IntlYen"
+      ],
       "gtk": [
         "yen"
       ],
@@ -9064,6 +9301,9 @@
       ],
       "macOs": [
         93
+      ],
+      "ios": [
+        137
       ],
       "gtk": [
         165
@@ -9084,6 +9324,9 @@
       "macOs": [
         "Lang1"
       ],
+      "ios": [
+        "Lang1"
+      ],
       "windows": [
         "KANA",
         "HANGEUL",
@@ -9096,6 +9339,9 @@
       ],
       "macOs": [
         104
+      ],
+      "ios": [
+        144
       ],
       "windows": [
         21,
@@ -9114,6 +9360,9 @@
       ],
       "macOs": [
         "Lang2"
+      ],
+      "ios": [
+        "Lang2"
       ]
     },
     "values": {
@@ -9122,6 +9371,9 @@
       ],
       "macOs": [
         102
+      ],
+      "ios": [
+        145
       ]
     }
   },
@@ -9132,11 +9384,17 @@
     "names": {
       "web": [
         "Lang3"
+      ],
+      "ios": [
+        "Lang3"
       ]
     },
     "values": {
       "web": [
         4295426194
+      ],
+      "ios": [
+        146
       ]
     }
   },
@@ -9147,11 +9405,17 @@
     "names": {
       "web": [
         "Lang4"
+      ],
+      "ios": [
+        "Lang4"
       ]
     },
     "values": {
       "web": [
         4295426195
+      ],
+      "ios": [
+        147
       ]
     }
   },
@@ -9162,11 +9426,17 @@
     "names": {
       "web": [
         "Lang5"
+      ],
+      "ios": [
+        "Lang5"
       ]
     },
     "values": {
       "web": [
         4295426196
+      ],
+      "ios": [
+        148
       ]
     }
   },
@@ -9193,6 +9463,9 @@
       "macOs": [
         "NumpadEnter"
       ],
+      "ios": [
+        "NumpadEnter"
+      ],
       "gtk": [
         "KP_Enter"
       ],
@@ -9203,6 +9476,9 @@
     "values": {
       "macOs": [
         76
+      ],
+      "ios": [
+        88
       ],
       "gtk": [
         65421
@@ -9250,6 +9526,9 @@
       "macOs": [
         "NumpadMultiply"
       ],
+      "ios": [
+        "NumpadMultiply"
+      ],
       "gtk": [
         "KP_Multiply"
       ],
@@ -9263,6 +9542,9 @@
     "values": {
       "macOs": [
         67
+      ],
+      "ios": [
+        85
       ],
       "gtk": [
         65450
@@ -9283,6 +9565,9 @@
       "macOs": [
         "NumpadAdd"
       ],
+      "ios": [
+        "NumpadAdd"
+      ],
       "gtk": [
         "KP_Add"
       ],
@@ -9296,6 +9581,9 @@
     "values": {
       "macOs": [
         69
+      ],
+      "ios": [
+        87
       ],
       "gtk": [
         65451
@@ -9316,6 +9604,9 @@
       "macOs": [
         "NumpadComma"
       ],
+      "ios": [
+        "NumpadComma"
+      ],
       "android": [
         "NUMPAD_COMMA"
       ]
@@ -9323,6 +9614,9 @@
     "values": {
       "macOs": [
         95
+      ],
+      "ios": [
+        133
       ],
       "android": [
         159
@@ -9335,6 +9629,9 @@
     "value": 8589934637,
     "names": {
       "macOs": [
+        "NumpadSubtract"
+      ],
+      "ios": [
         "NumpadSubtract"
       ],
       "gtk": [
@@ -9350,6 +9647,9 @@
     "values": {
       "macOs": [
         78
+      ],
+      "ios": [
+        86
       ],
       "gtk": [
         65453
@@ -9370,6 +9670,9 @@
       "macOs": [
         "NumpadDecimal"
       ],
+      "ios": [
+        "NumpadDecimal"
+      ],
       "gtk": [
         "KP_Delete"
       ],
@@ -9383,6 +9686,9 @@
     "values": {
       "macOs": [
         65
+      ],
+      "ios": [
+        99
       ],
       "gtk": [
         65439
@@ -9403,6 +9709,9 @@
       "macOs": [
         "NumpadDivide"
       ],
+      "ios": [
+        "NumpadDivide"
+      ],
       "gtk": [
         "KP_Divide"
       ],
@@ -9416,6 +9725,9 @@
     "values": {
       "macOs": [
         75
+      ],
+      "ios": [
+        84
       ],
       "gtk": [
         65455
@@ -9436,6 +9748,9 @@
       "macOs": [
         "Numpad0"
       ],
+      "ios": [
+        "Numpad0"
+      ],
       "gtk": [
         "KP_Insert",
         "KP_0"
@@ -9450,6 +9765,9 @@
     "values": {
       "macOs": [
         82
+      ],
+      "ios": [
+        98
       ],
       "gtk": [
         65438,
@@ -9471,6 +9789,9 @@
       "macOs": [
         "Numpad1"
       ],
+      "ios": [
+        "Numpad1"
+      ],
       "gtk": [
         "KP_End",
         "KP_1"
@@ -9485,6 +9806,9 @@
     "values": {
       "macOs": [
         83
+      ],
+      "ios": [
+        89
       ],
       "gtk": [
         65436,
@@ -9506,6 +9830,9 @@
       "macOs": [
         "Numpad2"
       ],
+      "ios": [
+        "Numpad2"
+      ],
       "gtk": [
         "KP_Down",
         "KP_2"
@@ -9520,6 +9847,9 @@
     "values": {
       "macOs": [
         84
+      ],
+      "ios": [
+        90
       ],
       "gtk": [
         65433,
@@ -9541,6 +9871,9 @@
       "macOs": [
         "Numpad3"
       ],
+      "ios": [
+        "Numpad3"
+      ],
       "gtk": [
         "KP_Page_Down",
         "KP_3"
@@ -9555,6 +9888,9 @@
     "values": {
       "macOs": [
         85
+      ],
+      "ios": [
+        91
       ],
       "gtk": [
         65435,
@@ -9576,6 +9912,9 @@
       "macOs": [
         "Numpad4"
       ],
+      "ios": [
+        "Numpad4"
+      ],
       "gtk": [
         "KP_Left",
         "KP_4"
@@ -9590,6 +9929,9 @@
     "values": {
       "macOs": [
         86
+      ],
+      "ios": [
+        92
       ],
       "gtk": [
         65430,
@@ -9611,6 +9953,9 @@
       "macOs": [
         "Numpad5"
       ],
+      "ios": [
+        "Numpad5"
+      ],
       "gtk": [
         "KP_5"
       ],
@@ -9624,6 +9969,9 @@
     "values": {
       "macOs": [
         87
+      ],
+      "ios": [
+        93
       ],
       "gtk": [
         65461
@@ -9644,6 +9992,9 @@
       "macOs": [
         "Numpad6"
       ],
+      "ios": [
+        "Numpad6"
+      ],
       "gtk": [
         "KP_Right",
         "KP_6"
@@ -9658,6 +10009,9 @@
     "values": {
       "macOs": [
         88
+      ],
+      "ios": [
+        94
       ],
       "gtk": [
         65432,
@@ -9679,6 +10033,9 @@
       "macOs": [
         "Numpad7"
       ],
+      "ios": [
+        "Numpad7"
+      ],
       "gtk": [
         "KP_Home",
         "KP_7"
@@ -9693,6 +10050,9 @@
     "values": {
       "macOs": [
         89
+      ],
+      "ios": [
+        95
       ],
       "gtk": [
         65429,
@@ -9714,6 +10074,9 @@
       "macOs": [
         "Numpad8"
       ],
+      "ios": [
+        "Numpad8"
+      ],
       "gtk": [
         "KP_Up",
         "KP_8"
@@ -9728,6 +10091,9 @@
     "values": {
       "macOs": [
         91
+      ],
+      "ios": [
+        96
       ],
       "gtk": [
         65431,
@@ -9749,6 +10115,9 @@
       "macOs": [
         "Numpad9"
       ],
+      "ios": [
+        "Numpad9"
+      ],
       "gtk": [
         "KP_Page_Up",
         "KP_9"
@@ -9763,6 +10132,9 @@
     "values": {
       "macOs": [
         92
+      ],
+      "ios": [
+        97
       ],
       "gtk": [
         65434,
@@ -9784,6 +10156,9 @@
       "macOs": [
         "NumpadEqual"
       ],
+      "ios": [
+        "NumpadEqual"
+      ],
       "gtk": [
         "KP_Equal"
       ],
@@ -9797,6 +10172,9 @@
     "values": {
       "macOs": [
         81
+      ],
+      "ios": [
+        103
       ],
       "gtk": [
         65469
@@ -9817,6 +10195,9 @@
       "macOs": [
         "AltLeft"
       ],
+      "ios": [
+        "AltLeft"
+      ],
       "gtk": [
         "Alt_L"
       ],
@@ -9830,6 +10211,9 @@
     "values": {
       "macOs": [
         58
+      ],
+      "ios": [
+        226
       ],
       "gtk": [
         65513
@@ -9850,6 +10234,9 @@
       "macOs": [
         "ControlLeft"
       ],
+      "ios": [
+        "ControlLeft"
+      ],
       "gtk": [
         "Control_L"
       ],
@@ -9864,6 +10251,9 @@
     "values": {
       "macOs": [
         59
+      ],
+      "ios": [
+        224
       ],
       "gtk": [
         65507
@@ -9885,6 +10275,9 @@
       "macOs": [
         "MetaLeft"
       ],
+      "ios": [
+        "MetaLeft"
+      ],
       "gtk": [
         "Meta_L"
       ],
@@ -9898,6 +10291,9 @@
     "values": {
       "macOs": [
         55
+      ],
+      "ios": [
+        227
       ],
       "gtk": [
         65511
@@ -9918,6 +10314,9 @@
       "macOs": [
         "ShiftLeft"
       ],
+      "ios": [
+        "ShiftLeft"
+      ],
       "gtk": [
         "Shift_L"
       ],
@@ -9932,6 +10331,9 @@
     "values": {
       "macOs": [
         56
+      ],
+      "ios": [
+        225
       ],
       "gtk": [
         65505
@@ -9953,6 +10355,9 @@
       "macOs": [
         "AltRight"
       ],
+      "ios": [
+        "AltRight"
+      ],
       "gtk": [
         "Alt_R",
         "ISO_Level3_Shift"
@@ -9967,6 +10372,9 @@
     "values": {
       "macOs": [
         61
+      ],
+      "ios": [
+        230
       ],
       "gtk": [
         65514,
@@ -9988,6 +10396,9 @@
       "macOs": [
         "ControlRight"
       ],
+      "ios": [
+        "ControlRight"
+      ],
       "gtk": [
         "Control_R"
       ],
@@ -10001,6 +10412,9 @@
     "values": {
       "macOs": [
         62
+      ],
+      "ios": [
+        228
       ],
       "gtk": [
         65508
@@ -10021,6 +10435,9 @@
       "macOs": [
         "MetaRight"
       ],
+      "ios": [
+        "MetaRight"
+      ],
       "gtk": [
         "Meta_R"
       ],
@@ -10034,6 +10451,9 @@
     "values": {
       "macOs": [
         54
+      ],
+      "ios": [
+        231
       ],
       "gtk": [
         65512
@@ -10054,6 +10474,9 @@
       "macOs": [
         "ShiftRight"
       ],
+      "ios": [
+        "ShiftRight"
+      ],
       "gtk": [
         "Shift_R"
       ],
@@ -10067,6 +10490,9 @@
     "values": {
       "macOs": [
         60
+      ],
+      "ios": [
+        229
       ],
       "gtk": [
         65506

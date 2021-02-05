@@ -1194,9 +1194,12 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
   0x0000005a: LogicalKeyboardKey.f20,
 };
 
-/// Maps macOS-specific key code values representing [LogicalKeyboardKey].
+/// A map of macOS key codes presenting [LogicalKeyboardKey].
 ///
-/// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
+/// Logical key codes are not available in macOS key events. Most of logical keys
+/// are derived from its characterIgnoringModifiers, but those keys that don't
+/// have a character representation will be derived from their key codes using
+/// this map.
 const Map<int, LogicalKeyboardKey> kMacOsToLogicalKey = <int, LogicalKeyboardKey>{
   51: LogicalKeyboardKey.backspace,
   53: LogicalKeyboardKey.escape,
@@ -1457,6 +1460,86 @@ const Map<int, LogicalKeyboardKey> kIosNumPadMap = <int, LogicalKeyboardKey>{
   0x00000085: LogicalKeyboardKey.numpadComma,
   0x000000b6: LogicalKeyboardKey.numpadParenLeft,
   0x000000b7: LogicalKeyboardKey.numpadParenRight,
+};
+
+/// A map of iOS key codes presenting [LogicalKeyboardKey].
+///
+/// Logical key codes are not available in iOS key events. Most of logical keys
+/// are derived from its characterIgnoringModifiers, but those keys that don't
+/// have a character representation will be derived from their key codes using
+/// this map.
+const Map<int, LogicalKeyboardKey> kIosToLogicalKey = <int, LogicalKeyboardKey>{
+  41: LogicalKeyboardKey.escape,
+  42: LogicalKeyboardKey.backspace,
+  57: LogicalKeyboardKey.capsLock,
+  58: LogicalKeyboardKey.f1,
+  59: LogicalKeyboardKey.f2,
+  60: LogicalKeyboardKey.f3,
+  61: LogicalKeyboardKey.f4,
+  62: LogicalKeyboardKey.f5,
+  63: LogicalKeyboardKey.f6,
+  64: LogicalKeyboardKey.f7,
+  65: LogicalKeyboardKey.f8,
+  66: LogicalKeyboardKey.f9,
+  67: LogicalKeyboardKey.f10,
+  68: LogicalKeyboardKey.f11,
+  69: LogicalKeyboardKey.f12,
+  73: LogicalKeyboardKey.insert,
+  74: LogicalKeyboardKey.home,
+  75: LogicalKeyboardKey.pageUp,
+  76: LogicalKeyboardKey.delete,
+  77: LogicalKeyboardKey.end,
+  78: LogicalKeyboardKey.pageDown,
+  79: LogicalKeyboardKey.arrowRight,
+  80: LogicalKeyboardKey.arrowLeft,
+  81: LogicalKeyboardKey.arrowDown,
+  82: LogicalKeyboardKey.arrowUp,
+  83: LogicalKeyboardKey.numLock,
+  84: LogicalKeyboardKey.numpadDivide,
+  85: LogicalKeyboardKey.numpadMultiply,
+  86: LogicalKeyboardKey.numpadSubtract,
+  87: LogicalKeyboardKey.numpadAdd,
+  88: LogicalKeyboardKey.numpadEnter,
+  89: LogicalKeyboardKey.numpad1,
+  90: LogicalKeyboardKey.numpad2,
+  91: LogicalKeyboardKey.numpad3,
+  92: LogicalKeyboardKey.numpad4,
+  93: LogicalKeyboardKey.numpad5,
+  94: LogicalKeyboardKey.numpad6,
+  95: LogicalKeyboardKey.numpad7,
+  96: LogicalKeyboardKey.numpad8,
+  97: LogicalKeyboardKey.numpad9,
+  98: LogicalKeyboardKey.numpad0,
+  99: LogicalKeyboardKey.numpadDecimal,
+  101: LogicalKeyboardKey.contextMenu,
+  103: LogicalKeyboardKey.numpadEqual,
+  104: LogicalKeyboardKey.f13,
+  105: LogicalKeyboardKey.f14,
+  106: LogicalKeyboardKey.f15,
+  107: LogicalKeyboardKey.f16,
+  108: LogicalKeyboardKey.f17,
+  109: LogicalKeyboardKey.f18,
+  110: LogicalKeyboardKey.f19,
+  111: LogicalKeyboardKey.f20,
+  127: LogicalKeyboardKey.audioVolumeMute,
+  128: LogicalKeyboardKey.audioVolumeUp,
+  129: LogicalKeyboardKey.audioVolumeDown,
+  133: LogicalKeyboardKey.numpadComma,
+  135: LogicalKeyboardKey.intlRo,
+  137: LogicalKeyboardKey.intlYen,
+  144: LogicalKeyboardKey.lang1,
+  145: LogicalKeyboardKey.lang2,
+  146: LogicalKeyboardKey.lang3,
+  147: LogicalKeyboardKey.lang4,
+  148: LogicalKeyboardKey.lang5,
+  224: LogicalKeyboardKey.controlLeft,
+  225: LogicalKeyboardKey.shiftLeft,
+  226: LogicalKeyboardKey.altLeft,
+  227: LogicalKeyboardKey.metaLeft,
+  228: LogicalKeyboardKey.controlRight,
+  229: LogicalKeyboardKey.shiftRight,
+  230: LogicalKeyboardKey.altRight,
+  231: LogicalKeyboardKey.metaRight,
 };
 
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].

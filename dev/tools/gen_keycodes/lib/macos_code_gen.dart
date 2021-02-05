@@ -48,7 +48,7 @@ class MacOsCodeGenerator extends PlatformCodeGenerator {
   String get _keyCodeToLogicalMap {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
-      zipStrict(entry.macOsValues, entry.macOsNames, (int macOsValue, String macOsName) {
+      zipStrict(entry.macOsKeyCodeValues, entry.macOsKeyCodeNames, (int macOsValue, String macOsName) {
         result.writeln('  @${toHex(macOsValue)} : @${toHex(entry.value, digits: 10)},    // $macOsName');
       });
     }

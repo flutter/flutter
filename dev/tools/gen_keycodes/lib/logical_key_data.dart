@@ -63,6 +63,13 @@ class LogicalKeyData {
         path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'macos_logical_to_physical.json')
       ).readAsStringSync()),
     );
+    _readIosKeyCodes(
+      data,
+      physicalKeyData,
+      parseMapOfListOfString(File(
+        path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'ios_logical_to_physical.json')
+      ).readAsStringSync()),
+    );
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
       (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) => a.value.value.compareTo(b.value.value)
@@ -184,8 +191,32 @@ class LogicalKeyData {
         print('Unexpected logical key $logicalKeyName specified for macOS keyCodeToLogicalMap.');
         return;
       }
-      logicalEntry.macOsNames.add(physicalEntry.name);
-      logicalEntry.macOsValues.add(physicalEntry.macOsScanCode);
+      logicalEntry.macOsKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.macOsKeyCodeValues.add(physicalEntry.macOsScanCode);
+    });
+  }
+
+  void _readIosKeyCodes(
+    Map<String, LogicalKeyEntry> data,
+    PhysicalKeyData physicalKeyData,
+    Map<String, List<String>> logicalToPhysical,
+  ) {
+    final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
+        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for iOS'); });
+
+    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
+      final PhysicalKeyEntry physicalEntry = physicalKeyData.getEntryByName(physicalKeyName);
+      final LogicalKeyEntry logicalEntry = data[logicalKeyName];
+      if (physicalEntry == null || physicalEntry.iosScanCode == null) {
+        print('Unexpected physical key $physicalKeyName specified for iOS keyCodeToLogicalMap.');
+        return;
+      }
+      if (logicalEntry == null) {
+        print('Unexpected logical key $logicalKeyName specified for iOS keyCodeToLogicalMap.');
+        return;
+      }
+      logicalEntry.iosKeyCodeNames.add(physicalEntry.name);
+      logicalEntry.iosKeyCodeValues.add(physicalEntry.iosScanCode);
     });
   }
 
@@ -317,8 +348,10 @@ class LogicalKeyEntry {
         assert(value != null),
         webNames = <String>[],
         webValues = <int>[],
-        macOsNames = <String>[],
-        macOsValues = <int>[],
+        macOsKeyCodeNames = <String>[],
+        macOsKeyCodeValues = <int>[],
+        iosKeyCodeNames = <String>[],
+        iosKeyCodeValues = <int>[],
         gtkNames = <String>[],
         gtkValues = <int>[],
         windowsNames = <String>[],
@@ -344,8 +377,10 @@ class LogicalKeyEntry {
       commentName = map['english'] as String,
       webNames = _toNonEmptyArray<String>(map['names']['web']),
       webValues = _toNonEmptyArray<int>(map['values']['web']),
-      macOsNames = _toNonEmptyArray<String>(map['names']['macOs']),
-      macOsValues = _toNonEmptyArray<int>(map['values']['macOs']),
+      macOsKeyCodeNames = _toNonEmptyArray<String>(map['names']['macOs']),
+      macOsKeyCodeValues = _toNonEmptyArray<int>(map['values']['macOs']),
+      iosKeyCodeNames = _toNonEmptyArray<String>(map['names']['ios']),
+      iosKeyCodeValues = _toNonEmptyArray<int>(map['values']['ios']),
       gtkNames = _toNonEmptyArray<String>(map['names']['gtk']),
       gtkValues = _toNonEmptyArray<int>(map['values']['gtk']),
       windowsNames = _toNonEmptyArray<String>(map['names']['windows']),
@@ -369,14 +404,21 @@ class LogicalKeyEntry {
   /// The value of the key.
   final List<int> webValues;
 
-  /// The list of names that macOS gives to this key (symbol names minus the
-  /// prefix).
-  final List<String> macOsNames;
+  /// The names of the key codes that corresponds to this logical key on macOS,
+  /// created from the corresponding physical keys.
+  final List<String> macOsKeyCodeNames;
 
-  /// The list of macOS key codes matching this key, created by looking up the
-  /// Linux name in the macOS data, and substituting the macOS key code
-  /// value.
-  final List<int> macOsValues;
+  /// The key codes that corresponds to this logical key on macOS, created from
+  /// the physical key list substituted with the key mapping.
+  final List<int> macOsKeyCodeValues;
+
+  /// The names of the key codes that corresponds to this logical key on iOS,
+  /// created from the corresponding physical keys.
+  final List<String> iosKeyCodeNames;
+
+  /// The key codes that corresponds to this logical key on iOS, created from the
+  /// physical key list substituted with the key mapping.
+  final List<int> iosKeyCodeValues;
 
   /// The list of names that GTK gives to this key (symbol names minus the
   /// prefix).
@@ -416,14 +458,16 @@ class LogicalKeyEntry {
       'keyLabel': keyLabel,
       'names': removeEmptyValues(<String, dynamic>{
         'web': webNames,
-        'macOs': macOsNames,
+        'macOs': macOsKeyCodeNames,
+        'ios': iosKeyCodeNames,
         'gtk': gtkNames,
         'windows': windowsNames,
         'android': androidNames,
       }),
       'values': removeEmptyValues(<String, List<int>>{
         'web': webValues,
-        'macOs': macOsValues,
+        'macOs': macOsKeyCodeValues,
+        'ios': iosKeyCodeValues,
         'gtk': gtkValues,
         'windows': windowsValues,
         'android': androidValues,

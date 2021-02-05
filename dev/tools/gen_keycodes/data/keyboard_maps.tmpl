@@ -59,9 +59,12 @@ const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardK
 @@@MACOS_FUNCTION_KEY_MAP@@@
 };
 
-/// Maps macOS-specific key code values representing [LogicalKeyboardKey].
+/// A map of macOS key codes presenting [LogicalKeyboardKey].
 ///
-/// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
+/// Logical key codes are not available in macOS key events. Most of logical keys
+/// are derived from its characterIgnoringModifiers, but those keys that don't
+/// have a character representation will be derived from their key codes using
+/// this map.
 const Map<int, LogicalKeyboardKey> kMacOsToLogicalKey = <int, LogicalKeyboardKey>{
 @@@MACOS_KEY_CODE_MAP@@@
 };
@@ -78,6 +81,16 @@ const Map<int, PhysicalKeyboardKey> kIosToPhysicalKey = <int, PhysicalKeyboardKe
 /// KEY_EQUALS and NUMPAD_EQUALS.
 const Map<int, LogicalKeyboardKey> kIosNumPadMap = <int, LogicalKeyboardKey>{
 @@@IOS_NUMPAD_MAP@@@
+};
+
+/// A map of iOS key codes presenting [LogicalKeyboardKey].
+///
+/// Logical key codes are not available in iOS key events. Most of logical keys
+/// are derived from its characterIgnoringModifiers, but those keys that don't
+/// have a character representation will be derived from their key codes using
+/// this map.
+const Map<int, LogicalKeyboardKey> kIosToLogicalKey = <int, LogicalKeyboardKey>{
+@@@IOS_KEY_CODE_MAP@@@
 };
 
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].
