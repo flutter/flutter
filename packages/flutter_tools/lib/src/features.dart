@@ -452,4 +452,4 @@ class FeatureChannelSetting {
   final bool enabledByDefault;
 }
 
-const bool flutterNext = true;
+const bool flutterNext = false;
