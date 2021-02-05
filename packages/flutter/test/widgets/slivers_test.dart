@@ -778,7 +778,7 @@ void main() {
         )
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
-      await tester.tap(find.byType(GestureDetector));
+      await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
       expect(events, equals(<String>[]));
     });
 
@@ -822,7 +822,7 @@ void main() {
         )
       ));
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
-      await tester.tap(find.byType(GestureDetector));
+      await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
       expect(events, equals(<String>[]));
     });
 

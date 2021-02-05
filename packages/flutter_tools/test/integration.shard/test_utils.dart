@@ -8,8 +8,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
@@ -22,7 +22,10 @@ const FileSystem fileSystem = LocalFileSystem();
 const Platform platform = LocalPlatform();
 
 /// The [ProcessManager] for the integration test environment.
-const ProcessManager processManager = LocalProcessManager();
+const ProcessManager processManager = LocalProcessManager(
+  platform: platform,
+  fileSystem: fileSystem,
+);
 
 /// Creates a temporary directory but resolves any symlinks to return the real
 /// underlying path to avoid issues with breakpoints/hot reload.

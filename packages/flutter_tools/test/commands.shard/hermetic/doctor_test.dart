@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -23,14 +24,12 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
@@ -1045,7 +1044,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
   MockDevice() {

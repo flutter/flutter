@@ -5,17 +5,18 @@
 // @dart = 2.8
 
 import 'dart:convert';
-import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
+import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, systemEncoding, Process, ProcessStartMode;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
-import 'package:process/process.dart';
 
 import '../reporting/reporting.dart';
 import 'common.dart' show throwToolExit;
+import 'io.dart';
 import 'platform.dart';
+import 'process.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we
@@ -673,7 +674,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(String executable, {String workingDirectory}) {
     return _runSync(
       () => _delegate.canRun(executable, workingDirectory: workingDirectory),
       platform: _platform,
@@ -681,7 +682,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
     return _runSync(
       () => _delegate.killPid(pid, signal),
       platform: _platform,
@@ -690,7 +691,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.ProcessResult> run(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -724,7 +725,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.Process> start(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -753,7 +754,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   io.ProcessResult runSync(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,

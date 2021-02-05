@@ -10,7 +10,7 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -36,7 +36,6 @@ void main() {
 
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    const ProcessManager processManager = LocalProcessManager();
     daemonProcess = await processManager.start(
       <String>[flutterBin, ...getLocalEngineArguments(), '--show-test-device', 'daemon'],
       workingDirectory: tempDir.path,

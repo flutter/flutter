@@ -295,7 +295,7 @@ void main() {
           final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
           expect(tapped, isFalse);
-          await tester.tap(find.byKey(key3));
+          await tester.tap(find.byKey(key3), warnIfMissed: false); // the container itself is transparent to hits
           expect(tapped, isTrue);
         });
       }
