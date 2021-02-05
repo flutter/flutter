@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -415,4 +416,14 @@ class FakePlistParser implements PlistParser {
   String getValueFromFile(String plistFilePath, String key) {
     return _underlyingValues[key] as String;
   }
+}
+
+class FakeBotDetector implements BotDetector {
+  const FakeBotDetector(bool isRunningOnBot)
+      : _isRunningOnBot = isRunningOnBot;
+
+  @override
+  Future<bool> get isRunningOnBot async => _isRunningOnBot;
+
+  final bool _isRunningOnBot;
 }
