@@ -984,6 +984,7 @@ class ListTile extends StatelessWidget {
 
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
+    if (!isNotEmpty) return;
 
     final Decoration decoration = BoxDecoration(
       border: Border(
