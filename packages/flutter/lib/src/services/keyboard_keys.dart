@@ -2518,29 +2518,37 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey shift = LogicalKeyboardKey(0x201000700e1, debugName: kReleaseMode ? null : 'Shift');
+  static const LogicalKeyboardKey shift = shiftLeft;
 
   /// Represents the logical "Meta" key on the keyboard.
   ///
   /// This key represents the union of the keys {metaLeft, metaRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey meta = LogicalKeyboardKey(0x201000700e3, debugName: kReleaseMode ? null : 'Meta');
+  static const LogicalKeyboardKey meta = metaLeft;
 
   /// Represents the logical "Alt" key on the keyboard.
   ///
   /// This key represents the union of the keys {altLeft, altRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey alt = LogicalKeyboardKey(0x201000700e2, debugName: kReleaseMode ? null : 'Alt');
+  static const LogicalKeyboardKey alt = altLeft;
 
   /// Represents the logical "Control" key on the keyboard.
   ///
   /// This key represents the union of the keys {controlLeft, controlRight} when
   /// comparing keys. This key will never be generated directly, its main use is
   /// in defining key maps.
-  static const LogicalKeyboardKey control = LogicalKeyboardKey(0x201000700e0, debugName: kReleaseMode ? null : 'Control');
+  static const LogicalKeyboardKey control = controlLeft;
 
+  static Map<int, LogicalKeyboardKey> debugKnownLogicalKeys() {
+    Map<int, LogicalKeyboardKey> result = <int, LogicalKeyboardKey>{};
+    assert(() {
+      result = _knownLogicalKeys;
+      return true;
+    }());
+    return result;
+  }
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -4627,6 +4635,14 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012, debugName: kReleaseMode ? null : 'Fn');
 
+  static Map<int, PhysicalKeyboardKey> debugKnownPhysicalKeys() {
+    Map<int, PhysicalKeyboardKey> result = <int, PhysicalKeyboardKey>{};
+    assert(() {
+      result = _knownPhysicalKeys;
+      return true;
+    }());
+    return result;
+  }
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{

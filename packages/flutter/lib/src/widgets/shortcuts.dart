@@ -153,7 +153,7 @@ abstract class ShortcutPrompt {
 
   Iterable<KeyboardStateCriterion>? get stateCriteria;
 
-  Iterable<LogicalKeyboardKey>? getTriggerKeys();
+  Iterable<LogicalKeyboardKey> getTriggerKeys();
 
   /// Returns a description of the key set that is short and readable.
   ///
@@ -201,7 +201,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   Iterable<KeyboardStateCriterion> get stateCriteria => keys;
 
   @override
-  Iterable<LogicalKeyboardKey>? getTriggerKeys() => null;
+  Iterable<LogicalKeyboardKey> getTriggerKeys() => keys;
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.altLeft,
@@ -270,7 +270,7 @@ class KeybindingPrompt implements ShortcutPrompt {
   }
 
   @override
-  Iterable<LogicalKeyboardKey>? getTriggerKeys() sync* {
+  Iterable<LogicalKeyboardKey> getTriggerKeys() sync* {
     yield _trigger;
   }
 
@@ -317,7 +317,6 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent
 
 class _PromptIntent {
   const _PromptIntent(this.prompt, this.intent);
-
   final ShortcutPrompt prompt;
   final Intent intent;
 }
@@ -331,10 +330,11 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// The [shortcuts] argument must not  be null.
   ShortcutManager({
-    Map<LogicalKeySet, Intent> shortcuts = const <LogicalKeySet, Intent>{},
+    Map<ShortcutPrompt, Intent> shortcuts = const <ShortcutPrompt, Intent>{},
     this.modal = false,
-  })  : assert(shortcuts != null),
-        _shortcuts = shortcuts;
+  })  : assert(shortcuts != null) {
+    this.shortcuts = shortcuts;
+  }
 
   /// True if the [ShortcutManager] should not pass on keys that it doesn't
   /// handle to any key-handling widgets that are ancestors to this one.
@@ -355,7 +355,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   ///
   /// The returned map should not be modified.
   Map<ShortcutPrompt, Intent> get shortcuts => _shortcuts;
-  Map<ShortcutPrompt, Intent> _shortcuts;
+  Map<ShortcutPrompt, Intent> _shortcuts = <ShortcutPrompt, Intent>{};
   set shortcuts(Map<ShortcutPrompt, Intent> value) {
     assert(value != null);
     if (!mapEquals<ShortcutPrompt, Intent>(_shortcuts, value)) {
@@ -365,22 +365,21 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutPrompt, Intent> source) {
-    final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
+  static Map<LogicalKeyboardKey, List<_PromptIntent>> _indexShortcuts(Map<ShortcutPrompt, Intent> source) {
+    final Map<LogicalKeyboardKey, List<_PromptIntent>> result = <LogicalKeyboardKey, List<_PromptIntent>>{};
     source.forEach((ShortcutPrompt prompt, Intent intent) {
-      final Iterable<LogicalKeyboardKey?> triggers = prompt.getTriggerKeys()
-          ?? (() sync* { yield null; })();
-      for (final LogicalKeyboardKey? trigger in triggers) {
+      final Iterable<LogicalKeyboardKey> triggers = prompt.getTriggerKeys();
+      for (final LogicalKeyboardKey trigger in triggers) {
         result.putIfAbsent(trigger, () => <_PromptIntent>[])
           .add(_PromptIntent(prompt, intent));
       }
     });
     return result;
   }
-  Map<LogicalKeyboardKey?, List<_PromptIntent>> get _indexedShortcuts {
+  Map<LogicalKeyboardKey, List<_PromptIntent>> get _indexedShortcuts {
     return _indexedShortcutsCache ??= _indexShortcuts(_shortcuts);
   }
-  Map<LogicalKeyboardKey?, List<_PromptIntent>>? _indexedShortcutsCache;
+  Map<LogicalKeyboardKey, List<_PromptIntent>>? _indexedShortcutsCache;
 
   /// Returns the [Intent], if any, that matches the current set of pressed
   /// keys.
@@ -390,10 +389,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Defaults to a set derived from [RawKeyboard.keysPressed] if `keysPressed`
   /// is not supplied.
   Intent? _find(KeyEvent event, KeyboardState state) {
-    final Set<_PromptIntent> candidates = <_PromptIntent>{
-      ..._indexedShortcuts[event.logical] ?? <_PromptIntent>[],
-      ..._indexedShortcuts[null] ?? <_PromptIntent>[],
-    };
+    final List<_PromptIntent> candidates = _indexedShortcuts[event.logical] ?? <_PromptIntent>[];
     print('candidates $candidates');
     for (final _PromptIntent promptIntent in candidates) {
       // Whether all criteria have been met. Having no criteria is considered

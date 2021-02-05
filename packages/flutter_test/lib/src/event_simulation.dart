@@ -7,6 +7,27 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'test_async_utils.dart';
 
+Map<LogicalKeyboardKey, PhysicalKeyboardKey> _buildTrivialKeyMapping() {
+  final Map<LogicalKeyboardKey, PhysicalKeyboardKey> result = <LogicalKeyboardKey, PhysicalKeyboardKey>{};
+  assert(() {
+    final Map<String, LogicalKeyboardKey> nameToLogicals = <String, LogicalKeyboardKey>{};
+    for (final LogicalKeyboardKey key in LogicalKeyboardKey.debugKnownLogicalKeys().values) {
+      if (key.debugName != null)
+        nameToLogicals[key.debugName!] = key;
+    }
+    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.debugKnownPhysicalKeys().values) {
+      if (key.debugName != null) {
+        final LogicalKeyboardKey? logical = nameToLogicals[key.debugName!];
+        if (logical != null)
+          result[logical] = key;
+      }
+    }
+    return true;
+  }());
+  return result;
+}
+late Map<LogicalKeyboardKey, PhysicalKeyboardKey> _trivialKeyMapping = _buildTrivialKeyMapping();
+
 // TODO(gspencergoog): Replace this with more robust key simulation code once
 // the new key event code is in.
 // https://github.com/flutter/flutter/issues/33521
@@ -696,6 +717,7 @@ Future<bool> simulateKeyDownEvent(
   bool synthesized = false,
   String? platform,
 }) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
   final bool fromKeyEvent = physicalKey != null
     && ServicesBinding.instance!.handleKeyEvent(KeyDownEvent(
          physical: physicalKey,
@@ -716,6 +738,7 @@ Future<bool> simulateKeyRepeatEvent(
   Duration timeStamp = Duration.zero,
   String? platform,
 }) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
   final bool fromKeyEvent = physicalKey != null
     && ServicesBinding.instance!.handleKeyEvent(KeyRepeatEvent(
          physical: physicalKey,
@@ -754,6 +777,7 @@ Future<bool> simulateKeyUpEvent(
   bool synthesized = false,
   String? platform,
 }) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
   final bool fromKeyEvent = physicalKey != null
     && ServicesBinding.instance!.handleKeyEvent(KeyUpEvent(
          physical: physicalKey,
