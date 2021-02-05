@@ -64,6 +64,9 @@ FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
   return reinterpret_cast<FlutterDesktopViewRef>(1);
 }
 
+void FlutterDesktopViewControllerForceRedraw(
+    FlutterDesktopViewControllerRef controller) {}
+
 bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
     FlutterDesktopViewControllerRef controller,
     HWND hwnd,

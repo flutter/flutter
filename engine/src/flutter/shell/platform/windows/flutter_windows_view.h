@@ -64,6 +64,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine();
 
+  // Tells the engine to generate a new frame
+  void ForceRedraw();
+
   // Callbacks for clearing context, settings context and swapping buffers,
   // these are typically called on an engine-controlled (non-platform) thread.
   bool ClearContext();

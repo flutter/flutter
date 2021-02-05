@@ -107,6 +107,10 @@ FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
 FLUTTER_EXPORT FlutterDesktopViewRef
 FlutterDesktopViewControllerGetView(FlutterDesktopViewControllerRef controller);
 
+// Requests new frame from engine and repaints the view
+FLUTTER_EXPORT void FlutterDesktopViewControllerForceRedraw(
+    FlutterDesktopViewControllerRef controller);
+
 #ifndef WINUWP
 // Allows the Flutter engine and any interested plugins an opportunity to
 // handle the given message.

@@ -95,6 +95,16 @@ uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
   return kWindowFrameBufferID;
 }
 
+void FlutterWindowsView::ForceRedraw() {
+  if (resize_status_ == ResizeState::kDone) {
+    // Request new frame
+    // TODO(knopp): Replace with more specific call once there is API for it
+    // https://github.com/flutter/flutter/issues/69716
+    SendWindowMetrics(resize_target_width_, resize_target_height_,
+                      binding_handler_->GetDpiScale());
+  }
+}
+
 void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   // Called on the platform thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
