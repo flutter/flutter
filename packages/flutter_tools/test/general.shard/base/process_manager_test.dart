@@ -191,13 +191,12 @@ void main() {
       test('not found', () {
         const String command = 'foo.exe';
 
-        final String executablePath = getExecutablePath(
+        expect(() => getExecutablePath(
           command,
           workingDir.path,
           platform: platform,
           fileSystem: fileSystem,
-        );
-        expect(executablePath, isNull);
+        ), throwsA(isA<ArgumentError>()));
       });
 
       test('when path has spaces', () {
@@ -237,13 +236,12 @@ void main() {
         final FileSystem fileSystemNoCwd = MemoryFileSystemNoCwd(fileSystem);
         final String command = fileSystem.path.join('.', 'bla.exe');
 
-        final String executablePath = getExecutablePath(
+        expect(() => getExecutablePath(
           command,
           null,
           platform: platform,
           fileSystem: fileSystemNoCwd,
-        );
-        expect(executablePath, isNull);
+        ), throwsA(isA<ArgumentError>()));
       });
     });
 
@@ -293,13 +291,12 @@ void main() {
       test('not found', () {
         const String command = 'foo';
 
-        final String executablePath = getExecutablePath(
+        expect(() => getExecutablePath(
           command,
           workingDir.path,
           platform: platform,
           fileSystem: fileSystem,
-        );
-        expect(executablePath, isNull);
+        ), throwsA(isA<ArgumentError>()));
       });
 
       test('when path has spaces', () {

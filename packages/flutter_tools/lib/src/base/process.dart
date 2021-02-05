@@ -792,7 +792,12 @@ class LocalProcessManager implements ProcessManager {
 
   @override
   bool canRun(String executable, {String workingDirectory}) {
-    return getExecutablePath(executable, workingDirectory, platform: _platform, fileSystem: _fileSystem) != null;
+    try {
+      getExecutablePath(executable, workingDirectory, platform: _platform, fileSystem: _fileSystem);
+    } on ArgumentError {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -897,7 +902,7 @@ class LocalProcessManager implements ProcessManager {
   }
 }
 
-/// Sanatizes the executable path on Windows.
+/// Sanitizes the executable path on Windows.
 /// https://github.com/dart-lang/sdk/issues/37751
 String sanitizeExecutablePath(String executable, {@required Platform platform }) {
   if (executable.isEmpty) {
@@ -924,10 +929,7 @@ String sanitizeExecutablePath(String executable, {@required Platform platform })
 /// Once the list of candidate paths has been constructed, this will pick the
 /// first such path that represents an existent file.
 ///
-/// Return `null` if there were no viable candidates, meaning the executable
-/// could not be found.
-///
-/// If [platform] is not specified, it will default to the current platform.
+/// Throws an [ArgumentError] if there are no viable clients.
 @visibleForTesting
 String getExecutablePath(
   String command,
@@ -935,6 +937,7 @@ String getExecutablePath(
   @required Platform platform,
   @required FileSystem fileSystem,
 }) {
+  bool workingDirectoryError = false;
   try {
     workingDirectory ??= fileSystem.currentDirectory.path;
   } on FileSystemException {
@@ -942,6 +945,7 @@ String getExecutablePath(
     // when the process doesn't have read/list permissions in each component of
     // the cwd path. In this case, fall back on '.'.
     workingDirectory ??= '.';
+    workingDirectoryError = true;
   }
   final String pathSeparator = platform.isWindows ? ';' : ':';
 
@@ -963,7 +967,11 @@ String getExecutablePath(
       return path;
     }
   }
-  return null;
+  throw ArgumentError(
+    'Could not resolve $command to an executable in $workingDirectory\n'
+    'workingDirectoryError: $workingDirectoryError\n'
+    'Had ${candidates.length} candidates',
+  );
 }
 
 /// Returns all possible combinations of `$searchPath\$command.$ext` for
