@@ -352,6 +352,9 @@ Depfile copyDeferredComponentSoFiles(
             .childDirectory('deferred_libs')
             .childDirectory(abi)
             .childFile('libapp.so-${unit.id}.part.so');
+        if (!destination.existsSync()) {
+          destination.createSync(recursive: true);
+        }
         final File source = env.fileSystem.file(unit.path);
         source.copySync(destination.path);
         inputs.add(source);
@@ -374,6 +377,9 @@ Depfile copyDeferredComponentSoFiles(
           .childDirectory(abi)
           // Omit 'lib' prefix here as it is added by the gradle task that adds 'lib' to 'app.so'.
           .childFile('app.so-${unit.id}.part.so');
+      if (!destination.existsSync()) {
+          destination.createSync(recursive: true);
+        }
       final File source = env.fileSystem.file(unit.path);
       source.copySync(destination.path);
       inputs.add(source);

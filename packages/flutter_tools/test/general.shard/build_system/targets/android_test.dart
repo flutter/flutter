@@ -7,11 +7,13 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
@@ -361,5 +363,153 @@ void main() {
     expect(environment.outputDir
       .childDirectory('arm64-v8a')
       .childFile('app.so').existsSync(), true);
+  });
+
+  test('copyDeferredComponentSoFiles', () {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('/out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    final File so1 = fileSystem.file('/unit2/abi1/part.so');
+    so1.createSync(recursive: true);
+    so1.writeAsStringSync('lib1', flush: true);
+    final File so2 = fileSystem.file('/unit3/abi1/part.so');
+    so2.createSync(recursive: true);
+    so2.writeAsStringSync('lib2', flush: true);
+    final File so3 = fileSystem.file('/unit4/abi1/part.so');
+    so3.createSync(recursive: true);
+    so3.writeAsStringSync('lib3', flush: true);
+
+    final File so4 = fileSystem.file('/unit2/abi2/part.so');
+    so4.createSync(recursive: true);
+    so4.writeAsStringSync('lib1', flush: true);
+    final File so5 = fileSystem.file('/unit3/abi2/part.so');
+    so5.createSync(recursive: true);
+    so5.writeAsStringSync('lib2', flush: true);
+    final File so6 = fileSystem.file('/unit4/abi2/part.so');
+    so6.createSync(recursive: true);
+    so6.writeAsStringSync('lib3', flush: true);
+
+    final List<DeferredComponent> components = <DeferredComponent>[
+      DeferredComponent(name: 'component2', libraries: <String>['lib1']),
+      DeferredComponent(name: 'component3', libraries: <String>['lib2']),
+    ];
+    final List<LoadingUnit> loadingUnits = <LoadingUnit>[
+      LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi1/part.so'),
+      LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi1/part.so'),
+      LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi1/part.so'),
+
+      LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi2/part.so'),
+      LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi2/part.so'),
+      LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi2/part.so'),
+    ];
+    for (final DeferredComponent component in components) {
+      component.assignLoadingUnits(loadingUnits);
+    }
+    final Directory buildDir = fileSystem.directory('/build');
+    if (!buildDir.existsSync()) {
+      buildDir.createSync(recursive: true);
+    }
+    final Depfile depfile = copyDeferredComponentSoFiles(
+      environment,
+      components,
+      loadingUnits,
+      buildDir,
+      <String>['abi1', 'abi2'],
+      BuildMode.release
+    );
+    expect(depfile.inputs.length, 6);
+    expect(depfile.outputs.length, 6);
+    for (int i = 0; i < 6; i++) {
+      expect(depfile.inputs[i].readAsStringSync(), depfile.outputs[i].readAsStringSync());
+    }
+
+    expect(depfile.outputs[0].path, '/build/component2/intermediates/flutter/release/deferred_libs/abi1/libapp.so-2.part.so');
+    expect(depfile.outputs[1].path, '/build/component3/intermediates/flutter/release/deferred_libs/abi1/libapp.so-3.part.so');
+
+    expect(depfile.outputs[2].path, '/build/component2/intermediates/flutter/release/deferred_libs/abi2/libapp.so-2.part.so');
+    expect(depfile.outputs[3].path, '/build/component3/intermediates/flutter/release/deferred_libs/abi2/libapp.so-3.part.so');
+
+    expect(depfile.outputs[4].path, '/out/abi1/app.so-4.part.so');
+    expect(depfile.outputs[5].path, '/out/abi2/app.so-4.part.so');
+  });
+
+  test('copyDeferredComponentSoFiles abi filtered', () {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('/out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    final File so1 = fileSystem.file('/unit2/abi1/part.so');
+    so1.createSync(recursive: true);
+    so1.writeAsStringSync('lib1', flush: true);
+    final File so2 = fileSystem.file('/unit3/abi1/part.so');
+    so2.createSync(recursive: true);
+    so2.writeAsStringSync('lib2', flush: true);
+    final File so3 = fileSystem.file('/unit4/abi1/part.so');
+    so3.createSync(recursive: true);
+    so3.writeAsStringSync('lib3', flush: true);
+
+    final File so4 = fileSystem.file('/unit2/abi2/part.so');
+    so4.createSync(recursive: true);
+    so4.writeAsStringSync('lib1', flush: true);
+    final File so5 = fileSystem.file('/unit3/abi2/part.so');
+    so5.createSync(recursive: true);
+    so5.writeAsStringSync('lib2', flush: true);
+    final File so6 = fileSystem.file('/unit4/abi2/part.so');
+    so6.createSync(recursive: true);
+    so6.writeAsStringSync('lib3', flush: true);
+
+    final List<DeferredComponent> components = <DeferredComponent>[
+      DeferredComponent(name: 'component2', libraries: <String>['lib1']),
+      DeferredComponent(name: 'component3', libraries: <String>['lib2']),
+    ];
+    final List<LoadingUnit> loadingUnits = <LoadingUnit>[
+      LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi1/part.so'),
+      LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi1/part.so'),
+      LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi1/part.so'),
+
+      LoadingUnit(id: 2, libraries: <String>['lib1'], path: '/unit2/abi2/part.so'),
+      LoadingUnit(id: 3, libraries: <String>['lib2'], path: '/unit3/abi2/part.so'),
+      LoadingUnit(id: 4, libraries: <String>['lib3'], path: '/unit4/abi2/part.so'),
+    ];
+    for (final DeferredComponent component in components) {
+      component.assignLoadingUnits(loadingUnits);
+    }
+    final Directory buildDir = fileSystem.directory('/build');
+    if (!buildDir.existsSync()) {
+      buildDir.createSync(recursive: true);
+    }
+    final Depfile depfile = copyDeferredComponentSoFiles(
+      environment,
+      components,
+      loadingUnits,
+      buildDir,
+      <String>['abi1'],
+      BuildMode.release
+    );
+    expect(depfile.inputs.length, 3);
+    expect(depfile.outputs.length, 3);
+    for (int i = 0; i < 3; i++) {
+      expect(depfile.inputs[i].readAsStringSync(), depfile.outputs[i].readAsStringSync());
+    }
+
+    expect(depfile.outputs[0].path, '/build/component2/intermediates/flutter/release/deferred_libs/abi1/libapp.so-2.part.so');
+    expect(depfile.outputs[1].path, '/build/component3/intermediates/flutter/release/deferred_libs/abi1/libapp.so-3.part.so');
+
+    expect(depfile.outputs[2].path, '/out/abi1/app.so-4.part.so');
   });
 }
