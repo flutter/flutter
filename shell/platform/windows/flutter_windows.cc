@@ -76,6 +76,11 @@ FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
   return HandleForView(controller->view.get());
 }
 
+void FlutterDesktopViewControllerForceRedraw(
+    FlutterDesktopViewControllerRef controller) {
+  controller->view->ForceRedraw();
+}
+
 FlutterDesktopEngineRef FlutterDesktopEngineCreate(
     const FlutterDesktopEngineProperties& engine_properties) {
   flutter::FlutterProjectBundle project(engine_properties);
