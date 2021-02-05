@@ -676,17 +676,15 @@ void main() {
       platform: windowsPlatform,
     );
 
-    // Throws an argument error because package:process fails to locate the executable.
+    // Throws an argument error because ProcessManager fails to locate the executable.
     expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
     expect(() => processManager.run(<String>['foo']), throwsArgumentError);
     expect(() => processManager.start(<String>['foo']), throwsArgumentError);
 
     // Throws process exception because the executable does not exist.
-    await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
-      expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.run(<String>['foo']), throwsA(isA<ProcessException>()));
-      expect(() => processManager.start(<String>['foo']), throwsA(isA<ProcessException>()));
-    });
+    expect(() => processManager.runSync(<String>['foo'], skipProcessResolution: true), throwsA(isA<ProcessException>()));
+    expect(() => processManager.run(<String>['foo'], skipProcessResolution: true), throwsA(isA<ProcessException>()));
+    expect(() => processManager.start(<String>['foo'], skipProcessResolution: true), throwsA(isA<ProcessException>()));
   });
 
   group('ProcessManager on windows throws tool exit', () {

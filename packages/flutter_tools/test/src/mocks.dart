@@ -116,6 +116,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
+    bool skipProcessResolution = false,
   }) {
     final List<String> commands = command.cast<String>();
     if (!runSucceeds) {

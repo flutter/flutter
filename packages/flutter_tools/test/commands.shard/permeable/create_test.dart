@@ -2643,6 +2643,7 @@ class LoggingProcessManager extends LocalProcessManager {
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
+    bool skipProcessResolution = false,
   }) {
     commands.add(command);
     return super.start(
@@ -2652,6 +2653,7 @@ class LoggingProcessManager extends LocalProcessManager {
       includeParentEnvironment: includeParentEnvironment,
       runInShell: runInShell,
       mode: mode,
+      skipProcessResolution: skipProcessResolution,
     );
   }
 }

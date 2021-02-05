@@ -246,6 +246,7 @@ abstract class ProcessUtils {
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
+    bool skipProcessResolution = false,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to
@@ -471,12 +472,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
+    bool skipProcessResolution = false,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     return _processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      skipProcessResolution: skipProcessResolution,
     );
   }
 
@@ -688,6 +691,7 @@ abstract class ProcessManager {
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
+    bool skipProcessResolution = false,
   });
 
   /// Starts a process and runs it non-interactively to completion.
@@ -740,6 +744,7 @@ abstract class ProcessManager {
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
+    bool skipProcessResolution = false,
   });
 
   /// Starts a process and runs it to completion. This is a synchronous
@@ -757,6 +762,7 @@ abstract class ProcessManager {
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
+    bool skipProcessResolution = false,
   });
 
   /// Returns `true` if the [executable] exists and if it can be executed.
@@ -808,12 +814,14 @@ class LocalProcessManager implements ProcessManager {
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
+    bool skipProcessResolution = false,
   }) {
     return Process.run(
       sanitizeExecutablePath(_getExecutable(
         command,
         workingDirectory,
         runInShell,
+        skipProcessResolution,
       ), platform: _platform),
       _getArguments(command),
       environment: environment,
@@ -833,12 +841,14 @@ class LocalProcessManager implements ProcessManager {
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
+    bool skipProcessResolution = false,
   }) {
     return Process.runSync(
       sanitizeExecutablePath(_getExecutable(
         command,
         workingDirectory,
         runInShell,
+        skipProcessResolution,
       ), platform: _platform),
       _getArguments(command),
       environment: environment,
@@ -858,12 +868,14 @@ class LocalProcessManager implements ProcessManager {
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
+    bool skipProcessResolution = false,
   }) {
     return Process.start(
       sanitizeExecutablePath(_getExecutable(
         command,
         workingDirectory,
         runInShell,
+        skipProcessResolution,
       ), platform: _platform),
       _getArguments(command),
       workingDirectory: workingDirectory,
@@ -878,9 +890,10 @@ class LocalProcessManager implements ProcessManager {
     List<String> command,
     String workingDirectory,
     bool runInShell,
+    bool skipProcessResolution,
   ) {
     final String commandName = command.first.toString();
-    if (runInShell) {
+    if (runInShell || skipProcessResolution) {
       return commandName;
     }
     final String executable = getExecutablePath(commandName, workingDirectory, platform: _platform, fileSystem: _fileSystem);

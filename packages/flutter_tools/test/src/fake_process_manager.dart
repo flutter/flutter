@@ -248,6 +248,7 @@ abstract class FakeProcessManager implements ProcessManager {
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     ProcessStartMode mode = ProcessStartMode.normal, // ignored
+    bool skipProcessResolution = false, // ignored
   }) {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, systemEncoding);
     if (process._completer != null) {
@@ -268,6 +269,7 @@ abstract class FakeProcessManager implements ProcessManager {
     bool runInShell = false, // ignored
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
+    bool skipProcessResolution = false, // ignored
   }) async {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
@@ -288,6 +290,7 @@ abstract class FakeProcessManager implements ProcessManager {
     bool runInShell = false, // ignored
     Encoding stdoutEncoding = systemEncoding, // actual encoder is ignored
     Encoding stderrEncoding = systemEncoding, // actual encoder is ignored
+    bool skipProcessResolution = false, // ignored
   }) {
     final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return ProcessResult(

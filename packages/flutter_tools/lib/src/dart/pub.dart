@@ -10,7 +10,6 @@ import 'package:package_config/package_config.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
@@ -333,13 +332,12 @@ class _DefaultPub implements Pub {
     bool generateSyntheticPackage = false,
   }) async {
     // Fully resolved pub or pub.bat is calculated based on current platform.
-    final io.Process process = await ErrorHandlingProcessManager.skipCommandLookup(() async {
-      return _processUtils.start(
-        _pubCommand(arguments),
-        workingDirectory: directory,
-        environment: await _createPubEnvironment(PubContext.interactive),
-      );
-    });
+    final io.Process process = await _processUtils.start(
+      _pubCommand(arguments),
+      workingDirectory: directory,
+      environment: await _createPubEnvironment(PubContext.interactive),
+      skipProcessResolution: true,
+    );
 
     // Pipe the Flutter tool stdin to the pub stdin.
     unawaited(process.stdin.addStream(stdio.stdin)
