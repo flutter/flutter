@@ -20,10 +20,10 @@ static bool SurfaceWillUpdate(size_t cur_width,
                               size_t target_height) {
   // TODO (https://github.com/flutter/flutter/issues/65061) : Avoid special
   // handling for zero dimensions.
-  bool non_zero_dims = target_height > 0 && target_width > 0;
+  bool non_zero_target_dims = target_height > 0 && target_width > 0;
   bool not_same_size =
       (cur_height != target_height) || (cur_width != target_width);
-  return non_zero_dims && not_same_size;
+  return non_zero_target_dims && not_same_size;
 }
 
 FlutterWindowsView::FlutterWindowsView(
@@ -109,8 +109,11 @@ void FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   // Called on the platform thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
-  bool surface_will_update = SurfaceWillUpdate(
-      resize_target_width_, resize_target_height_, width, height);
+  EGLint surface_width, surface_height;
+  surface_manager_->GetSurfaceDimensions(&surface_width, &surface_height);
+
+  bool surface_will_update =
+      SurfaceWillUpdate(surface_width, surface_height, width, height);
   if (surface_will_update) {
     resize_status_ = ResizeState::kResizeStarted;
     resize_target_width_ = width;
