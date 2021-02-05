@@ -162,7 +162,7 @@ class FlutterProject {
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
   // The `pubspec.lock` file of this project.
-  File get pubspecLock => directory.childFile('pubspec.lock');
+  File get pubspecLockFile => directory.childFile('pubspec.lock');
 
   /// The `.packages` file of this project.
   File get packagesFile => directory.childFile('.packages');

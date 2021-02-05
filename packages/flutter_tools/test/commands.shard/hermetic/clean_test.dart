@@ -75,6 +75,7 @@ void main() {
         expect(buildDirectory.existsSync(), isFalse);
         expect(projectUnderTest.dartTool.existsSync(), isFalse);
         expect(projectUnderTest.android.ephemeralDirectory.existsSync(), isFalse);
+        expect(projectUnderTest.pubspecLockFile.existsSync(), isFalse);
 
         expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.ios.generatedXcodePropertiesFile.existsSync(), isFalse);
@@ -82,6 +83,7 @@ void main() {
         expect(projectUnderTest.ios.deprecatedCompiledDartFramework.existsSync(), isFalse);
         expect(projectUnderTest.ios.deprecatedProjectFlutterFramework.existsSync(), isFalse);
         expect(projectUnderTest.ios.flutterPodspec.existsSync(), isFalse);
+        expect(projectUnderTest.ios.podfileLock.existsSync(), isFalse);
 
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
