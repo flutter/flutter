@@ -57,7 +57,7 @@
   "refreshIndicatorSemanticLabel": "Osvježi",
   "moreButtonTooltip": "Više",
   "dateSeparator": ".",
-  "dateHelpText": "mm/dd/gggg",
+  "dateHelpText": "dd. mm. gggg.",
   "selectYearSemanticsLabel": "Odaberite godinu",
   "unspecifiedDate": "Datum",
   "unspecifiedDateRange": "Datumski raspon",

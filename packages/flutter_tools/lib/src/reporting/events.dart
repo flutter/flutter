@@ -283,7 +283,8 @@ class NullSafetyAnalysisEvent implements UsageEvent {
       if (package.name == currentPackage) {
         languageVersion = package.languageVersion;
       }
-      if (package.languageVersion.major >= nullSafeVersion.major &&
+      if (package.languageVersion != null &&
+          package.languageVersion.major >= nullSafeVersion.major &&
           package.languageVersion.minor >= nullSafeVersion.minor) {
         migrated += 1;
       }

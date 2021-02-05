@@ -3119,12 +3119,12 @@ void main() {
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     key: const Key('Add tab'),
                     child: const Text('Add tab'),
                     onPressed: () => _onTabAdd(setState),
                   ),
-                  FlatButton(
+                  TextButton(
                     key: const Key('Remove tab'),
                     child: const Text('Remove tab'),
                     onPressed: () => _onTabRemove(setState),

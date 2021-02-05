@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
+import '../build_info.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
@@ -52,4 +55,25 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   @override
   bool get reportNullSafety => true;
+
+  /// Display a message describing the current null safety runtime mode
+  /// that was selected.
+  ///
+  /// This is similar to the run message in run_hot.dart
+  @protected
+  void displayNullSafetyMode(BuildInfo buildInfo) {
+    globals.printStatus('');
+    if (buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
+      globals.printStatus('💪 Building with sound null safety 💪', emphasis: true);
+    } else {
+      globals.printStatus(
+        'Building without sound null safety',
+        emphasis: true,
+      );
+      globals.printStatus(
+        'For more information see https://dart.dev/null-safety/unsound-null-safety',
+      );
+    }
+    globals.printStatus('');
+  }
 }

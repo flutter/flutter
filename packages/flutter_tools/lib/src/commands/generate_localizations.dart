@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../localizations/gen_l10n.dart';
 import '../localizations/gen_l10n_types.dart';
@@ -19,8 +20,10 @@ import '../runner/flutter_command.dart';
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     FileSystem fileSystem,
+    Logger logger,
   }) :
-    _fileSystem = fileSystem {
+    _fileSystem = fileSystem,
+    _logger = logger {
     argParser.addOption(
       'arb-dir',
       defaultsTo: globals.fs.path.join('lib', 'l10n'),
@@ -161,6 +164,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   }
 
   final FileSystem _fileSystem;
+  final Logger _logger;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -170,8 +174,26 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-
-    precacheLanguageAndRegionTags();
+    if (_fileSystem.file('l10n.yaml').existsSync()) {
+      final LocalizationOptions options = parseLocalizationsOptions(
+        file: _fileSystem.file('l10n.yaml'),
+        logger: _logger,
+      );
+      _logger.printStatus(
+        'Because l10n.yaml exists, the options defined there will be used '
+        'instead.\n'
+        'To use the command line arguments, delete the l10n.yaml file in the '
+        'Flutter project.\n\n'
+      );
+      generateLocalizations(
+        logger: _logger,
+        options: options,
+        projectDir: _fileSystem.currentDirectory,
+        dependenciesDir: null,
+        localizationsGenerator: LocalizationsGenerator(_fileSystem),
+      );
+      return FlutterCommandResult.success();
+    }
 
     final String inputPathString = stringArg('arb-dir');
     final String outputPathString = stringArg('output-dir');
@@ -179,7 +201,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final String templateArbFileName = stringArg('template-arb-file');
     final String untranslatedMessagesFile = stringArg('untranslated-messages-file');
     final String classNameString = stringArg('output-class');
-    final List<String> preferredSupportedLocale = stringsArg('preferred-supported-locales');
+    final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
     final String headerString = stringArg('header');
     final String headerFile = stringArg('header-file');
     final bool useDeferredLoading = boolArg('use-deferred-loading');
@@ -190,6 +212,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
     final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(_fileSystem);
 
+    precacheLanguageAndRegionTags();
+
     try {
       localizationsGenerator
         ..initialize(
@@ -198,7 +222,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           templateArbFileName: templateArbFileName,
           outputFileString: outputFileString,
           classNameString: classNameString,
-          preferredSupportedLocale: preferredSupportedLocale,
+          preferredSupportedLocales: preferredSupportedLocales,
           headerString: headerString,
           headerFile: headerFile,
           useDeferredLoading: useDeferredLoading,
@@ -209,7 +233,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           untranslatedMessagesFile: untranslatedMessagesFile,
         )
         ..loadResources()
-        ..writeOutputFiles(globals.logger);
+        ..writeOutputFiles(_logger);
     } on L10nException catch (e) {
       throwToolExit(e.message);
     }

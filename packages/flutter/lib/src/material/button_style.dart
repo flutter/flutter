@@ -114,6 +114,7 @@ class ButtonStyle with Diagnosticable {
     this.tapTargetSize,
     this.animationDuration,
     this.enableFeedback,
+    this.alignment,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -208,6 +209,16 @@ class ButtonStyle with Diagnosticable {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// The alignment of the button's child.
+  ///
+  /// Typically buttons are sized to be just big enough to contain the child and its
+  /// padding. If the button's size is constrained to a fixed size, for example by
+  /// enclosing it with a [SizedBox], this property defines how the child is aligned
+  /// within the available space.
+  ///
+  /// Always defaults to [Alignment.center].
+  final AlignmentGeometry? alignment;
+
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
@@ -226,6 +237,7 @@ class ButtonStyle with Diagnosticable {
     MaterialTapTargetSize? tapTargetSize,
     Duration? animationDuration,
     bool? enableFeedback,
+    AlignmentGeometry? alignment,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -243,6 +255,7 @@ class ButtonStyle with Diagnosticable {
       tapTargetSize: tapTargetSize ?? this.tapTargetSize,
       animationDuration: animationDuration ?? this.animationDuration,
       enableFeedback: enableFeedback ?? this.enableFeedback,
+      alignment: alignment ?? this.alignment,
     );
   }
 
@@ -270,6 +283,7 @@ class ButtonStyle with Diagnosticable {
       tapTargetSize: tapTargetSize ?? style.tapTargetSize,
       animationDuration: animationDuration ?? style.animationDuration,
       enableFeedback: enableFeedback ?? style.enableFeedback,
+      alignment: alignment ?? style.alignment,
     );
   }
 
@@ -291,6 +305,7 @@ class ButtonStyle with Diagnosticable {
       tapTargetSize,
       animationDuration,
       enableFeedback,
+      alignment,
     );
   }
 
@@ -315,7 +330,8 @@ class ButtonStyle with Diagnosticable {
         && other.visualDensity == visualDensity
         && other.tapTargetSize == tapTargetSize
         && other.animationDuration == animationDuration
-        && other.enableFeedback == enableFeedback;
+        && other.enableFeedback == enableFeedback
+        && other.alignment == alignment;
   }
 
   @override
@@ -336,6 +352,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(EnumProperty<MaterialTapTargetSize>('tapTargetSize', tapTargetSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
@@ -359,6 +376,7 @@ class ButtonStyle with Diagnosticable {
       tapTargetSize: t < 0.5 ? a?.tapTargetSize : b?.tapTargetSize,
       animationDuration: t < 0.5 ? a?.animationDuration : b?.animationDuration,
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
+      alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
     );
   }
 

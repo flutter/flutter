@@ -2,7 +2,6 @@ name: tracing_tests
 description: Various tests for tracing in flutter/flutter
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:

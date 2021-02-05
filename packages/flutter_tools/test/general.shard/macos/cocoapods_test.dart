@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -76,11 +75,10 @@ void main() {
       processManager: mockProcessManager,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
-      artifacts: Artifacts.test(),
       xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       usage: usage,
     );
-    pretendPodVersionIs('1.9.0');
+    pretendPodVersionIs('1.10.0');
     fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -109,7 +107,7 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/macos',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': '.', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
+      environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
     fileSystem.file('.packages').writeAsStringSync('\n');
   });
@@ -177,32 +175,26 @@ void main() {
 
     testWithoutContext('detects below minimum version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.5.0');
+      pretendPodVersionIs('1.6.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     });
 
     testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.0');
+      pretendPodVersionIs('1.9.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 
     testWithoutContext('detects at recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.0');
+      pretendPodVersionIs('1.10.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     });
 
     testWithoutContext('detects above recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.9.1');
+      pretendPodVersionIs('1.10.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
-    });
-
-    testWithoutContext('detects initialized over 1.8.0', () async {
-      pretendPodIsInstalled();
-      pretendPodVersionIs('1.8.0');
-      expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
     });
   });
 
@@ -281,11 +273,11 @@ void main() {
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
       expect(debugContents, contains('Existing debug config'));
       final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
       expect(releaseContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -313,11 +305,11 @@ void main() {
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
       expect(debugContents, contains('Existing debug config'));
       final String releaseContents = projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
       expect(releaseContents, contains(
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
       expect(releaseContents, contains('Existing release config'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -379,7 +371,7 @@ void main() {
       ), throwsToolExit(message: 'Podfile is out of date'));
     });
 
-    testWithoutContext('exits if Podfile parses .flutter-plugins', () async {
+    testWithoutContext('exits if iOS Podfile parses .flutter-plugins', () async {
       pretendPodIsInstalled();
 
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
@@ -390,6 +382,22 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile is out of date'));
+    });
+
+    testWithoutContext('prints warning if macOS Podfile parses .flutter-plugins', () async {
+      pretendPodIsInstalled();
+
+      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
+
+      await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.macos,
+        buildMode: BuildMode.debug,
+      );
+
+      expect(logger.errorText, contains('Warning: Podfile is out of date'));
+      expect(logger.errorText, contains('rm macos/Podfile'));
     });
 
     testWithoutContext('throws, if Podfile is missing.', () async {
@@ -594,7 +602,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/macos',
         environment: <String, String>{
-          'FLUTTER_FRAMEWORK_DIR': '.',
           'COCOAPODS_DISABLE_STATS': 'true',
           'LANG': 'en_US.UTF-8',
         },

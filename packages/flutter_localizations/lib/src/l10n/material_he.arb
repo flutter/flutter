@@ -60,7 +60,7 @@
   "refreshIndicatorSemanticLabel": "רענון",
   "moreButtonTooltip": "עוד",
   "dateSeparator": ".",
-  "dateHelpText": "dd/mm/yyyy",
+  "dateHelpText": "dd.mm.yyyy",
   "selectYearSemanticsLabel": "בחירת שנה",
   "unspecifiedDate": "תאריך",
   "unspecifiedDateRange": "טווח תאריכים",

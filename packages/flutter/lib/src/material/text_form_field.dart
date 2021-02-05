@@ -56,12 +56,12 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///     hintText: 'What do people call you?',
 ///     labelText: 'Name *',
 ///   ),
-///   onSaved: (String value) {
+///   onSaved: (String? value) {
 ///     // This optional block of code can be used to run
 ///     // code when the user saves the form.
 ///   },
-///   validator: (String value) {
-///     return value.contains('@') ? 'Do not use the @ char.' : null;
+///   validator: (String? value) {
+///     return (value != null && value.contains('@')) ? 'Do not use the @ char.' : null;
 ///   },
 /// )
 /// ```
@@ -88,7 +88,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///           child: Form(
 ///             autovalidateMode: AutovalidateMode.always,
 ///             onChanged: () {
-///               Form.of(primaryFocus.context).save();
+///               Form.of(primaryFocus!.context!)!.save();
 ///             },
 ///             child: Wrap(
 ///               children: List<Widget>.generate(5, (int index) {
@@ -97,7 +97,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///                   child: ConstrainedBox(
 ///                     constraints: BoxConstraints.tight(const Size(200, 50)),
 ///                     child: TextFormField(
-///                       onSaved: (String value) {
+///                       onSaved: (String? value) {
 ///                         print('Value for field $index saved as "$value"');
 ///                       },
 ///                     ),
@@ -157,12 +157,18 @@ class TextFormField extends FormField<String> {
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
     @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
+      'Use autovalidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
       'This feature was deprecated after v1.19.0.'
     )
     bool autovalidate = false,
+    @Deprecated(
+      'Use maxLengthEnforcement parameter which provides more specific '
+      'behavior related to the maxLength limit. '
+      'This feature was deprecated after v1.25.0-5.0.pre.'
+    )
     bool maxLengthEnforced = true,
+    MaxLengthEnforcement? maxLengthEnforcement,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
@@ -202,6 +208,10 @@ class TextFormField extends FormField<String> {
          'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),
+       assert(
+         maxLengthEnforced || maxLengthEnforcement == null,
+         'maxLengthEnforced is deprecated, use only maxLengthEnforcement',
+       ),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -259,6 +269,7 @@ class TextFormField extends FormField<String> {
            smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
            enableSuggestions: enableSuggestions,
            maxLengthEnforced: maxLengthEnforced,
+           maxLengthEnforcement: maxLengthEnforcement,
            maxLines: maxLines,
            minLines: minLines,
            expands: expands,
@@ -345,10 +356,10 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void reset() {
+    // setState will be called in the superclass, so even though state is being
+    // manipulated, no setState call is needed here.
+    _effectiveController!.text = widget.initialValue ?? '';
     super.reset();
-    setState(() {
-      _effectiveController!.text = widget.initialValue ?? '';
-    });
   }
 
   void _handleControllerChanged() {

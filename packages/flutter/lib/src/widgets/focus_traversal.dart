@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -1263,7 +1260,11 @@ class _OrderedFocusInfo {
 ///
 /// ```dart preamble
 /// class DemoButton extends StatelessWidget {
-///   const DemoButton({this.name, this.autofocus = false, this.order});
+///   const DemoButton({
+///     required this.name,
+///     this.autofocus = false,
+///     required this.order,
+///   });
 ///
 ///   final String name;
 ///   final bool autofocus;
@@ -1479,10 +1480,10 @@ class FocusTraversalOrder extends InheritedWidget {
 /// /// the type of T.
 /// class OrderedButton<T> extends StatefulWidget {
 ///   const OrderedButton({
-///     this.name,
+///     required this.name,
 ///     this.canRequestFocus = true,
 ///     this.autofocus = false,
-///     this.order,
+///     required this.order,
 ///   });
 ///
 ///   final String name;
@@ -1495,7 +1496,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// }
 ///
 /// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
-///   FocusNode focusNode;
+///   late FocusNode focusNode;
 ///
 ///   @override
 ///   void initState() {
@@ -1508,12 +1509,12 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 ///   @override
 ///   void dispose() {
-///     focusNode?.dispose();
+///     focusNode.dispose();
 ///     super.dispose();
 ///   }
 ///
 ///   @override
-///   void didUpdateWidget(OrderedButton oldWidget) {
+///   void didUpdateWidget(OrderedButton<T> oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
 ///     focusNode.canRequestFocus = widget.canRequestFocus;
 ///   }
@@ -1533,7 +1534,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       order = LexicalFocusOrder(widget.order.toString());
 ///     }
 ///
-///     Color overlayColor(Set<MaterialState> states) {
+///     Color? overlayColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused)) {
 ///         return Colors.red;
 ///       }
@@ -1543,7 +1544,7 @@ class FocusTraversalOrder extends InheritedWidget {
 ///       return null;  // defer to the default overlayColor
 ///     }
 ///
-///     Color foregroundColor(Set<MaterialState> states) {
+///     Color? foregroundColor(Set<MaterialState> states) {
 ///       if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
 ///         return Colors.white;
 ///       }
@@ -1558,8 +1559,8 @@ class FocusTraversalOrder extends InheritedWidget {
 ///           focusNode: focusNode,
 ///           autofocus: widget.autofocus,
 ///           style: ButtonStyle(
-///             overlayColor: MaterialStateProperty.resolveWith<Color>(overlayColor),
-///             foregroundColor: MaterialStateProperty.resolveWith<Color>(foregroundColor),
+///             overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
+///             foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
 ///           ),
 ///           onPressed: () => _handleOnPressed(),
 ///           child: Text(widget.name),

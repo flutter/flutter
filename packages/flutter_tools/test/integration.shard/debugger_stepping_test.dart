@@ -12,9 +12,17 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWithoutContext('can step over statements', () async {
-    final Directory tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
+  Directory tempDir;
 
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('debugger_stepping_test.');
+  });
+
+  tearDown(() async {
+    tryToDelete(tempDir);
+  });
+
+  testWithoutContext('can step over statements', () async {
     final SteppingProject _project = SteppingProject();
     await _project.setUpIn(tempDir);
 
@@ -43,6 +51,5 @@ void main() {
     }
 
     await _flutter.stop();
-    tryToDelete(tempDir);
   });
 }

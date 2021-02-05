@@ -72,6 +72,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     if (!flutterProject.fuchsia.existsSync()) {
       throwToolExit('No Fuchsia project is configured.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,

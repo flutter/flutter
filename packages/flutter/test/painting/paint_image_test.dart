@@ -20,6 +20,7 @@ class TestCanvas implements Canvas {
 void main() {
   late ui.Image image300x300;
   late ui.Image image300x200;
+
   setUpAll(() async {
     image300x300 = await createTestImage(width: 300, height: 300, cache: false);
     image300x200 = await createTestImage(width: 300, height: 200, cache: false);
@@ -106,6 +107,36 @@ void main() {
 
     debugInvertOversizedImages = false;
     FlutterError.onError = oldFlutterError;
+  });
+
+  test('debugInvertOversizedImages smaller than overhead allowance', () async {
+    debugInvertOversizedImages = true;
+    final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
+
+    final List<String> messages = <String>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      messages.add(details.exceptionAsString());
+    };
+
+    try {
+      // Create a 290x290 sized image, which is ~24kb less than the allocated size,
+      // and below the default debugImageOverheadAllowance size of 128kb.
+      const Rect rect = Rect.fromLTWH(50.0, 50.0, 290.0, 290.0);
+      final TestCanvas canvas = TestCanvas();
+
+      paintImage(
+        canvas: canvas,
+        rect: rect,
+        image: image300x300,
+        debugImageLabel: 'TestImage',
+        fit: BoxFit.fill,
+      );
+
+      expect(messages, isEmpty);
+    } finally {
+      debugInvertOversizedImages = false;
+      FlutterError.onError = oldFlutterError;
+    }
   });
 
   test('centerSlice with scale ≠ 1', () async {

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -47,4 +49,45 @@ void main() {
       expect(results.wasParsed('enable-experiment'), true);
     }
   });
+
+  testUsingContext('BuildSubCommand displays current null safety mode', () async {
+    const BuildInfo unsound = BuildInfo(
+      BuildMode.debug,
+      '',
+      trackWidgetCreation: false,
+      nullSafetyMode: NullSafetyMode.unsound,
+      treeShakeIcons: false,
+    );
+    const BuildInfo sound = BuildInfo(
+      BuildMode.debug,
+      '',
+      trackWidgetCreation: false,
+      nullSafetyMode: NullSafetyMode.sound,
+      treeShakeIcons: false,
+    );
+
+    FakeBuildSubCommand().test(unsound);
+    expect(testLogger.statusText, contains('Building without sound null safety'));
+
+    testLogger.clear();
+    FakeBuildSubCommand().test(sound);
+    expect(testLogger.statusText, contains('💪 Building with sound null safety 💪'));
+  });
+}
+
+class FakeBuildSubCommand extends BuildSubCommand {
+  @override
+  String get description => throw UnimplementedError();
+
+  @override
+  String get name => throw UnimplementedError();
+
+  void test(BuildInfo buildInfo) {
+    displayNullSafetyMode(buildInfo);
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    throw UnimplementedError();
+  }
 }

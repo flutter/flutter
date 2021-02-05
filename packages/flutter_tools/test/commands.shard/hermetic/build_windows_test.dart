@@ -315,17 +315,17 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     expect(configLines, containsAll(<String>[
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'  "DART_DEFINES=\"foo%3Da,bar%3Db\""',
-      r'  "DART_OBFUSCATION=\"true\""',
-      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "SPLIT_DEBUG_INFO=\"C:\\foo\\\""',
-      r'  "TRACK_WIDGET_CREATION=\"true\""',
-      r'  "TREE_SHAKE_ICONS=\"true\""',
-      r'  "FLUTTER_ROOT=\"C:\\flutter\""',
-      r'  "PROJECT_DIR=\"C:\\\""',
-      r'  "FLUTTER_TARGET=\"lib\\other.dart\""',
-      r'  "BUNDLE_SKSL_PATH=\"foo\\bar.sksl.json\""',
+      r'  "DART_DEFINES=foo%3Da,bar%3Db"',
+      r'  "DART_OBFUSCATION=true"',
+      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
+      r'  "TRACK_WIDGET_CREATION=true"',
+      r'  "TREE_SHAKE_ICONS=true"',
+      r'  "FLUTTER_ROOT=C:\\flutter"',
+      r'  "PROJECT_DIR=C:\\"',
+      r'  "FLUTTER_TARGET=lib\\other.dart"',
+      r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -407,6 +407,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),

@@ -2588,7 +2588,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url '\$storageUrl/download.flutter.io'\n"
+          '            url "\$storageUrl/download.flutter.io"\n'
           '        }\n'
           '      }\n'
           '\n'
@@ -2639,7 +2639,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url '\$storageUrl/download.flutter.io'\n"
+          '            url "\$storageUrl/download.flutter.io"\n'
           '        }\n'
           '      }\n'
           '\n'
@@ -2677,7 +2677,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url '\$storageUrl/download.flutter.io'\n"
+          '            url "\$storageUrl/download.flutter.io"\n'
           '        }\n'
           '      }\n'
           '\n'
@@ -2716,7 +2716,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url '\$storageUrl/download.flutter.io'\n"
+          '            url "\$storageUrl/download.flutter.io"\n'
           '        }\n'
           '      }\n'
           '\n'

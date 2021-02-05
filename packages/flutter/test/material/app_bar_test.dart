@@ -1122,6 +1122,97 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+      key: const ValueKey<String>('1'),
+      child: Scaffold(
+        key: const ValueKey<String>('1'),
+        appBar: AppBar(),
+      )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+    // Update pages
+    pages = <Page<void>>[ page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    // The page2 should have a back button
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+    // Update pages
+    pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+    // The back button should persist during the pop animation.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+  });
+
   testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
@@ -2198,6 +2289,25 @@ void main() {
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
+  testWidgets('SliverAppBar collapsedHeight', (WidgetTester tester) async {
+    const double collapsedHeight = 56.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+        floating: false,
+        pinned: false,
+        collapsedHeight: collapsedHeight
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(300.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
+  });
+
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
     const Key key = Key('leading');
     await tester.pumpWidget(MaterialApp(
@@ -2273,4 +2383,90 @@ void main() {
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
+
+  testWidgets('AppBar foregroundColor and backgroundColor', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff00ffff);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            backwardsCompatibility: false,
+            foregroundColor: foregroundColor,
+            backgroundColor: backgroundColor,
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final Material appBarMaterial = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(appBarMaterial.color, backgroundColor);
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
+
+  testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    final Key leadingIconKey = UniqueKey();
+    final Key actionIconKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(
+          appBarTheme: const AppBarTheme(
+            backwardsCompatibility: false,
+          ),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
+            leading: Icon(Icons.add_circle, key: leadingIconKey),
+            title: const Text('title'),
+            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle titleTextStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+    ).style;
+    expect(titleTextStyle.color, foregroundColor);
+
+    final IconThemeData leadingIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(leadingIconTheme.color, foregroundColor);
+
+    final IconThemeData actionIconTheme = tester.widget<IconTheme>(
+      find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+    ).data;
+    expect(actionIconTheme.color, foregroundColor);
+  });
+
 }

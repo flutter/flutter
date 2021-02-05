@@ -181,17 +181,6 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
-  if (!project.isModule && useMacOSConfig) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
-    // explicitly. Rather we rely on the xcode backend script and the Podfile
-    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
-    // However, this is necessary for regular macOS projects using Cocoapods.
-    final String frameworkDir =
-        flutterMacOSFrameworkDir(buildInfo.mode, globals.fs, globals.artifacts);
-    xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
-  }
-
-
   final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
@@ -202,7 +191,9 @@ List<String> _xcodeBuildSettingsLines({
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+
+    final String localEngineName = globals.fs.path.basename(engineOutPath);
+    xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -213,9 +204,21 @@ List<String> _xcodeBuildSettingsLines({
     //
     // Skip this step for macOS builds.
     if (!useMacOSConfig) {
-      final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+      String arch;
+      if (localEngineName.endsWith('_arm')) {
+        arch = 'armv7';
+      } else if (localEngineName.contains('_sim')) {
+        // Apple Silicon ARM simulators not yet supported.
+        arch = 'x86_64';
+      } else {
+        arch = 'arm64';
+      }
       xcodeBuildSettings.add('ARCHS=$arch');
     }
+  }
+  if (useMacOSConfig) {
+    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
+    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

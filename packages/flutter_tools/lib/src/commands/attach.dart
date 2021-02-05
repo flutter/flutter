@@ -101,6 +101,7 @@ class AttachCommand extends FlutterCommand {
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
+    addDevToolsOptions();
     usesDeviceTimeoutOption();
     hotRunnerFactory ??= HotRunnerFactory();
   }
@@ -405,7 +406,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(buildInfo, disableDds: boolArg('disable-dds'));
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      disableDds: boolArg('disable-dds'),
+      devToolsServerAddress: devToolsServerAddress,
+    );
 
     return buildInfo.isDebug
       ? hotRunnerFactory.build(

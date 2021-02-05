@@ -140,6 +140,22 @@ class FlutterManifest {
     return false;
   }
 
+  /// Any additional license files listed under the `flutter` key.
+  ///
+  /// This is expected to be a list of file paths that should be treated as
+  /// relative to the pubspec in this directory.
+  ///
+  /// For example:
+  ///
+  /// ```yaml
+  /// flutter:
+  ///   licenses:
+  ///     - assets/foo_license.txt
+  /// ```
+  List<String> get additionalLicenses => _flutterDescriptor.containsKey('licenses')
+    ? (_flutterDescriptor['licenses'] as YamlList).map((dynamic element) => element.toString()).toList()
+    : <String>[];
+
   /// True if this manifest declares a Flutter module project.
   ///
   /// A Flutter project is considered a module when it has a `module:`
@@ -434,6 +450,14 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           _validateFonts(kvp.value as YamlList, errors);
         }
         break;
+      case 'licenses':
+        final dynamic value = kvp.value;
+        if (value is YamlList) {
+          _validateListType<String>(value, '${kvp.key}', errors);
+        } else {
+          errors.add('Expected "${kvp.key}" to be a list of files, but got $value (${value.runtimeType})');
+        }
+        break;
       case 'module':
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
@@ -462,6 +486,14 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
         break;
+    }
+  }
+}
+
+void _validateListType<T>(YamlList yamlList, String context, List<String> errors) {
+  for (int i = 0; i < yamlList.length; i++) {
+    if (yamlList[i] is! T) {
+      errors.add('Expected "$context" to be a list of files, but element $i was a ${yamlList[i].runtimeType}');
     }
   }
 }

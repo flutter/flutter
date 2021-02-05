@@ -1222,15 +1222,6 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
          embedderId: embedderId,
        );
 
-  /// Creates an enter event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerEnterEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  factory PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) => PointerEnterEvent.fromMouseEvent(event);
-
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
@@ -1396,15 +1387,6 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
          synthesized: synthesized,
          embedderId: embedderId,
        );
-
-  /// Creates an enter event from a [PointerHoverEvent].
-  ///
-  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated(
-    'Use PointerExitEvent.fromMouseEvent instead. '
-    'This feature was deprecated after v1.4.3.'
-  )
-  factory PointerExitEvent.fromHoverEvent(PointerHoverEvent event) => PointerExitEvent.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
   ///

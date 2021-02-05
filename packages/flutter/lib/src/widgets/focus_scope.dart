@@ -93,7 +93,7 @@ import 'inherited_notifier.dart';
 ///     debugLabel: 'Scope',
 ///     autofocus: true,
 ///     child: DefaultTextStyle(
-///       style: textTheme.headline4,
+///       style: textTheme.headline4!,
 ///       child: Focus(
 ///         onKey: _handleKeyPress,
 ///         debugLabel: 'Button',
@@ -139,7 +139,10 @@ import 'inherited_notifier.dart';
 ///
 /// ```dart preamble
 /// class FocusableText extends StatelessWidget {
-///   const FocusableText(this.data, {Key key, this.autofocus}) : super(key: key);
+///   const FocusableText(this.data, {
+///     Key? key,
+///     required this.autofocus,
+///   }) : super(key: key);
 ///
 ///   /// The string to display as the text for this widget.
 ///   final String data;
@@ -749,19 +752,19 @@ class _FocusState extends State<Focus> {
 /// /// This is just a separate widget to simplify the example.
 /// class Pane extends StatelessWidget {
 ///   const Pane({
-///     Key key,
-///     this.focusNode,
+///     Key? key,
+///     required this.focusNode,
 ///     this.onPressed,
+///     required this.backgroundColor,
+///     required this.icon,
 ///     this.child,
-///     this.backgroundColor,
-///     this.icon,
 ///   }) : super(key: key);
 ///
 ///   final FocusNode focusNode;
-///   final VoidCallback onPressed;
-///   final Widget child;
+///   final VoidCallback? onPressed;
 ///   final Color backgroundColor;
 ///   final Widget icon;
+///   final Widget? child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -835,7 +838,7 @@ class _FocusState extends State<Focus> {
 ///                   child: Text('ANOTHER BUTTON TO FOCUS'),
 ///                 ),
 ///                 DefaultTextStyle(
-///                     style: Theme.of(context).textTheme.headline2,
+///                     style: Theme.of(context).textTheme.headline2!,
 ///                     child: Text('BACKDROP')),
 ///               ],
 ///             ),
@@ -864,7 +867,7 @@ class _FocusState extends State<Focus> {
 ///                 ? null
 ///                 : () => setState(() => backdropIsVisible = true),
 ///             child: DefaultTextStyle(
-///                 style: Theme.of(context).textTheme.headline2,
+///                 style: Theme.of(context).textTheme.headline2!,
 ///                 child: Text('FOREGROUND')),
 ///           ),
 ///         ),

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:fuchsia_remote_debug_protocol/src/dart/dart_vm.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:vm_service/vm_service.dart' as vms;
 import 'package:mockito/mockito.dart';
 
 import '../../common.dart';
@@ -17,11 +17,11 @@ void main() {
     });
 
     test('null connector', () async {
-      Future<json_rpc.Peer> mockServiceFunction(
+      Future<vms.VmService> mockServiceFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        return Future<json_rpc.Peer>(() => null);
+        return Future<vms.VmService>(() => null);
       }
 
       fuchsiaVmServiceConnectionFunction = mockServiceFunction;
@@ -30,12 +30,12 @@ void main() {
     });
 
     test('disconnect closes peer', () async {
-      final MockPeer peer = MockPeer();
-      Future<json_rpc.Peer> mockServiceFunction(
+      final MockVmService service = MockVmService();
+      Future<vms.VmService> mockServiceFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        return Future<json_rpc.Peer>(() => peer);
+        return Future<vms.VmService>(() => service);
       }
 
       fuchsiaVmServiceConnectionFunction = mockServiceFunction;
@@ -43,15 +43,15 @@ void main() {
           await DartVm.connect(Uri.parse('http://this.whatever/ws'));
       expect(vm, isNot(null));
       await vm.stop();
-      verify(peer.close());
+      verify(service.dispose());
     });
   });
 
   group('DartVm.getAllFlutterViews', () {
-    MockPeer mockPeer;
+    MockVmService mockService;
 
     setUp(() {
-      mockPeer = MockPeer();
+      mockService = MockVmService();
     });
 
     tearDown(() {
@@ -90,13 +90,13 @@ void main() {
         ],
       };
 
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        when(mockPeer.sendRequest(any, any)).thenAnswer((_) =>
-            Future<Map<String, dynamic>>(() => flutterViewCannedResponses));
-        return Future<json_rpc.Peer>(() => mockPeer);
+        when(mockService.callMethod('_flutter.listViews')).thenAnswer((_) async =>
+            vms.Response.parse(flutterViewCannedResponses));
+        return Future<vms.VmService>(() => mockService);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -148,13 +148,13 @@ void main() {
         ],
       };
 
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        when(mockPeer.sendRequest(any, any)).thenAnswer((_) =>
-            Future<Map<String, dynamic>>(() => flutterViewCannedResponses));
-        return Future<json_rpc.Peer>(() => mockPeer);
+        when(mockService.callMethod('_flutter.listViews')).thenAnswer((_) async =>
+            vms.Response.parse(flutterViewCannedResponses));
+        return Future<vms.VmService>(() => mockService);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -198,14 +198,13 @@ void main() {
         ],
       };
 
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        when(mockPeer.sendRequest(any, any)).thenAnswer((_) =>
-            Future<Map<String, dynamic>>(
-                () => flutterViewCannedResponseMissingId));
-        return Future<json_rpc.Peer>(() => mockPeer);
+        when(mockService.callMethod('_flutter.listViews')).thenAnswer((_) async =>
+            vms.Response.parse(flutterViewCannedResponseMissingId));
+        return Future<vms.VmService>(() => mockService);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -221,46 +220,44 @@ void main() {
     });
 
     test('get isolates by pattern', () async {
-      final Map<String, dynamic> vmCannedResponse = <String, dynamic>{
-        'isolates': <dynamic>[
-          <String, dynamic>{
-            'type': '@Isolate',
-            'fixedId': 'true',
-            'id': 'isolates/1',
-            'name': 'file://thingThatWillNotMatch:main()',
-            'number': '1',
-          },
-          <String, dynamic>{
-            'type': '@Isolate',
-            'fixedId': 'true',
-            'id': 'isolates/2',
-            'name': '0:dart_name_pattern()',
-            'number': '2',
-          },
-          <String, dynamic>{
-            'type': '@Isolate',
-            'fixedId': 'true',
-            'id': 'isolates/3',
-            'name': 'flutterBinary.cmx',
-            'number': '3',
-          },
-          <String, dynamic>{
-            'type': '@Isolate',
-            'fixedId': 'true',
-            'id': 'isolates/4',
-            'name': '0:some_other_dart_name_pattern()',
-            'number': '4',
-          },
-        ],
-      };
+      final List<vms.IsolateRef> isolates = <vms.IsolateRef>[
+        vms.IsolateRef.parse(<String, dynamic>{
+          'type': '@Isolate',
+          'fixedId': 'true',
+          'id': 'isolates/1',
+          'name': 'file://thingThatWillNotMatch:main()',
+          'number': '1',
+        }),
+        vms.IsolateRef.parse(<String, dynamic>{
+          'type': '@Isolate',
+          'fixedId': 'true',
+          'id': 'isolates/2',
+          'name': '0:dart_name_pattern()',
+          'number': '2',
+        }),
+        vms.IsolateRef.parse(<String, dynamic>{
+          'type': '@Isolate',
+          'fixedId': 'true',
+          'id': 'isolates/3',
+          'name': 'flutterBinary.cmx',
+          'number': '3',
+        }),
+        vms.IsolateRef.parse(<String, dynamic>{
+          'type': '@Isolate',
+          'fixedId': 'true',
+          'id': 'isolates/4',
+          'name': '0:some_other_dart_name_pattern()',
+          'number': '4',
+        }),
+      ];
 
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        when(mockPeer.sendRequest(any, any)).thenAnswer(
-            (_) => Future<Map<String, dynamic>>(() => vmCannedResponse));
-        return Future<json_rpc.Peer>(() => mockPeer);
+        when(mockService.getVM()).thenAnswer((_) async =>
+            FakeVM(isolates: isolates));
+        return Future<vms.VmService>(() => mockService);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -292,14 +289,13 @@ void main() {
         ],
       };
 
-      Future<json_rpc.Peer> mockVmConnectionFunction(
+      Future<vms.VmService> mockVmConnectionFunction(
         Uri uri, {
         Duration timeout,
       }) {
-        when(mockPeer.sendRequest(any, any)).thenAnswer((_) =>
-            Future<Map<String, dynamic>>(
-                () => flutterViewCannedResponseMissingIsolateName));
-        return Future<json_rpc.Peer>(() => mockPeer);
+        when(mockService.callMethod(any)).thenAnswer((_) async =>
+            vms.Response.parse(flutterViewCannedResponseMissingIsolateName));
+        return Future<vms.VmService>(() => mockService);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -314,41 +310,15 @@ void main() {
       expect(failingFunction, throwsA(isA<RpcFormatError>()));
     });
   });
-
-  group('DartVm.invokeRpc', () {
-    MockPeer mockPeer;
-
-    setUp(() {
-      mockPeer = MockPeer();
-    });
-
-    tearDown(() {
-      restoreVmServiceConnectionFunction();
-    });
-
-    test('verify timeout fires', () async {
-      const Duration timeoutTime = Duration(milliseconds: 100);
-      Future<json_rpc.Peer> mockVmConnectionFunction(
-        Uri uri, {
-        Duration timeout,
-      }) {
-        // Return a command that will never complete.
-        when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => Completer<Map<String, dynamic>>().future);
-        return Future<json_rpc.Peer>(() => mockPeer);
-      }
-
-      fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
-      final DartVm vm =
-          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
-      expect(vm, isNot(null));
-      Future<void> failingFunction() async {
-        await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
-      }
-
-      expect(failingFunction, throwsA(isA<TimeoutException>()));
-    });
-  });
 }
 
-class MockPeer extends Mock implements json_rpc.Peer {}
+class MockVmService extends Mock implements vms.VmService {}
+
+class FakeVM extends Fake implements vms.VM {
+  FakeVM({
+    this.isolates = const <vms.IsolateRef>[],
+  });
+
+  @override
+  List<vms.IsolateRef> isolates;
+}

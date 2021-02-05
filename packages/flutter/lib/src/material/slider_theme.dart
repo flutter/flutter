@@ -90,7 +90,7 @@ class SliderTheme extends InheritedTheme {
   /// }
   ///
   /// class LaunchState extends State<Launch> {
-  ///   double _rocketThrust;
+  ///   double _rocketThrust = 0;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -250,7 +250,7 @@ class SliderThemeData with Diagnosticable {
   /// }
   ///
   /// class BlissfulState extends State<Blissful> {
-  ///   double _bliss;
+  ///   double _bliss = 0;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {

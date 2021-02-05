@@ -30,11 +30,11 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
-// TabController tabController;
+// late TabController tabController;
 // void setState(VoidCallback fn) { }
-// String appBarTitle;
-// int tabCount;
-// TickerProvider tickerProvider;
+// late String appBarTitle;
+// late int tabCount;
+// late TickerProvider tickerProvider;
 
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
@@ -67,6 +67,12 @@ enum _ScaffoldSlot {
 /// To display a snack bar, obtain the [ScaffoldMessengerState] for the current
 /// [BuildContext] via [ScaffoldMessenger.of] and use the
 /// [ScaffoldMessengerState.showSnackBar] function.
+///
+/// When the [ScaffoldMessenger] has nested [Scaffold] descendants, the
+/// ScaffoldMessenger will only present a [SnackBar] to the root Scaffold of
+/// the subtree of Scaffolds. In order to show SnackBars in the inner, nested
+/// Scaffolds, set a new scope for your SnackBars by instantiating a new
+/// ScaffoldMessenger in between the levels of nesting.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold_center}
 ///
@@ -165,7 +171,7 @@ class ScaffoldMessenger extends StatefulWidget {
   ///       _counter++;
   ///     });
   ///     if (_counter % 10 == 0) {
-  ///       _scaffoldMessengerKey.currentState.showSnackBar(const SnackBar(
+  ///       _scaffoldMessengerKey.currentState!.showSnackBar(const SnackBar(
   ///         content: Text('A multiple of ten!'),
   ///       ));
   ///     }
@@ -377,8 +383,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   void _updateScaffolds() {
     for (final ScaffoldState scaffold in _scaffolds) {
-      scaffold._updateSnackBar();
+      if (_isRoot(scaffold))
+        scaffold._updateSnackBar();
     }
+  }
+
+  // Nested Scaffolds are handled by the ScaffoldMessenger by only presenting a
+  // SnackBar in the root Scaffold of the nested set.
+  bool _isRoot(ScaffoldState scaffold) {
+    final ScaffoldState? parent = scaffold.context.findAncestorStateOfType<ScaffoldState>();
+    return parent == null || !_scaffolds.contains(parent);
   }
 
   /// Removes the current [SnackBar] (if any) immediately from registered
@@ -1449,7 +1463,6 @@ class Scaffold extends StatefulWidget {
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
@@ -1459,6 +1472,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
+    this.restorationId,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1569,7 +1583,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openDrawer() {
-  ///   _scaffoldKey.currentState.openDrawer();
+  ///   _scaffoldKey.currentState!.openDrawer();
   /// }
   ///
   /// void _closeDrawer() {
@@ -1632,7 +1646,7 @@ class Scaffold extends StatefulWidget {
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
-  ///   _scaffoldKey.currentState.openEndDrawer();
+  ///   _scaffoldKey.currentState!.openEndDrawer();
   /// }
   ///
   /// void _closeEndDrawer() {
@@ -1725,18 +1739,6 @@ class Scaffold extends StatefulWidget {
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget? bottomSheet;
 
-  /// This flag is deprecated, please use [resizeToAvoidBottomInset]
-  /// instead.
-  ///
-  /// Originally the name referred [MediaQueryData.padding]. Now it refers
-  /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
-  /// should be clearer to readers.
-  @Deprecated(
-    'Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears. '
-    'This feature was deprecated after v1.1.9.'
-  )
-  final bool? resizeToAvoidBottomPadding;
-
   /// If true the [body] and the scaffold's floating widgets should size
   /// themselves to avoid the onscreen keyboard whose height is defined by the
   /// ambient [MediaQuery]'s [MediaQueryData.viewInsets] `bottom` property.
@@ -1782,6 +1784,20 @@ class Scaffold extends StatefulWidget {
   ///
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
+
+  /// Restoration ID to save and restore the state of the [Scaffold].
+  ///
+  /// If it is non-null, the scaffold will persist and restore whether the
+  /// [drawer] and [endDrawer] was open or closed.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2055,7 +2071,15 @@ class Scaffold extends StatefulWidget {
 ///
 /// Can display [BottomSheet]s. Retrieve a [ScaffoldState] from the current
 /// [BuildContext] using [Scaffold.of].
-class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
+class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, RestorationMixin {
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_drawerOpened, 'drawer_open');
+    registerForRestoration(_endDrawerOpened, 'end_drawer_open');
+  }
 
   // DRAWER API
 
@@ -2076,8 +2100,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// This is based on the appBar preferred height plus the top padding.
   double? get appBarMaxHeight => _appBarMaxHeight;
-  bool _drawerOpened = false;
-  bool _endDrawerOpened = false;
+  final RestorableBool _drawerOpened = RestorableBool(false);
+  final RestorableBool _endDrawerOpened = RestorableBool(false);
 
   /// Whether the [Scaffold.drawer] is opened.
   ///
@@ -2085,7 +2109,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
   ///    [Scaffold].
-  bool get isDrawerOpen => _drawerOpened;
+  bool get isDrawerOpen => _drawerOpened.value;
 
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
@@ -2093,18 +2117,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [ScaffoldState.openEndDrawer], which opens the [Scaffold.endDrawer] of
   ///    a [Scaffold].
-  bool get isEndDrawerOpen => _endDrawerOpened;
+  bool get isEndDrawerOpen => _endDrawerOpened.value;
 
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
-      _drawerOpened = isOpened;
+      _drawerOpened.value = isOpened;
     });
     widget.onDrawerChanged?.call(isOpened);
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
     setState(() {
-      _endDrawerOpened = isOpened;
+      _endDrawerOpened.value = isOpened;
     });
     widget.onEndDrawerChanged?.call(isOpened);
   }
@@ -2122,7 +2146,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
-    if (_endDrawerKey.currentState != null && _endDrawerOpened)
+    if (_endDrawerKey.currentState != null && _endDrawerOpened.value)
       _endDrawerKey.currentState!.close();
     _drawerKey.currentState?.open();
   }
@@ -2140,7 +2164,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
-    if (_drawerKey.currentState != null && _drawerOpened)
+    if (_drawerKey.currentState != null && _drawerOpened.value)
       _drawerKey.currentState!.close();
     _endDrawerKey.currentState?.open();
   }
@@ -2366,6 +2390,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic>? _currentBottomSheet;
+  final GlobalKey _currentBottomSheetKey = GlobalKey();
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
@@ -2398,7 +2423,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           return NotificationListener<DraggableScrollableNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
             child: DraggableScrollableActuator(
-              child: widget.bottomSheet!,
+              child: StatefulBuilder(
+                key: _currentBottomSheetKey,
+                builder: (BuildContext context, StateSetter setState) => widget.bottomSheet!,
+              ),
             ),
           );
         },
@@ -2420,6 +2448,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         return true;
       }());
     }
+  }
+
+  void _updatePersistentBottomSheet() {
+    _currentBottomSheetKey.currentState!.setState(() {});
   }
 
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
@@ -2602,6 +2634,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double? elevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
+    AnimationController? transitionAnimationController,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2616,7 +2649,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = BottomSheet.createAnimationController(this)..forward();
+    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
@@ -2699,9 +2732,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   late _ScaffoldGeometryNotifier _geometryNotifier;
 
-  // Backwards compatibility for deprecated resizeToAvoidBottomPadding property
   bool get _resizeToAvoidBottomInset {
-    return widget.resizeToAvoidBottomInset ?? widget.resizeToAvoidBottomPadding ?? true;
+    return widget.resizeToAvoidBottomInset ?? true;
   }
 
   @override
@@ -2751,16 +2783,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         }
         return true;
       }());
-      _closeCurrentBottomSheet();
-      _maybeBuildPersistentBottomSheet();
+      if (widget.bottomSheet == null) {
+        _closeCurrentBottomSheet();
+      } else if (widget.bottomSheet != null && oldWidget.bottomSheet == null) {
+        _maybeBuildPersistentBottomSheet();
+      } else {
+        _updatePersistentBottomSheet();
+      }
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void didChangeDependencies() {
-    // nullOk is valid here since  both the Scaffold and ScaffoldMessenger are
-    // currently available for managing SnackBars.
+    // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
+    // are currently available for managing SnackBars.
     final ScaffoldMessengerState? _currentScaffoldMessenger = ScaffoldMessenger.maybeOf(context);
     // If our ScaffoldMessenger has changed, unregister with the old one first.
     if (_scaffoldMessenger != null &&
@@ -2859,6 +2896,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
+          isDrawerOpen: _endDrawerOpened.value,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2884,6 +2922,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+          isDrawerOpen: _drawerOpened.value,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -3006,6 +3045,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       'the preferred API instead of the Scaffold methods.'
     );
 
+    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
+      final Widget stack = Stack(
+        alignment: Alignment.bottomCenter,
+        children: <Widget>[
+          ..._dismissedBottomSheets,
+          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
+        ],
+      );
+      _addIfNonNull(
+        children,
+        stack,
+        _ScaffoldSlot.bottomSheet,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+        removeBottomPadding: _resizeToAvoidBottomInset,
+      );
+    }
+
     // SnackBar set by ScaffoldMessenger
     if (_messengerSnackBar != null) {
       final SnackBarBehavior snackBarBehavior = _messengerSnackBar?._widget.behavior
@@ -3085,25 +3143,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
-      final Widget stack = Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          ..._dismissedBottomSheets,
-          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
-        ],
-      );
-      _addIfNonNull(
-        children,
-        stack,
-        _ScaffoldSlot.bottomSheet,
-        removeLeftPadding: false,
-        removeTopPadding: true,
-        removeRightPadding: false,
-        removeBottomPadding: _resizeToAvoidBottomInset,
-      );
-    }
-
     _addIfNonNull(
       children,
       _FloatingActionButtonTransition(
@@ -3145,7 +3184,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         break;
     }
 
-    if (_endDrawerOpened) {
+    if (_endDrawerOpened.value) {
       _buildDrawer(children, textDirection);
       _buildEndDrawer(children, textDirection);
     } else {

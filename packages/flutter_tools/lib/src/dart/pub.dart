@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -15,6 +16,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../reporting/reporting.dart';
 
@@ -127,6 +129,8 @@ abstract class Pub {
     List<String> arguments, {
     String directory,
     @required io.Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
   });
 }
 
@@ -324,6 +328,8 @@ class _DefaultPub implements Pub {
     List<String> arguments, {
     String directory,
     @required io.Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
   }) async {
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
@@ -356,6 +362,23 @@ class _DefaultPub implements Pub {
     final int code = await process.exitCode;
     if (code != 0) {
       throwToolExit('pub finished with exit code $code', exitCode: code);
+    }
+
+    if (touchesPackageConfig) {
+      final File packageConfigFile = _fileSystem.file(
+        _fileSystem.path.join(directory, '.dart_tool', 'package_config.json'));
+      final Directory generatedDirectory = _fileSystem.directory(
+        _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
+      final File lastVersion = _fileSystem.file(
+        _fileSystem.path.join(directory, '.dart_tool', 'version'));
+      final File currentVersion = _fileSystem.file(
+        _fileSystem.path.join(Cache.flutterRoot, 'version'));
+        lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+      await _updatePackageConfig(
+        packageConfigFile,
+        generatedDirectory,
+        generateSyntheticPackage,
+      );
     }
   }
 
@@ -455,20 +478,28 @@ class _DefaultPub implements Pub {
     if (!generateSyntheticPackage) {
       return;
     }
-    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 12));
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }
-    final PackageConfig newPackageConfig = PackageConfig(
-      <Package>[
-        ...packageConfig.packages,
-        flutterGen,
-      ],
-    );
-    // There is no current API for saving a package_config without hitting the real filesystem.
-    if (packageConfigFile.fileSystem is LocalFileSystem) {
-      await savePackageConfig(newPackageConfig, packageConfigFile.parent.parent);
-    }
+
+    // TODO(jonahwillams): Using raw json manipulation here because
+    // savePackageConfig always writes to local io, and it changes absolute
+    // paths to relative on round trip.
+    // See: https://github.com/dart-lang/package_config/issues/99,
+    // and: https://github.com/dart-lang/package_config/issues/100.
+
+    // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
+    // we can rely on the file to exist and be correctly formatted.
+    final dynamic jsonContents =
+        json.decode(packageConfigFile.readAsStringSync());
+
+    jsonContents['packages'].add(<String, dynamic>{
+      'name': 'flutter_gen',
+      'rootUri': 'flutter_gen',
+      'languageVersion': '2.12',
+    });
+
+    packageConfigFile.writeAsStringSync(json.encode(jsonContents));
   }
 
   // Subset the package config file to only the parts that are relevant for

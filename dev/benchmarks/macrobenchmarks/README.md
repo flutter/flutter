@@ -55,6 +55,7 @@ The key `[test_name]` can be:
 - `post_backdrop_filter_perf`
 - `simple_animation_perf`
 - `textfield_perf`
+- `fullscreen_textfield_perf`
 
 ### E2E benchmarks
 
@@ -121,10 +122,10 @@ Example:
 cd dev/benchmarks/macrobenchmarks
 
 # Runs in profile mode using the HTML renderer
-flutter run --profile -d web-server lib/web_benchmarks.dart
+flutter run --web-renderer=html --profile -d web-server lib/web_benchmarks.dart
 
 # Runs in profile mode using the CanvasKit renderer
-flutter run --dart-define=FLUTTER_WEB_USE_SKIA=true --profile -d web-server lib/web_benchmarks.dart
+flutter run --web-renderer=canvaskit --profile -d web-server lib/web_benchmarks.dart
 ```
 
 You can also run all benchmarks exactly as the devicelab runs them:

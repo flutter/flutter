@@ -176,6 +176,7 @@ void main() {
           '--split-debug-info',
           '/project-name/v1.2.3/',
           '--obfuscate',
+          '--dart-define=foo=bar'
         ],
       );
 
@@ -196,6 +197,7 @@ void main() {
       expect(buildInfo.flavor, 'free');
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
+      expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => mockAndroidBuilder,
     });
@@ -205,12 +207,8 @@ void main() {
     ProcessManager mockProcessManager;
     Directory tempDir;
     AndroidSdk mockAndroidSdk;
-    Usage mockUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
-
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
       mockProcessManager = MockProcessManager();

@@ -92,7 +92,6 @@ void main() {
           '-quiet',
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
-        'BUILD_DIR=/build/ios',
         '-sdk', 'iphoneos',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
@@ -249,6 +248,7 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
     expect(buffer.toString(), contains('event {category: code-size-analysis, action: ios, label: null, value: null, cd33: '));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

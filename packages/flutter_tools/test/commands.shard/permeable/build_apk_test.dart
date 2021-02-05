@@ -124,7 +124,6 @@ void main() {
 
     setUp(() {
       mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
 
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',

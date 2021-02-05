@@ -42,6 +42,10 @@ void main() {
     return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
 
+  testWithoutContext('flutter test set the working directory correctly', () async {
+    return _testFile('working_directory', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
+
   testWithoutContext('flutter test should report nice errors for exceptions thrown within testWidgets()', () async {
     return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
   });

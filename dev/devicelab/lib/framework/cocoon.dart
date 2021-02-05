@@ -34,9 +34,9 @@ class Cocoon {
   Cocoon({
     String serviceAccountTokenPath,
     @visibleForTesting Client httpClient,
-    @visibleForTesting FileSystem filesystem,
+    @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
-  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: filesystem);
+  }) : _httpClient = AuthenticatedCocoonClient(serviceAccountTokenPath, httpClient: httpClient, filesystem: fs);
 
   /// Client to make http requests to Cocoon.
   final AuthenticatedCocoonClient _httpClient;
@@ -45,6 +45,9 @@ class Cocoon {
 
   /// Url used to send results to.
   static const String baseCocoonApiUrl = 'https://flutter-dashboard.appspot.com/api';
+
+  /// Underlying [FileSystem] to use.
+  final FileSystem fs;
 
   static final Logger logger = Logger('CocoonClient');
 
@@ -61,8 +64,25 @@ class Cocoon {
     return _commitSha = result.stdout as String;
   }
 
+  /// Upload the JSON results in [resultsPath] to Cocoon.
+  ///
+  /// Flutter infrastructure's workflow is:
+  /// 1. Run DeviceLab test, writing results to a known path
+  /// 2. Request service account token from luci auth (valid for at least 3 minutes)
+  /// 3. Upload results from (1) to Cocooon
+  Future<void> sendResultsPath(String resultsPath) async {
+    final File resultFile = fs.file(resultsPath);
+    final Map<String, dynamic> resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
+    await _sendUpdateTaskRequest(resultsJson);
+  }
+
   /// Send [TaskResult] to Cocoon.
-  Future<void> sendTaskResult({@required String builderName, @required TaskResult result, @required String gitBranch}) async {
+  // TODO(chillers): Remove when sendResultsPath is used in prod. https://github.com/flutter/flutter/issues/72457
+  Future<void> sendTaskResult({
+    @required String builderName,
+    @required TaskResult result,
+    @required String gitBranch,
+  }) async {
     assert(builderName != null);
     assert(gitBranch != null);
     assert(result != null);
@@ -73,7 +93,45 @@ class Cocoon {
       print('${rec.level.name}: ${rec.time}: ${rec.message}');
     });
 
-    final Map<String, dynamic> status = <String, dynamic>{
+    final Map<String, dynamic> updateRequest = _constructUpdateRequest(
+      gitBranch: gitBranch,
+      builderName: builderName,
+      result: result,
+    );
+    await _sendUpdateTaskRequest(updateRequest);
+  }
+
+  /// Write the given parameters into an update task request and store the JSON in [resultsPath].
+  Future<void> writeTaskResultToFile({
+    @required String builderName,
+    @required String gitBranch,
+    @required TaskResult result,
+    @required String resultsPath,
+  }) async {
+    assert(builderName != null);
+    assert(gitBranch != null);
+    assert(result != null);
+    assert(resultsPath != null);
+
+    final Map<String, dynamic> updateRequest = _constructUpdateRequest(
+      gitBranch: gitBranch,
+      builderName: builderName,
+      result: result,
+    );
+    final File resultFile = fs.file(resultsPath);
+    if (resultFile.existsSync()) {
+      resultFile.deleteSync();
+    }
+    resultFile.createSync();
+    resultFile.writeAsStringSync(json.encode(updateRequest));
+  }
+
+  Map<String, dynamic> _constructUpdateRequest({
+    @required String builderName,
+    @required TaskResult result,
+    @required String gitBranch,
+  }) {
+    final Map<String, dynamic> updateRequest = <String, dynamic>{
       'CommitBranch': gitBranch,
       'CommitSha': commitSha,
       'BuilderName': builderName,
@@ -81,7 +139,7 @@ class Cocoon {
     };
 
     // Make a copy of result data because we may alter it for validation below.
-    status['ResultData'] = result.data;
+    updateRequest['ResultData'] = result.data;
 
     final List<String> validScoreKeys = <String>[];
     if (result.benchmarkScoreKeys != null) {
@@ -95,9 +153,13 @@ class Cocoon {
         }
       }
     }
-    status['BenchmarkScoreKeys'] = validScoreKeys;
+    updateRequest['BenchmarkScoreKeys'] = validScoreKeys;
 
-    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', status);
+    return updateRequest;
+  }
+
+  Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
+    final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
     if (response['Name'] != null) {
       logger.info('Updated Cocoon with results from this task');
     } else {
@@ -108,7 +170,7 @@ class Cocoon {
 
   /// Make an API request to Cocoon.
   Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath, [dynamic jsonData]) async {
-    final String url = '$baseCocoonApiUrl/$apiPath';
+    final Uri url = Uri.parse('$baseCocoonApiUrl/$apiPath');
 
     /// Retry requests to Cocoon as sometimes there are issues with the servers, such
     /// as version changes to the backend, datastore issues, or latency issues.

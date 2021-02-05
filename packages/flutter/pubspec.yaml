@@ -4,7 +4,6 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.12.0-0 <3.0.0"
 
 dependencies:

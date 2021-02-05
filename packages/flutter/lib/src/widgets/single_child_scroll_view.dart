@@ -91,7 +91,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(
@@ -161,7 +161,7 @@ import 'scrollable.dart';
 /// ```dart
 ///  Widget build(BuildContext context) {
 ///    return DefaultTextStyle(
-///      style: Theme.of(context).textTheme.bodyText2,
+///      style: Theme.of(context).textTheme.bodyText2!,
 ///      child: LayoutBuilder(
 ///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///          return SingleChildScrollView(

@@ -66,6 +66,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'url_launcher': '6.0.0-nullsafety.1',
   'connectivity': '3.0.0-nullsafety.1',
   'device_info': '2.0.0-nullsafety.1',
+  'camera': '0.6.4+5',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -320,6 +321,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         Directory temporaryFlutterSdk;
         if (upgrade) {
           temporaryFlutterSdk = createTemporaryFlutterSdk(
+            globals.logger,
             globals.fs,
             globals.fs.directory(Cache.flutterRoot),
             pubspecs,
@@ -1417,13 +1419,20 @@ String _computeChecksum(Iterable<String> names, String getVersion(String name)) 
 
 /// Create a synthetic Flutter SDK so that pub version solving does not get
 /// stuck on the old versions.
-Directory createTemporaryFlutterSdk(FileSystem fileSystem, Directory realFlutter, List<PubspecYaml> pubspecs) {
-  final Set<String> currentPackages = realFlutter
-    .childDirectory('packages')
-    .listSync()
-    .whereType<Directory>()
-    .map((Directory directory) => fileSystem.path.basename(directory.path))
-    .toSet();
+@visibleForTesting
+Directory createTemporaryFlutterSdk(
+  Logger logger,
+  FileSystem fileSystem,
+  Directory realFlutter,
+  List<PubspecYaml> pubspecs,
+) {
+  final Set<String> currentPackages = <String>{};
+  for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
+    // Verify that a pubspec.yaml exists to ensure this isn't a left over directory.
+    if (entity is Directory && entity.childFile('pubspec.yaml').existsSync()) {
+      currentPackages.add(fileSystem.path.basename(entity.path));
+    }
+  }
 
   final Map<String, PubspecYaml> pubspecsByName = <String, PubspecYaml>{};
   for (final PubspecYaml pubspec in pubspecs) {
@@ -1445,6 +1454,12 @@ Directory createTemporaryFlutterSdk(FileSystem fileSystem, Directory realFlutter
       .childFile('pubspec.yaml')
       ..createSync(recursive: true);
     final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
+    if (pubspecYaml == null) {
+      logger.printError(
+        "Unexpected package '$flutterPackage' found in packages directory",
+      );
+      continue;
+    }
     final StringBuffer output = StringBuffer('name: $flutterPackage\n');
 
     // Fill in SDK dependency constraint.

@@ -387,4 +387,21 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     expect(values, everyElement(300));
   });
+
+  testWidgets('Works with nullable tweens', (WidgetTester tester) async {
+    final List<Size?> values = <Size?>[];
+    await tester.pumpWidget(
+      TweenAnimationBuilder<Size?>(
+        duration: const Duration(seconds: 1),
+        tween: SizeTween(end: const Size(10,10)),
+        builder: (BuildContext context, Size? s, Widget? child) {
+          values.add(s);
+          return const Placeholder();
+        },
+      ),
+    );
+    expect(values, <Size>[const Size(10,10)]);
+    await tester.pump(const Duration(seconds: 2));
+    expect(values, <Size>[const Size(10,10)]);
+  });
 }

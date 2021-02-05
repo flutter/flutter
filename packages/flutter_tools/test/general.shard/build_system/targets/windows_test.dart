@@ -56,6 +56,7 @@ void main() {
       '$windowsDesktopPath\\flutter_windows.dll.lib',
       '$windowsDesktopPath\\flutter_windows.dll.pdb',
       '$windowsDesktopPath\\flutter_plugin_registrar.h',
+      '$windowsDesktopPath\\flutter_texture_registrar.h',
       '$windowsDesktopPath\\flutter_windows.h',
       icuData,
       '$windowsCppClientWrapper\\foo',
@@ -79,6 +80,7 @@ void main() {
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_messenger.h'), exists);
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h'), exists);
+    expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_texture_registrar.h'), exists);
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.h'), exists);
     expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$icuData'), exists);
     expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo'), exists);
@@ -103,6 +105,7 @@ void main() {
       '$windowsDesktopPath\\flutter_windows.dll.lib',
       '$windowsDesktopPath\\flutter_windows.dll.pdb',
       '$windowsDesktopPath\\flutter_plugin_registrar.h',
+      '$windowsDesktopPath\\flutter_texture_registrar.h',
       '$windowsDesktopPath\\flutter_windows.h',
       icuData,
       '$windowsCppClientWrapper\\foo',
@@ -115,6 +118,7 @@ void main() {
       r'C:\windows\flutter\ephemeral\flutter_windows.dll.lib',
       r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb',
       r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h',
+      r'C:\windows\flutter\ephemeral\flutter_texture_registrar.h',
       r'C:\windows\flutter\ephemeral\flutter_windows.h',
       'C:\\windows\\flutter\\ephemeral\\$icuData',
       'C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',

@@ -343,7 +343,7 @@ void main() {
       when(mockDevice.supportsHotRestart).thenReturn(true);
       when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug),
+        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = MockDevFs(),
       ];
       final OperationResult result = await HotRunner(
         devices,

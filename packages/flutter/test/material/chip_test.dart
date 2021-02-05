@@ -1440,6 +1440,32 @@ void main() {
     expect(materialBox, paints..path(color: chipTheme.disabledColor));
   });
 
+  testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
+    // The font family should be preserved even if the chip overrides some label style properties
+    final ThemeData theme = ThemeData(
+      fontFamily: 'MyFont'
+    );
+
+    Widget buildChip() {
+      return _wrapForChip(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: theme,
+          child: const Chip(
+            label: Text('Label'),
+            labelStyle: TextStyle(fontWeight: FontWeight.w200),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip());
+
+    final TextStyle labelStyle = getLabelStyle(tester).style;
+    expect(labelStyle.fontFamily, 'MyFont');
+    expect(labelStyle.fontWeight, FontWeight.w200);
+  });
+
   testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(

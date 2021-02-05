@@ -28,19 +28,19 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for all host platforms.');
     argParser.addFlag('force', abbr: 'f', negatable: false,
         help: 'Force re-downloading of artifacts.');
-    argParser.addFlag('android', negatable: true, defaultsTo: true,
+    argParser.addFlag('android', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for Android development.',
         hide: verboseHelp);
-    argParser.addFlag('android_gen_snapshot', negatable: true, defaultsTo: true,
+    argParser.addFlag('android_gen_snapshot', negatable: true, defaultsTo: false,
         help: 'Precache gen_snapshot for Android development.',
         hide: !verboseHelp);
-    argParser.addFlag('android_maven', negatable: true, defaultsTo: true,
+    argParser.addFlag('android_maven', negatable: true, defaultsTo: false,
         help: 'Precache Gradle dependencies for Android development.',
         hide: !verboseHelp);
     argParser.addFlag('android_internal_build', negatable: true, defaultsTo: false,
         help: 'Precache dependencies for internal Android development.',
         hide: !verboseHelp);
-    argParser.addFlag('ios', negatable: true, defaultsTo: true,
+    argParser.addFlag('ios', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for iOS development.');
     argParser.addFlag('web', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for web development.');
@@ -69,7 +69,9 @@ class PrecacheCommand extends FlutterCommand {
   final String name = 'precache';
 
   @override
-  final String description = "Populate the Flutter tool's cache of binary artifacts.";
+  final String description = "Populate the Flutter tool's cache of binary artifacts.\n\n"
+    'If no explicit platform flags are provided, this command will download the artifacts '
+    'for all currently enabled platforms';
 
   @override
   bool get shouldUpdateCache => false;
@@ -143,7 +145,12 @@ class PrecacheCommand extends FlutterCommand {
     if (boolArg('use-unsigned-mac-binaries')) {
       _cache.useUnsignedMacBinaries = true;
     }
-    _cache.platformOverrideArtifacts = _explicitArtifactSelections();
+    final Set<String> explicitlyEnabled = _explicitArtifactSelections();
+    _cache.platformOverrideArtifacts = explicitlyEnabled;
+
+    // If the user did not provide any artifact flags, then download
+    // all artifacts that correspond to an enabled platform.
+    final bool downloadDefaultArtifacts = explicitlyEnabled.isEmpty;
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
@@ -152,7 +159,7 @@ class PrecacheCommand extends FlutterCommand {
       }
 
       final String argumentName = umbrellaForArtifact[artifact.name] ?? artifact.name;
-      if (includeAllPlatforms || boolArg(argumentName)) {
+      if (includeAllPlatforms || boolArg(argumentName) || downloadDefaultArtifacts) {
         requiredArtifacts.add(artifact);
       }
     }

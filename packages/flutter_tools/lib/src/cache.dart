@@ -1136,6 +1136,8 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 }
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
+///
+/// This is a no-op if the android SDK is not available.
 class AndroidMavenArtifacts extends ArtifactSet {
   AndroidMavenArtifacts(this.cache, {
     @required Platform platform,
@@ -1152,6 +1154,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
+    if (globals.androidSdk == null) {
+      return;
+    }
     final Directory tempDir = cache.getRoot().createTempSync(
       'flutter_gradle_wrapper.',
     );
@@ -1784,14 +1789,24 @@ class ArtifactUpdater {
       } finally {
         status.stop();
       }
+      /// Unzipping multiple file into a directory will not remove old files
+      /// from previous versions that are not present in the new bundle.
+      final Directory destination = location.childDirectory(
+        tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
+      );
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
       _ensureExists(location);
 
       try {
         extractor(tempFile, location);
-      } on Exception {
+      } on Exception catch (err) {
         retries -= 1;
         if (retries == 0) {
-          rethrow;
+          throwToolExit(
+            'Flutter could not download and/or extract $url. Ensure you have '
+            'network connectivity and all of the required dependencies listed at'
+            'flutter.dev/setup.\nThe original exception was: $err.'
+          );
         }
         _deleteIgnoringErrors(tempFile);
         continue;

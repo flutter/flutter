@@ -54,7 +54,7 @@
   "refreshIndicatorSemanticLabel": "Yenile",
   "moreButtonTooltip": "Diğer",
   "dateSeparator": ".",
-  "dateHelpText": "aa/gg/yyyy",
+  "dateHelpText": "gg.aa.yyyy",
   "selectYearSemanticsLabel": "Yılı seçin",
   "unspecifiedDate": "Tarih",
   "unspecifiedDateRange": "Tarih Aralığı",

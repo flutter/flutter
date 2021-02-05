@@ -103,19 +103,6 @@ void main() {
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
-
-    // Backwards compatibility: deprecated resizeToAvoidBottomPadding flag
-    await tester.pumpWidget(boilerplate(MediaQuery(
-      data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Title')),
-        body: Container(key: bodyKey),
-        resizeToAvoidBottomPadding: false,
-      ),
-    )));
-
-    bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {

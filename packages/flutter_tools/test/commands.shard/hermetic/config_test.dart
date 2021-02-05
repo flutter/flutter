@@ -34,8 +34,6 @@ void main() {
     mockAndroidSdk = MockAndroidSdk();
     mockFlutterVersion = MockFlutterVersion();
     mockUsage = MockUsage();
-
-    when(mockUsage.isFirstRun).thenReturn(false);
   });
 
   void verifyNoAnalytics() {

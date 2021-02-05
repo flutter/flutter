@@ -302,7 +302,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 /// ```dart preamble
 /// class RedSelectedBorderSide extends MaterialStateBorderSide {
 ///   @override
-///   BorderSide resolve(Set<MaterialState> states) {
+///   BorderSide? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
 ///       return BorderSide(
 ///         width: 1,
@@ -361,7 +361,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
 /// ```dart preamble
 /// class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
 ///   @override
-///   OutlinedBorder resolve(Set<MaterialState> states) {
+///   OutlinedBorder? resolve(Set<MaterialState> states) {
 ///     if (states.contains(MaterialState.selected)) {
 ///       return RoundedRectangleBorder();
 ///     }

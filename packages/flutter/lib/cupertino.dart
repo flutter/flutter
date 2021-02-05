@@ -12,6 +12,14 @@
 /// Design](https://flutter.dev/docs/development/ui/widgets/material) set.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
+///
+/// See also:
+///
+///  * [flutter.dev/widgets/cupertino](https://flutter.dev/docs/development/ui/widgets/cupertino)
+///    for a catalog of all Cupertino widgets.
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
+///    for a catalog of commonly-used Flutter widgets.
+
 library cupertino;
 
 export 'src/cupertino/action_sheet.dart';
@@ -24,6 +32,7 @@ export 'src/cupertino/constants.dart';
 export 'src/cupertino/context_menu.dart';
 export 'src/cupertino/context_menu_action.dart';
 export 'src/cupertino/date_picker.dart';
+export 'src/cupertino/desktop_text_selection.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/form_row.dart';
 export 'src/cupertino/form_section.dart';
@@ -47,6 +56,8 @@ export 'src/cupertino/tab_view.dart';
 export 'src/cupertino/text_field.dart';
 export 'src/cupertino/text_form_field_row.dart';
 export 'src/cupertino/text_selection.dart';
+export 'src/cupertino/text_selection_toolbar.dart';
+export 'src/cupertino/text_selection_toolbar_button.dart';
 export 'src/cupertino/text_theme.dart';
 export 'src/cupertino/theme.dart';
 export 'src/cupertino/thumb_painter.dart';

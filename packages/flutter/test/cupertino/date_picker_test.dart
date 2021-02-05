@@ -933,6 +933,29 @@ void main() {
         expect(date.day, minDate.day);
     });
 
+    testWidgets('date picker does not display previous day of minimumDate if it is set at midnight', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/72932
+      final DateTime minDate = DateTime(2019, 12, 31);
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                minimumDate: minDate,
+                onDateTimeChanged: (DateTime newDate) { },
+                initialDateTime: minDate.add(const Duration(days: 1)),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Mon Dec 30'), findsNothing);
+    });
+
 
     group('Picker handles initial noon/midnight times', () {
       testWidgets('midnight', (WidgetTester tester) async {

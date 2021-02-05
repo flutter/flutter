@@ -60,7 +60,7 @@
   "refreshIndicatorSemanticLabel": "Оновити",
   "moreButtonTooltip": "Інші",
   "dateSeparator": ".",
-  "dateHelpText": "дд/мм/рррр",
+  "dateHelpText": "дд.мм.рррр",
   "selectYearSemanticsLabel": "Виберіть рік",
   "unspecifiedDate": "Дата",
   "unspecifiedDateRange": "Діапазон дат",

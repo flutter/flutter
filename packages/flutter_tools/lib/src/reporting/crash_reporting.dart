@@ -175,19 +175,17 @@ class CrashReportSender {
         filename: _kStackTraceFilename,
       ));
 
-      // package:http may throw unhandled async exceptions into the Zone.
-      await asyncGuard(() async {
-        final http.StreamedResponse resp = await _client.send(req);
+      final http.StreamedResponse resp = await _client.send(req);
 
-        if (resp.statusCode == HttpStatus.ok) {
-          final String reportId = await http.ByteStream(resp.stream)
-            .bytesToString();
-          _logger.printTrace('Crash report sent (report ID: $reportId)');
-          _crashReportSent = true;
-        } else {
-          _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
-        }
-      });
+      if (resp.statusCode == HttpStatus.ok) {
+        final String reportId = await http.ByteStream(resp.stream)
+          .bytesToString();
+        _logger.printTrace('Crash report sent (report ID: $reportId)');
+        _crashReportSent = true;
+      } else {
+        _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+      }
+
     // Catch all exceptions to print the message that makes clear that the
     // crash logger crashed.
     } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses

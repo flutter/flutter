@@ -483,10 +483,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   // Set during layout if overflow occurred on the main axis.
-  double? _overflow;
+  double _overflow = 0;
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
-  bool get _hasOverflow => _overflow! > precisionErrorTolerance;
+  bool get _hasOverflow => _overflow > precisionErrorTolerance;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -677,7 +677,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout cannot be computed for CrossAxisAlignment.baseline, which requires a full layout.'
       ));
-      return const Size(0, 0);
+      return Size.zero;
     }
     FlutterError? constraintsError;
     assert(() {
@@ -689,7 +689,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }());
     if (constraintsError != null) {
       assert(debugCannotComputeDryLayout(error: constraintsError));
-      return const Size(0, 0);
+      return Size.zero;
     }
 
     final _LayoutSizes sizes = _computeSizes(
@@ -1125,10 +1125,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       final Rect overflowChildRect;
       switch (_direction) {
         case Axis.horizontal:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow!, 0.0);
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
           break;
         case Axis.vertical:
-          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow!);
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
           break;
       }
       paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
@@ -1144,7 +1144,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_overflow != null && _hasOverflow)
+    if (_hasOverflow)
       header += ' OVERFLOWING';
     return header;
   }

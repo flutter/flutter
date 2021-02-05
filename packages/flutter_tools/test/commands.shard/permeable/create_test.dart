@@ -32,7 +32,7 @@ import '../../src/context.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
-const String _kNoPlatformsMessage = 'Must specify at least one platform using --platforms.\n';
+const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 // TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
@@ -299,8 +299,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
   }, overrides: <Type, Generator>{
@@ -366,8 +364,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
     return _runFlutterTest(projectDir);
@@ -1606,6 +1602,20 @@ void main() {
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
 
+  testUsingContext('null-safe sample-based project have no analyzer errors', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>['lib/main.dart'],
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('String?'), // uses null-safe syntax
+    );
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() { String? foo; print(foo); }'),
+  });
+
   testUsingContext('can write samples index to disk', () async {
     final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
@@ -2315,6 +2325,8 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(logger.statusText, contains('To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.'));
+    expect(logger.statusText, contains('For more information, see https://flutter.dev/go/plugin-platforms.'));
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
@@ -2335,6 +2347,25 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+    Logger: () => logger,
+  });
+
+  testUsingContext('flutter create prints note about null safety', () async {
+    await _createProject(
+      projectDir,
+      <String>[],
+      <String>[],
+    );
+    expect(logger.statusText, contains('dart migrate --apply-changes'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
     Logger: () => logger,
   });
 }

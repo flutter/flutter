@@ -79,13 +79,15 @@ abstract class Usage {
     String configDirOverride,
     String logFile,
     AnalyticsFactory analyticsIOFactory,
+    FirstRunMessenger firstRunMessenger,
     @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
                       logFile: logFile,
                       analyticsIOFactory: analyticsIOFactory,
-                      runningOnBot: runningOnBot);
+                      runningOnBot: runningOnBot,
+                      firstRunMessenger: firstRunMessenger);
 
   factory Usage.test() => _DefaultUsage.test();
 
@@ -93,9 +95,6 @@ abstract class Usage {
   static void command(String command, {
     Map<CustomDimensions, Object> parameters,
   }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
-
-  /// Whether this is the first run of the tool.
-  bool get isFirstRun;
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -191,6 +190,7 @@ class _DefaultUsage implements Usage {
     String configDirOverride,
     String logFile,
     AnalyticsFactory analyticsIOFactory,
+    @required this.firstRunMessenger,
     @required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
@@ -202,7 +202,7 @@ class _DefaultUsage implements Usage {
     analyticsIOFactory ??= _defaultAnalyticsIOFactory;
     _clock = globals.systemClock;
 
-    if (// To support testing, only allow other signals to supress analytics
+    if (// To support testing, only allow other signals to suppress analytics
         // when analytics are not being shunted to a file.
         !usingLogFile && (
         // Ignore local user branches.
@@ -277,16 +277,15 @@ class _DefaultUsage implements Usage {
   _DefaultUsage.test() :
       _suppressAnalytics = false,
       _analytics = AnalyticsMock(true),
+      firstRunMessenger = null,
       _clock = SystemClock.fixed(DateTime(2020, 10, 8));
 
   Analytics _analytics;
+  final FirstRunMessenger firstRunMessenger;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
   SystemClock _clock;
-
-  @override
-  bool get isFirstRun => _analytics.firstRun;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
@@ -383,52 +382,19 @@ class _DefaultUsage implements Usage {
     await _analytics.waitForLastPing(timeout: const Duration(milliseconds: 250));
   }
 
-  void _printWelcome() {
-    globals.printStatus('');
-    globals.printStatus('''
-  ╔════════════════════════════════════════════════════════════════════════════╗
-  ║                 Welcome to Flutter! - https://flutter.dev                  ║
-  ║                                                                            ║
-  ║ The Flutter tool uses Google Analytics to anonymously report feature usage ║
-  ║ statistics and basic crash reports. This data is used to help improve      ║
-  ║ Flutter tools over time.                                                   ║
-  ║                                                                            ║
-  ║ Flutter tool analytics are not sent on the very first run. To disable      ║
-  ║ reporting, type 'flutter config --no-analytics'. To display the current    ║
-  ║ setting, type 'flutter config'. If you opt out of analytics, an opt-out    ║
-  ║ event will be sent, and then no further information will be sent by the    ║
-  ║ Flutter tool.                                                              ║
-  ║                                                                            ║
-  ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
-  ║ Note: The Google Privacy Policy describes how data is handled in this      ║
-  ║ service.                                                                   ║
-  ║                                                                            ║
-  ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
-  ║ crash reports to Google.                                                   ║
-  ║                                                                            ║
-  ║ Read about data we send with crash reports:                                ║
-  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
-  ║                                                                            ║
-  ║ See Google's privacy policy:                                               ║
-  ║ https://policies.google.com/privacy                                        ║
-  ╚════════════════════════════════════════════════════════════════════════════╝
-  ''', emphasis: true);
-  }
-
   @override
   void printWelcome() {
     // Only print once per run.
     if (_printedWelcome) {
       return;
     }
-    if (// Display the welcome message if this is the first run of the tool.
-        isFirstRun ||
-        // Display the welcome message if we are not on master, and if the
-        // persistent tool state instructs that we should.
-        (globals.persistentToolState.redisplayWelcomeMessage ?? true)) {
-      _printWelcome();
+    // Display the welcome message if this is the first run of the tool or if
+    // the license terms have changed since it was last displayed.
+    if (firstRunMessenger != null && firstRunMessenger.shouldDisplayLicenseTerms() ?? true) {
+      globals.printStatus('');
+      globals.printStatus(firstRunMessenger.licenseTerms, emphasis: true);
       _printedWelcome = true;
-      globals.persistentToolState.redisplayWelcomeMessage = false;
+      firstRunMessenger.confirmLicenseTermsDisplayed();
     }
   }
 }

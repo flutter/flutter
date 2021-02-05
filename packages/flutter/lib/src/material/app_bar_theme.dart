@@ -29,8 +29,8 @@ class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     this.brightness,
-    this.color,
-    this.backgroundColor,
+    Color? color,
+    Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
     this.shadowColor,
@@ -42,7 +42,11 @@ class AppBarTheme with Diagnosticable {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
-  });
+    this.backwardsCompatibility,
+  }) : assert(
+         color == null || backgroundColor == null,
+         'The color and backgroundColor parameters mean the same thing. Only specify one.'),
+       backgroundColor = backgroundColor ?? color;
 
   /// This property is obsolete, please use [systemOverlayStyle] instead.
   ///
@@ -64,10 +68,11 @@ class AppBarTheme with Diagnosticable {
   /// See also:
   ///
   ///  * [backgroundColor], which serves this same purpose
-  ///    as this property, but has a consistent name.
+  ///    as this property, but has a name that's consistent with
+  ///    [AppBar.backgroundColor].
   ///  * [AppBar.backwardsCompatibility], which forces [AppBar] to depend
   ///    on this obsolete property.
-  final Color? color;
+  Color? get color => backgroundColor;
 
   /// Overrides the default value of [AppBar.backgroundColor] in all
   /// descendant [AppBar] widgets.
@@ -77,7 +82,6 @@ class AppBarTheme with Diagnosticable {
   ///  * [foregroundColor], which overrides the default value for
   ///    [AppBar.foregroundColor] in all descendant widgets.
   final Color? backgroundColor;
-
 
   /// Overrides the default value of [AppBar.foregroundColor] in all
   /// descendant widgets.
@@ -161,6 +165,10 @@ class AppBarTheme with Diagnosticable {
   /// property in all descendant [AppBar] widgets.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// Overrides the default value of [AppBar.backwardsCompatibility]
+  /// property in all descendant [AppBar] widgets.
+  final bool? backwardsCompatibility;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -178,11 +186,14 @@ class AppBarTheme with Diagnosticable {
     TextStyle? toolbarTextStyle,
     TextStyle? titleTextStyle,
     SystemUiOverlayStyle? systemOverlayStyle,
+    bool? backwardsCompatibility,
   }) {
+    assert(
+      color == null || backgroundColor == null,
+      'The color and backgroundColor parameters mean the same thing. Only specify one.');
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
-      color: color ?? this.color,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundColor: backgroundColor ?? color ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -194,6 +205,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: toolbarTextStyle ?? this.toolbarTextStyle,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       systemOverlayStyle: systemOverlayStyle ?? this.systemOverlayStyle,
+      backwardsCompatibility: backwardsCompatibility ?? this.backwardsCompatibility,
     );
   }
 
@@ -211,7 +223,6 @@ class AppBarTheme with Diagnosticable {
     assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
-      color: Color.lerp(a?.color, b?.color, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -224,6 +235,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle: TextStyle.lerp(a?.toolbarTextStyle, b?.toolbarTextStyle, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
       systemOverlayStyle: t < 0.5 ? a?.systemOverlayStyle : b?.systemOverlayStyle,
+      backwardsCompatibility: t < 0.5 ? a?.backwardsCompatibility : b?.backwardsCompatibility,
     );
   }
 
@@ -231,7 +243,6 @@ class AppBarTheme with Diagnosticable {
   int get hashCode {
     return hashValues(
       brightness,
-      color,
       backgroundColor,
       foregroundColor,
       elevation,
@@ -244,6 +255,7 @@ class AppBarTheme with Diagnosticable {
       toolbarTextStyle,
       titleTextStyle,
       systemOverlayStyle,
+      backwardsCompatibility,
     );
   }
 
@@ -255,7 +267,6 @@ class AppBarTheme with Diagnosticable {
       return false;
     return other is AppBarTheme
         && other.brightness == brightness
-        && other.color == color
         && other.backgroundColor == backgroundColor
         && other.foregroundColor == foregroundColor
         && other.elevation == elevation
@@ -267,14 +278,14 @@ class AppBarTheme with Diagnosticable {
         && other.titleSpacing == titleSpacing
         && other.toolbarTextStyle == toolbarTextStyle
         && other.titleTextStyle == titleTextStyle
-        && other.systemOverlayStyle == systemOverlayStyle;
+        && other.systemOverlayStyle == systemOverlayStyle
+        && other.backwardsCompatibility == backwardsCompatibility;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
@@ -286,5 +297,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('titleSpacing', titleSpacing, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('toolbarTextStyle', toolbarTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('backwardsCompatibility', backwardsCompatibility, defaultValue: null));
   }
 }

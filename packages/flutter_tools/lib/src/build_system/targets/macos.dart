@@ -16,14 +16,11 @@ import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
 
-/// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
+/// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
 /// This class is abstract to share logic between the three concrete
 /// implementations. The shelling out is done to avoid complications with
 /// preserving special files (e.g., symbolic links) in the framework structure.
-///
-/// Removes any previous version of the framework that already exists in the
-/// target directory.
 ///
 /// The real implementations are:
 ///   * [DebugUnpackMacOS]
@@ -38,13 +35,12 @@ abstract class UnpackMacOS extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/FlutterMacOS'),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
-
-  @override
-  List<String> get depfiles => const <String>['unpack_macos.d'];
 
   @override
   Future<void> build(Environment environment) async {
@@ -53,38 +49,22 @@ abstract class UnpackMacOS extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-    final Directory targetDirectory = environment
-      .outputDir
-      .childDirectory('FlutterMacOS.framework');
-    // Deleting this directory is required or else the FlutterMacOS module
-    // cannot be found.
-    if (targetDirectory.existsSync()) {
-      targetDirectory.deleteSync(recursive: true);
-    }
-    final List<File> inputs = environment.fileSystem.directory(basePath)
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-    final List<File> outputs = inputs.map((File file) {
-      final String relativePath = environment.fileSystem.path.relative(file.path, from: basePath);
-      return environment.fileSystem.file(environment.fileSystem.path.join(targetDirectory.path, relativePath));
-    }).toList();
-    final ProcessResult result = await environment.processManager
-        .run(<String>['cp', '-R', basePath, targetDirectory.path]);
+
+    final ProcessResult result = environment.processManager.runSync(<String>[
+      'rsync',
+      '-av',
+      '--delete',
+      '--filter',
+      '- .DS_Store/',
+      basePath,
+      environment.outputDir.path,
+    ]);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
+            '${result.stdout}\n---\n${result.stderr}',
       );
     }
-    final DepfileService depfileService = DepfileService(
-      logger: environment.logger,
-      fileSystem: environment.fileSystem,
-    );
-    depfileService.writeToFile(
-      Depfile(inputs, outputs),
-      environment.buildDir.childFile('unpack_macos.d'),
-    );
   }
 }
 

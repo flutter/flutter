@@ -305,11 +305,11 @@ abstract class DeviceManager {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput)];
+    return devices[int.parse(userInput) - 1];
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    int count = 0;
+    int count = 1;
     for (final Device device in devices) {
       _logger.printStatus(_userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
@@ -319,7 +319,7 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
       prompt: _userMessages.flutterChooseOne,
@@ -852,6 +852,7 @@ class DebuggingOptions {
     this.disablePortPublication = false,
     this.deviceVmServicePort,
     this.ddsPort,
+    this.devToolsServerAddress,
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
@@ -895,6 +896,7 @@ class DebuggingOptions {
       disablePortPublication = false,
       deviceVmServicePort = null,
       ddsPort = null,
+      devToolsServerAddress = null,
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
@@ -924,6 +926,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final bool disablePortPublication;
   final int ddsPort;
+  final Uri devToolsServerAddress;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;

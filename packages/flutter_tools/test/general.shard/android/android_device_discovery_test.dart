@@ -44,6 +44,25 @@ void main() {
     expect(await androidDevices.getDiagnostics(), isEmpty);
   });
 
+  testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
+    final AndroidDevices androidDevices = AndroidDevices(
+      androidSdk: FakeAndroidSdk(null),
+      logger: BufferLogger.test(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: FakeAndroidSdk('adb'),
+        featureFlags: TestFeatureFlags(),
+      ),
+      // Will throw an exception if anything other than canRun is invoked
+      processManager: FakeProcessManger(),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+    );
+
+    expect(await androidDevices.pollingGetDevices(), isEmpty);
+    expect(await androidDevices.getDiagnostics(), isEmpty);
+  });
+
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: null,
@@ -217,4 +236,11 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final String adbPath;
+}
+
+class FakeProcessManger extends Fake implements ProcessManager {
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    return false;
+  }
 }

@@ -58,8 +58,8 @@ import 'theme_data.dart';
 ///   return CheckboxListTile(
 ///     title: const Text('Animate Slowly'),
 ///     value: timeDilation != 1.0,
-///     onChanged: (bool value) {
-///       setState(() { timeDilation = value ? 10.0 : 1.0; });
+///     onChanged: (bool? value) {
+///       setState(() { timeDilation = value! ? 10.0 : 1.0; });
 ///     },
 ///     secondary: const Icon(Icons.hourglass_empty),
 ///   );
@@ -98,10 +98,10 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LinkedLabelCheckbox extends StatelessWidget {
 ///   const LinkedLabelCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -132,7 +132,7 @@ import 'theme_data.dart';
 ///           ),
 ///           Checkbox(
 ///             value: value,
-///             onChanged: (bool newValue) {
+///             onChanged: (bool? newValue) {
 ///               onChanged(newValue);
 ///             },
 ///           ),
@@ -178,10 +178,10 @@ import 'theme_data.dart';
 /// ```dart preamble
 /// class LabeledCheckbox extends StatelessWidget {
 ///   const LabeledCheckbox({
-///     this.label,
-///     this.padding,
-///     this.value,
-///     this.onChanged,
+///     required this.label,
+///     required this.padding,
+///     required this.value,
+///     required this.onChanged,
 ///   });
 ///
 ///   final String label;
@@ -202,7 +202,7 @@ import 'theme_data.dart';
 ///             Expanded(child: Text(label)),
 ///             Checkbox(
 ///               value: value,
-///               onChanged: (bool newValue) {
+///               onChanged: (bool? newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),

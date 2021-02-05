@@ -84,6 +84,7 @@ class BuildWebCommand extends BuildSubCommand {
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
+    displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
       target,

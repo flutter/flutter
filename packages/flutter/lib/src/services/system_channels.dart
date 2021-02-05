@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui';
 
 import 'message_codecs.dart';
@@ -316,6 +315,33 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
+    StandardMethodCodec(),
+  );
+
+  /// A [MethodChannel] for installing and managing deferred components.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `installDeferredComponent`: Requests that a deferred component identified by
+  ///    the provided loadingUnitId or moduleName be downloaded and installed.
+  ///    Providing a loadingUnitId with null moduleName will install a dynamic
+  ///    feature module that includes the desired loading unit. If a moduleName
+  ///    is provided, then the deferred component with the moduleName will be installed.
+  ///    This method returns a future that will not be completed until the
+  ///    feature is fully installed and ready to use. When an error occurs, the
+  ///    future will complete an error. Calling `loadLibrary()` on a deferred
+  ///    imported library is equivalent to calling this method with a
+  ///    loadingUnitId and null moduleName.
+  ///  * `uninstallDeferredComponent`:  Requests that a deferred component identified by
+  ///    the provided loadingUnitId or moduleName be uninstalled. Since
+  ///    uninstallation typically requires significant disk i/o, this method only
+  ///    signals the intent to uninstall. Actual uninstallation (eg, removal of
+  ///    assets and files) may occur at a later time. However, once uninstallation
+  ///    is requested, the deferred component should not be used anymore until
+  ///    `installDeferredComponent` or `loadLibrary` is called again.
+  static const MethodChannel deferredComponent = OptionalMethodChannel(
+    'flutter/deferredcomponent',
     StandardMethodCodec(),
   );
 }

@@ -137,6 +137,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///   }
   /// }
   /// ```
+  ///
+  /// To receive the result of invoking an action, it must be invoked using
+  /// [Actions.invoke], or by invoking it using an [ActionDispatcher]. An action
+  /// invoked via a [Shortcuts] widget will have its return value ignored.
   @protected
   Object? invoke(covariant T intent);
 
@@ -241,6 +245,102 @@ abstract class Action<T extends Intent> with Diagnosticable {
 /// If you listen to an [Action] widget in a widget hierarchy, you should use
 /// this widget. If you are using an [Action] outside of a widget context, then
 /// you must call removeListener yourself.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// This example shows how ActionListener handles adding and removing of
+/// the [listener] in the widget lifecycle.
+///
+/// ```dart preamble
+/// class ActionListenerExample extends StatefulWidget {
+///   @override
+///   _ActionListenerExampleState createState() => _ActionListenerExampleState();
+/// }
+///
+/// class _ActionListenerExampleState extends State<ActionListenerExample> {
+///   bool _on = false;
+///   late final MyAction _myAction;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _myAction = MyAction();
+///   }
+///
+///   void _toggleState() {
+///     setState(() {
+///       _on = !_on;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Row(
+///       crossAxisAlignment: CrossAxisAlignment.center,
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         Padding(
+///           padding: const EdgeInsets.all(8.0),
+///           child: OutlinedButton(
+///             onPressed: _toggleState,
+///             child: Text(_on ? 'Disable' : 'Enable'),
+///           ),
+///         ),
+///         _on
+///             ? Padding(
+///                 padding: const EdgeInsets.all(8.0),
+///                 child: ActionListener(
+///                   listener: (Action<Intent> action) {
+///                     if (action.intentType == MyIntent) {
+///                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+///                           content: const Text('Action Listener Called'),
+///                       ));
+///                     }
+///                   },
+///                   action: _myAction,
+///                   child: ElevatedButton(
+///                     onPressed: () =>
+///                         ActionDispatcher().invokeAction(_myAction, MyIntent()),
+///                     child: const Text('Call Action Listener'),
+///                   ),
+///                 ),
+///               )
+///             : Container(),
+///       ],
+///     );
+///   }
+/// }
+///
+/// class MyAction extends Action<MyIntent> {
+///   @override
+///   void addActionListener(listener) {
+///     super.addActionListener(listener);
+///     print('Action Listener was added');
+///   }
+///
+///   @override
+///   void removeActionListener(listener) {
+///     super.removeActionListener(listener);
+///     print('Action Listener was removed');
+///   }
+///
+///   @override
+///   void invoke(covariant MyIntent intent) {
+///     notifyActionListeners();
+///   }
+/// }
+///
+/// class MyIntent extends Intent {
+///   const MyIntent();
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ActionListenerExample();
+/// }
+/// ```
+/// {@end-tool}
+///
 @immutable
 class ActionListener extends StatefulWidget {
   /// Create a const [ActionListener].
@@ -422,6 +522,168 @@ class ActionDispatcher with Diagnosticable {
 ///
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
+///
+/// This example creates a custom [Action] subclass `ModifyAction` for modifying
+/// a model, and another, `SaveAction` for saving it.
+///
+/// This example demonstrates passing arguments to the [Intent] to be carried to
+/// the [Action]. Actions can get data either from their own construction (like
+/// the `model` in this example), or from the intent passed to them when invoked
+/// (like the increment `amount` in this example).
+///
+/// This example also demonstrates how to use Intents to limit a widget's
+/// dependencies on its surroundings. The `SaveButton` widget defined in this
+/// example can invoke actions defined in its ancestor widgets, which can be
+/// customized to match the part of the widget tree that it is in. It doesn't
+/// need to know about the `SaveAction` class, only the `SaveIntent`, and it
+/// only needs to know about a value notifier, not the entire model.
+///
+/// ```dart preamble
+/// // A simple model class that notifies listeners when it changes.
+/// class Model {
+///   ValueNotifier<bool> isDirty = ValueNotifier<bool>(false);
+///   ValueNotifier<int> data = ValueNotifier<int>(0);
+///
+///   int save() {
+///     if (isDirty.value) {
+///       print('Saved Data: ${data.value}');
+///       isDirty.value = false;
+///     }
+///     return data.value;
+///   }
+///
+///   void setValue(int newValue) {
+///     isDirty.value = data.value != newValue;
+///     data.value = newValue;
+///   }
+/// }
+///
+/// class ModifyIntent extends Intent {
+///   const ModifyIntent(this.value);
+///
+///   final int value;
+/// }
+///
+/// // An Action that modifies the model by setting it to the value that it gets
+/// // from the Intent passed to it when invoked.
+/// class ModifyAction extends Action<ModifyIntent> {
+///   ModifyAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   void invoke(covariant ModifyIntent intent) {
+///     model.setValue(intent.value);
+///   }
+/// }
+///
+/// // An intent for saving data.
+/// class SaveIntent extends Intent {
+///   const SaveIntent();
+/// }
+///
+/// // An Action that saves the data in the model it is created with.
+/// class SaveAction extends Action<SaveIntent> {
+///   SaveAction(this.model);
+///
+///   final Model model;
+///
+///   @override
+///   int invoke(covariant SaveIntent intent) => model.save();
+/// }
+///
+/// class SaveButton extends StatefulWidget {
+///   const SaveButton(this.valueNotifier);
+///
+///   final ValueNotifier<bool> valueNotifier;
+///
+///   @override
+///   _SaveButtonState createState() => _SaveButtonState();
+/// }
+///
+/// class _SaveButtonState extends State<SaveButton> {
+///   int savedValue = 0;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return AnimatedBuilder(
+///       animation: widget.valueNotifier,
+///       builder: (BuildContext context, Widget? child) {
+///         return TextButton.icon(
+///           icon: const Icon(Icons.save),
+///           label: Text('$savedValue'),
+///           style: ButtonStyle(
+///             foregroundColor: MaterialStateProperty.all<Color>(
+///               widget.valueNotifier.value ? Colors.red : Colors.green,
+///             ),
+///           ),
+///           onPressed: () {
+///             setState(() {
+///               savedValue = Actions.invoke(context, const SaveIntent()) as int;
+///             });
+///           },
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Model model = Model();
+/// int count = 0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Actions(
+///     actions: <Type, Action<Intent>>{
+///       ModifyIntent: ModifyAction(model),
+///       SaveIntent: SaveAction(model),
+///     },
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         return Row(
+///           mainAxisAlignment: MainAxisAlignment.spaceAround,
+///           children: <Widget>[
+///             const Spacer(),
+///             Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 IconButton(
+///                   icon: const Icon(Icons.exposure_plus_1),
+///                   onPressed: () {
+///                     Actions.invoke(context, ModifyIntent(count++));
+///                   },
+///                 ),
+///                 AnimatedBuilder(
+///                   animation: model.data,
+///                   builder: (BuildContext context, Widget? child) {
+///                     return Padding(
+///                       padding: const EdgeInsets.all(8.0),
+///                       child: Text('${model.data.value}',
+///                           style: Theme.of(context).textTheme.headline4),
+///                     );
+///                   }),
+///                 IconButton(
+///                   icon: const Icon(Icons.exposure_minus_1),
+///                   onPressed: () {
+///                     Actions.invoke(context, ModifyIntent(count--));
+///                   },
+///                 ),
+///               ],
+///             ),
+///             SaveButton(model.isDirty),
+///             const Spacer(),
+///           ],
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -620,35 +882,24 @@ class Actions extends StatefulWidget {
   /// Invokes the action associated with the given [Intent] using the
   /// [Actions] widget that most tightly encloses the given [BuildContext].
   ///
-  /// The `context`, `intent` and `nullOk` arguments must not be null.
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method.
+  ///
+  /// The `context` and `intent` arguments must not be null.
   ///
   /// If the given `intent` doesn't map to an action, or doesn't map to one that
   /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
   /// then it will look to the next ancestor [Actions] widget in the hierarchy
   /// until it reaches the root.
   ///
-  /// In debug mode, if `nullOk` is false, this method will throw an exception
-  /// if no ambient [Actions] widget is found, or if the given `intent` doesn't
-  /// map to an action in any of the [Actions.actions] maps that are found. In
-  /// release mode, this method will return null if no matching enabled action
-  /// is found, regardless of the setting of `nullOk`.
-  ///
-  /// Setting `nullOk` to true indicates that if no ambient [Actions] widget is
-  /// found, then in debug mode, this method should return null instead of
-  /// throwing an exception.
-  ///
-  /// This method returns the result of invoking the action's [Action.invoke]
-  /// method. If no action mapping was found for the specified intent (and
-  /// `nullOk` is true), or if the actions that were found were disabled, or the
-  /// action itself returns null from [Action.invoke], then this method returns
-  /// null.
+  /// This method will throw an exception if no ambient [Actions] widget is
+  /// found, or if the given `intent` doesn't map to an enabled action in any of
+  /// the [Actions.actions] maps that are found.
   static Object? invoke<T extends Intent>(
     BuildContext context,
-    T intent, {
-    bool nullOk = false,
-  }) {
+    T intent,
+  ) {
     assert(intent != null);
-    assert(nullOk != null);
     assert(context != null);
     Action<T>? action;
     InheritedElement? actionElement;
@@ -667,7 +918,7 @@ class Actions extends StatefulWidget {
     });
 
     assert(() {
-      if (!nullOk && actionElement == null) {
+      if (actionElement == null) {
         throw FlutterError('Unable to find an action for an Intent with type '
             '${intent.runtimeType} in an $Actions widget in the given context.\n'
             '$Actions.invoke() was unable to find an $Actions widget that '
@@ -681,6 +932,50 @@ class Actions extends StatefulWidget {
       }
       return true;
     }());
+    if (actionElement == null || action == null) {
+      return null;
+    }
+    // Invoke the action we found using the relevant dispatcher from the Actions
+    // Element we found.
+    return _findDispatcher(actionElement!).invokeAction(action!, intent, context);
+  }
+
+  /// Invokes the action associated with the given [Intent] using the
+  /// [Actions] widget that most tightly encloses the given [BuildContext].
+  ///
+  /// This method returns the result of invoking the action's [Action.invoke]
+  /// method. If no action mapping was found for the specified intent, or if the
+  /// actions that were found were disabled, or the action itself returns null
+  /// from [Action.invoke], then this method returns null.
+  ///
+  /// The `context` and `intent` arguments must not be null.
+  ///
+  /// If the given `intent` doesn't map to an action, or doesn't map to one that
+  /// returns true for [Action.isEnabled] in an [Actions.actions] map it finds,
+  /// then it will look to the next ancestor [Actions] widget in the hierarchy
+  /// until it reaches the root.
+  static Object? maybeInvoke<T extends Intent>(
+    BuildContext context,
+    T intent,
+  ) {
+    assert(intent != null);
+    assert(context != null);
+    Action<T>? action;
+    InheritedElement? actionElement;
+
+    _visitActionsAncestors(context, (InheritedElement element) {
+      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final Action<T>? result = actions.actions[intent.runtimeType] as Action<T>?;
+      if (result != null) {
+        actionElement = element;
+        if (result.isEnabled(intent)) {
+          action = result;
+          return true;
+        }
+      }
+      return false;
+    });
+
     if (actionElement == null || action == null) {
       return null;
     }
@@ -813,7 +1108,11 @@ class _ActionsMarker extends InheritedWidget {
 ///
 /// ```dart preamble
 /// class FadButton extends StatefulWidget {
-///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///   const FadButton({
+///     Key? key,
+///     required this.onPressed,
+///     required this.child,
+///   }) : super(key: key);
 ///
 ///   final VoidCallback onPressed;
 ///   final Widget child;
@@ -826,8 +1125,8 @@ class _ActionsMarker extends InheritedWidget {
 ///   bool _focused = false;
 ///   bool _hovering = false;
 ///   bool _on = false;
-///   Map<Type, Action<Intent>> _actionMap;
-///   Map<LogicalKeySet, Intent> _shortcutMap;
+///   late Map<Type, Action<Intent>> _actionMap;
+///   late Map<LogicalKeySet, Intent> _shortcutMap;
 ///
 ///   @override
 ///   void initState() {
@@ -1248,10 +1547,39 @@ class DoNothingAction extends Action<Intent> {
   void invoke(Intent intent) {}
 }
 
-/// An intent that activates the currently focused control.
+/// An [Intent] that activates the currently focused control.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.space] key on all
+/// platforms, and also to the [LogicalKeyboardKey.enter] key on all platforms
+/// except the web, where ENTER doesn't toggle selection. On the web, ENTER is
+/// bound to [ButtonActivateIntent] instead.
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ActivateIntent extends Intent {
   /// Creates a const [ActivateIntent] so subclasses can be const.
   const ActivateIntent();
+}
+
+/// An [Intent] that activates the currently focused button.
+///
+/// This intent is bound by default to the [LogicalKeyboardKey.enter] key on the
+/// web, where ENTER can be used to activate buttons, but not toggle selection.
+/// All other platforms bind [LogicalKeyboardKey.enter] to [ActivateIntent].
+///
+/// See also:
+///
+///  * [WidgetsApp.defaultShortcuts], which contains the default shortcuts used
+///    in apps.
+///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
+///    application (and defaults to [WidgetsApp.defaultShortcuts]).
+class ButtonActivateIntent extends Intent {
+  /// Creates a const [ButtonActivateIntent] so subclasses can be const.
+  const ButtonActivateIntent();
 }
 
 /// An action that activates the currently focused control.
@@ -1288,3 +1616,50 @@ class DismissIntent extends Intent {
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> {}
+
+/// An [Intent] that evaluates a series of specified [orderedIntents] for
+/// execution.
+class PrioritizedIntents extends Intent {
+  /// Creates a set of const [PrioritizedIntents].
+  const PrioritizedIntents({
+    required this.orderedIntents,
+  })  : assert(orderedIntents != null);
+
+  /// List of intents to be evaluated in order for execution. When an
+  /// [Action.isEnabled] returns true, that action will be invoked and
+  /// progression through the ordered intents stops.
+  final List<Intent> orderedIntents;
+}
+
+/// An [Action] that iterates through a list of [Intent]s, invoking the first
+/// that is enabled.
+class PrioritizedAction extends Action<PrioritizedIntents> {
+  late Action<dynamic> _selectedAction;
+  late Intent _selectedIntent;
+
+  @override
+  bool isEnabled(PrioritizedIntents intent) {
+    final FocusNode? focus = primaryFocus;
+    if  (focus == null || focus.context == null)
+      return false;
+    for (final Intent candidateIntent in intent.orderedIntents) {
+      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+        focus.context!,
+        intent: candidateIntent,
+      );
+      if (candidateAction != null && candidateAction.isEnabled(candidateIntent)) {
+        _selectedAction = candidateAction;
+        _selectedIntent = candidateIntent;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Object? invoke(PrioritizedIntents intent) {
+    assert(_selectedAction != null);
+    assert(_selectedIntent != null);
+    _selectedAction.invoke(_selectedIntent);
+  }
+}

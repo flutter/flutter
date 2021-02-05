@@ -231,6 +231,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey? key,
     required this.child,
     required this.alignment,
+    this.isDrawerOpen = false,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
@@ -298,6 +299,14 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
+  /// Whether or not the drawer is opened or closed.
+  ///
+  /// This parameter is primarily used by the state restoration framework
+  /// to restore the drawer's animation controller to the open or closed state
+  /// depending on what was last saved to the target platform before the
+  /// application was killed.
+  final bool isDrawerOpen;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -310,7 +319,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void initState() {
     super.initState();
     _scrimColorTween = _buildScrimColorTween();
-    _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
+    _controller = AnimationController(
+      value: widget.isDrawerOpen ? 1.0 : 0.0,
+      duration: _kBaseSettleDuration,
+      vsync: this,
+    );
+    _controller
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
   }
@@ -327,6 +341,16 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
       _scrimColorTween = _buildScrimColorTween();
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
+      switch(_controller.status) {
+        case AnimationStatus.completed:
+        case AnimationStatus.dismissed:
+          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   void _animationChanged() {

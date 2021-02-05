@@ -24,7 +24,17 @@ final LanguageVersion nullSafeVersion = LanguageVersion(2, 12);
 /// https://github.com/dart-lang/language/blob/master/accepted/future-releases/language-versioning/feature-specification.md#individual-library-language-version-override
 LanguageVersion determineLanguageVersion(File file, Package package) {
   int blockCommentDepth = 0;
-  for (final String line in file.readAsLinesSync()) {
+  // If reading the file fails, default to a null-safe version. The
+  // command will likely fail later in the process with a better error
+  // message.
+  List<String> lines;
+  try {
+    lines = file.readAsLinesSync();
+  } on FileSystemException {
+    return nullSafeVersion;
+  }
+
+  for (final String line in lines) {
     final String trimmedLine = line.trim();
     if (trimmedLine.isEmpty) {
       continue;

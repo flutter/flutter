@@ -92,8 +92,8 @@ class CreateCommand extends CreateBase {
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
+        ? 'api.flutter.dev'
+        : 'master-api.flutter.dev';
 
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -236,6 +236,8 @@ class CreateCommand extends CreateBase {
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
+      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -294,8 +296,9 @@ class CreateCommand extends CreateBase {
       if (!creatingNewProject && requestedPlatforms.isNotEmpty) {
         _printPluginUpdatePubspecMessage(relativePluginPath, platformsString);
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
-        globals.printError(_kNoPlatformsArgMessage);
+        _printNoPluginMessage();
       }
+      _printAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
@@ -309,6 +312,11 @@ In order to run your $application, type:
 
   \$ cd $relativeAppPath
   \$ flutter run
+
+To enable null safety, type:
+
+  \$ cd $relativeAppPath
+  \$ dart migrate --apply-changes
 
 Your $application code is in $relativeAppMain.
 ''');
@@ -489,15 +497,22 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
   globals.printStatus('''
-
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-For more information, see https://flutter.dev/go/developing-plugins.
 
 ''', emphasis: true, color: TerminalColor.red);
 }
 
-const String _kNoPlatformsArgMessage = '''
+void _printNoPluginMessage() {
+    globals.printError('''
+You've created a plugin project that doesn't yet support any platforms.
 
-Must specify at least one platform using --platforms.
-For more information, see https://flutter.dev/go/developing-plugins.
-''';
+''');
+}
+
+void _printAddPlatformMessage(String pluginPath) {
+  globals.printStatus('''
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
+For more information, see https://flutter.dev/go/plugin-platforms.
+
+''');
+}

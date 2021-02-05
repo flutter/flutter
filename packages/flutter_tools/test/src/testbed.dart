@@ -175,9 +175,6 @@ class NoOpUsage implements Usage {
   }
 
   @override
-  bool get isFirstRun => false;
-
-  @override
   Stream<Map<String, Object>> get onSend => const Stream<Map<String, Object>>.empty();
 
   @override

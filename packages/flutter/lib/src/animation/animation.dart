@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'tween.dart';
 
 // Examples can assume:
-// AnimationController _controller;
+// late AnimationController _controller;
 
 /// The status of an animation.
 enum AnimationStatus {

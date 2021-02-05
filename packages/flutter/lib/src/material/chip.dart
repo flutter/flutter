@@ -923,7 +923,7 @@ class InputChip extends StatelessWidget
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
-///   int _value = 1;
+///   int? _value = 1;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -1929,7 +1929,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final Color? checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor;
     final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
 
-    final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
+    final TextStyle effectiveLabelStyle = chipTheme.labelStyle.merge(widget.labelStyle);
     final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, _states);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final EdgeInsetsGeometry labelPadding = widget.labelPadding ?? chipTheme.labelPadding ?? _defaultLabelPadding;

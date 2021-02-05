@@ -66,7 +66,7 @@ class RawMaterialButton extends StatefulWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.padding = EdgeInsets.zero,
-    this.visualDensity = const VisualDensity(),
+    this.visualDensity = VisualDensity.standard,
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,

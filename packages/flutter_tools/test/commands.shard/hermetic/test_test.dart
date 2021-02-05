@@ -190,6 +190,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     BuildInfo buildInfo,
     String reporter,
     String timeout,
+    List<String> additionalArguments,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

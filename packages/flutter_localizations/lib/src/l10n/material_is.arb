@@ -53,7 +53,7 @@
   "refreshIndicatorSemanticLabel": "Endurnýja",
   "moreButtonTooltip": "Meira",
   "dateSeparator": "/",
-  "dateHelpText": "mm/dd/áááá",
+  "dateHelpText": "dd.mm.áááá",
   "selectYearSemanticsLabel": "Velja ár",
   "unspecifiedDate": "Dagsetning",
   "unspecifiedDateRange": "Tímabil",

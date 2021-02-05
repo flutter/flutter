@@ -5,22 +5,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:web_socket_channel/io.dart';
+import 'package:vm_service/vm_service.dart' as vms;
 
 import '../common/logging.dart';
 
-const Duration _kConnectTimeout = Duration(seconds: 9);
-
-const Duration _kReconnectAttemptInterval = Duration(seconds: 3);
-
+const Duration _kConnectTimeout = Duration(seconds: 3);
 const Duration _kRpcTimeout = Duration(seconds: 5);
-
 final Logger _log = Logger('DartVm');
 
-/// Signature of an asynchronous function for establishing a JSON RPC-2
+/// Signature of an asynchronous function for establishing a [vms.VmService]
 /// connection to a [Uri].
-typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
+typedef RpcPeerConnectionFunction = Future<vms.VmService> Function(
   Uri uri, {
   Duration timeout,
 });
@@ -31,79 +26,44 @@ typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
-/// The JSON RPC 2 spec says that a notification from a client must not respond
-/// to the client. It's possible the client sent a notification as a "ping", but
-/// the service isn't set up yet to respond.
-///
-/// For example, if the client sends a notification message to the server for
-/// 'streamNotify', but the server has not finished loading, it will throw an
-/// exception. Since the message is a notification, the server follows the
-/// specification and does not send a response back, but is left with an
-/// unhandled exception. That exception is safe for us to ignore - the client
-/// is signaling that it will try again later if it doesn't get what it wants
-/// here by sending a notification.
-// This may be ignoring too many exceptions. It would be best to rewrite
-// the client code to not use notifications so that it gets error replies back
-// and can decide what to do from there.
-// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
-bool _ignoreRpcError(dynamic error) {
-  if (error is json_rpc.RpcException) {
-    final json_rpc.RpcException exception = error;
-    return exception.data == null || exception.data['id'] == null;
-  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
-    return true;
-  }
-  return false;
-}
-
-
-void _unhandledJsonRpcError(dynamic error, dynamic stack) {
-  if (_ignoreRpcError(error)) {
-    return;
-  }
-  _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
-}
-
 /// Attempts to connect to a Dart VM service.
 ///
 /// Gives up after `timeout` has elapsed.
-Future<json_rpc.Peer> _waitAndConnect(
+Future<vms.VmService> _waitAndConnect(
   Uri uri, {
   Duration timeout = _kConnectTimeout,
 }) async {
-  final Stopwatch timer = Stopwatch()..start();
-
-  Future<json_rpc.Peer> attemptConnection(Uri uri) async {
-    WebSocket socket;
-    json_rpc.Peer peer;
+  int attempts = 0;
+  WebSocket socket;
+  while (true) {
     try {
-      socket = await WebSocket.connect(uri.toString()).timeout(timeout);
-      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
-      return peer;
-    } on HttpException catch (e) {
-      // This is a fine warning as this most likely means the port is stale.
-      _log.fine('$e: ${e.message}');
-      await peer?.close();
-      await socket?.close();
-      rethrow;
+      socket = await WebSocket.connect(uri.toString());
+      final StreamController<dynamic> controller = StreamController<dynamic>();
+      final Completer<void> streamClosedCompleter = Completer<void>();
+      socket.listen(
+        (dynamic data) => controller.add(data),
+        onDone: () => streamClosedCompleter.complete(),
+      );
+      final vms.VmService service = vms.VmService(
+        controller.stream,
+        socket.add,
+        log: null,
+        disposeHandler: () => socket.close(),
+        streamClosed: streamClosedCompleter.future
+      );
+      // This call is to ensure we are able to establish a connection instead of
+      // keeping on trucking and failing farther down the process.
+      await service.getVersion();
+      return service;
     } catch (e) {
-      _log.fine('Dart VM connection failed $e: ${e.message}');
-      // Other unknown errors will be handled with reconnects.
-      await peer?.close();
       await socket?.close();
-      if (timer.elapsed < timeout) {
-        _log.info('Attempting to reconnect');
-        await Future<void>.delayed(_kReconnectAttemptInterval);
-        return attemptConnection(uri);
-      } else {
-        _log.warning("Connection to Fuchsia's Dart VM timed out at "
-            '${uri.toString()}');
-        rethrow;
+      if (attempts > 5) {
+        _log.warning('It is taking an unusually long time to connect to the VM...');
       }
+      attempts += 1;
+      await Future<void>.delayed(timeout);
     }
   }
-
-  return attemptConnection(uri);
 }
 
 /// Restores the VM service connection function to the default implementation.
@@ -133,9 +93,9 @@ class RpcFormatError extends Error {
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
 /// function calls via [invokeRpc].
 class DartVm {
-  DartVm._(this._peer, this.uri);
+  DartVm._(this._vmService, this.uri);
 
-  final json_rpc.Peer _peer;
+  final vms.VmService _vmService;
 
   /// The URL through which this DartVM instance is connected.
   final Uri uri;
@@ -150,12 +110,12 @@ class DartVm {
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
     }
-    final json_rpc.Peer peer =
-        await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
-    if (peer == null) {
+
+    final vms.VmService service = await fuchsiaVmServiceConnectionFunction(uri, timeout: timeout);
+    if (service == null) {
       return null;
     }
-    return DartVm._(peer, uri);
+    return DartVm._(service, uri);
   }
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
@@ -167,39 +127,17 @@ class DartVm {
     Pattern pattern, {
     Duration timeout = _kRpcTimeout,
   }) async {
-    final Map<String, dynamic> jsonVmRef =
-        await invokeRpc('getVM', timeout: timeout);
+    final vms.VM vmRef = await _vmService.getVM();
     final List<IsolateRef> result = <IsolateRef>[];
-    for (final Map<String, dynamic> jsonIsolate in (jsonVmRef['isolates'] as List<dynamic>).cast<Map<String, dynamic>>()) {
-      final String name = jsonIsolate['name'] as String;
-      if (pattern.matchAsPrefix(name) != null) {
-        _log.fine('Found Isolate matching "$pattern": "$name"');
-        result.add(IsolateRef._fromJson(jsonIsolate, this));
+    for (final vms.IsolateRef isolateRef in vmRef.isolates) {
+      if (pattern.matchAsPrefix(isolateRef.name) != null) {
+        _log.fine('Found Isolate matching "$pattern": "${isolateRef.name}"');
+        result.add(IsolateRef._fromJson(isolateRef.json, this));
       }
     }
     return result;
   }
 
-  /// Invokes a raw JSON RPC command with the VM service.
-  ///
-  /// When `timeout` is set and reached, throws a [TimeoutException].
-  ///
-  /// If the function returns, it is with a parsed JSON response.
-  Future<Map<String, dynamic>> invokeRpc(
-    String function, {
-    Map<String, dynamic> params,
-    Duration timeout = _kRpcTimeout,
-  }) async {
-    final Map<String, dynamic> result = await _peer
-      .sendRequest(function, params ?? <String, dynamic>{})
-      .timeout(timeout, onTimeout: () {
-        throw TimeoutException(
-          'Peer connection timed out during RPC call',
-          timeout,
-        );
-      }) as Map<String, dynamic>;
-    return result;
-  }
 
   /// Returns a list of [FlutterView] objects running across all Dart VM's.
   ///
@@ -211,9 +149,8 @@ class DartVm {
     Duration timeout = _kRpcTimeout,
   }) async {
     final List<FlutterView> views = <FlutterView>[];
-    final Map<String, dynamic> rpcResponse =
-        await invokeRpc('_flutter.listViews', timeout: timeout);
-    for (final Map<String, dynamic> jsonView in (rpcResponse['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
+    final vms.Response rpcResponse = await _vmService.callMethod('_flutter.listViews');
+    for (final Map<String, dynamic> jsonView in (rpcResponse.json['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
@@ -222,11 +159,18 @@ class DartVm {
     return views;
   }
 
+  /// Tests that the connection to the [vms.VmService] is valid.
+  Future<void> ping() async {
+    final vms.Version version = await _vmService.getVersion();
+    _log.fine('DartVM($uri) version check result: $version');
+  }
+
   /// Disconnects from the Dart VM Service.
   ///
   /// After this function completes this object is no longer usable.
   Future<void> stop() async {
-    await _peer?.close();
+    _vmService.dispose();
+    await _vmService.onDone;
   }
 }
 

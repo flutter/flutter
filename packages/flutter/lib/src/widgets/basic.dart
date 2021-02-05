@@ -67,10 +67,10 @@ export 'package:flutter/rendering.dart' show
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
-// WidgetTester tester;
-// bool _visible;
+// late WidgetTester tester;
+// late bool _visible;
 // class Sky extends CustomPainter { @override void paint(Canvas c, Size s) => null; @override bool shouldRepaint(Sky s) => false; }
-// BuildContext context;
+// late BuildContext context;
 // dynamic userAvatarUrl;
 
 // BIDIRECTIONAL TEXT SUPPORT
@@ -2770,7 +2770,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// bool _offstage = true;
 ///
 /// Size _getFlutterLogoSize() {
-///   final RenderBox renderLogo = _key.currentContext.findRenderObject();
+///   final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
 ///   return renderLogo.size;
 /// }
 ///
@@ -2787,7 +2787,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         ),
 ///       ),
 ///       Text('Flutter logo is offstage: $_offstage'),
-///       RaisedButton(
+///       ElevatedButton(
 ///         child: Text('Toggle Offstage Value'),
 ///         onPressed: () {
 ///           setState(() {
@@ -2796,7 +2796,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///         },
 ///       ),
 ///       if (_offstage)
-///         RaisedButton(
+///         ElevatedButton(
 ///           child: Text('Get Flutter Logo size'),
 ///           onPressed: () {
 ///             ScaffoldMessenger.of(context).showSnackBar(
@@ -5230,7 +5230,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
-///   AnimationController menuAnimation;
+///   late AnimationController menuAnimation;
 ///   IconData lastTapped = Icons.notifications;
 ///   final List<IconData> menuItems = <IconData>[
 ///     Icons.home,
@@ -5290,7 +5290,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// }
 ///
 /// class FlowMenuDelegate extends FlowDelegate {
-///   FlowMenuDelegate({this.menuAnimation}) : super(repaint: menuAnimation);
+///   FlowMenuDelegate({required this.menuAnimation}) : super(repaint: menuAnimation);
 ///
 ///   final Animation<double> menuAnimation;
 ///
@@ -5303,7 +5303,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   void paintChildren(FlowPaintingContext context) {
 ///     double dx = 0.0;
 ///     for (int i = 0; i < context.childCount; ++i) {
-///       dx = context.getChildSize(i).width * i;
+///       dx = context.getChildSize(i)!.width * i;
 ///       context.paintChild(
 ///         i,
 ///         transform: Matrix4.translationValues(
@@ -5842,7 +5842,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   Future<ByteData> load(String key) async {
 ///     if (key == 'resources/test')
 ///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
-///     return null;
+///     return ByteData(0);
 ///   }
 /// }
 /// ```
@@ -6346,7 +6346,7 @@ class MouseRegion extends StatefulWidget {
   /// ```dart preamble
   /// // A region that hides its content one second after being hovered.
   /// class MyTimedButton extends StatefulWidget {
-  ///   MyTimedButton({ Key key, this.onEnterButton, this.onExitButton })
+  ///   MyTimedButton({ Key? key, required this.onEnterButton, required this.onExitButton })
   ///     : super(key: key);
   ///
   ///   final VoidCallback onEnterButton;
@@ -7247,7 +7247,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///     children: <Widget>[
 ///       Checkbox(
 ///         value: true,
-///         onChanged: (bool value) => null,
+///         onChanged: (bool? value) {},
 ///       ),
 ///       const Text("Settings"),
 ///     ],
@@ -7577,7 +7577,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// await showDialog<void>(
 ///   context: context,
 ///   builder: (BuildContext context) {
-///     int selectedRadio = 0;
+///     int? selectedRadio = 0;
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
@@ -7587,7 +7587,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///               return Radio<int>(
 ///                 value: index,
 ///                 groupValue: selectedRadio,
-///                 onChanged: (int value) {
+///                 onChanged: (int? value) {
 ///                   setState(() => selectedRadio = value);
 ///                 },
 ///               );
@@ -7683,6 +7683,10 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // It's tempting to want to optimize out this `drawRect()` call if the
+    // color is transparent (alpha==0), but doing so would be incorrect. See
+    // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
+    // a good description of why.
     if (size > Size.zero) {
       context.canvas.drawRect(offset & size, Paint()..color = color);
     }

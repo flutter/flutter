@@ -140,7 +140,6 @@ Future<void> run(List<String> args) async {
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.toList(),
-      workDir: testDirectory,
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,

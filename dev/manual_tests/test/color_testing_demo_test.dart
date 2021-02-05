@@ -4,7 +4,6 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:manual_tests/color_testing_demo.dart' as color_testing_demo;
 
