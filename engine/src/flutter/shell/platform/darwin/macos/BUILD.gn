@@ -115,7 +115,7 @@ source_set("flutter_framework_source") {
     "FLUTTER_ENGINE_NO_PROTOTYPES",
   ]
 
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objcc = [ "-fobjc-arc" ]
 
   libs = [
     "Cocoa.framework",
@@ -161,7 +161,7 @@ executable("flutter_desktop_darwin_unittests") {
     sources += [ "framework/Source/FlutterOpenGLRendererTest.mm" ]
   }
 
-  cflags_objcc = flutter_cflags_objcc_arc
+  cflags_objcc = [ "-fobjc-arc" ]
 
   ldflags = [ "-ObjC" ]
 

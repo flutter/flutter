@@ -5,25 +5,35 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_EXTERNAL_TEXTURE_METAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_EXTERNAL_TEXTURE_METAL_H_
 
+#include <atomic>
+
+#import <CoreVideo/CoreVideo.h>
+
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 
 class IOSExternalTextureMetal final : public Texture {
  public:
-  explicit IOSExternalTextureMetal(
-      fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>
-          darwin_external_texture_metal);
+  IOSExternalTextureMetal(int64_t texture_id,
+                          fml::CFRef<CVMetalTextureCacheRef> texture_cache,
+                          fml::scoped_nsobject<NSObject<FlutterTexture>> external_texture);
 
   // |Texture|
   ~IOSExternalTextureMetal();
 
  private:
-  fml::scoped_nsobject<FlutterDarwinExternalTextureMetal>
-      darwin_external_texture_metal_;
+  fml::CFRef<CVMetalTextureCacheRef> texture_cache_;
+  fml::scoped_nsobject<NSObject<FlutterTexture>> external_texture_;
+  std::atomic_bool texture_frame_available_;
+  fml::CFRef<CVPixelBufferRef> last_pixel_buffer_;
+  sk_sp<SkImage> external_image_;
+  OSType pixel_format_ = 0;
 
   // |Texture|
   void Paint(SkCanvas& canvas,
@@ -43,6 +53,13 @@ class IOSExternalTextureMetal final : public Texture {
 
   // |Texture|
   void OnTextureUnregistered() override;
+
+  sk_sp<SkImage> WrapExternalPixelBuffer(fml::CFRef<CVPixelBufferRef> pixel_buffer,
+                                         GrDirectContext* context) const;
+  sk_sp<SkImage> WrapRGBAExternalPixelBuffer(fml::CFRef<CVPixelBufferRef> pixel_buffer,
+                                             GrDirectContext* context) const;
+  sk_sp<SkImage> WrapNV12ExternalPixelBuffer(fml::CFRef<CVPixelBufferRef> pixel_buffer,
+                                             GrDirectContext* context) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureMetal);
 };
