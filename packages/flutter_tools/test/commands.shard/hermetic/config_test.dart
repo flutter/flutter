@@ -186,19 +186,19 @@ void main() {
 
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-web: true'),
+        containsIgnoringWhitespace('enable-web: true (Unavailable)'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-linux-desktop: true'),
+        containsIgnoringWhitespace('enable-linux-desktop: true (Unavailable)'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-windows-desktop: true'),
+        containsIgnoringWhitespace('enable-windows-desktop: true (Unavailable)'),
       );
       expect(
         testLogger.statusText,
-        containsIgnoringWhitespace('enable-macos-desktop: true'),
+        containsIgnoringWhitespace('enable-macos-desktop: true (Unavailable)'),
       );
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
