@@ -17,6 +17,8 @@ import './stdio.dart';
 const String kCandidateOption = 'candidate-branch';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
+const String kFrameworkOption = 'framework-upstream';
+const String kEngineOption = 'engine-upstream';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -36,9 +38,15 @@ class StartCommand extends Command<void> {
       allowed: <String>['stable', 'beta', 'dev'],
     );
     argParser.addOption(
-      kStateOption,
+      kFrameworkOption,
+      defaultsTo: FrameworkRepository.defaultUpstream,
+      help: 'Configurable Framework repo upstream. Primarily for testing.',
+      hide: true,
+    );
+    argParser.addOption(
+      kEngineOption,
       defaultsTo: defaultPath,
-      help: 'Path to persistent state file. Defaults to $defaultPath',
+      help: 'Configurable Engine repo upstream. Primarily for testing.',
     );
   }
 
@@ -81,7 +89,12 @@ class StartCommand extends Command<void> {
     state.releaseChannel = argResults[kReleaseOption] as String;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
-    state.framework = pb.Repository(candidateBranch: argResults[kCandidateOption] as String);
+    final FrameworkRepository framework = FrameworkRepository(checkouts);
+    state.framework = pb.Repository(
+      candidateBranch: argResults[kCandidateOption] as String,
+
+    );
+    final EngineRepository engine = EngineRepository(checkouts);
     state.engine = pb.Repository(candidateBranch: argResults[kCandidateOption] as String);
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');

@@ -72,7 +72,8 @@ abstract class Repository {
     }
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace(
-          'Cloning $name from $upstream to ${_checkoutDirectory.path}...');
+        'Cloning $name from $upstream to ${_checkoutDirectory.path}...',
+      );
       git.run(
         <String>['clone', '--', upstream, _checkoutDirectory.path],
         'Cloning $name repo',
@@ -92,8 +93,9 @@ abstract class Repository {
     }
 
     final String revision = reverseParse('HEAD');
-    stdio
-        .printTrace('Repository $name is checked out at revision "$revision".');
+    stdio.printTrace(
+      'Repository $name is checked out at revision "$revision".',
+    );
     return _checkoutDirectory;
   }
 
@@ -126,10 +128,11 @@ abstract class Repository {
     );
   }
 
-  void checkout(String revision) {
+  /// Check out the given ref.
+  void checkout(String ref) {
     git.run(
-      <String>['checkout', revision],
-      'checkout $revision',
+      <String>['checkout', ref],
+      'checkout ref',
       workingDirectory: checkoutDirectory.path,
     );
   }
@@ -345,8 +348,8 @@ class FrameworkRepository extends Repository {
   }
 
   @override
-  void checkout(String revision) {
-    super.checkout(revision);
+  void checkout(String ref) {
+    super.checkout(ref);
     // The tool will overwrite old cached artifacts, but not delete unused
     // artifacts from a previous version. Thus, delete the entire cache and
     // re-populate.
@@ -366,6 +369,42 @@ class FrameworkRepository extends Repository {
       globals.stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
+  }
+}
+
+class EngineRepository extends Repository {
+  EngineRepository(
+    this.checkouts, {
+    String name = 'framework',
+    String upstream = FrameworkRepository.defaultUpstream,
+    bool localUpstream = false,
+    bool useExistingCheckout = false,
+  }) : super(
+          name: name,
+          upstream: upstream,
+          fileSystem: checkouts.fileSystem,
+          localUpstream: localUpstream,
+          parentDirectory: checkouts.directory,
+          platform: checkouts.platform,
+          processManager: checkouts.processManager,
+          stdio: checkouts.stdio,
+          useExistingCheckout: useExistingCheckout,
+        );
+
+  final Checkouts checkouts;
+
+  static const String defaultUpstream = 'https://github.com/flutter/engine.git';
+
+  @override
+  Repository cloneRepository(String cloneName) {
+    assert(localUpstream);
+    cloneName ??= 'clone-of-$name';
+    return EngineRepository(
+      checkouts,
+      name: cloneName,
+      upstream: 'file://${checkoutDirectory.path}/',
+      useExistingCheckout: useExistingCheckout,
+    );
   }
 }
 
