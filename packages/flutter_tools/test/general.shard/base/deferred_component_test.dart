@@ -325,7 +325,7 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = 
+      final List<LoadingUnit> loadingUnits =
           LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test(), abis: <String>['test-abi2']);
       expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
 
