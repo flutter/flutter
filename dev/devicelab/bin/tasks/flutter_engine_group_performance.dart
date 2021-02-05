@@ -67,8 +67,13 @@ Future<TaskResult> _doTest() async {
         path.joinAll(_addComponent(multipleFluttersPath, 'android'));
 
     final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-    final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-    await _run('flutter', <String>['pub', 'get'], modulePath);
+    final String gradlewExecutable =
+        Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+    final String flutterPath = path.join(
+        Directory(Platform.script.path).parent.parent.parent.parent.parent.path,
+        'bin',
+        'flutter');
+    await _run(flutterPath, <String>['pub', 'get'], modulePath);
     await _run(gradlewExecutable, <String>['assembleRelease'], androidPath);
 
     final String apkPath = path.joinAll(_addComponents(
