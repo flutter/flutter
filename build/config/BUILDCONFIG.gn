@@ -543,7 +543,11 @@ if (custom_toolchain != "") {
   import("//build/config/ios/ios_sdk.gni")  # For use_ios_simulator
   host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
   if (use_ios_simulator) {
-    set_default_toolchain("//build/toolchain/mac:ios_clang_x64")
+    if (target_cpu == "arm" || target_cpu == "arm64") {
+      set_default_toolchain("//build/toolchain/mac:ios_clang_arm_sim")
+    } else {
+      set_default_toolchain("//build/toolchain/mac:ios_clang_x64_sim")
+    }
   } else {
     set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
   }
