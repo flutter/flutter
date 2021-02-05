@@ -1629,8 +1629,11 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () {
       return () {
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.base, response: FakeResponse(body: utf8.encode('void main() {}')))
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode('void main() {}')),
+          )
         ]);
       };
     },
@@ -1649,8 +1652,11 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () {
       return () {
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.base, response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')))
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+          )
         ]);
       };
     },
@@ -1673,8 +1679,11 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () {
       return () {
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.base, response: FakeResponse(body: utf8.encode(samplesIndexJson)))
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode(samplesIndexJson)),
+          )
         ]);
       };
     },
@@ -1699,8 +1708,11 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () {
       return () {
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.base, response: FakeResponse(body: utf8.encode(samplesIndexJson)))
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode(samplesIndexJson)),
+          )
         ]);
       };
     },
@@ -1721,8 +1733,11 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () {
       return () {
-        FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(Uri.base, response: const FakeResponse(statusCode: HttpStatus.notFound))
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: const FakeResponse(statusCode: HttpStatus.notFound),
+          )
         ]);
       };
     },
