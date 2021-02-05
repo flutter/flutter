@@ -834,7 +834,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (_platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
     }
@@ -907,7 +907,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
@@ -942,7 +942,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String engineVersion) async {
     engineVersion ??= version;
-    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$engineVersion/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
@@ -1574,7 +1574,7 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.

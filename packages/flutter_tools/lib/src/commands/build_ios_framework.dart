@@ -287,7 +287,7 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
   s.platform              = :ios, '8.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
