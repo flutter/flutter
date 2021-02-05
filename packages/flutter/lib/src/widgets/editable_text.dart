@@ -2640,7 +2640,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 cursorWidth: widget.cursorWidth,
                 cursorHeight: widget.cursorHeight,
                 cursorRadius: widget.cursorRadius,
-                cursorOffset: widget.cursorOffset,
+                cursorOffset: widget.cursorOffset ?? Offset.zero,
                 selectionHeightStyle: widget.selectionHeightStyle,
                 selectionWidthStyle: widget.selectionWidthStyle,
                 paintCursorAboveText: widget.paintCursorAboveText,
@@ -2724,7 +2724,7 @@ class _Editable extends LeafRenderObjectWidget {
     required this.cursorWidth,
     this.cursorHeight,
     this.cursorRadius,
-    this.cursorOffset,
+    required this.cursorOffset,
     required this.paintCursorAboveText,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
@@ -2772,7 +2772,7 @@ class _Editable extends LeafRenderObjectWidget {
   final double cursorWidth;
   final double? cursorHeight;
   final Radius? cursorRadius;
-  final Offset? cursorOffset;
+  final Offset cursorOffset;
   final bool paintCursorAboveText;
   final ui.BoxHeightStyle selectionHeightStyle;
   final ui.BoxWidthStyle selectionWidthStyle;

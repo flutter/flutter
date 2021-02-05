@@ -96,7 +96,7 @@ void main() {
     expect(tapped, equals(<int>[]));
     await tester.tap(find.text('1'));
     expect(tapped, equals(<int>[1]));
-    await tester.tap(find.text('3'));
+    await tester.tap(find.text('3'), warnIfMissed: false);
     expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
   });
 

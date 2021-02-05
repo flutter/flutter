@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
+import 'convert.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
@@ -192,9 +193,9 @@ class BuildInfo {
       if (dartObfuscation != null)
         'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions?.isNotEmpty ?? false)
-        'EXTRA_FRONT_END_OPTIONS': encodeDartDefines(extraFrontEndOptions),
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions?.join(','),
       if (extraGenSnapshotOptions?.isNotEmpty ?? false)
-        'EXTRA_GEN_SNAPSHOT_OPTIONS': encodeDartDefines(extraGenSnapshotOptions),
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions?.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath,
       if (trackWidgetCreation != null)
@@ -210,6 +211,34 @@ class BuildInfo {
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
+  }
+
+  /// Convert this config to a series of project level arguments to be passed
+  /// on the command line to gradle.
+  List<String> toGradleConfig() {
+    // PACKAGE_CONFIG not currently supported.
+    return <String>[
+      if (dartDefines?.isNotEmpty ?? false)
+        '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartObfuscation != null)
+        '-Pdart-obfuscation=$dartObfuscation',
+      if (extraFrontEndOptions?.isNotEmpty ?? false)
+        '-Pextra-front-end-options=${extraFrontEndOptions?.join(',')}',
+      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions?.join(',')}',
+      if (splitDebugInfoPath != null)
+        '-Psplit-debug-info=$splitDebugInfoPath',
+      if (trackWidgetCreation != null)
+        '-Ptrack-widget-creation=$trackWidgetCreation',
+      if (treeShakeIcons != null)
+        '-Ptree-shake-icons=$treeShakeIcons',
+      if (performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=$performanceMeasurementFile',
+      if (bundleSkSLPath != null)
+        '-Pbundle-sksl-path=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-Pcode-size-directory=$codeSizeDirectory',
+    ];
   }
 }
 
@@ -737,9 +766,32 @@ String getFuchsiaBuildDirectory() {
 /// These values are URI-encoded and then combined into a comma-separated string.
 const String kDartDefines = 'DartDefines';
 
-/// Encode a List of dart defines in a URI string.
+final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
+final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
+
+/// Encode a List of dart defines in a base64 string.
+///
+/// This encoding does not include `,`, which is used to distinguish
+/// the individual entries, nor does it include `%` which is often a
+/// control character on windows command lines.
+///
+/// When decoding this string, it can be safely split on commas, since any
+/// user provided commans will still be encoded.
+///
+/// If the presence of the `/` character ends up being an issue, this can
+/// be changed to use base32 instead.
 String encodeDartDefines(List<String> defines) {
-  return defines.map(Uri.encodeComponent).join(',');
+  return defines.map(_defineEncoder.convert).join(',');
+}
+
+List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String key) {
+  if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
+    return <String>[];
+  }
+  return environmentDefines[key]
+    .split(',')
+    .cast<String>()
+    .toList();
 }
 
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
@@ -749,7 +801,7 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
   }
   return environmentDefines[key]
     .split(',')
-    .map<Object>(Uri.decodeComponent)
+    .map<Object>(_defineDecoder.convert)
     .cast<String>()
     .toList();
 }
