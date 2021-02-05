@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';

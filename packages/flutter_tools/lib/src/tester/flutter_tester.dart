@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -15,6 +14,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
