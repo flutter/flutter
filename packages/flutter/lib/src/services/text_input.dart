@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
@@ -930,13 +929,19 @@ abstract class TextInputClient {
   void showToolbar();
 }
 
+/// An interface for recieving focus during a UIIndirectScribbleInteraction
 abstract class ScribbleClient {
+  /// A unique identifier for this element
   String get elementIdentifier;
 
+  /// Called during a UIIndirectScribbleInteraction when the [ScribbleClient] should
+  /// receive focus
   void onScribbleFocus(double x, double y);
 
+  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds
   bool inScribbleRect(double x, double y, double width, double height);
 
+  /// The current bounds of the [ScribbleClient]
   List<double> get bounds;
 }
 
@@ -957,7 +962,7 @@ class TextInputConnection {
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
-  List cachedTextBoxes = [];
+  List<Rect> _cachedTextBoxes = <Rect>[];
 
   static int _nextId = 1;
   final int _id;
@@ -1077,12 +1082,14 @@ class TextInputConnection {
       },
     );
   }
-  
-  void setSelectionRects(List textBoxes) {
-    if (!listEquals(cachedTextBoxes, textBoxes)) {
-      cachedTextBoxes = textBoxes;
-      TextInput._instance._setSelectionRects(textBoxes.map((box) {
-        var rect = box.toRect();
+
+  /// Send selection rects.
+  /// 
+  /// These are used by the engine during a UIDirectScribbleInteraction.
+  void setSelectionRects(List<Rect> textBoxes) {
+    if (!listEquals(_cachedTextBoxes, textBoxes)) {
+      _cachedTextBoxes = textBoxes;
+      TextInput._instance._setSelectionRects(textBoxes.map((Rect rect) {
         return <double>[rect.left, rect.top, rect.width, rect.height];
       }).toList());
     }
@@ -1349,23 +1356,24 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
-  Map<String, ScribbleClient> _scribbleClients = {};
+  final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       if (_scribbleClients.containsKey(args[0])) {
-        _scribbleClients[args[0]]?.onScribbleFocus(args[1], args[2]);
+        _scribbleClients[args[0]]?.onScribbleFocus(args[1] as double, args[2] as double);
       }
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      return _scribbleClients.keys.where((elementIdentifier) {
-        return _scribbleClients[elementIdentifier]?.inScribbleRect(args[0].toDouble(), args[1].toDouble(), args[2].toDouble(), args[3].toDouble()) ?? false;
-      }).map((elementIdentifier) => [elementIdentifier, ...(_scribbleClients[elementIdentifier]?.bounds ?? [])]).toList();
+      return _scribbleClients.keys.where((String elementIdentifier) {
+        return _scribbleClients[elementIdentifier]?.inScribbleRect(args[0] as double, args[1] as double, args[2] as double, args[3] as double) ?? false;
+      }).map((String elementIdentifier) => <dynamic>[elementIdentifier, ..._scribbleClients[elementIdentifier]?.bounds ?? <dynamic>[]]).toList();
     }
-    if (_currentConnection == null) return;
+    if (_currentConnection == null)
+      return;
 
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
@@ -1380,7 +1388,6 @@ class TextInput {
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
-    print('[scribble][flutter] $method: $args');
 
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final TextInputClient client = _currentConnection!._client;

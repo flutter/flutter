@@ -2436,10 +2436,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
       _textInputConnection!.setEditableSizeAndTransform(size, transform);
-      var textSpan = buildTextSpan();
-      var rects = List.generate(
-          textSpan.text?.length ?? 0, (i) => renderEditable.textPainter?.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first);
-      _textInputConnection!.setSelectionRects(rects);
+      final TextSpan textSpan = buildTextSpan();
+      final TextPainter? textPainter = renderEditable.textPainter;
+      if (textPainter != null) {
+        final List<Rect> rects = List<Rect>.generate(
+          textSpan.text?.length ?? 0, (int i) => textPainter.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first.toRect());
+        _textInputConnection!.setSelectionRects(rects);
+      } else {
+        _textInputConnection!.setSelectionRects(<Rect>[]);
+      }
       SchedulerBinding.instance!
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }
@@ -2525,6 +2530,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
+  @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
@@ -2919,11 +2925,11 @@ class _Editable extends LeafRenderObjectWidget {
 }
 
 class _ScribbleElement extends StatefulWidget {
+  const _ScribbleElement({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
+
   final Widget child;
   final FocusNode focusNode;
   final GlobalKey editableKey;
-
-  _ScribbleElement({Key? key, required this.child, required this.focusNode, required this.editableKey}): super(key: key);
 
   @override
   _ScribbleElementState createState() => _ScribbleElementState();
@@ -2942,14 +2948,14 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
     TextInput.deregisterScribbleElement(elementIdentifier);
   }
 
-  RenderEditable get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable;
+  RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
 
   String? _elementIdentifier;
 
   @override
   String get elementIdentifier {
   if (_elementIdentifier == null) {
-      math.Random random = math.Random();
+      final math.Random random = math.Random();
       _elementIdentifier = random.nextInt(1<<32).toString().padLeft(10, '0');
     }
     return _elementIdentifier!;
@@ -2958,24 +2964,26 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
   @override
   void onScribbleFocus(double x, double y) {
     widget.focusNode.requestFocus();
-    renderEditable.selectPositionAt(from: Offset(x, y), cause: SelectionChangedCause.keyboard);
+    renderEditable?.selectPositionAt(from: Offset(x, y), cause: SelectionChangedCause.keyboard);
   }
 
   @override
   bool inScribbleRect(double x, double y, double width, double height) {
-    List<double> _bounds = bounds;
-    if (_bounds.isEmpty) return false;
-    Rect rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
-    Rect scribbleRect = Rect.fromLTWH(x, y, width, height);
+    final List<double> _bounds = bounds;
+    if (_bounds.isEmpty)
+      return false;
+    final Rect rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
+    final Rect scribbleRect = Rect.fromLTWH(x, y, width, height);
     return rect.overlaps(scribbleRect);
   }
 
   @override
   List<double> get bounds {
-    RenderBox? box = context.findRenderObject() as RenderBox?;
-    if (box == null || !mounted || !box.attached) return [];
-    Offset topLeft = box.localToGlobal(Offset.zero);
-    return [topLeft.dx, topLeft.dy, box.size.width, box.size.height];
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null || !mounted || !box.attached)
+      return <double>[];
+    final Offset topLeft = box.localToGlobal(Offset.zero);
+    return <double>[topLeft.dx, topLeft.dy, box.size.width, box.size.height];
   }
 
   @override
