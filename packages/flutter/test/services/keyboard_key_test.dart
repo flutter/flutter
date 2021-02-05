@@ -27,9 +27,9 @@ void main() {
       // Check a letter key
       expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000061), equals(LogicalKeyboardKey.keyA));
       // Check a control key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0100070029), equals(LogicalKeyboardKey.escape));
+      expect(LogicalKeyboardKey.findKeyByKeyId(0x000000001b), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x01000700e1), equals(LogicalKeyboardKey.shiftLeft));
+      expect(LogicalKeyboardKey.findKeyByKeyId(0x030000010d), equals(LogicalKeyboardKey.shiftLeft));
     });
     test('Control characters are recognized as such', () async {
       // Check some common control characters

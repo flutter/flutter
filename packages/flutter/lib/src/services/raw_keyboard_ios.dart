@@ -92,7 +92,6 @@ class RawKeyEventDataIos extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
 
-
   @override
   LogicalKeyboardKey get logicalKey {
     /// A number of keys can already be determined using their physical key (key

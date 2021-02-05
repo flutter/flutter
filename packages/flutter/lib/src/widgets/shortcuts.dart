@@ -154,6 +154,11 @@ abstract class ShortcutPrompt {
   Iterable<KeyboardStateCriterion>? get stateCriteria;
 
   Iterable<LogicalKeyboardKey>? getTriggerKeys();
+
+  /// Returns a description of the key set that is short and readable.
+  ///
+  /// Intended to be used in debug mode for logging purposes.
+  String debugDescribeKeys();
 }
 
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
@@ -213,9 +218,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
     LogicalKeyboardKey.shiftSynonym,
   };
 
-  /// Returns a description of the key set that is short and readable.
-  ///
-  /// Intended to be used in debug mode for logging purposes.
+  @override
   String debugDescribeKeys() {
     final List<LogicalKeyboardKey> sortedKeys = keys.toList()..sort(
             (LogicalKeyboardKey a, LogicalKeyboardKey b) {
@@ -270,19 +273,24 @@ class KeybindingPrompt implements ShortcutPrompt {
   Iterable<LogicalKeyboardKey>? getTriggerKeys() sync* {
     yield _trigger;
   }
+
+  @override
+  String debugDescribeKeys() {
+    return 'TODO';
+  }
 }
 
 /// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet,
 /// Intent>` (the same type as the [Shortcuts.shortcuts] property) so that its
 /// diagnostic output is human-readable.
-class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>> {
+class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutPrompt, Intent>> {
   /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
   /// which are the same type as the [Shortcuts.shortcuts] property.
   ///
   /// The [showName] and [level] arguments must not be null.
   ShortcutMapProperty(
     String name,
-    Map<LogicalKeySet, Intent> value, {
+    Map<ShortcutPrompt, Intent> value, {
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
@@ -299,11 +307,11 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>
        );
 
   @override
-  Map<LogicalKeySet, Intent> get value => super.value!;
+  Map<ShortcutPrompt, Intent> get value => super.value!;
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    return '{${value.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
+    return '{${value.keys.map<String>((ShortcutPrompt prompt) => '{${prompt.debugDescribeKeys()}}: ${value[prompt]}').join(', ')}}';
   }
 }
 
@@ -346,20 +354,20 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// When the map is changed, listeners to this manager will be notified.
   ///
   /// The returned map should not be modified.
-  Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
-  Map<LogicalKeySet, Intent> _shortcuts;
-  set shortcuts(Map<LogicalKeySet, Intent> value) {
+  Map<ShortcutPrompt, Intent> get shortcuts => _shortcuts;
+  Map<ShortcutPrompt, Intent> _shortcuts;
+  set shortcuts(Map<ShortcutPrompt, Intent> value) {
     assert(value != null);
-    if (!mapEquals<LogicalKeySet, Intent>(_shortcuts, value)) {
+    if (!mapEquals<ShortcutPrompt, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
       notifyListeners();
     }
   }
 
-  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<LogicalKeySet, Intent> source) {
+  static Map<LogicalKeyboardKey?, List<_PromptIntent>> _indexShortcuts(Map<ShortcutPrompt, Intent> source) {
     final Map<LogicalKeyboardKey?, List<_PromptIntent>> result = <LogicalKeyboardKey?, List<_PromptIntent>>{};
-    source.forEach((LogicalKeySet prompt, Intent intent) {
+    source.forEach((ShortcutPrompt prompt, Intent intent) {
       final Iterable<LogicalKeyboardKey?> triggers = prompt.getTriggerKeys()
           ?? (() sync* { yield null; })();
       for (final LogicalKeyboardKey? trigger in triggers) {
@@ -386,15 +394,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
       ..._indexedShortcuts[event.logical] ?? <_PromptIntent>[],
       ..._indexedShortcuts[null] ?? <_PromptIntent>[],
     };
+    print('candidates $candidates');
     for (final _PromptIntent promptIntent in candidates) {
       // Whether all criteria have been met. Having no criteria is considered
       // all-met.
       if (promptIntent.prompt.stateCriteria?.every(
           (KeyboardStateCriterion criterion) => criterion.active(state)) != false) {
+        print('Found ${promptIntent.intent}');
         return promptIntent.intent;
       }
     }
 
+    print('Found nothing');
     return null;
   }
 
@@ -443,7 +454,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', _shortcuts));
+    properties.add(DiagnosticsProperty<Map<ShortcutPrompt, Intent>>('shortcuts', _shortcuts));
     properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
@@ -659,7 +670,7 @@ class Shortcuts extends StatefulWidget {
   /// in here (e.g. a final variable from your widget class) instead of defining
   /// it inline in the build function.
   /// {@endtemplate}
-  final Map<LogicalKeySet, Intent> shortcuts;
+  final Map<ShortcutPrompt, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
