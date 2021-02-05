@@ -1268,13 +1268,12 @@ class _RenderDecoration extends RenderBox {
     final double containerHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox?>[prefix, input, suffix])
-      + subtextHeight
       + contentPadding.bottom
       + densityOffset.dy;
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
-    return math.max(containerHeight, minContainerHeight);
+    return math.max(containerHeight, minContainerHeight) + subtextHeight;
   }
 
   @override
