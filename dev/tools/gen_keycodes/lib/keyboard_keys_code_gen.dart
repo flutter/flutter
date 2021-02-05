@@ -77,9 +77,11 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   String get _logicalDefinitions {
     String escapeLabel(String label) {
       label = label
+        .replaceAll('', '')
         .replaceAll('\n', r'\n')
         .replaceAll('\r', r'\r');
-      return label.contains("'") ? 'r"$label"' : "r'$label'";
+      return label.isEmpty ? null :
+             label.contains("'") ? 'r"$label"' : "r'$label'";
     }
     final StringBuffer definitions = StringBuffer();
     void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
