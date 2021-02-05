@@ -194,7 +194,7 @@ class LoadingUnit {
     try {
       manifest = jsonDecode(fileString) as Map<String, dynamic>;
     } on FormatException catch (e) {
-      globals.printError(e.toString());
+      globals.printError('Loading unit manifest at `${manifestFile.path}` was invalid JSON:\n$e');
     }
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     // Setup android source directory
