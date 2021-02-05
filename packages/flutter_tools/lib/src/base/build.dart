@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../build_info.dart';
@@ -137,9 +136,20 @@ class AOTSnapshotter {
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
+
+    // We strip snapshot by default, but allow to suppress this behavior
+    // by supplying --no-strip in extraGenSnapshotOptions.
+    bool shouldStrip = true;
+
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      genSnapshotArgs.addAll(extraGenSnapshotOptions);
+      for (final String option in extraGenSnapshotOptions) {
+        if (option == '--no-strip') {
+          shouldStrip = false;
+          continue;
+        }
+        genSnapshotArgs.add(option);
+      }
     }
 
     final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
@@ -147,15 +157,17 @@ class AOTSnapshotter {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
-        '--strip'
       ]);
     } else {
       final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-elf',
         '--elf=$aotSharedLibrary',
-        '--strip'
       ]);
+    }
+
+    if (shouldStrip) {
+      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {

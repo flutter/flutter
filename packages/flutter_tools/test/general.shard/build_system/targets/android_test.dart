@@ -294,6 +294,47 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('--no-strip in kExtraGenSnapshotOptions suppresses --strip gen_snapshot flag', () async {
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+        kExtraGenSnapshotOptions: 'foo,--no-strip,bar',
+        kTargetPlatform: 'android-arm',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    processManager.addCommand(
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(
+          Artifact.genSnapshot,
+          platform: TargetPlatform.android_arm64,
+          mode: BuildMode.release,
+        ),
+        '--deterministic',
+        'foo',
+        'bar',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+        environment.buildDir.childFile('app.dill').path
+      ],
+    ));
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+
+    await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
+      .build(environment);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testWithoutContext('android aot bundle copies so from abi directory', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,

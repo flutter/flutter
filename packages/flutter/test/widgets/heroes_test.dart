@@ -537,18 +537,18 @@ Future<void> main() async {
     navigator.pushNamed('/next');
 
     expect(log, isEmpty);
-    await tester.tap(find.text('foo', skipOffstage: false));
+    await tester.tap(find.text('foo', skipOffstage: false), warnIfMissed: false);
     expect(log, isEmpty);
 
     await tester.pump(const Duration(milliseconds: 10));
-    await tester.tap(find.text('foo', skipOffstage: false));
+    await tester.tap(find.text('foo', skipOffstage: false), warnIfMissed: false);
     expect(log, isEmpty);
-    await tester.tap(find.text('bar', skipOffstage: false));
+    await tester.tap(find.text('bar', skipOffstage: false), warnIfMissed: false);
     expect(log, isEmpty);
 
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('foo'), findsNothing);
-    await tester.tap(find.text('bar', skipOffstage: false));
+    await tester.tap(find.text('bar', skipOffstage: false), warnIfMissed: false);
     expect(log, isEmpty);
 
     await tester.pump(const Duration(seconds: 1));
@@ -976,7 +976,7 @@ Future<void> main() async {
 
     // Scroll the target upwards by 25 pixels. The Hero flight's Y coordinate
     // will be redirected from 100 to 75.
-    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0), warnIfMissed: false); // the container itself wouldn't be hit
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
@@ -1052,7 +1052,7 @@ Future<void> main() async {
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
-    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0), warnIfMissed: false); // the container itself wouldn't be hit
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.byKey(routeContainerKey), findsNothing); // Scrolled off the top

@@ -9,12 +9,11 @@ import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -36,11 +35,7 @@ void main() {
   });
 
   testWithoutContext('NoAndroidStudioValidator shows Android Studio as "not available" when not available.', () async {
-    final Config config = Config.test(
-      'test',
-      directory: fileSystem.currentDirectory,
-      logger: BufferLogger.test(),
-    );
+    final Config config = Config.test();
     final NoAndroidStudioValidator validator = NoAndroidStudioValidator(
       config: config,
       platform: linuxPlatform,

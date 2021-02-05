@@ -37,12 +37,13 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'common.dart';
-import 'fake_process_manager.dart';
+import 'fakes.dart';
 import 'mocks.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
-export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
+export 'package:flutter_tools/src/base/process.dart' show ProcessManager;
+export 'fake_process_manager.dart' show FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
@@ -87,7 +88,7 @@ void testUsingContext(
       'flutter_config_dir_test.',
     );
     return Config.test(
-      Config.kFlutterSettings,
+      name: Config.kFlutterSettings,
       directory: configDir,
       logger: globals.logger,
     );
@@ -126,7 +127,7 @@ void testUsingContext(
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),
-          Usage: () => FakeUsage(),
+          Usage: () => TestUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           PlistParser: () => FakePlistParser(),
@@ -332,48 +333,6 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
-class FakeUsage implements Usage {
-  @override
-  bool get suppressAnalytics => false;
-
-  @override
-  set suppressAnalytics(bool value) { }
-
-  @override
-  bool get enabled => true;
-
-  @override
-  set enabled(bool value) { }
-
-  @override
-  String get clientId => '00000000-0000-4000-0000-000000000000';
-
-  @override
-  void sendCommand(String command, { Map<String, String> parameters }) { }
-
-  @override
-  void sendEvent(String category, String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
-  }) { }
-
-  @override
-  void sendTiming(String category, String variableName, Duration duration, { String label }) { }
-
-  @override
-  void sendException(dynamic exception) { }
-
-  @override
-  Stream<Map<String, dynamic>> get onSend => null;
-
-  @override
-  Future<void> ensureAnalyticsSent() => Future<void>.value();
-
-  @override
-  void printWelcome() { }
-}
-
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   bool get isInstalled => true;
@@ -423,14 +382,6 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockHttpClient extends Mock implements HttpClient {}
 
 class MockCrashReporter extends Mock implements CrashReporter {}
-
-class FakePlistParser implements PlistParser {
-  @override
-  Map<String, dynamic> parseFile(String plistFilePath) => const <String, dynamic>{};
-
-  @override
-  String getValueFromFile(String plistFilePath, String key) => null;
-}
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   LocalFileSystemBlockingSetCurrentDirectory() : super.test(

@@ -6,7 +6,6 @@
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';

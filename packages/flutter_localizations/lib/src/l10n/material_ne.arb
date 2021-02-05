@@ -9,6 +9,8 @@
   "previousMonthTooltip": "अघिल्लो महिना",
   "nextPageTooltip": "अर्को पृष्ठ",
   "previousPageTooltip": "अघिल्लो पृष्ठ",
+  "firstPageTooltip": "First page",
+  "lastPageTooltip": "Last page",
   "showMenuTooltip": "मेनु देखाउनुहोस्",
   "aboutListTileTitle": "$applicationName बारे",
   "licensesPageTitle": "इजाजतपत्रहरू",

@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/cmake.dart';
@@ -17,7 +18,6 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -368,10 +368,10 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
-      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
       '  "SPLIT_DEBUG_INFO=foo/"',
       '  "TRACK_WIDGET_CREATION=true"',
       '  "TREE_SHAKE_ICONS=true"',

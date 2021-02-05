@@ -289,7 +289,7 @@ void main() {
     });
 
     testUsingContext('devToolsServerAddress returns parsed uri', () async {
-      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
       await createTestCommandRunner(command).run(<String>[
         'dummy',
         '--${FlutterCommand.kDevToolsServerAddress}',
@@ -299,7 +299,7 @@ void main() {
     });
 
     testUsingContext('devToolsServerAddress returns null for bad input', () async {
-      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions();
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'dummy',

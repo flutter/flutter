@@ -17,10 +17,10 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
@@ -46,29 +46,23 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   @required String shellPath,
+  @required DebuggingOptions debuggingOptions,
   TestWatcher watcher,
   bool enableObservatory = false,
   bool machine = false,
-  bool startPaused = false,
-  bool disableServiceAuthCodes = false,
-  bool disableDds = false,
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
   bool updateGoldens = false,
   bool buildTestAssets = false,
-  int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
-  bool nullAssertions = false,
-  @required BuildInfo buildInfo,
-  List<String> additionalArguments,
 }) {
   assert(testWrapper != null);
-  assert(enableObservatory || (!startPaused && observatoryPort == null));
+  assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
@@ -81,13 +75,10 @@ FlutterPlatform installHook({
   };
   final FlutterPlatform platform = FlutterPlatform(
     shellPath: shellPath,
+    debuggingOptions: debuggingOptions,
     watcher: watcher,
     machine: machine,
     enableObservatory: enableObservatory,
-    startPaused: startPaused,
-    disableServiceAuthCodes: disableServiceAuthCodes,
-    disableDds: disableDds,
-    explicitObservatoryPort: observatoryPort,
     host: _kHosts[serverType],
     port: port,
     precompiledDillPath: precompiledDillPath,
@@ -97,9 +88,6 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
-    nullAssertions: nullAssertions,
-    buildInfo: buildInfo,
-    additionalArguments: additionalArguments,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -233,13 +221,10 @@ typedef Finalizer = Future<void> Function();
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
     @required this.shellPath,
+    @required this.debuggingOptions,
     this.watcher,
     this.enableObservatory,
     this.machine,
-    this.startPaused,
-    this.disableServiceAuthCodes,
-    this.disableDds,
-    this.explicitObservatoryPort,
     this.host,
     this.port,
     this.precompiledDillPath,
@@ -249,19 +234,13 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
-    this.nullAssertions = false,
-    this.additionalArguments,
-    @required this.buildInfo,
   }) : assert(shellPath != null);
 
   final String shellPath;
+  final DebuggingOptions debuggingOptions;
   final TestWatcher watcher;
   final bool enableObservatory;
   final bool machine;
-  final bool startPaused;
-  final bool disableServiceAuthCodes;
-  final bool disableDds;
-  final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
   final String precompiledDillPath;
@@ -271,9 +250,6 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
-  final bool nullAssertions;
-  final BuildInfo buildInfo;
-  final List<String> additionalArguments;
 
   Directory fontsDirectory;
 
@@ -313,7 +289,7 @@ class FlutterPlatform extends PlatformPlugin {
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
-      if (explicitObservatoryPort != null) {
+      if (debuggingOptions.hostVmServicePort != null) {
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
       }
       // Fail if we're passing in a precompiled entry-point.
@@ -370,14 +346,11 @@ class FlutterPlatform extends PlatformPlugin {
   @visibleForTesting
   Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
 
-  PackageConfig _packageConfig;
-
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
-    _packageConfig ??= buildInfo.packageConfig;
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -432,7 +405,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildInfo, flutterProject);
+        compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -444,13 +417,8 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: buildInfo.packagesPath,
         enableObservatory: enableObservatory,
-        startPaused: startPaused,
-        disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
-        additionalArguments: additionalArguments,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -484,15 +452,15 @@ class FlutterPlatform extends PlatformPlugin {
         process,
         reportObservatoryUri: (Uri detectedUri) async {
           assert(!gotProcessObservatoryUri.isCompleted);
-          assert(explicitObservatoryPort == null ||
-              explicitObservatoryPort == detectedUri.port);
+          assert(debuggingOptions.hostVmServicePort == null ||
+              debuggingOptions.hostVmServicePort == detectedUri.port);
 
           Uri forwardingUri;
-          if (!disableDds) {
+          if (!debuggingOptions.disableDds) {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
               serviceUri: ddsServiceUri,
-              enableAuthCodes: !disableServiceAuthCodes,
+              enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
             forwardingUri = dds.uri;
@@ -508,7 +476,7 @@ class FlutterPlatform extends PlatformPlugin {
               globals.printTrace('Successfully connected to service protocol: $forwardingUri');
             }));
           }
-          if (startPaused && !machine) {
+          if (debuggingOptions.startPaused && !machine) {
             globals.printStatus('The test process has been started.');
             globals.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
             globals.printStatus('  $forwardingUri');
@@ -637,16 +605,18 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
+    final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
+
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
-      _packageConfig[flutterProject?.manifest?.appName],
+      packageConfig[flutterProject?.manifest?.appName],
     );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      flutterTestDep: _packageConfig['flutter_test'] != null,
+      flutterTestDep: packageConfig['flutter_test'] != null,
       languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
     );
   }
@@ -693,16 +663,14 @@ class FlutterPlatform extends PlatformPlugin {
   Future<Process> _startProcess(
     String executable,
     String testPath, {
-    String packages,
     bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableServiceAuthCodes = false,
-    int observatoryPort,
     int serverPort,
-    List<String> additionalArguments,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
-    assert(!startPaused || enableObservatory);
+    assert(!debuggingOptions.startPaused || enableObservatory);
+
+    final int observatoryPort = debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0;
+
     final List<String> command = <String>[
       executable,
       if (enableObservatory) ...<String>[
@@ -716,8 +684,8 @@ class FlutterPlatform extends PlatformPlugin {
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
         if (observatoryPort != null) '--observatory-port=$observatoryPort',
-        if (startPaused) '--start-paused',
-        if (disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (debuggingOptions.startPaused) '--start-paused',
+        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       ]
       else
         '--disable-observatory',
@@ -730,10 +698,10 @@ class FlutterPlatform extends PlatformPlugin {
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
-      '--packages=$packages',
-      if (nullAssertions)
+      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
-      ...?additionalArguments,
+      ...debuggingOptions.dartEntrypointArgs,
       testPath,
     ];
 
@@ -829,7 +797,7 @@ class FlutterPlatform extends PlatformPlugin {
         InternetAddress.loopbackIPv6 :
         InternetAddress.loopbackIPv4
       ).host,
-      port: explicitObservatoryPort ?? 0,
+      port: debuggingOptions.hostVmServicePort ?? 0,
     );
   }
 }
