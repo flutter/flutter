@@ -1293,7 +1293,7 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of type String\n');
+    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list, but got blah (String).\n');
   });
 
   testWithoutContext('FlutterManifest deferred component libraries is string', () async {
@@ -1315,7 +1315,7 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of type String\n');
+    expect(logger.errorText, 'Expected "libraries" key in the 0 element of "deferred-components" to be a list of dart library Strings, but element 0 was a YamlMap\n');
   });
 
   testWithoutContext('FlutterManifest deferred component assets is string', () async {
@@ -1337,7 +1337,58 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of type String\n');
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of file paths, but element 0 was a YamlMap\n');
+  });
+
+  testWithoutContext('FlutterManifest deferred component multiple assets is string', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      assets:
+        - path/to/file.so
+        - also-not-a-string:
+          - woo
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of file paths, but element 1 was a YamlMap\n');
+  });
+
+  testWithoutContext('FlutterManifest multiple deferred components assets is string', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  deferred-components:
+    - name: blah
+      assets:
+        - path/to/file.so
+    - name: blah2
+      assets:
+        - path/to/other/file.so
+        - not-a-string:
+          - woo
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText, 'Expected "assets" key in the 1 element of "deferred-components" to be a list of file paths, but element 1 was a YamlMap\n');
   });
 
   testWithoutContext('FlutterManifest deferred component assets is list', () async {
@@ -1358,7 +1409,7 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of type String\n');
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list, but got blah (String).\n');
   });
 
   testWithoutContext('FlutterManifest parses asset-only deferred components', () async {
