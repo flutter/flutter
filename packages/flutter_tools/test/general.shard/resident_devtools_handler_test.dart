@@ -68,7 +68,7 @@ void main() {
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
 
-    expect(handler.activeDevToolsServer(), null);
+    expect(handler.activeDevToolsServer, null);
   });
 
   testWithoutContext('Does not serve devtools if ResidentRunner does not support the service protocol', () async {
@@ -80,7 +80,7 @@ void main() {
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
 
-    expect(handler.activeDevToolsServer(), null);
+    expect(handler.activeDevToolsServer, null);
   });
 
   testWithoutContext('Can use devtools with existing devtools URI', () async {
@@ -104,8 +104,8 @@ void main() {
       flutterDevices: <FlutterDevice>[],
     );
 
-    expect(handler.activeDevToolsServer().host, 'localhost');
-    expect(handler.activeDevToolsServer().port, 8181);
+    expect(handler.activeDevToolsServer.host, 'localhost');
+    expect(handler.activeDevToolsServer.port, 8181);
   });
 
   testWithoutContext('can serveAndAnnounceDevTools with attached device does not fail on null vm service', () async {
@@ -115,7 +115,7 @@ void main() {
       BufferLogger.test(),
     );
 
-    // VM Service is intentionall null
+    // VM Service is intentionally null
     final FakeFlutterDevice device = FakeFlutterDevice();
 
     await handler.serveAndAnnounceDevTools(

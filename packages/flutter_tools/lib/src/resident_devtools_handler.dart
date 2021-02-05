@@ -13,7 +13,6 @@ import 'base/logger.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-
 /// Helper class to manage the life-cycle of devtools and its interaction with
 /// the resident runner.
 class ResidentDevtoolsHandler {
@@ -25,7 +24,8 @@ class ResidentDevtoolsHandler {
   bool _shutdown = false;
   bool _served = false;
 
-  DevToolsServerAddress activeDevToolsServer() =>  _devToolsLauncher?.activeDevToolsServer;
+  /// The current devtools server, or null if one is not running.
+  DevToolsServerAddress get activeDevToolsServer =>  _devToolsLauncher?.activeDevToolsServer;
 
   // This must be guaranteed not to return a Future that fails.
   Future<void> serveAndAnnounceDevTools({

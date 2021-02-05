@@ -1338,7 +1338,7 @@ abstract class ResidentRunner {
   bool _reportedDebuggers = false;
 
   void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
-    final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer();
+    final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
     if (devToolsServerAddress == null) {
       includeDevtools = false;
     }
