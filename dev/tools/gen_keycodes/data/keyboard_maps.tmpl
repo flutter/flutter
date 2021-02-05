@@ -119,11 +119,11 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
 @@@WEB_PHYSICAL_KEY_MAP@@@
 };
 
-/// A map of Web KeyboardEvent codes which have printable representations, but appear
-/// on the number pad. Used to provide different key objects for keys like
-/// KEY_EQUALS and NUMPAD_EQUALS.
-const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKey>{
-@@@WEB_NUMPAD_MAP@@@
+/// A map of Web KeyboardEvent keys which needs to be decided based on location,
+/// typically for numpad kyes and modifier keys. Used to provide different key
+/// objects for keys like KEY_EQUALS and NUMPAD_EQUALS.
+const Map<String, List<LogicalKeyboardKey?>> kWebLocationMap = <String, List<LogicalKeyboardKey?>>{
+@@@WEB_LOCATION_MAP@@@
 };
 
 /// Maps Windows KeyboardEvent codes to the matching [LogicalKeyboardKey].

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
@@ -336,14 +338,23 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   }
 
   /// This generates the map of Web number pad codes to logical keys.
-  String get webNumpadMap {
-    final _OutputLines<String> lines = _OutputLines<String>('Web numpad map');
-    for (final LogicalKeyEntry entry in numpadLogicalKeyData) {
-      for (final String name in entry.webNames) {
-        lines.add(name, "  '$name': LogicalKeyboardKey.${entry.constantName},");
-      }
-    }
-    return lines.sortedJoin().trimRight();
+  String get webLocationMap {
+    final String jsonRaw = File(path.join(
+      flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'web_logical_location_mapping.json')).readAsStringSync();
+    final Map<String, List<String>> locationMap = parseMapOfListOfString(jsonRaw);
+    final StringBuffer result = StringBuffer();
+    locationMap.forEach((String key, List<String> keyNames) {
+      final String keyStrings = keyNames.map((String keyName) {
+        final String constantName = logicalData.data[keyName]?.constantName;
+        if (constantName == null && keyName != null) {
+          print('Error: $keyName is not a valid key.');
+          return 'null';
+        }
+        return constantName != null ? 'LogicalKeyboardKey.$constantName' : 'null';
+      }).join(', ');
+      result.writeln("  '$key': <LogicalKeyboardKey?>[$keyStrings],");
+    });
+    return result.toString().trimRight();
   }
 
   @override
@@ -370,7 +381,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
       'WEB_LOGICAL_KEY_MAP': webLogicalKeyMap,
       'WEB_PHYSICAL_KEY_MAP': webPhysicalKeyMap,
-      'WEB_NUMPAD_MAP': webNumpadMap,
+      'WEB_LOCATION_MAP': webLocationMap,
       'WINDOWS_LOGICAL_KEY_MAP': windowsKeyCodeMap,
       'WINDOWS_PHYSICAL_KEY_MAP': windowsScanCodeMap,
       'WINDOWS_NUMPAD_MAP': windowsNumpadMap,

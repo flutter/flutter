@@ -2652,11 +2652,41 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
   'Fn': PhysicalKeyboardKey.fn,
 };
 
-/// A map of Web KeyboardEvent codes which have printable representations, but appear
-/// on the number pad. Used to provide different key objects for keys like
-/// KEY_EQUALS and NUMPAD_EQUALS.
-const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKey>{
-
+/// A map of Web KeyboardEvent keys which needs to be decided based on location,
+/// typically for numpad kyes and modifier keys. Used to provide different key
+/// objects for keys like KEY_EQUALS and NUMPAD_EQUALS.
+const Map<String, List<LogicalKeyboardKey?>> kWebLocationMap = <String, List<LogicalKeyboardKey?>>{
+  '0': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit0, null, null, LogicalKeyboardKey.numpad0],
+  '1': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit1, null, null, LogicalKeyboardKey.numpad1],
+  '2': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit2, null, null, LogicalKeyboardKey.numpad2],
+  '3': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit3, null, null, LogicalKeyboardKey.numpad3],
+  '4': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit4, null, null, LogicalKeyboardKey.numpad4],
+  '5': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit5, null, null, LogicalKeyboardKey.numpad5],
+  '6': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit6, null, null, LogicalKeyboardKey.numpad6],
+  '7': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit7, null, null, LogicalKeyboardKey.numpad7],
+  '8': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit8, null, null, LogicalKeyboardKey.numpad8],
+  '9': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit9, null, null, LogicalKeyboardKey.numpad9],
+  '.': <LogicalKeyboardKey?>[LogicalKeyboardKey.period, null, null, LogicalKeyboardKey.numpadDecimal],
+  'Insert': <LogicalKeyboardKey?>[LogicalKeyboardKey.insert, null, null, LogicalKeyboardKey.numpad0],
+  'End': <LogicalKeyboardKey?>[LogicalKeyboardKey.end, null, null, LogicalKeyboardKey.numpad1],
+  'ArrowDown': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowDown, null, null, LogicalKeyboardKey.numpad2],
+  'PageDown': <LogicalKeyboardKey?>[LogicalKeyboardKey.pageDown, null, null, LogicalKeyboardKey.numpad3],
+  'ArrowLeft': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowLeft, null, null, LogicalKeyboardKey.numpad4],
+  'Clear': <LogicalKeyboardKey?>[LogicalKeyboardKey.clear, null, null, LogicalKeyboardKey.numpad5],
+  'ArrowRight': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowRight, null, null, LogicalKeyboardKey.numpad6],
+  'Home': <LogicalKeyboardKey?>[LogicalKeyboardKey.home, null, null, LogicalKeyboardKey.numpad7],
+  'ArrowUp': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowUp, null, null, LogicalKeyboardKey.numpad8],
+  'PageUp': <LogicalKeyboardKey?>[LogicalKeyboardKey.pageUp, null, null, LogicalKeyboardKey.numpad9],
+  'Delete': <LogicalKeyboardKey?>[LogicalKeyboardKey.delete, null, null, LogicalKeyboardKey.numpadDecimal],
+  '/': <LogicalKeyboardKey?>[LogicalKeyboardKey.slash, null, null, LogicalKeyboardKey.numpadDivide],
+  '*': <LogicalKeyboardKey?>[LogicalKeyboardKey.asterisk, null, null, LogicalKeyboardKey.numpadMultiply],
+  '-': <LogicalKeyboardKey?>[LogicalKeyboardKey.minus, null, null, LogicalKeyboardKey.numpadSubtract],
+  '+': <LogicalKeyboardKey?>[LogicalKeyboardKey.add, null, null, LogicalKeyboardKey.numpadAdd],
+  'Enter': <LogicalKeyboardKey?>[LogicalKeyboardKey.enter, null, null, LogicalKeyboardKey.numpadEnter],
+  'Shift': <LogicalKeyboardKey?>[null, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight, null],
+  'Control': <LogicalKeyboardKey?>[null, LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight, null],
+  'Alt': <LogicalKeyboardKey?>[null, LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight, null],
+  'Meta': <LogicalKeyboardKey?>[null, LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight, null],
 };
 
 /// Maps Windows KeyboardEvent codes to the matching [LogicalKeyboardKey].
