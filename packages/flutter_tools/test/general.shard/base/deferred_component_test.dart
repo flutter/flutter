@@ -7,6 +7,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -91,6 +92,25 @@ void main() {
       expect(component.assigned, true);
       expect(component.loadingUnits.length, 0);
     });
+
+    test('toString', () {
+      final DeferredComponent component = DeferredComponent(
+        name: 'bestcomponent',
+        libraries: <String>['lib1', 'lib2'],
+        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+      );
+      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
+    });
+
+    test('toString assigned', () {
+      final DeferredComponent component = DeferredComponent(
+        name: 'bestcomponent',
+        libraries: <String>['lib1', 'lib2'],
+        assets: <Uri>[Uri.file('asset1'), Uri.file('asset2')],
+      );
+      component.assignLoadingUnits(<LoadingUnit>[LoadingUnit(id: 2, libraries: <String>['lib1'])]);
+      expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  LoadingUnits:\n    - 2\n  Assets:\n    - asset1\n    - asset2');
+    });
   });
 
   group('LoadingUnit basics', () {
@@ -169,7 +189,7 @@ void main() {
 ] }
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest);
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
       expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
       expect(loadingUnits[0].id, 2);
       expect(loadingUnits[0].path, '/arm64-v8a/app.so-2.part.so');
@@ -200,9 +220,132 @@ void main() {
 ]
 
 ''', flush: true);
-      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest);
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
       expect(loadingUnits.length, 0);
       expect(loadingUnits.isEmpty, true);
+    });
+
+    testUsingContext('parseLoadingUnitManifest does not exist', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File manifest = fileSystem.file('/manifest.json');
+      if (manifest.existsSync()) {
+        manifest.deleteSync(recursive: true);
+      }
+      final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(manifest, BufferLogger.test());
+      expect(loadingUnits.length, 0);
+      expect(loadingUnits.isEmpty, true);
+    });
+
+    test('parseGeneratedLoadingUnits all abis', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File manifest1 = fileSystem.file('/test-abi1/manifest.json');
+      manifest1.createSync(recursive: true);
+      manifest1.writeAsStringSync(r'''
+{ "loadingUnits": [
+{ "id": 1, "path": "\/test-abi1\/app.so", "libraries": [
+"dart:core"]}
+,
+{ "id": 2, "path": "\/test-abi1\/app.so-2.part.so", "libraries": [
+"lib2"]}
+,
+{ "id": 3, "path": "\/test-abi1\/app.so-3.part.so", "libraries": [
+"lib3", "lib4"]}
+] }
+
+''', flush: true);
+      final File manifest2 = fileSystem.file('/test-abi2/manifest.json');
+      manifest2.createSync(recursive: true);
+      manifest2.writeAsStringSync(r'''
+{ "loadingUnits": [
+{ "id": 1, "path": "\/test-abi2\/app.so", "libraries": [
+"dart:core"]}
+,
+{ "id": 2, "path": "\/test-abi2\/app.so-2.part.so", "libraries": [
+"lib2"]}
+,
+{ "id": 3, "path": "\/test-abi2\/app.so-3.part.so", "libraries": [
+"lib3", "lib4"]}
+] }
+
+''', flush: true);
+      final List<LoadingUnit> loadingUnits =
+          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test());
+      expect(loadingUnits.length, 4); // base module (id 1) is not parsed.
+
+      expect(loadingUnits[0].id, 2);
+      expect(loadingUnits[0].path, '/test-abi2/app.so-2.part.so');
+      expect(loadingUnits[0].libraries.length, 1);
+      expect(loadingUnits[0].libraries[0], 'lib2');
+      expect(loadingUnits[1].id, 3);
+      expect(loadingUnits[1].path, '/test-abi2/app.so-3.part.so');
+      expect(loadingUnits[1].libraries.length, 2);
+      expect(loadingUnits[1].libraries[0], 'lib3');
+      expect(loadingUnits[1].libraries[1], 'lib4');
+
+      expect(loadingUnits[2].id, 2);
+      expect(loadingUnits[2].path, '/test-abi1/app.so-2.part.so');
+      expect(loadingUnits[2].libraries.length, 1);
+      expect(loadingUnits[2].libraries[0], 'lib2');
+      expect(loadingUnits[3].id, 3);
+      expect(loadingUnits[3].path, '/test-abi1/app.so-3.part.so');
+      expect(loadingUnits[3].libraries.length, 2);
+      expect(loadingUnits[3].libraries[0], 'lib3');
+      expect(loadingUnits[3].libraries[1], 'lib4');
+    });
+
+    test('parseGeneratedLoadingUnits all selective abis', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final File manifest1 = fileSystem.file('/test-abi1/manifest.json');
+      manifest1.createSync(recursive: true);
+      manifest1.writeAsStringSync(r'''
+{ "loadingUnits": [
+{ "id": 1, "path": "\/test-abi1\/app.so", "libraries": [
+"dart:core"]}
+,
+{ "id": 2, "path": "\/test-abi1\/app.so-2.part.so", "libraries": [
+"lib2"]}
+,
+{ "id": 3, "path": "\/test-abi1\/app.so-3.part.so", "libraries": [
+"lib3", "lib4"]}
+] }
+
+''', flush: true);
+      final File manifest2 = fileSystem.file('/test-abi2/manifest.json');
+      manifest2.createSync(recursive: true);
+      manifest2.writeAsStringSync(r'''
+{ "loadingUnits": [
+{ "id": 1, "path": "\/test-abi2\/app.so", "libraries": [
+"dart:core"]}
+,
+{ "id": 2, "path": "\/test-abi2\/app.so-2.part.so", "libraries": [
+"lib2"]}
+,
+{ "id": 3, "path": "\/test-abi2\/app.so-3.part.so", "libraries": [
+"lib3", "lib4"]}
+] }
+
+''', flush: true);
+      final List<LoadingUnit> loadingUnits = 
+          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test(), abis: <String>['test-abi2']);
+      expect(loadingUnits.length, 2); // base module (id 1) is not parsed.
+
+      expect(loadingUnits[0].id, 2);
+      expect(loadingUnits[0].path, '/test-abi2/app.so-2.part.so');
+      expect(loadingUnits[0].libraries.length, 1);
+      expect(loadingUnits[0].libraries[0], 'lib2');
+      expect(loadingUnits[1].id, 3);
+      expect(loadingUnits[1].path, '/test-abi2/app.so-3.part.so');
+      expect(loadingUnits[1].libraries.length, 2);
+      expect(loadingUnits[1].libraries[0], 'lib3');
+      expect(loadingUnits[1].libraries[1], 'lib4');
+    });
+
+    test('parseGeneratedLoadingUnits no manifests', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final List<LoadingUnit> loadingUnits =
+          LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test());
+      expect(loadingUnits.isEmpty, true);
+      expect(loadingUnits.length, 0);
     });
   });
 }

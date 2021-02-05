@@ -7,8 +7,8 @@
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 
 /// Represents a configured deferred component as defined in
 /// the app's pubspec.yaml.
@@ -91,19 +91,19 @@ class DeferredComponent {
   /// configuration.
   @override
   String toString() {
-    final StringBuffer out = StringBuffer('\nDeferredComponent: $name\n  Libs:');
+    final StringBuffer out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
     for (final String lib in libraries) {
-      out.write('\n    $lib');
+      out.write('\n    - $lib');
     }
-    out.write('\n  LoadingUnits:');
-    if (loadingUnits != null) {
+    if (loadingUnits != null && _assigned) {
+      out.write('\n  LoadingUnits:');
       for (final LoadingUnit loadingUnit in loadingUnits) {
-        out.write('\n    ${loadingUnit.id}');
+        out.write('\n    - ${loadingUnit.id}');
       }
     }
     out.write('\n  Assets:');
     for (final Uri asset in assets) {
-      out.write('\n    ${asset.path}');
+      out.write('\n    - ${asset.path}');
     }
     return out.toString();
   }
@@ -156,7 +156,7 @@ class LoadingUnit {
   ///
   /// This will read all existing loading units for every provided abi. If no abis are
   /// provided, loading units for all abis will be parsed.
-  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, {List<String> abis}) {
+  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String> abis}) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
     for (final FileSystemEntity fileEntity in files) {
@@ -175,7 +175,7 @@ class LoadingUnit {
         if (!file.path.endsWith('manifest.json') || !matchingAbi) {
           continue;
         }
-        loadingUnits.addAll(parseLoadingUnitManifest(file));
+        loadingUnits.addAll(parseLoadingUnitManifest(file, logger));
       }
     }
     return loadingUnits;
@@ -184,7 +184,7 @@ class LoadingUnit {
   /// Parses loading units from a single loading unit manifest json file.
   ///
   /// Returns an empty list if the manifestFile does not exist or is invalid.
-  static List<LoadingUnit> parseLoadingUnitManifest(File manifestFile) {
+  static List<LoadingUnit> parseLoadingUnitManifest(File manifestFile, Logger logger) {
     if (!manifestFile.existsSync()) {
       return <LoadingUnit>[];
     }
@@ -194,7 +194,7 @@ class LoadingUnit {
     try {
       manifest = jsonDecode(fileString) as Map<String, dynamic>;
     } on FormatException catch (e) {
-      globals.printError('Loading unit manifest at `${manifestFile.path}` was invalid JSON:\n$e');
+      logger.printError('Loading unit manifest at `${manifestFile.path}` was invalid JSON:\n$e');
     }
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     // Setup android source directory
