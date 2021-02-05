@@ -20,6 +20,8 @@ const ConductorState$json = const {
     const {'1': 'releaseChannel', '3': 1, '4': 1, '5': 9, '10': 'releaseChannel'},
     const {'1': 'engine', '3': 2, '4': 1, '5': 11, '6': '.conductor_state.Repository', '10': 'engine'},
     const {'1': 'framework', '3': 3, '4': 1, '5': 11, '6': '.conductor_state.Repository', '10': 'framework'},
+    const {'1': 'createdDate', '3': 4, '4': 1, '5': 3, '10': 'createdDate'},
+    const {'1': 'lastUpdatedDate', '3': 5, '4': 1, '5': 3, '10': 'lastUpdatedDate'},
   ],
 };
 

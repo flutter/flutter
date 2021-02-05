@@ -14,10 +14,20 @@ String defaultStateFilePath(Platform platform) {
 }
 
 void presentState(Stdio stdio, pb.ConductorState state) {
-  stdio.printStatus('\nFlutter Conductor Status\n');
-  stdio.printStatus('Release channel:\t\t${state.releaseChannel}\n');
+  stdio.printStatus('Flutter Conductor Status\n');
+  stdio.printStatus('Release channel: ${state.releaseChannel}');
+  stdio.printStatus('');
+  stdio.printStatus(
+      'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
+  stdio.printStatus(
+      'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
+  stdio.printStatus('');
   stdio.printStatus('Engine Repo');
-  stdio.printStatus('\tCandidate branch${state.engine.candidateBranch}');
+  stdio.printStatus('\tCandidate branch: ${state.engine.candidateBranch}');
+  stdio.printStatus('\tPrevious git HEAD: ${state.engine.previousGitHead}');
+  stdio.printStatus('\tPath to checkout: ${state.engine.checkoutPath}');
   stdio.printStatus('Framework Repo');
-  stdio.printStatus('\tCandidate branch${state.framework.candidateBranch}');
+  stdio.printStatus('\tCandidate branch: ${state.framework.candidateBranch}');
+  stdio.printStatus('\tPrevious git HEAD: ${state.framework.previousGitHead}');
+  stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
 }

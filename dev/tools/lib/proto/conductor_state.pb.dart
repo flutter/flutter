@@ -7,6 +7,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Repository extends $pb.GeneratedMessage {
@@ -89,6 +90,8 @@ class ConductorState extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseChannel', protoName: 'releaseChannel')
     ..aOM<Repository>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'engine', subBuilder: Repository.create)
     ..aOM<Repository>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'framework', subBuilder: Repository.create)
+    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdDate', protoName: 'createdDate')
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastUpdatedDate', protoName: 'lastUpdatedDate')
     ..hasRequiredFields = false
   ;
 
@@ -97,6 +100,8 @@ class ConductorState extends $pb.GeneratedMessage {
     $core.String releaseChannel,
     Repository engine,
     Repository framework,
+    $fixnum.Int64 createdDate,
+    $fixnum.Int64 lastUpdatedDate,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -107,6 +112,12 @@ class ConductorState extends $pb.GeneratedMessage {
     }
     if (framework != null) {
       _result.framework = framework;
+    }
+    if (createdDate != null) {
+      _result.createdDate = createdDate;
+    }
+    if (lastUpdatedDate != null) {
+      _result.lastUpdatedDate = lastUpdatedDate;
     }
     return _result;
   }
@@ -161,5 +172,23 @@ class ConductorState extends $pb.GeneratedMessage {
   void clearFramework() => clearField(3);
   @$pb.TagNumber(3)
   Repository ensureFramework() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get createdDate => $_getI64(3);
+  @$pb.TagNumber(4)
+  set createdDate($fixnum.Int64 v) { $_setInt64(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCreatedDate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCreatedDate() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get lastUpdatedDate => $_getI64(4);
+  @$pb.TagNumber(5)
+  set lastUpdatedDate($fixnum.Int64 v) { $_setInt64(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasLastUpdatedDate() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearLastUpdatedDate() => clearField(5);
 }
 

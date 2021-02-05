@@ -23,6 +23,10 @@ const List<String> kReleaseChannels = <String>[
   'master',
 ];
 
+final RegExp releaseCandidateBranchRegex = RegExp(
+  r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
+);
+
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
   final String str = input as String;

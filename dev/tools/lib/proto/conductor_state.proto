@@ -3,8 +3,9 @@ syntax = "proto3";
 package conductor_state;
 
 message Repository {
-  // The git branch used for applying cherrypicks before being pushed to the
-  // release branch.
+  // The development git branch the release is based on.
+  //
+  // Must be of the form /flutter-(\d+)\.(\d+)-candidate\.(\d+)/
   string candidateBranch = 1;
 
   // The commit hash at the tip of the branch before cherrypicks were applied.
@@ -15,7 +16,16 @@ message Repository {
 }
 
 message ConductorState {
+  // One of 'stable', 'beta', or 'dev'
   string releaseChannel = 1;
-  Repository engine = 2;
-  Repository framework = 3;
+
+  // The name of the release.
+  string releaseVersion = 2;
+
+  Repository engine = 4;
+  Repository framework = 5;
+  int64 createdDate = 6;
+  int64 lastUpdatedDate = 7;
+
+  repeated string logs = 8;
 }
