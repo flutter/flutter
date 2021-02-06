@@ -41,7 +41,7 @@ Future<TaskResult> analyzerBenchmarkTask() async {
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'microbenchmarks')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'platform_views_layout_hybrid_composition')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'test_apps')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'test_apps', 'stocks')),
         Directory(path.join(flutterDirectory.path, 'dev', 'customer_testing')),
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flutter_gallery')),
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'hybrid_android_views')),
