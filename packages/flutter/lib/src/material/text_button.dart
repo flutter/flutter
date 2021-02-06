@@ -103,7 +103,7 @@ import 'theme_data.dart';
 ///     ),
 ///   );
 /// }
-/// 
+///
 /// ```
 /// {@end-tool}
 ///
