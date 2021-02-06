@@ -24,7 +24,7 @@ Future<TaskResult> analyzerBenchmarkTask() async {
   await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
-    final Directory toolsDirectory = Directory(path.join('dev', 'tools'));
+    final Directory toolsDirectory = Directory(path.join(flutterDirectory.path, 'dev', 'tools'));
     await inDirectory<void>(toolsDirectory, () async {
       await flutter('pub', options: <String>['get']);
     });
