@@ -10,7 +10,8 @@ Flutter build results are available at:
 * https://ci.chromium.org/p/flutter/
   - Additional testing and processing are done after changes are submitted.
 
-The LUCI infra requires permissions to retrigger or schedule builds. File an
+Flutter infra requires special permissions to retrigger builds on the
+[build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
 [infra ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue) to
 request permission.
 
