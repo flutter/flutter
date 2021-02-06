@@ -148,18 +148,21 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
                 onError: (Error error) {
                   stderrDone.completeError(error);
                 });
-
+            print('zzzzz1');
             await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future], eagerError: true);
+            print('zzzzz2');
             await process.exitCode;
+            print('zzzzz3');
 
             freshRestartReloadsData = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
           }
         });
       } finally {
         flutterFrameworkSource.writeAsStringSync(oldContents);
+        print('zzzzz4');
       }
     });
-
+    print('zzzzz5');
     return TaskResult.success(
       <String, dynamic>{
         'hotReloadInitialDevFSSyncMilliseconds': smallReloadData['hotReloadInitialDevFSSyncMilliseconds'][0],
