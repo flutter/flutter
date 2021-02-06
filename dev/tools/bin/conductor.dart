@@ -12,6 +12,7 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:dev_tools/abort.dart';
 import 'package:dev_tools/codesign.dart';
+import 'package:dev_tools/doctor.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/logs.dart';
 import 'package:dev_tools/roll_dev.dart';
@@ -72,6 +73,7 @@ Future<void> main(List<String> args) async {
     LogsCommand(
       checkouts: checkouts,
     ),
+    DoctorCommand(checkouts: checkouts),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
