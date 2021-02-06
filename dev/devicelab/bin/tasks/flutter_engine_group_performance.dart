@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/utils.dart' as utils;
 import 'package:flutter_devicelab/tasks/perf_tests.dart' show ListStatistics;
 import 'package:path/path.dart' as path;
 
@@ -43,35 +44,22 @@ Future<void> _withApkInstall(
 
 Future<TaskResult> _doTest() async {
   try {
-    final List<String> scriptPathComponents = path.split(Platform.script.path);
-    final List<String> multipleFluttersPath =
-        scriptPathComponents.sublist(0, scriptPathComponents.length - 4);
-    multipleFluttersPath.addAll(<String>['benchmarks', 'multiple_flutters']);
-    final String modulePath =
-        path.joinAll(multipleFluttersPath + <String>['module']);
-    final String androidPath =
-        path.joinAll(multipleFluttersPath + <String>['android']);
+    final String flutterDirectory = utils.flutterDirectory.path;
+    final String multipleFluttersPath =
+        path.join(flutterDirectory, 'dev', 'benchmarks', 'multiple_flutters');
+    final String modulePath = path.join(multipleFluttersPath, 'module');
+    final String androidPath = path.join(multipleFluttersPath, 'android');
 
     final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final String gradlewExecutable =
         Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-    final String flutterPath = path.join(
-        Directory(Platform.script.path).parent.parent.parent.parent.parent.path,
-        'bin',
-        'flutter');
+    final String flutterPath = path.join(flutterDirectory, 'bin', 'flutter');
     await _run(flutterPath, <String>['pub', 'get'], modulePath);
     await _run(gradlewExecutable, <String>['assembleRelease'], androidPath);
 
-    final String apkPath = path.joinAll(multipleFluttersPath +
-        <String>[
-          'android',
-          'app',
-          'build',
-          'outputs',
-          'apk',
-          'release',
-          'app-release.apk'
-        ]);
+    final String apkPath = path.join(multipleFluttersPath, 'android', 'app',
+        'build', 'outputs', 'apk', 'release', 'app-release.apk');
+    print('foo: $apkPath');
 
     TaskResult result;
     await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
