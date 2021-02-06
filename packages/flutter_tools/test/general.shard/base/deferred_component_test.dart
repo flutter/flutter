@@ -25,7 +25,7 @@ void main() {
       expect(component.assets, <Uri>[Uri.file('asset1'), Uri.file('asset2')]);
     });
 
-    test('assignLoadingUnits', () {
+    test('assignLoadingUnits selects the needed loading units and sets assigned', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
@@ -93,7 +93,7 @@ void main() {
       expect(component.loadingUnits.length, 0);
     });
 
-    test('toString', () {
+    test('toString produces correct string for unassigned component', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
@@ -102,7 +102,7 @@ void main() {
       expect(component.toString(), '\nDeferredComponent: bestcomponent\n  Libraries:\n    - lib1\n    - lib2\n  Assets:\n    - asset1\n    - asset2');
     });
 
-    test('toString assigned', () {
+    test('toString produces correct string for assigned component', () {
       final DeferredComponent component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
@@ -125,7 +125,7 @@ void main() {
       expect(unit.libraries, <String>['lib1', 'lib4']);
     });
 
-    test('toString', () {
+    test('toString produces correct string', () {
       final LoadingUnit unit = LoadingUnit(
         id: 2,
         path: 'path/to/so.so',
@@ -134,7 +134,7 @@ void main() {
       expect(unit.toString(),'\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
-    test('equalsIgnoringPath', () {
+    test('equalsIgnoringPath works for various input', () {
       final LoadingUnit unit1 = LoadingUnit(
         id: 2,
         path: 'path/to/so.so',
@@ -172,7 +172,7 @@ void main() {
       expect(unit5.equalsIgnoringPath(unit6), false);
     });
 
-    test('parseLoadingUnitManifest', () {
+    test('parseLoadingUnitManifest parses single manifest file', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final File manifest = fileSystem.file('/manifest.json');
       manifest.createSync(recursive: true);
@@ -202,7 +202,7 @@ void main() {
       expect(loadingUnits[1].libraries[1], 'lib4');
     });
 
-    testUsingContext('parseLoadingUnitManifest invalid', () {
+    testUsingContext('parseLoadingUnitManifest returns empty when manifest is invalid JSON', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final File manifest = fileSystem.file('/manifest.json');
       manifest.createSync(recursive: true);
@@ -236,7 +236,7 @@ void main() {
       expect(loadingUnits.isEmpty, true);
     });
 
-    test('parseGeneratedLoadingUnits all abis', () {
+    test('parseGeneratedLoadingUnits parses all abis if no abis provided', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final File manifest1 = fileSystem.file('/test-abi1/manifest.json');
       manifest1.createSync(recursive: true);
@@ -293,7 +293,7 @@ void main() {
       expect(loadingUnits[3].libraries[1], 'lib4');
     });
 
-    test('parseGeneratedLoadingUnits all selective abis', () {
+    test('parseGeneratedLoadingUnits only parses provided abis', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final File manifest1 = fileSystem.file('/test-abi1/manifest.json');
       manifest1.createSync(recursive: true);
@@ -340,7 +340,7 @@ void main() {
       expect(loadingUnits[1].libraries[1], 'lib4');
     });
 
-    test('parseGeneratedLoadingUnits no manifests', () {
+    test('parseGeneratedLoadingUnits returns empty when no manifest files exist', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final List<LoadingUnit> loadingUnits =
           LoadingUnit.parseGeneratedLoadingUnits(fileSystem.directory('/'), BufferLogger.test());

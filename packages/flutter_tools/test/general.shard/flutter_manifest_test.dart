@@ -1145,7 +1145,7 @@ flutter:
     expect(logger.errorText, 'Expected "licenses" to be a list of files, but element 1 was a YamlMap\n');
   });
 
-  testWithoutContext('FlutterManifest parses deferred components', () async {
+  testWithoutContext('FlutterManifest parses single deferred components', () async {
     const String manifest = '''
 name: test
 dependencies:
@@ -1165,7 +1165,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest == null, false);
+    expect(flutterManifest, isNotNull);
     expect(flutterManifest.deferredComponents.length, 1);
     expect(flutterManifest.deferredComponents[0].name, 'component1');
     expect(flutterManifest.deferredComponents[0].libraries.length, 1);
@@ -1200,7 +1200,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest == null, false);
+    expect(flutterManifest, isNotNull);
     expect(flutterManifest.deferredComponents.length, 2);
     expect(flutterManifest.deferredComponents[0].name, 'component1');
     expect(flutterManifest.deferredComponents[0].libraries.length, 1);
@@ -1231,7 +1231,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest == null, false);
+    expect(flutterManifest, isNotNull);
     expect(flutterManifest.deferredComponents.length, 0);
   });
 
@@ -1432,7 +1432,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest == null, false);
+    expect(flutterManifest, isNotNull);
     expect(flutterManifest.deferredComponents.length, 1);
     expect(flutterManifest.deferredComponents[0].name, 'component1');
     expect(flutterManifest.deferredComponents[0].libraries.length, 0);

@@ -365,7 +365,7 @@ void main() {
       .childFile('app.so').existsSync(), true);
   });
 
-  test('copyDeferredComponentSoFiles', () {
+  test('copyDeferredComponentSoFiles copies all files to correct locations', () {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('/out')..createSync(),
@@ -379,23 +379,23 @@ void main() {
     );
     final File so1 = fileSystem.file('/unit2/abi1/part.so');
     so1.createSync(recursive: true);
-    so1.writeAsStringSync('lib1', flush: true);
+    so1.writeAsStringSync('lib1');
     final File so2 = fileSystem.file('/unit3/abi1/part.so');
     so2.createSync(recursive: true);
-    so2.writeAsStringSync('lib2', flush: true);
+    so2.writeAsStringSync('lib2');
     final File so3 = fileSystem.file('/unit4/abi1/part.so');
     so3.createSync(recursive: true);
-    so3.writeAsStringSync('lib3', flush: true);
+    so3.writeAsStringSync('lib3');
 
     final File so4 = fileSystem.file('/unit2/abi2/part.so');
     so4.createSync(recursive: true);
-    so4.writeAsStringSync('lib1', flush: true);
+    so4.writeAsStringSync('lib1');
     final File so5 = fileSystem.file('/unit3/abi2/part.so');
     so5.createSync(recursive: true);
-    so5.writeAsStringSync('lib2', flush: true);
+    so5.writeAsStringSync('lib2');
     final File so6 = fileSystem.file('/unit4/abi2/part.so');
     so6.createSync(recursive: true);
-    so6.writeAsStringSync('lib3', flush: true);
+    so6.writeAsStringSync('lib3');
 
     final List<DeferredComponent> components = <DeferredComponent>[
       DeferredComponent(name: 'component2', libraries: <String>['lib1']),
@@ -427,9 +427,20 @@ void main() {
     );
     expect(depfile.inputs.length, 6);
     expect(depfile.outputs.length, 6);
-    for (int i = 0; i < 6; i++) {
-      expect(depfile.inputs[i].readAsStringSync(), depfile.outputs[i].readAsStringSync());
-    }
+
+    expect(depfile.inputs[0].path, so1.path);
+    expect(depfile.inputs[1].path, so2.path);
+    expect(depfile.inputs[2].path, so4.path);
+    expect(depfile.inputs[3].path, so5.path);
+    expect(depfile.inputs[4].path, so3.path);
+    expect(depfile.inputs[5].path, so6.path);
+
+    expect(depfile.outputs[0].readAsStringSync(), so1.readAsStringSync());
+    expect(depfile.outputs[1].readAsStringSync(), so2.readAsStringSync());
+    expect(depfile.outputs[2].readAsStringSync(), so4.readAsStringSync());
+    expect(depfile.outputs[3].readAsStringSync(), so5.readAsStringSync());
+    expect(depfile.outputs[4].readAsStringSync(), so3.readAsStringSync());
+    expect(depfile.outputs[5].readAsStringSync(), so6.readAsStringSync());
 
     expect(depfile.outputs[0].path, '/build/component2/intermediates/flutter/release/deferred_libs/abi1/libapp.so-2.part.so');
     expect(depfile.outputs[1].path, '/build/component3/intermediates/flutter/release/deferred_libs/abi1/libapp.so-3.part.so');
@@ -441,7 +452,7 @@ void main() {
     expect(depfile.outputs[5].path, '/out/abi2/app.so-4.part.so');
   });
 
-  test('copyDeferredComponentSoFiles abi filtered', () {
+  test('copyDeferredComponentSoFiles copies files for only listed abis', () {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('/out')..createSync(),
@@ -455,23 +466,23 @@ void main() {
     );
     final File so1 = fileSystem.file('/unit2/abi1/part.so');
     so1.createSync(recursive: true);
-    so1.writeAsStringSync('lib1', flush: true);
+    so1.writeAsStringSync('lib1');
     final File so2 = fileSystem.file('/unit3/abi1/part.so');
     so2.createSync(recursive: true);
-    so2.writeAsStringSync('lib2', flush: true);
+    so2.writeAsStringSync('lib2');
     final File so3 = fileSystem.file('/unit4/abi1/part.so');
     so3.createSync(recursive: true);
-    so3.writeAsStringSync('lib3', flush: true);
+    so3.writeAsStringSync('lib3');
 
     final File so4 = fileSystem.file('/unit2/abi2/part.so');
     so4.createSync(recursive: true);
-    so4.writeAsStringSync('lib1', flush: true);
+    so4.writeAsStringSync('lib1');
     final File so5 = fileSystem.file('/unit3/abi2/part.so');
     so5.createSync(recursive: true);
-    so5.writeAsStringSync('lib2', flush: true);
+    so5.writeAsStringSync('lib2');
     final File so6 = fileSystem.file('/unit4/abi2/part.so');
     so6.createSync(recursive: true);
-    so6.writeAsStringSync('lib3', flush: true);
+    so6.writeAsStringSync('lib3');
 
     final List<DeferredComponent> components = <DeferredComponent>[
       DeferredComponent(name: 'component2', libraries: <String>['lib1']),
@@ -503,9 +514,14 @@ void main() {
     );
     expect(depfile.inputs.length, 3);
     expect(depfile.outputs.length, 3);
-    for (int i = 0; i < 3; i++) {
-      expect(depfile.inputs[i].readAsStringSync(), depfile.outputs[i].readAsStringSync());
-    }
+
+    expect(depfile.inputs[0].path, so1.path);
+    expect(depfile.inputs[1].path, so2.path);
+    expect(depfile.inputs[2].path, so3.path);
+
+    expect(depfile.outputs[0].readAsStringSync(), so1.readAsStringSync());
+    expect(depfile.outputs[1].readAsStringSync(), so2.readAsStringSync());
+    expect(depfile.outputs[2].readAsStringSync(), so3.readAsStringSync());
 
     expect(depfile.outputs[0].path, '/build/component2/intermediates/flutter/release/deferred_libs/abi1/libapp.so-2.part.so');
     expect(depfile.outputs[1].path, '/build/component3/intermediates/flutter/release/deferred_libs/abi1/libapp.so-3.part.so');
