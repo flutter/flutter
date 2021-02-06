@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Rolls the dev channel.
-// Only tested on Linux.
-//
 // See: https://github.com/flutter/flutter/wiki/Release-process
 
 import 'dart:io' as io;

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show jsonDecode;
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -11,7 +9,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import './globals.dart' show ConductorException;
-//import './proto/conductor_state.pb.dart' as pb;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
@@ -51,15 +48,6 @@ class DoctorCommand extends Command<void> {
     }
 
     stdio.printStatus('Your local setup is ready to conduct a Flutter release.');
-    //final File stateFile = fileSystem.file(argResults['state-file']);
-    //if (!stateFile.existsSync()) {
-    //  throw ConductorException('No persistent state file found at ${stateFile.path}.');
-    //}
-    //final pb.ConductorState state = pb.ConductorState()
-    //  ..mergeFromProto3Json(
-    //    jsonDecode(stateFile.readAsStringSync()),
-    //  );
-    //state.logs.forEach(stdio.printStatus);
   }
 }
 
