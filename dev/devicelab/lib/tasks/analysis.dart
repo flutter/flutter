@@ -70,6 +70,7 @@ Future<TaskResult> analyzerBenchmarkTask() async {
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web')),
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web_e2e_tests')),
         Directory(path.join(flutterDirectory.path, 'dev', 'manual_tests')),
+	Directory(path.join(flutterDirectory.path, 'examples', 'platform_channel_swift')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_driver')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_localizations')),
@@ -77,7 +78,6 @@ Future<TaskResult> analyzerBenchmarkTask() async {
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_web_plugins')),
         Directory(path.join(flutterDirectory.path, 'packages', 'fuchsia_remote_debug_protocol')),
         Directory(path.join(flutterDirectory.path, 'packages', 'integration_test')),
-	Directory(path.join(flutterDirectory.path, 'packages', 'platform_channel_swift')),
       ]);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
