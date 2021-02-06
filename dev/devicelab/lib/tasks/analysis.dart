@@ -36,7 +36,7 @@ Future<TaskResult> analyzerBenchmarkTask() async {
       <Directory>[
         Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
         Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layouts')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout')),
       ]);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
