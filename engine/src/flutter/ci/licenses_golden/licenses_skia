@@ -1,4 +1,4 @@
-Signature: eebbe431c9ae40fcb37e4c592bd30223
+Signature: 50b6fd56646db2658062d2081abccf47
 
 UNUSED LICENSES:
 
@@ -2563,6 +2563,8 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexture.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTextureRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkTransferBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkTransferBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkUtil.h
 FILE: ../../../third_party/skia/src/image/SkImage_Gpu.h
@@ -5256,6 +5258,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
+FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
