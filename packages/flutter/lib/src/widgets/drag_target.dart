@@ -76,7 +76,7 @@ typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildC
 /// dragStartPoint for the Draggable feedback. When it is [DragAnchor.child] the
 /// RenderBox of the Draggable. When it is [DragAnchor.pointer] it is simply
 /// Offset(0, 0). This strategy can be overridden by passing a function as the
-/// parameter [dragAnchorStrategy] which follows the [DragAnchorStrategy]
+/// parameter dragAnchorStrategy which follows the [DragAnchorStrategy]
 /// signature.
 Offset defaultDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   switch (draggable.dragAnchor) {
