@@ -20,14 +20,24 @@ const int _kRunsPerBenchmark = 3;
 /// Path to the generated "mega gallery" app.
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
+Future<void> pubGetDependencies(List<Directory> directories) async {
+  for (final Directory directory in directories) {
+    await inDirectory<void>(directory, () async {
+      await flutter('pub', options: <String>['get']);
+    });
+  }
+}
+
 Future<TaskResult> analyzerBenchmarkTask() async {
   await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
-    final Directory toolsDirectory = Directory(path.join(flutterDirectory.path, 'dev', 'tools'));
-    await inDirectory<void>(toolsDirectory, () async {
-      await flutter('pub', options: <String>['get']);
-    });
+    await pubGetDependencies(
+      <Directory>[
+        Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layouts')),
+      ]);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
