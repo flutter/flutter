@@ -73,6 +73,7 @@ abstract class _Benchmark {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
     final Stopwatch stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {
+      await flutter('pub', options: <String>['get']);
       stopwatch.start();
       await flutter('analyze', options: options);
       stopwatch.stop();
