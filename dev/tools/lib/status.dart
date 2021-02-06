@@ -14,17 +14,27 @@ import './repository.dart';
 import './state.dart';
 import './stdio.dart';
 
+const String kVerboseFlag = 'verbose';
+const String kStateOption = 'state-file';
+
 /// Command to print the status of the current Flutter release.
 class StatusCommand extends Command<void> {
   StatusCommand({
     @required this.checkouts,
     @required this.stdio,
-    }) : platform = checkouts.platform, fileSystem = checkouts.fileSystem {
+  })  : platform = checkouts.platform,
+        fileSystem = checkouts.fileSystem {
     final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
-        'state-file',
-        defaultsTo: defaultPath,
-        help: 'Path to persistent state file. Defaults to $defaultPath',
+      kStateOption,
+      defaultsTo: defaultPath,
+      help: 'Path to persistent state file. Defaults to $defaultPath',
+    );
+    argParser.addFlag(
+      kVerboseFlag,
+      abbr: 'v',
+      defaultsTo: false,
+      help: 'Also print logs.',
     );
   }
 
@@ -41,14 +51,18 @@ class StatusCommand extends Command<void> {
 
   @override
   void run() {
-    final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
-    if (stateFile.existsSync()) {
-      final pb.ConductorState state = pb.ConductorState()..mergeFromProto3Json(
-        jsonDecode(stateFile.readAsStringSync()),
-      );
-      presentState(stdio, state);
-    } else {
-      stdio.printStatus('No persistent state file found at ${argResults['state-file']}.');
+    final File stateFile = checkouts.fileSystem.file(argResults[kStateOption]);
+    if (!stateFile.existsSync()) {
+      stdio.printStatus(
+          'No persistent state file found at ${argResults[kStateOption]}.');
+      return;
+    }
+    final pb.ConductorState state = pb.ConductorState();
+    state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
+    presentState(stdio, state);
+    if (argResults[kVerboseFlag] as bool) {
+      stdio.printStatus('\nLogs:');
+      state.logs.forEach(stdio.printStatus);
     }
   }
 }
