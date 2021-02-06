@@ -1,4 +1,4 @@
-Signature: 2ae39b75ec5b1e3b457b4c8614d626bb
+Signature: eebbe431c9ae40fcb37e4c592bd30223
 
 UNUSED LICENSES:
 
@@ -2563,8 +2563,6 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexture.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTextureRenderTarget.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkTransferBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkTransferBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkUtil.h
 FILE: ../../../third_party/skia/src/image/SkImage_Gpu.h
