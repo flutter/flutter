@@ -59,7 +59,6 @@ Future<TaskResult> _doTest() async {
 
     final String apkPath = path.join(multipleFluttersPath, 'android', 'app',
         'build', 'outputs', 'apk', 'release', 'app-release.apk');
-    print('foo: $apkPath');
 
     TaskResult result;
     await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
