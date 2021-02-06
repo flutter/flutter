@@ -48,7 +48,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     Map<String, dynamic> mediumReloadData;
     Map<String, dynamic> largeReloadData;
     Map<String, dynamic> freshRestartReloadsData;
-
+    print('zzzzz0');
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
@@ -112,7 +112,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               process.stdin.writeln('q');
             }
           });
-
+          print('zzzzz0.1');
           // Start `flutter run` again to make sure it loads from the previous
           // state. Frontend loads up from previously generated kernel files.
           {
