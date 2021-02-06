@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 const String _kFlutterUA = 'UA-67589403-6';
@@ -79,23 +81,20 @@ abstract class Usage {
     String configDirOverride,
     String logFile,
     AnalyticsFactory analyticsIOFactory,
+    FirstRunMessenger firstRunMessenger,
     @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
                       logFile: logFile,
                       analyticsIOFactory: analyticsIOFactory,
-                      runningOnBot: runningOnBot);
-
-  factory Usage.test() => _DefaultUsage.test();
+                      runningOnBot: runningOnBot,
+                      firstRunMessenger: firstRunMessenger);
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, Object> parameters,
   }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
-
-  /// Whether this is the first run of the tool.
-  bool get isFirstRun;
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
@@ -191,6 +190,7 @@ class _DefaultUsage implements Usage {
     String configDirOverride,
     String logFile,
     AnalyticsFactory analyticsIOFactory,
+    @required this.firstRunMessenger,
     @required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
@@ -202,7 +202,7 @@ class _DefaultUsage implements Usage {
     analyticsIOFactory ??= _defaultAnalyticsIOFactory;
     _clock = globals.systemClock;
 
-    if (// To support testing, only allow other signals to supress analytics
+    if (// To support testing, only allow other signals to suppress analytics
         // when analytics are not being shunted to a file.
         !usingLogFile && (
         // Ignore local user branches.
@@ -274,19 +274,12 @@ class _DefaultUsage implements Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
 
-  _DefaultUsage.test() :
-      _suppressAnalytics = false,
-      _analytics = AnalyticsMock(true),
-      _clock = SystemClock.fixed(DateTime(2020, 10, 8));
-
   Analytics _analytics;
+  final FirstRunMessenger firstRunMessenger;
 
   bool _printedWelcome = false;
   bool _suppressAnalytics = false;
   SystemClock _clock;
-
-  @override
-  bool get isFirstRun => _analytics.firstRun;
 
   @override
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
@@ -383,52 +376,19 @@ class _DefaultUsage implements Usage {
     await _analytics.waitForLastPing(timeout: const Duration(milliseconds: 250));
   }
 
-  void _printWelcome() {
-    globals.printStatus('');
-    globals.printStatus('''
-  ╔════════════════════════════════════════════════════════════════════════════╗
-  ║                 Welcome to Flutter! - https://flutter.dev                  ║
-  ║                                                                            ║
-  ║ The Flutter tool uses Google Analytics to anonymously report feature usage ║
-  ║ statistics and basic crash reports. This data is used to help improve      ║
-  ║ Flutter tools over time.                                                   ║
-  ║                                                                            ║
-  ║ Flutter tool analytics are not sent on the very first run. To disable      ║
-  ║ reporting, type 'flutter config --no-analytics'. To display the current    ║
-  ║ setting, type 'flutter config'. If you opt out of analytics, an opt-out    ║
-  ║ event will be sent, and then no further information will be sent by the    ║
-  ║ Flutter tool.                                                              ║
-  ║                                                                            ║
-  ║ By downloading the Flutter SDK, you agree to the Google Terms of Service.  ║
-  ║ Note: The Google Privacy Policy describes how data is handled in this      ║
-  ║ service.                                                                   ║
-  ║                                                                            ║
-  ║ Moreover, Flutter includes the Dart SDK, which may send usage metrics and  ║
-  ║ crash reports to Google.                                                   ║
-  ║                                                                            ║
-  ║ Read about data we send with crash reports:                                ║
-  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
-  ║                                                                            ║
-  ║ See Google's privacy policy:                                               ║
-  ║ https://policies.google.com/privacy                                        ║
-  ╚════════════════════════════════════════════════════════════════════════════╝
-  ''', emphasis: true);
-  }
-
   @override
   void printWelcome() {
     // Only print once per run.
     if (_printedWelcome) {
       return;
     }
-    if (// Display the welcome message if this is the first run of the tool.
-        isFirstRun ||
-        // Display the welcome message if we are not on master, and if the
-        // persistent tool state instructs that we should.
-        (globals.persistentToolState.redisplayWelcomeMessage ?? true)) {
-      _printWelcome();
+    // Display the welcome message if this is the first run of the tool or if
+    // the license terms have changed since it was last displayed.
+    if (firstRunMessenger != null && firstRunMessenger.shouldDisplayLicenseTerms() ?? true) {
+      globals.printStatus('');
+      globals.printStatus(firstRunMessenger.licenseTerms, emphasis: true);
       _printedWelcome = true;
-      globals.persistentToolState.redisplayWelcomeMessage = false;
+      firstRunMessenger.confirmLicenseTermsDisplayed();
     }
   }
 }
@@ -500,4 +460,165 @@ class LogToFileAnalytics extends AnalyticsMock {
   void setSessionValue(String param, dynamic value) {
     _sessionValues[param] = value.toString();
   }
+}
+
+
+/// Create a testing Usage instance.
+///
+/// All sent events, exceptions, timings, and pages are
+/// buffered on the object and can be inspected later.
+@visibleForTesting
+class TestUsage implements Usage {
+  final List<TestUsageCommand> commands = <TestUsageCommand>[];
+  final List<TestUsageEvent> events = <TestUsageEvent>[];
+  final List<dynamic> exceptions = <dynamic>[];
+  final List<TestTimingEvent> timings = <TestTimingEvent>[];
+  int ensureAnalyticsSentCalls = 0;
+
+  @override
+  bool enabled = true;
+
+  @override
+  bool suppressAnalytics = false;
+
+  @override
+  String get clientId => 'test-client';
+
+  @override
+  Future<void> ensureAnalyticsSent() async {
+    ensureAnalyticsSentCalls++;
+  }
+
+  @override
+  Stream<Map<String, dynamic>> get onSend => throw UnimplementedError();
+
+  @override
+  void printWelcome() { }
+
+  @override
+  void sendCommand(String command, {Map<String, String> parameters}) {
+    commands.add(TestUsageCommand(command, parameters: parameters));
+  }
+
+  @override
+  void sendEvent(String category, String parameter, {String label, int value, Map<String, String> parameters}) {
+    events.add(TestUsageEvent(category, parameter, label: label, value: value, parameters: parameters));
+  }
+
+  @override
+  void sendException(dynamic exception) {
+    exceptions.add(exception);
+  }
+
+  @override
+  void sendTiming(String category, String variableName, Duration duration, {String label}) {
+    timings.add(TestTimingEvent(category, variableName, duration, label: label));
+  }
+}
+
+@visibleForTesting
+@immutable
+class TestUsageCommand {
+  const TestUsageCommand(this.command, {this.parameters});
+
+  final String command;
+  final Map<String, String> parameters;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestUsageCommand &&
+      other.command == command &&
+      _mapsEqual(other.parameters, parameters);
+  }
+
+  @override
+  int get hashCode => command.hashCode ^ parameters.hashCode;
+
+  @override
+  String toString() => 'TestUsageCommand($command, parameters:$parameters)';
+}
+
+@visibleForTesting
+@immutable
+class TestUsageEvent {
+  const TestUsageEvent(this.category, this.parameter, {this.label, this.value, this.parameters});
+
+  final String category;
+  final String parameter;
+  final String label;
+  final int value;
+  final Map<String, String> parameters;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestUsageEvent &&
+      other.category == category &&
+      other.parameter == parameter &&
+      other.label == label &&
+      other.value == value &&
+      _mapsEqual(other.parameters, parameters);
+  }
+
+  @override
+  int get hashCode => category.hashCode ^
+    parameter.hashCode ^
+    label.hashCode ^
+    value.hashCode ^
+    parameters.hashCode;
+
+  @override
+  String toString() => 'TestUsageEvent($category, $parameter, label:$label, value:$value, parameters:$parameters)';
+}
+
+@visibleForTesting
+@immutable
+class TestTimingEvent {
+  const TestTimingEvent(this.category, this.variableName, this.duration, {this.label});
+
+  final String category;
+  final String variableName;
+  final Duration duration;
+  final String label;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestTimingEvent &&
+      other.category == category &&
+      other.variableName == variableName &&
+      other.duration == duration &&
+      other.label == label;
+  }
+
+  @override
+  int get hashCode => category.hashCode ^
+    variableName.hashCode ^
+    duration.hashCode ^
+    label.hashCode;
+
+  @override
+  String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
+}
+
+bool _mapsEqual(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+
+  for (final dynamic k in a.keys) {
+    final dynamic bValue = b[k];
+    if (bValue == null && !b.containsKey(k)) {
+      return false;
+    }
+    if (bValue != a[k]) {
+      return false;
+    }
+  }
+
+  return true;
 }

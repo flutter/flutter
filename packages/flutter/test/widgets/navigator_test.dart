@@ -279,7 +279,7 @@ void main() {
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
-    await tester.tap(find.text('right'));
+    await tester.tap(find.text('right'), warnIfMissed: false);
     expect(log, equals(<String>['left']));
   });
 
@@ -2606,6 +2606,79 @@ void main() {
       expect(find.text('third'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+        const TestPage(key: ValueKey<String>('3'), name:'third'),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate
+            ],
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Navigator(
+                pages: myPages,
+              ),
+            ),
+          ),
+        )
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The Navigator.onPopPage must be provided to use the\n'
+          '   Navigator.pages API\n'
+          ''
+        ),
+      );
+    });
+
+    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterErrorDetails? firstError;
+      FlutterError.onError = (FlutterErrorDetails? detail) {
+        // We only care about the first error;
+        firstError ??= detail;
+      };
+      await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+            child: Localizations(
+              locale: const Locale('en', 'US'),
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate
+              ],
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Navigator(
+                  pages: myPages,
+                ),
+              ),
+            ),
+          )
+      );
+      FlutterError.onError = originalOnError;
+      expect(
+        firstError!.exception.toString(),
+        'The Navigator.pages must not be empty to use the Navigator.pages API',
+      );
     });
 
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {

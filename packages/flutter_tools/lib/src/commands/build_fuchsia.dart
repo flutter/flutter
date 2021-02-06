@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -72,6 +74,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     if (!flutterProject.fuchsia.existsSync()) {
       throwToolExit('No Fuchsia project is configured.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,

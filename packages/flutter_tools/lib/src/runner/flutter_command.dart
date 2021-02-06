@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -127,6 +129,12 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
+
+  /// The option name for a custom DevTools server address.
+  static const String kDevToolsServerAddress = 'devtools-server-address';
+
+  /// The flag name for whether to launch the DevTools or not.
+  static const String kEnableDevTools = 'devtools';
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
@@ -322,20 +330,39 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
+  void addDevToolsOptions({@required bool verboseHelp}) {
+    argParser.addFlag(
+      kEnableDevTools,
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Enable (or disable, with --no-$kEnableDevTools) the launching of the '
+            'Flutter DevTools debugger and profiler. '
+            'If specified, --$kDevToolsServerAddress is ignored.'
+    );
+    argParser.addOption(
+      kDevToolsServerAddress,
+      hide: !verboseHelp,
+      help: 'When this value is provided, the Flutter tool will not spin up a '
+            'new DevTools server instance, and will instead use the one provided '
+            'at the given address. Ignored if --no-$kEnableDevTools is specified.'
+    );
+  }
+
   void addDdsOptions({@required bool verboseHelp}) {
     argParser.addOption('dds-port',
       help: 'When this value is provided, the Dart Development Service (DDS) will be '
-            'bound to the provided port.\nSpecifying port 0 (the default) will find '
-            'a random free port.');
+            'bound to the provided port.\n'
+            'Specifying port 0 (the default) will find a random free port.'
+    );
     argParser.addFlag(
-      'disable-dds',
+      'disable-dds', // TODO(ianh): this should be called `dds` and default to true (see style guide about double negatives)
       hide: !verboseHelp,
-      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided'
-            ' when attaching to an application with an existing DDS instance (e.g.,'
-            ' attaching to an application currently connected to by "flutter run") or'
-            ' when running certain tests.\n'
-            'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
-            ' already connected to the target application.'
+      help: 'Disable the Dart Developer Service (DDS). This flag should only be provided '
+            'when attaching to an application with an existing DDS instance (e.g., '
+            'attaching to an application currently connected to by "flutter run") or '
+            'when running certain tests.\n'
+            'Passing this flag may degrade IDE functionality if a DDS instance is not '
+            'already connected to the target application.'
     );
   }
 
@@ -363,6 +390,16 @@ abstract class FlutterCommand extends Command<void> {
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
+  }
+
+  Uri get devToolsServerAddress {
+    if (argResults.wasParsed(kDevToolsServerAddress)) {
+      final Uri uri = Uri.tryParse(stringArg(kDevToolsServerAddress));
+      if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
+        return uri;
+      }
+    }
+    return null;
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -456,12 +493,13 @@ abstract class FlutterCommand extends Command<void> {
             'and double.fromEnvironment constructors.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
       valueHelp: 'foo=bar',
+      splitCommas: false,
     );
   }
 
   void usesWebRendererOption() {
     argParser.addOption('web-renderer',
-      defaultsTo: 'html',
+      defaultsTo: 'auto',
       allowed: <String>['auto', 'canvaskit', 'html'],
       help: 'The renderer implementation to use when building for the web. Possible values are:\n'
             'html - always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL. This is the default.\n'
@@ -661,7 +699,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cached-ness information will be written in a JSON format.'
+        'cached-ness information will be written in a JSON format.',
+      hide: hide,
     );
   }
 
@@ -674,6 +713,7 @@ abstract class FlutterCommand extends Command<void> {
         "'--no-daemon' to the gradle wrapper script. This flag will cause the daemon "
         'process to terminate after the build is completed',
       defaultsTo: true,
+      hide: hide,
     );
   }
 
@@ -900,7 +940,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringsArg(FlutterOptions.kDartDefinesOption)
         : <String>[];
 
-    if (argParser.options.containsKey('web-renderer') && argResults.wasParsed('web-renderer')) {
+    if (argParser.options.containsKey('web-renderer')) {
       dartDefines = updateDartDefines(dartDefines, stringArg('web-renderer'));
     }
 

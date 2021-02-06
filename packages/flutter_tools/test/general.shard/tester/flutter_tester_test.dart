@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -172,18 +173,12 @@ Hello!
 }
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
-  final FileSystem fileSystem = MemoryFileSystem.test();
-  final Logger logger = BufferLogger.test();
   return FlutterTesterDevices(
-    logger: logger,
+    logger: BufferLogger.test(),
     artifacts: Artifacts.test(),
     processManager: FakeProcessManager.any(),
     fileSystem: MemoryFileSystem.test(),
-    config: Config.test(
-      'test',
-      directory: fileSystem.currentDirectory,
-      logger: logger,
-    ),
+    config: Config.test(),
     flutterVersion: MockFlutterVersion(),
   );
 }

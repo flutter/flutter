@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -137,6 +139,7 @@ void main() {
     final List<String> allowedPath = <String>[
       fileSystem.path.join(flutterTools, 'test', 'integration.shard', 'test_utils.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'file_system.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'process.dart'),
     ];
     for (final String dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files =  fileSystem.directory(fileSystem.path.join(flutterTools, dirName))

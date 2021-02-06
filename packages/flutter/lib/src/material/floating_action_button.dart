@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -210,7 +209,11 @@ class FloatingActionButton extends StatelessWidget {
                  label,
                  const SizedBox(width: 20.0),
                ]
-             : <Widget>[
+             : !isExtended ? <Widget>[
+               const SizedBox(width: 20.0),
+               icon,
+               const SizedBox(width: 20.0),
+           ] : <Widget>[
                  const SizedBox(width: 16.0),
                  icon,
                  const SizedBox(width: 8.0),
