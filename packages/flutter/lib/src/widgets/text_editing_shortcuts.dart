@@ -21,8 +21,6 @@ import 'text_editing_intents.dart';
 /// This example shows how to use an additional [Shortcuts] widget to override
 /// the left arrow key [Intent] and map it to the right arrow key instead.
 ///
-/// If
-///
 /// ```dart
 /// final TextEditingController controller = TextEditingController(
 ///   text: "Try using the keyboard's arrow keys and notice that left moves right.",
