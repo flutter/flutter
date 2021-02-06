@@ -34,9 +34,8 @@ Future<TaskResult> analyzerBenchmarkTask() async {
     mkdirs(_megaGalleryDirectory);
     await pubGetDependencies(
       <Directory>[
-        Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'bots')),
         Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'bots')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'microbenchmarks')),
@@ -70,9 +69,15 @@ Future<TaskResult> analyzerBenchmarkTask() async {
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web')),
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web_e2e_tests')),
         Directory(path.join(flutterDirectory.path, 'dev', 'manual_tests')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'snippets')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'tools', 'gen_keycodes')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'tools', 'vitool')),
 	Directory(path.join(flutterDirectory.path, 'examples', 'platform_channel_swift')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_driver')),
+        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_goldens')),
+        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_goldens_client')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_localizations')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_test')),
         Directory(path.join(flutterDirectory.path, 'packages', 'flutter_web_plugins')),
