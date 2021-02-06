@@ -35,8 +35,26 @@ Future<TaskResult> analyzerBenchmarkTask() async {
     await pubGetDependencies(
       <Directory>[
         Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'bots')),
         Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
         Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'microbenchmarks')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'platform_views_layout_hybrid_composition')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'test_apps')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'customer_testing')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flutter_gallery')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'hybrid_android_views')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'image_loading')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_add2app_life_cycle')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_app_with_extensions')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_platform_view_tests')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'platform_interaction')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'release_smoke_test')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ui')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web')),
+        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_test')),
+        Directory(path.join(flutterDirectory.path, 'packages', 'integration_test')),
       ]);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
