@@ -9,8 +9,9 @@ const Repository$json = const {
   '1': 'Repository',
   '2': const [
     const {'1': 'candidateBranch', '3': 1, '4': 1, '5': 9, '10': 'candidateBranch'},
-    const {'1': 'previousGitHead', '3': 2, '4': 1, '5': 9, '10': 'previousGitHead'},
-    const {'1': 'checkoutPath', '3': 3, '4': 1, '5': 9, '10': 'checkoutPath'},
+    const {'1': 'startingGitHead', '3': 2, '4': 1, '5': 9, '10': 'startingGitHead'},
+    const {'1': 'currentGitHead', '3': 3, '4': 1, '5': 9, '10': 'currentGitHead'},
+    const {'1': 'checkoutPath', '3': 4, '4': 1, '5': 9, '10': 'checkoutPath'},
   ],
 };
 

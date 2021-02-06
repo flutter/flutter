@@ -20,6 +20,7 @@ abstract class Repository {
   Repository({
     @required this.name,
     @required this.upstream,
+    @required this.initialRef,
     @required this.processManager,
     @required this.stdio,
     @required this.platform,
@@ -33,6 +34,9 @@ abstract class Repository {
 
   final String name;
   final String upstream;
+
+  /// The initial ref (branch or commit name) to check out.
+  final String initialRef;
   final Git git;
   final ProcessManager processManager;
   final Stdio stdio;
@@ -60,13 +64,8 @@ abstract class Repository {
       _checkoutDirectory.deleteSync(recursive: true);
     } else if (useExistingCheckout && _checkoutDirectory.existsSync()) {
       git.run(
-        <String>['checkout', 'master'],
-        'Checkout to master branch',
-        workingDirectory: _checkoutDirectory.path,
-      );
-      git.run(
-        <String>['pull', '--ff-only'],
-        'Updating $name repo',
+        <String>['checkout', initialRef],
+        'Checking out $initialRef',
         workingDirectory: _checkoutDirectory.path,
       );
     }
@@ -75,7 +74,12 @@ abstract class Repository {
         'Cloning $name from $upstream to ${_checkoutDirectory.path}...',
       );
       git.run(
-        <String>['clone', '--', upstream, _checkoutDirectory.path],
+        <String>[
+          'clone',
+          '--',
+          upstream,
+          _checkoutDirectory.path
+        ],
         'Cloning $name repo',
         workingDirectory: parentDirectory.path,
       );
@@ -90,6 +94,11 @@ abstract class Repository {
           );
         }
       }
+      git.run(
+        <String>['checkout', initialRef],
+        'Checking out initialRef $initialRef',
+        workingDirectory: _checkoutDirectory.path,
+      );
     }
 
     final String revision = reverseParse('HEAD');
@@ -266,9 +275,11 @@ class FrameworkRepository extends Repository {
     String upstream = FrameworkRepository.defaultUpstream,
     bool localUpstream = false,
     bool useExistingCheckout = false,
+    String initialRef = FrameworkRepository.defaultBranch,
   }) : super(
           name: name,
           upstream: upstream,
+          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
@@ -300,6 +311,8 @@ class FrameworkRepository extends Repository {
   final Checkouts checkouts;
   static const String defaultUpstream =
       'https://github.com/flutter/flutter.git';
+
+  static const String defaultBranch = 'master';
 
   String get cacheDirectory => fileSystem.path.join(
         checkoutDirectory.path,
@@ -375,13 +388,15 @@ class FrameworkRepository extends Repository {
 class EngineRepository extends Repository {
   EngineRepository(
     this.checkouts, {
-    String name = 'framework',
-    String upstream = FrameworkRepository.defaultUpstream,
+    String name = 'engine',
+    String initialRef = EngineRepository.defaultBranch,
+    String upstream = EngineRepository.defaultUpstream,
     bool localUpstream = false,
     bool useExistingCheckout = false,
   }) : super(
           name: name,
           upstream: upstream,
+          initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
           parentDirectory: checkouts.directory,
@@ -394,6 +409,7 @@ class EngineRepository extends Repository {
   final Checkouts checkouts;
 
   static const String defaultUpstream = 'https://github.com/flutter/engine.git';
+  static const String defaultBranch = 'master';
 
   @override
   Repository cloneRepository(String cloneName) {

@@ -70,24 +70,25 @@ class StartCommand extends Command<void> {
 
   @override
   void run() {
-    if (!argResults.wasParsed(kReleaseOption)) {
-      throw ConductorException(
-          'The command line option `--$kReleaseOption` must be provided');
-    }
-    if (!argResults.wasParsed(kCandidateOption)) {
-      throw ConductorException(
-          'The command line option `--$kCandidateOption` must be provided');
-    } else if (!releaseCandidateBranchRegex.hasMatch(argResults[kCandidateOption] as String)) {
-      throw ConductorException(
-        'Invalid release candidate branch "${argResults[kCandidateOption]}". '
-        'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.'
-      );
-    }
+    final String candidateBranch = argResults[kCandidateOption] as String;
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (stateFile.existsSync()) {
       throw ConductorException(
         'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
         'Run `conductor abort` to cancel a previous release.'
+      );
+    }
+    if (!argResults.wasParsed(kReleaseOption)) {
+      throw ConductorException(
+          'The command line option `--$kReleaseOption` must be provided');
+    }
+    if (!argResults.wasParsed(kCandidateOption) || candidateBranch.trim().isEmpty) {
+      throw ConductorException(
+          'The command line option `--$kCandidateOption` must be provided');
+    } else if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
+      throw ConductorException(
+        'Invalid release candidate branch "$candidateBranch". '
+        'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.'
       );
     }
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
@@ -96,14 +97,34 @@ class StartCommand extends Command<void> {
     state.releaseChannel = argResults[kReleaseOption] as String;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
-    final FrameworkRepository framework = FrameworkRepository(checkouts);
-    state.framework = pb.Repository(
-      candidateBranch: argResults[kCandidateOption] as String,
+
+    final EngineRepository engine = EngineRepository(
+      checkouts,
+      initialRef: candidateBranch,
     );
-    final EngineRepository engine = EngineRepository(checkouts);
-    state.engine = pb.Repository(candidateBranch: argResults[kCandidateOption] as String);
+    final String engineHead = engine.reverseParse('HEAD');
+    state.engine = pb.Repository(
+      candidateBranch: candidateBranch,
+      startingGitHead: engineHead,
+      currentGitHead: engineHead,
+      checkoutPath: engine.checkoutDirectory.path,
+    );
+    final FrameworkRepository framework = FrameworkRepository(
+      checkouts,
+      initialRef: candidateBranch,
+    );
+    final String frameworkHead = framework.reverseParse('HEAD');
+    state.framework = pb.Repository(
+      candidateBranch: candidateBranch,
+      startingGitHead: frameworkHead,
+      currentGitHead: frameworkHead,
+      checkoutPath: framework.checkoutDirectory.path,
+    );
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
+
+    state.logs.addAll(stdio.logs);
+
     stateFile.writeAsStringSync(
       jsonEncode(state.toProto3Json()),
       flush: true,

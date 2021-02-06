@@ -13,6 +13,7 @@ import 'package:args/command_runner.dart';
 import 'package:dev_tools/abort.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/globals.dart';
+import 'package:dev_tools/logs.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/start.dart';
@@ -66,6 +67,9 @@ Future<void> main(List<String> args) async {
       stdio: stdio,
     ),
     AbortCommand(
+      checkouts: checkouts,
+    ),
+    LogsCommand(
       checkouts: checkouts,
     ),
   ].forEach(runner.addCommand);

@@ -18,24 +18,30 @@ class Repository extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'candidateBranch',
         protoName: 'candidateBranch')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'previousGitHead',
-        protoName: 'previousGitHead')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checkoutPath',
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startingGitHead',
+        protoName: 'startingGitHead')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentGitHead',
+        protoName: 'currentGitHead')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checkoutPath',
         protoName: 'checkoutPath')
     ..hasRequiredFields = false;
 
   Repository._() : super();
   factory Repository({
     $core.String candidateBranch,
-    $core.String previousGitHead,
+    $core.String startingGitHead,
+    $core.String currentGitHead,
     $core.String checkoutPath,
   }) {
     final _result = create();
     if (candidateBranch != null) {
       _result.candidateBranch = candidateBranch;
     }
-    if (previousGitHead != null) {
-      _result.previousGitHead = previousGitHead;
+    if (startingGitHead != null) {
+      _result.startingGitHead = startingGitHead;
+    }
+    if (currentGitHead != null) {
+      _result.currentGitHead = currentGitHead;
     }
     if (checkoutPath != null) {
       _result.checkoutPath = checkoutPath;
@@ -77,28 +83,40 @@ class Repository extends $pb.GeneratedMessage {
   void clearCandidateBranch() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get previousGitHead => $_getSZ(1);
+  $core.String get startingGitHead => $_getSZ(1);
   @$pb.TagNumber(2)
-  set previousGitHead($core.String v) {
+  set startingGitHead($core.String v) {
     $_setString(1, v);
   }
 
   @$pb.TagNumber(2)
-  $core.bool hasPreviousGitHead() => $_has(1);
+  $core.bool hasStartingGitHead() => $_has(1);
   @$pb.TagNumber(2)
-  void clearPreviousGitHead() => clearField(2);
+  void clearStartingGitHead() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get checkoutPath => $_getSZ(2);
+  $core.String get currentGitHead => $_getSZ(2);
   @$pb.TagNumber(3)
-  set checkoutPath($core.String v) {
+  set currentGitHead($core.String v) {
     $_setString(2, v);
   }
 
   @$pb.TagNumber(3)
-  $core.bool hasCheckoutPath() => $_has(2);
+  $core.bool hasCurrentGitHead() => $_has(2);
   @$pb.TagNumber(3)
-  void clearCheckoutPath() => clearField(3);
+  void clearCurrentGitHead() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get checkoutPath => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set checkoutPath($core.String v) {
+    $_setString(3, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasCheckoutPath() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCheckoutPath() => clearField(4);
 }
 
 class ConductorState extends $pb.GeneratedMessage {

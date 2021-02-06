@@ -9,10 +9,14 @@ message Repository {
   string candidateBranch = 1;
 
   // The commit hash at the tip of the branch before cherrypicks were applied.
-  string previousGitHead = 2;
+  string startingGitHead = 2;
+
+  // The difference in commits between this and [startingGitHead] is the number
+  // of cherrypicks that have been currently applied.
+  string currentGitHead = 3;
 
   // Path to the git checkout on local disk.
-  string checkoutPath = 3;
+  string checkoutPath = 4;
 }
 
 message ConductorState {

@@ -24,10 +24,12 @@ void presentState(Stdio stdio, pb.ConductorState state) {
   stdio.printStatus('');
   stdio.printStatus('Engine Repo');
   stdio.printStatus('\tCandidate branch: ${state.engine.candidateBranch}');
-  stdio.printStatus('\tPrevious git HEAD: ${state.engine.previousGitHead}');
+  stdio.printStatus('\tStarting git HEAD: ${state.engine.startingGitHead}');
+  stdio.printStatus('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   stdio.printStatus('\tPath to checkout: ${state.engine.checkoutPath}');
   stdio.printStatus('Framework Repo');
   stdio.printStatus('\tCandidate branch: ${state.framework.candidateBranch}');
-  stdio.printStatus('\tPrevious git HEAD: ${state.framework.previousGitHead}');
+  stdio.printStatus('\tStarting git HEAD: ${state.framework.startingGitHead}');
+  stdio.printStatus('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
 }
