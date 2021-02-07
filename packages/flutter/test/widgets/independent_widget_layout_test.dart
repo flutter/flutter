@@ -216,10 +216,10 @@ void main() {
     final OffscreenWidgetTree tree = OffscreenWidgetTree();
     final List<WidgetState> states = <WidgetState>[];
     tree.pumpWidget(SizedBox(child: TestStates(states: states)));
-    expect(states, [WidgetState.initialized]);
+    expect(states, <WidgetState>[WidgetState.initialized]);
     expect(tree.renderView.child, isNotNull);
     tree.pumpWidget(null); // The root node should be allowed to have no child.
-    expect(states, [WidgetState.initialized, WidgetState.disposed]);
+    expect(states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
     expect(tree.renderView.child, isNull);
   });
 }
