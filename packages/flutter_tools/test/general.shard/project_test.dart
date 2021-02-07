@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -21,6 +23,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -306,12 +309,12 @@ void main() {
     });
 
     group('language', () {
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      XcodeProjectInterpreter xcodeProjectInterpreter;
       MemoryFileSystem fs;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(processManager: FakeProcessManager.any());
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,
           fileSystem: fs,
@@ -337,19 +340,19 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
 
     group('product bundle identifier', () {
       MemoryFileSystem fs;
-      MockPlistUtils mockPlistUtils;
+      FakePlistParser testPlistUtils;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockPlistUtils = MockPlistUtils();
+        testPlistUtils = FakePlistParser();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
           fileSystem: fs,
@@ -361,7 +364,7 @@ apply plugin: 'kotlin-android'
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => mockPlistUtils,
+          PlistParser: () => testPlistUtils,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
           FlutterProjectFactory: () => flutterProjectFactory,
         });
@@ -399,7 +402,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
+        testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
@@ -417,7 +420,7 @@ apply plugin: 'kotlin-android'
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
         });
 
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
+        testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
@@ -437,7 +440,7 @@ apply plugin: 'kotlin-android'
           return Future<XcodeProjectInfo>.value(XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger));
         });
 
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
+        testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
       });
 
@@ -619,12 +622,12 @@ apply plugin: 'kotlin-android'
   });
   group('watch companion', () {
     MemoryFileSystem fs;
-    MockPlistUtils mockPlistUtils;
+    FakePlistParser testPlistParser;
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
     FlutterProjectFactory flutterProjectFactory;
     setUp(() {
       fs = MemoryFileSystem.test();
-      mockPlistUtils = MockPlistUtils();
+      testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       flutterProjectFactory = FlutterProjectFactory(
         fileSystem: fs,
@@ -638,7 +641,7 @@ apply plugin: 'kotlin-android'
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => mockPlistUtils,
+      PlistParser: () => testPlistParser,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       FlutterProjectFactory: () => flutterProjectFactory,
     });
@@ -663,7 +666,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        PlistParser: () => mockPlistUtils,
+        PlistParser: () => testPlistParser,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
@@ -676,7 +679,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        PlistParser: () => mockPlistUtils,
+        PlistParser: () => testPlistParser,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
@@ -685,12 +688,12 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
-        when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someOTHERproject');
+        testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someOTHERproject');
         expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        PlistParser: () => mockPlistUtils,
+        PlistParser: () => testPlistParser,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
@@ -699,13 +702,13 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         project.ios.xcodeProject.createSync();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
-        when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someProject');
+        testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
 
         expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        PlistParser: () => mockPlistUtils,
+        PlistParser: () => testPlistParser,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         FlutterProjectFactory: () => flutterProjectFactory,
       });
@@ -966,8 +969,6 @@ File androidPluginRegistrant(Directory parent) {
     .childDirectory('plugins')
     .childFile('GeneratedPluginRegistrant.java');
 }
-
-class MockPlistUtils extends Mock implements PlistParser {}
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override

@@ -488,7 +488,7 @@ class _DiamondBorder extends ShapeBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return const EdgeInsets.only();
+    return EdgeInsets.zero;
   }
 
   @override

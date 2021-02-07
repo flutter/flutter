@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -34,8 +35,7 @@ void main() {
     // some of the checks for devices.
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
-    const ProcessManager _processManager = LocalProcessManager();
-    final ProcessResult _proc = await _processManager.run(
+    final ProcessResult _proc = await processManager.run(
       <String>[flutterBin, 'run', '-d', 'invalid-device-id'],
       workingDirectory: tempDir.path,
     );
@@ -53,4 +53,25 @@ void main() {
     await _flutter.run(pidFile: pidFile);
     expect(pidFile.existsSync(), isTrue);
   });
+
+  testWithoutContext('sets activeDevToolsServerAddress extension', () async {
+    await _flutter.run(
+      startPaused: true,
+      withDebugger: true,
+      additionalCommandArgs: <String>['--devtools-server-address', 'http://127.0.0.1:9110'],
+    );
+    await _flutter.resume();
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutter,
+      extension: 'ext.flutter.activeDevToolsServerAddress',
+      continuePollingValue: '',
+      matches: equals('http://127.0.0.1:9110'),
+    );
+    await pollForServiceExtensionValue<String>(
+      testDriver: _flutter,
+      extension: 'ext.flutter.connectedVmServiceUri',
+      continuePollingValue: '',
+      matches: isNotEmpty,
+    );
+  }, timeout: const Timeout.factor(4));
 }

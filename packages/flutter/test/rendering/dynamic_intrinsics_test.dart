@@ -72,7 +72,7 @@ class RenderInvalidIntrinsics extends RenderBox {
   @override
   double computeMaxIntrinsicHeight(double width) => -1;
   @override
-  Size computeDryLayout(BoxConstraints constraints) => const Size(0, 0);
+  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
 }
 
 void main() {

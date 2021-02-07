@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// @dart = 2.8
 
-import 'package:process/process.dart';
+import 'dart:async';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';

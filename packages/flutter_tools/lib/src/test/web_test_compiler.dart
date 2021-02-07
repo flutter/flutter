@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -12,6 +13,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';

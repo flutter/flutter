@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -11,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
@@ -18,7 +21,6 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -39,7 +41,10 @@ void main() {
   setUp(() {
     fileSystem = LocalFileSystem.instance;
     platform = const LocalPlatform();
-    processManager = const LocalProcessManager();
+    processManager = LocalProcessManager(
+      fileSystem: fileSystem,
+      platform: platform,
+    );
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');

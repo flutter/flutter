@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'pair.dart';

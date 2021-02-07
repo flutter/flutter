@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:async/async.dart';
@@ -513,6 +515,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          enableDevTools: true,
           route: route,
         );
       },

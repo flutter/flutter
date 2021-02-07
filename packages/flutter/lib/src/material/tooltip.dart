@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip_theme.dart';
 
 /// A material design tooltip.
@@ -224,11 +223,11 @@ class Tooltip extends StatefulWidget {
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
-  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
+  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
+  static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
 
   late double height;

@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'common.dart';
-import 'context.dart';
-
-export 'package:process/process.dart' show ProcessManager;
 
 typedef VoidCallback = void Function();
 
@@ -24,7 +23,7 @@ class FakeCommand {
     this.workingDirectory,
     this.environment,
     this.encoding,
-    this.duration = const Duration(),
+    this.duration = Duration.zero,
     this.onRun,
     this.exitCode = 0,
     this.stdout = '',
@@ -243,7 +242,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -262,7 +261,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<ProcessResult> run(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -282,7 +281,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   ProcessResult runSync(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -299,11 +298,14 @@ abstract class FakeProcessManager implements ProcessManager {
     );
   }
 
+  /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) => true;
+  bool canRun(dynamic executable, {String workingDirectory}) => !excludedExecutables.contains(executable);
+
+  Set<String> excludedExecutables = <String>{};
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
     // Killing a fake process has no effect unless it has an attached completer.
     final _FakeProcess fakeProcess = _fakeRunningProcesses[pid];
     if (fakeProcess == null) {
@@ -329,7 +331,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
-      duration: const Duration(),
+      duration: Duration.zero,
       exitCode: 0,
       stdout: '',
       stderr: '',

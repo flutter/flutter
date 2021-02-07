@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class PestoDemo extends StatelessWidget {
   const PestoDemo({ Key? key }) : super(key: key);
@@ -370,7 +369,7 @@ class _RecipePageState extends State<RecipePage> {
                   background: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment(0.0, -1.0),
+                        begin: Alignment.topCenter,
                         end: Alignment(0.0, -0.2),
                         colors: <Color>[Color(0x60000000), Color(0x00000000)],
                       ),

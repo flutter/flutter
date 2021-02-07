@@ -109,7 +109,7 @@ void main() {
     await tester.tap(find.byKey(noCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pump();
     expect(cancels, equals(0));
 
@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pump();
     expect(cancels, equals(1));
 
@@ -182,7 +182,7 @@ void main() {
     // Try to bring up the popup menu and tap outside it to cancel the menu
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
     expect(onCanceledCalled, isFalse);
@@ -203,7 +203,7 @@ void main() {
     // Try to bring up the popup menu and tap outside it to cancel the menu
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
     expect(onCanceledCalled, isFalse);
@@ -332,7 +332,7 @@ void main() {
     itemBuilderCalled = false;
 
     // Close the popup.
-    await tester.tap(find.byKey(popupButtonKey));
+    await tester.tap(find.byKey(popupButtonKey), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(
@@ -763,8 +763,8 @@ void main() {
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
-    PopupMenuButton<int> buildMenuButton({Offset offset = const Offset(0.0, 0.0)}) {
-      return  PopupMenuButton<int>(
+    PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
+      return PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -800,7 +800,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
 
     // Collapse the menu.
-    await tester.tap(find.byType(IconButton));
+    await tester.tap(find.byType(IconButton), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Popup a new menu with Offset(50.0, 50.0).
@@ -1514,7 +1514,7 @@ void main() {
                 onPressed: () {
                   showMenu<int>(
                     context: context,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1, child: Text('1'),
@@ -1553,7 +1553,7 @@ void main() {
                   showMenu<int>(
                     context: context,
                     useRootNavigator: true,
-                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    position: RelativeRect.fill,
                     items: <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1, child: Text('1'),
@@ -1840,35 +1840,46 @@ void main() {
     }
 
     testWidgets('PopupMenuButton enableFeedback works properly', (WidgetTester tester) async {
-      //PopupMenuButton with enabled feedback
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+
+      // PopupMenuButton with enabled feedback.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenuButton with disabled feedback
+      await tester.pumpWidget(Container());
+
+      // PopupMenuButton with disabled feedback.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: false));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenuButton with enabled feedback by default
+      await tester.pumpWidget(Container());
+
+      // PopupMenuButton with enabled feedback by default.
       await tester.pumpWidget(buildFrame());
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenu with disabled feedback using PopupMenuButtonTheme
+      await tester.pumpWidget(Container());
+
+      // PopupMenu with disabled feedback using PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(themeEnableFeedback: false));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
       expect(feedback.clickSoundCount, 2);
       expect(feedback.hapticCount, 0);
 
-      //PopupMenu enableFeedback property overrides PopupMenuButtonTheme
+      await tester.pumpWidget(Container());
+
+      // PopupMenu enableFeedback property overrides PopupMenuButtonTheme.
       await tester.pumpWidget(buildFrame(widgetEnableFeedack: false,themeEnableFeedback: true));
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();

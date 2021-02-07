@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io' show Process, ProcessResult;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -15,7 +18,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
@@ -39,10 +41,10 @@ void main() {
 
   group('Usage', () {
     Directory tempDir;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -94,17 +96,17 @@ void main() {
       await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
 
-      verify(mockUsage.sendEvent(
-        'tool-command-result',
-        'aar',
-        label: 'success',
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'tool-command-result',
+          'aar',
+          label: 'success',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -295,4 +297,3 @@ class MockAndroidBuilder extends Mock implements AndroidBuilder {}
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
-class MockUsage extends Mock implements Usage {}

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -252,6 +254,20 @@ library funstuff;
     expect(determineLanguageVersion(file, package), LanguageVersion(2, 7));
   });
 
+  testWithoutContext('defaults to null safe version if package lookup returns null', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+''');
+    final Package package = Package(
+      'foo',
+      Uri.parse('file://foo/'),
+      languageVersion: null,
+    );
+
+    expect(determineLanguageVersion(file, package), LanguageVersion(2, 12));
+  });
 
   testWithoutContext('Returns null safe error if reading the file throws a FileSystemException', () {
     final Package package = Package(

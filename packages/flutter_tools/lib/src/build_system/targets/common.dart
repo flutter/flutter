@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -225,7 +227,7 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = decodeDartDefines(environment.defines, kExtraFrontEndOptions);
+    final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -304,7 +306,7 @@ abstract class AotElfBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
-    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
+    final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];

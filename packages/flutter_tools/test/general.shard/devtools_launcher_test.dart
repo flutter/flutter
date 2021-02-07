@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -116,6 +118,55 @@ void main() {
     );
 
     final DevToolsServerAddress address = await launcher.serve();
+    expect(address.host, '127.0.0.1');
+    expect(address.port, 9100);
+  });
+
+  testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      pubExecutable: 'pub',
+      logger: logger,
+      platform: platform,
+      persistentToolState: persistentToolState,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'activate',
+            'devtools',
+          ],
+          stdout: 'Activated DevTools 0.9.5',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'list',
+          ],
+          stdout: 'devtools 0.9.6',
+        ),
+        FakeCommand(
+          command: const <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+          ],
+          stdout: 'Serving DevTools at http://127.0.0.1:9100\n',
+          completer: completer,
+        ),
+      ]),
+    );
+
+    DevToolsServerAddress address = await launcher.serve();
+    expect(address.host, '127.0.0.1');
+    expect(address.port, 9100);
+
+    // Call `serve` again and verify that the already running server is returned.
+    address = await launcher.serve();
     expect(address.host, '127.0.0.1');
     expect(address.port, 9100);
   });

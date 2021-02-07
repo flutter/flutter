@@ -804,4 +804,67 @@ void main() {
         ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/66444
+  testWidgets("RawScrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    final GlobalKey outerKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            key: key2,
+            thumbColor: const Color(0x11111111),
+            child: SingleChildScrollView(
+              key: outerKey,
+              child: SizedBox(
+                height: 1000.0,
+                width: double.infinity,
+                child: Column(
+                  children: <Widget>[
+                    RawScrollbar(
+                      key: key1,
+                      thumbColor: const Color(0x22222222),
+                      child: SizedBox(
+                        height: 300.0,
+                        width: double.infinity,
+                        child: SingleChildScrollView(
+                          key: innerKey,
+                          child: const SizedBox(
+                            key: Key('Inner scrollable'),
+                            height: 1000.0,
+                            width: double.infinity,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the inner scrollable widget.
+    await tester.drag(find.byKey(innerKey), const Offset(0.0, -25.0));
+    await tester.pump();
+    // Scrollbar fully showing.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      tester.renderObject(find.byKey(key2)),
+      paintsExactlyCountTimes(#drawRect, 2), // Each bar will call [drawRect] twice.
+    );
+
+    expect(
+      tester.renderObject(find.byKey(key1)),
+      paintsExactlyCountTimes(#drawRect, 2),
+    );
+  });
 }

@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'convert.dart';
 import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
@@ -46,16 +48,15 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   @override
   Future<void> launch(Uri vmServiceUri) async {
     // Place this entire method in a try/catch that swallows exceptions because
-    // we do not want to block Flutter run/attach operations on a DevTools
-    // failure.
+    // this method is guaranteed not to return a Future that throws.
     try {
       bool offline = false;
       try {
         const String pubHostedUrlKey = 'PUB_HOSTED_URL';
         if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(_platform.environment[pubHostedUrlKey]);
+          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
         } else {
-          await http.head('https://pub.dev');
+          await http.head(Uri.https('pub.dev', ''));
         }
       } on Exception {
         offline = true;
@@ -107,8 +108,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen(_logger.printError);
-      devToolsUri = await completer.future
-        .timeout(const Duration(seconds: 10));
+      devToolsUrl = await completer.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
@@ -122,7 +122,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       'global',
       'list',
     ]);
-
     if (_pubGlobalListProcess.stdout.toString().contains('devtools ')) {
       return true;
     }
@@ -142,7 +141,6 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     if (!shouldActivate) {
       return false;
     }
-
     final Status status = _logger.startProgress(
       'Activating Dart DevTools...',
     );
@@ -172,13 +170,15 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<DevToolsServerAddress> serve() async {
-    await launch(null);
+    if (activeDevToolsServer == null) {
+      await launch(null);
+    }
     return activeDevToolsServer;
   }
 
   @override
   Future<void> close() async {
-    devToolsUri = null;
+    devToolsUrl = null;
     if (_devToolsProcess != null) {
       _devToolsProcess.kill();
       await _devToolsProcess.exitCode;

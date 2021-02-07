@@ -234,7 +234,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, 0));
+    expect(tester.getTopLeft(find.text('Tile 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, 50));
 
     tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(525);
@@ -253,7 +253,7 @@ void main() {
     tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, 0));
+    expect(tester.getTopLeft(find.text('Tile 0')), Offset.zero);
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, 50));
 
     await tester.restoreFrom(data);
@@ -399,7 +399,7 @@ void main() {
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
     expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
@@ -413,7 +413,7 @@ void main() {
     expect(find.text('Tile 10'), findsOneWidget);
 
     final TestRestorationData data = await tester.getRestorationData();
-    await tester.drag(find.byType(ListView), const Offset(0, 600));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, 600));
     await tester.pump();
 
     expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);

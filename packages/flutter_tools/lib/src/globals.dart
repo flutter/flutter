@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
+// @dart = 2.8
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
@@ -80,10 +80,8 @@ FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils
   platform: platform,
 );
 
-const ProcessManager _kLocalProcessManager = LocalProcessManager();
-
 /// The active process manager.
-ProcessManager get processManager => context.get<ProcessManager>() ?? _kLocalProcessManager;
+ProcessManager get processManager => context.get<ProcessManager>();
 ProcessUtils get processUtils => context.get<ProcessUtils>();
 
 const Platform _kLocalPlatform = LocalPlatform();

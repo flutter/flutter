@@ -68,7 +68,7 @@ void main() {
 
   void dispatchRemoveDevice([int device = 0]) {
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 0.0), device: device),
+      _pointerData(PointerChange.remove, Offset.zero, device: device),
     ]));
   }
 
@@ -117,12 +117,12 @@ void main() {
 
     // Pointer enters the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
     ]));
     addTearDown(() => dispatchRemoveDevice());
 
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 0.0))),
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset.zero)),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -170,11 +170,11 @@ void main() {
 
     // The first mouse is added on the annotation.
     ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.add, Offset.zero),
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 0.0))),
+      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset.zero)),
       EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(0.0, 1.0))),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);

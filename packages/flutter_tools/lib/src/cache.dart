@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -833,7 +834,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (_platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
     if (location.existsSync()) {
       location.deleteSync(recursive: true);
     }
@@ -906,7 +907,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
@@ -941,7 +942,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String engineVersion) async {
     engineVersion ??= version;
-    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$engineVersion/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
@@ -1573,7 +1574,7 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.
@@ -1789,14 +1790,24 @@ class ArtifactUpdater {
       } finally {
         status.stop();
       }
+      /// Unzipping multiple file into a directory will not remove old files
+      /// from previous versions that are not present in the new bundle.
+      final Directory destination = location.childDirectory(
+        tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
+      );
+      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
       _ensureExists(location);
 
       try {
         extractor(tempFile, location);
-      } on Exception {
+      } on Exception catch (err) {
         retries -= 1;
         if (retries == 0) {
-          rethrow;
+          throwToolExit(
+            'Flutter could not download and/or extract $url. Ensure you have '
+            'network connectivity and all of the required dependencies listed at'
+            'flutter.dev/setup.\nThe original exception was: $err.'
+          );
         }
         _deleteIgnoringErrors(tempFile);
         continue;

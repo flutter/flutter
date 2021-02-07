@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -761,11 +762,7 @@ class FakeDownloadedArtifact extends CachedArtifact {
 }
 
 class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
-class MockDirectory extends Mock implements Directory {}
-class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
