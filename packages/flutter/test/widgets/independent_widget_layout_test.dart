@@ -218,7 +218,7 @@ void main() {
     tree.pumpWidget(SizedBox(child: TestStates(states: states)));
     expect(states, [WidgetState.initialized]);
     expect(tree.renderView.child, isNotNull);
-    tree.pumpWidget(null);
+    tree.pumpWidget(null); // The root node should be allowed to have no child.
     expect(states, [WidgetState.initialized, WidgetState.disposed]);
     expect(tree.renderView.child, isNull);
   });
