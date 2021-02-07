@@ -1151,6 +1151,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     assert(parent == null);
     super.mount(parent, newSlot);
     _rebuild();
+    assert(_child != null);
   }
 
   @override
@@ -1180,7 +1181,6 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   void _rebuild() {
     try {
       _child = updateChild(_child, widget.child, _rootChildSlot);
-      assert(_child != null);
     } catch (exception, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
