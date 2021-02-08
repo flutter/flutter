@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -547,7 +549,7 @@ String _getIosEngineArtifactPath(String engineDirectory,
       .childDirectory(_artifactToFileName(Artifact.flutterXcframework));
 
   if (!xcframeworkDirectory.existsSync()) {
-    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter build ios".');
+    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
   }
   Directory flutterFrameworkSource;
   for (final Directory platformDirectory

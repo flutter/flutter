@@ -9,9 +9,6 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
-import 'package:googleapis/bigquery/v2.dart' as bq;
-import 'package:googleapis_auth/auth_io.dart' as auth;
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -58,12 +55,8 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-
-/// The number of Cirrus jobs that run build tests in parallel.
-///
-/// WARNING: if you change this number, also change .cirrus.yml
-/// and make sure it runs _all_ shards.
-const int kBuildTestShardCount = 2;
+const String kShardKey = 'SHARD';
+const String kSubshardKey = 'SUBSHARD';
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
@@ -77,12 +70,6 @@ const int kBuildTestShardCount = 2;
 int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
   ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
   : 8;
-
-/// The number of shards the long-running Web tests are split into.
-///
-/// WARNING: this number must match the shard count in LUCI configs.
-const int kWebLongRunningTestShardCount = 3;
-
 /// Tests that we don't run on Web for compilation reasons.
 //
 // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
@@ -90,6 +77,8 @@ const List<String> kWebTestFileKnownFailures = <String>[
   'test/services/message_codecs_vm_test.dart',
   'test/examples/sector_layout_test.dart',
 ];
+
+const String kSmokeTestShardName = 'smoke_tests';
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -110,18 +99,19 @@ Future<void> main(List<String> args) async {
     print('═' * 80);
     await _runSmokeTests();
     print('═' * 80);
-    await selectShard(const <String, ShardRunner>{
+    await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
+      'tool_integration_tests': _runIntegrationToolTests,
       'web_tool_tests': _runWebToolTests,
       'web_tests': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPluginsTests,
+      kSmokeTestShardName: () async {}, // No-op, the smoke tests already ran. Used for testing this script.
     });
   } on ExitException catch (error) {
     error.apply();
@@ -186,68 +176,96 @@ Future<void> _runSmokeTests() async {
   // We run the "pass" and "fail" smoke tests first, and alone, because those
   // are particularly critical and sensitive. If one of these fails, there's no
   // point even trying the others.
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'pass_test.dart'),
-    printOutput: false,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'fail_test.dart'),
-    expectFailure: true,
-    printOutput: false,
-  );
-  // We run the timeout tests individually because they are timing-sensitive.
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
-    expectFailure: false,
-    printOutput: false,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
-    expectFailure: true,
-    printOutput: false,
-  );
-  await _runFlutterTest(automatedTests,
-    script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
-    expectFailure: true,
-    printOutput: false,
-    outputChecker: (CommandResult result) {
-      return result.flattenedStdout.contains('failingPendingTimerTest')
-        ? null
-        : 'Failed to find the stack trace for the pending Timer.';
-    }
-  );
-  // We run the remaining smoketests in parallel, because they each take some
-  // time to run (e.g. compiling), so we don't want to run them in series,
-  // especially on 20-core machines...
-  await Future.wait<void>(
-    <Future<void>>[
-      _runFlutterTest(automatedTests,
-        script: path.join('test_smoke_test', 'crash1_test.dart'),
-        expectFailure: true,
-        printOutput: false,
-      ),
-      _runFlutterTest(automatedTests,
-        script: path.join('test_smoke_test', 'crash2_test.dart'),
-        expectFailure: true,
-        printOutput: false,
-      ),
-      _runFlutterTest(automatedTests,
-        script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-        expectFailure: true,
-        printOutput: false,
-      ),
-      _runFlutterTest(automatedTests,
-        script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
-        expectFailure: true,
-        printOutput: false,
-      ),
-      _runFlutterTest(automatedTests,
-        script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
-        expectFailure: true,
-        printOutput: false,
-      ),
-    ],
-  );
+  final List<ShardRunner> tests = <ShardRunner>[
+    () => _runFlutterTest(
+          automatedTests,
+          script: path.join('test_smoke_test', 'pass_test.dart'),
+          printOutput: false,
+        ),
+    () => _runFlutterTest(
+          automatedTests,
+          script: path.join('test_smoke_test', 'fail_test.dart'),
+          expectFailure: true,
+          printOutput: false,
+        ),
+    // We run the timeout tests individually because they are timing-sensitive.
+    () => _runFlutterTest(
+          automatedTests,
+          script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
+          expectFailure: false,
+          printOutput: false,
+        ),
+    () => _runFlutterTest(
+          automatedTests,
+          script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
+          expectFailure: true,
+          printOutput: false,
+        ),
+    () => _runFlutterTest(automatedTests,
+            script:
+                path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
+            expectFailure: true,
+            printOutput: false, outputChecker: (CommandResult result) {
+          return result.flattenedStdout.contains('failingPendingTimerTest')
+              ? null
+              : 'Failed to find the stack trace for the pending Timer.';
+        }),
+    // We run the remaining smoketests in parallel, because they each take some
+    // time to run (e.g. compiling), so we don't want to run them in series,
+    // especially on 20-core machines...
+    () => Future.wait<void>(
+          <Future<void>>[
+            _runFlutterTest(
+              automatedTests,
+              script: path.join('test_smoke_test', 'crash1_test.dart'),
+              expectFailure: true,
+              printOutput: false,
+            ),
+            _runFlutterTest(
+              automatedTests,
+              script: path.join('test_smoke_test', 'crash2_test.dart'),
+              expectFailure: true,
+              printOutput: false,
+            ),
+            _runFlutterTest(
+              automatedTests,
+              script:
+                  path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+              expectFailure: true,
+              printOutput: false,
+            ),
+            _runFlutterTest(
+              automatedTests,
+              script: path.join(
+                  'test_smoke_test', 'missing_import_test.broken_dart'),
+              expectFailure: true,
+              printOutput: false,
+            ),
+            _runFlutterTest(
+              automatedTests,
+              script: path.join('test_smoke_test',
+                  'disallow_error_reporter_modification_test.dart'),
+              expectFailure: true,
+              printOutput: false,
+            ),
+          ],
+        ),
+  ];
+
+  List<ShardRunner> testsToRun;
+
+  // Smoke tests are special and run first for all test shards.
+  // Run all smoke tests for other shards.
+  // Only shard smoke tests when explicitly specified.
+  final String shardName = Platform.environment[kShardKey];
+  if (shardName == kSmokeTestShardName) {
+    testsToRun = _selectIndexOfTotalSubshard<ShardRunner>(tests);
+  } else {
+    testsToRun = tests;
+  }
+  for (final ShardRunner test in testsToRun) {
+    await test();
+  }
 
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
@@ -255,86 +273,46 @@ Future<void> _runSmokeTests() async {
     exitWithError(<String>[versionError]);
 }
 
-Future<bq.BigqueryApi> _getBigqueryApi() async {
-  if (!useFlutterTestFormatter) {
-    return null;
-  }
-  // TODO(dnfield): How will we do this on LUCI?
-  final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
-  // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
-  if (privateKey == null || privateKey.isEmpty || privateKey.startsWith('ENCRYPTED[')) {
-    return null;
-  }
-  try {
-    final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials(
-      'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
-      auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
-      '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
-    );
-    final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
-    final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
-    return bq.BigqueryApi(client);
-  } catch (e) {
-    print('${red}Failed to get BigQuery API client.$reset');
-    print(e);
-    return null;
-  }
+Future<void> _runGeneralToolTests() async {
+  await _pubRunTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    testPaths: <String>[path.join('test', 'general.shard')],
+    enableFlutterToolAsserts: false,
+    // Detect unit test time regressions (poor time delay handling, etc).
+    perTestTimeout: const Duration(seconds: 2),
+  );
 }
 
-Future<void> _runToolCoverage() async {
+Future<void> _runCommandsToolTests() async {
+  // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
+  // on Windows.
+  final String suffix = Platform.isWindows ? 'permeable' : '';
   await _pubRunTest(
-    toolRoot,
-    testPaths: <String>[
-      path.join('test', 'general.shard'),
-      path.join('test', 'commands.shard', 'hermetic'),
-    ],
-    coverage: 'coverage',
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    forceSingleCore: true,
+    testPaths: <String>[path.join('test', 'commands.shard', suffix)],
   );
-  await runCommand(pub,
-    <String>[
-      'run',
-      'coverage:format_coverage',
-      '--lcov',
-      '--in=coverage',
-      '--out=coverage/lcov.info',
-      '--packages=.packages',
-      '--report-on=lib/'
-    ],
-    workingDirectory: toolRoot,
-    outputMode: OutputMode.capture,
+}
+
+Future<void> _runIntegrationToolTests() async {
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
+  final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await _pubRunTest(
+    toolsPath,
+    forceSingleCore: true,
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
   );
 }
 
 Future<void> _runToolTests() async {
-  const String kDotShard = '.shard';
-  const String kWeb = 'web';
-  const String kTest = 'test';
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
-
-  final Map<String, ShardRunner> subshards = Map<String, ShardRunner>.fromIterable(
-    Directory(path.join(toolsPath, kTest))
-      .listSync()
-      .map<String>((FileSystemEntity entry) => entry.path)
-      .where((String name) => name.endsWith(kDotShard))
-      .where((String name) => path.basenameWithoutExtension(name) != kWeb)
-      .map<String>((String name) => path.basenameWithoutExtension(name)),
-    // The `dynamic` on the next line is because Map.fromIterable isn't generic.
-    value: (dynamic subshard) => () async {
-      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
-      // on Windows.
-      final String suffix = Platform.isWindows && subshard == 'commands'
-        ? 'permeable'
-        : '';
-      await _pubRunTest(
-        toolsPath,
-        forceSingleCore: subshard != 'general',
-        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
-        enableFlutterToolAsserts: subshard != 'general',
-      );
-    },
-  );
-
-  await selectSubshard(subshards);
+  await selectSubshard(<String, ShardRunner>{
+    'general': _runGeneralToolTests,
+    'commands': _runCommandsToolTests,
+  });
 }
 
 Future<void> _runWebToolTests() async {
@@ -389,7 +367,7 @@ Future<void> _runBuildTests() async {
       ],
   ]..shuffle(math.Random(0));
 
-  await _selectIndexedSubshard(tests, kBuildTestShardCount);
+  await _runShardRunnerIndexOfTotalSubshard(tests);
 }
 
 Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
@@ -594,7 +572,6 @@ Future<void> _runAddToAppLifeCycleTests() async {
 }
 
 Future<void> _runFrameworkTests() async {
-  final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   final List<String> soundNullSafetyOptions     = <String>['--null-assertions', '--sound-null-safety'];
   final List<String> mixedModeNullSafetyOptions = <String>['--null-assertions', '--no-sound-null-safety'];
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
@@ -605,7 +582,6 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
-        tableData: bigqueryApi?.tabledata,
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
       );
     }
@@ -614,14 +590,12 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
-        tableData: bigqueryApi?.tabledata,
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=true', ...soundNullSafetyOptions],
-      tableData: bigqueryApi?.tabledata,
       tests: <String>[ 'test_release' + path.separator ],
     );
   }
@@ -638,7 +612,6 @@ Future<void> _runFrameworkTests() async {
       await _runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption, ...soundNullSafetyOptions],
-        tableData: bigqueryApi?.tabledata,
         tests: tests,
       );
     }
@@ -691,28 +664,26 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'benchmarks', 'metrics_center'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata, options: soundNullSafetyOptions);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), forceSingleCore: true);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')], options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: soundNullSafetyOptions);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: soundNullSafetyOptions);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: mixedModeNullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
-      tableData: bigqueryApi?.tabledata,
     );
     await runFixTests();
     await runPrivateTests();
@@ -738,7 +709,6 @@ Future<void> _runFrameworkTests() async {
         }
         return null;
       },
-      tableData: bigqueryApi?.tabledata,
     );
   }
 
@@ -833,8 +803,6 @@ Future<void> _runWebUnitTests() async {
 }
 
 /// Coarse-grained integration tests running on the Web.
-///
-/// These tests are sharded into [kWebLongRunningTestShardCount] shards.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
     () => _runGalleryE2eWebTest('debug'),
@@ -845,7 +813,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('release', canvasKit: true),
   ];
   await _ensureChromeDriverIsRunning();
-  await _selectIndexedSubshard(tests, kWebLongRunningTestShardCount);
+  await _runShardRunnerIndexOfTotalSubshard(tests);
   await _stopChromeDriver();
 }
 
@@ -1210,7 +1178,6 @@ Future<void> _pubRunTest(String workingDirectory, {
   bool enableFlutterToolAsserts = true,
   bool useBuildRunner = false,
   String coverage,
-  bq.TabledataResourceApi tableData,
   bool forceSingleCore = false,
   Duration perTestTimeout,
 }) async {
@@ -1281,7 +1248,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     } finally {
       formatter.finish();
     }
-    await _processTestOutput(formatter, testOutput, tableData);
+    await _processTestOutput(formatter, testOutput);
   } else {
     await runCommand(
       pub,
@@ -1300,7 +1267,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
   OutputChecker outputChecker,
   List<String> options = const <String>[],
   bool skip = false,
-  bq.TabledataResourceApi tableData,
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
@@ -1370,7 +1336,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     } finally {
       formatter.finish();
     }
-    await _processTestOutput(formatter, testOutput, tableData);
+    await _processTestOutput(formatter, testOutput);
   } else {
     await runCommand(
       flutter,
@@ -1414,7 +1380,6 @@ enum CiProviders {
 Future<void> _processTestOutput(
   FlutterCompactFormatter formatter,
   Stream<String> testOutput,
-  bq.TabledataResourceApi tableData,
 ) async {
   final Timer heartbeat = Timer.periodic(const Duration(seconds: 30), (Timer timer) {
     print('Processing...');
@@ -1423,54 +1388,6 @@ Future<void> _processTestOutput(
   await testOutput.forEach(formatter.processRawOutput);
   heartbeat.cancel();
   formatter.finish();
-  if (tableData == null || formatter.tests.isEmpty) {
-    return;
-  }
-  final bq.TableDataInsertAllRequest request = bq.TableDataInsertAllRequest();
-  final String authors = await _getAuthors();
-  request.rows = List<bq.TableDataInsertAllRequestRows>.from(
-    formatter.tests.map<bq.TableDataInsertAllRequestRows>((TestResult result) =>
-      bq.TableDataInsertAllRequestRows.fromJson(<String, dynamic> {
-        'json': <String, dynamic>{
-          'source': <String, dynamic>{
-            'provider': ciProviderName,
-            'url': ciUrl,
-            'platform': <String, dynamic>{
-              'os': Platform.operatingSystem,
-              'version': Platform.operatingSystemVersion,
-            },
-          },
-          'test': <String, dynamic>{
-            'name': result.name,
-            'result': result.status.toString(),
-            'file': result.path,
-            'line': result.line,
-            'column': result.column,
-            'time': result.totalTime,
-          },
-          'git': <String, dynamic>{
-            'author': authors,
-            'pull_request': prNumber,
-            'commit': gitHash,
-            'organization': 'flutter',
-            'repository': 'flutter',
-          },
-          'error': result.status != TestStatus.failed ? null : <String, dynamic>{
-            'message': result.errorMessage,
-            'stack_trace': result.stackTrace,
-          },
-          'information': result.messages,
-        },
-      }),
-    ),
-    growable: false,
-  );
-  final bq.TableDataInsertAllResponse response = await tableData.insertAll(request, 'flutter-infra', 'tests', 'ci');
-  if (response.insertErrors != null && response.insertErrors.isNotEmpty) {
-    print('${red}BigQuery insert errors:');
-    print(response.toJson());
-    print(reset);
-  }
 }
 
 CiProviders get ciProvider {
@@ -1481,56 +1398,6 @@ CiProviders get ciProvider {
     return CiProviders.luci;
   }
   return null;
-}
-
-String get ciProviderName {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return 'cirrusci';
-    case CiProviders.luci:
-      return 'luci';
-  }
-  return 'unknown';
-}
-
-int get prNumber {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_PR'] == null
-          ? -1
-          : int.tryParse(Platform.environment['CIRRUS_PR']);
-    case CiProviders.luci:
-      return -1; // LUCI doesn't know about this.
-  }
-  return -1;
-}
-
-Future<String> _getAuthors() async {
-  final String author = await runAndGetStdout(
-    'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
-    workingDirectory: flutterRoot,
-  ).first;
-  return author;
-}
-
-String get ciUrl {
-  switch (ciProvider) {
-    case CiProviders.cirrus:
-      return 'https://cirrus-ci.com/task/${Platform.environment['CIRRUS_TASK_ID']}';
-    case CiProviders.luci:
-      return 'https://ci.chromium.org/p/flutter/g/framework/console'; // TODO(dnfield): can we get a direct link to the actual build?
-  }
-  return '';
-}
-
-String get gitHash {
-  switch(ciProvider) {
-    case CiProviders.cirrus:
-      return Platform.environment['CIRRUS_CHANGE_IN_REPO'];
-    case CiProviders.luci:
-      return 'HEAD'; // TODO(dnfield): Set this in the env for LUCI.
-  }
-  return '';
 }
 
 /// Returns the name of the branch being tested.
@@ -1562,47 +1429,69 @@ Future<String> verifyVersion(File file) async {
   return null;
 }
 
-/// Parse (zero-)index-named subshards and equally distribute [tests]
-/// between them. Last shard should end in "_last" to catch mismatches
-/// between `.cirrus.yml` and `test.dart`. See [selectShard] for naming details.
+/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
+/// and equally distribute [tests] between them.
+/// Subshard format is "{index}_{total number of shards}".
+/// The scheduler can change the number of total shards without needing an additional
+/// commit in this repository.
 ///
 /// Examples:
-/// build_tests-0-linux
-/// build_tests-1-linux
-/// build_tests-2_last-linux
-Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards) async {
-  final int testsPerShard = tests.length ~/ numberOfShards;
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
+/// 1_3
+/// 2_3
+/// 3_3
+List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
+  // Example: "1_3" means the first (one-indexed) shard of three total shards.
+  final String subshardName = Platform.environment[subshardKey];
+  if (subshardName == null) {
+    print('$kSubshardKey environment variable is missing, skipping sharding');
+    return tests;
+  }
+  print('$bold$subshardKey=$subshardName$reset');
 
-  for (int subshard = 0; subshard < numberOfShards; subshard += 1) {
-    String last = '';
-    List<ShardRunner> sublist;
-    if (subshard < numberOfShards - 1) {
-      sublist = tests.sublist(subshard * testsPerShard, (subshard + 1) * testsPerShard);
-    } else {
-      sublist = tests.sublist(subshard * testsPerShard, tests.length);
-      // We make sure the last shard ends in _last.
-      last = '_last';
-    }
-    subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist)
-        await test();
-    };
+  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
+  final Match match = pattern.firstMatch(subshardName);
+  if (match == null || match.groupCount != 2) {
+    print('${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"');
+    exit(1);
+  }
+  // One-indexed.
+  final int index = int.parse(match.group(1));
+  final int total = int.parse(match.group(2));
+  if (index > total) {
+    print('${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.');
+    exit(1);
   }
 
-  await selectSubshard(subshards);
+  final int testsPerShard = tests.length ~/ total;
+  final int start = (index - 1) * testsPerShard;
+  final int end = index * testsPerShard;
+
+  print('Selecting subshard $index of $total (range ${start + 1}-$end of ${tests.length})');
+  return tests.sublist(start, end);
+}
+
+Future<void> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+  final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
+  for (final ShardRunner test in sublist) {
+    await test();
+  }
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
 /// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
-/// However, for local testing you can just set the SHARD and SUBSHARD
+/// For local testing you can just set the SHARD and SUBSHARD
 /// environment variables. For example, to run all the framework tests you can
-/// just set SHARD=framework_tests. To run specifically the third subshard of
+/// just set SHARD=framework_tests. Some shards support named subshards, like
+/// SHARD=framework_tests SUBSHARD=widgets. Others support arbitrary numbered
+/// subsharding, like SHARD=build_tests SUBSHARD=1_2 (where 1_2 means "one of two"
+/// as in run the first half of the tests).
+///
+/// To run specifically the third subshard of
 /// the Web tests you can set SHARD=web_tests SUBSHARD=2 (it's zero-based).
-Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, 'SHARD', 'shard', 0);
-Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, 'SUBSHARD', 'subshard', 1);
+Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
+Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, kSubshardKey, 'subshard', 1);
 
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 

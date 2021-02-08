@@ -14,6 +14,8 @@ import 'button_style_button.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'ink_ripple.dart';
+import 'ink_well.dart';
 import 'material_state.dart';
 import 'outlined_button_theme.dart';
 import 'theme.dart';
@@ -131,6 +133,7 @@ class OutlinedButton extends ButtonStyleButton {
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
+    Size? fixedSize,
     BorderSide? side,
     OutlinedBorder? shape,
     MouseCursor? enabledMouseCursor,
@@ -140,6 +143,7 @@ class OutlinedButton extends ButtonStyleButton {
     Duration? animationDuration,
     bool? enableFeedback,
     AlignmentGeometry? alignment,
+    InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
       ? null
@@ -160,6 +164,7 @@ class OutlinedButton extends ButtonStyleButton {
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
       mouseCursor: mouseCursor,
@@ -168,6 +173,7 @@ class OutlinedButton extends ButtonStyleButton {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashFactory: splashFactory,
     );
   }
 
@@ -210,6 +216,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
+  /// * `fixedSize` - null
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
@@ -220,6 +227,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `animationDuration` - kThemeChangeDuration
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
+  /// * `splashFactory` - InkRipple.splashFactory
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -253,6 +261,7 @@ class OutlinedButton extends ButtonStyleButton {
       animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
+      splashFactory: InkRipple.splashFactory,
     );
   }
 

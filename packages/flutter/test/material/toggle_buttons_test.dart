@@ -707,7 +707,7 @@ void main() {
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
@@ -781,7 +781,7 @@ void main() {
       inkFeatures,
       paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
     );
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -852,7 +852,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -1648,5 +1648,53 @@ void main() {
     );
 
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true, false],
+            onPressed: (int index) { },
+            focusNodes: focusNodes,
+            children: const <Widget>[Text('one'), Text('two')],
+          ),
+        ),
+      ),
+    );
+
+    double toggleButtonElevation(String text) {
+      return tester.widget<Material>(find.widgetWithText(Material, text).first).elevation;
+    }
+
+    // Default toggle button elevation
+    expect(toggleButtonElevation('one'), 0); // highlighted
+    expect(toggleButtonElevation('two'), 0); // not highlighted
+
+    // Hovered button elevation
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(tester.getCenter(find.text('one')));
+    await tester.pumpAndSettle();
+    expect(toggleButtonElevation('one'), 0);
+    await hoverGesture.moveTo(tester.getCenter(find.text('two')));
+    await tester.pumpAndSettle();
+    expect(toggleButtonElevation('two'), 0);
+
+    // Focused button elevation
+    focusNodes[0].requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNodes[0].hasFocus, isTrue);
+    expect(focusNodes[1].hasFocus, isFalse);
+    expect(toggleButtonElevation('one'), 0);
+    focusNodes[1].requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNodes[0].hasFocus, isFalse);
+    expect(focusNodes[1].hasFocus, isTrue);
+    expect(toggleButtonElevation('two'), 0);
+
+    await hoverGesture.removePointer();
   });
 }

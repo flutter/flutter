@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -28,10 +30,10 @@ void main() {
 
   group('Usage', () {
     Directory tempDir;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -101,17 +103,17 @@ void main() {
 
       await runBuildApkCommand(projectPath);
 
-      verify(mockUsage.sendEvent(
-        'tool-command-result',
-        'apk',
-        label: 'success',
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'tool-command-result',
+          'apk',
+          label: 'success',
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -120,10 +122,10 @@ void main() {
     ProcessManager mockProcessManager;
     String gradlew;
     AndroidSdk mockAndroidSdk;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
 
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
@@ -235,6 +237,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -263,8 +266,9 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=true',
+          '-Pdart-obfuscation=false',
           '-Psplit-debug-info=${tempDir.path}',
+          '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -295,8 +299,9 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=true',
+          '-Pdart-obfuscation=false',
           '-Pextra-front-end-options=foo,bar',
+          '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
@@ -327,6 +332,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -351,6 +357,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -388,18 +395,20 @@ void main() {
         containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
       );
 
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'gradle-r8-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'gradle-r8-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
@@ -418,6 +427,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -450,18 +460,21 @@ void main() {
         'following the steps on https://goo.gl/CP92wY'
         ),
       );
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'app-not-using-android-x',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'app-not-using-android-x',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
@@ -474,6 +487,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=true',
           '-Ptree-shake-icons=true',
           'assembleRelease',
@@ -503,18 +517,21 @@ void main() {
         ),
         isFalse,
       );
-      verify(mockUsage.sendEvent(
-        'build',
-        'apk',
-        label: 'app-using-android-x',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'apk',
+          label: 'app-using-android-x',
+          parameters: <String, String>{},
+        ),
+      ));
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 }
@@ -537,4 +554,3 @@ Future<BuildApkCommand> runBuildApkCommand(
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
-class MockUsage extends Mock implements Usage {}

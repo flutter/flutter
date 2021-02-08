@@ -152,7 +152,7 @@ void main() {
 
     final Element child0 = tester.element(find.byKey(child0Key));
     final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
     final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
@@ -173,7 +173,7 @@ void main() {
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(10.0, 10.0)));
   });
 
@@ -198,7 +198,7 @@ void main() {
 
     final Element child0 = tester.element(find.byKey(child0Key));
     final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
     final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
@@ -219,7 +219,7 @@ void main() {
       ),
     );
 
-    expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
+    expect(child0RenderObjectParentData.offset, equals(Offset.zero));
     expect(child1RenderObjectParentData.offset, equals(const Offset(0.0, 10.0)));
   });
 
@@ -409,7 +409,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(IndexedStack));
+    await tester.tap(find.byType(IndexedStack), warnIfMissed: false);
     final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);

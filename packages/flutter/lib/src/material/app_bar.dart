@@ -729,7 +729,7 @@ class _AppBarState extends State<AppBar> {
 
     final Color backgroundColor = backwardsCompatibility
       ? widget.backgroundColor
-        ?? appBarTheme.color
+        ?? appBarTheme.backgroundColor
         ?? theme.primaryColor
       : widget.backgroundColor
         ?? appBarTheme.backgroundColor

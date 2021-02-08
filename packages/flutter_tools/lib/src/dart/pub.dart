@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -9,12 +11,14 @@ import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../reporting/reporting.dart';
 
@@ -329,11 +333,14 @@ class _DefaultPub implements Pub {
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
   }) async {
-    final io.Process process = await _processUtils.start(
-      _pubCommand(arguments),
-      workingDirectory: directory,
-      environment: await _createPubEnvironment(PubContext.interactive),
-    );
+    // Fully resolved pub or pub.bat is calculated based on current platform.
+    final io.Process process = await ErrorHandlingProcessManager.skipCommandLookup(() async {
+      return _processUtils.start(
+        _pubCommand(arguments),
+        workingDirectory: directory,
+        environment: await _createPubEnvironment(PubContext.interactive),
+      );
+    });
 
     // Pipe the Flutter tool stdin to the pub stdin.
     unawaited(process.stdin.addStream(stdio.stdin)
@@ -476,20 +483,28 @@ class _DefaultPub implements Pub {
     if (!generateSyntheticPackage) {
       return;
     }
-    final Package flutterGen = Package('flutter_gen', generatedDirectory.uri, languageVersion: LanguageVersion(2, 12));
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }
-    final PackageConfig newPackageConfig = PackageConfig(
-      <Package>[
-        ...packageConfig.packages,
-        flutterGen,
-      ],
-    );
-    // There is no current API for saving a package_config without hitting the real filesystem.
-    if (packageConfigFile.fileSystem is LocalFileSystem) {
-      await savePackageConfig(newPackageConfig, packageConfigFile.parent.parent);
-    }
+
+    // TODO(jonahwillams): Using raw json manipulation here because
+    // savePackageConfig always writes to local io, and it changes absolute
+    // paths to relative on round trip.
+    // See: https://github.com/dart-lang/package_config/issues/99,
+    // and: https://github.com/dart-lang/package_config/issues/100.
+
+    // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
+    // we can rely on the file to exist and be correctly formatted.
+    final dynamic jsonContents =
+        json.decode(packageConfigFile.readAsStringSync());
+
+    jsonContents['packages'].add(<String, dynamic>{
+      'name': 'flutter_gen',
+      'rootUri': 'flutter_gen',
+      'languageVersion': '2.12',
+    });
+
+    packageConfigFile.writeAsStringSync(json.encode(jsonContents));
   }
 
   // Subset the package config file to only the parts that are relevant for

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -40,6 +42,6 @@ void main() {
         );
       }
     });
-  }, skip: platform.isWindows, // Flaky on Windows: https://github.com/flutter/flutter/issues/74052
+  }, skip: true, // Flaky: https://github.com/flutter/flutter/issues/74052
   );
 }

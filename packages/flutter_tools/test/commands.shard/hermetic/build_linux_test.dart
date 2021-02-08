@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -45,12 +47,12 @@ void main() {
 
   FileSystem fileSystem;
   ProcessManager processManager;
-  Usage usage;
+  TestUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     Cache.flutterRoot = _kTestFlutterRoot;
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -366,10 +368,10 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-      '  "DART_DEFINES=foo.bar%3D2,fizz.far%3D3"',
+      '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
-      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment%3Dnon-nullable"',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment%3Dnon-nullable"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
       '  "SPLIT_DEBUG_INFO=foo/"',
       '  "TRACK_WIDGET_CREATION=true"',
       '  "TREE_SHAKE_ICONS=true"',
@@ -455,16 +457,15 @@ set(BINARY_NAME "fizz_bar")
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
     expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: linux, label: null, value: null, cd33:'));
+    expect(usage.events, contains(
+      const TestUsageEvent('code-size-analysis', 'linux'),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

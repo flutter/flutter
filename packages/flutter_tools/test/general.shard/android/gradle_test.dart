@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -20,7 +22,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -114,7 +115,7 @@ void main() {
 
     testWithoutContext('assemble debug', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
+        getAssembleTaskFor(BuildInfo.debug),
         equals('assembleDebug'),
       );
       expect(
@@ -137,11 +138,11 @@ void main() {
 
   group('findBundleFile', () {
     FileSystem fileSystem;
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
     });
 
     testWithoutContext('Finds app bundle when flavor contains underscores in release mode', () {
@@ -209,7 +210,7 @@ void main() {
 
     testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app.aab', fileSystem);
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
+      final File bundle = findBundleFile(project, BuildInfo.debug);
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
     });
@@ -265,7 +266,7 @@ void main() {
 
     testWithoutContext('Finds app bundle in debug mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab', fileSystem);
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
+      final File bundle = findBundleFile(project, BuildInfo.debug);
       expect(bundle, isNotNull);
       expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
     });
@@ -310,20 +311,20 @@ void main() {
             "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
         )
       );
-      verify(
-        mockUsage.sendEvent(
-          any,
-          any,
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
           label: 'gradle-expected-file-not-found',
-          parameters: const <String, String> {
+          parameters: <String, String> {
             'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
           },
         ),
-      ).called(1);
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -915,7 +916,9 @@ plugin2=${plugin2.path}
             '-Pis-plugin=true',
             '-PbuildNumber=1.0',
             '-q',
-            '-Pfont-subset=true',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=true',
             '-Ptarget-platform=android-arm,android-arm64,android-x64',
             'assembleAarRelease',
           ],
@@ -930,7 +933,9 @@ plugin2=${plugin2.path}
             '-Pis-plugin=true',
             '-PbuildNumber=1.0',
             '-q',
-            '-Pfont-subset=true',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=true',
             '-Ptarget-platform=android-arm,android-arm64,android-x64',
             'assembleAarRelease',
           ],
@@ -1005,7 +1010,7 @@ plugin1=${plugin1.path}
   });
 
   group('gradle build', () {
-    Usage mockUsage;
+    TestUsage testUsage;
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
     MockLocalEngineArtifacts mockArtifacts;
@@ -1016,7 +1021,7 @@ plugin1=${plugin1.path}
     Cache cache;
 
     setUp(() {
-      mockUsage = MockUsage();
+      testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
       fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
@@ -1115,20 +1120,21 @@ plugin1=${plugin1.path}
 
       expect(handlerCalled, isTrue);
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-random-event-label-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-random-event-label-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('recognizes common errors - retry build', () async {
@@ -1196,21 +1202,21 @@ plugin1=${plugin1.path}
       ));
 
       expect(testFnCalled, equals(2));
-
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-random-event-label-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-random-event-label-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('recognizes process exceptions - tool exit', () async {
@@ -1271,20 +1277,21 @@ plugin1=${plugin1.path}
 
       expect(handlerCalled, isTrue);
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-random-event-label-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-random-event-label-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
@@ -1404,19 +1411,21 @@ plugin1=${plugin1.path}
         ],
       );
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-random-event-label-success',
-        parameters: anyNamed('parameters'),
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-random-event-label-success',
+          parameters: <String, String>{},
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       FileSystem: () => fileSystem,
       Platform: () => android,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('performs code size analysis and sends analytics', () async {
@@ -1490,17 +1499,19 @@ plugin1=${plugin1.path}
         localGradleErrors: <GradleHandledError>[],
       );
 
-      verify(mockUsage.sendEvent(
-        'code-size-analysis',
-        'apk',
-      )).called(1);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'code-size-analysis',
+          'apk',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       FileSystem: () => fileSystem,
       Platform: () => android,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('recognizes common errors - retry build with AAR plugins', () async {
@@ -1574,20 +1585,21 @@ plugin1=${plugin1.path}
       expect(testFnCalled, equals(2));
       expect(builtPluginAsAar, isTrue);
 
-      verify(mockUsage.sendEvent(
-        any,
-        any,
-        label: 'gradle-random-event-label-failure',
-        parameters: anyNamed('parameters'),
-      )).called(1);
-
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
+          'build',
+          'unspecified',
+          label: 'gradle-random-event-label-failure',
+          parameters: <String, String>{},
+        ),
+      ));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
       ProcessManager: () => mockProcessManager,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
@@ -2095,7 +2107,9 @@ plugin1=${plugin1.path}
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
+          '-Ptree-shake-icons=false',
           'assembleRelease'
         ],
       ));
@@ -2795,11 +2809,7 @@ class FakeGradleUtils extends GradleUtils {
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockAndroidStudio extends Mock implements AndroidStudio {}
-class MockDirectory extends Mock implements Directory {}
-class MockFile extends Mock implements File {}
 class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockUsage extends Mock implements Usage {}

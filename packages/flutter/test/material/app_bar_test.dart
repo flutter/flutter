@@ -553,7 +553,7 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(hamburger), Offset.zero);
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
@@ -1268,7 +1268,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1309,7 +1309,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1330,7 +1330,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1340,7 +1340,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1361,7 +1361,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1382,7 +1382,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1415,7 +1415,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1449,7 +1449,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0, 0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
@@ -1495,7 +1495,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));

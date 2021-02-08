@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -55,6 +58,30 @@ class Xcode {
         _processUtils =
             ProcessUtils(logger: logger, processManager: processManager);
 
+  /// Create an [Xcode] for testing.
+  ///
+  /// Defaults to a memory file system, fake platform,
+  /// buffer logger, and test [XcodeProjectInterpreter].
+  @visibleForTesting
+  factory Xcode.test({
+    @required ProcessManager processManager,
+    XcodeProjectInterpreter xcodeProjectInterpreter,
+    Platform platform,
+    FileSystem fileSystem,
+  }) {
+    platform ??= FakePlatform(
+      operatingSystem: 'macos',
+      environment: <String, String>{},
+    );
+    return Xcode(
+      platform: platform,
+      processManager: processManager,
+      fileSystem: fileSystem ?? MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+    );
+  }
+
   final Platform _platform;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
@@ -78,12 +105,7 @@ class Xcode {
     return _xcodeSelectPath;
   }
 
-  bool get isInstalled {
-    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty) {
-      return false;
-    }
-    return _xcodeProjectInterpreter.isInstalled;
-  }
+  bool get isInstalled => _xcodeProjectInterpreter.isInstalled;
 
   Version get currentVersion => Version(
         _xcodeProjectInterpreter.majorVersion,

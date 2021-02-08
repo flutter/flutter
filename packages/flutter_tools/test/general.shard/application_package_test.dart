@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+// @dart = 2.8
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -25,6 +25,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -247,16 +248,19 @@ void main() {
 
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
+    FakePlistParser testPlistParser;
+
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
 
     setUp(() {
       os = MockOperatingSystemUtils();
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext('Error on non-existing file', () {
@@ -290,7 +294,7 @@ void main() {
 
     testUsingContext('Error on bad info.plist', () {
       globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
+      globals.fs.file('bundle.app/Info.plist').createSync();
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
       expect(
@@ -302,7 +306,8 @@ void main() {
 
     testUsingContext('Success with app bundle', () {
       globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
+      globals.fs.file('bundle.app/Info.plist').createSync();
+      testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, 'bundle.app');
@@ -353,9 +358,10 @@ void main() {
         final Directory bundleAppDir = globals.fs.directory(
             globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
         bundleAppDir.createSync(recursive: true);
+        testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
         globals.fs
             .file(globals.fs.path.join(bundleAppDir.path, 'Info.plist'))
-            .writeAsStringSync(plistData);
+            .createSync();
       });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
@@ -699,27 +705,6 @@ N: android=http://schemas.android.com/apk/res/android
         A: dist:instant=(type 0x12)0xffffffff
       E: uses-permission (line=24)
         A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
-''';
-
-
-class MockPlistUtils extends Mock implements PlistParser {
-  @override
-  String getValueFromFile(String path, String key) {
-    final File file = globals.fs.file(path);
-    if (!file.existsSync()) {
-      return null;
-    }
-    return json.decode(file.readAsStringSync())[key] as String;
-  }
-}
-
-// Contains no bundle identifier.
-const String badPlistData = '''
-{}
-''';
-
-const String plistData = '''
-{"CFBundleIdentifier": "fooBundleId"}
 ''';
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

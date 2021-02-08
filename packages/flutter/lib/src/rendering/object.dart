@@ -1305,6 +1305,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// The object responsible for creating this render object.
   ///
   /// Used in debug messages.
+  ///
+  /// See also:
+  ///
+  ///  * [DebugCreator], which the [widgets] library uses as values for this field.
   Object? debugCreator;
 
   void _debugReportException(String method, Object exception, StackTrace stack) {
@@ -1441,6 +1445,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsLayout = true;
 
   RenderObject? _relayoutBoundary;
+
+  /// Whether [invokeLayoutCallback] for this render object is currently running.
+  bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
   /// The layout constraints most recently supplied by the parent.
