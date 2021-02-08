@@ -20,7 +20,9 @@ def main():
   parser.add_argument('--dst', type=str, required=True)
   parser.add_argument('--arm64-out-dir', type=str, required=True)
   parser.add_argument('--armv7-out-dir', type=str, required=True)
-  parser.add_argument('--simulator-out-dir', type=str, required=True)
+  # TODO(gw280): Remove --simulator-out-dir alias when all recipes are updated
+  parser.add_argument('--simulator-x64-out-dir', '--simulator-out-dir', type=str, required=True)
+  parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
   parser.add_argument('--strip', action="store_true", default=False)
   parser.add_argument('--dsym', action="store_true", default=False)
   parser.add_argument('--strip-bitcode', dest='strip_bitcode', action="store_true", default=False)
@@ -28,13 +30,17 @@ def main():
   args = parser.parse_args()
 
   fat_framework = os.path.join(args.dst, 'Flutter.framework')
+  fat_simulator_framework = os.path.join(args.dst, 'sim', 'Flutter.framework')
   arm64_framework = os.path.join(args.arm64_out_dir, 'Flutter.framework')
   armv7_framework = os.path.join(args.armv7_out_dir, 'Flutter.framework')
-  simulator_framework = os.path.join(args.simulator_out_dir, 'Flutter.framework')
+  simulator_x64_framework = os.path.join(args.simulator_x64_out_dir, 'Flutter.framework')
+  if args.simulator_arm64_out_dir is not None:
+    simulator_arm64_framework = os.path.join(args.simulator_arm64_out_dir, 'Flutter.framework')
+    simulator_arm64_dylib = os.path.join(simulator_arm64_framework, 'Flutter')
 
   arm64_dylib = os.path.join(arm64_framework, 'Flutter')
   armv7_dylib = os.path.join(armv7_framework, 'Flutter')
-  simulator_dylib = os.path.join(simulator_framework, 'Flutter')
+  simulator_x64_dylib = os.path.join(simulator_x64_framework, 'Flutter')
 
   if not os.path.isdir(arm64_framework):
     print('Cannot find iOS arm64 Framework at %s' % arm64_framework)
@@ -44,8 +50,8 @@ def main():
     print('Cannot find iOS armv7 Framework at %s' % armv7_framework)
     return 1
 
-  if not os.path.isdir(simulator_framework):
-    print('Cannot find iOS simulator Framework at %s' % simulator_framework)
+  if not os.path.isdir(simulator_x64_framework):
+    print('Cannot find iOS x64 simulator Framework at %s' % simulator_framework)
     return 1
 
   if not os.path.isfile(arm64_dylib):
@@ -56,7 +62,7 @@ def main():
     print('Cannot find iOS armv7 dylib at %s' % armv7_dylib)
     return 1
 
-  if not os.path.isfile(simulator_dylib):
+  if not os.path.isfile(simulator_x64_dylib):
     print('Cannot find iOS simulator dylib at %s' % simulator_dylib)
     return 1
 
@@ -80,20 +86,42 @@ def main():
   ])
   process_framework(args, fat_framework, fat_framework_binary)
 
-  # Create XCFramework from the arm-only fat framework and the simulator framework.
+  if args.simulator_arm64_out_dir is not None:
+    shutil.rmtree(fat_simulator_framework, True)
+    shutil.copytree(simulator_arm64_framework, fat_simulator_framework)
+
+    fat_simulator_framework_binary = os.path.join(fat_simulator_framework, 'Flutter')
+
+    # Create the arm64/x64 simulator fat framework.
+    subprocess.check_call([
+      'lipo',
+      simulator_x64_dylib,
+      simulator_arm64_dylib,
+      '-create',
+      '-output',
+      fat_simulator_framework_binary
+    ])
+    process_framework(args, fat_simulator_framework, fat_simulator_framework_binary)
+    simulator_framework = fat_simulator_framework
+  else:
+    simulator_framework = simulator_x64_framework
+
+  # Create XCFramework from the arm-only fat framework and the arm64/x64 simulator frameworks, or just the
+  # x64 simulator framework if only that one exists.
   xcframeworks = [simulator_framework, fat_framework]
   create_xcframework(location=args.dst, name='Flutter', frameworks=xcframeworks)
 
-  # Add the simulator into the fat framework.
+  # Add the x64 simulator into the fat framework
   subprocess.check_call([
     'lipo',
     arm64_dylib,
     armv7_dylib,
-    simulator_dylib,
+    simulator_x64_dylib,
     '-create',
     '-output',
     fat_framework_binary
   ])
+
   process_framework(args, fat_framework, fat_framework_binary)
 
 
