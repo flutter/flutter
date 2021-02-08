@@ -1458,6 +1458,47 @@ void main() {
       expect(delegate.textEditingValue.selection.baseOffset, 0);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
+    // Regression test for https://github.com/flutter/flutter/issues/75616.
+    test('functions with Capslock pressed', () async {
+      final TextSelectionDelegate delegate = FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final ViewportOffset viewportOffset = ViewportOffset.zero();
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {},
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          text: 'test',
+          style: TextStyle(
+            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+      );
+
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      await simulateKeyDownEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      await simulateKeyDownEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.backspace, platform: 'android');
+      await simulateKeyUpEvent(LogicalKeyboardKey.capsLock, platform: 'android');
+      expect(delegate.textEditingValue.text, 'tet');
+      expect(delegate.textEditingValue.selection.isCollapsed, true);
+      expect(delegate.textEditingValue.selection.baseOffset, 2);
+
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
     test('handles obscured text', () async {
       final TextSelectionDelegate delegate = FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(

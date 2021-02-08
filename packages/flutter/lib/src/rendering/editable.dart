@@ -648,6 +648,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
     final bool isMacOS = keyEvent.data is RawKeyEventDataMacOs;
+
+    // Ignores CapsLock if it's a Backspace key event. On Android the backspace
+    // key on the "extra symbols" keypad also holds down Capslock.
+    // See: https://github.com/flutter/flutter/issues/75616.
+    if (key == LogicalKeyboardKey.backspace)
+      keysPressed.remove(LogicalKeyboardKey.capsLock);
     if (!_nonModifierKeys.contains(key) ||
         keysPressed.difference(isMacOS ? _macOsModifierKeys : _modifierKeys).length > 1 ||
         keysPressed.difference(_interestingKeys).isNotEmpty) {
