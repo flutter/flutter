@@ -1639,6 +1639,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
+    if (_listenerAttached)
+      RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
