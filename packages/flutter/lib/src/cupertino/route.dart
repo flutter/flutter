@@ -910,7 +910,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // A performance evaluation on xx showed, that drawing the gradient manually
     // as implemented below is more performant than relying on [LinearGradient.createShader]
     // because compiling that shader takes a long time. On an iPhone XR, the
-    // implementation below reduced the worst frame time for a cupertino page transition from xx ms down to
+    // implementation below reduced the worst frame time for a cupertino page transition of a newly installed app from xx ms down to
     // xx ms, mainly because there's no longer a need to compile a shader for the
     // LinearGradient.
     //
