@@ -31,7 +31,7 @@ void main() {
         const AutofillConfiguration config = AutofillConfiguration(
           uniqueIdentifier: 'id',
           autofillHints: <String>[],
-          currentEditingValue: TextEditingValue(),
+          currentEditingValue: TextEditingValue.empty,
         );
 
         json = config.toJson();

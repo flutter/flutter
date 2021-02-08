@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -423,8 +421,8 @@ void main() {
           home: Center(
             child: CupertinoSearchTextField(
               suffixMode: OverlayVisibilityMode.always,
-              prefixInsets: EdgeInsets.all(0),
-              suffixInsets: EdgeInsets.all(0),
+              prefixInsets: EdgeInsets.zero,
+              suffixInsets: EdgeInsets.zero,
             ),
           ),
         ),

@@ -115,6 +115,34 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// fully re-compile your application (e.g. by re-executing `flutter run`) after
 /// making a change.
 ///
+/// ## Testing State Restoration
+///
+/// {@template flutter.widgets.RestorationManager}
+/// To test state restoration on Android:
+///   1. Turn on "Don't keep activities", which destroys the Android activity
+///      as soon as the user leaves it. This option should become available
+///      when Developer Options are turned on for the device.
+///   2. Run the code sample on an Android device.
+///   3. Create some in-memory state in the app on the phone,
+///      e.g. by navigating to a different screen.
+///   4. Background the Flutter app, then return to it. It will restart
+///      and restore its state.
+///
+/// To test state restoration on iOS:
+///   1. Open `ios/Runner.xcworkspace/` in Xcode.
+///   2. (iOS 14+ only): Switch to build in profile or release mode, as
+///      launching an app from the home screen is not supported in debug
+///      mode.
+///   2. Press the Play button in Xcode to build and run the app.
+///   3. Create some in-memory state in the app on the phone,
+///      e.g. by navigating to a different screen.
+///   4. Background the app on the phone, e.g. by going back to the home screen.
+///   5. Press the Stop button in Xcode to terminate the app while running in
+///      the background.
+///   6. Open the app again on the phone (not via Xcode). It will restart
+///      and restore its state.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [ServicesBinding.restorationManager], which holds the singleton instance

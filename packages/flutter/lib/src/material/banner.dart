@@ -50,6 +50,10 @@ import 'theme.dart';
 /// Otherwise, the [actions] will be placed below the [content]. Use
 /// [forceActionsBelow] to override this behavior.
 ///
+/// If the [actions] placed below the [content], they will be laid out in a row.
+/// If there isn't sufficient room to display everything, they are laid out
+/// in a column instead.
+///
 /// The [actions] and [content] must be provided. An optional leading widget
 /// (typically an [Image]) can also be provided. The [contentTextStyle] and
 /// [backgroundColor] can be provided to customize the banner.
@@ -70,6 +74,7 @@ class MaterialBanner extends StatelessWidget {
     this.padding,
     this.leadingPadding,
     this.forceActionsBelow = false,
+    this.overflowAlignment = OverflowBarAlignment.end,
   }) : assert(content != null),
        assert(actions != null),
        assert(forceActionsBelow != null),
@@ -124,7 +129,14 @@ class MaterialBanner extends StatelessWidget {
   /// this is false, the [actions] will be placed on the trailing side of the
   /// [content] if [actions]'s length is 1 and below the [content] if greater
   /// than 1.
+  ///
+  /// Defaults to false.
   final bool forceActionsBelow;
+
+  /// The horizontal alignment of the [actions] when the [actions] laid out in a column.
+  ///
+  /// Defaults to [OverflowBarAlignment.end].
+  final OverflowBarAlignment overflowAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +158,7 @@ class MaterialBanner extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 52.0),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: OverflowBar(
+        overflowAlignment: overflowAlignment,
         spacing: 8,
         children: actions,
       ),

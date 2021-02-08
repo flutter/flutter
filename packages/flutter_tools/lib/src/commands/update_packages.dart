@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -20,53 +22,55 @@ import '../runner/flutter_command.dart';
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
-  // Add pinned packages here.
+  // Add pinned packages here. Please leave a comment explaining why.
+  // PACKAGES WITH INCOMPATIBLE LATER VERSIONS
   // Dart analyzer does not catch renamed or deleted files.
   // Therefore, we control the version of flutter_gallery_assets so that
   // existing tests do not fail when the package has a new version.
-  'flutter_gallery_assets': '^0.2.0',
-  'mockito': '4.1.1',  // Prevent mockito from upgrading to the source gen version.
-  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'flutter_gallery_assets': '^1.0.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
-  'shelf': '0.7.5',
-  // Dart team owned nnbd deps
-  'async': '2.5.0-nullsafety.3',
-  'boolean_selector': '2.1.0-nullsafety.3',
-  'characters': '1.1.0-nullsafety.5',
-  'charcode': '1.2.0-nullsafety.3',
-  'clock': '1.1.0-nullsafety.3',
-  'collection': '1.15.0-nullsafety.5',
-  'intl': '0.17.0-nullsafety.2',
-  'fake_async': '1.2.0-nullsafety.3',
-  'js': '0.6.3-nullsafety.3',
-  'matcher': '0.12.10-nullsafety.3',
-  'meta': '1.3.0-nullsafety.6',
-  'path': '1.8.0-nullsafety.3',
-  'pedantic': '1.10.0-nullsafety.3',
-  'pool': '1.5.0-nullsafety.3',
-  'source_maps': '0.10.10-nullsafety.3',
-  'source_map_stack_trace': '2.1.0-nullsafety.4',
-  'source_span': '1.8.0-nullsafety.4',
-  'stack_trace': '1.10.0-nullsafety.6',
-  'stream_channel': '2.1.0-nullsafety.3',
-  'string_scanner': '1.1.0-nullsafety.3',
-  'term_glyph': '1.2.0-nullsafety.3',
-  'test': '1.16.0-nullsafety.9',
-  'test_api': '0.2.19-nullsafety.6',
-  'test_core': '0.3.12-nullsafety.9',
-  'typed_data': '1.3.0-nullsafety.5',
-  'vector_math': '2.1.0-nullsafety.5',
-  // Flutter team owned nnbd deps
-  'platform': '3.0.0-nullsafety.4',
-  'file': '6.0.0-nullsafety.4',
-  'process': '4.0.0-nullsafety.4',
-  'process_runner': '4.0.0-nullsafety.5',
-  'path_provider': '1.6.14',
-  'video_player': '2.0.0-nullsafety.2',
-  'url_launcher': '6.0.0-nullsafety.1',
-  'connectivity': '3.0.0-nullsafety.1',
-  'device_info': '2.0.0-nullsafety.1',
-  'camera': '0.6.4+5',
+  'mockito': '4.1.1', // Prevent mockito from upgrading to the source gen version.
+  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  // DART TEAM OWNED NNBD DEPS
+  'archive': '">=3.0.0-nullsafety.0"',
+  'async': '">=2.5.0-nullsafety.3"',
+  'boolean_selector': '">=2.1.0-nullsafety.3"',
+  'characters': '">=1.1.0-nullsafety.5"',
+  'charcode': '">=1.2.0-nullsafety.3"',
+  'clock': '">=1.1.0-nullsafety.3"',
+  'collection': '">=1.15.0-nullsafety.5"',
+  'fake_async': '">=1.2.0-nullsafety.3"',
+  'intl': '">=0.17.0-nullsafety.2"',
+  'js': '">=0.6.3-nullsafety.3"',
+  'matcher': '">=0.12.10-nullsafety.3"',
+  'meta': '">=1.3.0-nullsafety.6"',
+  'path': '">=1.8.0-nullsafety.3"',
+  'pedantic': '">=1.10.0-nullsafety.3"',
+  'petitparser': '">=4.0.0-nullsafety.1"',
+  'pool': '">=1.5.0-nullsafety.3"',
+  'source_map_stack_trace': '">=2.1.0-nullsafety.4"',
+  'source_maps': '">=0.10.10-nullsafety.3"',
+  'source_span': '">=1.8.0-nullsafety.4"',
+  'stack_trace': '">=1.10.0-nullsafety.6"',
+  'stream_channel': '">=2.1.0-nullsafety.3"',
+  'string_scanner': '">=1.1.0-nullsafety.3"',
+  'term_glyph': '">=1.2.0-nullsafety.3"',
+  'test': '">=1.16.0-nullsafety.16"',
+  'test_api': '">=0.2.19-nullsafety.6"',
+  'test_core': '">=0.3.12-nullsafety.15"',
+  'typed_data': '">=1.3.0-nullsafety.5"',
+  'vector_math': '">=2.1.0-nullsafety.5"',
+  'vm_service': '">=6.0.1-nullsafety.1"',
+  'xml': '">=5.0.0-nullsafety.1"',
+  // FLUTTER TEAM OWNED NNBD DEPS
+  'connectivity': '">=3.0.0-nullsafety.1"',
+  'device_info': '">=2.0.0-nullsafety.1"',
+  'file': '">=6.0.0-nullsafety.4"',
+  'platform': '">=3.0.0-nullsafety.4"',
+  'process': '">=4.0.0-nullsafety.4"',
+  'process_runner': '">=4.0.0-nullsafety.5"',
+  'url_launcher': '">=6.0.0-nullsafety.1"',
+  'video_player': '">=2.0.0-nullsafety.2"',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -151,7 +155,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       'Downloading lcov data for package:flutter...',
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
-    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int> data = await _net.fetchUrl(coverageUri);
     final String coverageDir = globals.fs.path.join(
       Cache.flutterRoot,

@@ -84,58 +84,7 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # Android on-device tests
-
-  complex_layout_scroll_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of the Complex Layout sample app on
-      Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  tiles_scroll_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  home_scroll_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of scrolling the material page in the
-      flutter_gallery app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  drive_perf_debug_warning:
-    description: >
-      Check that driver will print warnings when traceAction is called in debug mode.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  cull_opacity_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of culling opacity widgets on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  picture_cache_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of raster caching many pictures on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  cubic_bezier_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of cubic bezier animations on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  cubic_bezier_perf_sksl_warmup__timeline_summary:
-    description: >
-      Measures the runtime performance of cubic bezier animations on Android
-      with SkSL shader warm-up.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
+  # iOS on-device tests
 
   flutter_gallery_sksl_warmup__transition_perf_e2e_ios32:
     description: >
@@ -144,182 +93,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
-
-  backdrop_filter_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  textfield_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of textfield on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  fullscreen_textfield_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of large textfields with complex paragraph on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  color_filter_and_fade_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of color filter with fade on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  fading_child_animation_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of opacity filter with fade on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  imagefiltered_transform_animation_perf__timeline_summary:
-    description: >
-      Measures the runtime performance of imagefiltered widget with transform on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  flavors_test:
-    description: >
-      Checks that flavored builds work on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  channels_integration_test:
-    description: >
-      Checks that platform channels work on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  external_ui_integration_test:
-    description: >
-      Checks that external UIs work on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  embedded_android_views_integration_test:
-    description: >
-      Tests embedded Android views.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hybrid_android_views_integration_test:
-    description: >
-      Tests hybrid Android views.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  android_semantics_integration_test:
-    description: >
-      Tests that the Android accessibility bridge produces correct semantics.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  android_plugin_example_app_build_test:
-    description: >
-      Tests that the plugin example app can be built using the Flutter Gradle plugin.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  run_release_test:
-    description: >
-      Checks that `flutter run --release` does not crash.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  platform_interaction_test:
-    description: >
-      Checks platform interaction on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  platform_channel_sample_test:
-    description: >
-     Runs a driver test on the Platform Channel sample app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  platform_view__start_up:
-    description: >
-      Verifies that Platform View can be used from an Android project.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  complex_layout__start_up:
-    description: >
-      Measures the startup time of the Complex Layout sample app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hot_mode_dev_cycle__benchmark:
-    description: >
-      Measures the performance of Dart VM hot patching feature.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  complex_layout_scroll_perf__memory:
-    description: >
-      Measures memory usage of the scroll performance test.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hello_world_android__compile:
-    description: >
-      Measures the APK size of Hello World.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hello_world__memory:
-    description: >
-      Measures starting memory usage of the simplest Flutter app.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  microbenchmarks:
-    description: >
-      Runs benchmarks from dev/benchmarks/microbenchmarks.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  flutter_view__start_up:
-    description: >
-      Verifies that Flutter View can be used from an Android project.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  integration_ui_driver:
-    description: >
-      Runs end-to-end Flutter tests on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  integration_ui_keyboard_resize:
-    description: >
-      Runs end-to-end Flutter tests on Android.
-    stage: devicelab
-    required_agent_capabilities: [ "mac/android" ]
-
-  integration_ui_screenshot:
-    description: >
-      Runs end-to-end Flutter tests on Android.
-    stage: devicelab
-    required_agent_capabilities: [ "mac/android" ]
-
-  integration_ui_textfield:
-    description: >
-      Runs end-to-end Flutter tests on Android.
-    stage: devicelab
-    required_agent_capabilities: [ "mac/android" ]
-
-  service_extensions_test:
-    description: >
-      Validates our service protocol extensions.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  # iOS on-device tests
 
   ios_defines_test:
     description: >
@@ -556,23 +329,11 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  new_gallery__transition_perf:
-    description: >
-      Measures the performance of screen transitions in the new Flutter Gallery on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
   new_gallery_ios__transition_perf:
     description: >
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-
-  fast_scroll_large_images__memory:
-    description: >
-      Measures memory usage for scrolling through a list of large images.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
 
   large_image_changer_perf_ios:
     description: >

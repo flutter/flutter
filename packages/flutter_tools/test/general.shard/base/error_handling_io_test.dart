@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +26,6 @@ class MockPathContext extends Mock implements path.Context {}
 class MockDirectory extends Mock implements Directory {}
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockUsage extends Mock implements Usage {}
 
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -87,6 +89,7 @@ void setupReadMocks({
 }) {
   final MockFile mockFile = MockFile();
   when(mockFileSystem.file(any)).thenReturn(mockFile);
+  when(mockFileSystem.currentDirectory).thenThrow(FileSystemException('', '', OSError('', errorCode)));
   when(mockFile.readAsStringSync(
     encoding: anyNamed('encoding'),
   )).thenThrow(FileSystemException('', '', OSError('', errorCode)));
@@ -345,7 +348,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    testWithoutContext('When reading from a file or directory without permission', () {
       setupReadMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
@@ -357,6 +360,8 @@ void main() {
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => fs.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -579,7 +584,7 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('When reading from a file without permission', () {
+    testWithoutContext('When reading from a file or directory without permission', () {
       setupReadMocks(
         mockFileSystem: mockFileSystem,
         fs: fs,
@@ -591,6 +596,8 @@ void main() {
       const String expectedMessage = 'Flutter failed to read a file at';
       expect(() => file.readAsStringSync(),
              throwsToolExit(message: expectedMessage));
+      expect(() => fs.currentDirectory,
+             throwsToolExit(message: 'The flutter tool cannot access the file or directory'));
     });
   });
 
@@ -660,6 +667,25 @@ void main() {
 
       expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
       expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
+    });
+  });
+
+  test('skipCommandLookup invokes Process calls directly', () async {
+    final ErrorHandlingProcessManager processManager = ErrorHandlingProcessManager(
+      delegate: const LocalProcessManager(),
+      platform: windowsPlatform,
+    );
+
+    // Throws an argument error because package:process fails to locate the executable.
+    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
+    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
+    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
+
+    // Throws process exception because the executable does not exist.
+    await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
+      expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
+      expect(() => processManager.run(<String>['foo']), throwsA(isA<ProcessException>()));
+      expect(() => processManager.start(<String>['foo']), throwsA(isA<ProcessException>()));
     });
   });
 
@@ -920,9 +946,11 @@ void main() {
       fileSystem.file('source').copySync('dest');
 
       expect(memoryDest.readAsBytesSync(), expectedBytes);
-      verify(globals.flutterUsage.sendEvent('error-handling', 'copy-fallback')).called(1);
+      expect((globals.flutterUsage as TestUsage).events, contains(
+        const TestUsageEvent('error-handling', 'copy-fallback'),
+      ));
     }, overrides: <Type, Generator>{
-      Usage: () => MockUsage(),
+      Usage: () => TestUsage(),
     });
 
     // Uses context for analytics.
@@ -956,7 +984,7 @@ void main() {
 
       verify(dest.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
-      Usage: () => MockUsage(),
+      Usage: () => TestUsage(),
     });
   });
 }

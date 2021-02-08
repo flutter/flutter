@@ -1389,7 +1389,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     assert(() {
       _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(10.0, 10.0),
           <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
           <double>[0.25, 0.25, 0.75, 0.75],
@@ -2502,7 +2502,7 @@ class RenderFittedBox extends RenderProxyBox {
         assert(debugCannotComputeDryLayout(
           reason: 'Child provided invalid size of $childSize.',
         ));
-        return const Size(0, 0);
+        return Size.zero;
       }
 
       switch (fit) {
@@ -3514,10 +3514,10 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox {
+class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that listens for specific semantic gestures.
   ///
-  /// The [scrollFactor] argument must not be null.
+  /// The [scrollFactor] and [behavior] arguments must not be null.
   RenderSemanticsGestureHandler({
     RenderBox? child,
     GestureTapCallback? onTap,
@@ -3525,12 +3525,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
     this.scrollFactor = 0.8,
+    HitTestBehavior behavior = HitTestBehavior.deferToChild,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(child);
+       super(behavior: behavior, child: child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.

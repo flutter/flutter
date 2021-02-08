@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -40,7 +42,9 @@ void main() {
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
-    ).attach();
+    ).attach(
+      enableDevTools: false,
+    );
     expect(exitCode, 2);
   });
 
@@ -88,7 +92,9 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).run();
+      ).run(
+        enableDevTools: false,
+      );
 
       expect(result, 1);
       verify(mockFlutterDevice.runCold(

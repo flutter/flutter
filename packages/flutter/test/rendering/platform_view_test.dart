@@ -77,7 +77,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
       ]));
@@ -90,7 +90,7 @@ void main() {
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, const Offset(0, 0)),
+        _pointerData(ui.PointerChange.add, Offset.zero),
         _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
         _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
       ]));

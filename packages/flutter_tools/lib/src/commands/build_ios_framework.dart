@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -18,7 +20,6 @@ import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../plugins.dart';
@@ -286,7 +287,7 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra_release/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
   s.platform              = :ios, '8.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
@@ -365,7 +366,7 @@ end
             kBuildMode: getNameForBuildMode(buildInfo.mode),
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
             kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-            kDartDefines: jsonEncode(buildInfo.dartDefines),
+            kDartDefines: encodeDartDefines(buildInfo.dartDefines),
             kBitcodeFlag: 'true',
             if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
               kExtraGenSnapshotOptions:

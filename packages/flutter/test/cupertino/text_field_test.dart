@@ -1547,7 +1547,7 @@ void main() {
     expect(find.text('field 1'), findsOneWidget);
     expect(find.text('field 2'), findsOneWidget);
 
-    await tester.longPress(find.text('field 2'));
+    await tester.longPress(find.text('field 2'), warnIfMissed: false); // can't actually hit placeholder
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -2981,7 +2981,7 @@ void main() {
       );
 
       expect(tapCount, 0);
-      await tester.tap(find.byType(CupertinoTextField));
+      await tester.tap(find.byType(CupertinoTextField), warnIfMissed: false); // disabled
       await tester.pump();
       expect(tapCount, 0);
 
@@ -3016,7 +3016,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.byType(CupertinoTextField));
+      await tester.tap(find.byType(CupertinoTextField), warnIfMissed: false); // disabled
       await tester.pump();
       expect(tapCount, 1);
   });
@@ -4285,6 +4285,39 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
+    bool scrollInvoked = false;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Actions(
+          actions: <Type, Action<Intent>>{
+            ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: (Intent intent) {
+              scrollInvoked = true;
+            }),
+          },
+          child: ListView(
+            children: const <Widget>[
+              Padding(padding: EdgeInsets.symmetric(vertical: 200)),
+              CupertinoTextField(),
+              Padding(padding: EdgeInsets.symmetric(vertical: 800)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(scrollInvoked, isFalse);
+
+    // Set focus on the text field.
+    await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(scrollInvoked, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    expect(scrollInvoked, isFalse);
   });
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {

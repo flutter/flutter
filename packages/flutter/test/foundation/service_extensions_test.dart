@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -167,7 +166,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 29 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -757,5 +756,31 @@ void main() {
     final String brightnessValue = result['value'] as String;
 
     expect(brightnessValue, 'Brightness.light');
+  });
+
+  test('Service extensions - activeDevToolsServerAddress', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9101'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9101');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9102'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9102');
+  });
+
+  test('Service extensions - connectedVmServiceUri', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54669/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54669/kMUMseKAnog=/');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
   });
 }

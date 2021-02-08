@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' as io; // ignore: dart_io_import;
 
@@ -15,10 +17,10 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../test/test_wrapper.dart';
@@ -44,29 +46,23 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   @required String shellPath,
+  @required DebuggingOptions debuggingOptions,
   TestWatcher watcher,
   bool enableObservatory = false,
   bool machine = false,
-  bool startPaused = false,
-  bool disableServiceAuthCodes = false,
-  bool disableDds = false,
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
   bool updateGoldens = false,
   bool buildTestAssets = false,
-  int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
-  bool nullAssertions = false,
-  @required BuildInfo buildInfo,
-  List<String> additionalArguments,
 }) {
   assert(testWrapper != null);
-  assert(enableObservatory || (!startPaused && observatoryPort == null));
+  assert(enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
@@ -79,13 +75,10 @@ FlutterPlatform installHook({
   };
   final FlutterPlatform platform = FlutterPlatform(
     shellPath: shellPath,
+    debuggingOptions: debuggingOptions,
     watcher: watcher,
     machine: machine,
     enableObservatory: enableObservatory,
-    startPaused: startPaused,
-    disableServiceAuthCodes: disableServiceAuthCodes,
-    disableDds: disableDds,
-    explicitObservatoryPort: observatoryPort,
     host: _kHosts[serverType],
     port: port,
     precompiledDillPath: precompiledDillPath,
@@ -95,9 +88,6 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
-    nullAssertions: nullAssertions,
-    buildInfo: buildInfo,
-    additionalArguments: additionalArguments,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -223,9 +213,7 @@ autoUpdateGoldenFiles = $updateGoldens;
   return buffer.toString();
 }
 
-enum InitialResult { crashed, connected }
-
-enum TestResult { crashed, harnessBailed, testBailed }
+enum _TestHarnessStatus { testerCrashed, finished }
 
 typedef Finalizer = Future<void> Function();
 
@@ -233,13 +221,10 @@ typedef Finalizer = Future<void> Function();
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
     @required this.shellPath,
+    @required this.debuggingOptions,
     this.watcher,
     this.enableObservatory,
     this.machine,
-    this.startPaused,
-    this.disableServiceAuthCodes,
-    this.disableDds,
-    this.explicitObservatoryPort,
     this.host,
     this.port,
     this.precompiledDillPath,
@@ -249,19 +234,13 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
-    this.nullAssertions = false,
-    this.additionalArguments,
-    @required this.buildInfo,
   }) : assert(shellPath != null);
 
   final String shellPath;
+  final DebuggingOptions debuggingOptions;
   final TestWatcher watcher;
   final bool enableObservatory;
   final bool machine;
-  final bool startPaused;
-  final bool disableServiceAuthCodes;
-  final bool disableDds;
-  final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
   final String precompiledDillPath;
@@ -271,9 +250,6 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
-  final bool nullAssertions;
-  final BuildInfo buildInfo;
-  final List<String> additionalArguments;
 
   Directory fontsDirectory;
 
@@ -313,7 +289,7 @@ class FlutterPlatform extends PlatformPlugin {
   StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
-      if (explicitObservatoryPort != null) {
+      if (debuggingOptions.hostVmServicePort != null) {
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
       }
       // Fail if we're passing in a precompiled entry-point.
@@ -370,14 +346,11 @@ class FlutterPlatform extends PlatformPlugin {
   @visibleForTesting
   Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
 
-  PackageConfig _packageConfig;
-
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
-    _packageConfig ??= buildInfo.packageConfig;
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -432,7 +405,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildInfo, flutterProject);
+        compiler ??= TestCompiler(debuggingOptions.buildInfo, flutterProject);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -444,13 +417,8 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: buildInfo.packagesPath,
         enableObservatory: enableObservatory,
-        startPaused: startPaused,
-        disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: disableDds ? explicitObservatoryPort : 0,
         serverPort: server.port,
-        additionalArguments: additionalArguments,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -464,7 +432,7 @@ class FlutterPlatform extends PlatformPlugin {
             // We expect SIGKILL (9) because we tried to terminate it.
             // It's negative because signals are returned as negative exit codes.
             final String message = _getErrorMessage(
-                _getExitCodeMessage(exitCode, 'after tests finished'),
+                _getExitCodeMessage(exitCode),
                 testPath,
                 shellPath);
             controller.sink.addError(message);
@@ -472,52 +440,49 @@ class FlutterPlatform extends PlatformPlugin {
         }
       });
 
-      final Completer<void> gotProcessObservatoryUri = Completer<void>();
+      final Completer<Uri> gotProcessObservatoryUri = Completer<Uri>();
       if (!enableObservatory) {
         gotProcessObservatoryUri.complete();
       }
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
-      Uri processObservatoryUri;
       final Uri ddsServiceUri = getDdsServiceUri();
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) async {
-          assert(processObservatoryUri == null);
-          assert(explicitObservatoryPort == null ||
-              explicitObservatoryPort == detectedUri.port);
-          if (!disableDds) {
+          assert(!gotProcessObservatoryUri.isCompleted);
+          assert(debuggingOptions.hostVmServicePort == null ||
+              debuggingOptions.hostVmServicePort == detectedUri.port);
+
+          Uri forwardingUri;
+          if (!debuggingOptions.disableDds) {
             final DartDevelopmentService dds = await DartDevelopmentService.startDartDevelopmentService(
               detectedUri,
               serviceUri: ddsServiceUri,
-              enableAuthCodes: !disableServiceAuthCodes,
+              enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
               ipv6: host.type == InternetAddressType.IPv6,
             );
-            processObservatoryUri = dds.uri;
+            forwardingUri = dds.uri;
             globals.printTrace('Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
           } else {
-            processObservatoryUri = detectedUri;
+            forwardingUri = detectedUri;
           }
           {
-            globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
+            globals.printTrace('Connecting to service protocol: $forwardingUri');
+            final Future<vm_service.VmService> localVmService = connectToVmService(forwardingUri,
               compileExpression: _compileExpressionService);
             unawaited(localVmService.then((vm_service.VmService vmservice) {
-              globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
+              globals.printTrace('Successfully connected to service protocol: $forwardingUri');
             }));
           }
-          if (startPaused && !machine) {
+          if (debuggingOptions.startPaused && !machine) {
             globals.printStatus('The test process has been started.');
             globals.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
-            globals.printStatus('  $processObservatoryUri');
+            globals.printStatus('  $forwardingUri');
             globals.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
-          } else {
-            globals.printTrace('test $ourTestCount: using observatory uri $processObservatoryUri from pid ${process.pid}');
           }
-          gotProcessObservatoryUri.complete();
-          watcher?.handleStartedProcess(
-              ProcessEvent(ourTestCount, process, processObservatoryUri));
+          gotProcessObservatoryUri.complete(forwardingUri);
         },
       );
 
@@ -525,124 +490,52 @@ class FlutterPlatform extends PlatformPlugin {
       // The engine could crash, in which case process.exitCode will complete.
       // The engine could connect to us, in which case webSocket.future will complete.
       // The local test harness could get bored of us.
-      globals.printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final InitialResult initialResult = await Future.any<InitialResult>(<Future<InitialResult>>[
-        process.exitCode.then<InitialResult>((int exitCode) => InitialResult.crashed),
-        gotProcessObservatoryUri.future.then<InitialResult>((void value) {
-          return webSocket.future.then<InitialResult>(
-            (WebSocket webSocket) => InitialResult.connected,
-          );
-        }),
+      globals.printTrace('test $ourTestCount: awaiting connection to result for test process at pid ${process.pid}');
+      final _TestHarnessStatus testHarnessStatus = await Future.any<_TestHarnessStatus>(<Future<_TestHarnessStatus>>[
+        process.exitCode.then<_TestHarnessStatus>((int exitCode) => _TestHarnessStatus.testerCrashed),
+        gotProcessObservatoryUri.future.then<_TestHarnessStatus>((Uri processObservatoryUri) {
+          if (processObservatoryUri != null) {
+            globals.printTrace('test $ourTestCount: Observatory uri is available at $processObservatoryUri');
+          }
+          watcher?.handleStartedProcess(ProcessEvent(ourTestCount, process, processObservatoryUri));
+
+          return webSocket.future.then<_TestHarnessStatus>((WebSocket remoteSocket) async {
+            globals.printTrace('test $ourTestCount: connected to test harness, now awaiting test result');
+            await _controlTests(
+              controller: controller,
+              remoteSocket: remoteSocket,
+              onError: (dynamic error, StackTrace stackTrace) {
+                // If you reach here, it's unlikely we're going to be able to really handle this well.
+                globals.printError('test: $testPath\nerror: $error');
+                if (!controllerSinkClosed) {
+                  controller.sink.addError(error, stackTrace);
+                  controller.sink.close();
+                } else {
+                  globals.printError('unexpected error: $error');
+                }
+              }
+            );
+
+            await watcher?.handleFinishedTest(ProcessEvent(ourTestCount, process, processObservatoryUri));
+            return _TestHarnessStatus.finished;
+          });
+        })
       ]);
 
-      switch (initialResult) {
-        case InitialResult.crashed:
-          globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
-          final int exitCode = await process.exitCode;
-          subprocessActive = false;
-          final String message = _getErrorMessage(
-              _getExitCodeMessage(
-                  exitCode, 'before connecting to test harness'),
-              testPath,
-              shellPath);
-          controller.sink.addError(message);
-          // Awaited for with 'sink.done' below.
-          unawaited(controller.sink.close());
-          globals.printTrace('test $ourTestCount: waiting for controller sink to close');
-          await controller.sink.done;
-          await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
-          break;
-        case InitialResult.connected:
-          globals.printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
-          final WebSocket testSocket = await webSocket.future;
-
-          final Completer<void> harnessDone = Completer<void>();
-          final StreamSubscription<dynamic> harnessToTest =
-              controller.stream.listen(
-            (dynamic event) {
-              testSocket.add(json.encode(event));
-            },
-            onDone: harnessDone.complete,
-            onError: (dynamic error, StackTrace stack) {
-              // If you reach here, it's unlikely we're going to be able to really handle this well.
-              globals.printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
-              if (!controllerSinkClosed) {
-                controller.sink.addError(error, stack);
-                controller.sink.close();
-              } else {
-                globals.printError('unexpected error from test harness controller stream: $error');
-              }
-            },
-            cancelOnError: true,
-          );
-
-          final Completer<void> testDone = Completer<void>();
-          final StreamSubscription<dynamic> testToHarness = testSocket.listen(
-            (dynamic encodedEvent) {
-              assert(encodedEvent is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent as String));
-            },
-            onDone: testDone.complete,
-            onError: (dynamic error, StackTrace stack) {
-              // If you reach here, it's unlikely we're going to be able to really handle this well.
-              globals.printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
-              if (!controllerSinkClosed) {
-                controller.sink.addError(error, stack);
-                controller.sink.close();
-              } else {
-                globals.printError('unexpected error from test socket stream: $error');
-              }
-            },
-            cancelOnError: true,
-          );
-
-          globals.printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final TestResult testResult = await Future.any<TestResult>(<Future<TestResult>>[
-            process.exitCode.then<TestResult>((int exitCode) {
-              return TestResult.crashed;
-            }),
-            harnessDone.future.then<TestResult>((void value) {
-              return TestResult.harnessBailed;
-            }),
-            testDone.future.then<TestResult>((void value) {
-              return TestResult.testBailed;
-            }),
-          ]);
-
-          await Future.wait<void>(<Future<void>>[
-            harnessToTest.cancel(),
-            testToHarness.cancel(),
-          ]);
-
-          switch (testResult) {
-            case TestResult.crashed:
-              globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
-              final int exitCode = await process.exitCode;
-              subprocessActive = false;
-              final String message = _getErrorMessage(
-                  _getExitCodeMessage(
-                      exitCode, 'before test harness closed its WebSocket'),
-                  testPath,
-                  shellPath);
-              controller.sink.addError(message);
-              // Awaited for with 'sink.done' below.
-              unawaited(controller.sink.close());
-              globals.printTrace('test $ourTestCount: waiting for controller sink to close');
-              await controller.sink.done;
-              break;
-            case TestResult.harnessBailed:
-            case TestResult.testBailed:
-              if (testResult == TestResult.harnessBailed) {
-                globals.printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
-              } else {
-                assert(testResult == TestResult.testBailed);
-                globals.printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
-              }
-              await watcher?.handleFinishedTest(
-                  ProcessEvent(ourTestCount, process, processObservatoryUri));
-              break;
-          }
-          break;
+      if (testHarnessStatus == _TestHarnessStatus.testerCrashed) {
+        globals.printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
+        final int exitCode = await process.exitCode;
+        subprocessActive = false;
+        final String message = _getErrorMessage(
+            _getExitCodeMessage(exitCode),
+            testPath,
+            shellPath);
+        controller.sink.addError(message);
+        // Awaited for with 'sink.done' below in `finally`.
+        unawaited(controller.sink.close());
+        globals.printTrace('test $ourTestCount: waiting for controller sink to close');
+        await controller.sink.done;
+        await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
       }
     } on Exception catch (error, stack) {
       globals.printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
@@ -712,16 +605,18 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
+    final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
+
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
-      _packageConfig[flutterProject?.manifest?.appName],
+      packageConfig[flutterProject?.manifest?.appName],
     );
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      flutterTestDep: _packageConfig['flutter_test'] != null,
+      flutterTestDep: packageConfig['flutter_test'] != null,
       languageVersionHeader: '// @dart=${languageVersion.major}.${languageVersion.minor}'
     );
   }
@@ -768,16 +663,14 @@ class FlutterPlatform extends PlatformPlugin {
   Future<Process> _startProcess(
     String executable,
     String testPath, {
-    String packages,
     bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableServiceAuthCodes = false,
-    int observatoryPort,
     int serverPort,
-    List<String> additionalArguments,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
-    assert(!startPaused || enableObservatory);
+    assert(!debuggingOptions.startPaused || enableObservatory);
+
+    final int observatoryPort = debuggingOptions.disableDds ? debuggingOptions.hostVmServicePort : 0;
+
     final List<String> command = <String>[
       executable,
       if (enableObservatory) ...<String>[
@@ -791,8 +684,8 @@ class FlutterPlatform extends PlatformPlugin {
         // I mention this only so that you won't be tempted, as I was, to apply
         // the obvious simplification to this code and remove this entire feature.
         if (observatoryPort != null) '--observatory-port=$observatoryPort',
-        if (startPaused) '--start-paused',
-        if (disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (debuggingOptions.startPaused) '--start-paused',
+        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       ]
       else
         '--disable-observatory',
@@ -805,10 +698,10 @@ class FlutterPlatform extends PlatformPlugin {
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
-      '--packages=$packages',
-      if (nullAssertions)
+      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
-      ...?additionalArguments,
+      ...debuggingOptions.dartEntrypointArgs,
       testPath,
     ];
 
@@ -876,22 +769,22 @@ class FlutterPlatform extends PlatformPlugin {
     return '$what\nTest: $testPath\nShell: $shellPath\n\n';
   }
 
-  String _getExitCodeMessage(int exitCode, String when) {
+  String _getExitCodeMessage(int exitCode) {
     switch (exitCode) {
       case 1:
-        return 'Shell subprocess cleanly reported an error $when. Check the logs above for an error message.';
+        return 'Shell subprocess cleanly reported an error. Check the logs above for an error message.';
       case 0:
-        return 'Shell subprocess ended cleanly $when. Did main() call exit()?';
+        return 'Shell subprocess ended cleanly. Did main() call exit()?';
       case -0x0f: // ProcessSignal.SIGTERM
-        return 'Shell subprocess crashed with SIGTERM ($exitCode) $when.';
+        return 'Shell subprocess crashed with SIGTERM ($exitCode).';
       case -0x0b: // ProcessSignal.SIGSEGV
-        return 'Shell subprocess crashed with segmentation fault $when.';
+        return 'Shell subprocess crashed with segmentation fault.';
       case -0x06: // ProcessSignal.SIGABRT
-        return 'Shell subprocess crashed with SIGABRT ($exitCode) $when.';
+        return 'Shell subprocess crashed with SIGABRT ($exitCode).';
       case -0x02: // ProcessSignal.SIGINT
-        return 'Shell subprocess terminated by ^C (SIGINT, $exitCode) $when.';
+        return 'Shell subprocess terminated by ^C (SIGINT, $exitCode).';
       default:
-        return 'Shell subprocess crashed with unexpected exit code $exitCode $when.';
+        return 'Shell subprocess crashed with unexpected exit code $exitCode.';
     }
   }
 
@@ -904,7 +797,7 @@ class FlutterPlatform extends PlatformPlugin {
         InternetAddress.loopbackIPv6 :
         InternetAddress.loopbackIPv4
       ).host,
-      port: explicitObservatoryPort ?? 0,
+      port: debuggingOptions.hostVmServicePort ?? 0,
     );
   }
 }
@@ -967,4 +860,62 @@ class _AsyncError {
   const _AsyncError(this.error, this.stack);
   final dynamic error;
   final StackTrace stack;
+}
+
+/// Bridges the package:test controller and the remote tester.
+///
+/// Sets up a that allows the package:test test [controller] to communicate with
+/// a [remoteSocket] that runs the test. The returned future completes when
+/// either side is closed, which also indicates when the tests have finished.
+Future<void> _controlTests({
+  @required
+  StreamChannel<dynamic> controller,
+  @required
+  WebSocket remoteSocket,
+  @required
+  void Function(dynamic, StackTrace) onError,
+}) async {
+  final Completer<void> harnessDone = Completer<void>();
+  final StreamSubscription<dynamic> harnessToTest =
+      controller.stream.listen(
+    (dynamic event) {
+      remoteSocket.add(json.encode(event));
+    },
+    onDone: harnessDone.complete,
+    onError: (dynamic error, StackTrace stack) {
+      globals.printError('test harness controller stream experienced an unexpected error');
+      onError(error, stack);
+    },
+    cancelOnError: true,
+  );
+
+  final Completer<void> testDone = Completer<void>();
+  final StreamSubscription<dynamic> testToHarness = remoteSocket.listen(
+    (dynamic encodedEvent) {
+      assert(encodedEvent is String); // we shouldn't ever get binary messages
+      controller.sink.add(json.decode(encodedEvent as String));
+    },
+    onDone: testDone.complete,
+    onError: (dynamic error, StackTrace stack) {
+      globals.printError('test socket stream experienced an unexpected error');
+      onError(error, stack);
+    },
+    cancelOnError: true,
+  );
+
+  globals.printTrace('waiting for test harness or tests to finish');
+
+  await Future.any<void>(<Future<void>>[
+    harnessDone.future.then<void>((void value) {
+      globals.printTrace('test process is no longer needed by test harness');
+    }),
+    testDone.future.then<void>((void value) {
+      globals.printTrace('test harness is no longer needed by test process');
+    }),
+  ]);
+
+  await Future.wait<void>(<Future<void>>[
+    harnessToTest.cancel(),
+    testToHarness.cancel(),
+  ]);
 }

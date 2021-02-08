@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
 
@@ -84,7 +86,7 @@ LanguageVersion determineLanguageVersion(File file, Package package) {
 
   // If the language version cannot be found, use the package version.
   if (package != null) {
-    return package.languageVersion;
+    return package.languageVersion ?? nullSafeVersion;
   }
   // Default to 2.12
   return nullSafeVersion;
