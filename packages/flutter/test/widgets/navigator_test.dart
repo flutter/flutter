@@ -2648,6 +2648,62 @@ void main() {
       );
     });
 
+    Widget _buildFrame(String action) {
+      const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/' : (BuildContext context) => OnTapPage(
+          id: action,
+          onTap: (){
+            if (action == 'push') {
+              Navigator.of(context).push(myPage.createRoute(context));
+            } else if (action == 'pushReplacement') {
+              Navigator.of(context).pushReplacement(myPage.createRoute(context));
+            } else if (action == 'pushAndRemoveUntil') {
+              Navigator.of(context).pushAndRemoveUntil(myPage.createRoute(context), (_) => true);
+            }
+          },
+        ),
+      };
+
+      return MaterialApp(routes: routes);
+    }
+
+    void _checkException(WidgetTester tester) {
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+            'FlutterError\n'
+                '   The Navigator.onPopPage must be provided to use the\n'
+                '   Navigator.pages API\n'
+                ''
+        ),
+      );
+    }
+
+    testWidgets('throw if push PageRoute to Navigator 1.0 - push', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('push'));
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if push PageRoute to Navigator 1.0 - pushReplacement', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.tap(find.text('pushReplacement'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if push PageRoute to Navigator 1.0 - pushAndRemoveUntil', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.tap(find.text('pushAndRemoveUntil'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;

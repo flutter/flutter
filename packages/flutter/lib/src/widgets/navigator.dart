@@ -4450,8 +4450,30 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    state restoration.
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
+    _debugCheckUsePagesAPI(route);
     _pushEntry(_RouteEntry(route, initialState: _RouteLifecycle.push));
     return route.popped;
+  }
+
+  void _debugCheckUsePagesAPI(Route<dynamic> route) {
+    assert((){
+      if (route.settings is Page) {
+        // This navigator uses page API.
+        if (widget.onPopPage == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                  'The Navigator.onPopPage must be provided to use the '
+                      'Navigator.pages API'
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+      }
+      return true;
+    }());
   }
 
   bool _debugIsStaticCallback(Function callback) {
@@ -4596,6 +4618,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   Future<T?> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
     assert(newRoute != null);
     assert(newRoute._navigator == null);
+    _debugCheckUsePagesAPI(newRoute);
     _pushReplacementEntry(_RouteEntry(newRoute, initialState: _RouteLifecycle.pushReplace), result);
     return newRoute.popped;
   }
@@ -4703,6 +4726,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(newRoute != null);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
+    _debugCheckUsePagesAPI(newRoute);
     _pushEntryAndRemoveUntil(_RouteEntry(newRoute, initialState: _RouteLifecycle.push), predicate);
     return newRoute.popped;
   }
