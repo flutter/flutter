@@ -81,7 +81,7 @@ FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils
 );
 
 /// The active process manager.
-ProcessManager get processManager => context.get<ProcessManager>();
+ProcessManager get processManager => context.get<ProcessManager>() ?? const LocalProcessManager();
 ProcessUtils get processUtils => context.get<ProcessUtils>();
 
 const Platform _kLocalPlatform = LocalPlatform();
