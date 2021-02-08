@@ -149,6 +149,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
               'when another tool (usually a debugger) resumed the isolate '
               'before the flutter_driver did.'
           );
+          return vms.Success();
         } else {
           // Failed to resume due to another reason. Fail hard.
           throw e;
@@ -312,11 +313,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
         isolateId: _appIsolate.id,
         args: serialized,
       ).then<Map<String, dynamic>>((vms.Response value) => value.json!);
-      response = (await _warnIfSlow<Map<String, dynamic>>(
+      response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
         timeout: command.timeout ?? kUnusuallyLongTimeout,
         message: '${command.kind} message is taking a long time to complete...',
-      ))!;
+      );
       _logCommunication('<<< $response');
     } catch (error, stackTrace) {
       throw DriverError(
@@ -407,7 +408,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       const int kSecondInMicros = 1000000;
       int currentStart = startTime;
       int currentEnd = startTime + kSecondInMicros; // 1 second of timeline
-      final List<Map<String, Object?>?> chunks = <Map<String, Object>?>[];
+      final List<Map<String, Object?>?> chunks = <Map<String, Object?>?>[];
       do {
         final vms.Timeline chunk = await _serviceClient.getVMTimeline(
           timeOriginMicros: currentStart,
@@ -420,9 +421,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
         currentEnd += kSecondInMicros;
       } while (currentStart < endTime!);
       return Timeline.fromJson(<String, Object>{
-        'traceEvents': <Object> [
+        'traceEvents': <Object?> [
           for (Map<String, Object?>? chunk in chunks)
-            ...chunk!['traceEvents']! as List<Object>,
+            ...chunk!['traceEvents']! as List<Object?>,
         ],
       });
     } catch (error, stackTrace) {
@@ -621,22 +622,24 @@ void _log(String message) {
   driverLog('VMServiceFlutterDriver', message);
 }
 
-Future<T?> _warnIfSlow<T>({
-  required Future<T?> future,
+Future<T> _warnIfSlow<T>({
+  required Future<T> future,
   required Duration timeout,
   required String message,
-}) {
+}) async {
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  future
-    .timeout(timeout, onTimeout: () {
-      _log(message);
-      return null;
-    })
+  final Completer<void> completer = Completer<void>();
+  completer.future.timeout(timeout, onTimeout: () {
+    _log(message);
+    return null;
+  });
+  try {
+    await future.whenComplete(() { completer.complete(); });
+  } catch (e) {
     // Don't duplicate errors if [future] completes with an error.
-    .catchError((Object e, StackTrace s) => null);
-
+  }
   return future;
 }
 

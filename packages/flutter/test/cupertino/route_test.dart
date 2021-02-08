@@ -545,7 +545,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
 
     // Exit animation
-    await tester.tap(find.text('Button'));
+    await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
@@ -634,7 +634,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
 
     // Exit animation
-    await tester.tap(find.text('Button'));
+    await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
@@ -1068,7 +1068,7 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
   });

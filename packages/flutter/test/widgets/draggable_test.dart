@@ -293,7 +293,7 @@ void main() {
     events.clear();
 
     expect(events, isEmpty);
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     expect(events, equals(<String>['tap']));
     events.clear();
 
@@ -325,7 +325,7 @@ void main() {
 
     expect(events, isEmpty);
     await tester.tap(find.text('Button'));
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['tap', 'tap', 'drop', 'details']));

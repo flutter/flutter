@@ -2708,22 +2708,21 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     caretRect = caretRect.shift(renderEditable._paintOffset);
     final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
 
-    if (shouldPaint) {
-      final Radius? radius = cursorRadius;
-      caretPaint.color = caretColor;
-      if (radius == null) {
-        canvas.drawRect(integralRect, caretPaint);
-      } else {
-        final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
-        canvas.drawRRect(caretRRect, caretPaint);
-      }
+    final Radius? radius = cursorRadius;
+    caretPaint.color = caretColor;
+    if (radius == null) {
+      canvas.drawRect(integralRect, caretPaint);
+    } else {
+      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+      canvas.drawRRect(caretRRect, caretPaint);
     }
     caretPaintCallback(integralRect);
   }
 
   @override
   void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
-    // Compute the caret location even when `shouldPaint` is false.
+    if (!shouldPaint)
+      return;
 
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
@@ -2748,7 +2747,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
     // Floating Cursor.
-    if (floatingCursorRect == null || floatingCursorColor == null || !shouldPaint)
+    if (floatingCursorRect == null || floatingCursorColor == null)
       return;
 
     canvas.drawRRect(

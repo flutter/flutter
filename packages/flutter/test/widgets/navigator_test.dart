@@ -279,7 +279,7 @@ void main() {
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
-    await tester.tap(find.text('right'));
+    await tester.tap(find.text('right'), warnIfMissed: false);
     expect(log, equals(<String>['left']));
   });
 

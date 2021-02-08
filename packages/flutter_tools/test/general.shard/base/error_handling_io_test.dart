@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show flutterUsage;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -666,6 +667,25 @@ void main() {
 
       expect(fs.currentDirectory.toString(), equals(mockDirectory.toString()));
       expect(fs.currentDirectory, isA<ErrorHandlingDirectory>());
+    });
+  });
+
+  test('skipCommandLookup invokes Process calls directly', () async {
+    final ErrorHandlingProcessManager processManager = ErrorHandlingProcessManager(
+      delegate: const LocalProcessManager(),
+      platform: windowsPlatform,
+    );
+
+    // Throws an argument error because package:process fails to locate the executable.
+    expect(() => processManager.runSync(<String>['foo']), throwsArgumentError);
+    expect(() => processManager.run(<String>['foo']), throwsArgumentError);
+    expect(() => processManager.start(<String>['foo']), throwsArgumentError);
+
+    // Throws process exception because the executable does not exist.
+    await ErrorHandlingProcessManager.skipCommandLookup<void>(() async {
+      expect(() => processManager.runSync(<String>['foo']), throwsA(isA<ProcessException>()));
+      expect(() => processManager.run(<String>['foo']), throwsA(isA<ProcessException>()));
+      expect(() => processManager.start(<String>['foo']), throwsA(isA<ProcessException>()));
     });
   });
 

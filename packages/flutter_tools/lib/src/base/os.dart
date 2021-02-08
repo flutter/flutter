@@ -7,7 +7,6 @@
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../build_info.dart';
 import '../globals.dart' as globals;
