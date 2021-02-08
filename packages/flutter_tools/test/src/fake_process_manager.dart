@@ -9,9 +9,12 @@ import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'common.dart';
+import 'context.dart';
+
+export 'package:process/process.dart' show ProcessManager;
 
 typedef VoidCallback = void Function();
 
@@ -242,7 +245,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -261,7 +264,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<ProcessResult> run(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -281,7 +284,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   ProcessResult runSync(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true, // ignored
@@ -305,7 +308,7 @@ abstract class FakeProcessManager implements ProcessManager {
   Set<String> excludedExecutables = <String>{};
 
   @override
-  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     // Killing a fake process has no effect unless it has an attached completer.
     final _FakeProcess fakeProcess = _fakeRunningProcesses[pid];
     if (fakeProcess == null) {

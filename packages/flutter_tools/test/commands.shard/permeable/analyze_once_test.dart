@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/base/error_handling_io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -108,13 +108,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
+    processManager = const LocalProcessManager();
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     fileSystem = LocalFileSystem.instance;
-    processManager = LocalProcessManager(
-      platform: platform,
-      fileSystem: fileSystem,
-    );
     logger = BufferLogger.test();
     analyzerSeparator = platform.isWindows ? '-' : '•';
     artifacts = CachedArtifacts(
