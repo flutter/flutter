@@ -796,7 +796,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   bool get hasScrolledBody {
     for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.hasContentDimensions || !position.hasPixels) {
-        // It's possible that NestedScrollView built twice without being laid out.
+        // It's possible that NestedScrollView built twice before layout phase
+        // in a same frame.
         // This happens for example when FocusManager schedule a microTask
         // that mark NestedScrollView dirty during `scheduleAttachRootWidget`.
         // https://github.com/flutter/flutter/pull/75308
