@@ -8,11 +8,11 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'convert.dart';
 import 'persistent_tool_state.dart';
 import 'resident_runner.dart';
