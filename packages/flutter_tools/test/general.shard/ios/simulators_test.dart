@@ -25,9 +25,8 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
-
-class MockPlistUtils extends Mock implements PlistParser {}
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -861,12 +860,14 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
   });
 
   group('startApp', () {
+    FakePlistParser testPlistParser;
     SimControl simControl;
     Xcode xcode;
 
     setUp(() {
       simControl = MockSimControl();
       xcode = Xcode.test(processManager: FakeProcessManager.any());
+      testPlistParser = FakePlistParser();
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
@@ -876,7 +877,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
       );
-      when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
+      testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
@@ -887,7 +888,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, 'correct', any));
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,
@@ -910,7 +911,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
 
       verify(simControl.launch(any, any, captureAny)).captured.contains('--enable-software-rendering');
     }, overrides: <Type, Generator>{
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => testPlistParser,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,

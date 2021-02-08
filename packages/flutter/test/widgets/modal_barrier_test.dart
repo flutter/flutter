@@ -54,7 +54,7 @@ void main() {
     );
 
     await tester.pumpWidget(subject);
-    await tester.tap(find.text('target'));
+    await tester.tap(find.text('target'), warnIfMissed: false);
     await tester.pumpWidget(subject);
     expect(tapped, isFalse,
       reason: 'because the tap is not prevented by ModalBarrier');
@@ -181,7 +181,7 @@ void main() {
       );
 
       await tester.pumpWidget(subject);
-      await tester.tap(find.text('target'));
+      await tester.tap(find.text('target'), warnIfMissed: false);
       await tester.pumpWidget(subject);
     } finally {
       SystemChannels.platform.setMockMethodCallHandler(null);

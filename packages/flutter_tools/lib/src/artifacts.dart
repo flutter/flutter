@@ -549,7 +549,7 @@ String _getIosEngineArtifactPath(String engineDirectory,
       .childDirectory(_artifactToFileName(Artifact.flutterXcframework));
 
   if (!xcframeworkDirectory.existsSync()) {
-    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter build ios".');
+    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
   }
   Directory flutterFrameworkSource;
   for (final Directory platformDirectory
