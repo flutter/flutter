@@ -1704,7 +1704,7 @@ plugin1=${plugin1.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext("gradle exit code is properly passed on", () async {
+    testUsingContext('gradle exit code is properly passed on', () async {
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
