@@ -3454,7 +3454,12 @@ void main() {
 
     // Move the caret to the end of the text and check that the text field
     // scrolls to make the caret visible.
-    controller.selection = TextSelection.collapsed(offset: longText.length);
+    scrollableState = tester.firstState(find.byType(Scrollable));
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
+      selection: TextSelection.collapsed(offset: longText.length),
+    );
+
     await tester.pump(); // TODO(ianh): Figure out why this extra pump is needed.
     await skipPastScrollingAnimation(tester);
 
@@ -3486,7 +3491,10 @@ void main() {
 
     // Move the caret to the end of the text and check that the text field
     // scrolls to make the caret visible.
-    controller.selection = const TextSelection.collapsed(offset: tallText.length);
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.textEditingValue = editableTextState.textEditingValue.copyWith(
+      selection: const TextSelection.collapsed(offset: tallText.length),
+    );
     await tester.pump();
     await skipPastScrollingAnimation(tester);
 
