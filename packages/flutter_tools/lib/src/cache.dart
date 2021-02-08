@@ -1001,19 +1001,20 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
+    // Currently only Linux supports both arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
-        <String>['windows-$arch', 'windows-$arch/artifacts.zip'],
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
-        <String>['darwin-$arch', 'darwin-$arch/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
       ]
       else if (_platform.isWindows)
-        <String>['windows-$arch', 'windows-$arch/artifacts.zip']
+        <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-$arch', 'darwin-$arch/artifacts.zip']
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
       else if (_platform.isLinux)
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
@@ -1491,11 +1492,12 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
+    // Currently only Linux supports both arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-$arch', 'darwin-$arch/$artifactName.zip'],
+      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
-      'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],
+      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
     if (cache.includeAllPlatforms) {
       return artifacts.values.toList();
