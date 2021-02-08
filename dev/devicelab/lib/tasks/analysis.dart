@@ -20,70 +20,11 @@ const int _kRunsPerBenchmark = 3;
 /// Path to the generated "mega gallery" app.
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
-Future<void> pubGetDependencies(List<Directory> directories) async {
-  for (final Directory directory in directories) {
-    await inDirectory<void>(directory, () async {
-      await flutter('pub', options: <String>['get']);
-    });
-  }
-}
-
 Future<TaskResult> analyzerBenchmarkTask() async {
   await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
-    await pubGetDependencies(
-      <Directory>[
-        Directory(path.join(flutterDirectory.path, 'dev', 'automated_tests')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'bots')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'microbenchmarks')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'platform_views_layout')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'platform_views_layout_hybrid_composition')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'benchmarks', 'test_apps', 'stocks')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'customer_testing')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'abstract_method_smoke_test')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_semantics_testing')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_embedding_v2_smoke_test')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_semantics_testing')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_splash_screens', 'splash_screen_kitchen_sink')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_splash_screens', 'splash_screen_load_rotate')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_splash_screens', 'splash_screen_trans_rotate')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_views')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'channels')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'external_ui')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flavors')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flutter_driver_screenshot_test')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flutter_gallery')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'gradle_deprecated_settings')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'hybrid_android_views')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'image_loading')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_add2app_life_cycle', 'flutterapp')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_app_with_extensions')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_platform_view_tests')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'non_nullable')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'platform_interaction')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'release_smoke_test')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ui')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'web_e2e_tests')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'manual_tests')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'snippets')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'tools')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'tools', 'gen_keycodes')),
-        Directory(path.join(flutterDirectory.path, 'dev', 'tools', 'vitool')),
-	Directory(path.join(flutterDirectory.path, 'examples', 'platform_channel_swift')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_driver')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_goldens')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_goldens_client')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_localizations')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_test')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'flutter_web_plugins')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'fuchsia_remote_debug_protocol')),
-        Directory(path.join(flutterDirectory.path, 'packages', 'integration_test')),
-      ]);
+    await flutter('update-packages');
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
