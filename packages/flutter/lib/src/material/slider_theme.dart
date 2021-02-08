@@ -1486,7 +1486,21 @@ abstract class BaseSliderTrackShape {
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
-  const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
+  const RectangularSliderTrackShape({
+    this.disabledThumbGapWidth = 2.0,
+    this.minValue,
+    this.maxValue,
+    this.secondaryValue,
+    this.secondaryValeTrackColor,
+  }) : assert(secondaryValue == null
+    || (secondaryValue != null &&
+        minValue != null &&
+        maxValue != null &&
+        secondaryValeTrackColor != null &&
+        secondaryValue >= minValue &&
+        secondaryValue <= maxValue
+       )
+  );
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
@@ -1499,6 +1513,27 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     'This feature was deprecated after v1.5.7.'
   )
   final double disabledThumbGapWidth;
+
+  /// The minimum value the user can select.
+  final double? minValue;
+
+  /// The maximum value the user can select.
+  final double? maxValue;
+
+  /// The secondary value for this slider.
+  final double? secondaryValue;
+
+  /// The color to use for the portion of the slider secondary value track.
+  final Color? secondaryValeTrackColor;
+
+  // Returns a number between 0.0 and 1.0, given a value between min and max.
+  double _unlerp(double value) {
+    assert(value <= maxValue!);
+    assert(value >= minValue!);
+    return maxValue! > minValue!
+      ? (value - minValue!) / (maxValue! - minValue!)
+      : 0.0;
+  }
 
   @override
   void paint(
@@ -1533,25 +1568,6 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       return;
     }
 
-    // Assign the track segment paints, which are left: active, right: inactive,
-    // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-        break;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-        break;
-    }
-
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,
@@ -1560,10 +1576,60 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
 
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
+    // Assign the track segment paints, which are left: active, right: inactive,
+    // but reversed for right to left text.
+    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
+    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+
+    Paint? secondaryValueTrackPaint;
+    if (secondaryValue != null){
+      secondaryValueTrackPaint = Paint()..color = secondaryValeTrackColor!;
+    }
+
+    double? secondaryValueTrackEdge;
+    bool needPaintSecondaryValueTrack = false;
+
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        leftTrackPaint = activePaint;
+        rightTrackPaint = inactivePaint;
+        if (secondaryValue != null) {
+          secondaryValueTrackEdge = trackRect.left + _unlerp(secondaryValue!) * trackRect.width;
+          needPaintSecondaryValueTrack = secondaryValueTrackEdge > thumbCenter.dx;
+        }
+        break;
+      case TextDirection.rtl:
+        leftTrackPaint = inactivePaint;
+        rightTrackPaint = activePaint;
+        if (secondaryValue != null) {
+          secondaryValueTrackEdge = trackRect.left + (1.0 - _unlerp(secondaryValue!)) * trackRect.width;
+          needPaintSecondaryValueTrack = secondaryValueTrackEdge < thumbCenter.dx;
+        }
+        break;
+    }
+
+    final Rect leftTrackSegment = Rect.fromLTRB(
+      trackRect.left,
+      trackRect.top,
+      needPaintSecondaryValueTrack ? math.min(thumbCenter.dx, secondaryValueTrackEdge!) : thumbCenter.dx,
+      trackRect.bottom
+    );
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
+    if (needPaintSecondaryValueTrack) {
+      final Rect secondaryValueTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, secondaryValueTrackEdge!, trackRect.bottom);
+      context.canvas.drawRect(secondaryValueTrackSegment, secondaryValueTrackPaint!);
+    }
+    final Rect rightTrackSegment = Rect.fromLTRB(
+      needPaintSecondaryValueTrack ? math.max(thumbCenter.dx, secondaryValueTrackEdge!) : thumbCenter.dx,
+      trackRect.top,
+      trackRect.right,
+      trackRect.bottom
+    );
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
   }
@@ -1596,7 +1662,41 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
-  const RoundedRectSliderTrackShape();
+  const RoundedRectSliderTrackShape({
+    this.minValue,
+    this.maxValue,
+    this.secondaryValue,
+    this.secondaryValeTrackColor,
+  }) : assert(secondaryValue == null
+      || (secondaryValue != null &&
+          minValue != null &&
+          maxValue != null &&
+          secondaryValeTrackColor != null &&
+          secondaryValue >= minValue &&
+          secondaryValue <= maxValue
+      )
+  );
+
+  /// The minimum value the user can select.
+  final double? minValue;
+
+  /// The maximum value the user can select.
+  final double? maxValue;
+
+  /// The secondary value for this slider.
+  final double? secondaryValue;
+
+  /// The color to use for the portion of the slider secondary value track.
+  final Color? secondaryValeTrackColor;
+
+  // Returns a number between 0.0 and 1.0, given a value between min and max.
+  double _unlerp(double value) {
+    assert(value <= maxValue!);
+    assert(value >= minValue!);
+    return maxValue! > minValue!
+        ? (value - minValue!) / (maxValue! - minValue!)
+        : 0.0;
+  }
 
   @override
   void paint(
@@ -1630,25 +1730,6 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       return;
     }
 
-    // Assign the track segment paints, which are leading: active and
-    // trailing: inactive.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
-    final Paint leftTrackPaint;
-    final Paint rightTrackPaint;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        leftTrackPaint = activePaint;
-        rightTrackPaint = inactivePaint;
-        break;
-      case TextDirection.rtl:
-        leftTrackPaint = inactivePaint;
-        rightTrackPaint = activePaint;
-        break;
-    }
-
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,
@@ -1656,6 +1737,43 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
+
+    // Assign the track segment paints, which are leading: active and
+    // trailing: inactive.
+    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
+    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
+    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+
+    Paint? secondaryValueTrackPaint;
+    if (secondaryValue != null){
+      secondaryValueTrackPaint = Paint()..color = secondaryValeTrackColor!;
+    }
+
+    double? secondaryValueTrackEdge;
+    bool needPaintSecondaryValueTrack = false;
+
+    final Paint leftTrackPaint;
+    final Paint rightTrackPaint;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        leftTrackPaint = activePaint;
+        rightTrackPaint = inactivePaint;
+        if (secondaryValue != null) {
+          secondaryValueTrackEdge = trackRect.left + _unlerp(secondaryValue!) * trackRect.width;
+          needPaintSecondaryValueTrack = secondaryValueTrackEdge > thumbCenter.dx;
+       }
+        break;
+      case TextDirection.rtl:
+        leftTrackPaint = inactivePaint;
+        rightTrackPaint = activePaint;
+        if (secondaryValue != null) {
+          secondaryValueTrackEdge = trackRect.left + (1.0 - _unlerp(secondaryValue!)) * trackRect.width;
+          needPaintSecondaryValueTrack = secondaryValueTrackEdge < thumbCenter.dx;
+        }
+        break;
+    }
+
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular(trackRect.height / 2 + 1);
 
@@ -1663,16 +1781,22 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       RRect.fromLTRBAndCorners(
         trackRect.left,
         (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-        thumbCenter.dx,
+        needPaintSecondaryValueTrack ? math.min(thumbCenter.dx, secondaryValueTrackEdge!) : thumbCenter.dx,
         (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
         topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
         bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
       ),
       leftTrackPaint,
     );
+
+    if (needPaintSecondaryValueTrack) {
+      final Rect secondaryValueTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, secondaryValueTrackEdge!, trackRect.bottom);
+      context.canvas.drawRect(secondaryValueTrackSegment, secondaryValueTrackPaint!);
+    }
+
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
+        needPaintSecondaryValueTrack ? math.max(thumbCenter.dx, secondaryValueTrackEdge!) : thumbCenter.dx,
         (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
         trackRect.right,
         (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,

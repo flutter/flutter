@@ -2468,4 +2468,169 @@ void main() {
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
+
+  testWidgets('Slider secondaryValue test', (WidgetTester tester) async {
+    TextDirection textDirection = TextDirection.ltr;
+    double? value;
+    SliderTrackShape? trackShape;
+
+    Widget buildFrame(){
+      return MaterialApp(
+        theme: ThemeData(
+            sliderTheme: SliderThemeData(
+              trackShape: trackShape,
+            )
+        ),
+        home: Directionality(
+          textDirection: textDirection,
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Center(
+                child: Slider(
+                  value: value!,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // secondaryValue < value, secondaryValue track should not be painted.
+    value = 0.5;
+    trackShape = const RoundedRectSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.4,
+      secondaryValeTrackColor: Colors.pink,
+    );
+    await tester.pumpWidget(buildFrame());
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+
+    expect(renderObject,
+        paints
+        // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 400.0, 303.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(400.0, 298.0, 776.0, 302.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+    );
+
+    // secondaryValue == value, secondaryValue track should not be painted.
+    value = 0.5;
+    trackShape = const RoundedRectSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.5,
+      secondaryValeTrackColor: Colors.pink,
+    );
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 400.0, 303.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(400.0, 298.0, 776.0, 302.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+    );
+
+    // secondaryValue > value, secondaryValue track should be painted.
+    value = 0.5;
+    trackShape = const RoundedRectSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.6,
+      secondaryValeTrackColor: Colors.pink,
+    );
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 400.0, 303.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
+        // secondaryValue track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 475.2, 302.0))
+        // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(475.2, 298.0, 776.0, 302.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+    );
+
+    // slider paint correctly when text direction is rtl.
+    textDirection = TextDirection.rtl;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // inactive track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 298.0, 324.8, 302.0, topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
+        // secondaryValue track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 324.8, 302.0))
+        // active track RRect
+          ..rrect(rrect: RRect.fromLTRBAndCorners(400.0, 297.0, 776.0, 303.0, topRight: const Radius.circular(3.0), bottomRight: const Radius.circular(3.0)))
+    );
+
+    // slider paint correctly when trackShape is RectangularSliderTrackShape.
+    trackShape = const RectangularSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.6,
+      secondaryValeTrackColor: Colors.pink,
+    );
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // inactive track Rect
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 324.8, 302.0))
+        // secondaryValue track Rect.
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 324.8, 302.0))
+        // active track Rect
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0))
+    );
+
+    // secondaryValue == value, secondaryValue track should not be painted when track shape is rect.
+    value = 0.5;
+    trackShape = const RectangularSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.5,
+      secondaryValeTrackColor: Colors.pink,
+    );
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // inactive track Rect
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0))
+        // active track Rect
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0))
+    );
+
+    // secondaryValue < value, secondaryValue track should not be painted when track shape is rect.
+    value = 0.5;
+    trackShape = const RectangularSliderTrackShape(
+      minValue: 0.0,
+      maxValue: 1.0,
+      secondaryValue: 0.4,
+      secondaryValeTrackColor: Colors.pink,
+    );
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+
+    expect(renderObject,
+        paints
+        // inactive track Rect
+          ..rect(rect: const Rect.fromLTRB(24.0, 298.0, 400.0, 302.0))
+        // active track Rect
+          ..rect(rect: const Rect.fromLTRB(400.0, 298.0, 776.0, 302.0))
+    );
+  });
 }
