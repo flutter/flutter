@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../material.dart';
 import 'colors.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
@@ -790,7 +789,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   const _CupertinoEdgeShadowDecoration._(this._colors);
 
   static DecorationTween kTween = DecorationTween(
-    end:  const _CupertinoEdgeShadowDecoration._(
+    end: const _CupertinoEdgeShadowDecoration._(
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
         Color(0x38000000),
@@ -801,6 +800,11 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     ),
   );
 
+  // Colors used to paint a gradient at the start edge of the box it's
+  // decorating.
+  //
+  // The first color in the list is used at the start of the gradient, which
+  // is located at the start edge of the decorated box.
   final List<Color> _colors;
 
   // Linearly interpolate between two edge shadow decorations decorations.
