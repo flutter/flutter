@@ -903,6 +903,29 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
+  testWidgets('AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
+    Widget buildAppBar([double? elevation]) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), elevation: elevation),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    // Default elevation should be _AppBarState._defaultElevation = 4.0
+    await tester.pumpWidget(buildAppBar());
+    expect(getMaterial().elevation, 4.0);
+
+    // AppBar should use the specified elevation.
+    await tester.pumpWidget(buildAppBar(8.0));
+    expect(getMaterial().elevation, 8.0);
+  });
+
   testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
     Widget buildSliverAppBar(bool forceElevated, [double? elevation]) {
@@ -920,17 +943,22 @@ void main() {
       );
     }
 
-    final Finder appBarFinder = find.byType(AppBar);
-    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
+    Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
+    // When forceElevated is off, SliverAppBar should not be elevated.
     await tester.pumpWidget(buildSliverAppBar(false));
-    expect(getAppBarWidget(appBarFinder).elevation, 0.0);
+    expect(getMaterial().elevation, 0.0);
 
+    // Default elevation should be _AppBarState._defaultElevation = 4.0, and
+    // the AppBar's elevation should not be specified by SliverAppBar.
     await tester.pumpWidget(buildSliverAppBar(true));
-    expect(getAppBarWidget(appBarFinder).elevation, null);
+    expect(getMaterial().elevation, 4.0);
+    expect(getAppBar().elevation, null);
 
-    await tester.pumpWidget(buildSliverAppBar(true, 4.0));
-    expect(getAppBarWidget(appBarFinder).elevation, 4.0);
+    // SliverAppBar should use the specified elevation.
+    await tester.pumpWidget(buildSliverAppBar(true, 8.0));
+    expect(getMaterial().elevation, 8.0);
   });
 
   testWidgets('SliverAppBar uses elevation of AppBarTheme', (WidgetTester tester) async {
@@ -954,14 +982,13 @@ void main() {
       );
     }
 
-    final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
     await tester.pumpWidget(buildSliverAppBar(false, themeElevation));
-    expect(getMaterialWidget(materialFinder).elevation, 0.0);
+    expect(getMaterial().elevation, 0.0);
 
     await tester.pumpWidget(buildSliverAppBar(true, themeElevation));
-    expect(getMaterialWidget(materialFinder).elevation, themeElevation);
+    expect(getMaterial().elevation, themeElevation);
   });
 
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
