@@ -145,6 +145,7 @@ class _PointAtTime {
 ///
 /// The quality of the velocity estimation will be better if more data points
 /// have been received.
+final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
 class VelocityTracker {
   /// Create a new velocity tracker for a pointer [kind].
   @Deprecated(
