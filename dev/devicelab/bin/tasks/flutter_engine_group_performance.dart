@@ -15,20 +15,6 @@ const String _bundleName = 'dev.flutter.multipleflutters';
 const String _activityName = 'MainActivity';
 const int _numberOfIterations = 10;
 
-Future<void> _run(String command, List<String> args, String cwd) async {
-  print('$command: $args');
-  final Process process =
-      await Process.start(command, args, workingDirectory: cwd);
-  final Future<dynamic> stdoutStream = stdout.addStream(process.stdout);
-  final Future<dynamic> stderrStream = stderr.addStream(process.stderr);
-  final int exitCode = await process.exitCode;
-  if (exitCode != 0) {
-    throw Exception('command "$command $args" had exit code: $exitCode');
-  }
-  await stdoutStream;
-  await stderrStream;
-}
-
 Future<void> _withApkInstall(
     String apkPath, String bundleName, Function(AndroidDevice) body) async {
   final DeviceDiscovery devices = DeviceDiscovery();
@@ -54,8 +40,10 @@ Future<TaskResult> _doTest() async {
     final String gradlewExecutable =
         Platform.isWindows ? '.\\$gradlew' : './$gradlew';
     final String flutterPath = path.join(flutterDirectory, 'bin', 'flutter');
-    await _run(flutterPath, <String>['pub', 'get'], modulePath);
-    await _run(gradlewExecutable, <String>['assembleRelease'], androidPath);
+    await utils.eval(flutterPath, <String>['pub', 'get'],
+        workingDirectory: modulePath);
+    await utils.eval(gradlewExecutable, <String>['assembleRelease'],
+        workingDirectory: androidPath);
 
     final String apkPath = path.join(multipleFluttersPath, 'android', 'app',
         'build', 'outputs', 'apk', 'release', 'app-release.apk');
