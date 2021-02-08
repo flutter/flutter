@@ -1741,10 +1741,6 @@ plugin1=${plugin1.path}
         )
       , throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
 
-      expect(
-        testLogger.statusText.contains('Consuming the Module'),
-        isFalse,
-      );
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
