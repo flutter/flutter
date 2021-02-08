@@ -36,7 +36,7 @@ import 'theme.dart';
 ///
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
-/// 
+///
 /// [CupertinoApp] isn't necessary for an iOS app.
 ///
 /// Use this widget with caution on Android since it may produce behaviors
