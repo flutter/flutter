@@ -603,7 +603,7 @@ void main() {
                     height: 25.0,
                     child: RichText(
                       key: const ValueKey<String>('text6'),
-                      text: const TextSpan(children: [
+                      text: const TextSpan(children: <TextSpan>[
                         TextSpan(text: 'Hello'),
                         TextSpan(text: ', '),
                         TextSpan(text: 'World'),
