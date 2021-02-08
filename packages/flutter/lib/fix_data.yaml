@@ -26,7 +26,7 @@ transforms:
           - kind: 'addParameter'
             index: 0
             name: 'kind'
-            style: optional_positional
+            style: required_positional
             argumentValue:
               expression: 'PointerDeviceKind.touch'
       - if: "pointerDeviceKind != ''"
