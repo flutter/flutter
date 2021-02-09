@@ -1796,18 +1796,11 @@ class ArtifactUpdater {
       final Directory destination = location.childDirectory(
         tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
       );
-      try {
-        ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
-      } on FileSystemException catch (error) {
-        if (_platform.isWindows && error.osError.errorCode == 32) {
-          throwToolExit(
-            'Failed to download $url because the local file/directory is in use '
-            'by another process. Try closing any running IDEs or editors and trying '
-            'again'
-          );
-        }
-        rethrow;
-      }
+      ErrorHandlingFileSystem.deleteIfExists(
+        destination,
+        recursive: true,
+        handleSharingViolation: _platform.isWindows,
+      );
       _ensureExists(location);
 
       try {
