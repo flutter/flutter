@@ -69,7 +69,7 @@ void main() {
         final HttpClientRequest request = await client.getUrl(null);
         final HttpClientResponse response = await request.close();
 
-        expect(response.statusCode, HttpStatus.badRequest);
+        expect(response.statusCode, HttpStatus.ok);
         expect(response.contentLength, 0);
       });
     });
