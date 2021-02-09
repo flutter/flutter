@@ -196,8 +196,9 @@ class HotRunner extends ResidentRunner {
 
     if (enableDevTools) {
       // The method below is guaranteed never to return a failing future.
-      unawaited(serveAndAnnounceDevTools(
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
       ));
     }
 
@@ -221,7 +222,9 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
-    unawaited(callConnectedVmServiceUriExtension());
+    unawaited(residentDevtoolsHandler.callConnectedVmServiceUriExtension(
+      flutterDevices,
+    ));
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
@@ -641,8 +644,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      unawaited(maybeCallDevToolsUriServiceExtension());
-      unawaited(callConnectedVmServiceUriExtension());
+      unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
       return result;
     }
     final OperationResult result = await _hotReloadHelper(

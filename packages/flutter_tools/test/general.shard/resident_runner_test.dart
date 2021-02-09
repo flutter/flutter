@@ -1600,7 +1600,7 @@ void main() {
     verify(mockDevtoolsLauncher.serve()).called(1);
 
     // Shutdown
-    await residentRunner.shutdownDevTools();
+    await residentRunner.residentDevtoolsHandler.shutdown();
     verify(mockDevtoolsLauncher.close()).called(1);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
@@ -1634,7 +1634,7 @@ void main() {
     verify(mockDevtoolsLauncher.serve()).called(1);
 
     // Shutdown
-    await residentRunner.shutdownDevTools();
+    await residentRunner.residentDevtoolsHandler.shutdown();
     verify(mockDevtoolsLauncher.close()).called(1);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
@@ -1713,7 +1713,7 @@ void main() {
     verify(mockDevtoolsLauncher.serve()).called(1);
 
     // Shutdown
-    await residentRunner.shutdownDevTools();
+    await residentRunner.residentDevtoolsHandler.shutdown();
     verify(mockDevtoolsLauncher.close()).called(1);
   }), overrides: <Type, Generator>{
     DevtoolsLauncher: () => mockDevtoolsLauncher,
@@ -2940,86 +2940,6 @@ void main() {
     expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
     expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
     expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsAssertionError);
-  });
-
-  testWithoutContext('wait for extension handles an immediate extension', () {
-    final vm_service.Isolate isolate = vm_service.Isolate(
-      id: '1',
-      pauseEvent: vm_service.Event(
-        kind: vm_service.EventKind.kResume,
-        timestamp: 0
-      ),
-      breakpoints: <vm_service.Breakpoint>[],
-      exceptionPauseMode: null,
-      libraries: <vm_service.LibraryRef>[
-        vm_service.LibraryRef(
-          id: '1',
-          uri: 'file:///hello_world/main.dart',
-          name: '',
-        ),
-      ],
-      livePorts: 0,
-      name: 'test',
-      number: '1',
-      pauseOnExit: false,
-      runnable: true,
-      startTime: 0,
-      isSystemIsolate: false,
-      isolateFlags: <vm_service.IsolateFlag>[],
-      extensionRPCs: <String>['foo']
-    );
-
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Extension',
-        }
-      ),
-      FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-      FakeVmServiceRequest(
-        method: 'getIsolate',
-        jsonResponse: isolate.toJson(),
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-      ),
-    ]);
-    waitForExtension(fakeVmServiceHost.vmService, 'foo');
-  });
-
-  testWithoutContext('wait for extension handles no isolates', () {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Extension',
-        }
-      ),
-      FakeVmServiceRequest(method: 'getVM', jsonResponse: vm_service.VM(
-        isolates: <vm_service.IsolateRef>[],
-        pid: 1,
-        hostCPU: '',
-        isolateGroups: <vm_service.IsolateGroupRef>[],
-        targetCPU: '',
-        startTime: 0,
-        name: 'dart',
-        architectureBits: 64,
-        operatingSystem: '',
-        version: '',
-        systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-        systemIsolates: <vm_service.IsolateRef>[],
-      ).toJson()),
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Flutter.FrameworkInitialization',
-          kind: 'test',
-        ),
-      ),
-    ]);
-    waitForExtension(fakeVmServiceHost.vmService, 'foo');
   });
 }
 
