@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -103,7 +104,8 @@ abstract class FlutterTestDriver {
     }
     _debugPrint('Spawning flutter $arguments in ${_projectFolder.path}');
 
-    _process = await processManager.start(
+    const ProcessManager _processManager = LocalProcessManager();
+    _process = await _processManager.start(
       <String>[flutterBin]
         .followedBy(arguments)
         .toList(),
