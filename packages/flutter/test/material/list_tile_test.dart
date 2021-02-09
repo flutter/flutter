@@ -252,6 +252,11 @@ void main() {
     expect(find.text('third'), findsOneWidget);
   });
 
+  testWidgets('ListTile.divideTiles with empty list', (WidgetTester tester) async {
+    final Iterable<Widget> output = ListTile.divideTiles(tiles: <Widget>[], color: Colors.grey);
+    expect(output, isEmpty);
+  });
+
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();

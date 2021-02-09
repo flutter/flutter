@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,7 +20,6 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -344,7 +342,3 @@ IOSDevice setUpIOSDevice({
 
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
-class MockVmService extends Mock implements VmService {}
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
-class MockIOSDeploy extends Mock implements IOSDeploy {}
