@@ -62,43 +62,51 @@ import 'theme_data.dart';
 ///     child: Column(
 ///       mainAxisSize: MainAxisSize.min,
 ///       children: <Widget>[
-///         const TextButton(
-///           onPressed: null,
-///           child: Text(
-///             'Disabled Button',
-///             style: TextStyle(fontSize: 20)
-///           ),
-///         ),
-///         const SizedBox(height: 30),
 ///         TextButton(
-///           onPressed: () {},
-///           child: const Text(
-///             'Enabled Button',
-///             style: TextStyle(fontSize: 20)
-///           ),
-///         ),
-///         const SizedBox(height: 30),
-///         TextButton(
-///              onPressed: () {},
-///              style: ButtonStyle(
-///                padding: MaterialStateProperty.all(EdgeInsets.zero),
-///                foregroundColor: MaterialStateProperty.all(Colors.white),
-///              ),
-///              child: Container(
-///                decoration: const BoxDecoration(
-///                  gradient: LinearGradient(
-///                    colors: <Color>[
-///                      Color(0xFF0D47A1),
-///                      Color(0xFF1976D2),
-///                      Color(0xFF42A5F5),
-///                   ],
-///                  ),
-///                ),
-///                padding: const EdgeInsets.all(10.0),
-///                child: const Text('Gradient Button',
-///                    style: TextStyle(fontSize: 20)),
-///              ),
+///            style: TextButton.styleFrom(
+///              textStyle: TextStyle(fontSize: 20),
 ///            ),
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         TextButton(
+///           style: TextButton.styleFrom(
+///             textStyle: TextStyle(fontSize: 20),
+///           ),
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ClipRRect(
+///           borderRadius: BorderRadius.circular(4),
+///           child: Stack(
+///             children: <Widget>[
+///               Positioned.fill(
+///                 child: Container(
+///                   decoration: const BoxDecoration(
+///                     gradient: LinearGradient(
+///                       colors: <Color>[
+///                         Color(0xFF0D47A1),
+///                         Color(0xFF1976D2),
+///                         Color(0xFF42A5F5),
+///                       ],
+///                     ),
+///                   ),
+///                 ),
+///               ),
+///               TextButton(
+///                 style: TextButton.styleFrom(
+///                   padding: const EdgeInsets.all(16.0),
+///                   primary: Colors.white,
+///                   textStyle: TextStyle(fontSize: 20),
+///                 ),
+///                 onPressed: () {},
+///                  child: const Text('Gradient'),
+///               ),
+///             ],
+///           ),
+///         ),
 ///       ],
 ///     ),
 ///   );
