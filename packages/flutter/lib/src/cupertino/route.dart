@@ -948,7 +948,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
         shadowDirection = 1;
         break;
       case TextDirection.ltr:
-        start = offset.dx;
+        start = offset.dx - 1;
         shadowDirection = -1;
         break;
     }
@@ -960,6 +960,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
       }
       final Paint paint = Paint()
         ..strokeWidth = 1.0
+        ..isAntiAlias = false
         ..color = Color.lerp(colors[bandColorIndex], colors[bandColorIndex + 1], (dx % bandWidth) / bandWidth)!;
       final double x = start + shadowDirection * dx;
       canvas.drawLine(Offset(x, offset.dy), Offset(x, offset.dy + shadowHeight), paint);
