@@ -15,17 +15,20 @@
 namespace flutter {
 namespace testing {
 
+namespace {
 static constexpr char kScanCodeKey[] = "scanCode";
 static constexpr int kHandledScanCode = 20;
 static constexpr int kUnhandledScanCode = 21;
 
-std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
+static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto response_doc =
       std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
   auto& allocator = response_doc->GetAllocator();
   response_doc->AddMember("handled", handled, allocator);
   return JsonMessageCodec::GetInstance().EncodeMessage(*response_doc);
 }
+
+}  // namespace
 
 TEST(KeyEventHandlerTest, KeyboardHookHandling) {
   auto handled_message = CreateResponse(true);
