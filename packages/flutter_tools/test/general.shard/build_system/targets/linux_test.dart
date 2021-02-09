@@ -20,34 +20,48 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 void main() {
-  const TargetPlatform targetPlatform = TargetPlatform.linux_x64;
+  final List<TargetPlatform> targetPlatforms = <TargetPlatform>[
+    TargetPlatform.linux_arm64,
+    TargetPlatform.linux_arm64
+  ];
+
   testWithoutContext('Copies files to correct cache directory, excluding unrelated code', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Artifacts artifacts = Artifacts.test();
-    setUpCacheDirectory(fileSystem, artifacts);
+    for (final TargetPlatform targetPlatform in targetPlatforms) {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Artifacts artifacts = Artifacts.test();
+      setUpCacheDirectory(fileSystem, artifacts, targetPlatform);
 
-    final Environment testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
-      defines: <String, String>{
-        kBuildMode: 'debug',
-      },
-      artifacts: artifacts,
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-    );
-    testEnvironment.buildDir.createSync(recursive: true);
+      final Environment testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kBuildMode: 'debug',
+        },
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+      testEnvironment.buildDir.createSync(recursive: true);
 
-    await const UnpackLinux(targetPlatform).build(testEnvironment);
+      switch (targetPlatform) {
+      case TargetPlatform.linux_arm64:
+        await const UnpackLinux(TargetPlatform.linux_arm64).build(testEnvironment);
+        break;
+      case TargetPlatform.linux_x64:
+      default:
+        await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+        break;
+      }
 
-    expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/libflutter_linux_gtk.so'), exists);
 
-    final String headersPath = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: targetPlatform, mode: BuildMode.debug);
-    expect(fileSystem.file('linux/flutter/ephemeral/$headersPath/foo.h'), exists);
+      final String headersPath = artifacts.getArtifactPath(Artifact.linuxHeaders, platform: targetPlatform, mode: BuildMode.debug);
+      expect(fileSystem.file('linux/flutter/ephemeral/$headersPath/foo.h'), exists);
 
-    final String icuDataPath = artifacts.getArtifactPath(Artifact.icuData, platform: targetPlatform);
-    expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPath'), exists);
-    expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
+      final String icuDataPath = artifacts.getArtifactPath(Artifact.icuData, platform: targetPlatform);
+      expect(fileSystem.file('linux/flutter/ephemeral/$icuDataPath'), exists);
+      expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
+    }
   });
 
   // Only required for the test below that still depends on the context.
@@ -86,19 +100,29 @@ void main() {
       }
     ));
 
-    await const DebugBundleLinuxAssets(targetPlatform).build(testEnvironment);
-    final Directory output = testEnvironment.outputDir
-      .childDirectory('flutter_assets');
+    for (final TargetPlatform targetPlatform in targetPlatforms) {
+      switch (targetPlatform) {
+      case TargetPlatform.linux_arm64:
+        await const DebugBundleLinuxAssets(TargetPlatform.linux_arm64).build(testEnvironment);
+        break;
+      case TargetPlatform.linux_x64:
+      default:
+        await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+        break;
+      }
+      final Directory output = testEnvironment.outputDir
+        .childDirectory('flutter_assets');
 
-    expect(output.childFile('kernel_blob.bin'), exists);
-    expect(output.childFile('AssetManifest.json'), exists);
-    expect(output.childFile('version.json'), exists);
-    // SkSL
-    expect(output.childFile('io.flutter.shaders.json'), exists);
-    expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
+      expect(output.childFile('kernel_blob.bin'), exists);
+      expect(output.childFile('AssetManifest.json'), exists);
+      expect(output.childFile('version.json'), exists);
+      // SkSL
+      expect(output.childFile('io.flutter.shaders.json'), exists);
+      expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
 
-    // No bundled fonts
-    expect(output.childFile('FontManifest.json'), isNot(exists));
+      // No bundled fonts
+      expect(output.childFile('FontManifest.json'), isNot(exists));
+    }
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -121,18 +145,30 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfProfile(targetPlatform)).build(testEnvironment);
-    await const ProfileBundleLinuxAssets(targetPlatform).build(testEnvironment);
-    final Directory libDir = testEnvironment.outputDir
-      .childDirectory('lib');
-    final Directory assetsDir = testEnvironment.outputDir
-      .childDirectory('flutter_assets');
+    for (final TargetPlatform targetPlatform in targetPlatforms) {
+      switch (targetPlatform) {
+      case TargetPlatform.linux_arm64:
+        await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_arm64)).build(testEnvironment);
+        await const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64).build(testEnvironment);
+        break;
+      case TargetPlatform.linux_x64:
+      default:
+        await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)).build(testEnvironment);
+        await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+        break;
+      }
 
-    expect(libDir.childFile('libapp.so'), exists);
-    expect(assetsDir.childFile('AssetManifest.json'), exists);
-    expect(assetsDir.childFile('version.json'), exists);
-    // No bundled fonts
-    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+      final Directory libDir = testEnvironment.outputDir
+        .childDirectory('lib');
+      final Directory assetsDir = testEnvironment.outputDir
+        .childDirectory('flutter_assets');
+
+      expect(libDir.childFile('libapp.so'), exists);
+      expect(assetsDir.childFile('AssetManifest.json'), exists);
+      expect(assetsDir.childFile('version.json'), exists);
+      // No bundled fonts
+      expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+    }
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -155,26 +191,37 @@ void main() {
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
 
-    await const LinuxAotBundle(AotElfRelease(targetPlatform)).build(testEnvironment);
-    await const ReleaseBundleLinuxAssets(targetPlatform).build(testEnvironment);
-    final Directory libDir = testEnvironment.outputDir
-      .childDirectory('lib');
-    final Directory assetsDir = testEnvironment.outputDir
-      .childDirectory('flutter_assets');
+    for (final TargetPlatform targetPlatform in targetPlatforms) {
+      switch (targetPlatform) {
+      case TargetPlatform.linux_arm64:
+        await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_arm64)).build(testEnvironment);
+        await const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64).build(testEnvironment);
+        break;
+      case TargetPlatform.linux_x64:
+      default:
+        await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)).build(testEnvironment);
+        await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
+        break;
+      }
+      final Directory libDir = testEnvironment.outputDir
+        .childDirectory('lib');
+      final Directory assetsDir = testEnvironment.outputDir
+        .childDirectory('flutter_assets');
 
-    expect(libDir.childFile('libapp.so'), exists);
-    expect(assetsDir.childFile('AssetManifest.json'), exists);
-    expect(assetsDir.childFile('version.json'), exists);
-    // No bundled fonts
-    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+      expect(libDir.childFile('libapp.so'), exists);
+      expect(assetsDir.childFile('AssetManifest.json'), exists);
+      expect(assetsDir.childFile('version.json'), exists);
+      // No bundled fonts
+      expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+    }
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
-void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
-  const TargetPlatform targetPlatform = TargetPlatform.linux_x64;
+void setUpCacheDirectory(
+    FileSystem fileSystem, Artifacts artifacts, TargetPlatform targetPlatform) {
   final String desktopPath = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: targetPlatform, mode: BuildMode.debug);
   fileSystem.file('$desktopPath/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPath/libflutter_linux_gtk.so').createSync(recursive: true);

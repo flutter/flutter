@@ -172,7 +172,7 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.windows_x64);
     });
 
-    testWithoutContext('Linux', () async {
+    testWithoutContext('Linux x64', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
           command: <String>[
@@ -186,6 +186,22 @@ void main() {
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'linux'));
       expect(utils.hostPlatform, HostPlatform.linux_x64);
+    });
+
+    testWithoutContext('Linux ARM', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'aarch64',
+        ),
+      );
+
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
     testWithoutContext('macOS ARM', () async {

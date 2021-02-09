@@ -141,6 +141,40 @@ add_custom_command(
 
         expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
       });
+
+      testWithoutContext('is migrated to use FLUTTER_TARGET_PLATFORM', () {
+        managedCmakeFile.writeAsStringSync(r'''
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_phony_
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+      linux-x64 ${CMAKE_BUILD_TYPE}
+  VERBATIM
+)
+''');
+
+        final CmakeCustomCommandMigration cmakeProjectMigration = CmakeCustomCommandMigration(
+          mockCmakeProject,
+          testLogger,
+        );
+        expect(cmakeProjectMigration.migrate(), isTrue);
+
+        expect(managedCmakeFile.readAsStringSync(), r'''
+add_custom_command(
+  OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
+    ${CMAKE_CURRENT_BINARY_DIR}/_phony_
+  COMMAND ${CMAKE_COMMAND} -E env
+    ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh"
+      ${FLUTTER_TARGET_PLATFORM} ${CMAKE_BUILD_TYPE}
+  VERBATIM
+)
+''');
+
+        expect(testLogger.statusText, contains('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.'));
+      });
     });
   });
 }

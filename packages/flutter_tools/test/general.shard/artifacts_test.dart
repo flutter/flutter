@@ -113,6 +113,10 @@ void main() {
         artifacts.getArtifactPath(Artifact.flutterTester),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
       );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
+      );
     });
 
     testWithoutContext('precompiled web artifact paths are correct', () {
