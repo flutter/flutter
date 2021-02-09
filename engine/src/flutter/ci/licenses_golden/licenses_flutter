@@ -969,6 +969,8 @@ FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_cod
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.mm
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h
+FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
