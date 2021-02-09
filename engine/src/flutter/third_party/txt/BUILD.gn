@@ -36,13 +36,16 @@ config("allow_posix_names") {
   }
 }
 
+config("define_skshaper") {
+  if (flutter_enable_skshaper) {
+    defines = [ "FLUTTER_ENABLE_SKSHAPER" ]
+  }
+}
+
 source_set("txt") {
   defines = []
   if (flutter_use_fontconfig) {
     defines += [ "FLUTTER_USE_FONTCONFIG" ]
-  }
-  if (flutter_enable_skshaper) {
-    defines += [ "FLUTTER_ENABLE_SKSHAPER" ]
   }
 
   sources = [
@@ -135,6 +138,8 @@ source_set("txt") {
   ]
 
   public_configs = [ ":txt_config" ]
+
+  configs += [ ":define_skshaper" ]
 
   public_deps = [
     "//flutter/fml",
@@ -255,6 +260,8 @@ if (enable_unittests) {
       "tests/txt_test_utils.h",
     ]
 
+    configs += [ ":define_skshaper" ]
+
     deps = [
       ":txt",
       "//flutter/fml",
@@ -271,6 +278,8 @@ if (enable_unittests) {
       "benchmarks/paragraph_builder_benchmarks.cc",
       "benchmarks/txt_run_all_benchmarks.cc",
     ]
+
+    configs += [ ":define_skshaper" ]
 
     deps = [
              ":txt",
@@ -328,7 +337,10 @@ if (enable_unittests) {
       ]
     }
 
-    configs += [ ":allow_posix_names" ]
+    configs += [
+      ":allow_posix_names",
+      ":define_skshaper",
+    ]
 
     deps = [
              ":txt",
