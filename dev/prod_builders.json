@@ -25,6 +25,12 @@
          "flaky": false
       },
       {
+         "name": "Linux android_stack_size_test",
+         "repo": "flutter",
+         "task_name": "linux_android_stack_size_test",
+         "flaky": true
+      },
+      {
          "name": "Linux android_view_scroll_perf__timeline_summary",
          "repo": "flutter",
          "task_name": "linux_android_view_scroll_perf__timeline_summary",
