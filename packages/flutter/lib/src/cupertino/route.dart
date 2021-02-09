@@ -918,19 +918,20 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     //   colors: _decoration._colors,
     // )
     //
-    // A performance evaluation on xx showed, that drawing the gradient manually
-    // as implemented below is more performant than relying on [LinearGradient.createShader]
-    // because compiling that shader takes a long time. On an iPhone XR, the
-    // implementation below reduced the worst frame time for a cupertino page transition of a newly installed app from xx ms down to
-    // xx ms, mainly because there's no longer a need to compile a shader for the
-    // LinearGradient.
+    // A performance evaluation on Feb 8, 2021 showed, that drawing the gradient
+    // manually as implemented below is more performant than relying on
+    // [LinearGradient.createShad∂er] because compiling that shader takes a long
+    // time. On an iPhone XR, the implementation below reduced the worst frame
+    // time for a cupertino page transition of a newly installed app from ~95ms
+    // down to ~30ms, mainly because there's no longer a need to compile a
+    // shader for the LinearGradient.
     //
     // The implementation below divides the width of the shadow into multiple
-    // bands of equal width, one for each color interval defined by `_decoration._colors`.
-    // Band x is filled with a gradient going from `_decoration._colors[x]` to
-    // `_decoration._colors[x + 1]` by drawing 1px wide lines. The color of a
-    // particular line is computed by lerping between the two colors that define
-    // the interval of the band.
+    // bands of equal width, one for each color interval defined by
+    // `_decoration._colors`. Band x is filled with a gradient going from
+    // `_decoration._colors[x]` to `_decoration._colors[x + 1]` by drawing 1px
+    // wide lines. The color of a particular line is computed by lerping between
+    // the two colors that define the interval of the band.
 
     // Shadow spans 5% of the page.
     final double shadowWidth = 0.05 * configuration.size!.width;
