@@ -801,7 +801,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     ),
   );
 
-  // Colors used to paint a gradient at the start edge of the box it is.
+  // Colors used to paint a gradient at the start edge of the box it is
   // decorating.
   //
   // The first color in the list is used at the start of the gradient, which
@@ -809,7 +809,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   //
   // If this is null, no shadow is drawn.
   //
-  // The list must have at least two colors in it (otherwise it would not a
+  // The list must have at least two colors in it (otherwise it would not be a
   // gradient).
   final List<Color>? _colors;
 
