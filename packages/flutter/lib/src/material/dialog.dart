@@ -424,13 +424,8 @@ class AlertDialog extends StatelessWidget {
   /// This is different from [actionsPadding], which defines the padding
   /// between the entire button bar and the edges of the dialog.
   ///
-  /// If this property is null, then it will use the surrounding
-  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
+  /// If this property is null, then it will default to
   /// 8.0 logical pixels on the left and right.
-  ///
-  /// See also:
-  ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry? buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
