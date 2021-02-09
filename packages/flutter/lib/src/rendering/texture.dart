@@ -46,17 +46,6 @@ class TextureBox extends RenderBox {
       _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
-  bool get freeze => _freeze;
-  bool _freeze;
-  set freeze(bool value) {
-    assert(value != null);
-    if (value != _freeze) {
-      _freeze = value;
-      markNeedsPaint();
-    }
-  }
-
-  /// The identity of the backend texture.
   int get textureId => _textureId;
   int _textureId;
   set textureId(int value) {
@@ -67,15 +56,26 @@ class TextureBox extends RenderBox {
     }
   }
 
+  /// When true the texture will not be updated with new frames.
+  bool get freeze => _freeze;
+  bool _freeze;
+  set freeze(bool value) {
+    assert(value != null);
+    if (value != _freeze) {
+      _freeze = value;
+      markNeedsPaint();
+    }
+  }
+
   /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
     assert(value != null);
-    if (value == _filterQuality)
-      return;
-    _filterQuality = value;
-    markNeedsPaint();
+    if (value != _filterQuality) {
+      _filterQuality = value;
+      markNeedsPaint();
+    }
   }
 
   @override

@@ -38,13 +38,15 @@ class Texture extends LeafRenderObjectWidget {
   const Texture({
     Key? key,
     required this.textureId,
-    required this.freeze,
+    this.freeze = false,
     this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
 
   /// The identity of the backend texture.
   final int textureId;
+
+  /// When true the texture will not be updated with new frames.
   final bool freeze;
 
   /// {@template flutter.widgets.Texture.filterQuality}
