@@ -11,15 +11,43 @@ import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import './git.dart';
-import './globals.dart' as globals;
+import './globals.dart';
 import './stdio.dart';
 import './version.dart';
+
+/// Allowed git remote names.
+enum RemoteName {
+  upstream,
+  mirror,
+}
+
+class Remote {
+  const Remote({
+    @required RemoteName name,
+    @required this.url,
+  }) : _name = name;
+
+  final RemoteName _name;
+  /// The name of the remote.
+  String get name {
+    switch (_name) {
+      case RemoteName.upstream:
+        return 'upstream';
+      case RemoteName.mirror:
+        return 'mirror';
+    }
+    throw ConductorException('Invalid value of _name: $_name'); // For analyzer
+  }
+
+  /// The URL of the remote.
+  final String url;
+}
 
 /// A source code repository.
 abstract class Repository {
   Repository({
     @required this.name,
-    @required this.upstream,
+    @required this.fetchRemote,
     @required this.initialRef,
     @required this.processManager,
     @required this.stdio,
@@ -28,12 +56,19 @@ abstract class Repository {
     @required this.parentDirectory,
     this.localUpstream = false,
     this.useExistingCheckout = false,
+    this.pushRemote,
   })  : git = Git(processManager),
         assert(localUpstream != null),
         assert(useExistingCheckout != null);
 
   final String name;
-  final String upstream;
+  final Remote fetchRemote;
+
+  /// Remote to publish tags and commits to.
+  ///
+  /// This value can be null, in which case attempting to publish will lead to
+  /// a [ConductorException].
+  final Remote pushRemote;
 
   /// The initial ref (branch or commit name) to check out.
   final String initialRef;
@@ -71,13 +106,16 @@ abstract class Repository {
     }
     if (!_checkoutDirectory.existsSync()) {
       stdio.printTrace(
-        'Cloning $name from $upstream to ${_checkoutDirectory.path}...',
+        'Cloning $name from ${fetchRemote.url} to ${_checkoutDirectory.path}...',
       );
       git.run(
         <String>[
           'clone',
+          '--no-checkout', // We will explicitly check out [initialRef] later
+          '--origin',
+          fetchRemote.name,
           '--',
-          upstream,
+          fetchRemote.url,
           _checkoutDirectory.path
         ],
         'Cloning $name repo',
@@ -86,7 +124,7 @@ abstract class Repository {
       if (localUpstream) {
         // These branches must exist locally for the repo that depends on it
         // to fetch and push to.
-        for (final String channel in globals.kReleaseChannels) {
+        for (final String channel in kReleaseChannels) {
           git.run(
             <String>['checkout', channel, '--'],
             'check out branch $channel locally',
@@ -272,13 +310,13 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     String name = 'framework',
-    String upstream = FrameworkRepository.defaultUpstream,
+    Remote fetchRemote = const Remote(name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
     String initialRef = FrameworkRepository.defaultBranch,
   }) : super(
           name: name,
-          upstream: upstream,
+          fetchRemote: fetchRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -302,7 +340,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstream: 'file://$upstreamPath/',
+      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://$upstreamPath/'),
       localUpstream: false,
       useExistingCheckout: useExistingCheckout,
     );
@@ -327,7 +365,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      upstream: 'file://${checkoutDirectory.path}/',
+      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
       useExistingCheckout: useExistingCheckout,
     );
   }
@@ -379,7 +417,7 @@ class FrameworkRepository extends Repository {
     final io.ProcessResult result =
         runFlutter(<String>['--version', '--machine']);
     final Map<String, dynamic> versionJson = jsonDecode(
-      globals.stdoutToString(result.stdout),
+      stdoutToString(result.stdout),
     ) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
@@ -390,12 +428,12 @@ class EngineRepository extends Repository {
     this.checkouts, {
     String name = 'engine',
     String initialRef = EngineRepository.defaultBranch,
-    String upstream = EngineRepository.defaultUpstream,
+    Remote fetchRemote = const Remote(name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
   }) : super(
           name: name,
-          upstream: upstream,
+          fetchRemote: fetchRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
@@ -418,7 +456,7 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      upstream: 'file://${checkoutDirectory.path}/',
+      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
       useExistingCheckout: useExistingCheckout,
     );
   }

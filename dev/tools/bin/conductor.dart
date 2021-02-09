@@ -7,7 +7,7 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/abort.dart';
+import 'package:dev_tools/cleanup.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/doctor.dart';
 import 'package:dev_tools/globals.dart';
@@ -64,7 +64,7 @@ Future<void> main(List<String> args) async {
       checkouts: checkouts,
       stdio: stdio,
     ),
-    AbortCommand(
+    CleanupCommand(
       checkouts: checkouts,
     ),
     LogsCommand(

@@ -1,6 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:platform/platform.dart';
 
+import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
+import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './stdio.dart' show Stdio;
 
 const String kStateFileName = '.flutter_conductor_state.json';
@@ -14,7 +20,8 @@ String defaultStateFilePath(Platform platform) {
 }
 
 void presentState(Stdio stdio, pb.ConductorState state) {
-  stdio.printStatus('Flutter Conductor Status\n');
+  stdio.printStatus('Flutter Conductor Status');
+  stdio.printStatus('');
   stdio.printStatus('Release channel: ${state.releaseChannel}');
   stdio.printStatus('');
   stdio.printStatus(
@@ -32,4 +39,62 @@ void presentState(Stdio stdio, pb.ConductorState state) {
   stdio.printStatus('\tStarting git HEAD: ${state.framework.startingGitHead}');
   stdio.printStatus('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
+  stdio.printStatus('');
+  stdio.printStatus('Next steps:');
+  stdio.printStatus(nextPhaseMessage(state));
+}
+
+String nextPhaseMessage(pb.ConductorState state) {
+  switch (state.currentPhase) {
+    case ReleasePhase.INITIALIZED:
+      if (state.engine.cherrypicks.isEmpty) {
+        return <String>[
+          'There are no engine cherrypicks, so issue `conductor next` to continue',
+          'to the next step.',
+        ].join('\n');
+      }
+      return <String>[
+        'You must now manually apply the following engine cherrypicks to the checkout',
+        'at ${state.engine.checkoutPath} in order:',
+        for (final String cherrypick in state.engine.cherrypicks)
+          '\t$cherrypick',
+        'See $kReleaseDocumentationUrl for more information.',
+      ].join('\n');
+    case ReleasePhase.ENGINE_CHERRYPICKS_APPLIED:
+      return <String>[
+        'You must verify Engine CI builds are successful and then codesign the',
+        'binaries at revision ${state.engine.currentGitHead}.',
+      ].join('\n');
+    case ReleasePhase.ENGINE_BINARIES_CODESIGNED:
+      return <String>[
+        'You must now manually apply the following framework cherrypicks to the checkout',
+        'at ${state.framework.checkoutPath} in order:',
+        for (final String cherrypick in state.framework.cherrypicks)
+          '\t$cherrypick',
+      ].join('\n');
+    case ReleasePhase.FRAMEWORK_CHERRYPICKS_APPLIED:
+      return <String>[
+        'You must verify Framework CI builds are successful.',
+        'See $kReleaseDocumentationUrl for more information.',
+      ].join('\n');
+    case ReleasePhase.VERSION_PUBLISHED:
+      return 'Issue `conductor next` to publish your release to the release branch.';
+    case ReleasePhase.CHANNEL_PUBLISHED:
+      return <String>[
+        'Release archive packages must be verified on cloud storage. Issue',
+        '`conductor next` to check if they are ready.',
+      ].join('\n');
+    case ReleasePhase.RELEASE_VERIFIED:
+      return 'This release has been completed.';
+  }
+  assert(false);
+  return ''; // For analyzer
+}
+
+ReleasePhase getNextPhase(ReleasePhase currentPhase) {
+  assert(currentPhase != null);
+  if (currentPhase == ReleasePhase.RELEASE_VERIFIED) {
+    throw ConductorException('There is no next ReleasePhase!');
+  }
+  return ReleasePhase.valueOf(currentPhase.value + 1);
 }

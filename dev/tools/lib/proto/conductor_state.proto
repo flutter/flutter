@@ -2,6 +2,31 @@ syntax = "proto3";
 
 package conductor_state;
 
+// A git remote
+message Remote {
+  string name = 1;
+  string url = 2;
+}
+
+enum ReleasePhase {
+  // Release was started with `conductor start` and repositories cloned.
+  INITIALIZED = 0;
+  ENGINE_CHERRYPICKS_APPLIED = 1;
+  ENGINE_BINARIES_CODESIGNED = 2;
+  FRAMEWORK_CHERRYPICKS_APPLIED = 3;
+
+  // Git tag applied to framework RC branch HEAD and pushed upstream.
+  VERSION_PUBLISHED = 4;
+
+  // RC branch HEAD pushed to upstream release branch.
+  //
+  // For example, flutter-1.2-candidate.3 -> upstream/beta
+  CHANNEL_PUBLISHED = 5;
+
+  // Package artifacts verified to exist on cloud storage.
+  RELEASE_VERIFIED = 6;
+}
+
 message Repository {
   // The development git branch the release is based on.
   //
@@ -17,6 +42,17 @@ message Repository {
 
   // Path to the git checkout on local disk.
   string checkoutPath = 4;
+
+  // The remote commits will be fetched from.
+  Remote upstream = 5;
+
+  // The remote cherrypicks will be pushed to to create a Pull Request.
+  //
+  // This should be a mirror owned by the user conducting the release.
+  Remote mirror = 6;
+
+  // Each string should be a full git commit hash.
+  repeated string cherrypicks = 7;
 }
 
 message ConductorState {
@@ -32,4 +68,7 @@ message ConductorState {
   int64 lastUpdatedDate = 7;
 
   repeated string logs = 8;
+
+  // The last [ReleasePhase] that was successfully completed.
+  ReleasePhase currentPhase = 9;
 }

@@ -10,6 +10,81 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'conductor_state.pbenum.dart';
+
+export 'conductor_state.pbenum.dart';
+
+class Remote extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Remote',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
+      createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'url')
+    ..hasRequiredFields = false;
+
+  Remote._() : super();
+  factory Remote({
+    $core.String name,
+    $core.String url,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (url != null) {
+      _result.url = url;
+    }
+    return _result;
+  }
+  factory Remote.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Remote.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  Remote clone() => Remote()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Remote copyWith(void Function(Remote) updates) =>
+      super.copyWith((message) => updates(message as Remote)); // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Remote create() => Remote._();
+  Remote createEmptyInstance() => create();
+  static $pb.PbList<Remote> createRepeated() => $pb.PbList<Remote>();
+  @$core.pragma('dart2js:noInline')
+  static Remote getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Remote>(create);
+  static Remote _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) {
+    $_setString(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get url => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set url($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasUrl() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUrl() => clearField(2);
+}
+
 class Repository extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Repository',
@@ -24,6 +99,11 @@ class Repository extends $pb.GeneratedMessage {
         protoName: 'currentGitHead')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checkoutPath',
         protoName: 'checkoutPath')
+    ..aOM<Remote>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'upstream',
+        subBuilder: Remote.create)
+    ..aOM<Remote>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mirror',
+        subBuilder: Remote.create)
+    ..pPS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks')
     ..hasRequiredFields = false;
 
   Repository._() : super();
@@ -32,6 +112,9 @@ class Repository extends $pb.GeneratedMessage {
     $core.String startingGitHead,
     $core.String currentGitHead,
     $core.String checkoutPath,
+    Remote upstream,
+    Remote mirror,
+    $core.Iterable<$core.String> cherrypicks,
   }) {
     final _result = create();
     if (candidateBranch != null) {
@@ -45,6 +128,15 @@ class Repository extends $pb.GeneratedMessage {
     }
     if (checkoutPath != null) {
       _result.checkoutPath = checkoutPath;
+    }
+    if (upstream != null) {
+      _result.upstream = upstream;
+    }
+    if (mirror != null) {
+      _result.mirror = mirror;
+    }
+    if (cherrypicks != null) {
+      _result.cherrypicks.addAll(cherrypicks);
     }
     return _result;
   }
@@ -117,6 +209,37 @@ class Repository extends $pb.GeneratedMessage {
   $core.bool hasCheckoutPath() => $_has(3);
   @$pb.TagNumber(4)
   void clearCheckoutPath() => clearField(4);
+
+  @$pb.TagNumber(5)
+  Remote get upstream => $_getN(4);
+  @$pb.TagNumber(5)
+  set upstream(Remote v) {
+    setField(5, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasUpstream() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUpstream() => clearField(5);
+  @$pb.TagNumber(5)
+  Remote ensureUpstream() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  Remote get mirror => $_getN(5);
+  @$pb.TagNumber(6)
+  set mirror(Remote v) {
+    setField(6, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasMirror() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearMirror() => clearField(6);
+  @$pb.TagNumber(6)
+  Remote ensureMirror() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  $core.List<$core.String> get cherrypicks => $_getList(6);
 }
 
 class ConductorState extends $pb.GeneratedMessage {
@@ -138,6 +261,12 @@ class ConductorState extends $pb.GeneratedMessage {
     ..aInt64(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastUpdatedDate',
         protoName: 'lastUpdatedDate')
     ..pPS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
+    ..e<ReleasePhase>(
+        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
+        protoName: 'currentPhase',
+        defaultOrMaker: ReleasePhase.INITIALIZED,
+        valueOf: ReleasePhase.valueOf,
+        enumValues: ReleasePhase.values)
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
@@ -149,6 +278,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $fixnum.Int64 createdDate,
     $fixnum.Int64 lastUpdatedDate,
     $core.Iterable<$core.String> logs,
+    ReleasePhase currentPhase,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -171,6 +301,9 @@ class ConductorState extends $pb.GeneratedMessage {
     }
     if (logs != null) {
       _result.logs.addAll(logs);
+    }
+    if (currentPhase != null) {
+      _result.currentPhase = currentPhase;
     }
     return _result;
   }
@@ -274,4 +407,16 @@ class ConductorState extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(8)
   $core.List<$core.String> get logs => $_getList(6);
+
+  @$pb.TagNumber(9)
+  ReleasePhase get currentPhase => $_getN(7);
+  @$pb.TagNumber(9)
+  set currentPhase(ReleasePhase v) {
+    setField(9, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasCurrentPhase() => $_has(7);
+  @$pb.TagNumber(9)
+  void clearCurrentPhase() => clearField(9);
 }

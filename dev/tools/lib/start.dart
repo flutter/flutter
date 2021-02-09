@@ -12,6 +12,7 @@ import 'package:platform/platform.dart';
 
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
+import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
@@ -75,7 +76,7 @@ class StartCommand extends Command<void> {
     if (stateFile.existsSync()) {
       throw ConductorException(
         'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
-        'Run `conductor abort` to cancel a previous release.'
+        'Run `conductor cleanup` to cancel a previous release.'
       );
     }
     if (!argResults.wasParsed(kReleaseOption)) {
@@ -121,6 +122,8 @@ class StartCommand extends Command<void> {
       checkoutPath: framework.checkoutDirectory.path,
     );
 
+    state.currentPhase = ReleasePhase.INITIALIZED;
+
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 
     state.logs.addAll(stdio.logs);
@@ -129,5 +132,7 @@ class StartCommand extends Command<void> {
       jsonEncode(state.toProto3Json()),
       flush: true,
     );
+
+    presentState(stdio, state);
   }
 }

@@ -57,7 +57,12 @@ class RollDevCommand extends Command<void> {
       help: 'Do not create tag and push to remote, only update release branch. '
       'For recovering when the script fails trying to git push to the release branch.'
     );
-    argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
+    argParser.addFlag(
+      kYes,
+      negatable: false,
+      abbr: 'y',
+      help: 'Skip the confirmation prompt.',
+    );
   }
 
   final Checkouts checkouts;

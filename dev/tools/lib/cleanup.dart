@@ -15,9 +15,11 @@ import './stdio.dart';
 const String kYesFlag = 'yes';
 const String kStateOption = 'state-file';
 
-/// Command to print the status of the current Flutter release.
-class AbortCommand extends Command<void> {
-  AbortCommand({
+/// Command to clean up persistent state file.
+///
+/// If the release was not completed, this command will abort the release.
+class CleanupCommand extends Command<void> {
+  CleanupCommand({
     @required this.checkouts,
   })  : platform = checkouts.platform,
         fileSystem = checkouts.fileSystem,
@@ -43,14 +45,17 @@ class AbortCommand extends Command<void> {
   String get name => 'abort';
 
   @override
-  String get description => 'Abort current Flutter release and cleanup state file.';
+  String get description => 'Cleanup persistent state file. '
+      'This will abort a work in progress release.';
 
   @override
   void run() {
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (!stateFile.existsSync()) {
-      throw ConductorException('No persistent state file found at ${stateFile.path}!');
+      throw ConductorException(
+          'No persistent state file found at ${stateFile.path}!');
     }
+
     // TODO use flag
     stdio.printStatus('Deleting file ${stateFile.path}...');
     stateFile.deleteSync();
