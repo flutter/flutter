@@ -2217,10 +2217,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The text to display.
   TextSpan? get text => _textPainter.text as TextSpan?;
   final TextPainter _textPainter;
-  /// The text painter currently used to paint text.
-  /// 
-  /// Currently used to find the selection rects for Scribble support
-  TextPainter? get textPainter => _textPainter;
   set text(TextSpan? value) {
     if (_textPainter.text == value)
       return;
@@ -2686,6 +2682,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
   Queue<SemanticsNode>? _cachedChildNodes;
+
+  /// {@macro flutter.painting.textPainter.getBoxesForSelection}
+  List<TextBox> getBoxesForSelection(TextSelection selection) => _textPainter.getBoxesForSelection(selection);
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

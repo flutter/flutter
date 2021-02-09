@@ -663,11 +663,9 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
-    this.scribbleInProgress = false,
   }) : assert(text != null),
        assert(selection != null),
-       assert(composing != null),
-       assert(scribbleInProgress != null);
+       assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -683,7 +681,6 @@ class TextEditingValue {
         start: encoded['composingBase'] as int? ?? -1,
         end: encoded['composingExtent'] as int? ?? -1,
       ),
-      scribbleInProgress: encoded['scribbleInProgress'] as bool? ?? false,
     );
   }
 
@@ -697,7 +694,6 @@ class TextEditingValue {
       'selectionIsDirectional': selection.isDirectional,
       'composingBase': composing.start,
       'composingExtent': composing.end,
-      'scribbleInProgress': scribbleInProgress,
     };
   }
 
@@ -710,9 +706,6 @@ class TextEditingValue {
   /// The range of text that is still being composed.
   final TextRange composing;
 
-  /// true if the update occurred during a scribble interaction
-  final bool scribbleInProgress;
-
   /// A value that corresponds to the empty string with no selection and no composing range.
   static const TextEditingValue empty = TextEditingValue();
 
@@ -721,13 +714,11 @@ class TextEditingValue {
     String? text,
     TextSelection? selection,
     TextRange? composing,
-    bool? scribbleInProgress,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing,
-      scribbleInProgress: scribbleInProgress ?? this.scribbleInProgress,
     );
   }
 
@@ -752,8 +743,7 @@ class TextEditingValue {
     return other is TextEditingValue
         && other.text == text
         && other.selection == selection
-        && other.composing == composing
-        && other.scribbleInProgress == scribbleInProgress;
+        && other.composing == composing;
   }
 
   @override
@@ -761,7 +751,6 @@ class TextEditingValue {
     text.hashCode,
     selection.hashCode,
     composing.hashCode,
-    scribbleInProgress.hashCode,
   );
 }
 
@@ -936,13 +925,13 @@ abstract class ScribbleClient {
 
   /// Called during a UIIndirectScribbleInteraction when the [ScribbleClient] should
   /// receive focus
-  void onScribbleFocus(double x, double y);
+  void onScribbleFocus(Offset offset);
 
   /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds
-  bool inScribbleRect(double x, double y, double width, double height);
+  bool isInScribbleRect(Rect rect);
 
   /// The current bounds of the [ScribbleClient]
-  List<double> get bounds;
+  Rect get bounds;
 }
 
 /// An interface for interacting with a text input control.
@@ -984,6 +973,8 @@ class TextInputConnection {
 
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
+
+  bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
   void show() {
@@ -1357,20 +1348,36 @@ class TextInput {
   late TextInputConfiguration _currentConfiguration;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
+  bool _scribbleInProgress = false;
+
+  /// true if a scribble interaction is currently happening
+  bool get scribbleInProgress => _scribbleInProgress;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       if (_scribbleClients.containsKey(args[0])) {
-        _scribbleClients[args[0]]?.onScribbleFocus(args[1] as double, args[2] as double);
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset(args[1] as double, args[2] as double));
       }
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       return _scribbleClients.keys.where((String elementIdentifier) {
-        return _scribbleClients[elementIdentifier]?.inScribbleRect(args[0] as double, args[1] as double, args[2] as double, args[3] as double) ?? false;
-      }).map((String elementIdentifier) => <dynamic>[elementIdentifier, ..._scribbleClients[elementIdentifier]?.bounds ?? <dynamic>[]]).toList();
+        final Rect rect = Rect.fromLTWH(args[0].toDouble() , args[1].toDouble() , args[2].toDouble() , args[3].toDouble() );
+        print('rectFor $elementIdentifier: $rect');
+        return _scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false;
+      }).map((String elementIdentifier) {
+        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+        if (bounds == Rect.zero) {
+          return <dynamic>[elementIdentifier];
+        }
+        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+      }).toList();
+    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
+      _scribbleInProgress = false;
+    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
+      _scribbleInProgress = false;
     }
     if (_currentConnection == null)
       return;
@@ -1584,8 +1591,8 @@ class TextInput {
     TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
   }
 
-  /// Deregisters a [ScribbleClient] with [elementIdentifier]
-  static void deregisterScribbleElement(String elementIdentifier) {
+  /// Unregisters a [ScribbleClient] with [elementIdentifier]
+  static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 }
