@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show ProcessSignal;
 import 'dart:io';
 
 import 'package:process/process.dart';
@@ -160,7 +159,7 @@ class _FakeProcess implements Process {
   final String _stdout;
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
     // Killing a fake process has no effect.
     return false;
   }
