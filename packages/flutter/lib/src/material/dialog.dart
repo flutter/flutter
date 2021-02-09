@@ -538,13 +538,18 @@ class AlertDialog extends StatelessWidget {
 
 
     if (actions != null) {
+      final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
         padding: actionsPadding,
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
-          overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
-          children: actions!,
+        child: Container(
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsets.all(spacing),
+          child: OverflowBar(
+            spacing: spacing,
+            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+            children: actions!,
+          ),
         ),
       );
     }
