@@ -29,7 +29,6 @@ import 'package:process/process.dart';
 import 'common.dart' as tester;
 import 'context.dart';
 import 'fake_http_client.dart';
-import 'fake_process_manager.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
