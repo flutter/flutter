@@ -120,9 +120,11 @@ class AppContext {
   /// such value has been associated.
   T get<T>() {
     // Convert lookups of old process manager into new process manager.
+    // TODO(jonahwilliams): remove once g3 is migrated to flutter process manager.
+    // https://github.com/flutter/flutter/issues/75744
     dynamic value;
     if (T == process.ProcessManager) {
-       value = _generateIfNecessary(ProcessManager, _overrides);
+      value = _generateIfNecessary(ProcessManager, _overrides);
     } else {
       value = _generateIfNecessary(T, _overrides);
     }
