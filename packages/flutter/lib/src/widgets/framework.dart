@@ -2310,7 +2310,7 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree. For some use cases, the simpler [Offscreen]
+/// the size of the rendered tree. For some use cases, the simpler [Offstage]
 /// widget may be a better alternative to this approach.
 ///
 /// ```dart imports
