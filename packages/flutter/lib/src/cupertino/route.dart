@@ -929,8 +929,8 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // The implementation below divides the width of the shadow into multiple
     // bands of equal width, one for each color interval defined by
     // `_decoration._colors`. Band x is filled with a gradient going from
-    // `_decoration._colors[x]` to `_decoration._colors[x + 1]` by drawing 1px
-    // wide lines. The color of a particular line is computed by lerping between
+    // `_decoration._colors[x]` to `_decoration._colors[x + 1]` by drawing a
+    // bunch of 1px wide rects. The rects change their color by lerping between
     // the two colors that define the interval of the band.
 
     // Shadow spans 5% of the page.
@@ -959,11 +959,9 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
         bandColorIndex += 1;
       }
       final Paint paint = Paint()
-        ..strokeWidth = 1.0
-        ..isAntiAlias = false
         ..color = Color.lerp(colors[bandColorIndex], colors[bandColorIndex + 1], (dx % bandWidth) / bandWidth)!;
       final double x = start + shadowDirection * dx;
-      canvas.drawLine(Offset(x, offset.dy), Offset(x, offset.dy + shadowHeight), paint);
+      canvas.drawRect(Rect.fromLTWH(x - 1.0, offset.dy, 1.0, shadowHeight), paint);
     }
   }
 }
