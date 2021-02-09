@@ -49,6 +49,6 @@ const ConductorState$json = const {
     const {'1': 'createdDate', '3': 6, '4': 1, '5': 3, '10': 'createdDate'},
     const {'1': 'lastUpdatedDate', '3': 7, '4': 1, '5': 3, '10': 'lastUpdatedDate'},
     const {'1': 'logs', '3': 8, '4': 3, '5': 9, '10': 'logs'},
-    const {'1': 'currentPhase', '3': 9, '4': 1, '5': 14, '6': '.conductor_state.ReleasePhase', '10': 'currentPhase'},
+    const {'1': 'lastPhase', '3': 9, '4': 1, '5': 14, '6': '.conductor_state.ReleasePhase', '10': 'lastPhase'},
   ],
 };

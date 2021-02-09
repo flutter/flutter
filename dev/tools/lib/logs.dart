@@ -11,17 +11,16 @@ import 'package:platform/platform.dart';
 
 import './globals.dart' show ConductorException;
 import './proto/conductor_state.pb.dart' as pb;
-import './repository.dart';
 import './state.dart';
 import './stdio.dart';
 
 /// Command to print the logs from the current Flutter release.
 class LogsCommand extends Command<void> {
   LogsCommand({
-    @required this.checkouts,
-  })  : platform = checkouts.platform,
-        fileSystem = checkouts.fileSystem,
-        stdio = checkouts.stdio {
+    @required this.fileSystem,
+    @required this.platform,
+    @required this.stdio,
+  }) {
     final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
       'state-file',
@@ -30,7 +29,6 @@ class LogsCommand extends Command<void> {
     );
   }
 
-  final Checkouts checkouts;
   final FileSystem fileSystem;
   final Platform platform;
   final Stdio stdio;

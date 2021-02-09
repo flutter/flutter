@@ -7,11 +7,12 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
-import 'package:dev_tools/cleanup.dart';
+import 'package:dev_tools/clean.dart';
 import 'package:dev_tools/codesign.dart';
 import 'package:dev_tools/doctor.dart';
 import 'package:dev_tools/globals.dart';
 import 'package:dev_tools/logs.dart';
+import 'package:dev_tools/next.dart';
 import 'package:dev_tools/roll_dev.dart';
 import 'package:dev_tools/repository.dart';
 import 'package:dev_tools/start.dart';
@@ -58,19 +59,20 @@ Future<void> main(List<String> args) async {
     ),
     StatusCommand(
       checkouts: checkouts,
-      stdio: stdio,
     ),
     StartCommand(
       checkouts: checkouts,
-      stdio: stdio,
     ),
-    CleanupCommand(
+    CleanCommand(
       checkouts: checkouts,
     ),
     LogsCommand(
-      checkouts: checkouts,
+      fileSystem: fileSystem,
+      platform: platform,
+      stdio: stdio,
     ),
     DoctorCommand(checkouts: checkouts),
+    NextCommand(checkouts: checkouts),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {

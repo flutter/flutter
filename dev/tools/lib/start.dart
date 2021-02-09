@@ -20,16 +20,18 @@ import './stdio.dart';
 const String kCandidateOption = 'candidate-branch';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
-const String kFrameworkOption = 'framework-upstream';
-const String kEngineOption = 'engine-upstream';
+const String kFrameworkMirrorOption = 'framework-mirror';
+const String kEngineMirrorOption = 'engine-mirror';
+const String kFrameworkUpstreamOption = 'framework-upstream';
+const String kEngineUpstreamOption = 'engine-upstream';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
   StartCommand({
     @required this.checkouts,
-    @required this.stdio,
   })  : platform = checkouts.platform,
-        fileSystem = checkouts.fileSystem {
+        fileSystem = checkouts.fileSystem,
+        stdio = checkouts.stdio {
     final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
       kCandidateOption,
@@ -41,15 +43,24 @@ class StartCommand extends Command<void> {
       allowed: <String>['stable', 'beta', 'dev'],
     );
     argParser.addOption(
-      kFrameworkOption,
+      kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help: 'Configurable Framework repo upstream. Primarily for testing.',
+      help: 'Configurable Framework repo upstream remote. Primarily for testing.',
       hide: true,
     );
     argParser.addOption(
-      kEngineOption,
+      kEngineUpstreamOption,
       defaultsTo: EngineRepository.defaultUpstream,
-      help: 'Configurable Engine repo upstream. Primarily for testing.',
+      help: 'Configurable Engine repo upstream remote. Primarily for testing.',
+      hide: true,
+    );
+    argParser.addOption(
+      kFrameworkMirrorOption,
+      help: 'Framework repo mirror remote.',
+    );
+    argParser.addOption(
+      kEngineMirrorOption,
+      help: 'Engine repo mirror remote.',
     );
     argParser.addOption(
       kStateOption,
@@ -79,19 +90,25 @@ class StartCommand extends Command<void> {
         'Run `conductor cleanup` to cancel a previous release.'
       );
     }
-    if (!argResults.wasParsed(kReleaseOption)) {
-      throw ConductorException(
-          'The command line option `--$kReleaseOption` must be provided');
+    final List<String> requiredArgs = <String>[
+      kFrameworkMirrorOption,
+      kEngineMirrorOption,
+      kReleaseOption,
+      kCandidateOption,
+    ];
+    for (final String arg in requiredArgs) {
+      if (!argResults.wasParsed(arg)) {
+        throw ConductorException(
+            'The command line option `--$arg` must be provided -> ${argResults[arg]}');
+      }
     }
-    if (!argResults.wasParsed(kCandidateOption) || candidateBranch.trim().isEmpty) {
-      throw ConductorException(
-          'The command line option `--$kCandidateOption` must be provided');
-    } else if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
+    if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
         'Invalid release candidate branch "$candidateBranch". '
         'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.'
       );
     }
+
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
     final pb.ConductorState state = pb.ConductorState();
 
@@ -102,6 +119,10 @@ class StartCommand extends Command<void> {
     final EngineRepository engine = EngineRepository(
       checkouts,
       initialRef: candidateBranch,
+      pushRemote: Remote(
+        name: RemoteName.mirror,
+        url: argResults[kEngineMirrorOption] as String,
+      ),
     );
     final String engineHead = engine.reverseParse('HEAD');
     state.engine = pb.Repository(
@@ -122,7 +143,7 @@ class StartCommand extends Command<void> {
       checkoutPath: framework.checkoutDirectory.path,
     );
 
-    state.currentPhase = ReleasePhase.INITIALIZED;
+    state.lastPhase = ReleasePhase.INITIALIZED;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 

@@ -70,5 +70,5 @@ message ConductorState {
   repeated string logs = 8;
 
   // The last [ReleasePhase] that was successfully completed.
-  ReleasePhase currentPhase = 9;
+  ReleasePhase lastPhase = 9;
 }

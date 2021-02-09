@@ -20,8 +20,6 @@ String defaultStateFilePath(Platform platform) {
 }
 
 void presentState(Stdio stdio, pb.ConductorState state) {
-  stdio.printStatus('Flutter Conductor Status');
-  stdio.printStatus('');
   stdio.printStatus('Release channel: ${state.releaseChannel}');
   stdio.printStatus('');
   stdio.printStatus(
@@ -40,12 +38,22 @@ void presentState(Stdio stdio, pb.ConductorState state) {
   stdio.printStatus('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
   stdio.printStatus('');
+  stdio.printStatus('Last completed step: ${state.lastPhase.name}');
+  if (state.lastPhase == ReleasePhase.RELEASE_VERIFIED) {
+    stdio.printStatus(
+      '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
+    );
+    return;
+  }
+  stdio.printStatus('');
   stdio.printStatus('Next steps:');
   stdio.printStatus(nextPhaseMessage(state));
+  stdio.printStatus('');
+  stdio.printStatus('Issue `conductor next` when you are ready to proceed.');
 }
 
 String nextPhaseMessage(pb.ConductorState state) {
-  switch (state.currentPhase) {
+  switch (state.lastPhase) {
     case ReleasePhase.INITIALIZED:
       if (state.engine.cherrypicks.isEmpty) {
         return <String>[
@@ -91,6 +99,10 @@ String nextPhaseMessage(pb.ConductorState state) {
   return ''; // For analyzer
 }
 
+/// Returns the next phase in the ReleasePhase enum.
+///
+/// Will throw a [ConductorException] if [ReleasePhase.RELEASE_VERIFIED] is
+/// passed as an argument, as there is no next phase.
 ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   assert(currentPhase != null);
   if (currentPhase == ReleasePhase.RELEASE_VERIFIED) {

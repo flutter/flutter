@@ -262,8 +262,8 @@ class ConductorState extends $pb.GeneratedMessage {
         protoName: 'lastUpdatedDate')
     ..pPS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
     ..e<ReleasePhase>(
-        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
-        protoName: 'currentPhase',
+        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastPhase', $pb.PbFieldType.OE,
+        protoName: 'lastPhase',
         defaultOrMaker: ReleasePhase.INITIALIZED,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
@@ -278,7 +278,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $fixnum.Int64 createdDate,
     $fixnum.Int64 lastUpdatedDate,
     $core.Iterable<$core.String> logs,
-    ReleasePhase currentPhase,
+    ReleasePhase lastPhase,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -302,8 +302,8 @@ class ConductorState extends $pb.GeneratedMessage {
     if (logs != null) {
       _result.logs.addAll(logs);
     }
-    if (currentPhase != null) {
-      _result.currentPhase = currentPhase;
+    if (lastPhase != null) {
+      _result.lastPhase = lastPhase;
     }
     return _result;
   }
@@ -409,14 +409,14 @@ class ConductorState extends $pb.GeneratedMessage {
   $core.List<$core.String> get logs => $_getList(6);
 
   @$pb.TagNumber(9)
-  ReleasePhase get currentPhase => $_getN(7);
+  ReleasePhase get lastPhase => $_getN(7);
   @$pb.TagNumber(9)
-  set currentPhase(ReleasePhase v) {
+  set lastPhase(ReleasePhase v) {
     setField(9, v);
   }
 
   @$pb.TagNumber(9)
-  $core.bool hasCurrentPhase() => $_has(7);
+  $core.bool hasLastPhase() => $_has(7);
   @$pb.TagNumber(9)
-  void clearCurrentPhase() => clearField(9);
+  void clearLastPhase() => clearField(9);
 }

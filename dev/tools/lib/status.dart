@@ -21,9 +21,9 @@ const String kStateOption = 'state-file';
 class StatusCommand extends Command<void> {
   StatusCommand({
     @required this.checkouts,
-    @required this.stdio,
   })  : platform = checkouts.platform,
-        fileSystem = checkouts.fileSystem {
+        fileSystem = checkouts.fileSystem,
+        stdio = checkouts.stdio {
     final String defaultPath = defaultStateFilePath(platform);
     argParser.addOption(
       kStateOption,

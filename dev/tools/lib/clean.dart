@@ -18,8 +18,8 @@ const String kStateOption = 'state-file';
 /// Command to clean up persistent state file.
 ///
 /// If the release was not completed, this command will abort the release.
-class CleanupCommand extends Command<void> {
-  CleanupCommand({
+class CleanCommand extends Command<void> {
+  CleanCommand({
     @required this.checkouts,
   })  : platform = checkouts.platform,
         fileSystem = checkouts.fileSystem,
@@ -42,7 +42,7 @@ class CleanupCommand extends Command<void> {
   final Stdio stdio;
 
   @override
-  String get name => 'abort';
+  String get name => 'clean';
 
   @override
   String get description => 'Cleanup persistent state file. '

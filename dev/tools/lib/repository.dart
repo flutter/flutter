@@ -431,9 +431,11 @@ class EngineRepository extends Repository {
     Remote fetchRemote = const Remote(name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
+    Remote pushRemote,
   }) : super(
           name: name,
           fetchRemote: fetchRemote,
+          pushRemote: pushRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,
