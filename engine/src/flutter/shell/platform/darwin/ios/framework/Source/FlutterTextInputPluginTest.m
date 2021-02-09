@@ -20,6 +20,30 @@ FLUTTER_ASSERT_ARC
 - (void)setMarkedRect:(CGRect)markedRect;
 - (void)updateEditingState;
 - (BOOL)isVisibleToAutofill;
+
+@end
+
+@interface FlutterTextInputViewSpy : FlutterTextInputView
+@property(nonatomic, assign) UIAccessibilityNotifications receivedNotification;
+@property(nonatomic, assign) id receivedNotificationTarget;
+@property(nonatomic, assign) BOOL isAccessibilityFocused;
+
+- (void)postAccessibilityNotification:(UIAccessibilityNotifications)notification target:(id)target;
+
+@end
+
+@implementation FlutterTextInputViewSpy {
+}
+
+- (void)postAccessibilityNotification:(UIAccessibilityNotifications)notification target:(id)target {
+  self.receivedNotification = notification;
+  self.receivedNotificationTarget = target;
+}
+
+- (BOOL)accessibilityElementIsFocused {
+  return _isAccessibilityFocused;
+}
+
 @end
 
 @interface FlutterSecureTextInputView : FlutterTextInputView
@@ -33,7 +57,7 @@ FLUTTER_ASSERT_ARC
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
 - (void)collectGarbageInputViews;
-- (UIView*)textInputParentView;
+- (NSArray<UIView*>*)textInputViews;
 @end
 
 @interface FlutterTextInputPluginTest : XCTestCase
@@ -71,6 +95,22 @@ FLUTTER_ASSERT_ARC
                              }];
 }
 
+- (void)setTextInputShow {
+  FlutterMethodCall* setClientCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
+                                                                       arguments:@[]];
+  [textInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+}
+
+- (void)setTextInputHide {
+  FlutterMethodCall* setClientCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.hide"
+                                                                       arguments:@[]];
+  [textInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+}
+
 - (NSMutableDictionary*)mutableTemplateCopy {
   if (!_template) {
     _template = @{
@@ -88,7 +128,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (NSArray<FlutterTextInputView*>*)installedInputViews {
-  return [textInputPlugin.textInputParentView.subviews
+  return (NSArray<FlutterTextInputView*>*)[textInputPlugin.textInputViews
       filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self isKindOfClass: %@",
                                                                    [FlutterTextInputView class]]];
 }
@@ -741,6 +781,41 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(self.installedInputViews.count, 2);
 
   [self commitAutofillContextAndVerify];
+}
+
+#pragma mark - Accessibility - Tests
+
+- (void)testUITextInputAccessibilityNotHiddenWhenShowed {
+  // Send show text input method call.
+  [self setTextInputShow];
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+
+  // The input view should not be hidden.
+  XCTAssertEqual([inputFields count], 1u);
+
+  // Send hide text input method call.
+  [self setTextInputHide];
+
+  inputFields = self.installedInputViews;
+
+  // The input view should be hidden.
+  XCTAssertEqual([inputFields count], 0u);
+}
+
+- (void)testFlutterTextInputViewDirectFocusToBackingTextInput {
+  FlutterTextInputViewSpy* inputView = [[FlutterTextInputViewSpy alloc] init];
+  inputView.textInputDelegate = engine;
+  UIView* container = [[UIView alloc] init];
+  UIAccessibilityElement* backing =
+      [[UIAccessibilityElement alloc] initWithAccessibilityContainer:container];
+  inputView.backingTextInputAccessibilityObject = backing;
+  // Simulate accessibility focus.
+  inputView.isAccessibilityFocused = YES;
+  [inputView accessibilityElementDidBecomeFocused];
+
+  XCTAssertEqual(inputView.receivedNotification, UIAccessibilityScreenChangedNotification);
+  XCTAssertEqual(inputView.receivedNotificationTarget, backing);
 }
 
 @end
