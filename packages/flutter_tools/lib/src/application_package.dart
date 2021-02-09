@@ -7,7 +7,6 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 
 import 'android/android_sdk.dart';

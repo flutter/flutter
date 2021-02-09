@@ -2139,7 +2139,7 @@ void main() {
 
       // Tap after releasing the overscroll to trigger secondary inner ballistic
       // scroll activity with 0 velocity.
-      await tester.tap(find.text('Item 49'));
+      await tester.tap(find.text('Item 49'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // If handled correctly, the ballistic scroll activity should finish

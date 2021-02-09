@@ -13,6 +13,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../devfs.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -265,30 +266,32 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    final bool disableServiceAuthCodes = boolArg('disable-service-auth-codes');
+    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      buildInfo,
+      startPaused: startPaused,
+      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableDds: disableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+    );
 
     final int result = await testRunner.runTests(
       testWrapper,
       files,
+      debuggingOptions: debuggingOptions,
       names: names,
       plainNames: plainNames,
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
-      startPaused: startPaused,
-      disableServiceAuthCodes: disableServiceAuthCodes,
-      disableDds: disableDds,
       ipv6: boolArg('ipv6'),
       machine: machine,
-      buildInfo: buildInfo,
       updateGoldens: boolArg('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       reporter: stringArg('reporter'),
       timeout: stringArg('timeout'),
     );

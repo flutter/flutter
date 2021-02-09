@@ -179,7 +179,9 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   }
 
   void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
+    if (value != widget.valueListenable.value) {
+      setState(() { value = widget.valueListenable.value; });
+    }
   }
 
   @override

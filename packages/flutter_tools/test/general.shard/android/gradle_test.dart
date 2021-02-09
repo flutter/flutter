@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -25,7 +26,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -916,7 +916,9 @@ plugin2=${plugin2.path}
             '-Pis-plugin=true',
             '-PbuildNumber=1.0',
             '-q',
-            '-Pfont-subset=true',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=true',
             '-Ptarget-platform=android-arm,android-arm64,android-x64',
             'assembleAarRelease',
           ],
@@ -931,7 +933,9 @@ plugin2=${plugin2.path}
             '-Pis-plugin=true',
             '-PbuildNumber=1.0',
             '-q',
-            '-Pfont-subset=true',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=true',
             '-Ptarget-platform=android-arm,android-arm64,android-x64',
             'assembleAarRelease',
           ],
@@ -2103,7 +2107,9 @@ plugin1=${plugin1.path}
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
+          '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
+          '-Ptree-shake-icons=false',
           'assembleRelease'
         ],
       ));
