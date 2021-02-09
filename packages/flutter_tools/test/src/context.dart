@@ -39,7 +39,6 @@ import 'package:mockito/mockito.dart';
 import 'common.dart';
 import 'fake_process_manager.dart';
 import 'fakes.dart';
-import 'mocks.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
@@ -175,7 +174,7 @@ void testUsingContext(
       // If a test needs a BotDetector that does not always return true, it
       // can provide the AlwaysFalseBotDetector in the overrides, or its own
       // BotDetector implementation in the overrides.
-      BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
+      BotDetector: overrides[BotDetector] ?? () => const FakeBotDetector(true),
     });
   }, testOn: testOn, skip: skip, timeout: timeout);
 }
