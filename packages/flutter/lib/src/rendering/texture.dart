@@ -38,10 +38,23 @@ class TextureBox extends RenderBox {
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
     required int textureId,
+    bool freeze = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
       _textureId = textureId,
+      _freeze = freeze,
       _filterQuality = filterQuality;
+
+  /// The identity of the backend texture.
+  bool get freeze => _freeze;
+  bool _freeze;
+  set freeze(bool value) {
+    assert(value != null);
+    if (value != _freeze) {
+      _freeze = value;
+      markNeedsPaint();
+    }
+  }
 
   /// The identity of the backend texture.
   int get textureId => _textureId;
@@ -87,6 +100,7 @@ class TextureBox extends RenderBox {
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
+      freeze: freeze,
       filterQuality: _filterQuality,
     ));
   }
