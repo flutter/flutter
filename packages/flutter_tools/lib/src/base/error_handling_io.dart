@@ -112,7 +112,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
             'volume. Consider relocating the project and trying again',
           );
         }
-        return false;
+        return true;
       }
       rethrow;
     }
