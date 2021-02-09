@@ -182,7 +182,6 @@ void main() {
     expect(logger.errorText, contains('Failed to restore Chrome preferences'));
   });
 
-
   testWithoutContext('can launch chrome with a custom debug port', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
