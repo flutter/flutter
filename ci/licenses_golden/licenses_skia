@@ -1,4 +1,4 @@
-Signature: 93753c6fbf720cd325dad8a8f031c117
+Signature: 9d172be6aa37e5d4af7fa920d63e1ab3
 
 UNUSED LICENSES:
 
@@ -2539,8 +2539,6 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkAttachment.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandBuffer.cpp
@@ -5244,11 +5242,13 @@ FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer2.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer2.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
