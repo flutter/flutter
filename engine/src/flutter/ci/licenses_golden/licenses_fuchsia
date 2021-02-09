@@ -1,4 +1,4 @@
-Signature: f7ed4cca7b97c9d5d62f25f87333ad1c
+Signature: 83ad0e74ee12ebe386972accc188aa6a
 
 UNUSED LICENSES:
 
@@ -3422,6 +3422,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
+FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/iterator.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 The Fuchsia Authors. All rights reserved.
 
