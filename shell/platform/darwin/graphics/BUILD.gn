@@ -7,18 +7,23 @@ assert(is_ios || is_mac)
 import("//flutter/common/config.gni")
 
 source_set("graphics") {
-  cflags_objc = flutter_cflags_objc
-  cflags_objcc = flutter_cflags_objcc
+  cflags_objc = flutter_cflags_objc_arc
+  cflags_objcc = flutter_cflags_objcc_arc
 
   sources = [
     "FlutterDarwinContextMetal.h",
     "FlutterDarwinContextMetal.mm",
+    "FlutterDarwinExternalTextureMetal.h",
+    "FlutterDarwinExternalTextureMetal.mm",
   ]
 
   deps = [
     "//flutter/common/graphics",
     "//flutter/fml",
+    "//flutter/shell/platform/darwin/common:framework_shared",
   ]
+
+  libs = [ "CoreVideo.framework" ]
 
   public_deps = [ "//third_party/skia" ]
 
