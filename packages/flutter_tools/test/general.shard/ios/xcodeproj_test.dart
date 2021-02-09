@@ -50,18 +50,6 @@ void main() {
       );
     });
 
-    // Work around https://github.com/flutter/flutter/issues/56415.
-    testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
-      when(processManager.runSync(<String>['which', 'sysctl']))
-          .thenReturn(ProcessResult(0, 0, '', ''));
-      when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-      when(processManager.runSync(<String>['xcrun', 'xcodebuild', '-version']))
-        .thenThrow(const ProcessException(xcodebuild, <String>['-version']));
-
-      expect(xcodeProjectInterpreter.versionText, isNull);
-    });
-
     testWithoutContext('xcodebuild build settings flakes', () async {
       const Duration delay = Duration(seconds: 1);
       processManager.processFactory = mocks.flakyProcessFactory(
@@ -141,6 +129,19 @@ void main() {
 
     expect(xcodeProjectInterpreter.versionText, isNull);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  });
+
+  testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kARMCheckCommand,
+      FakeCommand(
+        command: <String>['xcrun', 'xcodebuild', '-version'],
+        exception: ProcessException(xcodebuild, <String>['-version']),
+      ),
+    ]);
+
+    expect(xcodeProjectInterpreter.versionText, isNull);
   });
 
   testWithoutContext('xcodebuild versionText returns formatted version text', () {
