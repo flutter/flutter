@@ -103,11 +103,17 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
 TextInputPlugin::~TextInputPlugin() = default;
 
 void TextInputPlugin::ComposeBeginHook() {
+  if (active_model_ == nullptr) {
+    return;
+  }
   active_model_->BeginComposing();
   SendStateUpdate(*active_model_);
 }
 
 void TextInputPlugin::ComposeEndHook() {
+  if (active_model_ == nullptr) {
+    return;
+  }
   active_model_->CommitComposing();
   active_model_->EndComposing();
   SendStateUpdate(*active_model_);
@@ -115,6 +121,9 @@ void TextInputPlugin::ComposeEndHook() {
 
 void TextInputPlugin::ComposeChangeHook(const std::u16string& text,
                                         int cursor_pos) {
+  if (active_model_ == nullptr) {
+    return;
+  }
   active_model_->AddText(text);
   cursor_pos += active_model_->composing_range().base();
   active_model_->UpdateComposingText(text);
