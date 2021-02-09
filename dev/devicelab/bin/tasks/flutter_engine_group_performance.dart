@@ -28,6 +28,25 @@ Future<void> _withApkInstall(
   }
 }
 
+/// Since we don't check the gradle wrapper in with the android host project we
+/// yank the gradle wrapper from the module (which is added by the Flutter tool).
+void _copyGradleFromModule(String source, String destination) {
+  print('copying gradle from module $source to $destination');
+  final String wrapperPath = path.join(source, '.android', 'gradlew');
+  final String windowsWrapperPath = path.join(source, '.android', 'gradlew.bat');
+  final String wrapperDestinationPath = path.join(destination, 'gradlew');
+  final String windowsWrapperDestinationPath = path.join(destination, 'gradlew.bat');
+  File(wrapperPath).copySync(wrapperDestinationPath);
+  File(windowsWrapperPath).copySync(windowsWrapperDestinationPath);
+  final Directory gradleDestinationDirectory = Directory(path.join(destination, 'gradle', 'wrapper'));
+  if (!gradleDestinationDirectory.existsSync()) {
+    gradleDestinationDirectory.createSync(recursive: true);
+  }
+  final String gradleDestinationPath = path.join(gradleDestinationDirectory.path, 'gradle-wrapper.jar');
+  final String gradlePath = path.join(source, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar');
+  File(gradlePath).copySync(gradleDestinationPath);
+}
+
 Future<TaskResult> _doTest() async {
   try {
     final String flutterDirectory = utils.flutterDirectory.path;
@@ -42,6 +61,8 @@ Future<TaskResult> _doTest() async {
     final String flutterPath = path.join(flutterDirectory, 'bin', 'flutter');
     await utils.eval(flutterPath, <String>['pub', 'get'],
         workingDirectory: modulePath);
+    _copyGradleFromModule(modulePath, androidPath);
+
     await utils.eval(gradlewExecutable, <String>['assembleRelease'],
         workingDirectory: androidPath);
 
