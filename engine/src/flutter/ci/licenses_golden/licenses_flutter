@@ -1516,6 +1516,7 @@ FILE: ../../../flutter/shell/platform/windows/text_input_manager_win32.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h
+FILE: ../../../flutter/shell/platform/windows/text_input_plugin_unittest.cc
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils.cc
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils.h
 FILE: ../../../flutter/shell/platform/windows/win32_dpi_utils_unittests.cc
