@@ -11,7 +11,6 @@ import 'dart:io';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -29,7 +28,6 @@ import 'package:meta/meta.dart';
 
 import 'common.dart' as tester;
 import 'context.dart';
-import 'fake_process_manager.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;

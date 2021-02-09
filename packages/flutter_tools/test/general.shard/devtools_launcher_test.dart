@@ -228,18 +228,16 @@ void main() {
           ],
           stdout: 'devtools 0.9.6',
         ),
-        FakeCommand(
-            command: const <String>[
-              'pub',
-              'global',
-              'run',
-              'devtools',
-              '--no-launch-browser',
-              '--vm-uri=http://127.0.0.1:1234/abcdefg',
-            ],
-            onRun: () {
-              throw const ProcessException('pub', <String>[]);
-            }
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+            '--vm-uri=http://127.0.0.1:1234/abcdefg',
+          ],
+          exception: ProcessException('pub', <String>[]),
         )
       ]),
     );
@@ -273,18 +271,16 @@ void main() {
           ],
           stdout: 'devtools 0.9.6',
         ),
-        FakeCommand(
-            command: const <String>[
-              'pub',
-              'global',
-              'run',
-              'devtools',
-              '--no-launch-browser',
-              '--vm-uri=http://127.0.0.1:1234/abcdefg',
-            ],
-            onRun: () {
-              throw const ProcessException('pub', <String>[]);
-            }
+        const FakeCommand(
+          command: <String>[
+            'pub',
+            'global',
+            'run',
+            'devtools',
+            '--no-launch-browser',
+            '--vm-uri=http://127.0.0.1:1234/abcdefg',
+          ],
+          exception: ProcessException('pub', <String>[]),
         )
       ]),
     );

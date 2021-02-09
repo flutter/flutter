@@ -10,7 +10,6 @@ import 'dart:io' as io show IOSink;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
@@ -176,7 +175,7 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
   final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
-  final Process process = MockBasicProcess();
+  final Process process = _MockBasicProcess();
 
   when(process.stdout).thenAnswer((_) => stdoutStream);
   when(process.stderr).thenAnswer((_) => stderrStream);
@@ -184,7 +183,7 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
   return process;
 }
 
-class MockBasicProcess extends Mock implements Process {}
+class _MockBasicProcess extends Mock implements Process {}
 
 /// A process that exits successfully with no output and ignores all input.
 class MockProcess extends Mock implements Process {
@@ -253,7 +252,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 }
 
 /// Common functionality for tracking mock interaction.
-class BasicMock {
+class _BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
@@ -271,7 +270,7 @@ class BasicMock {
   }
 }
 
-class MockResidentCompiler extends BasicMock implements ResidentCompiler {
+class MockResidentCompiler extends _BasicMock implements ResidentCompiler {
   @override
   void accept() { }
 
@@ -370,18 +369,3 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
-
-class AlwaysTrueBotDetector implements BotDetector {
-  const AlwaysTrueBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => true;
-}
-
-
-class AlwaysFalseBotDetector implements BotDetector {
-  const AlwaysFalseBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => false;
-}

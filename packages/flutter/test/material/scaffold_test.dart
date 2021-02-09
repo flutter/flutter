@@ -465,7 +465,7 @@ void main() {
       ),
     );
 
-    await tester.drag(find.text('body'), const Offset(0.0, -1000.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -1000.0));
     expect(didPressButton, isFalse);
     await tester.tap(find.text('X'));
     expect(didPressButton, isTrue);
@@ -1392,24 +1392,28 @@ void main() {
       await tester.tap(drawerOpenButton);
       await tester.pumpAndSettle();
       expect(true, scaffoldState.isDrawerOpen);
-      await tester.tap(endDrawerOpenButton);
+      await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       expect(false, scaffoldState.isDrawerOpen);
 
       await tester.tap(endDrawerOpenButton);
       await tester.pumpAndSettle();
       expect(true, scaffoldState.isEndDrawerOpen);
-      await tester.tap(drawerOpenButton);
+      await tester.tap(drawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       expect(false, scaffoldState.isEndDrawerOpen);
 
       scaffoldState.openDrawer();
       expect(true, scaffoldState.isDrawerOpen);
-      await tester.tap(drawerOpenButton);
+      await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
+      expect(false, scaffoldState.isDrawerOpen);
 
       scaffoldState.openEndDrawer();
       expect(true, scaffoldState.isEndDrawerOpen);
+
+      scaffoldState.openDrawer();
+      expect(true, scaffoldState.isDrawerOpen);
     });
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
@@ -1441,7 +1445,7 @@ void main() {
       // not open the drawer.
       await tester.tap(find.byType(IconButton).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(IconButton).last);
+      await tester.tap(find.byType(IconButton).last, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
 
       expect(find.text('endDrawer'), findsNothing);
@@ -1456,7 +1460,7 @@ void main() {
 
       // Tapping on the end drawer and then on the drawer should close the
       // drawer and then reopen it.
-      await tester.tap(find.byType(IconButton).last);
+      await tester.tap(find.byType(IconButton).last, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       await tester.tap(find.byType(IconButton).first);
       await tester.pumpAndSettle();
@@ -2099,6 +2103,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return GestureDetector(
+                key: tapTarget,
                 onTap: () {
                   scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
@@ -2106,7 +2111,6 @@ void main() {
                 child: Container(
                   height: 100.0,
                   width: 100.0,
-                  key: tapTarget,
                 ),
               );
             }
@@ -2136,6 +2140,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return GestureDetector(
+                key: tapTarget,
                 onTap: () {
                   ScaffoldMessenger.of(context);
                 },
@@ -2143,7 +2148,6 @@ void main() {
                 child: Container(
                   height: 100.0,
                   width: 100.0,
-                  key: tapTarget,
                 ),
               );
             }

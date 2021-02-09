@@ -137,9 +137,7 @@ void main() {
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
-        }, onRun: () {
-          throw const ProcessException('ios-deploy', <String>[]);
-        })
+        }, exception: const ProcessException('ios-deploy', <String>[])),
       ]);
       final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
@@ -244,9 +242,7 @@ void main() {
       ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
-      }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
-      })
+      }, exception: const ProcessException('ios-deploy', <String>[])),
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppInstalled = await device.installApp(iosApp);
@@ -267,9 +263,7 @@ void main() {
       ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
-      }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
-      })
+      }, exception: const ProcessException('ios-deploy', <String>[])),
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppUninstalled = await device.uninstallApp(iosApp);
