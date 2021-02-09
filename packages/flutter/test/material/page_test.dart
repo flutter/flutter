@@ -110,7 +110,7 @@ void main() {
     // rather than relative to the screen so assert that the shadow starts at
     // offset.dx = -1.
     final PaintPattern paintsShadow = paints;
-    for (int i = 1; i <= 0.05 * 800; i += 1) {
+    for (int i = 0; i < 0.05 * 800; i += 1) {
       paintsShadow.line(p1: Offset(-i.toDouble(), 0.0), p2: Offset(-i.toDouble(), 600));
     }
     expect(box, paintsShadow);

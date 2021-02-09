@@ -948,7 +948,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
         shadowDirection = 1;
         break;
       case TextDirection.ltr:
-        start = offset.dx - 1;
+        start = offset.dx;
         shadowDirection = -1;
         break;
     }
