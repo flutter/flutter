@@ -33,7 +33,7 @@ class GenL10nProject extends Project {
 
   @override
   final String pubspec = '''
-name: test
+name: test_l10n_project
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
 
@@ -42,7 +42,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: 0.17.0-nullsafety.2
+  intl: 0.17.0
 ''';
 
   @override
