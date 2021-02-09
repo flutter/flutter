@@ -35,6 +35,7 @@ import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
+import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
@@ -774,6 +775,7 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    _residentDevtoolsHandler = ResidentDevtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
   @protected
@@ -795,9 +797,8 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  @visibleForTesting
-  DevtoolsLauncher get devToolsLauncher => _devToolsLauncher;
-  DevtoolsLauncher _devToolsLauncher;
+  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
+  ResidentDevtoolsHandler _residentDevtoolsHandler;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -965,7 +966,7 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    await shutdownDevTools();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -973,7 +974,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> detach() async {
-    await shutdownDevTools();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     await shutdownDartDevelopmentService();
@@ -1274,101 +1275,6 @@ abstract class ResidentRunner {
     }
   }
 
-  DevToolsServerAddress activeDevToolsServer() {
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    return _devToolsLauncher.activeDevToolsServer;
-  }
-
-  // This must be guaranteed not to return a Future that fails.
-  Future<void> serveAndAnnounceDevTools({
-    Uri devToolsServerAddress,
-  }) async {
-    if (!supportsServiceProtocol) {
-      return;
-    }
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (devToolsServerAddress != null) {
-      _devToolsLauncher.devToolsUrl = devToolsServerAddress;
-    } else {
-      unawaited(_devToolsLauncher.serve());
-    }
-    await _devToolsLauncher.ready;
-    if (_reportedDebuggers) {
-      // Since the DevTools only just became available, we haven't had a chance to
-      // report their URLs yet. Do so now.
-      printDebuggerList(includeObservatory: false);
-    }
-    await maybeCallDevToolsUriServiceExtension();
-  }
-
-  Future<void> maybeCallDevToolsUriServiceExtension() async {
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (_devToolsLauncher?.activeDevToolsServer != null) {
-      await Future.wait(<Future<void>>[
-        for (final FlutterDevice device in flutterDevices)
-          _callDevToolsUriExtension(device),
-      ]);
-    }
-  }
-
-  Future<void> _callDevToolsUriExtension(FlutterDevice device) async {
-    if (_devToolsLauncher == null) {
-      return;
-    }
-    await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
-    try {
-      if (_devToolsLauncher == null) {
-        return;
-      }
-      unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
-        'ext.flutter.activeDevToolsServerAddress',
-        device: device,
-        params: <String, dynamic>{
-          'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
-        },
-      ));
-    } on Exception catch (e) {
-      globals.printError(
-        'Failed to set DevTools server address: ${e.toString()}. Deep links to'
-        ' DevTools will not show in Flutter errors.',
-      );
-    }
-  }
-
-  Future<void> callConnectedVmServiceUriExtension() async {
-    await Future.wait(<Future<void>>[
-      for (final FlutterDevice device in flutterDevices)
-        _callConnectedVmServiceExtension(device),
-    ]);
-  }
-
-  Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
-    if (device.vmService.httpAddress != null || device.vmService.wsAddress != null) {
-      final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
-      await waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri');
-      try {
-        unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
-          'ext.flutter.connectedVmServiceUri',
-          device: device,
-          params: <String, dynamic>{
-            'value': uri.toString(),
-          },
-        ));
-      } on Exception catch (e) {
-        globals.printError(e.toString());
-        globals.printError(
-          'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
-          ' will not show in Flutter errors.',
-        );
-      }
-    }
-  }
-
-  Future<void> shutdownDevTools() async {
-    await _devToolsLauncher?.close();
-    _devToolsLauncher = null;
-  }
-
   Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
   }
@@ -1428,10 +1334,11 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  bool get reportedDebuggers => _reportedDebuggers;
   bool _reportedDebuggers = false;
 
   void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
-    final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
+    final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
     if (devToolsServerAddress == null) {
       includeDevtools = false;
     }
@@ -1504,36 +1411,6 @@ abstract class ResidentRunner {
 
   // Clears the screen.
   void clearScreen() => globals.logger.clear();
-}
-
-@visibleForTesting
-Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
-  final Completer<void> completer = Completer<void>();
-  try {
-    await vmService.streamListen(vm_service.EventStreams.kExtension);
-  } on Exception {
-    // do nothing
-  }
-  StreamSubscription<vm_service.Event> extensionStream;
-  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
-      // as well, so make sure we don't try to complete this twice.
-      if (!completer.isCompleted) {
-        completer.complete();
-        extensionStream.cancel();
-      }
-    }
-  });
-  final vm_service.VM vm = await vmService.getVM();
-  if (vm.isolates.isNotEmpty) {
-    final vm_service.IsolateRef isolateRef = vm.isolates.first;
-    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
-    if (isolate.extensionRPCs.contains(extension)) {
-      return;
-    }
-  }
-  await completer.future;
 }
 
 class OperationResult {

@@ -344,9 +344,13 @@ class ChromiumLauncher {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
 
-    if (sourceChromeDefault.existsSync()) {
-      targetChromeDefault.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+    try {
+      if (sourceChromeDefault.existsSync()) {
+        targetChromeDefault.createSync(recursive: true);
+        _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to restore Chrome preferences: $err');
     }
   }
 
