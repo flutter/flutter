@@ -85,7 +85,7 @@ void main() {
 
     expect(topBeforeScroll.dy, equals(0.0));
     expect(topAfterScroll.dy, equals(-100.0));
-  }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform value) => value != TargetPlatform.fuchsia).toSet()));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
   testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
     await tester.pumpWidget(

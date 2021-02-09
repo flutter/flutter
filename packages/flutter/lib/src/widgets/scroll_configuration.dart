@@ -26,6 +26,25 @@ class ScrollBehavior {
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
+  /// Provides additional context for [ScrollContext.setCanDrag].
+  ///
+  /// For example, on Desktop platforms, dragging should be disabled on
+  /// [Scrollable] widgets.
+  bool getCanDrag(BuildContext context) {
+    // When modifying this function, consider modifying the implementation in
+    // _MaterialScrollBehavior as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return false;
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return true;
+    }
+  }
+
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
   /// For example, on Android, this method wraps the given widget with a

@@ -299,9 +299,6 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   const RangeMaintainingTestScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
-
-  @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return child;
   }

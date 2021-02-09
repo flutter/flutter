@@ -256,7 +256,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
-    }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
@@ -311,7 +311,7 @@ void main() {
         moreOrLessEquals(350.0, epsilon: 0.5),
       );
       expect(selectedItems, <int>[9]);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
     testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
@@ -370,6 +370,6 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
   });
 }

@@ -87,5 +87,5 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 }

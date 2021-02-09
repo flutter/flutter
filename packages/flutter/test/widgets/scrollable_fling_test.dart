@@ -32,7 +32,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
 const double dragOffset = 213.82;
 
 void main() {
-  testWidgets('Flings on different platforms', (WidgetTester tester) async {
+  testWidgets('Flings except on desktop platforms', (WidgetTester tester) async {
     double getCurrentOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
@@ -47,17 +47,17 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.linux);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(); // trigger fling
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(const Duration(seconds: 5));
     final double linuxResult = getCurrentOffset();
 
     await pumpTest(tester, TargetPlatform.windows);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(); // trigger fling
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(const Duration(seconds: 5));
     final double windowsResult = getCurrentOffset();
 
@@ -73,22 +73,19 @@ void main() {
     await pumpTest(tester, TargetPlatform.macOS);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
     // Scroll starts ease into the scroll on iOS.
-    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(); // trigger fling
-    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
+    expect(getCurrentOffset(), 0.0);
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getCurrentOffset();
 
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(androidResult, greaterThan(macOSResult)); // macOS can't be flung
     expect(linuxResult, lessThan(iOSResult)); // iOS is slipperier than Linux
-    expect(linuxResult, lessThan(macOSResult)); // macOS is slipperier than Linux
+    expect(linuxResult, equals(macOSResult)); // macOS and Linux can't be flung
     expect(windowsResult, lessThan(iOSResult)); // iOS is slipperier than Windows
-    expect(windowsResult, lessThan(macOSResult)); // macOS is slipperier than Windows
-    expect(windowsResult, equals(androidResult));
-    expect(windowsResult, equals(androidResult));
-    expect(linuxResult, equals(androidResult));
-    expect(linuxResult, equals(androidResult));
+    expect(windowsResult, equals(macOSResult)); // macOS and Windows can't be flung
+    expect(linuxResult, equals(windowsResult)); // Linux and Windows can't be flung
   });
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {

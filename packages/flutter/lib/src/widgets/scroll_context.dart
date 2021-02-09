@@ -56,6 +56,9 @@ abstract class ScrollContext {
   void setIgnorePointer(bool value);
 
   /// Whether the user can drag the widget, for example to initiate a scroll.
+  ///
+  /// This can be overridden by the [ScrollConfiguration], where
+  /// [ScrollBehavior.getCanDrag] often is used for platform-specific overrides.
   void setCanDrag(bool value);
 
   /// Set the [SemanticsAction]s that should be expose to the semantics tree.

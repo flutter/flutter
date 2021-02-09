@@ -1120,5 +1120,5 @@ void main() {
       tester.renderObject(find.byKey(key1)),
       paintsExactlyCountTimes(#drawRect, 2),
     );
-  }, variant: TargetPlatformVariant.all());
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }));
 }

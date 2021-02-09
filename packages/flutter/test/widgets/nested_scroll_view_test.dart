@@ -187,7 +187,27 @@ void main() {
     final Offset point2 = tester.getCenter(find.text('aaa1'));
     expect(point2.dy, greaterThan(point1.dy));
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('NestedScrollView overscroll and release and hold disabled on desktop', (WidgetTester tester) async {
+    // Dragging on macOS is disabled, and should never overscroll.
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 250));
+    final Offset point1 = tester.getCenter(find.text('aaa1'));
+    await tester.dragFrom(point1, const Offset(0.0, 200.0));
+    await tester.pump();
+    expect(
+      tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+      200.0,
+    );
+    expect(tester.getCenter(find.text('aaa1')), point1);
+    await tester.flingFrom(point1, const Offset(0.0, -80.0), 50000.0);
+    await tester.pump(const Duration(milliseconds: 20));
+    final Offset point2 = tester.getCenter(find.text('aaa1'));
+    expect(point2.dy, point1.dy);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
@@ -207,7 +227,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('aaa2'), findsNothing);
     await tester.pump(const Duration(milliseconds: 1000));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('NestedScrollView overscroll and release and hold disabled on desktop', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 250));
+    final Offset point = tester.getCenter(find.text('aaa1'));
+    await tester.flingFrom(point, const Offset(0.0, 200.0), 5000.0);
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('aaa2'), findsOneWidget);
+    final TestGesture gesture1 = await tester.startGesture(point);
+    await tester.pump(const Duration(milliseconds: 5000));
+    expect(find.text('aaa2'), findsOneWidget);
+    await gesture1.moveBy(const Offset(0.0, 50.0));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1000));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
@@ -224,7 +264,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('aaa2'), findsOneWidget);
   },
-  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('NestedScrollView overscroll and release disabled on desktop', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+    final TestGesture gesture1 = await tester.startGesture(
+      tester.getCenter(find.text('aaa1'))
+    );
+    await gesture1.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    await gesture1.up();
+    await tester.pumpAndSettle();
+    expect(find.text('aaa2'), findsOneWidget);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
@@ -848,7 +905,8 @@ void main() {
     );
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    // Overscrolling not applicable on TargetPlatform.macOS
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('NestedScrollViewState exposes inner and outer controllers', () {
     testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {
@@ -2203,7 +2261,8 @@ void main() {
       nestedScrollView.currentState!.outerController.position.maxScrollExtent,
     );
     expect(nestedScrollView.currentState!.innerController.position.pixels, 295.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    // TargetPlatform.macOS does not allow for overscroll.
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Scroll pointer signal should not cause overscroll.',
       (WidgetTester tester) async {

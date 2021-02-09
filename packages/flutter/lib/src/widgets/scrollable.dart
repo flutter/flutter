@@ -496,6 +496,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void setCanDrag(bool canDrag) {
     if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
       return;
+
+    // ScrollBehavior can override canDrag. For example, on Desktop, the
+    // ScrollConfiguration may dictate that dragging Scrollables is not allowed.
+    canDrag = canDrag && _configuration.getCanDrag(context);
+
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
       // Cancel the active hold/drag (if any) because the gesture recognizers

@@ -10,6 +10,7 @@ import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'layout_builder.dart';
 import 'notification_listener.dart';
+import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
@@ -29,6 +30,28 @@ typedef ScrollableWidgetBuilder = Widget Function(
   BuildContext context,
   ScrollController scrollController,
 );
+
+// Override ScrollBehavior.getCanDrag. For the rest, defer to ancestor
+// ScrollBehavior/sub-class. The DraggableScrollableSheet should not have drag
+// disabled on web and desktop.
+class _DraggableSheetScrollBehavior extends ScrollBehavior {
+  const _DraggableSheetScrollBehavior(this.defaultConfiguration);
+  final ScrollBehavior defaultConfiguration;
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) => defaultConfiguration.getPlatform(context);
+
+  @override
+  bool getCanDrag(BuildContext context) => true;
+
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return defaultConfiguration.buildViewportChrome(context, child, axisDirection);
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) => defaultConfiguration.getScrollPhysics(context);
+}
 
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
@@ -328,16 +351,19 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-        final Widget sheet = FractionallySizedBox(
-          heightFactor: _extent.currentExtent,
-          child: widget.builder(context, _scrollController),
-          alignment: Alignment.bottomCenter,
-        );
-        return widget.expand ? SizedBox.expand(child: sheet) : sheet;
-      },
+    return ScrollConfiguration(
+      behavior: _DraggableSheetScrollBehavior(context.findAncestorWidgetOfExactType<ScrollConfiguration>()!.behavior),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+          final Widget sheet = FractionallySizedBox(
+            heightFactor: _extent.currentExtent,
+            child: widget.builder(context, _scrollController),
+            alignment: Alignment.bottomCenter,
+          );
+          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
+        },
+      ),
     );
   }
 

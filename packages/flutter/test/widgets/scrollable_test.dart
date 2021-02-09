@@ -143,7 +143,7 @@ void main() {
     // Once the hold is let go, it should still snap back to origin.
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(getScrollOffset(tester), 0.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Repeated flings builds momentum', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
@@ -156,7 +156,7 @@ void main() {
     // On iOS, the velocity will be larger than the velocity of the last fling by a
     // non-trivial amount.
     expect(getScrollVelocity(tester), greaterThan(1100.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Repeated flings do not build momentum on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
@@ -171,7 +171,7 @@ void main() {
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
 
-  testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
+  testWidgets('No iOS momentum build with flings in opposite directions', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -182,9 +182,9 @@ void main() {
     // The only applied velocity to the scrollable is the second fling that was in the
     // opposite direction.
     expect(getScrollVelocity(tester), -1000.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
+  testWidgets('No iOS momentum kept on hold gestures', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -195,7 +195,7 @@ void main() {
     await gesture.up();
     // After a hold longer than 2 frames, previous velocity is lost.
     expect(getScrollVelocity(tester), 0.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Drags creeping unaffected on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
@@ -208,7 +208,7 @@ void main() {
     expect(getScrollOffset(tester), 1.5);
   });
 
-  testWidgets('Drags creeping must break threshold on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Drags creeping must break threshold on iOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -0.5));
@@ -226,17 +226,17 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 50));
     // -0.5 over threshold transferred.
     expect(getScrollOffset(tester), 0.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Big drag over threshold magnitude preserved on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Big drag over threshold magnitude preserved on iOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0));
     // No offset lost from threshold.
     expect(getScrollOffset(tester), 30.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Slow threshold breaks are attenuated on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Slow threshold breaks are attenuated on iOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     // This is a typical 'hesitant' iOS scroll start.
@@ -245,9 +245,9 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -10.0), timeStamp: const Duration(milliseconds: 20));
     // Subsequent motions unaffected.
     expect(getScrollOffset(tester), moreOrLessEquals(11.16666666666666673));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Small continuing motion preserved on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Small continuing motion preserved on iOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
@@ -258,9 +258,9 @@ void main() {
     expect(getScrollOffset(tester), 31.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 60));
     expect(getScrollOffset(tester), 31.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('Motion stop resets threshold on iOS/macOS', (WidgetTester tester) async {
+  testWidgets('Motion stop resets threshold on iOS', (WidgetTester tester) async {
     await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
@@ -281,7 +281,7 @@ void main() {
     expect(getScrollOffset(tester), 31.5);
     await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 180));
     expect(getScrollOffset(tester), 32.5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Scroll pointer signals are handled on Fuchsia', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);

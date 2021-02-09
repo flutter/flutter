@@ -1265,7 +1265,7 @@ void main() {
       expect(controller.selectedItem, 49);
       // More importantly, lands tightly on 49.
       expect(scrolledPositions.last, moreOrLessEquals(49 * 100.0, epsilon: 0.3));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
   });
 
   testWidgets('ListWheelScrollView getOffsetToReveal', (WidgetTester tester) async {

@@ -350,7 +350,7 @@ void main() {
         );
         expect(tester.getBottomLeft(button).dy, lessThan(600.0));
         expect(tester.getCenter(button).dx, equals(400.0));
-      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
       group('fillOverscroll: true, relevant platforms', () {
         testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
@@ -378,7 +378,7 @@ void main() {
           await tester.pumpAndSettle();
           final RenderBox box3 = tester.renderObject<RenderBox>(find.byType(Container).last);
           expect(box3.size.height, equals(450));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
@@ -425,7 +425,7 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(450),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
@@ -490,7 +490,7 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(148.0 + VisualDensity.adaptivePlatformDensity.vertical * 4.0),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
@@ -552,7 +552,7 @@ void main() {
             find.bySemanticsLabel('4'),
             findsOneWidget,
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
           final GlobalKey key = GlobalKey();
@@ -641,7 +641,7 @@ void main() {
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('fillOverscroll: true, is ignored on irrelevant platforms', () {
