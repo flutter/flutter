@@ -146,7 +146,7 @@ void main() {
   });
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build invokes CMake and ninja, and writes temporary files for $arch hosts', () async {
+    testUsingContext('Linux build invokes CMake and ninja, and writes temporary files on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeCommand('release', target: arch),
@@ -169,7 +169,7 @@ void main() {
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Handles argument error from missing cmake', () async {
+    testUsingContext('Handles argument error from missing cmake on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -191,7 +191,7 @@ void main() {
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Handles argument error from missing ninja', () async {
+    testUsingContext('Handles argument error from missing ninja on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -214,7 +214,7 @@ void main() {
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build does not spew stdout to status logger', () async {
+    testUsingContext('Linux build does not spew stdout to status logger on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -239,7 +239,7 @@ void main() {
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build extracts errors from stdout', () async {
+    testUsingContext('Linux build extracts errors from stdout on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
 
@@ -296,7 +296,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -324,7 +324,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build --debug passes debug mode to cmake and ninja', () async {
+    testUsingContext('Linux build --debug passes debug mode to cmake and ninja on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -346,7 +346,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build --profile passes profile mode to make', () async {
+    testUsingContext('Linux build --profile passes profile mode to make on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -367,7 +367,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   }
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build configures CMake exports', () async {
+    testUsingContext('Linux build configures CMake exports on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -474,7 +474,7 @@ set(BINARY_NAME "fizz_bar")
   });
 
   for (final String arch in supportedArchitectures) {
-    testUsingContext('Performs code size analysis and sends analytics', () async {
+    testUsingContext('Performs code size analysis and sends analytics on $arch hosts', () async {
       final BuildCommand command = BuildCommand();
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.list(<FakeCommand>[
