@@ -2675,29 +2675,30 @@ void main() {
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
-            'FlutterError\n'
-                '   The Navigator.onPopPage must be provided to use the\n'
-                '   Navigator.pages API\n'
-                ''
+          'FlutterError\n'
+          '   A page-based route should not be added using the imperative api,\n'
+          '   provide a new list with the corresponding Page to Navigator.pages\n'
+          '   instead.\n'
+          ''
         ),
       );
     }
 
-    testWidgets('throw if push PageRoute to Navigator 1.0 - push', (WidgetTester tester) async {
+    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
       await tester.pumpWidget(_buildFrame('push'));
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
       _checkException(tester);
     });
 
-    testWidgets('throw if push PageRoute to Navigator 1.0 - pushReplacement', (WidgetTester tester) async {
+    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
       await tester.pumpWidget(_buildFrame('pushReplacement'));
       await tester.tap(find.text('pushReplacement'));
       await tester.pumpAndSettle();
       _checkException(tester);
     });
 
-    testWidgets('throw if push PageRoute to Navigator 1.0 - pushAndRemoveUntil', (WidgetTester tester) async {
+    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
       await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
       await tester.tap(find.text('pushAndRemoveUntil'));
       await tester.pumpAndSettle();

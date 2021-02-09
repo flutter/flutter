@@ -4450,27 +4450,25 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    state restoration.
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
-    _debugCheckUsePagesAPI(route);
+    _debugCheckIsPagelessRoute(route);
     _pushEntry(_RouteEntry(route, initialState: _RouteLifecycle.push));
     return route.popped;
   }
 
-  void _debugCheckUsePagesAPI(Route<dynamic> route) {
+  void _debugCheckIsPagelessRoute(Route<dynamic> route) {
     assert((){
       if (route.settings is Page) {
-        // This navigator uses page API.
-        if (widget.onPopPage == null) {
-          FlutterError.reportError(
-            FlutterErrorDetails(
-              exception: FlutterError(
-                  'The Navigator.onPopPage must be provided to use the '
-                      'Navigator.pages API'
-              ),
-              library: 'widget library',
-              stack: StackTrace.current,
+        // It is a page-based route.
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError(
+              'A page-based route should not be added using the imperative api, provide a '
+              'new list with the corresponding Page to Navigator.pages instead.'
             ),
-          );
-        }
+            library: 'widget library',
+            stack: StackTrace.current,
+          ),
+        );
       }
       return true;
     }());
@@ -4618,7 +4616,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   Future<T?> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
     assert(newRoute != null);
     assert(newRoute._navigator == null);
-    _debugCheckUsePagesAPI(newRoute);
+    _debugCheckIsPagelessRoute(newRoute);
     _pushReplacementEntry(_RouteEntry(newRoute, initialState: _RouteLifecycle.pushReplace), result);
     return newRoute.popped;
   }
@@ -4726,7 +4724,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(newRoute != null);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
-    _debugCheckUsePagesAPI(newRoute);
+    _debugCheckIsPagelessRoute(newRoute);
     _pushEntryAndRemoveUntil(_RouteEntry(newRoute, initialState: _RouteLifecycle.push), predicate);
     return newRoute.popped;
   }
