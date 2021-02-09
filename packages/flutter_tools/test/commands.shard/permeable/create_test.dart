@@ -2633,11 +2633,11 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
-  List<List<String>> commands = <List<String>>[];
+  List<List<dynamic>> commands = <List<dynamic>>[];
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,

@@ -5,9 +5,11 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:io' as io show ProcessSignal; // ignore: dart_io_import
 
 import 'package:meta/meta.dart';
 import 'package:file/local.dart' as local_fs;
+import 'package:process/process.dart' as process;
 
 import '../convert.dart';
 import 'common.dart';
@@ -616,7 +618,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 /// methods in the [Process] class, which in turn allows the underlying
 /// implementation to be mocked out or decorated for testing and debugging
 /// purposes.
-abstract class ProcessManager {
+abstract class ProcessManager implements process.ProcessManager {
   /// Starts a process by running the specified [command].
   ///
   /// The first element in [command] will be treated as the executable to run,
@@ -681,8 +683,9 @@ abstract class ProcessManager {
   /// not become available when it terminated.
   ///
   /// The default value for `mode` is `ProcessStartMode.NORMAL`.
+  @override
   Future<Process> start(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -732,8 +735,9 @@ abstract class ProcessManager {
   ///       stdout.write(result.stdout);
   ///       stderr.write(result.stderr);
   ///     });
+  @override
   Future<ProcessResult> run(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -749,8 +753,9 @@ abstract class ProcessManager {
   ///
   /// Returns a `ProcessResult` with the result of running the process,
   /// i.e., exit code, standard out and standard in.
+  @override
   ProcessResult runSync(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -760,7 +765,8 @@ abstract class ProcessManager {
   });
 
   /// Returns `true` if the [executable] exists and if it can be executed.
-  bool canRun(String executable, {String workingDirectory});
+  @override
+  bool canRun(dynamic executable, {String workingDirectory});
 
   /// Kills the process with id [pid].
   ///
@@ -776,7 +782,8 @@ abstract class ProcessManager {
   /// Returns `true` if the signal is successfully delivered to the
   /// process. Otherwise the signal could not be sent, usually meaning
   /// that the process is already dead.
-  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]);
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]);
 }
 
 /// A process manager that delegates directly to the dart:io Process class.
@@ -791,17 +798,17 @@ class LocalProcessManager implements ProcessManager {
   final FileSystem _fileSystem;
 
   @override
-  bool canRun(String executable, {String workingDirectory}) {
-    return getExecutablePath(executable, workingDirectory, platform: _platform, fileSystem: _fileSystem) != null;
+  bool canRun(dynamic executable, {String workingDirectory}) {
+    return getExecutablePath(executable.toString(), workingDirectory, platform: _platform, fileSystem: _fileSystem) != null;
   }
 
   @override
-  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
-    return signal.send(pid);
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return Process.killPid(pid, signal);
   }
 
   @override
-  Future<ProcessResult> run(List<String> command, {
+  Future<ProcessResult> run(List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -826,7 +833,7 @@ class LocalProcessManager implements ProcessManager {
   }
 
   @override
-  ProcessResult runSync(List<String> command, {
+  ProcessResult runSync(List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -852,7 +859,7 @@ class LocalProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
@@ -875,7 +882,7 @@ class LocalProcessManager implements ProcessManager {
   }
 
   String _getExecutable(
-    List<String> command,
+    List<dynamic> command,
     String workingDirectory,
     bool runInShell,
   ) {
@@ -891,9 +898,9 @@ class LocalProcessManager implements ProcessManager {
   }
 
   List<String> _getArguments(
-    List<String> command,
+    List<dynamic> command,
   ) {
-    return command.skip(1).toList();
+    return command.skip(1).map((dynamic arg) => arg.toString()).toList();
   }
 }
 
