@@ -146,13 +146,49 @@ class KeySet<T extends KeyboardKey> {
   }
 }
 
+/// Interface to define the key combinition that initiates a shortcut [Intent].
+///
+/// A shortcut prompt is fulfilled when the correct event ([trigger]) occurs at
+/// the correct time ([stateCriteria]). For example, If the desired shortcut
+/// is Alt-T, then the trigger should be events that contain
+/// [LogicalKeyboardKey.keyT], while the state criteria should include either (or
+/// both of) left Alt or right Alt being pressed, and none of the Shift, Meta, or
+/// Control keys being pressed.
+///
+/// See also:
+///
+///  * [KeybindingPrompt], which is a subclass to conveniently build shortcuts
+///    consisting of modifier keys as state criteria and one trigger, such as
+///    Ctrl-Shift-C.
 abstract class ShortcutPrompt {
+  /// A const constructor so that subclasses may be const.
   const ShortcutPrompt();
 
+  /// The condition that a triggering [KeyEvent] must satisfy.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey], [PhysicalKeyboardKey], or [UnionKeyboardKey],
+  ///    which are common options here to require the event to have such key.
   KeyboardEventCriterion? get trigger;
 
+  /// The conditions that the keyboard state must satisfy when the triggering
+  /// event occurs.
+  ///
+  /// An empty [Iterable] is accepted, meaning that the prompt is fulfilled
+  /// when the trigger event occurs under any circumstances.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey], [PhysicalKeyboardKey], or [UnionKeyboardKey],
+  ///    which are common options here to require that a key should be pressed.
+  ///  * [KeyboardLockMode], which is a common option here to require that a lock
+  ///    mode should be enabled.
+  ///  * [NegateStateCriterion], which is a common option here to require that a
+  ///    certain state criterion must *not* be satisfied.
   Iterable<KeyboardStateCriterion>? get stateCriteria;
 
+  /// A conversion [
   Iterable<LogicalKeyboardKey> getTriggerKeys();
 
   /// Returns a description of the key set that is short and readable.
