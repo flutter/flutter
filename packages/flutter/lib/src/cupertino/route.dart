@@ -786,9 +786,10 @@ class _CupertinoBackGestureController<T> {
 // box it's decorating. It's like a [BoxDecoration] with only a gradient except
 // it paints on the start side of the box instead of behind the box.
 class _CupertinoEdgeShadowDecoration extends Decoration {
-  const _CupertinoEdgeShadowDecoration._(this._colors);
+  const _CupertinoEdgeShadowDecoration._([this._colors]);
 
   static DecorationTween kTween = DecorationTween(
+    begin: const _CupertinoEdgeShadowDecoration._(), // No decoration initially.
     end: const _CupertinoEdgeShadowDecoration._(
       // Eyeballed gradient used to mimic a drop shadow on the start side only.
       <Color>[
@@ -800,12 +801,17 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     ),
   );
 
-  // Colors used to paint a gradient at the start edge of the box it's
+  // Colors used to paint a gradient at the start edge of the box it is.
   // decorating.
   //
   // The first color in the list is used at the start of the gradient, which
   // is located at the start edge of the decorated box.
-  final List<Color> _colors;
+  //
+  // If this is null, no shadow is drawn.
+  //
+  // The list must have at least two colors in it (otherwise it would not a
+  // gradient).
+  final List<Color>? _colors;
 
   // Linearly interpolate between two edge shadow decorations decorations.
   //
@@ -833,16 +839,17 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return _CupertinoEdgeShadowDecoration._(b!._colors.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
+      return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
     if (b == null)
-      return _CupertinoEdgeShadowDecoration._(a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors!.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+    assert(b._colors != null || a._colors != null);
     // If it ever becomes necessary, we could allow decorations with different
     // length' here, similarly to how it is handled in [LinearGradient.lerp].
-    assert(b._colors.length == a._colors.length);
+    assert(b._colors == null || a._colors == null || a._colors!.length == b._colors!.length);
     return _CupertinoEdgeShadowDecoration._(
       <Color>[
-        for (int i = 0; i < b._colors.length; i += 1)
-          Color.lerp(a._colors[i], b._colors[i], t)!,
+        for (int i = 0; i < b._colors!.length; i += 1)
+          Color.lerp(a._colors?[i], b._colors?[i], t)!,
       ]
     );
   }
@@ -896,7 +903,11 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    final List<Color> colors = _decoration._colors;
+    final List<Color>? colors = _decoration._colors;
+    if (colors == null) {
+      return;
+    }
+
     assert(colors.length > 1);
 
     // The following code simulates drawing a [LinearGradient] configured as
