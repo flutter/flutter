@@ -524,11 +524,12 @@ set(BINARY_NAME "fizz_bar")
     final BuildCommand command = BuildCommand();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub', '--target-platform=linux-arm64']
+      const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => getCustomFakeOsUtils('arm64'),
   });
 }
 
