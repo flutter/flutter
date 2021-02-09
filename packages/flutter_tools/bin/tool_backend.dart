@@ -56,7 +56,6 @@ or
   ]);
   final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : targetPlatform;
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
-
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

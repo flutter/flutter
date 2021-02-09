@@ -69,7 +69,7 @@ void main() {
         ),
         throwsToolExit(
             message:
-                'No xcframework found at $xcframeworkPath. Try running "flutter build ios".'),
+                'No xcframework found at $xcframeworkPath.'),
       );
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(
@@ -219,7 +219,7 @@ void main() {
         ),
         throwsToolExit(
             message:
-                'No xcframework found at /out/android_debug_unopt/Flutter.xcframework. Try running "flutter build ios".'),
+                'No xcframework found at /out/android_debug_unopt/Flutter.xcframework'),
       );
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(

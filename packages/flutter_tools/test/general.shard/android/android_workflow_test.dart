@@ -19,7 +19,8 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+import '../../src/fakes.dart';
+import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager;
 import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
@@ -30,7 +31,7 @@ void main() {
   Logger logger;
   MemoryFileSystem fileSystem;
   MockProcessManager processManager;
-  MockStdio stdio;
+  FakeStdio stdio;
 
   setUp(() {
     sdk = MockAndroidSdk();
@@ -38,7 +39,7 @@ void main() {
     fileSystem.directory('/home/me').createSync(recursive: true);
     logger = BufferLogger.test();
     processManager = MockProcessManager();
-    stdio = MockStdio();
+    stdio = FakeStdio();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
