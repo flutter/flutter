@@ -2310,7 +2310,8 @@ abstract class BuildContext {
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to build an off-screen widget tree used to measure
-/// the size of the rendered tree.
+/// the size of the rendered tree. For some use cases, the simpler [Offscreen]
+/// widget may be a better alternative to this approach.
 ///
 /// ```dart imports
 /// import 'package:flutter/rendering.dart';
@@ -2343,6 +2344,9 @@ abstract class BuildContext {
 ///   }
 /// }
 ///
+/// // The default FocusManager, when created, modifies some static properties
+/// // that we don't want to modify, which is why we use a failing implementation
+/// // here.
 /// class FailingFocusManager implements FocusManager {
 ///   @override
 ///   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
