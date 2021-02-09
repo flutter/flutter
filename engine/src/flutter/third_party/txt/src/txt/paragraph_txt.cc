@@ -909,8 +909,9 @@ void ParagraphTxt::Layout(double width) {
             blob_buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
             size_t pos_index = blob_index * 2;
-            blob_buffer.pos[pos_index] =
-                layout.getX(glyph_index) + justify_x_offset_delta;
+            blob_buffer.pos[pos_index] = layout.getX(glyph_index) +
+                                         justify_x_offset +
+                                         justify_x_offset_delta;
             blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
             if (glyph_index == cluster_start_glyph_index)
@@ -1028,10 +1029,11 @@ void ParagraphTxt::Layout(double width) {
         Range<double> record_x_pos(
             glyph_positions.front().x_pos.start - run_x_offset,
             glyph_positions.back().x_pos.end - run_x_offset);
-        paint_records.emplace_back(
-            run.style(), SkPoint::Make(run_x_offset + justify_x_offset, 0),
-            builder.make(), *metrics, line_number, record_x_pos.start,
-            record_x_pos.end, run.is_ghost(), run.placeholder_run());
+        paint_records.emplace_back(run.style(), SkPoint::Make(run_x_offset, 0),
+                                   builder.make(), *metrics, line_number,
+                                   record_x_pos.start, record_x_pos.end,
+                                   run.is_ghost(), run.placeholder_run());
+
         justify_x_offset += justify_x_offset_delta;
 
         line_glyph_positions.insert(line_glyph_positions.end(),
