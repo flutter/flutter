@@ -20,7 +20,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
@@ -79,23 +78,20 @@ void main() {
     List<String> logLines;
     String mainPath;
 
-    MockProcessManager mockProcessManager;
-    MockProcess mockProcess;
+    FakeProcessManager fakeProcessManager;
     MockBuildSystem mockBuildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
       Platform: () => FakePlatform(operatingSystem: 'linux'),
       FileSystem: () => fileSystem,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
       BuildSystem: () => mockBuildSystem,
     };
 
     setUp(() {
       mockBuildSystem = MockBuildSystem();
-      mockProcessManager = MockProcessManager();
-      mockProcessManager.processFactory =
-          (List<String> commands) => mockProcess;
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
 
       when(mockBuildSystem.build(
         any,
@@ -105,7 +101,7 @@ void main() {
       });
       device = FlutterTesterDevice('flutter-tester',
         fileSystem: fileSystem,
-        processManager: mockProcessManager,
+        processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
         buildDirectory: 'build',
         logger: BufferLogger.test(),
@@ -149,17 +145,27 @@ void main() {
       expect(jitReleaseResult.started, isFalse);
     });
 
-
     testUsingContext('performs a build and starts in debug mode', () async {
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-      mockProcess = MockProcess(stdout: Stream<List<int>>.fromIterable(<List<int>>[
+      final String assetsPath = fileSystem.path.join('build', 'flutter_assets');
+      final String dillPath = fileSystem.path.join('build', 'flutter-tester-app.dill');
+      fakeProcessManager.addCommand(FakeCommand(
+        command: <String>[
+          'Artifact.flutterTester',
+          '--run-forever',
+          '--non-interactive',
+          '--enable-dart-profiling',
+          '--packages=.packages',
+          '--flutter-assets-dir=$assetsPath',
+          dillPath,
+        ],
+        stdout:
         '''
 Observatory listening on $observatoryUri
 Hello!
-'''
-            .codeUnits,
-      ]));
+''',
+      ));
 
       final LaunchResult result = await device.startApp(app,
         mainPath: mainPath,
@@ -169,6 +175,7 @@ Hello!
       expect(result.started, isTrue);
       expect(result.observatoryUri, observatoryUri);
       expect(logLines.last, 'Hello!');
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: startOverrides);
   });
 }
