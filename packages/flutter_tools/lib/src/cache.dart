@@ -1797,10 +1797,10 @@ class ArtifactUpdater {
         tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
       );
       try {
-      ErrorHandlingFileSystem.deleteIfExists(
-        destination,
-        recursive: true,
-      );
+        ErrorHandlingFileSystem.deleteIfExists(
+          destination,
+          recursive: true,
+        );
       } on FileSystemException catch (error) {
         if (_platform.isWindows && error.osError.errorCode == 32) {
           throwToolExit(
