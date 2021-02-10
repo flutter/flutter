@@ -926,12 +926,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
+    final bool isBootstrapFrame = renderViewElement == null;
     _readyToProduceFrames = true;
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
     ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>?);
+    if (isBootstrapFrame) {
+      SchedulerBinding.instance!.ensureVisualUpdate();
+    }
   }
 
   /// Whether the [renderViewElement] has been initialized.
@@ -1094,9 +1098,6 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
       owner.buildScope(element!, () {
         element!.mount(null, null);
       });
-      // This is most likely the first time the framework is ready to produce
-      // a frame. Ensure that we are asked for one.
-      SchedulerBinding.instance!.ensureVisualUpdate();
     } else {
       element._newWidget = this;
       element.markNeedsBuild();
