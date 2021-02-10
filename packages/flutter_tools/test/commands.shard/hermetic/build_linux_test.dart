@@ -42,14 +42,6 @@ final Platform notLinuxPlatform = FakePlatform(
   }
 );
 
-final List<String> supportedArchitectures = <String>['x64', 'arm64'];
-
-final CustomFakeOperatingSystemUtils osUtilsForX64Host =
-    CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_x64);
-
-final CustomFakeOperatingSystemUtils osUtilsForArm64Host =
-    CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64);
-
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -145,108 +137,99 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build invokes CMake and ninja, and writes temporary files on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch),
-        ninjaCommand('release', target: arch),
-      ]);
+  testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
+    final BuildCommand command = BuildCommand();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
 
-      setUpMockProjectFilesForBuild();
+    setUpMockProjectFilesForBuild();
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub']
-      );
-      expect(fileSystem.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    expect(fileSystem.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Handles argument error from missing cmake on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch, onRun: () {
-          throw ArgumentError();
-        }),
-      ]);
+  testUsingContext('Handles argument error from missing cmake', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release', onRun: () {
+        throw ArgumentError();
+      }),
+    ]);
 
-      expect(createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub']
-      ), throwsToolExit(message: "cmake not found. Run 'flutter doctor' for more information."));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    ), throwsToolExit(message: "cmake not found. Run 'flutter doctor' for more information."));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Handles argument error from missing ninja on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch),
-        ninjaCommand('release', target: arch, onRun: () {
-          throw ArgumentError();
-        }),
-      ]);
+  testUsingContext('Handles argument error from missing ninja', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release', onRun: () {
+        throw ArgumentError();
+      }),
+    ]);
 
-      expect(createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub']
-      ), throwsToolExit(message: "ninja not found. Run 'flutter doctor' for more information."));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    ), throwsToolExit(message: "ninja not found. Run 'flutter doctor' for more information."));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build does not spew stdout to status logger on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('debug', target: arch),
-        ninjaCommand('debug', target: arch,
-          stdout: 'STDOUT STUFF',
-        ),
-      ]);
+  testUsingContext('Linux build does not spew stdout to status logger', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('debug'),
+      ninjaCommand('debug',
+        stdout: 'STDOUT STUFF',
+      ),
+    ]);
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--debug', '--no-pub']
-      );
-      expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.traceText, contains('STDOUT STUFF'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug', '--no-pub']
+    );
+    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.traceText, contains('STDOUT STUFF'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build extracts errors from stdout on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
+  testUsingContext('Linux build extracts errors from stdout', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
 
-      // This contains a mix of routine build output and various types of errors
-      // (Dart error, compile error, link error), edited down for compactness.
-      final String stdout = 'ninja: Entering directory `build/linux/$arch/release'
-r'''
+    // This contains a mix of routine build output and various types of errors
+    // (Dart error, compile error, link error), edited down for compactness.
+    const String stdout = r'''
+ninja: Entering directory `build/linux/x64/release
 [1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
@@ -264,19 +247,18 @@ ninja: build stopped: subcommand failed.
 ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 ''';
 
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch),
-        ninjaCommand('release',
-          target: arch,
-          stdout: stdout,
-        ),
-      ]);
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release',
+        stdout: stdout,
+      ),
+    ]);
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub']
-      );
-      // Just the warnings and errors should be surfaced.
-      expect(testLogger.errorText, r'''
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    // Just the warnings and errors should be surfaced.
+    expect(testLogger.errorText, r'''
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:6:2: error: expected ';' after class
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
@@ -286,149 +268,139 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 ''');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('debug', target: arch),
-        ninjaCommand('debug', target: arch,
-          environment: const <String, String>{
-            'VERBOSE_SCRIPT_LOGGING': 'true'
-          },
-          stdout: 'STDOUT STUFF',
-        ),
-      ]);
+  testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('debug'),
+      ninjaCommand('debug',
+        environment: const <String, String>{
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+        },
+        stdout: 'STDOUT STUFF',
+      ),
+    ]);
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--debug', '-v', '--no-pub']
-      );
-      expect(testLogger.statusText, contains('STDOUT STUFF'));
-      expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug', '-v', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('STDOUT STUFF'));
+    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build --debug passes debug mode to cmake and ninja on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('debug', target: arch),
-        ninjaCommand('debug', target: arch),
-      ]);
+  testUsingContext('Linux build --debug passes debug mode to cmake and ninja', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('debug'),
+      ninjaCommand('debug'),
+    ]);
 
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--debug', '--no-pub']
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+  testUsingContext('Linux build --profile passes profile mode to make', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('profile'),
+      ninjaCommand('profile'),
+    ]);
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build --profile passes profile mode to make on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('profile', target: arch),
-        ninjaCommand('profile', target: arch),
-      ]);
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--profile', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--profile', '--no-pub']
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+  testUsingContext('Linux build configures CMake exports', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
+    fileSystem.file('lib/other.dart')
+      .createSync(recursive: true);
+    fileSystem.file('foo/bar.sksl.json')
+      .createSync(recursive: true);
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Linux build configures CMake exports on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch),
-        ninjaCommand('release', target: arch),
-      ]);
-      fileSystem.file('lib/other.dart')
-        .createSync(recursive: true);
-      fileSystem.file('foo/bar.sksl.json')
-        .createSync(recursive: true);
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'build',
+        'linux',
+        '--target=lib/other.dart',
+        '--no-pub',
+        '--track-widget-creation',
+        '--split-debug-info=foo/',
+        '--enable-experiment=non-nullable',
+        '--obfuscate',
+        '--dart-define=foo.bar=2',
+        '--dart-define=fizz.far=3',
+        '--tree-shake-icons',
+        '--bundle-sksl-path=foo/bar.sksl.json',
+      ]
+    );
 
-      await createTestCommandRunner(command).run(
-        const <String>[
-          'build',
-          'linux',
-          '--target=lib/other.dart',
-          '--no-pub',
-          '--track-widget-creation',
-          '--split-debug-info=foo/',
-          '--enable-experiment=non-nullable',
-          '--obfuscate',
-          '--dart-define=foo.bar=2',
-          '--dart-define=fizz.far=3',
-          '--tree-shake-icons',
-          '--bundle-sksl-path=foo/bar.sksl.json',
-        ]
-      );
+    final File cmakeConfig = fileSystem.currentDirectory
+      .childDirectory('linux')
+      .childDirectory('flutter')
+      .childDirectory('ephemeral')
+      .childFile('generated_config.cmake');
 
-      final File cmakeConfig = fileSystem.currentDirectory
-        .childDirectory('linux')
-        .childDirectory('flutter')
-        .childDirectory('ephemeral')
-        .childFile('generated_config.cmake');
+    expect(cmakeConfig, exists);
 
-      expect(cmakeConfig, exists);
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
 
-      final List<String> configLines = cmakeConfig.readAsLinesSync();
-
-      expect(configLines, containsAll(<String>[
-        'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
-        'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
-        '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
-        '  "DART_OBFUSCATION=true"',
-        '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
-        '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
-        '  "SPLIT_DEBUG_INFO=foo/"',
-        '  "TRACK_WIDGET_CREATION=true"',
-        '  "TREE_SHAKE_ICONS=true"',
-        '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
-        '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
-        '  "FLUTTER_TARGET=lib/other.dart"',
-        '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
-      ]));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    expect(configLines, containsAll(<String>[
+      'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
+      'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
+      '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
+      '  "DART_OBFUSCATION=true"',
+      '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
+      '  "SPLIT_DEBUG_INFO=foo/"',
+      '  "TRACK_WIDGET_CREATION=true"',
+      '  "TREE_SHAKE_ICONS=true"',
+      '  "FLUTTER_ROOT=$_kTestFlutterRoot"',
+      '  "PROJECT_DIR=${fileSystem.currentDirectory.path}"',
+      '  "FLUTTER_TARGET=lib/other.dart"',
+      '  "BUNDLE_SKSL_PATH=foo/bar.sksl.json"',
+    ]));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
 
   testUsingContext('linux can extract binary name from CMake file', () async {
     fileSystem.file('linux/CMakeLists.txt')
@@ -473,16 +445,15 @@ set(BINARY_NAME "fizz_bar")
     Platform: () => linuxPlatform,
   });
 
-  for (final String arch in supportedArchitectures) {
-    testUsingContext('Performs code size analysis and sends analytics on $arch hosts', () async {
-      final BuildCommand command = BuildCommand();
-      setUpMockProjectFilesForBuild();
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        cmakeCommand('release', target: arch),
-        ninjaCommand('release', target: arch, onRun: () {
-          fileSystem.file('build/flutter_size_01/snapshot.linux-$arch.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+  testUsingContext('Performs code size analysis and sends analytics', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release', onRun: () {
+        fileSystem.file('build/flutter_size_01/snapshot.linux-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 [
   {
     "l": "dart:_internal",
@@ -491,34 +462,75 @@ set(BINARY_NAME "fizz_bar")
     "s": 2400
   }
 ]''');
-          fileSystem.file('build/flutter_size_01/trace.linux-$arch.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('{}');
-        }),
-      ]);
+        fileSystem.file('build/flutter_size_01/trace.linux-x64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
+    ]);
 
-      fileSystem.file('build/linux/$arch/release/bundle/libapp.so')
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(List<int>.filled(10000, 0));
+    fileSystem.file('build/linux/x64/release/bundle/libapp.so')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(command).run(
-        const <String>['build', 'linux', '--no-pub', '--analyze-size']
-      );
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub', '--analyze-size']
+    );
 
-      expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
-      expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
-      expect(usage.events, contains(
-        const TestUsageEvent('code-size-analysis', 'linux'),
-      ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      Usage: () => usage,
-      OperatingSystemUtils: () => getCustomFakeOsUtils(arch),
-    });
-  }
+    expect(testLogger.statusText, contains('A summary of your Linux bundle analysis can be found at'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage.events, contains(
+      const TestUsageEvent('code-size-analysis', 'linux'),
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Usage: () => usage,
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
+
+  testUsingContext('Build on x64 hosts passes and the bundle is saved the path containing the architecture name.', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+
+    expect(fileSystem.directory('build/linux/x64/release').existsSync(), isTrue);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
+
+  testUsingContext('Build on arm64 hosts passes and the bundle is saved the path containing the architecture name.', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release', target: 'arm64'),
+      ninjaCommand('release', target: 'arm64'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+
+    expect(fileSystem.directory('build/linux/arm64/release').existsSync(), isTrue);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+  });
 
   testUsingContext('Not support Linux cross-build for x64 on arm64', () async {
     final BuildCommand command = BuildCommand();
@@ -529,12 +541,8 @@ set(BINARY_NAME "fizz_bar")
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => getCustomFakeOsUtils('arm64'),
+    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
-}
-
-CustomFakeOperatingSystemUtils getCustomFakeOsUtils(String arch) {
-  return arch == 'x64' ? osUtilsForX64Host : osUtilsForArm64Host;
 }
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
