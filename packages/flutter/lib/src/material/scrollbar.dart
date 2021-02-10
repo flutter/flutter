@@ -34,7 +34,30 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// [showTrackOnHover]. The thickness of the track and scrollbar thumb will
 /// become larger when hovering, unless overridden by [hoverThickness].
 ///
-// TODO(Piinks): Add code sample
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows [Scrollbar] for a fraction of seconds while scrolling.
+/// If you want to persist [Scrollbar] then set [isAlwaysShown] is true along with
+/// [ScrollController].
+///
+/// ```dart
+///
+/// Widget build(BuildContext context) {
+///   return Scrollbar(
+///     child: GridView.builder(
+///       gridDelegate:
+///           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///       itemBuilder: (_, __) {
+///         return Center(
+///           child: const Text('data'),
+///         );
+///       },
+///     ),
+///   ),
+/// }
+///
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
