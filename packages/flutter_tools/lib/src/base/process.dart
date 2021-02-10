@@ -9,7 +9,6 @@ import 'dart:io' as io show ProcessSignal; // ignore: dart_io_import
 
 import 'package:meta/meta.dart';
 import 'package:file/local.dart' as local_fs;
-import 'package:process/process.dart' as process;
 
 import '../convert.dart';
 import 'common.dart';
@@ -612,87 +611,13 @@ class _DefaultProcessUtils implements ProcessUtils {
   }
 }
 
-// TODO(jonahwilliams): remove after updating g3
-class ProcessManagerWrapper implements process.ProcessManager, ProcessManager {
-  ProcessManagerWrapper(this.delegate);
-
-  final process.ProcessManager delegate;
-
-  @override
-  bool canRun(dynamic executable, {String workingDirectory}) => delegate.canRun(executable, workingDirectory: workingDirectory);
-
-  @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    return delegate.killPid(pid, signal);
-  }
-
-  @override
-  Future<ProcessResult> run(List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    return delegate.run(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    );
-  }
-
-  @override
-  ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    return delegate.runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    );
-  }
-
-  @override
-  Future<Process> start(List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
-    return delegate.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      mode: mode,
-    );
-  }
-}
-
 /// Manages the creation of abstract processes.
 ///
 /// Using instances of this class provides level of indirection from the static
 /// methods in the [Process] class, which in turn allows the underlying
 /// implementation to be mocked out or decorated for testing and debugging
 /// purposes.
-abstract class ProcessManager implements process.ProcessManager {
+abstract class ProcessManager {
   /// Starts a process by running the specified [command].
   ///
   /// The first element in [command] will be treated as the executable to run,
@@ -757,7 +682,6 @@ abstract class ProcessManager implements process.ProcessManager {
   /// not become available when it terminated.
   ///
   /// The default value for `mode` is `ProcessStartMode.NORMAL`.
-  @override
   Future<Process> start(
     List<dynamic> command, {
     String workingDirectory,
@@ -809,7 +733,6 @@ abstract class ProcessManager implements process.ProcessManager {
   ///       stdout.write(result.stdout);
   ///       stderr.write(result.stderr);
   ///     });
-  @override
   Future<ProcessResult> run(
     List<dynamic> command, {
     String workingDirectory,
@@ -827,7 +750,6 @@ abstract class ProcessManager implements process.ProcessManager {
   ///
   /// Returns a `ProcessResult` with the result of running the process,
   /// i.e., exit code, standard out and standard in.
-  @override
   ProcessResult runSync(
     List<dynamic> command, {
     String workingDirectory,
@@ -839,7 +761,6 @@ abstract class ProcessManager implements process.ProcessManager {
   });
 
   /// Returns `true` if the [executable] exists and if it can be executed.
-  @override
   bool canRun(dynamic executable, {String workingDirectory});
 
   /// Kills the process with id [pid].
@@ -856,7 +777,6 @@ abstract class ProcessManager implements process.ProcessManager {
   /// Returns `true` if the signal is successfully delivered to the
   /// process. Otherwise the signal could not be sent, usually meaning
   /// that the process is already dead.
-  @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]);
 }
 

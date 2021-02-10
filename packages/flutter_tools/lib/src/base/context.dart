@@ -8,9 +8,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart' as process;
-
-import 'process.dart';
 
 /// Generates an [AppContext] value.
 ///
@@ -119,15 +116,7 @@ class AppContext {
   /// Gets the value associated with the specified [type], or `null` if no
   /// such value has been associated.
   T get<T>() {
-    // Convert lookups of old process manager into new process manager.
-    // TODO(jonahwilliams): remove once g3 is migrated to flutter process manager.
-    // https://github.com/flutter/flutter/issues/75744
-    dynamic value;
-    if (T == process.ProcessManager) {
-      value = ProcessManagerWrapper(_generateIfNecessary(process.ProcessManager, _overrides) as process.ProcessManager);
-    } else {
-      value = _generateIfNecessary(T, _overrides);
-    }
+    dynamic value = _generateIfNecessary(T, _overrides);
     if (value == null && _parent != null) {
       value = _parent.get<T>();
     }
