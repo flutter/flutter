@@ -23,7 +23,7 @@ String get defaultFontFamily {
 const String defaultColor = 'color: rgb(255, 0, 0);';
 const String defaultFontSize = 'font-size: 14px;';
 final String paragraphStyle =
-    '$defaultFontFamily position: absolute; white-space: pre;';
+    'position: absolute; white-space: pre;';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -50,7 +50,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle">'
+      '<p style="$paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -61,7 +61,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 39.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle">'
+      '<p style="$paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'Hel<br>lo'
       '</span>'
@@ -168,7 +168,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="line-height: 1.5; font-size: 13px; $paragraphStyle">'
+      '<p style="line-height: 1.5; $paragraphStyle">'
       '<span style="$defaultColor line-height: 1.5; font-size: 9px; font-weight: bold; font-style: italic; $defaultFontFamily letter-spacing: 2px;">'
       'Hello'
       '</span>'
@@ -206,7 +206,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle">'
+      '<p style="$paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -220,7 +220,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 75.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle width: 75px;">'
+      '<p style="$paragraphStyle width: 75px;">'
       '<span style="$defaultColor font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -271,7 +271,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle">'
+      '<p style="$paragraphStyle">'
       '<span style="$defaultColor line-height: 2; font-size: 13px; font-weight: bold; $defaultFontFamily">'
       'Hello'
       '</span>'
@@ -335,7 +335,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: double.infinity));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle">'
+      '<p style="$paragraphStyle">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'First<br>Second '
       '</span>'
@@ -349,7 +349,7 @@ void testMain() async {
     paragraph.layout(ParagraphConstraints(width: 180.0));
     expect(
       paragraph.toDomElement().outerHtml,
-      '<p style="font-size: 13px; $paragraphStyle width: 180px;">'
+      '<p style="$paragraphStyle width: 180px;">'
       '<span style="$defaultColor font-size: 13px; $defaultFontFamily">'
       'First<br>Second <br>'
       '</span>'
