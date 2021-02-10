@@ -62,6 +62,4 @@ if (is_ios || is_mac) {
     "-Werror=undeclared-selector",
   ]
   flutter_cflags_objcc = flutter_cflags_objc
-  flutter_cflags_objc_arc = flutter_cflags_objc + [ "-fobjc-arc" ]
-  flutter_cflags_objcc_arc = flutter_cflags_objc_arc
 }
