@@ -23,7 +23,7 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
@@ -36,6 +36,8 @@ class TestCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
     usesWebRendererOption();
+    usesDeviceUserOption();
+
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -186,9 +188,15 @@ class TestCommand extends FlutterCommand {
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
 
+  bool _isIntegrationTest = false;
+  List<String> _testFiles = <String>[];
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{};
+    final Set<DevelopmentArtifact> results = _isIntegrationTest
+        // Use [DeviceBasedDevelopmentArtifacts].
+        ? await super.requiredArtifacts
+        : <DevelopmentArtifact>{};
     if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }
@@ -200,6 +208,49 @@ class TestCommand extends FlutterCommand {
 
   @override
   String get description => 'Run Flutter unit tests for the current project.';
+
+  @override
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {
+    _testFiles = argResults.rest.map<String>((String testPath) => globals.fs.path.absolute(testPath)).toList();
+    if (_testFiles.isEmpty) {
+      // We don't scan the entire package, only the test/ subdirectory, so that
+      // files with names like like "hit_test.dart" don't get run.
+      final Directory testDir = globals.fs.directory('test');
+      if (!testDir.existsSync()) {
+        throwToolExit('Test directory "${testDir.path}" not found.');
+      }
+      _testFiles = _findTests(testDir).toList();
+      if (_testFiles.isEmpty) {
+        throwToolExit(
+            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
+                'Test files must be in that directory and end with the pattern "_test.dart".'
+        );
+      }
+    } else {
+      _testFiles = <String>[
+        for (String path in _testFiles)
+          if (globals.fs.isDirectorySync(path))
+            ..._findTests(globals.fs.directory(path))
+          else
+            path,
+      ];
+    }
+
+    final String currentDirectory = globals.fs.currentDirectory.absolute.path;
+    if (_testFiles.any((String file) => file.startsWith('$currentDirectory/integration_test/'))) {
+      // This needs to happen before [super.verifyThenRunCommand] so that the
+      // correct [requiredArtifacts] can be identified before [run] takes place.
+      _isIntegrationTest = true;
+    }
+    if (_isIntegrationTest && !_testFiles.every((String file) => file.startsWith('$currentDirectory/integration_test/'))) {
+      throwToolExit(
+        'Integration tests and unit tests cannot be run in a single invocation.'
+          ' Use separate invocations of `flutter test` to run integration tests'
+          ' and unit tests.'
+      );
+    }
+    return super.verifyThenRunCommand(commandPath);
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -234,10 +285,8 @@ class TestCommand extends FlutterCommand {
       await _buildTestAsset();
     }
 
-    List<String> files = argResults.rest.map<String>((String testPath) => globals.fs.path.absolute(testPath)).toList();
-
     final bool startPaused = boolArg('start-paused');
-    if (startPaused && files.length != 1) {
+    if (startPaused && _testFiles.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
         exitCode: 1,
@@ -249,30 +298,6 @@ class TestCommand extends FlutterCommand {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
-    }
-
-    if (files.isEmpty) {
-      // We don't scan the entire package, only the test/ subdirectory, so that
-      // files with names like like "hit_test.dart" don't get run.
-      final Directory testDir = globals.fs.directory('test');
-      if (!testDir.existsSync()) {
-        throwToolExit('Test directory "${testDir.path}" not found.');
-      }
-      files = _findTests(testDir).toList();
-      if (files.isEmpty) {
-        throwToolExit(
-            'Test directory "${testDir.path}" does not appear to contain any test files.\n'
-            'Test files must be in that directory and end with the pattern "_test.dart".'
-        );
-      }
-    } else {
-      files = <String>[
-        for (String path in files)
-          if (globals.fs.isDirectorySync(path))
-            ..._findTests(globals.fs.directory(path))
-          else
-            path,
-      ];
     }
 
     final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
@@ -324,9 +349,25 @@ class TestCommand extends FlutterCommand {
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
     );
 
+    Device integrationTestDevice;
+    if (_isIntegrationTest) {
+      integrationTestDevice = await findTargetDevice();
+
+      if (buildInfo.packageConfig['integration_test'] == null) {
+        throwToolExit(
+          'Error: cannot run without a dependency on "package:integration_test". '
+          'Ensure the following lines are present in your pubspec.yaml:'
+          '\n\n'
+          'dev_dependencies:\n'
+          '  integration_test:\n'
+          '    sdk: flutter\n',
+        );
+      }
+    }
+
     final int result = await testRunner.runTests(
       testWrapper,
-      files,
+      _testFiles,
       debuggingOptions: debuggingOptions,
       names: names,
       plainNames: plainNames,
@@ -347,6 +388,8 @@ class TestCommand extends FlutterCommand {
       runSkipped: boolArg('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
+      integrationTestDevice: integrationTestDevice,
+      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
     );
 
     if (collector != null) {

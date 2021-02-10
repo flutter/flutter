@@ -87,7 +87,7 @@ void main() {
     testUsingContext('as true when not originally set', () async {
       processManager.addCommand(flutterTestCommand('true'));
 
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
 
@@ -95,7 +95,7 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_TEST': 'true'};
       processManager.addCommand(flutterTestCommand('true'));
 
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
 
@@ -103,7 +103,7 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_TEST': 'false'};
       processManager.addCommand(flutterTestCommand('false'));
 
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
 
@@ -111,7 +111,7 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
       processManager.addCommand(flutterTestCommand('neither true nor false'));
 
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
 
@@ -119,7 +119,7 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_TEST': null};
       processManager.addCommand(flutterTestCommand(null));
 
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
   });
@@ -153,7 +153,7 @@ void main() {
     });
 
     testUsingContext('Can pass additional arguments to tester binary', () async {
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
 
       expect(processManager.hasRemainingExpectations, false);
     });
@@ -186,7 +186,7 @@ void main() {
     });
 
     testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
-      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.start('example.dill');
       await device.observatoryUri;
 
       final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();

@@ -264,6 +264,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool runSkipped = false,
     int shardIndex,
     int totalShards,
+    Device integrationTestDevice,
+    String integrationTestUserIdentifier,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
