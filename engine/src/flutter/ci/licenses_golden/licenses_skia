@@ -1,4 +1,4 @@
-Signature: afee23802fa3c7b0e0abfade7a28b0ff
+Signature: 0ddb12f120434c6521f9b151128d6833
 
 UNUSED LICENSES:
 
@@ -2760,8 +2760,7 @@ FILE: ../../../third_party/skia/src/core/SkTDynamicHash.h
 FILE: ../../../third_party/skia/src/core/SkTMultiMap.h
 FILE: ../../../third_party/skia/src/core/SkValidationUtils.h
 FILE: ../../../third_party/skia/src/effects/SkLumaColorFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdFilter.h
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapEffect.cpp
@@ -5233,6 +5232,7 @@ ORIGIN: ../../../third_party/skia/bench/TriangulatorBench.cpp + ../../../third_p
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/TriangulatorBench.cpp
 FILE: ../../../third_party/skia/gm/crbug_1167277.cpp
+FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
