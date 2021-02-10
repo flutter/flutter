@@ -160,15 +160,6 @@ void main() {
     expect(() => ErrorHandlingFileSystem.deleteIfExists(file), throwsA(isA<ToolExit>()));
   });
 
-  testWithoutContext('deleteIfExists throws tool exit if sharing violation is encountered', () {
-    final File file = MockFile();
-    when(file.existsSync()).thenReturn(true);
-    when(file.deleteSync(recursive: false))
-      .thenThrow(const FileSystemException('', '', OSError('', 32)));
-
-    expect(() => ErrorHandlingFileSystem.deleteIfExists(file, handleSharingViolation: true), throwsA(isA<ToolExit>()));
-  });
-
   testWithoutContext('deleteIfExists does not tool exit if file exists on read-only '
     'volume and it is run under noExitOnFailure', () {
     final File file = MockFile();
