@@ -50,9 +50,9 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'webkit_inspection_protocol': '0.7.4',
   'yaml': '2.2.1',
   // Flutter team owned nnbd deps
-  'platform': '3.0.0-nullsafety.4',
-  'file': '6.0.0-nullsafety.4',
-  'process': '4.0.0-nullsafety.4',
+  'platform': '3.0.0',
+  'file': '6.0.0',
+  'process': '4.0.0',
   'process_runner': '4.0.0-nullsafety.5',
   'path_provider': '1.6.14',
   'video_player': '2.0.0-nullsafety.2',
