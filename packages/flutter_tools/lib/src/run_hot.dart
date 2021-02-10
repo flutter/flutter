@@ -5,11 +5,11 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
-import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -27,6 +27,7 @@ import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
