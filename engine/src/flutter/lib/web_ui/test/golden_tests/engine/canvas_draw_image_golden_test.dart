@@ -334,15 +334,18 @@ void testMain() async {
   // Yellow text should be behind image and rectangle.
   // Cyan text should be above everything.
   test('Paints text above and below image', () async {
+    // Use a non-Ahem font so that text is visible.
+    debugEmulateFlutterTesterEnvironment = false;
     final RecordingCanvas rc =
         RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     Image testImage = createTestImage();
     double testWidth = testImage.width.toDouble();
     double testHeight = testImage.height.toDouble();
+    final Color orange = Color(0xFFFF9800);
     final Paragraph paragraph1 = createTestParagraph(
-        'should be below...............',
-        color: Color(0xFFFFFF40));
+        'Should be below below below below below',
+        color: orange);
     paragraph1.layout(const ParagraphConstraints(width: 400.0));
     rc.drawParagraph(paragraph1, const Offset(20, 100));
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
@@ -352,14 +355,19 @@ void testMain() async {
         Paint()
           ..strokeWidth = 3
           ..color = Color(0xA0000000));
+    final Color cyan = Color(0xFF0097A7);
     final Paragraph paragraph2 = createTestParagraph(
-        'Should be above...............',
-        color: Color(0xFF00FFFF));
+        'Should be above above above above above',
+        color: cyan);
     paragraph2.layout(const ParagraphConstraints(width: 400.0));
     rc.drawParagraph(paragraph2, const Offset(20, 150));
     rc.restore();
-    await _checkScreenshot(rc, 'draw_text_composite_order_below',
-        maxDiffRatePercent: 1.0);
+    await _checkScreenshot(
+      rc,
+      'draw_text_composite_order_below',
+      maxDiffRatePercent: 1.0,
+      region: Rect.fromLTWH(0, 0, 350, 300),
+    );
   });
 
   // Creates a picture
@@ -723,7 +731,7 @@ HtmlImage createTestImage({int width = 100, int height = 50}) {
 Paragraph createTestParagraph(String text,
     {Color color = const Color(0xFF000000)}) {
   final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
-    fontFamily: 'Ahem',
+    fontFamily: 'Roboto',
     fontStyle: FontStyle.normal,
     fontWeight: FontWeight.normal,
     fontSize: 14.0,
