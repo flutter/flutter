@@ -1,4 +1,4 @@
-Signature: d96728f9cd68e79d591face70ed418e5
+Signature: afee23802fa3c7b0e0abfade7a28b0ff
 
 UNUSED LICENSES:
 
@@ -7255,6 +7255,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
