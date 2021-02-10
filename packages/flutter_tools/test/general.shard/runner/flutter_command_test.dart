@@ -25,6 +25,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import 'utils.dart';
 
 void main() {
@@ -670,20 +671,6 @@ class FakeSignals implements Signals {
 
   @override
   Stream<Object> get errors => delegate.errors;
-}
-
-class FakePub extends Fake implements Pub {
-  @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
-    bool checkUpToDate = false,
-  }) async { }
 }
 
 class FakeClock extends Fake implements SystemClock {
