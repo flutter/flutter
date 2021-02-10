@@ -641,7 +641,6 @@ void main() {
       when(mockHotRunner.attach(
         appStartedCompleter: anyNamed('appStartedCompleter'),
         allowExistingDdsInstance: true,
-        enableDevTools: anyNamed('enableDevTools'),
       )).thenAnswer((_) async {
         await null;
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
@@ -680,7 +679,6 @@ void main() {
       when(mockHotRunner.attach(
         appStartedCompleter: anyNamed('appStartedCompleter'),
         allowExistingDdsInstance: true,
-        enableDevTools: anyNamed('enableDevTools'),
       )).thenAnswer((_) async {
         await null;
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
