@@ -29,13 +29,13 @@
       "name": "collection",
       "rootUri": "../../../../third_party/dart/third_party/pkg/collection",
       "packageUri": "lib",
-      "languageVersion": "2.10"
+      "languageVersion": "2.12"
     },
     {
       "name": "path",
       "rootUri": "../../../../third_party/dart/third_party/pkg/path",
       "packageUri": "lib",
-      "languageVersion": "2.10"
+      "languageVersion": "2.12"
     }
   ]
 }
