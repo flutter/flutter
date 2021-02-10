@@ -394,17 +394,24 @@ void main() {
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
   });
 
-  testWithoutContext('FontSubset artifacts on linux', () {
-    final List<String> supportedArchitectures = <String>['x64', 'arm64'];
-    for (final String arch in supportedArchitectures) {
-      fakeProcessManager.addCommand(arch == 'x64' ? unameCommandForX64 : unameCommandForArm64);
+  testWithoutContext('FontSubset artifacts on x64 linux', () {
+    fakeProcessManager.addCommand(unameCommandForX64);
 
-      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
-      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
-      cache.includeAllPlatforms = false;
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    cache.includeAllPlatforms = false;
 
-      expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-$arch', 'linux-$arch/font-subset.zip']]);
-    }
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
+  });
+
+  testWithoutContext('FontSubset artifacts on arm64 linux', () {
+    fakeProcessManager.addCommand(unameCommandForArm64);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    cache.includeAllPlatforms = false;
+
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-arm64', 'linux-arm64/font-subset.zip']]);
   });
 
   testWithoutContext('FontSubset artifacts on windows', () {
@@ -450,10 +457,8 @@ void main() {
     expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: fuchsia'));
   });
 
-  testWithoutContext('FontSubset artifacts for all platforms', () {
-    final List<String> supportedArchitectures = <String>['x64', 'arm64'];
-    for (final String arch in supportedArchitectures) {
-      fakeProcessManager.addCommand(arch == 'x64' ? unameCommandForX64 : unameCommandForArm64);
+  testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
+      fakeProcessManager.addCommand(unameCommandForX64);
 
       final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
       final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
@@ -461,10 +466,23 @@ void main() {
 
       expect(artifacts.getBinaryDirs(), <List<String>>[
         <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
-        <String>['linux-$arch', 'linux-$arch/font-subset.zip'],
+        <String>['linux-x64', 'linux-x64/font-subset.zip'],
         <String>['windows-x64', 'windows-x64/font-subset.zip'],
       ]);
-    }
+  });
+
+  testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
+      fakeProcessManager.addCommand(unameCommandForArm64);
+
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
+      cache.includeAllPlatforms = true;
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['darwin-x64', 'darwin-x64/font-subset.zip'], // arm64 macOS hosts is not supported now
+        <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
+        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 macOS hosts is not supported now
+      ]);
   });
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
@@ -515,10 +533,8 @@ void main() {
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
-  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
-    final List<String> supportedArchitectures = <String>['x64', 'arm64'];
-    for (final String arch in supportedArchitectures) {
-      fakeProcessManager.addCommand(arch == 'x64' ? unameCommandForX64 : unameCommandForArm64);
+  testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
+      fakeProcessManager.addCommand(unameCommandForX64);
 
       final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
       final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
@@ -526,11 +542,27 @@ void main() {
         platform: FakePlatform(operatingSystem: 'linux'),
       );
 
-      expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
-        contains(contains('profile')),
-        contains(contains('release')),
-      ]));
-    }
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
+      ]);
+  });
+
+  testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
+      fakeProcessManager.addCommand(unameCommandForArm64);
+
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+      final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+        cache,
+        platform: FakePlatform(operatingSystem: 'linux'),
+      );
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['linux-arm64', 'linux-arm64/linux-arm64-flutter-gtk.zip'],
+        <String>['linux-arm64-profile', 'linux-arm64-profile/linux-arm64-flutter-gtk.zip'],
+        <String>['linux-arm64-release', 'linux-arm64-release/linux-arm64-flutter-gtk.zip'],
+      ]);
   });
 
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
