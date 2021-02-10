@@ -124,7 +124,7 @@ class AppContext {
     // https://github.com/flutter/flutter/issues/75744
     dynamic value;
     if (T == process.ProcessManager) {
-      value = _generateIfNecessary(ProcessManager, _overrides);
+      value = ProcessManagerWrapper(_generateIfNecessary(process.ProcessManager, _overrides) as process.ProcessManager);
     } else {
       value = _generateIfNecessary(T, _overrides);
     }

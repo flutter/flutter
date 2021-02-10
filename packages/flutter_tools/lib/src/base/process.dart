@@ -612,6 +612,80 @@ class _DefaultProcessUtils implements ProcessUtils {
   }
 }
 
+// TODO(jonahwilliams): remove after updating g3
+class ProcessManagerWrapper implements process.ProcessManager, ProcessManager {
+  ProcessManagerWrapper(this.delegate);
+
+  final process.ProcessManager delegate;
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) => delegate.canRun(executable, workingDirectory: workingDirectory);
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return delegate.killPid(pid, signal);
+  }
+
+  @override
+  Future<ProcessResult> run(List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
+    return delegate.run(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  @override
+  ProcessResult runSync(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
+    return delegate.runSync(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  @override
+  Future<Process> start(List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) {
+    return delegate.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+}
+
 /// Manages the creation of abstract processes.
 ///
 /// Using instances of this class provides level of indirection from the static
