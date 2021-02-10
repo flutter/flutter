@@ -31,6 +31,10 @@ class FlatButton extends MaterialButton {
   /// Create a simple text button.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
+  @Deprecated(
+    'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
+    'This feature was deprecated after v1.25.0-8.1.pre.'
+  )
   const FlatButton({
     Key? key,
     required VoidCallback? onPressed,

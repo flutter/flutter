@@ -156,6 +156,10 @@ class TapSemanticEvent extends SemanticsEvent {
 )
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
+  @Deprecated(
+    'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
+    'This feature was deprecated after v1.12.16.'
+  )
   const UpdateLiveRegionEvent() : super('updateLiveRegion');
 
   @override

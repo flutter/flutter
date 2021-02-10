@@ -559,8 +559,20 @@ class ThemeData with Diagnosticable {
     required this.buttonColor,
     required this.toggleButtonsTheme,
     required this.secondaryHeaderColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.textSelectionColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.cursorColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.cursorColor,
+    @Deprecated(
+      'Use TextSelectionThemeData.selectionHandleColor instead. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.textSelectionHandleColor,
     required this.backgroundColor,
     required this.dialogBackgroundColor,
@@ -610,6 +622,10 @@ class ThemeData with Diagnosticable {
     required this.radioTheme,
     required this.switchTheme,
     required this.fixTextFieldOutlineLabel,
+    @Deprecated(
+      'No longer used by the framework, please remove any reference to it. '
+      'This feature was deprecated after v1.23.0-4.0.pre.'
+    )
     required this.useTextSelectionTheme,
   }) : assert(visualDensity != null),
        assert(primaryColor != null),
