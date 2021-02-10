@@ -53,7 +53,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///         );
 ///       },
 ///     ),
-///   ),
+///   );
 /// }
 ///
 /// ```
