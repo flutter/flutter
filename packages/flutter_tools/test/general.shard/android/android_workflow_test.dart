@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -23,7 +22,6 @@ import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManag
 import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 void main() {
   AndroidSdk sdk;
