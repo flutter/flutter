@@ -259,7 +259,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
-         autofocus: autofocus,
+         autoFocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,
@@ -451,7 +451,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
       animation: _controller,
       builder: (BuildContext context, Widget? child) {
         return RaisedButton(
-          autofocus: widget.autofocus,
+          autoFocus: widget.autoFocus,
           textColor: widget.textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(),

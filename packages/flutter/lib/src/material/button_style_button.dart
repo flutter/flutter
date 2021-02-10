@@ -369,7 +369,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,
-          autofocus: widget.autofocus,
+          autofocus: widget.autoFocus,
           splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,

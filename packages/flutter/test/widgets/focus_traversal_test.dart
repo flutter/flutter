@@ -347,7 +347,7 @@ void main() {
                 return MaterialButton(
                   key: key1,
                   focusNode: testNode1,
-                  autofocus: true,
+                  autoFocus: true,
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       MaterialPageRoute<void>(
@@ -356,7 +356,7 @@ void main() {
                             child: MaterialButton(
                               key: key2,
                               focusNode: testNode2,
-                              autofocus: true,
+                              autoFocus: true,
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
@@ -1146,7 +1146,7 @@ void main() {
                   child: MaterialButton(
                     key: key1,
                     focusNode: testNode1,
-                    autofocus: true,
+                    autoFocus: true,
                     onPressed: () {
                       Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
@@ -1157,7 +1157,7 @@ void main() {
                                 child: MaterialButton(
                                   key: key2,
                                   focusNode: testNode2,
-                                  autofocus: true,
+                                  autoFocus: true,
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
@@ -1613,7 +1613,7 @@ void main() {
                       Row(
                         children: <Widget>[
                           Focus(
-                            autofocus: true,
+                            autoFocus: true,
                             debugLabel: 'upperLeft',
                             child: Container(width: 100, height: 100, key: upperLeftKey),
                           ),
@@ -1915,7 +1915,7 @@ void main() {
                         width: 100,
                         height: 100,
                         child: EditableText(
-                          autofocus: true,
+                          autoFocus: true,
                           key: upperLeftKey,
                           controller: controller1,
                           focusNode: focusNodeUpperLeft,
@@ -2098,7 +2098,7 @@ void main() {
           child: Column(
             children: <Widget>[
               Focus(
-                autofocus: true,
+                autoFocus: true,
                 child: Container(),
               ),
               FocusTraversalGroup(
@@ -2150,7 +2150,7 @@ void main() {
                 ),
                 Focus(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   child: Container(),
                 ),
               ],

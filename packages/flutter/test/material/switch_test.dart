@@ -733,7 +733,7 @@ void main() {
                   });
                 } : null,
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
                 focusNode: focusNode,
               );
             }),
@@ -809,7 +809,7 @@ void main() {
                 value: true,
                 onChanged: (bool newValue) {},
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
                 splashRadius: splashRadius,
               );
             }),
@@ -917,7 +917,7 @@ void main() {
                   });
                 } : null,
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
               );
             }),
           ),
@@ -1226,7 +1226,7 @@ void main() {
               child: Center(
                 child: Switch(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   value: true,
                   thumbColor: thumbColor,
                   onChanged: (_) { },
@@ -1400,7 +1400,7 @@ void main() {
               child: Center(
                 child: Switch(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   value: true,
                   trackColor: trackColor,
                   onChanged: (_) { },
@@ -1532,7 +1532,7 @@ void main() {
         home: Scaffold(
           body: Switch(
             focusNode: focusNode,
-            autofocus: focused,
+            autoFocus: focused,
             value: active,
             onChanged: (_) { },
             thumbColor: MaterialStateProperty.all(thumbColor),

@@ -4183,7 +4183,7 @@ void main() {
               child: ConstrainedBox(
                 constraints: BoxConstraints.loose(const Size(200, 200)),
                 child: const CupertinoTextField(
-                  autofocus: true,
+                  autoFocus: true,
                 ),
               ),
             ),

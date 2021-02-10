@@ -89,7 +89,7 @@ class _HoverDemoState extends State<HoverDemo> {
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: TextField(
-                    autofocus: false,
+                    autoFocus: false,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Enter Text',

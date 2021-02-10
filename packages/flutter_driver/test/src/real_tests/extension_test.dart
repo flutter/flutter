@@ -896,7 +896,7 @@ void main() {
         child: Center(
           child: TextField(
             key: ValueKey<String>('foo'),
-            autofocus: true,
+            autoFocus: true,
           ),
         ),
       ),

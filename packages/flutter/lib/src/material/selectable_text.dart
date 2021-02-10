@@ -645,7 +645,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
         textScaleFactor: widget.textScaleFactor,
-        autofocus: widget.autofocus,
+        autoFocus: widget.autoFocus,
         forceLine: false,
         toolbarOptions: widget.toolbarOptions,
         minLines: widget.minLines,

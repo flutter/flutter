@@ -117,7 +117,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             value: selected,
             onChanged: (bool value) {},
-            autofocus: autofocus,
+            autoFocus: autofocus,
           ),
         ),
       );
@@ -221,7 +221,7 @@ void main() {
           body: Switch(
             value: selected,
             onChanged: (bool value) {},
-            autofocus: autofocus,
+            autoFocus: autofocus,
             thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedThumbColor;
@@ -320,7 +320,7 @@ void main() {
           body: Switch(
             value: selected,
             onChanged: (bool value) {},
-            autofocus: autofocus,
+            autoFocus: autofocus,
             activeColor: selectedThumbColor,
             inactiveThumbColor: defaultThumbColor,
             activeTrackColor: selectedTrackColor,

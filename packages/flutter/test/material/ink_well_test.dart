@@ -89,7 +89,7 @@ void main() {
         child: Material(
           child: Center(
             child: InkWell(
-              autofocus: true,
+              autoFocus: true,
               onTap: () {
                 log.add('tap');
               },
@@ -639,7 +639,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: InkWell(
-            autofocus: true,
+            autoFocus: true,
             onTap: () {},
             onLongPress: () {},
             onHover: (bool hover) {},
@@ -679,7 +679,7 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: InkWell(
-              autofocus: true,
+              autoFocus: true,
               onTap: () {},
               onLongPress: () {},
               onHover: (bool hover) {},
@@ -725,7 +725,7 @@ void main() {
             width: 100,
             height: 100,
             child: InkWell(
-              autofocus: true,
+              autoFocus: true,
               onTap: () {},
               onLongPress: () {},
               onHover: (bool value) { hovering = value; },

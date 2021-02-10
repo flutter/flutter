@@ -435,7 +435,7 @@ void main() {
       wrap(
         child: IconButton(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           onPressed: () {},
           icon: const Icon(Icons.link),
         ),
@@ -449,7 +449,7 @@ void main() {
       wrap(
         child: IconButton(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           onPressed: null,
           icon: const Icon(Icons.link),
         ),
@@ -469,7 +469,7 @@ void main() {
           ),
           child: IconButton(
             focusNode: focusNode,
-            autofocus: true,
+            autoFocus: true,
             onPressed: () {},
             icon: const Icon(Icons.link),
           ),
@@ -488,7 +488,7 @@ void main() {
           ),
           child: IconButton(
             focusNode: focusNode,
-            autofocus: true,
+            autoFocus: true,
             onPressed: null,
             icon: const Icon(Icons.link),
           ),
@@ -509,7 +509,7 @@ void main() {
           children: <Widget>[
             IconButton(
               focusNode: focusNode1,
-              autofocus: true,
+              autoFocus: true,
               onPressed: () {},
               icon: const Icon(Icons.link),
             ),

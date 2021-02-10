@@ -57,7 +57,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     return Focus(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
-      autofocus: true,
+      autoFocus: true,
       child: AnimatedBuilder(
         animation: _focusNode,
         builder: (BuildContext context, Widget child) {

@@ -210,7 +210,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: OutlineButton(
-          autofocus: true,
+          autoFocus: true,
           focusColor: focusColor,
           focusNode: focusNode,
           onPressed: () { },

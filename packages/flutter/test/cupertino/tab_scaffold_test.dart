@@ -152,7 +152,7 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTextField(
               focusNode: focusNodes[index],
-              autofocus: true,
+              autoFocus: true,
             );
           },
         ),

@@ -57,7 +57,7 @@ class _DemoButtonState extends State<DemoButton> {
   Widget build(BuildContext context) {
     return TextButton(
       focusNode: focusNode,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused))
@@ -140,7 +140,7 @@ class _FocusDemoState extends State<FocusDemo> {
       child: FocusScope(
         debugLabel: 'Scope',
         onKey: _handleKeyPress,
-        autofocus: true,
+        autoFocus: true,
         child: DefaultTextStyle(
           style: textTheme.headline4,
           child: Scaffold(

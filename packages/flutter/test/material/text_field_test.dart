@@ -4159,7 +4159,7 @@ void main() {
               children: <Widget>[
                 TextField(
                   focusNode: focusNode1,
-                  autofocus: true,
+                  autoFocus: true,
                   maxLength: 10,
                   enabled: true,
                 ),
@@ -5672,7 +5672,7 @@ void main() {
       boilerplate(
         child: TextField(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           enabled: true,
         ),
       ),
@@ -5683,7 +5683,7 @@ void main() {
       boilerplate(
         child: TextField(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           enabled: false,
         ),
       ),
@@ -5699,7 +5699,7 @@ void main() {
             ),
             child: TextField(
               focusNode: focusNode,
-              autofocus: true,
+              autoFocus: true,
               enabled: true,
             ),
           );
@@ -5720,7 +5720,7 @@ void main() {
             ),
             child:  TextField(
               focusNode: focusNode,
-              autofocus: true,
+              autoFocus: true,
               enabled: false,
             ),
           );
@@ -6782,7 +6782,7 @@ void main() {
           home: Material(
             child: Center(
               child: TextField(
-                autofocus: true,
+                autoFocus: true,
                 controller: controller,
               ),
             ),
@@ -7809,9 +7809,9 @@ void main() {
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
-      autofocus: true,
+      autoFocus: true,
       obscureText: false,
-      autocorrect: false,
+      autoCorrect: false,
       maxLines: 10,
       maxLength: 100,
       maxLengthEnforcement: MaxLengthEnforcement.none,

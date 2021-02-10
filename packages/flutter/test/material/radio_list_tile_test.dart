@@ -582,7 +582,7 @@ void main() {
           groupValue: 2,
           onChanged: (_) {},
           title: Text('Title', key: childKey),
-          autofocus: true,
+          autoFocus: true,
         ),
       ),
     );
@@ -597,7 +597,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title', key: childKey),
-          autofocus: true,
+          autoFocus: true,
         ),
       ),
     );

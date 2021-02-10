@@ -417,7 +417,7 @@ class EditableText extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
-  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
+  /// The [controller], [focusNode], [obscureText], [autoCorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
   /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
@@ -431,7 +431,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autoCorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -494,7 +494,7 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
-       assert(autocorrect != null),
+       assert(autoCorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
@@ -629,7 +629,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to true. Cannot be null.
   /// {@endtemplate}
-  final bool autocorrect;
+  final bool autoCorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -1458,7 +1458,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autoCorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
@@ -2528,7 +2528,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
-      autocorrect: widget.autocorrect,
+      autoCorrect: widget.autoCorrect,
       smartDashesType: widget.smartDashesType,
       smartQuotesType: widget.smartQuotesType,
       enableSuggestions: widget.enableSuggestions,
@@ -2629,7 +2629,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 textWidthBasis: widget.textWidthBasis,
                 obscuringCharacter: widget.obscuringCharacter,
                 obscureText: widget.obscureText,
-                autocorrect: widget.autocorrect,
+                autocorrect: widget.autoCorrect,
                 smartDashesType: widget.smartDashesType,
                 smartQuotesType: widget.smartQuotesType,
                 enableSuggestions: widget.enableSuggestions,

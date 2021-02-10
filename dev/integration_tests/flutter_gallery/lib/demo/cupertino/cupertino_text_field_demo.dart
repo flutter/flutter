@@ -52,7 +52,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
           onPressed: ()=> setState(()=> _chatTextController!.clear()),
         ),
       ),
-      autofocus: true,
+      autoFocus: true,
       suffixMode: OverlayVisibilityMode.editing,
       onSubmitted: (String text)=> setState(()=> _chatTextController!.clear()),
     );
@@ -68,7 +68,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
       clearButtonMode: OverlayVisibilityMode.editing,
       textCapitalization: TextCapitalization.words,
-      autocorrect: false,
+      autoCorrect: false,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
@@ -86,7 +86,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
       clearButtonMode: OverlayVisibilityMode.editing,
       keyboardType: TextInputType.emailAddress,
-      autocorrect: false,
+      autoCorrect: false,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
@@ -122,7 +122,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 12.0),
       clearButtonMode: OverlayVisibilityMode.editing,
       keyboardType: TextInputType.number,
-      autocorrect: false,
+      autoCorrect: false,
       obscureText: true,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),

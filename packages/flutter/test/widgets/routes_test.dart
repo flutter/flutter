@@ -537,7 +537,7 @@ void main() {
               pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
                 return Focus(
                   child: TextField(
-                    autofocus: true,
+                    autoFocus: true,
                     focusNode: focusNode,
                     controller: controller,
                   ),

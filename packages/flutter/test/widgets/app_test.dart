@@ -50,7 +50,7 @@ void main() {
           return Material(
             child: Checkbox(
               value: checked,
-              autofocus: true,
+              autoFocus: true,
               onChanged: (bool? value) {
                 checked = value;
               },
@@ -81,7 +81,7 @@ void main() {
           return Material(
             child: Checkbox(
               value: checked,
-              autofocus: true,
+              autoFocus: true,
               onChanged: (bool? value) {
                 checked = value;
               },
@@ -110,7 +110,7 @@ void main() {
           return Material(
             child: Checkbox(
               value: checked,
-              autofocus: true,
+              autoFocus: true,
               onChanged: (bool? value) {
                 checked = value;
               },

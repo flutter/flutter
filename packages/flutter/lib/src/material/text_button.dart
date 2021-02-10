@@ -366,7 +366,7 @@ class _TextButtonWithIcon extends TextButton {
          onLongPress: onLongPress,
          style: style,
          focusNode: focusNode,
-         autofocus: autofocus ?? false,
+         autoFocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),
       );

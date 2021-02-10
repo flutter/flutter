@@ -413,7 +413,7 @@ class _FocusDemoState extends State<FocusDemo> {
           child: FocusScope(
             key: FocusDemo.appKey,
             debugLabel: 'Scope',
-            autofocus: true,
+            autoFocus: true,
             child: DefaultTextStyle(
               style: textTheme.headline4,
               child: Scaffold(

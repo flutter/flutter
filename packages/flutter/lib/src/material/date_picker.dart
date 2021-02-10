@@ -445,7 +445,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                     errorInvalidText: widget.errorInvalidText,
                     fieldHintText: widget.fieldHintText,
                     fieldLabelText: widget.fieldLabelText,
-                    autofocus: true,
+                    autoFocus: true,
                   ),
                   const Spacer(),
                 ],
@@ -1081,7 +1081,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
                   lastDate: widget.lastDate,
                   onStartDateChanged: _handleStartDateChanged,
                   onEndDateChanged: _handleEndDateChanged,
-                  autofocus: true,
+                  autoFocus: true,
                   autovalidate: _autoValidate,
                   helpText: widget.helpText,
                   errorInvalidRangeText: widget.errorInvalidRangeText,
@@ -2509,7 +2509,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_startDate != null) {
       _startInputText = localizations.formatCompactDate(_startDate!);
-      final bool selectText = widget.autofocus && !_autoSelected;
+      final bool selectText = widget.autoFocus && !_autoSelected;
       _updateController(_startController, _startInputText, selectText);
       _autoSelected = selectText;
     }
@@ -2607,7 +2607,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             ),
             keyboardType: TextInputType.datetime,
             onChanged: _handleStartChanged,
-            autofocus: widget.autofocus,
+            autoFocus: widget.autoFocus,
           ),
         ),
         const SizedBox(width: 8),

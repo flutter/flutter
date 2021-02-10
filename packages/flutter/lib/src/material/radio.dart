@@ -501,7 +501,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       mouseCursor: effectiveMouseCursor,
       enabled: enabled,
       onShowFocusHighlight: _handleHighlightChanged,

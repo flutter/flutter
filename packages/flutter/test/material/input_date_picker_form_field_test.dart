@@ -43,7 +43,7 @@ void main() {
             errorInvalidText: errorInvalidText,
             fieldHintText: fieldHintText,
             fieldLabelText: fieldLabelText,
-            autofocus: autofocus,
+            autoFocus: autofocus,
           ),
         ),
       ),

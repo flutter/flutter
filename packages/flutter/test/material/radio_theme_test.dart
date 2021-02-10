@@ -111,7 +111,7 @@ void main() {
             onChanged: (int? int) {},
             value: selected ? 1 : 0,
             groupValue: 1,
-            autofocus: autofocus,
+            autoFocus: autofocus,
           ),
         ),
       );
@@ -193,7 +193,7 @@ void main() {
             onChanged: (int? int) {},
             value: selected ? 0 : 1,
             groupValue: 0,
-            autofocus: autofocus,
+            autoFocus: autofocus,
             mouseCursor: mouseCursor,
             fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
@@ -259,7 +259,7 @@ void main() {
             onChanged: (int? int) {},
             value: selected ? 0 : 1,
             groupValue: 0,
-            autofocus: autofocus,
+            autoFocus: autofocus,
             activeColor: selectedFillColor,
           ),
         ),

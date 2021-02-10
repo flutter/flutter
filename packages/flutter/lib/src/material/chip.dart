@@ -1941,7 +1941,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       child: InkWell(
         onFocusChange: _handleFocus,
         focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
+        autofocus: widget.autoFocus,
         canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,

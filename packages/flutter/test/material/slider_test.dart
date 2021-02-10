@@ -1667,7 +1667,7 @@ void main() {
                       value = newValue;
                     });
                   } : null,
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode,
                 ),
               );
@@ -1769,7 +1769,7 @@ void main() {
                     value = newValue;
                   });
                 },
-                autofocus: true,
+                autoFocus: true,
               );
             }),
           ),
@@ -1810,7 +1810,7 @@ void main() {
                     value = newValue;
                   });
                 },
-                autofocus: true,
+                autoFocus: true,
               );
             }),
           ),
@@ -1853,7 +1853,7 @@ void main() {
                       value = newValue;
                     });
                   },
-                  autofocus: true,
+                  autoFocus: true,
                 ),
               );
             }),
@@ -1897,7 +1897,7 @@ void main() {
                       value = newValue;
                     });
                   },
-                  autofocus: true,
+                  autoFocus: true,
                 ),
               );
             }),

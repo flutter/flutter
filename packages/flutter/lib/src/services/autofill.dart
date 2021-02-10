@@ -773,7 +773,7 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
        assert(currentClientConfiguration != null),
        super(inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
-         autocorrect: currentClientConfiguration.autocorrect,
+         autocorrect: currentClientConfiguration.autoCorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
          smartQuotesType: currentClientConfiguration.smartQuotesType,
          enableSuggestions: currentClientConfiguration.enableSuggestions,

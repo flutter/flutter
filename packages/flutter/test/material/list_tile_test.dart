@@ -1217,7 +1217,7 @@ void main() {
                 title: Text('A', key: childKey),
                 dense: true,
                 enabled: true,
-                autofocus: true,
+                autoFocus: true,
                 onTap: () {},
               ),
             ],
@@ -1238,7 +1238,7 @@ void main() {
                 title: Text('A', key: childKey),
                 dense: true,
                 enabled: false,
-                autofocus: true,
+                autoFocus: true,
                 onTap: () {},
               ),
             ],
@@ -1268,7 +1268,7 @@ void main() {
                   key: tileKey,
                   onTap: enabled ? () {} : null,
                   focusColor: Colors.orange[500],
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode,
                 ),
               );
@@ -1323,7 +1323,7 @@ void main() {
                   key: tileKey,
                   onTap: enabled ? () {} : null,
                   hoverColor: Colors.orange[500],
-                  autofocus: true,
+                  autoFocus: true,
                 ),
               );
             }),
@@ -1404,7 +1404,7 @@ void main() {
                     });
                   } : null,
                   hoverColor: Colors.orange[500],
-                  autofocus: true,
+                  autoFocus: true,
                 ),
               );
             }),
@@ -1432,7 +1432,7 @@ void main() {
               child: ListTile(
                 key: key,
                 onTap: () {},
-                autofocus: true,
+                autoFocus: true,
                 visualDensity: visualDensity,
               ),
             ),

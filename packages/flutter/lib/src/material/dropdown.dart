@@ -1432,7 +1432,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         child: Focus(
           canRequestFocus: _enabled,
           focusNode: focusNode,
-          autofocus: widget.autofocus,
+          autoFocus: widget.autoFocus,
           child: GestureDetector(
             onTap: _enabled ? _handleTap : null,
             behavior: HitTestBehavior.opaque,
@@ -1501,7 +1501,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isDense != null),
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
-       assert(autofocus != null),
+       assert(autoFocus != null),
        assert(autovalidate != null),
        assert(
          autovalidate == false ||
@@ -1553,7 +1553,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      itemHeight: itemHeight,
                      focusColor: focusColor,
                      focusNode: focusNode,
-                     autofocus: autofocus,
+                     autofocus: autoFocus,
                      dropdownColor: dropdownColor,
                    ),
                  ),

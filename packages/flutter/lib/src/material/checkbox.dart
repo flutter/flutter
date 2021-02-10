@@ -412,7 +412,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       enabled: enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,

@@ -319,7 +319,7 @@ class TextField extends StatefulWidget {
   /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
   /// must not be null.
   ///
-  /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
+  /// The [textAlign], [autoFocus], [obscureText], [readOnly], [autoCorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
   /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
   /// arguments must not be null.
@@ -344,10 +344,10 @@ class TextField extends StatefulWidget {
     this.readOnly = false,
     ToolbarOptions? toolbarOptions,
     this.showCursor,
-    this.autofocus = false,
+    this.autoFocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autoCorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -388,10 +388,10 @@ class TextField extends StatefulWidget {
     this.restorationId,
   }) : assert(textAlign != null),
        assert(readOnly != null),
-       assert(autofocus != null),
+       assert(autoFocus != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
-       assert(autocorrect != null),
+       assert(autoCorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
@@ -523,7 +523,7 @@ class TextField extends StatefulWidget {
   final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.autofocus}
-  final bool autofocus;
+  final bool autoFocus;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
@@ -532,7 +532,7 @@ class TextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool autoCorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -823,10 +823,10 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autoFocus, defaultValue: false));
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autoCorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
@@ -1205,10 +1205,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           strutStyle: widget.strutStyle,
           textAlign: widget.textAlign,
           textDirection: widget.textDirection,
-          autofocus: widget.autofocus,
+          autoFocus: widget.autoFocus,
           obscuringCharacter: widget.obscuringCharacter,
           obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
+          autoCorrect: widget.autoCorrect,
           smartDashesType: widget.smartDashesType,
           smartQuotesType: widget.smartQuotesType,
           enableSuggestions: widget.enableSuggestions,

@@ -290,7 +290,7 @@ void main() {
       child1Attachment.reparent(parent: parent);
       child2Attachment.reparent(parent: parent);
 
-      scope.autofocus(child2);
+      scope.autoFocus(child2);
       await tester.pump();
 
       expect(scope.focusedChild, equals(child2));
@@ -300,7 +300,7 @@ void main() {
       expect(child2.hasFocus, isTrue);
       expect(child2.hasPrimaryFocus, isTrue);
       child1.requestFocus();
-      scope.autofocus(child2);
+      scope.autoFocus(child2);
 
       await tester.pump();
 
@@ -1114,7 +1114,7 @@ void main() {
     parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
     child1Attachment.reparent(parent: parent1);
     child2Attachment.reparent(parent: child1);
-    parent1.autofocus(child2);
+    parent1.autoFocus(child2);
     await tester.pump();
     parent2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
     parent2.requestFocus();
@@ -1276,7 +1276,7 @@ void main() {
     }
     tester.binding.focusManager.addListener(handleFocusChange);
 
-    parent1.autofocus(child2);
+    parent1.autoFocus(child2);
     expect(notifyCount, equals(0));
     await tester.pump();
     expect(notifyCount, equals(1));

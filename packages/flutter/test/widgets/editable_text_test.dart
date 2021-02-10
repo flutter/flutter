@@ -100,7 +100,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -144,7 +144,7 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
-    expect(editableText.autocorrect, isTrue);
+    expect(editableText.autoCorrect, isTrue);
     expect(editableText.enableSuggestions, isTrue);
     expect(editableText.textAlign, TextAlign.start);
     expect(editableText.cursorWidth, 2.0);
@@ -160,7 +160,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
@@ -300,7 +300,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: FocusScope(
                 node: focusScopeNode,
-                autofocus: true,
+                autoFocus: true,
                 child: EditableText(
                   controller: controller,
                   backgroundCursorColor: Colors.grey,
@@ -336,7 +336,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: FocusScope(
                 node: focusScopeNode,
-                autofocus: true,
+                autoFocus: true,
                 child: EditableText(
                   controller: controller,
                   backgroundCursorColor: Colors.grey,
@@ -367,7 +367,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: FocusScope(
                 node: focusScopeNode,
-                autofocus: true,
+                autoFocus: true,
                 child: EditableText(
                   controller: controller,
                   backgroundCursorColor: Colors.grey,
@@ -399,7 +399,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: FocusScope(
                 node: focusScopeNode,
-                autofocus: true,
+                autoFocus: true,
                 child: EditableText(
                   controller: controller,
                   backgroundCursorColor: Colors.grey,
@@ -431,7 +431,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
@@ -464,7 +464,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
@@ -499,7 +499,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
@@ -531,7 +531,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: FocusScope(
               node: focusScopeNode,
-              autofocus: true,
+              autoFocus: true,
               child: EditableText(
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
@@ -562,7 +562,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: FocusScope(
               node: focusScopeNode,
-              autofocus: true,
+              autoFocus: true,
               child: EditableText(
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
@@ -592,7 +592,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: FocusScope(
               node: focusScopeNode,
-              autofocus: true,
+              autoFocus: true,
               child: EditableText(
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
@@ -684,7 +684,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: Column(
               children: <Widget>[
                 EditableText(
@@ -727,7 +727,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: Column(
               children: <Widget>[
                 EditableText(
@@ -765,7 +765,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
@@ -798,7 +798,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -832,7 +832,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -866,7 +866,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -899,7 +899,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -932,7 +932,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -976,7 +976,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -1050,7 +1050,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: ListView(
               children: <Widget>[
                 testNameField,
@@ -1581,7 +1581,7 @@ void main() {
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
-              autofocus: true,
+              autoFocus: true,
             ),
             TextButton(
                 child: Text('Next Widget', key: nextKey), onPressed: () {}),
@@ -1847,7 +1847,7 @@ void main() {
           focusNode: focusNode,
           style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
           cursorColor: Colors.blue,
-          autocorrect: true,
+          autoCorrect: true,
           autocorrectionTextRectColor: rectColor,
           showCursor: false,
           onEditingComplete: () { },
@@ -1983,7 +1983,7 @@ void main() {
         textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -2023,7 +2023,7 @@ void main() {
         textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -2049,7 +2049,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -3488,7 +3488,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp( // So we can show overlays.
       home: EditableText(
-        autofocus: true,
+        autoFocus: true,
         backgroundCursorColor: Colors.grey,
         controller: controller,
         focusNode: focusNode,
@@ -3828,7 +3828,7 @@ void main() {
             maxLines: 10,
             controller: controller,
             showSelectionHandles: true,
-            autofocus: true,
+            autoFocus: true,
             focusNode: FocusNode(),
             style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
             cursorColor: Colors.blue,
@@ -4517,7 +4517,7 @@ void main() {
           child: EditableText(
             readOnly: true,
             controller: controller,
-            autofocus: true,
+            autoFocus: true,
             focusNode: FocusNode(),
             style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
             cursorColor: Colors.blue,
@@ -5844,7 +5844,7 @@ void main() {
         maxLines: 10,
         controller: controller,
         showSelectionHandles: true,
-        autofocus: true,
+        autoFocus: true,
         focusNode: FocusNode(),
         style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
         cursorColor: Colors.blue,
@@ -5871,7 +5871,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -5944,7 +5944,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -6026,7 +6026,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -6068,7 +6068,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6123,7 +6123,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6171,7 +6171,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6213,7 +6213,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6253,7 +6253,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6293,7 +6293,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.blue,
               controller: controller,
@@ -6415,7 +6415,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FocusScope(
           node: focusScopeNode,
-          autofocus: true,
+          autoFocus: true,
           child: EditableText(
             backgroundCursorColor: Colors.grey,
             controller: controller,
@@ -6435,7 +6435,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FocusScope(
           node: focusScopeNode,
-          autofocus: true,
+          autoFocus: true,
           child: EditableText(
             backgroundCursorColor: Colors.grey,
             controller: controller,
@@ -6461,7 +6461,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FocusScope(
           node: focusScopeNode,
-          autofocus: true,
+          autoFocus: true,
           child: DefaultTextHeightBehavior(
             textHeightBehavior: customTextHeightBehavior,
             child: EditableText(
@@ -6494,7 +6494,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FocusScope(
           node: focusScopeNode,
-          autofocus: true,
+          autoFocus: true,
           child: DefaultTextHeightBehavior(
             textHeightBehavior: inheritedTextHeightBehavior,
             child: EditableText(
@@ -7063,7 +7063,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
-            autofocus: true,
+            autoFocus: true,
             controller: unsettableController,
             backgroundCursorColor: Colors.grey,
             focusNode: focusNode,

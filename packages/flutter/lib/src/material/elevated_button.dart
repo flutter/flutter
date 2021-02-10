@@ -404,7 +404,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
          onLongPress: onLongPress,
          style: style,
          focusNode: focusNode,
-         autofocus: autofocus ?? false,
+         autoFocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _ElevatedButtonWithIconChild(icon: icon, label: label),
       );

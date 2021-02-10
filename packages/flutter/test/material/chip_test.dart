@@ -2623,7 +2623,7 @@ void main() {
       _wrapForChip(
         child: InputChip(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
@@ -2638,7 +2638,7 @@ void main() {
       _wrapForChip(
         child: InputChip(
           focusNode: focusNode,
-          autofocus: true,
+          autoFocus: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
@@ -2659,13 +2659,13 @@ void main() {
           children: <Widget>[
             InputChip(
               focusNode: focusNode1,
-              autofocus: true,
+              autoFocus: true,
               label: const Text('Chip A'),
               onPressed: () { },
             ),
             InputChip(
               focusNode: focusNode2,
-              autofocus: true,
+              autoFocus: true,
               label: const Text('Chip B'),
               onPressed: null,
             ),

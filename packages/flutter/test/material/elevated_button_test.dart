@@ -483,7 +483,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ElevatedButton(
-          autofocus: true,
+          autoFocus: true,
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),

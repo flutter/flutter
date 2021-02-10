@@ -285,7 +285,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: MaterialButton(
-            autofocus: true,
+            autoFocus: true,
             focusNode: focusNode,
             onPressed: () {},
             child: Container(width: 100, height: 100, color: const Color(0xffff0000)),

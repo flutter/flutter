@@ -340,7 +340,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: RawMaterialButton(
-            autofocus: true,
+            autoFocus: true,
             focusNode: focusNode,
             onPressed: () {},
             child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
@@ -378,13 +378,13 @@ void main() {
           child: Column(
             children: <Widget>[
               RawMaterialButton(
-                autofocus: true,
+                autoFocus: true,
                 focusNode: focusNode1,
                 onPressed: () {},
                 child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
               ),
               RawMaterialButton(
-                autofocus: true,
+                autoFocus: true,
                 focusNode: focusNode2,
                 onPressed: null,
                 child: Container(width: 100, height: 100, color: const Color(0xffff0000)),

@@ -542,7 +542,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       enabled: enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
@@ -582,7 +582,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final Size size = getSwitchSize(Theme.of(context));
     return Focus(
       focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       child: Container(
         width: size.width, // Same size as the Material switch.
         height: size.height,

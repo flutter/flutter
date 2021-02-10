@@ -290,7 +290,7 @@ class StockHomeState extends State<StockHome> {
       ),
       title: TextField(
         controller: _searchQuery,
-        autofocus: true,
+        autoFocus: true,
         decoration: const InputDecoration(
           hintText: 'Search stocks',
         ),
@@ -343,7 +343,7 @@ class _CreateCompanySheet extends StatelessWidget {
     return Column(
       children: const <Widget>[
         TextField(
-          autofocus: true,
+          autoFocus: true,
           decoration: InputDecoration(
             hintText: 'Company Name',
           ),

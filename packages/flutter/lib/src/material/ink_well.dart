@@ -1097,7 +1097,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           focusNode: widget.focusNode,
           canRequestFocus: _canRequestFocus,
           onFocusChange: _handleFocusUpdate,
-          autofocus: widget.autofocus,
+          autoFocus: widget.autoFocus,
           child: MouseRegion(
             cursor: effectiveMouseCursor,
             onEnter: _handleMouseEnter,

@@ -372,7 +372,7 @@ void main() {
                   value: 0,
                   onChanged: (int? newValue) {},
                   focusColor: Colors.orange[500],
-                  autofocus: true,
+                  autoFocus: true,
                   groupValue: 0,
                   splashRadius: splashRadius,
                 ),
@@ -415,7 +415,7 @@ void main() {
                     });
                   } : null,
                   focusColor: Colors.orange[500],
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode,
                   groupValue: groupValue,
                 ),
@@ -579,7 +579,7 @@ void main() {
                       } : null,
                       hoverColor: Colors.orange[500],
                       groupValue: groupValue,
-                      autofocus: true,
+                      autoFocus: true,
                     ),
                     Radio<int>(
                       key: radioKey1,
@@ -885,7 +885,7 @@ void main() {
                 height: 100,
                 color: Colors.white,
                 child: Radio<int>(
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode,
                   key: radioKey,
                   value: 0,
@@ -977,7 +977,7 @@ void main() {
         home: Scaffold(
           body: Radio<bool>(
             focusNode: focusNode,
-            autofocus: focused,
+            autoFocus: focused,
             value: active,
             groupValue: true,
             onChanged: (_) { },

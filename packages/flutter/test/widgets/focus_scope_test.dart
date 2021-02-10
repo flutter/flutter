@@ -62,7 +62,7 @@ class TestFocusState extends State<TestFocus> {
         FocusScope.of(context).requestFocus(focusNode);
       },
       child: Focus(
-        autofocus: widget.autofocus,
+        autoFocus: widget.autoFocus,
         focusNode: focusNode,
         debugLabel: widget.debugLabel,
         child: Text(
@@ -205,7 +205,7 @@ void main() {
         FocusScope(
           debugLabel: 'Parent Scope',
           node: parentFocusScope,
-          autofocus: true,
+          autoFocus: true,
           child: Column(
             children: <Widget>[
               TestFocus(
@@ -541,7 +541,7 @@ void main() {
         FocusScope(
           debugLabel: 'Parent Scope',
           node: parentFocusScope,
-          autofocus: true,
+          autoFocus: true,
           child: Column(
             children: <Widget>[
               TestFocus(
@@ -1026,7 +1026,7 @@ void main() {
 
       await tester.pumpWidget(
         Focus(
-          autofocus: true,
+          autoFocus: true,
           focusNode: focusNode,
           child: Container(),
         ),
@@ -1044,7 +1044,7 @@ void main() {
           children: <Widget>[
             Focus(
               focusNode: focusNodeA,
-              autofocus: true,
+              autoFocus: true,
               child: Container(),
             ),
           ],
@@ -1063,7 +1063,7 @@ void main() {
             ),
             Focus(
               focusNode: focusNodeB,
-              autofocus: true,
+              autoFocus: true,
               child: Container(),
             ),
           ],
@@ -1248,7 +1248,7 @@ void main() {
       bool? gotFocus;
       await tester.pumpWidget(
         Focus(
-          autofocus: true,
+          autoFocus: true,
           canRequestFocus: true,
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Container(key: key1),
@@ -1646,7 +1646,7 @@ void main() {
             child: Column(
               children: <Widget>[
                 Focus(
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode1,
                   child: Container(),
                 ),
@@ -1683,7 +1683,7 @@ void main() {
             child: Column(
               children: <Widget>[
                 Focus(
-                  autofocus: true,
+                  autoFocus: true,
                   focusNode: focusNode1,
                   child: Container(),
                 ),

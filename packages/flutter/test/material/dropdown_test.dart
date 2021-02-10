@@ -81,7 +81,7 @@ Widget buildDropdown({
         isExpanded: isExpanded,
         // No underline attribute
         focusNode: focusNode,
-        autofocus: autofocus,
+        autoFocus: autoFocus,
         focusColor: focusColor,
         dropdownColor: dropdownColor,
         items: listItems,
@@ -105,7 +105,7 @@ Widget buildDropdown({
     isExpanded: isExpanded,
     underline: underline,
     focusNode: focusNode,
-    autofocus: autofocus,
+    autoFocus: autoFocus,
     focusColor: focusColor,
     dropdownColor: dropdownColor,
     items: listItems,
@@ -163,7 +163,7 @@ Widget buildFrame({
             isExpanded: isExpanded,
             underline: underline,
             focusNode: focusNode,
-            autofocus: autofocus,
+            autoFocus: autofocus,
             focusColor: focusColor,
             dropdownColor: dropdownColor,
             items: items,
@@ -2445,7 +2445,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return DropdownButton<String>(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   onChanged: (String? newValue) {
                     setState(() {
                       value = newValue;
@@ -2500,7 +2500,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return DropdownButton<String>(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   onChanged: (String? newValue) {
                     setState(() {
                       value = newValue;
@@ -2553,7 +2553,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return DropdownButton<String>(
                 focusNode: focusNode,
-                autofocus: true,
+                autoFocus: true,
                 onChanged: (String? newValue) {
                   setState(() {
                     value = newValue;
@@ -2616,7 +2616,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return DropdownButton<int>(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   onChanged: (int? newValue) {
                     setState(() {
                       value = newValue;
@@ -2679,7 +2679,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return DropdownButton<int>(
                   focusNode: focusNode,
-                  autofocus: true,
+                  autoFocus: true,
                   onChanged: (int? newValue) {
                     setState(() {
                       value = newValue;

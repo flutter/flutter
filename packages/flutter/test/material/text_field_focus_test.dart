@@ -17,7 +17,7 @@ void main() {
           child: Center(
             child: TextField(
               focusNode: focusNode,
-              autofocus: true,
+              autoFocus: true,
             ),
           ),
         ),
@@ -84,7 +84,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
-              autofocus: true,
+              autoFocus: true,
             ),
           ),
         ),

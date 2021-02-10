@@ -86,7 +86,7 @@ void main() {
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
-      expect(configuration.autocorrect, true);
+      expect(configuration.autoCorrect, true);
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
       expect(configuration.keyboardAppearance, Brightness.light);
@@ -97,7 +97,7 @@ void main() {
         inputType: TextInputType.text,
         readOnly: true,
         obscureText: true,
-        autocorrect: false,
+        autoCorrect: false,
         actionLabel: 'xyzzy',
       );
       final Map<String, dynamic> json = configuration.toJson();
@@ -116,7 +116,7 @@ void main() {
       const TextInputConfiguration configuration = TextInputConfiguration(
         inputType: TextInputType.numberWithOptions(decimal: true),
         obscureText: true,
-        autocorrect: false,
+        autoCorrect: false,
         actionLabel: 'xyzzy',
       );
       final Map<String, dynamic> json = configuration.toJson();

@@ -248,7 +248,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
-         autofocus: autofocus,
+         autoFocus: autofocus,
          padding: padding,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,

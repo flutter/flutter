@@ -222,7 +222,7 @@ void main() {
             LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
           },
           child: Focus(
-            autofocus: true,
+            autoFocus: true,
             child: Container(key: containerKey, width: 100, height: 100),
           ),
         ),
@@ -283,7 +283,7 @@ void main() {
               LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
             },
             child: Focus(
-              autofocus: true,
+              autoFocus: true,
               child: Container(key: containerKey, width: 100, height: 100),
             ),
           ),
@@ -320,7 +320,7 @@ void main() {
                 LogicalKeySet(LogicalKeyboardKey.keyA): Intent.doNothing,
               },
               child: Focus(
-                autofocus: true,
+                autoFocus: true,
                 child: Container(key: containerKey, width: 100, height: 100),
               ),
             ),
@@ -359,7 +359,7 @@ void main() {
                   LogicalKeySet(LogicalKeyboardKey.shift): Intent.doNothing,
                 },
                 child: Focus(
-                  autofocus: true,
+                  autoFocus: true,
                   child: Container(key: containerKey, width: 100, height: 100),
                 ),
               ),
@@ -385,7 +385,7 @@ void main() {
               shortcuts: <LogicalKeySet, Intent>{
                 LogicalKeySet(LogicalKeyboardKey.keyA): const TestIntent(),
               },
-              child: TextField(key: textFieldKey, autofocus: true),
+              child: TextField(key: textFieldKey, autoFocus: true),
             ),
           ),
         ),
@@ -418,7 +418,7 @@ void main() {
                     },
                   ),
                 },
-                child: TextField(key: textFieldKey, autofocus: true),
+                child: TextField(key: textFieldKey, autoFocus: true),
               ),
             ),
           ),
@@ -457,7 +457,7 @@ void main() {
                   actions: <Type, Action<Intent>>{
                     TestIntent: DoNothingAction(consumesKey: false),
                   },
-                  child: TextField(key: textFieldKey, autofocus: true),
+                  child: TextField(key: textFieldKey, autoFocus: true),
                 ),
               ),
             ),
@@ -496,7 +496,7 @@ void main() {
                   shortcuts: <LogicalKeySet, Intent>{
                     LogicalKeySet(LogicalKeyboardKey.keyA): DoNothingAndStopPropagationIntent(),
                   },
-                  child: TextField(key: textFieldKey, autofocus: true),
+                  child: TextField(key: textFieldKey, autoFocus: true),
                 ),
               ),
             ),

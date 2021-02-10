@@ -176,7 +176,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       _inputText = localizations.formatCompactDate(_selectedDate!);
       TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
       // Select the new text if we are auto focused and haven't selected the text before.
-      if (widget.autofocus && !_autoSelected) {
+      if (widget.autoFocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
           baseOffset: 0,
           extentOffset: _inputText!.length,
@@ -245,7 +245,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       keyboardType: TextInputType.datetime,
       onSaved: _handleSaved,
       onFieldSubmitted: _handleSubmitted,
-      autofocus: widget.autofocus,
+      autoFocus: widget.autoFocus,
       controller: _controller,
     );
   }

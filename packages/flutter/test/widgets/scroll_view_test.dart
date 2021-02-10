@@ -1271,7 +1271,7 @@ void main() {
             (int index) {
               return SliverToBoxAdapter(
                 child: Focus(
-                  autofocus: index == 0,
+                  autoFocus: index == 0,
                   child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
                 ),
               );

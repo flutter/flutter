@@ -47,7 +47,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
-          child: TextField(focusNode: focusNode, autofocus: true),
+          child: TextField(focusNode: focusNode, autoFocus: true),
         ),
       ),
     ));
@@ -59,7 +59,7 @@ void main() {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
 
     await tester.pumpWidget(FocusScope(
-      autofocus: true,
+      autoFocus: true,
       node: focusScopeNode,
       child: const MaterialApp(
         home: Text('Home'),

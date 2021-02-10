@@ -336,7 +336,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
          onLongPress: onLongPress,
          style: style,
          focusNode: focusNode,
-         autofocus: autofocus ?? false,
+         autoFocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _OutlinedButtonWithIconChild(icon: icon, label: label),
       );

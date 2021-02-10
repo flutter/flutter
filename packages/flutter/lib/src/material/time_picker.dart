@@ -1706,7 +1706,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
-          autofocus: widget.autofocus ?? false,
+          autoFocus: widget.autoFocus ?? false,
           expands: true,
           maxLines: null,
           inputFormatters: <TextInputFormatter>[

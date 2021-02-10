@@ -648,7 +648,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: TextField(
-            autofocus: true,
+            autoFocus: true,
             controller: controller,
           ),
         ),

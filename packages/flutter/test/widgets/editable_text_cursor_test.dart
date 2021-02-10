@@ -454,7 +454,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -533,7 +533,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -585,7 +585,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -630,7 +630,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
@@ -690,12 +690,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
               controller: controller,
               focusNode: focusNode,
-              autofocus: true,
+              autoFocus: true,
               style: textStyle,
               cursorColor: cursorColor,
             ),

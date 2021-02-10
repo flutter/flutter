@@ -715,7 +715,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         actions: _actionMap,
         shortcuts: _shortcutMap,
         focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
+        autoFocus: widget.autoFocus,
         enabled: _enabled,
         onShowFocusHighlight: _handleFocusHighlightChanged,
         onShowHoverHighlight: _handleHoverChanged,

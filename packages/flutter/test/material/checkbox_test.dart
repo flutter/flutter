@@ -413,7 +413,7 @@ void main() {
                   });
                 } : null,
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
                 focusNode: focusNode,
               );
             }),
@@ -482,7 +482,7 @@ void main() {
                 value: false,
                 onChanged: (bool? newValue) {},
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
                 splashRadius: splashRadius,
               );
             }),
@@ -579,7 +579,7 @@ void main() {
                   });
                 } : null,
                 focusColor: Colors.orange[500],
-                autofocus: true,
+                autoFocus: true,
               );
             }),
           ),
@@ -869,7 +869,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 focusNode: focusNode,
-                autofocus: true,
+                autoFocus: true,
                 value: true,
                 fillColor: fillColor,
                 onChanged: (bool? value) { },
@@ -935,7 +935,7 @@ void main() {
         home: Scaffold(
           body: Checkbox(
             focusNode: focusNode,
-            autofocus: focused,
+            autoFocus: focused,
             value: active,
             onChanged: (_) { },
             fillColor: MaterialStateProperty.all(fillColor),

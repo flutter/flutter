@@ -92,7 +92,7 @@ void main() {
           value: true,
           onChanged: (_) {},
           title: Text('Hello', key: childKey),
-          autofocus: true,
+          autoFocus: true,
         ),
       ),
     );
@@ -106,7 +106,7 @@ void main() {
           value: true,
           onChanged: null,
           title: Text('Hello', key: childKey),
-          autofocus: true,
+          autoFocus: true,
         ),
       ),
     );

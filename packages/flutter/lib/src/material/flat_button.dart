@@ -214,7 +214,7 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
-         autofocus: autofocus,
+         autoFocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,

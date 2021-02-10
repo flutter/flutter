@@ -122,7 +122,7 @@ void main() {
           body: Checkbox(
             onChanged: (bool? value) {},
             value: selected,
-            autofocus: autofocus,
+            autoFocus: autofocus,
           ),
         ),
       );
@@ -208,7 +208,7 @@ void main() {
             body: Checkbox(
               onChanged: (bool? value) { },
               value: selected,
-              autofocus: autofocus,
+              autoFocus: autofocus,
               mouseCursor: mouseCursor,
               fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {

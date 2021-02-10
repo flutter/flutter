@@ -266,7 +266,7 @@ void main() {
 
     final SelectableText selectableText = tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
-    expect(selectableText.autofocus, false);
+    expect(selectableText.autoFocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
     expect(selectableText.cursorHeight, isNull);
@@ -311,7 +311,7 @@ void main() {
     final SelectableText selectableText =
     tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
-    expect(selectableText.autofocus, false);
+    expect(selectableText.autoFocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
     expect(selectableText.cursorHeight, isNull);
@@ -3653,7 +3653,7 @@ void main() {
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
       textScaleFactor: 1.0,
-      autofocus: true,
+      autoFocus: true,
       showCursor: true,
       minLines: 2,
       maxLines: 10,

@@ -5286,7 +5286,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           absorbing: false, // it's mutated directly by _cancelActivePointers above
           child: FocusScope(
             node: focusScopeNode,
-            autofocus: true,
+            autoFocus: true,
             child: UnmanagedRestorationScope(
               bucket: bucket,
               child: Overlay(
