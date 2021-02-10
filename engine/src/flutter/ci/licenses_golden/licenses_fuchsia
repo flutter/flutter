@@ -1,4 +1,4 @@
-Signature: 4fe1f80cddd0639d39f21836af583d61
+Signature: 6d7a11ee50bfc5003496ab017dfcc6d9
 
 UNUSED LICENSES:
 
@@ -2380,7 +2380,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/sequencer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/single_threaded_executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/thread_safety.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/traits.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/variant.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/promise.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/scheduler.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/scope.cc
@@ -2585,7 +2584,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/natural_types_header.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/natural_types_implementation.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/types.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/source_location.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands_sizing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands_sizing.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/bit.h
@@ -3224,7 +3222,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/barrier.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/in_place_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/storage_internal.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/string_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/health.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/hierarchy.cc
