@@ -262,7 +262,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _shouldStart(ScrollNotification notification) {
-    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
+    return ((notification is ScrollStartNotification && notification.dragDetails != null)
+            || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
       && notification.metrics.extentBefore == 0.0
       && _mode == null
       && _start(notification.metrics.axisDirection);
