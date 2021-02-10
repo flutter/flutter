@@ -5,12 +5,9 @@
 #ifndef SHELL_PLATFORM_DARWIN_GRAPHICS_DARWIN_CONTEXT_METAL_H_
 #define SHELL_PLATFORM_DARWIN_GRAPHICS_DARWIN_CONTEXT_METAL_H_
 
-#import <CoreVideo/CVMetalTextureCache.h>
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
-#import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -33,13 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
                      commandQueue:(id<MTLCommandQueue>)commandQueue;
 
 /**
- * Creates an external texture with the specified ID and contents.
- */
-- (FlutterDarwinExternalTextureMetal*)
-    createExternalTextureWithIdentifier:(int64_t)textureID
-                                texture:(NSObject<FlutterTexture>*)texture;
-
-/**
  * MTLDevice that is backing this context.s
  */
 @property(nonatomic, readonly) id<MTLDevice> device;
@@ -59,11 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Skia GrContext that is used for resources (uploading textures etc).
  */
 @property(nonatomic, readonly) sk_sp<GrDirectContext> resourceContext;
-
-/*
- * Texture cache for external textures.
- */
-@property(nonatomic, readonly) CVMetalTextureCacheRef textureCache;
 
 @end
 
