@@ -29,33 +29,26 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
   'shelf': '0.7.5',
-  // Dart team owned nnbd deps
-  'async': '2.5.0-nullsafety.3',
-  'boolean_selector': '2.1.0-nullsafety.3',
-  'characters': '1.1.0-nullsafety.5',
-  'charcode': '1.2.0-nullsafety.3',
-  'clock': '1.1.0-nullsafety.3',
-  'collection': '1.15.0-nullsafety.5',
-  'intl': '0.17.0-nullsafety.2',
-  'fake_async': '1.2.0-nullsafety.3',
-  'js': '0.6.3-nullsafety.3',
-  'matcher': '0.12.10-nullsafety.3',
-  'meta': '1.3.0-nullsafety.6',
-  'path': '1.8.0-nullsafety.3',
-  'pedantic': '1.10.0-nullsafety.3',
-  'pool': '1.5.0-nullsafety.3',
-  'source_maps': '0.10.10-nullsafety.3',
-  'source_map_stack_trace': '2.1.0-nullsafety.4',
-  'source_span': '1.8.0-nullsafety.4',
-  'stack_trace': '1.10.0-nullsafety.6',
-  'stream_channel': '2.1.0-nullsafety.3',
-  'string_scanner': '1.1.0-nullsafety.3',
-  'term_glyph': '1.2.0-nullsafety.3',
-  'test': '1.16.0-nullsafety.9',
-  'test_api': '0.2.19-nullsafety.6',
-  'test_core': '0.3.12-nullsafety.9',
-  'typed_data': '1.3.0-nullsafety.5',
-  'vector_math': '2.1.0-nullsafety.5',
+  // Pinned for 1.26.x release branch to allow updating stable null-safe
+  '_fe_analyzer_shared': '12.0.0',
+  'analyzer': '0.40.6',
+  'cli_util': '0.2.0',
+  'coverage': '0.14.2',
+  'devtools': '0.9.6+3',
+  'devtools_shared': '0.9.6+3',
+  'file_testing': '2.1.0',
+  'mime': '0.9.7',
+  'node_preamble': '1.4.12',
+  'pubspec_parse': '0.1.7',
+  'shelf_packages_handler': '2.0.0',
+  'shelf_static': '0.2.9+1',
+  'shelf_web_socket': '0.2.3',
+  'source_span': '1.8.0',
+  'sse': '3.6.0',
+  'vm_service': '5.5.0',
+  'watcher': '0.9.7+15',
+  'webkit_inspection_protocol': '0.7.4',
+  'yaml': '2.2.1',
   // Flutter team owned nnbd deps
   'platform': '3.0.0-nullsafety.4',
   'file': '6.0.0-nullsafety.4',
@@ -729,6 +722,23 @@ class PubspecYaml {
   /// This returns all regular dependencies and all dev dependencies.
   Iterable<PubspecDependency> get allDependencies sync* {
     for (final PubspecLine data in inputData) {
+      // Only for branch, to allow rolling nullsafe packages and work around not
+      // being able to pin transitive deps.
+      const List<String> transitiveDepsAllowlist = <String>[
+        '_fe_analyzer_shared',
+        'analyzer',
+        'cli_util',
+        'devtools',
+        'devtools_shared',
+        'node_preamble',
+        'shelf_packages_handler',
+        'source_span',
+        'sse',
+        'watcher',
+      ];
+      if (data is PubspecDependency && transitiveDepsAllowlist.contains(data.name)) {
+        yield data;
+      }
       if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive) {
         yield data;
       }
