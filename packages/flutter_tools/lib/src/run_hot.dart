@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
@@ -78,6 +79,7 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -88,6 +90,7 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool benchmarkMode;
@@ -221,10 +224,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
-
-    unawaited(residentDevtoolsHandler.callConnectedVmServiceUriExtension(
-      flutterDevices,
-    ));
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);

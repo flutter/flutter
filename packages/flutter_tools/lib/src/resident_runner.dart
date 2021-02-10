@@ -758,6 +758,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -775,7 +776,7 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    _residentDevtoolsHandler = ResidentDevtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
   @protected
