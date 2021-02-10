@@ -4458,12 +4458,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool _debugCheckIsPagelessRoute(Route<dynamic> route) {
     assert((){
       if (route.settings is Page) {
-        // It is a page-based route.
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: FlutterError(
-              'A page-based route should not be added using the imperative api, provide a '
-              'new list with the corresponding Page to Navigator.pages instead.'
+              'A page-based route should not be added using the imperative api. '
+              'Provide a new list with the corresponding Page to Navigator.pages instead.'
             ),
             library: 'widget library',
             stack: StackTrace.current,

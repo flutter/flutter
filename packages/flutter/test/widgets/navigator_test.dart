@@ -2676,8 +2676,8 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   A page-based route should not be added using the imperative api,\n'
-          '   provide a new list with the corresponding Page to Navigator.pages\n'
+          '   A page-based route should not be added using the imperative api.\n'
+          '   Provide a new list with the corresponding Page to Navigator.pages\n'
           '   instead.\n'
           ''
         ),
