@@ -133,7 +133,7 @@ class CanvasParagraph implements EngineParagraph {
         domRenderer.createElement('p') as html.HtmlElement;
 
     // 1. Set paragraph-level styles.
-    _applyParagraphStyleToElement(element: rootElement, style: paragraphStyle);
+    _applyNecessaryParagraphStyles(element: rootElement, style: paragraphStyle);
     final html.CssStyleDeclaration cssStyle = rootElement.style;
     cssStyle
       ..position = 'absolute'
@@ -256,6 +256,31 @@ class CanvasParagraph implements EngineParagraph {
   @override
   List<EngineLineMetrics> computeLineMetrics() {
     return _layoutService.lines;
+  }
+}
+
+/// Applies a paragraph [style] to an [element], translating the properties to
+/// their corresponding CSS equivalents.
+///
+/// As opposed to [_applyParagraphStyleToElement], this method only applies
+/// styles that are necessary at the paragraph level. Other styles (e.g. font
+/// size) are always applied at the span level so they aren't needed at the
+/// paragraph level.
+void _applyNecessaryParagraphStyles({
+  required html.HtmlElement element,
+  required EngineParagraphStyle style,
+}) {
+  final html.CssStyleDeclaration cssStyle = element.style;
+
+  if (style._textAlign != null) {
+    cssStyle.textAlign = textAlignToCssValue(
+        style._textAlign, style._textDirection ?? ui.TextDirection.ltr);
+  }
+  if (style._lineHeight != null) {
+    cssStyle.lineHeight = '${style._lineHeight}';
+  }
+  if (style._textDirection != null) {
+    cssStyle.direction = _textDirectionToCss(style._textDirection);
   }
 }
 

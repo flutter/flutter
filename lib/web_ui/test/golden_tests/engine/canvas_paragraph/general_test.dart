@@ -151,7 +151,7 @@ void testMain() async {
     canvas.drawParagraph(paragraph, offset);
     offset = offset.translate(0, paragraph.height + 10);
 
-    return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_dom');
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_dom', maxDiffRatePercent: 0.3);
   });
 
   void testAlignAndTransform(EngineCanvas canvas) {
@@ -174,8 +174,7 @@ void testMain() async {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.rotate(math.pi / 4);
-      final Rect rect =
-          Rect.fromLTRB(0.0, 0.0, 150.0, paragraph.height);
+      final Rect rect = Rect.fromLTRB(0.0, 0.0, 150.0, paragraph.height);
       canvas.drawRect(rect, SurfacePaintData()..color = black);
       canvas.drawParagraph(paragraph, Offset.zero);
       canvas.restore();
@@ -196,6 +195,35 @@ void testMain() async {
     final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
     testAlignAndTransform(canvas);
     return takeScreenshot(canvas, bounds, 'canvas_paragraph_align_transform_dom');
+  });
+
+  void testGiantParagraphStyles(EngineCanvas canvas) {
+    final CanvasParagraph paragraph = rich(
+      ParagraphStyle(fontFamily: 'Roboto', fontSize: 80.0),
+      (CanvasParagraphBuilder builder) {
+        builder.pushStyle(EngineTextStyle.only(color: yellow, fontSize: 24.0));
+        builder.addText('Lorem ');
+        builder.pushStyle(EngineTextStyle.only(color: red, fontSize: 32.0));
+        builder.addText('ipsum');
+      },
+    )..layout(constrain(double.infinity));
+    final Rect rect = Rect.fromLTRB(0.0, 0.0, paragraph.maxIntrinsicWidth, paragraph.height);
+    canvas.drawRect(rect, SurfacePaintData()..color = black);
+    canvas.drawParagraph(paragraph, Offset.zero);
+  }
+
+  test('giant paragraph style', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final canvas = BitmapCanvas(bounds, RenderStrategy());
+    testGiantParagraphStyles(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_paragraph_style');
+  });
+
+  test('giant paragraph style (DOM)', () {
+    const Rect bounds = Rect.fromLTWH(0, 0, 300, 200);
+    final canvas = DomCanvas(domRenderer.createElement('flt-picture'));
+    testGiantParagraphStyles(canvas);
+    return takeScreenshot(canvas, bounds, 'canvas_paragraph_giant_paragraph_style_dom');
   });
 
   test('paints spans with varying heights/baselines', () {
