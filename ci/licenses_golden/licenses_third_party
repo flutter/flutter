@@ -1,4 +1,4 @@
-Signature: 012b964406f7fb58d8674a197bceeb88
+Signature: 55f133f9c4c47b90acafb5efccb7f162
 
 UNUSED LICENSES:
 
@@ -9448,6 +9448,10 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytes
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_2/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_2/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_2/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_3/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_3/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_3/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct16bytesMixedx10_3/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct3bytesx10/arm64_linux.expect
@@ -9490,6 +9494,20 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLa
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_VeryLargeStruct/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatarray/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/arm64_linux.expect
@@ -9504,6 +9522,20 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_linux.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_macos.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_floatx4/x64_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm64_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/arm_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_android.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/ia32_win.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_ios.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_linux.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_macos.expect
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8array/x64_win.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/arm64_android.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/arm64_ios.expect
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/unit_tests/struct_int8x10/arm64_linux.expect
@@ -9785,55 +9817,6 @@ FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/errors.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
-ORIGIN: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/calloc.dart + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart2/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiCall/dart2/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart2/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart/calloc.dart
-FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart2/calloc.dart
-FILE: ../../../third_party/dart/samples/ffi/calloc.dart
-FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/calloc.dart
-FILE: ../../../third_party/dart/samples_2/ffi/calloc.dart
-FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
-FILE: ../../../third_party/dart/samples_2/ffi/sqlite/lib/src/ffi/calloc.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/ffi/allocation.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -11886,6 +11869,44 @@ FILE: ../../../third_party/dart/runtime/platform/splay-tree-inl.h
 FILE: ../../../third_party/dart/runtime/platform/splay-tree.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2010, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h
+FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/allocation.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
