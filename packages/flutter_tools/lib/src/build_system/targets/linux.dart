@@ -193,8 +193,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   const DebugBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => targetPlatform == TargetPlatform.linux_x64 ?
-      'debug_bundle_linux-x64_assets' : 'debug_bundle_linux-arm64_assets';
+  String get name => 'debug_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
 
   @override
   List<Source> get inputs => <Source>[
@@ -211,8 +210,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   const ProfileBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => targetPlatform == TargetPlatform.linux_x64 ?
-      'profile_bundle_linux-x64_assets' : 'profile_bundle_linux-arm64_assets';
+  String get name => 'profile_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -228,8 +226,7 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   const ReleaseBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => targetPlatform == TargetPlatform.linux_x64 ?
-      'release_bundle_linux-x64_assets' : 'release_bundle_linux-arm64_assets';
+  String get name => 'release_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
