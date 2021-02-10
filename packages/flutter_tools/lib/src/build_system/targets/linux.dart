@@ -28,7 +28,6 @@ const String _kLinuxDepfile = 'linux_engine_sources.d';
 class UnpackLinux extends Target {
   const UnpackLinux(this.targetPlatform);
 
-  /// The specific Android ABI we are building for.
   final TargetPlatform targetPlatform;
 
   @override
@@ -96,7 +95,6 @@ class UnpackLinux extends Target {
 abstract class BundleLinuxAssets extends Target {
   const BundleLinuxAssets(this.targetPlatform);
 
-  /// The specific Android ABI we are building for.
   final TargetPlatform targetPlatform;
 
   @override
