@@ -53,7 +53,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///         );
 ///       },
 ///     ),
-///   );
+///   ),
 /// }
 ///
 /// ```
@@ -142,8 +142,7 @@ class Scrollbar extends StatefulWidget {
 }
 
 class _ScrollbarState extends State<Scrollbar> {
-  bool get _useCupertinoScrollbar =>
-      Theme.of(context).platform == TargetPlatform.iOS;
+  bool get _useCupertinoScrollbar => Theme.of(context).platform == TargetPlatform.iOS;
 
   @override
   Widget build(BuildContext context) {
@@ -152,11 +151,9 @@ class _ScrollbarState extends State<Scrollbar> {
         child: widget.child,
         isAlwaysShown: widget.isAlwaysShown ?? false,
         thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: widget.thickness ??
-            CupertinoScrollbar.defaultThicknessWhileDragging,
+        thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
         radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging:
-            widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        radiusWhileDragging: widget.radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: widget.controller,
         notificationPredicate: widget.notificationPredicate,
       );
@@ -186,18 +183,17 @@ class _MaterialScrollbar extends RawScrollbar {
     Radius? radius,
     ScrollNotificationPredicate? notificationPredicate,
   }) : super(
-          key: key,
-          child: child,
-          controller: controller,
-          isAlwaysShown: isAlwaysShown,
-          thickness: thickness,
-          radius: radius,
-          fadeDuration: _kScrollbarFadeDuration,
-          timeToFade: _kScrollbarTimeToFade,
-          pressDuration: Duration.zero,
-          notificationPredicate:
-              notificationPredicate ?? defaultScrollNotificationPredicate,
-        );
+         key: key,
+         child: child,
+         controller: controller,
+         isAlwaysShown: isAlwaysShown,
+         thickness: thickness,
+         radius: radius,
+         fadeDuration: _kScrollbarFadeDuration,
+         timeToFade: _kScrollbarTimeToFade,
+         pressDuration: Duration.zero,
+         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+       );
 
   final bool? showTrackOnHover;
   final double? hoverThickness;
@@ -216,16 +212,14 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late bool _useAndroidScrollbar;
 
   @override
-  bool get showScrollbar =>
-      widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
+  bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
 
-  bool get _showTrackOnHover =>
-      widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
+  bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
-        if (_dragIsActive) MaterialState.dragged,
-        if (_hoverIsActive) MaterialState.hovered,
-      };
+    if (_dragIsActive) MaterialState.dragged,
+    if (_hoverIsActive) MaterialState.hovered,
+  };
 
   MaterialStateProperty<Color> get _thumbColor {
     final Color onSurface = _colorScheme.onSurface;
@@ -268,10 +262,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackColor?.resolve(states) ??
-            (brightness == Brightness.light
-                ? onSurface.withOpacity(0.03)
-                : onSurface.withOpacity(0.05));
+        return _scrollbarTheme.trackColor?.resolve(states)
+          ?? (brightness == Brightness.light
+            ? onSurface.withOpacity(0.03)
+            : onSurface.withOpacity(0.05));
       }
       return const Color(0x00000000);
     });
@@ -282,10 +276,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackBorderColor?.resolve(states) ??
-            (brightness == Brightness.light
-                ? onSurface.withOpacity(0.1)
-                : onSurface.withOpacity(0.25));
+        return _scrollbarTheme.trackBorderColor?.resolve(states)
+          ?? (brightness == Brightness.light
+            ? onSurface.withOpacity(0.1)
+            : onSurface.withOpacity(0.25));
       }
       return const Color(0x00000000);
     });
@@ -294,13 +288,13 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover)
-        return widget.hoverThickness ??
-            _scrollbarTheme.thickness?.resolve(states) ??
-            _kScrollbarThicknessWithTrack;
+        return widget.hoverThickness
+          ?? _scrollbarTheme.thickness?.resolve(states)
+          ?? _kScrollbarThicknessWithTrack;
       // The default scrollbar thickness is smaller on mobile.
-      return widget.thickness ??
-          _scrollbarTheme.thickness?.resolve(states) ??
-          (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
+      return widget.thickness
+        ?? _scrollbarTheme.thickness?.resolve(states)
+        ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
     });
   }
 
@@ -344,11 +338,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness.resolve(_states)
-      ..radius = widget.radius ??
-          _scrollbarTheme.radius ??
-          (_useAndroidScrollbar ? null : _kScrollbarRadius)
-      ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ??
-          (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
+      ..radius = widget.radius ?? _scrollbarTheme.radius ?? (_useAndroidScrollbar ? null : _kScrollbarRadius)
+      ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.of(context).padding;
@@ -357,17 +348,13 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    setState(() {
-      _dragIsActive = true;
-    });
+    setState(() { _dragIsActive = true; });
   }
 
   @override
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     super.handleThumbPressEnd(localPosition, velocity);
-    setState(() {
-      _dragIsActive = false;
-    });
+    setState(() { _dragIsActive = false; });
   }
 
   @override
@@ -376,15 +363,11 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position)) {
       // Pointer is hovering over the scrollbar
-      setState(() {
-        _hoverIsActive = true;
-      });
+      setState(() { _hoverIsActive = true; });
       _hoverAnimationController.forward();
     } else if (_hoverIsActive) {
       // Pointer was, but is no longer over painted scrollbar.
-      setState(() {
-        _hoverIsActive = false;
-      });
+      setState(() { _hoverIsActive = false; });
       _hoverAnimationController.reverse();
     }
   }
@@ -392,9 +375,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void handleHoverExit(PointerExitEvent event) {
     super.handleHoverExit(event);
-    setState(() {
-      _hoverIsActive = false;
-    });
+    setState(() { _hoverIsActive = false; });
     _hoverAnimationController.reverse();
   }
 
