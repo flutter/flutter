@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -28,17 +27,20 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
+    @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
-        _persistentToolState = persistentToolState;
+        _persistentToolState = persistentToolState,
+        _httpClient = httpClient ?? io.HttpClient();
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
   final PersistentToolState _persistentToolState;
+  final io.HttpClient _httpClient;
 
   io.Process _devToolsProcess;
 
@@ -53,10 +55,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       bool offline = false;
       try {
         const String pubHostedUrlKey = 'PUB_HOSTED_URL';
+        Uri uri;
         if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
+          uri = Uri.parse(_platform.environment[pubHostedUrlKey]);
         } else {
-          await http.head(Uri.https('pub.dev', ''));
+          uri = Uri.https('pub.dev', '');
+        }
+        final io.HttpClientRequest request = await _httpClient.headUrl(uri);
+        final io.HttpClientResponse response = await request.close();
+        await response.drain<void>();
+        if (response.statusCode != io.HttpStatus.ok) {
+          offline = true;
         }
       } on Exception {
         offline = true;
