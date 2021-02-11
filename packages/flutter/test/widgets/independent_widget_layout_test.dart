@@ -32,7 +32,7 @@ class OffscreenWidgetTree {
   final PipelineOwner pipelineOwner = PipelineOwner();
   RenderObjectToWidgetElement<RenderBox>? root;
 
-  void pumpWidget(Widget app) {
+  void pumpWidget(Widget? app) {
     root = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
@@ -212,4 +212,45 @@ void main() {
     expect(offscreenFocus.hasFocus, isTrue);
   });
 
+  testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
+    final OffscreenWidgetTree tree = OffscreenWidgetTree();
+    final List<WidgetState> states = <WidgetState>[];
+    tree.pumpWidget(SizedBox(child: TestStates(states: states)));
+    expect(states, <WidgetState>[WidgetState.initialized]);
+    expect(tree.renderView.child, isNotNull);
+    tree.pumpWidget(null); // The root node should be allowed to have no child.
+    expect(states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
+    expect(tree.renderView.child, isNull);
+  });
+}
+
+enum WidgetState {
+  initialized,
+  disposed,
+}
+
+class TestStates extends StatefulWidget {
+  const TestStates({required this.states});
+
+  final List<WidgetState> states;
+
+  @override
+  TestStatesState createState() => TestStatesState();
+}
+
+class TestStatesState extends State<TestStates> {
+  @override
+  void initState() {
+    super.initState();
+    widget.states.add(WidgetState.initialized);
+  }
+
+  @override
+  void dispose() {
+    widget.states.add(WidgetState.disposed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
 }

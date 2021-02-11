@@ -2307,6 +2307,67 @@ abstract class BuildContext {
 /// To assign a build owner to a tree, use the
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows how to build an off-screen widget tree used to measure
+/// the size of the rendered tree. For some use cases, the simpler [Offstage]
+/// widget may be a better alternative to this approach.
+///
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// import 'package:flutter/widgets.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   WidgetsFlutterBinding.ensureInitialized();
+///   print(measureWidget(const SizedBox(width: 640, height: 480)));
+/// }
+///
+/// Size measureWidget(Widget widget) {
+///   final PipelineOwner pipelineOwner = PipelineOwner();
+///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
+///   final BuildOwner buildOwner = BuildOwner(focusManager: FailingFocusManager());
+///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
+///     container: rootView,
+///     debugShortDescription: '[root]',
+///     child: widget,
+///   ).attachToRenderTree(buildOwner);
+///   try {
+///     rootView.scheduleInitialLayout();
+///     pipelineOwner.flushLayout();
+///     return rootView.size;
+///   } finally {
+///     // Clean up.
+///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
+///     buildOwner.finalizeTree();
+///   }
+/// }
+///
+/// // The default FocusManager, when created, modifies some static properties
+/// // that we don't want to modify, which is why we use a failing implementation
+/// // here.
+/// class FailingFocusManager implements FocusManager {
+///   @override
+///   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+///
+///   @override
+///   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => 'FailingFocusManager';
+/// }
+///
+/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+///   @override
+///   void performLayout() {
+///     assert(child != null);
+///     child!.layout(const BoxConstraints(), parentUsesSize: true);
+///     size = child!.size;
+///   }
+///
+///   @override
+///   void debugAssertDoesMeetConstraints() => true;
+/// }
+/// ```
+/// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
   BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
