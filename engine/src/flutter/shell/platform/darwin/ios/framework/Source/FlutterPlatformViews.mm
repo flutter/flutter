@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
@@ -938,7 +939,12 @@ void FlutterPlatformViewsController::ResetFrameState() {
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  [_flutterViewController.get() touchesCancelled:touches withEvent:event];
+  // In the event of platform view is removed, iOS generates a "stationary" change type instead of
+  // "cancelled" change type.
+  // Flutter needs all the cancelled touches to be "cancelled" change types in order to correctly
+  // handle gesture sequence.
+  // We always override the change type to "cancelled".
+  [((FlutterViewController*)_flutterViewController.get()) forceTouchesCancelled:touches];
   _currentTouchPointersCount -= touches.count;
   if (_currentTouchPointersCount == 0) {
     self.state = UIGestureRecognizerStateFailed;
