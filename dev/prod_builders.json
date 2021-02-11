@@ -157,6 +157,12 @@
          "flaky": false
       },
       {
+         "name": "Linux flutter_engine_group_performance",
+         "repo": "flutter",
+         "task_name": "linux_flutter_engine_group_performance",
+         "flaky": true
+      },
+      {
          "name": "Linux flutter_gallery__back_button_memory",
          "repo": "flutter",
          "task_name": "linux_flutter_gallery__back_button_memory",
