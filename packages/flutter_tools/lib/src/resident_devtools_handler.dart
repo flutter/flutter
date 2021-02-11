@@ -71,7 +71,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       flutterDevices,
     );
     await _callConnectedVmServiceUriExtension(
-      flutterDevices
+      flutterDevices,
     );
   }
 
