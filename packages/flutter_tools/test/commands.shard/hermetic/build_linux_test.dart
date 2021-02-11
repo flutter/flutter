@@ -229,7 +229,7 @@ void main() {
     // This contains a mix of routine build output and various types of errors
     // (Dart error, compile error, link error), edited down for compactness.
     const String stdout = r'''
-ninja: Entering directory `build/linux/x64/release
+ninja: Entering directory `build/linux/x64/release'
 [1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
@@ -302,7 +302,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
-  testUsingContext('Linux build --debug passes debug mode to cmake and ninja', () async {
+  testUsingContext('Linux on x64 build --debug passes debug mode to cmake and ninja', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -321,7 +321,26 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
-  testUsingContext('Linux build --profile passes profile mode to make', () async {
+  testUsingContext('Linux on ARM64 build --debug passes debug mode to cmake and ninja', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('debug', target: 'arm64'),
+      ninjaCommand('debug', target: 'arm64'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+  });
+
+  testUsingContext('Linux on x64 build --profile passes profile mode to make', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -338,6 +357,37 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
+
+  testUsingContext('Linux on ARM64 build --profile passes profile mode to make', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('profile', target: 'arm64'),
+      ninjaCommand('profile', target: 'arm64'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--profile', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+  });
+
+  testUsingContext('Not support Linux cross-build for x64 on arm64', () async {
+    final BuildCommand command = BuildCommand();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']
+    ), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
 
   testUsingContext('Linux build configures CMake exports', () async {
@@ -490,57 +540,48 @@ set(BINARY_NAME "fizz_bar")
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
-  testUsingContext('Build on x64 hosts passes and the bundle is saved the path containing the architecture name.', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release'),
-      ninjaCommand('release'),
-    ]);
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    );
-
-    expect(fileSystem.directory('build/linux/x64/release').existsSync(), isTrue);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-  });
-
-  testUsingContext('Build on arm64 hosts passes and the bundle is saved the path containing the architecture name.', () async {
+  testUsingContext('Linux on ARM64 build --release passes, and check if the LinuxBuildDirectory for arm64 can be referenced correctly by using analytics', () async {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),
-      ninjaCommand('release', target: 'arm64'),
+      ninjaCommand('release', target: 'arm64', onRun: () {
+        fileSystem.file('build/flutter_size_01/snapshot.linux-arm64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+[
+  {
+    "l": "dart:_internal",
+    "c": "SubListIterable",
+    "n": "[Optimized] skip",
+    "s": 2400
+  }
+]''');
+        fileSystem.file('build/flutter_size_01/trace.linux-arm64.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+      }),
     ]);
 
+    fileSystem.file('build/linux/arm64/release/bundle/libapp.so')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(10000, 0));
+
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
+      const <String>['build', 'linux', '--no-pub', '--analyze-size']
     );
 
-    expect(fileSystem.directory('build/linux/arm64/release').existsSync(), isTrue);
+    // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
+    expect(testLogger.statusText,  contains('libapp.so (Dart AOT)'));
+    expect(usage.events, contains(
+      const TestUsageEvent('code-size-analysis', 'linux'),
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-  });
-
-  testUsingContext('Not support Linux cross-build for x64 on arm64', () async {
-    final BuildCommand command = BuildCommand();
-
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']
-    ), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Usage: () => usage,
     OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
 }
