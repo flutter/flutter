@@ -5,7 +5,6 @@
 package io.flutter.view;
 
 import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.FlutterJNI;
 
 /**
@@ -25,7 +24,6 @@ public final class FlutterCallbackInformation {
    *     `dart:ui`.
    * @return an instance of FlutterCallbackInformation for the provided handle.
    */
-  @NonNull
   public static FlutterCallbackInformation lookupCallbackInformation(long handle) {
     return FlutterJNI.nativeLookupCallbackInformation(handle);
   }
