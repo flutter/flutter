@@ -46,6 +46,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+  static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
@@ -53,11 +54,12 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     // this method is guaranteed not to return a Future that throws.
     try {
       bool offline = false;
+      bool useOverrideUrl = false;
       try {
-        const String pubHostedUrlKey = 'PUB_HOSTED_URL';
         Uri uri;
-        if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          uri = Uri.parse(_platform.environment[pubHostedUrlKey]);
+        if (_platform.environment.containsKey(_pubHostedUrlKey)) {
+          useOverrideUrl = true;
+          uri = Uri.parse(_platform.environment[_pubHostedUrlKey]);
         } else {
           uri = Uri.https('pub.dev', '');
         }
@@ -69,6 +71,16 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         }
       } on Exception {
         offline = true;
+      } on ArgumentError {
+        if (!useOverrideUrl) {
+          rethrow;
+        }
+        // The user supplied a custom pub URL that was invalid, the pretend to be offline
+        // and inform them that the URL was invalid.
+        offline = true;
+        _logger.printError(
+          'PUB_HOSTED_URL was set to an invalid URL: "${_platform.environment[_pubHostedUrlKey]}".'
+        );
       }
 
       if (offline) {
