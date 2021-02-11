@@ -13,10 +13,27 @@ import 'base/logger.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
+typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher, ResidentRunner, Logger);
+
+ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher launcher, ResidentRunner runner, Logger logger) {
+  return FlutterResidentDevtoolsHandler(launcher, runner, logger);
+}
+
 /// Helper class to manage the life-cycle of devtools and its interaction with
 /// the resident runner.
-class ResidentDevtoolsHandler {
-  ResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
+abstract class ResidentDevtoolsHandler {
+  /// The current devtools server, or null if one is not running.
+  DevToolsServerAddress get activeDevToolsServer;
+
+  Future<void> hotRestart(List<FlutterDevice> flutterDevices);
+
+  Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices});
+
+  Future<void> shutdown();
+}
+
+class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
+  FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
 
   final DevtoolsLauncher _devToolsLauncher;
   final ResidentRunner _residentRunner;
@@ -24,10 +41,11 @@ class ResidentDevtoolsHandler {
   bool _shutdown = false;
   bool _served = false;
 
-  /// The current devtools server, or null if one is not running.
+  @override
   DevToolsServerAddress get activeDevToolsServer =>  _devToolsLauncher?.activeDevToolsServer;
 
   // This must be guaranteed not to return a Future that fails.
+  @override
   Future<void> serveAndAnnounceDevTools({
     Uri devToolsServerAddress,
     @required List<FlutterDevice> flutterDevices,
@@ -48,12 +66,16 @@ class ResidentDevtoolsHandler {
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeObservatory: false);
     }
-    await maybeCallDevToolsUriServiceExtension(
+    await _waitForExtensions(flutterDevices);
+    await _maybeCallDevToolsUriServiceExtension(
+      flutterDevices,
+    );
+    await _callConnectedVmServiceUriExtension(
       flutterDevices,
     );
   }
 
-   Future<void> maybeCallDevToolsUriServiceExtension(
+   Future<void> _maybeCallDevToolsUriServiceExtension(
      List<FlutterDevice> flutterDevices,
    ) async {
      if (_devToolsLauncher?.activeDevToolsServer == null) {
@@ -69,7 +91,6 @@ class ResidentDevtoolsHandler {
   Future<void> _callDevToolsUriExtension(
     FlutterDevice device,
   ) async {
-    await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
     try {
       await _invokeRpcOnFirstView(
         'ext.flutter.activeDevToolsServerAddress',
@@ -86,7 +107,15 @@ class ResidentDevtoolsHandler {
     }
   }
 
-  Future<void> callConnectedVmServiceUriExtension(List<FlutterDevice> flutterDevices) async {
+  Future<void> _waitForExtensions(List<FlutterDevice> flutterDevices) async {
+    await Future.wait(<Future<void>>[
+      for (final FlutterDevice device in flutterDevices)
+        if (device.vmService != null)
+          waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri'),
+    ]);
+  }
+
+  Future<void> _callConnectedVmServiceUriExtension(List<FlutterDevice> flutterDevices) async {
     await Future.wait(<Future<void>>[
       for (final FlutterDevice device in flutterDevices)
         if (device.vmService != null)
@@ -95,24 +124,24 @@ class ResidentDevtoolsHandler {
   }
 
   Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
-    if (device.vmService.httpAddress != null || device.vmService.wsAddress != null) {
-      final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
-      await waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri');
-      try {
-        await _invokeRpcOnFirstView(
-          'ext.flutter.connectedVmServiceUri',
-          device: device,
-          params: <String, dynamic>{
-            'value': uri.toString(),
-          },
-        );
-      } on Exception catch (e) {
-        _logger.printError(e.toString());
-        _logger.printError(
-          'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
-          ' will not show in Flutter errors.',
-        );
-      }
+    final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
+    if (uri == null) {
+      return;
+    }
+    try {
+      await _invokeRpcOnFirstView(
+        'ext.flutter.connectedVmServiceUri',
+        device: device,
+        params: <String, dynamic>{
+          'value': uri.toString(),
+        },
+      );
+    } on Exception catch (e) {
+      _logger.printError(e.toString());
+      _logger.printError(
+        'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
+        ' will not show in Flutter errors.',
+      );
     }
   }
 
@@ -121,6 +150,9 @@ class ResidentDevtoolsHandler {
     @required Map<String, dynamic> params,
   }) async {
     final List<FlutterView> views = await device.vmService.getFlutterViews();
+    if (views.isEmpty) {
+      return;
+    }
     await device.vmService
       .invokeFlutterExtensionRpcRaw(
         method,
@@ -130,13 +162,16 @@ class ResidentDevtoolsHandler {
       );
   }
 
+  @override
   Future<void> hotRestart(List<FlutterDevice> flutterDevices) async {
+    await _waitForExtensions(flutterDevices);
     await Future.wait(<Future<void>>[
-      maybeCallDevToolsUriServiceExtension(flutterDevices),
-      callConnectedVmServiceUriExtension(flutterDevices),
+      _maybeCallDevToolsUriServiceExtension(flutterDevices),
+      _callConnectedVmServiceUriExtension(flutterDevices),
     ]);
   }
 
+  @override
   Future<void> shutdown() async {
     if (_devToolsLauncher == null || _shutdown || !_served) {
       return;
@@ -175,4 +210,30 @@ Future<void> waitForExtension(vm_service.VmService vmService, String extension) 
     }
   }
   await completer.future;
+}
+
+@visibleForTesting
+NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher launcher, ResidentRunner runner, Logger logger) {
+  return NoOpDevtoolsHandler();
+}
+
+@visibleForTesting
+class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
+  @override
+  DevToolsServerAddress get activeDevToolsServer => null;
+
+  @override
+  Future<void> hotRestart(List<FlutterDevice> flutterDevices) async {
+    return;
+  }
+
+  @override
+  Future<void> serveAndAnnounceDevTools({Uri devToolsServerAddress, List<FlutterDevice> flutterDevices}) async {
+    return;
+  }
+
+  @override
+  Future<void> shutdown() async {
+    return;
+  }
 }
