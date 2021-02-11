@@ -34,6 +34,18 @@ void main() {
     );
   });
 
+  test('getNextFrame fails with invalid data', () async {
+    Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
+    data = Uint8List.view(data.buffer, 0, 4000);
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+    try {
+      await codec.getNextFrame();
+      fail('exception not thrown');
+    } catch(e) {
+      expect(e, exceptionWithMessage('Codec failed'));
+    }
+  });
+
   test('nextFrame', () async {
     final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
