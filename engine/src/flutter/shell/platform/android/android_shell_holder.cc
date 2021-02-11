@@ -122,6 +122,11 @@ AndroidShellHolder::AndroidShellHolder(
       FML_LOG(ERROR) << "Failed to set UI task runner priority";
     }
   });
+  task_runners.GetIOTaskRunner()->PostTask([]() {
+    if (::setpriority(PRIO_PROCESS, gettid(), 1) != 0) {
+      FML_LOG(ERROR) << "Failed to set IO task runner priority";
+    }
+  });
 
   shell_ =
       Shell::Create(GetDefaultPlatformData(),  // window data
@@ -130,6 +135,14 @@ AndroidShellHolder::AndroidShellHolder(
                     on_create_platform_view,   // platform view create callback
                     on_create_rasterizer       // rasterizer create callback
       );
+
+  if (shell_) {
+    shell_->GetDartVM()->GetConcurrentMessageLoop()->PostTaskToAllWorkers([]() {
+      if (::setpriority(PRIO_PROCESS, gettid(), 1) != 0) {
+        FML_LOG(ERROR) << "Failed to set Workers task runner priority";
+      }
+    });
+  }
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
