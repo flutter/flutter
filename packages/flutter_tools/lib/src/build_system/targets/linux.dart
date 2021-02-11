@@ -193,7 +193,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   const DebugBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => 'debug_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
+  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
 
   @override
   List<Source> get inputs => <Source>[
