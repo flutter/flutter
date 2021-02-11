@@ -83,9 +83,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -131,9 +139,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -203,9 +219,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -283,9 +307,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -356,9 +388,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -433,9 +473,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -526,9 +574,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
@@ -623,9 +679,17 @@ void main() {
         const FakeCommand(command: <String>[
           'git',
           'clone',
+          '--no-checkout',
+          '--origin',
+          'upstream',
           '--',
           kUpstreamRemote,
           '${checkoutsParentDirectory}flutter_conductor_checkouts/framework',
+        ]),
+        const FakeCommand(command: <String>[
+          'git',
+          'checkout',
+          'master',
         ]),
         const FakeCommand(command: <String>[
           'git',
