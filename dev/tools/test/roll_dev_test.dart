@@ -209,7 +209,7 @@ void main() {
         ),
         false,
       );
-      expect(stdio.stdout.contains(nextVersion), true);
+      expect(stdio.logs.join('').contains(nextVersion), true);
     });
 
     test(

@@ -45,7 +45,7 @@ void main() {
       framework = FrameworkRepository(
         checkouts,
         name: 'test-framework',
-        upstream: 'file://${frameworkUpstream.checkoutDirectory.path}/',
+        fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${frameworkUpstream.checkoutDirectory.path}/'),
       );
     });
 

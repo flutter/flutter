@@ -49,11 +49,12 @@ class TestStdio extends Stdio {
     _stdin = stdin ?? <String>[];
   }
 
-  final StringBuffer _error = StringBuffer();
-  String get error => _error.toString();
+  String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
-  final StringBuffer _stdout = StringBuffer();
-  String get stdout => _stdout.toString();
+  String get stdout => logs.where((String log) {
+    return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ');
+  }).join('\n');
+  //String get stdout => _stdout.toString();
 
   final bool verbose;
   List<String> _stdin;

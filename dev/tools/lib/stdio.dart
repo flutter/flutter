@@ -7,31 +7,30 @@ import 'dart:io' as io;
 import 'package:meta/meta.dart';
 
 abstract class Stdio {
-  final List<String> _log = <String>[];
-  List<String> get logs => _log;
+  final List<String> logs = <String>[];
 
   /// Error/warning messages printed to STDERR.
   @mustCallSuper
   void printError(String message) {
-    _log.add('[error] $message');
+    logs.add('[error] $message');
   }
 
   /// Ordinary STDOUT messages.
   @mustCallSuper
   void printStatus(String message) {
-    _log.add('[status] $message');
+    logs.add('[status] $message');
   }
 
   /// Debug messages that are only printed in verbose mode.
   @mustCallSuper
   void printTrace(String message) {
-    _log.add('[trace] $message');
+    logs.add('[trace] $message');
   }
 
   /// Write string to STDOUT without trailing newline.
   @mustCallSuper
   void write(String message) {
-    _log.add('[write] $message');
+    logs.add('[write] $message');
   }
 
   /// Read a line of text from STDIN.
