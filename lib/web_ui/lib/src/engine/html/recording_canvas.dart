@@ -417,11 +417,15 @@ class RecordingCanvas {
     final double paintSpread = _getPaintSpread(paint);
     final PaintDrawDRRect command =
         PaintDrawDRRect(outer, inner, paint.paintData);
+    final double left = math.min(outer.left, outer.right);
+    final double right = math.max(outer.left, outer.right);
+    final double top = math.min(outer.top, outer.bottom);
+    final double bottom = math.max(outer.top, outer.bottom);
     _paintBounds.growLTRB(
-      outer.left - paintSpread,
-      outer.top - paintSpread,
-      outer.right + paintSpread,
-      outer.bottom + paintSpread,
+      left - paintSpread,
+      top - paintSpread,
+      right + paintSpread,
+      bottom + paintSpread,
       command,
     );
     _commands.add(command);
@@ -1026,6 +1030,9 @@ class PaintDrawDRRect extends DrawCommand {
 
   @override
   void apply(EngineCanvas canvas) {
+    if (paint.style == null) {
+      paint.style = ui.PaintingStyle.fill;
+    }
     canvas.drawPath(path!, paint);
   }
 
