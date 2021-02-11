@@ -259,6 +259,7 @@ void main() {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
     );
+    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
