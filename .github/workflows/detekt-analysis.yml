@@ -1,0 +1,103 @@
+# This workflow performs a static analysis of your Kotlin source code using
+# Detekt.
+#
+# Scans are triggered:
+# 1. On every push to default and protected branches
+# 2. On every Pull Request targeting the default branch
+# 3. On a weekly schedule
+# 4. Manually, on demand, via the "workflow_dispatch" event
+#
+# The workflow should work with no modifications, but you might like to use a
+# later version of the Detekt CLI by modifing the $DETEKT_RELEASE_TAG
+# environment variable.
+name: Scan with Detekt
+
+on:
+  # Triggers the workflow on push or pull request events but only for default and protected branches
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+     - cron: '28 15 * * 3'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  # Release tag associated with version of Detekt to be installed
+  # SARIF support (required for this workflow) was introduced in Detekt v1.15.0
+  DETEKT_RELEASE_TAG: v1.15.0
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "scan"
+  scan:
+    name: Scan
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Gets the download URL associated with the $DETEKT_RELEASE_TAG
+    - name: Get Detekt download URL
+      id: detekt_info
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        DETEKT_DOWNLOAD_URL=$( gh api graphql --field tagName=$DETEKT_RELEASE_TAG --raw-field query='
+          query getReleaseAssetDownloadUrl($tagName: String!) {
+            repository(name: "detekt", owner: "detekt") {
+              release(tagName: $tagName) {
+                releaseAssets(name: "detekt", first: 1) {
+                  nodes {
+                    downloadUrl
+                  }
+                }
+              }
+            }
+          }
+        ' | \
+        jq --raw-output '.data.repository.release.releaseAssets.nodes[0].downloadUrl' )
+        echo "::set-output name=download_url::$DETEKT_DOWNLOAD_URL"
+
+    # Sets up the detekt cli
+    - name: Setup Detekt
+      run: |
+        dest=$( mktemp -d )
+        curl --request GET \
+          --url ${{ steps.detekt_info.outputs.download_url }} \
+          --silent \
+          --location \
+          --output $dest/detekt
+        chmod a+x $dest/detekt
+        echo $dest >> $GITHUB_PATH
+
+    # Performs static analysis using Detekt
+    - name: Run Detekt
+      continue-on-error: true
+      run: |
+        detekt --input ${{ github.workspace }} --report sarif:${{ github.workspace }}/detekt.sarif.json
+
+    # Modifies the SARIF output produced by Detekt so that absolute URIs are relative
+    # This is so we can easily map results onto their source files
+    # This can be removed once relative URI support lands in Detekt: https://git.io/JLBbA
+    - name: Make artifact location URIs relative
+      continue-on-error: true
+      run: |
+        echo "$(
+          jq \
+            --arg github_workspace ${{ github.workspace }} \
+            '. | ( .runs[].results[].locations[].physicalLocation.artifactLocation.uri |= if test($github_workspace) then .[($github_workspace | length | . + 1):] else . end )' \
+            ${{ github.workspace }}/detekt.sarif.json
+        )" > ${{ github.workspace }}/detekt.sarif.json
+
+    # Uploads results to GitHub repository using the upload-sarif action
+    - uses: github/codeql-action/upload-sarif@v1
+      with:
+        # Path to SARIF file relative to the root of the repository
+        sarif_file: ${{ github.workspace }}/detekt.sarif.json
+        checkout_path: ${{ github.workspace }}
