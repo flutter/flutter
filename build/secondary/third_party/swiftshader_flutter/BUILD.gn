@@ -32,6 +32,8 @@ config("internal_config") {
       "/wd4800",
       "/wd5030",
     ]
+
+    libs = [ "user32.lib", "gdi32.lib" ]
   } else {
     cflags = [
       "-Wno-header-hygiene",
