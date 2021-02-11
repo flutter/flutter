@@ -53,15 +53,7 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
-  testWithoutContext('LinuxDevice on x64 and arm64 hosts', () async {
-    final LinuxDevice deviceX64Host = LinuxDevice(
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_x64),
-    );
-    expect(await deviceX64Host.targetPlatform, TargetPlatform.linux_x64);
-
+  testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
     final LinuxDevice deviceArm64Host = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
