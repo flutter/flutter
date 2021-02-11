@@ -29,6 +29,9 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr;
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
 - (FlutterRestorationPlugin*)restorationPlugin;
+// Send touches to the Flutter Engine while forcing the change type to be cancelled.
+// The `phase`s in `touches` are ignored.
+- (void)forceTouchesCancelled:(NSSet*)touches;
 
 @end
 

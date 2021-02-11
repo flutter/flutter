@@ -947,6 +947,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr];
 }
 
+- (void)forceTouchesCancelled:(NSSet*)touches {
+  flutter::PointerData::Change cancel = flutter::PointerData::Change::kCancel;
+  [self dispatchTouches:touches pointerDataChangeOverride:&cancel];
+}
+
 #pragma mark - Handle view resizing
 
 - (void)updateViewportMetrics {
