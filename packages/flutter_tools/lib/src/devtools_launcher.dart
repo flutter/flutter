@@ -75,7 +75,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         if (!useOverrideUrl) {
           rethrow;
         }
-        // The user supplied a custom pub URL that was invalid, the pretend to be offline
+        // The user supplied a custom pub URL that was invalid, pretend to be offline
         // and inform them that the URL was invalid.
         offline = true;
         _logger.printError(
