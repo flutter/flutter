@@ -210,7 +210,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   const ProfileBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => 'profile_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
+  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
