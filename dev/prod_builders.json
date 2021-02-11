@@ -673,6 +673,12 @@
          "flaky": false
       },
       {
+         "name": "Mac_android smoke_catalina_start_up",
+         "repo": "flutter",
+         "task_name": "mac_android_smoke_catalina_start_up",
+         "flaky": true
+      },
+      {
          "name": "Mac_android textfield_perf__timeline_summary",
          "repo": "flutter",
          "task_name": "mac_android_textfield_perf__timeline_summary",
