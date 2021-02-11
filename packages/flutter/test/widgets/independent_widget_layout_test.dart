@@ -2,11 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 const Size _kTestViewSize = Size(800.0, 600.0);
+
+class ScheduledFrameTrackingWindow extends TestWindow {
+  ScheduledFrameTrackingWindow() : super(window: ui.window);
+
+  int _scheduledFrameCount = 0;
+  int get scheduledFrameCount => _scheduledFrameCount;
+
+  void resetScheduledFrameCount() {
+    _scheduledFrameCount = 0;
+  }
+
+  @override
+  void scheduleFrame() {
+    _scheduledFrameCount++;
+    super.scheduleFrame();
+  }
+}
+
+class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding {
+  final ScheduledFrameTrackingWindow _window = ScheduledFrameTrackingWindow();
+
+  @override
+  ScheduledFrameTrackingWindow get window => _window;
+}
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(
@@ -139,6 +165,20 @@ class TestFocusableState extends State<TestFocusable> {
 }
 
 void main() {
+  // Override the bindings for this test suite so that we can track the number
+  // of times a frame has been scheduled.
+  ScheduledFrameTrackingBindings();
+
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
+    expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
+    final ScheduledFrameTrackingWindow window = WidgetsBinding.instance!.window as ScheduledFrameTrackingWindow;
+    window.resetScheduledFrameCount();
+    expect(window.scheduledFrameCount, isZero);
+    final OffscreenWidgetTree tree = OffscreenWidgetTree();
+    tree.pumpWidget(const SizedBox.shrink());
+    expect(window.scheduledFrameCount, isZero);
+  });
+
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
     final Trigger trigger1 = Trigger();
     final Counter counter1 = Counter();
