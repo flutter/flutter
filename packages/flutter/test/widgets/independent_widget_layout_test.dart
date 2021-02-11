@@ -169,7 +169,7 @@ void main() {
   // of times a frame has been scheduled.
   ScheduledFrameTrackingBindings();
 
-  testWidgets('foo', (WidgetTester tester) async {
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
     final ScheduledFrameTrackingWindow window = WidgetsBinding.instance!.window as ScheduledFrameTrackingWindow;
     window.resetScheduledFrameCount();
