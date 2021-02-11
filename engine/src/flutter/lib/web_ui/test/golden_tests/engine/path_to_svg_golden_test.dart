@@ -16,17 +16,26 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+enum PaintMode {
+  kStrokeAndFill,
+  kStroke,
+  kFill,
+  kStrokeWidthOnly,
+}
+
 void testMain() async {
-  final Rect region = Rect.fromLTWH(8, 8, 600, 800); // Compensate for old scuba tester padding
+  final Rect region = Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
 
   Future<void> testPath(Path path, String scubaFileName,
       {Paint paint, double maxDiffRatePercent = null, bool write = false,
-      bool strokeEnabled = true, bool enableFill = true}) async {
-    const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 800);
+      PaintMode mode = PaintMode.kStrokeAndFill}) async {
+    const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 400);
     final BitmapCanvas bitmapCanvas = BitmapCanvas(canvasBounds,
         RenderStrategy());
     final RecordingCanvas canvas = RecordingCanvas(canvasBounds);
 
+    bool enableFill = mode == PaintMode.kStrokeAndFill ||
+        mode == PaintMode.kFill;
     if (enableFill) {
       paint ??= Paint()
         ..color = const Color(0x807F7F7F)
@@ -34,12 +43,18 @@ void testMain() async {
       canvas.drawPath(path, paint);
     }
 
-    if (strokeEnabled) {
+    if (mode == PaintMode.kStrokeAndFill || mode == PaintMode.kStroke) {
       paint = Paint()
         ..strokeWidth = 2
         ..color = enableFill ? const Color(0xFFFF0000) :
             const Color(0xFF000000)
         ..style = PaintingStyle.stroke;
+    }
+
+    if (mode == PaintMode.kStrokeWidthOnly) {
+      paint = Paint()
+        ..color = const Color(0xFF4060E0)
+        ..strokeWidth = 10;
     }
 
     canvas.drawPath(path, paint);
@@ -95,17 +110,17 @@ void testMain() async {
           largeArc: false, clockwise: false, distance: 20),
       ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: false, distance: 20),
-      ArcSample(const Offset(0, 150),
+      ArcSample(const Offset(0, 0),
           largeArc: false, clockwise: true, distance: 20),
-      ArcSample(const Offset(200, 150),
+      ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: true, distance: 20),
-      ArcSample(const Offset(0, 300),
+      ArcSample(const Offset(0, 0),
           largeArc: false, clockwise: false, distance: -20),
-      ArcSample(const Offset(200, 300),
+      ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: false, distance: -20),
-      ArcSample(const Offset(0, 450),
+      ArcSample(const Offset(0, 0),
           largeArc: false, clockwise: true, distance: -20),
-      ArcSample(const Offset(200, 450),
+      ArcSample(const Offset(200, 0),
           largeArc: true, clockwise: true, distance: -20)
     ];
     int sampleIndex = 0;
@@ -157,7 +172,16 @@ void testMain() async {
     path.lineTo(4, 51.5);
     path.conicTo(0.5, 51.5, 0.5, 48, w);
     path.lineTo(0.5, 14);
-    await testPath(path, 'svg_editoutline', enableFill: false);
+    await testPath(path, 'svg_editoutline', mode: PaintMode.kStroke);
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/74416
+  test('render stroke', () async {
+    final Path path = Path();
+    path.moveTo(20, 20);
+    path.lineTo(200, 200);
+    await testPath(path, 'svg_stroke_width',
+        mode: PaintMode.kStrokeWidthOnly);
   });
 }
 
@@ -169,7 +193,8 @@ html.Element pathToSvgElement(Path path, Paint paint,
       '<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" '
           'width="${bounds.right}" height="${bounds.bottom}">');
   sb.write('<path ');
-  if (paint.style == PaintingStyle.stroke) {
+  if (paint.style == PaintingStyle.stroke ||
+      (paint.strokeWidth != null && paint.strokeWidth != 0.0)) {
     sb.write('stroke="${colorToCssString(paint.color)}" ');
     sb.write('stroke-width="${paint.strokeWidth}" ');
     if (!enableFill) {
