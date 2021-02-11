@@ -271,7 +271,7 @@ class _PosixUtils extends OperatingSystemUtils {
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
-        _logger.printTrace(
+        _logger.printError(
           'Error trying to run uname -m'
           '\nstdout: ${hostPlatformCheck.stdout}'
           '\nstderr: ${hostPlatformCheck.stderr}',
