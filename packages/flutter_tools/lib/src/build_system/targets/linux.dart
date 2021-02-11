@@ -226,7 +226,7 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   const ReleaseBundleLinuxAssets(TargetPlatform targetPlatform) : super(targetPlatform);
 
   @override
-  String get name => 'release_bundle_''${getNameForTargetPlatform(targetPlatform)}''_assets';
+  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
