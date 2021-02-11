@@ -153,18 +153,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'devtools'
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
-        status.cancel();
         _logger.printError('Error running `pub global activate '
             'devtools`:\n${_devToolsActivateProcess.stderr}');
         return false;
       }
-      status.stop();
       _persistentToolState.lastDevToolsActivationTime = DateTime.now();
       return true;
     } on Exception catch (e, _) {
-      status.stop();
       _logger.printError('Error running `pub global activate devtools`: $e');
       return false;
+    } finally {
+      status.stop();
     }
   }
 
@@ -178,7 +177,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> close() async {
-    devToolsUrl = null;
+    if (devToolsUrl != null) {
+      devToolsUrl = null;
+    }
     if (_devToolsProcess != null) {
       _devToolsProcess.kill();
       await _devToolsProcess.exitCode;

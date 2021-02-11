@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart' show MockProcessManager, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
+import '../../src/mocks.dart' show MockProcessManager;
 import '../../src/testbed.dart';
 
 void main() {
@@ -456,7 +456,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysFalseBotDetector(),
+      BotDetector: () => const FakeBotDetector(false),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -478,7 +478,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -579,7 +579,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -599,7 +599,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -619,7 +619,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -639,7 +639,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -659,7 +659,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -679,7 +679,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -700,7 +700,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -720,7 +720,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
-      BotDetector: () => const AlwaysTrueBotDetector(),
+      BotDetector: () => const FakeBotDetector(true),
       Pub: () => Pub(
         fileSystem: globals.fs,
         logger: globals.logger,

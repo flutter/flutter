@@ -18,8 +18,6 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -137,9 +135,7 @@ void main() {
         ], environment: const <String, String>{
           'PATH': '/usr/bin:null',
           ...kDyLdLibEntry,
-        }, onRun: () {
-          throw const ProcessException('ios-deploy', <String>[]);
-        })
+        }, exception: const ProcessException('ios-deploy', <String>[])),
       ]);
       final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
@@ -244,9 +240,7 @@ void main() {
       ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
-      }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
-      })
+      }, exception: const ProcessException('ios-deploy', <String>[])),
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppInstalled = await device.installApp(iosApp);
@@ -267,9 +261,7 @@ void main() {
       ], environment: const <String, String>{
         'PATH': '/usr/bin:null',
         ...kDyLdLibEntry,
-      }, onRun: () {
-        throw const ProcessException('ios-deploy', <String>[]);
-      })
+      }, exception: const ProcessException('ios-deploy', <String>[])),
     ]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, artifacts: artifacts);
     final bool wasAppUninstalled = await device.uninstallApp(iosApp);
@@ -322,5 +314,3 @@ IOSDevice setUpIOSDevice({
     interfaceType: interfaceType,
   );
 }
-
-class MockVmService extends Mock implements VmService {}
