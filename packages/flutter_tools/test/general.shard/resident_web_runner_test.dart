@@ -32,7 +32,6 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
@@ -1649,7 +1648,6 @@ class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}

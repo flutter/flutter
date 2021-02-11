@@ -2948,9 +2948,7 @@ class MockDartDevelopmentService extends Mock implements DartDevelopmentService 
 class MockVMService extends Mock implements vm_service.VmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
-class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDevtoolsLauncher extends Mock implements DevtoolsLauncher {}
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 class MockDevice extends Mock implements Device {}
 

@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -350,4 +349,3 @@ IOSDevice setUpIOSDevice({
 }
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockVmService extends Mock implements VmService {}

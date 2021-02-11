@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -23,7 +22,6 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
@@ -192,8 +190,6 @@ void main() {
 
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockWebDevice extends Mock implements Device {}
-class MockDebugConnection extends Mock implements DebugConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
