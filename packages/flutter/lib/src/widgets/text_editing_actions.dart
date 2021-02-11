@@ -11,6 +11,7 @@ import 'framework.dart';
 import 'text_editing_action.dart';
 import 'text_editing_intents.dart';
 
+// TODO(justinmc): Update these examples now that the naming has changed.
 /// An [Actions] widget that handles the default text editing behavior for
 /// Flutter on the current platform.
 ///
@@ -209,25 +210,17 @@ class TextEditingActions extends StatelessWidget {
   );
 
   static final Map<Type, Action<Intent>> _androidActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionToEndAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    AltArrowRightTextIntent: _moveSelectionRightByLineAction,
     AltArrowUpTextIntent: _moveSelectionToStartAction,
     AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
     AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
     AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
     AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
     ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
     ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     // EndTextIntent is not handled by this platform.
     // HomeTextIntent is not handled by this platform.
-    // MetaArrowDownTextIntent is not handled by this platform.
     // MetaArrowLeftTextIntent is not handled by this platform.
     // MetaArrowRightTextIntent is not handled by this platform.
     // MetaArrowUpTextIntent is not handled by this platform.
@@ -244,25 +237,17 @@ class TextEditingActions extends StatelessWidget {
   };
 
   static final Map<Type, Action<Intent>> _fuchsiaActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionToEndAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    AltArrowRightTextIntent: _moveSelectionRightByLineAction,
     AltArrowUpTextIntent: _moveSelectionToStartAction,
     AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
     AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
     AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
     AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
     ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
     ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     // EndTextIntent is not handled by this platform.
     // HomeTextIntent is not handled by this platform.
-    // MetaArrowDownTextIntent is not handled by this platform.
     // MetaArrowLeftTextIntent is not handled by this platform.
     // MetaArrowRightTextIntent is not handled by this platform.
     // MetaArrowUpTextIntent is not handled by this platform.
@@ -279,25 +264,17 @@ class TextEditingActions extends StatelessWidget {
   };
 
   static final Map<Type, Action<Intent>> _iOSActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionToEndAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    AltArrowRightTextIntent: _moveSelectionRightByLineAction,
     AltArrowUpTextIntent: _moveSelectionToStartAction,
     AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
     AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
     AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
     AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
     ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
     ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     // EndTextIntent is not handled by this platform.
     // HomeTextIntent is not handled by this platform.
-    // MetaArrowDownTextIntent is not handled by this platform.
     // MetaArrowLeftTextIntent is not handled by this platform.
     // MetaArrowRightTextIntent is not handled by this platform.
     // MetaArrowUpTextIntent is not handled by this platform.
@@ -314,25 +291,17 @@ class TextEditingActions extends StatelessWidget {
   };
 
   static final Map<Type, Action<Intent>> _linuxActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionToEndAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    AltArrowRightTextIntent: _moveSelectionRightByLineAction,
     AltArrowUpTextIntent: _moveSelectionToStartAction,
     AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
     AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
     AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
     AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
     ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
     ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     // EndTextIntent is not handled by this platform.
     // HomeTextIntent is not handled by this platform.
-    // MetaArrowDownTextIntent is not handled by this platform.
     // MetaArrowLeftTextIntent is not handled by this platform.
     // MetaArrowRightTextIntent is not handled by this platform.
     // MetaArrowUpTextIntent is not handled by this platform.
@@ -349,25 +318,17 @@ class TextEditingActions extends StatelessWidget {
   };
 
   static final Map<Type, Action<Intent>> _macActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionRightByLineAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    AltArrowRightTextIntent: _moveSelectionRightByWordAction,
     AltArrowUpTextIntent: _moveSelectionLeftByLineAction,
     AltShiftArrowDownTextIntent: _extendSelectionRightByLineAction,
     AltShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     AltShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     AltShiftArrowUpTextIntent: _expandSelectionLeftByLineAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     // ControlArrowLeftTextIntent is not handled by this platform.
     // ControlArrowRightTextIntent is not handled by this platform.
     // ControlShiftArrowLeftTextIntent is not handled by this platform.
     // ControlShiftArrowRightTextIntent is not handled by this platform.
     // EndTextIntent is not handled by this platform.
     // HomeTextIntent is not handled by this platform.
-    MetaArrowDownTextIntent: _moveSelectionToEndAction,
     MetaArrowLeftTextIntent: _moveSelectionLeftByLineAction,
     MetaArrowRightTextIntent: _moveSelectionRightByLineAction,
     MetaArrowUpTextIntent: _moveSelectionToStartAction,
@@ -384,25 +345,17 @@ class TextEditingActions extends StatelessWidget {
   };
 
   static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
-    AltArrowDownTextIntent: _moveSelectionToEndAction,
-    AltArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    AltArrowRightTextIntent: _moveSelectionRightByLineAction,
     AltArrowUpTextIntent: _moveSelectionToStartAction,
     AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
     AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
     AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
     AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ArrowDownTextIntent: _moveSelectionDown,
-    ArrowLeftTextIntent: _moveSelectionLeft,
-    ArrowRightTextIntent: _moveSelectionRight,
-    ArrowUpTextIntent: _moveSelectionUp,
     ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
     ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
     ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
     ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
     EndTextIntent: _moveSelectionRightByLineAction,
     HomeTextIntent: _moveSelectionLeftByLineAction,
-    // MetaArrowDownTextIntent is not handled by this platform.
     // MetaArrowLeftTextIntent is not handled by this platform.
     // MetaArrowRightTextIntent is not handled by this platform.
     // MetaArrowUpTextIntent is not handled by this platform.
@@ -416,6 +369,19 @@ class TextEditingActions extends StatelessWidget {
     ShiftArrowUpTextIntent: _extendSelectionUpAction,
     ShiftEndTextIntent: _expandSelectionRightByLineAction,
     ShiftHomeTextIntent: _expandSelectionLeftByLineAction,
+  };
+
+  // These Intents are triggered by TextEditingShortcuts. They are included
+  // regardless of the platform; it's up to TextEditingShortcuts to decide which
+  // are called on which platform.
+  static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
+    MoveSelectionDownTextIntent: _moveSelectionDown,
+    MoveSelectionLeftTextIntent: _moveSelectionLeft,
+    MoveSelectionLeftByLineTextIntent: _moveSelectionLeftByLineAction,
+    MoveSelectionRightTextIntent: _moveSelectionRight,
+    MoveSelectionRightByLineTextIntent: _moveSelectionRightByLineAction,
+    MoveSelectionToEndTextIntent: _moveSelectionToEndAction,
+    MoveSelectionUpTextIntent: _moveSelectionUp,
   };
 
   static Map<Type, Action<Intent>> get _actions {
@@ -440,6 +406,7 @@ class TextEditingActions extends StatelessWidget {
     return Actions(
       actions: <Type, Action<Intent>>{
         ...additionalActions,
+        ..._shortcutsActions,
         ..._actions,
       },
       child: child,
