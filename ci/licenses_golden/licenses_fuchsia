@@ -1,4 +1,4 @@
-Signature: 6d7a11ee50bfc5003496ab017dfcc6d9
+Signature: 750a3ce59a8f64ffec889972c9624d8e
 
 UNUSED LICENSES:
 
@@ -446,7 +446,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/meta.json
@@ -1162,7 +1161,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/meta.json
@@ -1775,7 +1773,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.buildinfo/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/meta.json
@@ -2240,8 +2237,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/pairing_delegate
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/remote_device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/central.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/camera.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/data.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/tiles.fidl
