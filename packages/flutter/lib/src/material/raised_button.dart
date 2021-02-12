@@ -116,6 +116,10 @@ class RaisedButton extends MaterialButton {
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], [icon],
   /// [label], and [clipBehavior] arguments must not be null.
+  @Deprecated(
+    'Use ElevatedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   factory RaisedButton.icon({
     Key? key,
     required VoidCallback? onPressed,

@@ -195,6 +195,10 @@ class PluginRegistry extends Registrar {
   /// Creates a [Registrar].
   ///
   /// The argument is ignored.
+  @Deprecated(
+    'Use Registrar instead. '
+    'This feature was deprecated after v1.24.0-7.0.pre.'
+  )
   PluginRegistry([
     @Deprecated(
       'This argument is ignored. '
