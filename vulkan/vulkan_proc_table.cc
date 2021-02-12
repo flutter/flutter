@@ -138,6 +138,7 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
 #endif  // OS_ANDROID
 #if OS_FUCHSIA
   ACQUIRE_PROC(CreateBufferCollectionFUCHSIA, handle);
+  ACQUIRE_PROC(DestroyBufferCollectionFUCHSIA, handle);
   ACQUIRE_PROC(GetMemoryZirconHandleFUCHSIA, handle);
   ACQUIRE_PROC(ImportSemaphoreZirconHandleFUCHSIA, handle);
   ACQUIRE_PROC(SetBufferCollectionConstraintsFUCHSIA, handle);
