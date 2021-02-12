@@ -28,7 +28,7 @@ import 'toggleable.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// This example shows how you can override the default theme of
 /// of a [Checkbox] with a [MaterialStateProperty].
