@@ -117,6 +117,17 @@ abstract class ContainerLayer extends Layer {
   }
 }
 
+/// The top-most layer in the layer tree.
+///
+/// This layer does not draw anything. It's only used so we can add leaf layers
+/// to [LayerSceneBuilder] without requiring a [ContainerLayer].
+class RootLayer extends ContainerLayer {
+  @override
+  void paint(PaintContext context) {
+    paintChildren(context);
+  }
+}
+
 class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFilterEngineLayer {
   final ui.ImageFilter _filter;
 

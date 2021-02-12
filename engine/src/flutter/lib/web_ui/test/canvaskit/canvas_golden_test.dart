@@ -197,7 +197,7 @@ void testMain() {
 
       // Render the scene once without painting the shadow bounds just to
       // preroll the scene to compute the shadow bounds.
-      buildTestScene(paintShadowBounds: false).rootLayer!.preroll(
+      buildTestScene(paintShadowBounds: false).rootLayer.preroll(
         PrerollContext(
           RasterCache(),
           HtmlViewEmbedder(),

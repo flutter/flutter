@@ -8,9 +8,7 @@ part of engine;
 class LayerScene implements ui.Scene {
   final LayerTree layerTree;
 
-  LayerScene(Layer? rootLayer) : layerTree = LayerTree() {
-    layerTree.rootLayer = rootLayer;
-  }
+  LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
 
   @override
   void dispose() {}
@@ -23,8 +21,12 @@ class LayerScene implements ui.Scene {
 }
 
 class LayerSceneBuilder implements ui.SceneBuilder {
-  Layer? rootLayer;
-  ContainerLayer? currentLayer;
+  LayerSceneBuilder() : rootLayer = RootLayer() {
+    currentLayer = rootLayer;
+  }
+
+  final RootLayer rootLayer;
+  late ContainerLayer currentLayer;
 
   @override
   void addChildScene({
@@ -50,16 +52,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
-    currentLayer!.add(PictureLayer(
+    currentLayer.add(PictureLayer(
         picture as CkPicture, offset, isComplexHint, willChangeHint));
   }
 
   @override
   void addRetained(ui.EngineLayer retainedLayer) {
-    if (currentLayer == null) {
-      return;
-    }
-    currentLayer!.add(retainedLayer as Layer);
+    currentLayer.add(retainedLayer as Layer);
   }
 
   @override
@@ -82,7 +81,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     double height = 0.0,
     Object? webOnlyPaintedBy,
   }) {
-    currentLayer!.add(PlatformViewLayer(viewId, offset, width, height));
+    currentLayer.add(PlatformViewLayer(viewId, offset, width, height));
   }
 
   @override
@@ -92,10 +91,11 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void pop() {
-    if (currentLayer == null) {
+    if (currentLayer == rootLayer) {
+      // Don't pop the root layer. It must always be there.
       return;
     }
-    currentLayer = currentLayer!.parent;
+    currentLayer = currentLayer.parent!;
   }
 
   @override
@@ -221,16 +221,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   T pushLayer<T extends ContainerLayer>(T layer) {
-    if (rootLayer == null) {
-      rootLayer = currentLayer = layer;
-      return layer;
-    }
-
-    if (currentLayer == null) {
-      return layer;
-    }
-
-    currentLayer!.add(layer);
+    currentLayer.add(layer);
     currentLayer = layer;
     return layer;
   }
