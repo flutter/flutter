@@ -151,8 +151,7 @@ class FlutterTesterDevice extends Device {
     }
 
     final Directory assetDirectory = _fileSystem.systemTempDirectory
-      .createTempSync('flutter-tester')
-      ..createSync(recursive: true);
+      .createTempSync('flutter-tester');
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
       _fileSystem.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
