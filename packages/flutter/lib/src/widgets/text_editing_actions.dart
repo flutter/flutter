@@ -105,9 +105,33 @@ class TextEditingActions extends StatelessWidget {
     }
   );
 
+  static final TextEditingAction<ExtendSelectionLeftByLineTextIntent> _extendSelectionLeftByLineAction = TextEditingAction<ExtendSelectionLeftByLineTextIntent>(
+    onInvoke: (ExtendSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+    }
+  );
+
+  static final TextEditingAction<ExtendSelectionLeftByWordTextIntent> _extendSelectionLeftByWordAction = TextEditingAction<ExtendSelectionLeftByWordTextIntent>(
+    onInvoke: (ExtendSelectionLeftByWordTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+    }
+  );
+
   static final TextEditingAction<ExtendSelectionLeftTextIntent> _extendSelectionLeftAction = TextEditingAction<ExtendSelectionLeftTextIntent>(
     onInvoke: (ExtendSelectionLeftTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    }
+  );
+
+  static final TextEditingAction<ExtendSelectionRightByLineTextIntent> _extendSelectionRightByLineAction = TextEditingAction<ExtendSelectionRightByLineTextIntent>(
+    onInvoke: (ExtendSelectionRightByLineTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+    }
+  );
+
+  static final TextEditingAction<ExtendSelectionRightByWordTextIntent> _extendSelectionRightByWordAction = TextEditingAction<ExtendSelectionRightByWordTextIntent>(
+    onInvoke: (ExtendSelectionRightByWordTextIntent intent, EditableTextState editableTextState) {
+      editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
@@ -120,30 +144,6 @@ class TextEditingActions extends StatelessWidget {
   static final TextEditingAction<ExtendSelectionUpTextIntent> _extendSelectionUpAction = TextEditingAction<ExtendSelectionUpTextIntent>(
     onInvoke: (ExtendSelectionUpTextIntent intent, EditableTextState editableTextState) {
       editableTextState.renderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
-    }
-  );
-
-  static final TextEditingAction<ExtendSelectionLeftByLineTextIntent> _extendSelectionLeftByLineAction = TextEditingAction<ExtendSelectionLeftByLineTextIntent>(
-    onInvoke: (ExtendSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
-    }
-  );
-
-  static final TextEditingAction<ExtendSelectionLeftByWordTextIntent> _extendSelectionLeftByWordAction = TextEditingAction<ExtendSelectionLeftByWordTextIntent>(
-    onInvoke: (ExtendSelectionLeftByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
-    }
-  );
-
-  static final TextEditingAction<ExtendSelectionRightByLineTextIntent> _extendSelectionRightByLineAction = TextEditingAction<ExtendSelectionRightByLineTextIntent>(
-    onInvoke: (ExtendSelectionRightByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
-    }
-  );
-
-  static final TextEditingAction<ExtendSelectionRightByWordTextIntent> _extendSelectionRightByWordAction = TextEditingAction<ExtendSelectionRightByWordTextIntent>(
-    onInvoke: (ExtendSelectionRightByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
     }
   );
 
@@ -179,7 +179,7 @@ class TextEditingActions extends StatelessWidget {
 
   static final TextEditingAction<MoveSelectionLeftByWordTextIntent> _moveSelectionLeftByWordAction = TextEditingAction<MoveSelectionLeftByWordTextIntent>(
     onInvoke: (MoveSelectionLeftByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+      editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
@@ -191,7 +191,7 @@ class TextEditingActions extends StatelessWidget {
 
   static final TextEditingAction<MoveSelectionRightByWordTextIntent> _moveSelectionRightByWordAction = TextEditingAction<MoveSelectionRightByWordTextIntent>(
     onInvoke: (MoveSelectionRightByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+      editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard, false);
     }
   );
 

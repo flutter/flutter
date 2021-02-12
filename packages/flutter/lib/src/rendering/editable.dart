@@ -810,14 +810,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // If we can just return the end of the text without checking for a word.
-    if (offset == text.length - 1
-        || offset == text.length) {
+    if (offset == text.length - 1 || offset == text.length) {
       return text.length;
     }
 
-    final int startPoint = nextCharacter(offset, text, includeWhitespace);
-    final TextRange word = textPainter.getWordBoundary(TextPosition(offset: startPoint));
-    return word.end;
+    final int startPoint = includeWhitespace || !_isWhitespace(text.codeUnitAt(offset))
+        ? offset
+        : nextCharacter(offset, text, includeWhitespace);
+    final TextRange nextWord = textPainter.getWordBoundary(TextPosition(offset: startPoint));
+    return nextWord.end;
   }
 
   // Return the given TextSelection extended left to the beginning of the
