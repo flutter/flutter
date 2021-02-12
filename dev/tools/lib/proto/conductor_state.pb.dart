@@ -50,7 +50,7 @@ class Remote extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   Remote copyWith(void Function(Remote) updates) =>
-      super.copyWith((message) => updates(message as Remote)); // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as Remote)) as Remote; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static Remote create() => Remote._();
@@ -152,7 +152,7 @@ class Repository extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   Repository copyWith(void Function(Repository) updates) =>
-      super.copyWith((message) => updates(message as Repository)); // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as Repository)) as Repository; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static Repository create() => Repository._();
@@ -267,6 +267,7 @@ class ConductorState extends $pb.GeneratedMessage {
         defaultOrMaker: ReleasePhase.INITIALIZED,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
+    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion')
     ..hasRequiredFields = false;
 
   ConductorState._() : super();
@@ -279,6 +280,7 @@ class ConductorState extends $pb.GeneratedMessage {
     $fixnum.Int64 lastUpdatedDate,
     $core.Iterable<$core.String> logs,
     ReleasePhase lastPhase,
+    $core.String conductorVersion,
   }) {
     final _result = create();
     if (releaseChannel != null) {
@@ -305,6 +307,9 @@ class ConductorState extends $pb.GeneratedMessage {
     if (lastPhase != null) {
       _result.lastPhase = lastPhase;
     }
+    if (conductorVersion != null) {
+      _result.conductorVersion = conductorVersion;
+    }
     return _result;
   }
   factory ConductorState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
@@ -319,7 +324,8 @@ class ConductorState extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   ConductorState copyWith(void Function(ConductorState) updates) =>
-      super.copyWith((message) => updates(message as ConductorState)); // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as ConductorState))
+          as ConductorState; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static ConductorState create() => ConductorState._();
@@ -419,4 +425,16 @@ class ConductorState extends $pb.GeneratedMessage {
   $core.bool hasLastPhase() => $_has(7);
   @$pb.TagNumber(9)
   void clearLastPhase() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.String get conductorVersion => $_getSZ(8);
+  @$pb.TagNumber(10)
+  set conductorVersion($core.String v) {
+    $_setString(8, v);
+  }
+
+  @$pb.TagNumber(10)
+  $core.bool hasConductorVersion() => $_has(8);
+  @$pb.TagNumber(10)
+  void clearConductorVersion() => clearField(10);
 }

@@ -62,6 +62,7 @@ Future<void> main(List<String> args) async {
     ),
     StartCommand(
       checkouts: checkouts,
+      flutterRoot: localFlutterRoot,
     ),
     CleanCommand(
       checkouts: checkouts,
@@ -72,7 +73,10 @@ Future<void> main(List<String> args) async {
       stdio: stdio,
     ),
     DoctorCommand(checkouts: checkouts),
-    NextCommand(checkouts: checkouts),
+    NextCommand(
+      checkouts: checkouts,
+      flutterRoot: localFlutterRoot,
+    ),
   ].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {

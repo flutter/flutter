@@ -71,4 +71,7 @@ message ConductorState {
 
   // The last [ReleasePhase] that was successfully completed.
   ReleasePhase lastPhase = 9;
+
+  // Commit hash of the Conductor tool.
+  string conductor_version = 10;
 }

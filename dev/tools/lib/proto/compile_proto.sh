@@ -14,12 +14,13 @@ if ! type protoc >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! type protoc-gen-dart >/dev/null 2>&1; then
-  PUB_LINK='https://pub.dev/packages/protoc_plugin'
-  echo "Error! \"protoc-gen-dart\" binary required (pub package `protoc_plugin`) on path."
-  echo "See $PUB_LINK for more information."
+if ! type dart >/dev/null 2>&1; then
+  echo "Error! \"dart\" binary required on path."
   exit 1
 fi
+
+# Pin protoc-gen-dart to pre-nullsafe version.
+dart pub global activate protoc_plugin 19.3.1
 
 protoc --dart_out="$DIR" --proto_path="$DIR" "$DIR/conductor_state.proto"
 

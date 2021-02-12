@@ -9,7 +9,9 @@ import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
+import './git.dart';
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
@@ -29,7 +31,9 @@ const String kEngineUpstreamOption = 'engine-upstream';
 class StartCommand extends Command<void> {
   StartCommand({
     @required this.checkouts,
+    @required this.flutterRoot,
   })  : platform = checkouts.platform,
+        processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
     final String defaultPath = defaultStateFilePath(platform);
@@ -45,7 +49,8 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help: 'Configurable Framework repo upstream remote. Primarily for testing.',
+      help:
+          'Configurable Framework repo upstream remote. Primarily for testing.',
       hide: true,
     );
     argParser.addOption(
@@ -67,12 +72,30 @@ class StartCommand extends Command<void> {
       defaultsTo: defaultPath,
       help: 'Path to persistent state file. Defaults to $defaultPath',
     );
-}
+
+    final Git git = Git(processManager);
+    conductorVersion = git.getOutput(
+      <String>['rev-parse', 'HEAD'],
+      'look up the current revision.',
+      workingDirectory: flutterRoot.path,
+    ).trim();
+
+    assert(conductorVersion.isNotEmpty);
+  }
 
   final Checkouts checkouts;
+
+  /// The root directory of the Flutter repository that houses the Conductor.
+  ///
+  /// This directory is used to check the git revision of the Conductor.
+  final Directory flutterRoot;
   final FileSystem fileSystem;
   final Platform platform;
+  final ProcessManager processManager;
   final Stdio stdio;
+
+  /// Git revision for the currently running Conductor.
+  String conductorVersion;
 
   @override
   String get name => 'start';
@@ -86,9 +109,8 @@ class StartCommand extends Command<void> {
     final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
     if (stateFile.existsSync()) {
       throw ConductorException(
-        'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
-        'Run `conductor cleanup` to cancel a previous release.'
-      );
+          'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
+          'Run `conductor cleanup` to cancel a previous release.');
     }
     final List<String> requiredArgs = <String>[
       kFrameworkMirrorOption,
@@ -104,9 +126,8 @@ class StartCommand extends Command<void> {
     }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
-        'Invalid release candidate branch "$candidateBranch". '
-        'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.'
-      );
+          'Invalid release candidate branch "$candidateBranch". '
+          'Text should match the regex pattern /${releaseCandidateBranchRegex.pattern}/.');
     }
 
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
@@ -144,6 +165,8 @@ class StartCommand extends Command<void> {
     );
 
     state.lastPhase = ReleasePhase.INITIALIZED;
+
+    state.conductorVersion = conductorVersion;
 
     stdio.printTrace('Writing state to file ${stateFile.path}...');
 

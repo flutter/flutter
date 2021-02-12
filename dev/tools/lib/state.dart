@@ -20,6 +20,7 @@ String defaultStateFilePath(Platform platform) {
 }
 
 void presentState(Stdio stdio, pb.ConductorState state) {
+  stdio.printStatus('Conductor version: ${state.conductorVersion}');
   stdio.printStatus('Release channel: ${state.releaseChannel}');
   stdio.printStatus('');
   stdio.printStatus(

@@ -9,7 +9,10 @@ import 'package:file/file.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
+import './git.dart';
+import './globals.dart' as globals;
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 import './repository.dart';
@@ -23,7 +26,9 @@ const String kOverrideNextOption = 'override-next';
 class NextCommand extends Command<void> {
   NextCommand({
     @required this.checkouts,
+    @required this.flutterRoot,
   })  : platform = checkouts.platform,
+        processManager = checkouts.processManager,
         fileSystem = checkouts.fileSystem,
         stdio = checkouts.stdio {
     final String defaultPath = defaultStateFilePath(platform);
@@ -34,16 +39,34 @@ class NextCommand extends Command<void> {
     );
     argParser.addOption(
       kOverrideNextOption,
-      allowed: ReleasePhase.values.map((ReleasePhase phase) => phase.value.toString()).toList(),
-      help: 'Override the next phase. For testing.',
-      //hide: true,
+      allowed: ReleasePhase.values
+          .map((ReleasePhase phase) => phase.value.toString())
+          .toList(),
+      help: 'Override the next phase. For testing. Use numeric enum values.',
+      hide: true,
     );
-}
+    final Git git = Git(processManager);
+    conductorVersion = git.getOutput(
+      <String>['rev-parse', 'HEAD'],
+      'look up the current revision.',
+      workingDirectory: flutterRoot.path,
+    ).trim();
 
+    assert(conductorVersion.isNotEmpty);
+  }
+
+  /// The root directory of the Flutter repository that houses the Conductor.
+  ///
+  /// This directory is used to check the git revision of the Conductor.
+  final Directory flutterRoot;
   final Checkouts checkouts;
   final FileSystem fileSystem;
   final Platform platform;
+  final ProcessManager processManager;
   final Stdio stdio;
+
+  /// Git revision for the currently running Conductor.
+  String conductorVersion;
 
   @override
   String get name => 'next';
@@ -61,6 +84,12 @@ class NextCommand extends Command<void> {
     }
     final pb.ConductorState state = pb.ConductorState();
     state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
+
+    if (state.conductorVersion != conductorVersion) {
+      throw globals.ConductorException(
+          'You are using conductor version $conductorVersion while the current '
+          'release was started with version ${state.conductorVersion}!');
+    }
 
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
 
@@ -84,6 +113,8 @@ class NextCommand extends Command<void> {
       case ReleasePhase.VERSION_PUBLISHED:
       case ReleasePhase.CHANNEL_PUBLISHED:
       case ReleasePhase.RELEASE_VERIFIED:
+        assert(false);
+        break;
     }
 
     state.lastPhase = currentPhase;
