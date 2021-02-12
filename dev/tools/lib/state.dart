@@ -39,21 +39,42 @@ void presentState(Stdio stdio, pb.ConductorState state) {
   stdio.printStatus('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
   stdio.printStatus('');
-  stdio.printStatus('Last completed step: ${state.lastPhase.name}');
   if (state.lastPhase == ReleasePhase.VERIFY_RELEASE) {
     stdio.printStatus(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
     );
     return;
   }
-  stdio.printStatus('');
-  stdio.printStatus('Next steps:');
-  stdio.printStatus(nextPhaseMessage(state));
+  stdio.printStatus('The next step is:');
+  stdio.printStatus(presentPhases(state.lastPhase));
+
+  stdio.printStatus(phaseInstructions(state));
   stdio.printStatus('');
   stdio.printStatus('Issue `conductor next` when you are ready to proceed.');
 }
 
-String nextPhaseMessage(pb.ConductorState state) {
+String presentPhases(ReleasePhase lastPhase) {
+  final ReleasePhase nextPhase = getNextPhase(lastPhase);
+  final StringBuffer buffer = StringBuffer();
+  bool phaseCompleted = true;
+
+  for (final ReleasePhase phase in ReleasePhase.values) {
+    if (phase == nextPhase) {
+      // This phase will execute the next time `conductor next` is run.
+      buffer.writeln('> ${phase.name} (next)');
+      phaseCompleted = false;
+    } else if (phaseCompleted) {
+      // This phase was already completed.
+      buffer.writeln('✓ ${phase.name}');
+    } else {
+      // This phase has not been completed yet.
+      buffer.writeln('  ${phase.name}');
+    }
+  }
+  return buffer.toString();
+}
+
+String phaseInstructions(pb.ConductorState state) {
   switch (state.lastPhase) {
     case ReleasePhase.INITIALIZE:
       if (state.engine.cherrypicks.isEmpty) {
@@ -104,10 +125,10 @@ String nextPhaseMessage(pb.ConductorState state) {
 ///
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_VERIFIED] is
 /// passed as an argument, as there is no next phase.
-ReleasePhase getNextPhase(ReleasePhase currentPhase) {
-  assert(currentPhase != null);
-  if (currentPhase == ReleasePhase.VERIFY_RELEASE) {
+ReleasePhase getNextPhase(ReleasePhase previousPhase) {
+  assert(previousPhase != null);
+  if (previousPhase == ReleasePhase.VERIFY_RELEASE) {
     throw ConductorException('There is no next ReleasePhase!');
   }
-  return ReleasePhase.valueOf(currentPhase.value + 1);
+  return ReleasePhase.valueOf(previousPhase.value + 1);
 }
