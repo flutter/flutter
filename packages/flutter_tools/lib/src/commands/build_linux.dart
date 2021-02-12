@@ -78,6 +78,12 @@ class BuildLinuxCommand extends BuildSubCommand {
         targetPlatform != TargetPlatform.linux_arm64) {
       throwToolExit('"cross-building" only supported on Linux x64 hosts.');
     }
+    // TODO(fujino): https://github.com/flutter/flutter/issues/74929
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 &&
+        targetPlatform == TargetPlatform.linux_arm64) {
+      throwToolExit(
+          'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
+    }
     displayNullSafetyMode(buildInfo);
     await buildLinux(
       flutterProject.linux,
