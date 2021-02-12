@@ -18,8 +18,8 @@ import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
 ///
-/// This is implemented in isolated to prevent the flutter_tool from needing
-/// a devtools dep in google3.
+/// This is implemented in `isolated/` to prevent the flutter_tool from needing
+/// a devtools dependency in google3.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     @required Platform platform,
