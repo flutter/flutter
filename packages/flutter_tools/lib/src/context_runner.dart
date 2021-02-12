@@ -105,6 +105,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
+        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -117,6 +118,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
+        operatingSystemUtils: globals.os,
       ),
       AssetBundleFactory: () {
         return AssetBundleFactory.defaultInstance(
