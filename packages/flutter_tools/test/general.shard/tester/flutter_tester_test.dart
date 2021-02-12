@@ -150,7 +150,6 @@ void main() {
     testUsingContext('performs a build and starts in debug mode', () async {
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-      final String assetsPath = fileSystem.path.join('build', 'flutter_assets');
       final Completer<void> completer = Completer<void>();
       fakeProcessManager.addCommand(FakeCommand(
         command: const <String>[

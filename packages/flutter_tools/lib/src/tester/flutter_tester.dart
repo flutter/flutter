@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -18,6 +17,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../project.dart';
