@@ -784,11 +784,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   public void onEndFrame() {
     final FlutterView view = (FlutterView) flutterView;
-    // If there are no platform views in the current frame,
-    // then revert the image view surface and use the previous surface.
+    // If there are no platform views, then revert the image view surface,
+    // and use the previous surface.
     //
     // Otherwise, acquire the latest image.
-    if (flutterViewConvertedToImageView && currentFrameUsedPlatformViewIds.isEmpty()) {
+    if (flutterViewConvertedToImageView && platformViews.size() == 0) {
       flutterViewConvertedToImageView = false;
       view.revertImageView(
           () -> {
