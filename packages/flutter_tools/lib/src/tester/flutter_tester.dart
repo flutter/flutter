@@ -229,11 +229,8 @@ class FlutterTesterDevice extends Device {
     ApplicationPackage app, {
     String userIdentifier,
   }) async {
-    if (_process != null) {
-      _process.kill();
-      await _process.exitCode;
-      _process = null;
-    }
+    _process?.kill();
+    _process = null;
     return true;
   }
 
