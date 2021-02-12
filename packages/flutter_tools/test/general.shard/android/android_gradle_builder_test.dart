@@ -1645,6 +1645,8 @@ FakePlatform fakePlatform(String name) {
   );
 }
 
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockAndroidStudio extends Mock implements AndroidStudio {}
 class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
