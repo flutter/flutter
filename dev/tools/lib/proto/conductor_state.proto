@@ -10,21 +10,21 @@ message Remote {
 
 enum ReleasePhase {
   // Release was started with `conductor start` and repositories cloned.
-  INITIALIZED = 0;
-  ENGINE_CHERRYPICKS_APPLIED = 1;
-  ENGINE_BINARIES_CODESIGNED = 2;
-  FRAMEWORK_CHERRYPICKS_APPLIED = 3;
+  INITIALIZE = 0;
+  APPLY_ENGINE_CHERRYPICKS = 1;
+  CODESIGN_ENGINE_BINARIES = 2;
+  APPLY_FRAMEWORK_CHERRYPICKS = 3;
 
   // Git tag applied to framework RC branch HEAD and pushed upstream.
-  VERSION_PUBLISHED = 4;
+  PUBLISH_VERSION = 4;
 
   // RC branch HEAD pushed to upstream release branch.
   //
   // For example, flutter-1.2-candidate.3 -> upstream/beta
-  CHANNEL_PUBLISHED = 5;
+  PUBLISH_CHANNEL = 5;
 
   // Package artifacts verified to exist on cloud storage.
-  RELEASE_VERIFIED = 6;
+  VERIFY_RELEASE = 6;
 }
 
 message Repository {

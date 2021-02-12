@@ -264,7 +264,7 @@ class ConductorState extends $pb.GeneratedMessage {
     ..e<ReleasePhase>(
         9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastPhase', $pb.PbFieldType.OE,
         protoName: 'lastPhase',
-        defaultOrMaker: ReleasePhase.INITIALIZED,
+        defaultOrMaker: ReleasePhase.INITIALIZE,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
     ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion')

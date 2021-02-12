@@ -164,7 +164,7 @@ class StartCommand extends Command<void> {
       checkoutPath: framework.checkoutDirectory.path,
     );
 
-    state.lastPhase = ReleasePhase.INITIALIZED;
+    state.lastPhase = ReleasePhase.INITIALIZE;
 
     state.conductorVersion = conductorVersion;
 

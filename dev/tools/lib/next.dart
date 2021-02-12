@@ -104,15 +104,15 @@ class NextCommand extends Command<void> {
     }
 
     switch (currentPhase) {
-      case ReleasePhase.INITIALIZED:
+      case ReleasePhase.INITIALIZE:
         assert(false); // should be unreachable
         break;
-      case ReleasePhase.ENGINE_CHERRYPICKS_APPLIED:
-      case ReleasePhase.ENGINE_BINARIES_CODESIGNED:
-      case ReleasePhase.FRAMEWORK_CHERRYPICKS_APPLIED:
-      case ReleasePhase.VERSION_PUBLISHED:
-      case ReleasePhase.CHANNEL_PUBLISHED:
-      case ReleasePhase.RELEASE_VERIFIED:
+      case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
+      case ReleasePhase.CODESIGN_ENGINE_BINARIES:
+      case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
+      case ReleasePhase.PUBLISH_VERSION:
+      case ReleasePhase.PUBLISH_CHANNEL:
+      case ReleasePhase.VERIFY_RELEASE:
         assert(false);
         break;
     }

@@ -13,19 +13,19 @@ import 'dart:typed_data' as $typed_data;
 const ReleasePhase$json = const {
   '1': 'ReleasePhase',
   '2': const [
-    const {'1': 'INITIALIZED', '2': 0},
-    const {'1': 'ENGINE_CHERRYPICKS_APPLIED', '2': 1},
-    const {'1': 'ENGINE_BINARIES_CODESIGNED', '2': 2},
-    const {'1': 'FRAMEWORK_CHERRYPICKS_APPLIED', '2': 3},
-    const {'1': 'VERSION_PUBLISHED', '2': 4},
-    const {'1': 'CHANNEL_PUBLISHED', '2': 5},
-    const {'1': 'RELEASE_VERIFIED', '2': 6},
+    const {'1': 'INITIALIZE', '2': 0},
+    const {'1': 'APPLY_ENGINE_CHERRYPICKS', '2': 1},
+    const {'1': 'CODESIGN_ENGINE_BINARIES', '2': 2},
+    const {'1': 'APPLY_FRAMEWORK_CHERRYPICKS', '2': 3},
+    const {'1': 'PUBLISH_VERSION', '2': 4},
+    const {'1': 'PUBLISH_CHANNEL', '2': 5},
+    const {'1': 'VERIFY_RELEASE', '2': 6},
   ],
 };
 
 /// Descriptor for `ReleasePhase`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List releasePhaseDescriptor = $convert.base64Decode(
-    'CgxSZWxlYXNlUGhhc2USDwoLSU5JVElBTElaRUQQABIeChpFTkdJTkVfQ0hFUlJZUElDS1NfQVBQTElFRBABEh4KGkVOR0lORV9CSU5BUklFU19DT0RFU0lHTkVEEAISIQodRlJBTUVXT1JLX0NIRVJSWVBJQ0tTX0FQUExJRUQQAxIVChFWRVJTSU9OX1BVQkxJU0hFRBAEEhUKEUNIQU5ORUxfUFVCTElTSEVEEAUSFAoQUkVMRUFTRV9WRVJJRklFRBAG');
+    'CgxSZWxlYXNlUGhhc2USDgoKSU5JVElBTElaRRAAEhwKGEFQUExZX0VOR0lORV9DSEVSUllQSUNLUxABEhwKGENPREVTSUdOX0VOR0lORV9CSU5BUklFUxACEh8KG0FQUExZX0ZSQU1FV09SS19DSEVSUllQSUNLUxADEhMKD1BVQkxJU0hfVkVSU0lPThAEEhMKD1BVQkxJU0hfQ0hBTk5FTBAFEhIKDlZFUklGWV9SRUxFQVNFEAY=');
 @$core.Deprecated('Use remoteDescriptor instead')
 const Remote$json = const {
   '1': 'Remote',

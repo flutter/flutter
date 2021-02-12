@@ -40,7 +40,7 @@ void presentState(Stdio stdio, pb.ConductorState state) {
   stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
   stdio.printStatus('');
   stdio.printStatus('Last completed step: ${state.lastPhase.name}');
-  if (state.lastPhase == ReleasePhase.RELEASE_VERIFIED) {
+  if (state.lastPhase == ReleasePhase.VERIFY_RELEASE) {
     stdio.printStatus(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
     );
@@ -55,7 +55,7 @@ void presentState(Stdio stdio, pb.ConductorState state) {
 
 String nextPhaseMessage(pb.ConductorState state) {
   switch (state.lastPhase) {
-    case ReleasePhase.INITIALIZED:
+    case ReleasePhase.INITIALIZE:
       if (state.engine.cherrypicks.isEmpty) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
@@ -69,31 +69,31 @@ String nextPhaseMessage(pb.ConductorState state) {
           '\t$cherrypick',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
-    case ReleasePhase.ENGINE_CHERRYPICKS_APPLIED:
+    case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       return <String>[
         'You must verify Engine CI builds are successful and then codesign the',
         'binaries at revision ${state.engine.currentGitHead}.',
       ].join('\n');
-    case ReleasePhase.ENGINE_BINARIES_CODESIGNED:
+    case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       return <String>[
         'You must now manually apply the following framework cherrypicks to the checkout',
         'at ${state.framework.checkoutPath} in order:',
         for (final String cherrypick in state.framework.cherrypicks)
           '\t$cherrypick',
       ].join('\n');
-    case ReleasePhase.FRAMEWORK_CHERRYPICKS_APPLIED:
+    case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       return <String>[
         'You must verify Framework CI builds are successful.',
         'See $kReleaseDocumentationUrl for more information.',
       ].join('\n');
-    case ReleasePhase.VERSION_PUBLISHED:
+    case ReleasePhase.PUBLISH_VERSION:
       return 'Issue `conductor next` to publish your release to the release branch.';
-    case ReleasePhase.CHANNEL_PUBLISHED:
+    case ReleasePhase.PUBLISH_CHANNEL:
       return <String>[
         'Release archive packages must be verified on cloud storage. Issue',
         '`conductor next` to check if they are ready.',
       ].join('\n');
-    case ReleasePhase.RELEASE_VERIFIED:
+    case ReleasePhase.VERIFY_RELEASE:
       return 'This release has been completed.';
   }
   assert(false);
@@ -106,7 +106,7 @@ String nextPhaseMessage(pb.ConductorState state) {
 /// passed as an argument, as there is no next phase.
 ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   assert(currentPhase != null);
-  if (currentPhase == ReleasePhase.RELEASE_VERIFIED) {
+  if (currentPhase == ReleasePhase.VERIFY_RELEASE) {
     throw ConductorException('There is no next ReleasePhase!');
   }
   return ReleasePhase.valueOf(currentPhase.value + 1);
