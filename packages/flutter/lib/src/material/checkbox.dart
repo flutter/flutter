@@ -58,7 +58,7 @@ import 'toggleable.dart';
 ///         isChecked = !isChecked;
 ///       });
 ///     },
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
