@@ -1074,7 +1074,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionLeftByLine(cause);
     }
 
-    final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
+    final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
