@@ -101,7 +101,7 @@ class StartCommand extends Command<void> {
   String get name => 'start';
 
   @override
-  String get description => 'Start a new Flutter release.';
+  String get description => 'Initialize a new Flutter release.';
 
   @override
   void run() {
