@@ -210,163 +210,31 @@ class TextEditingActions extends StatelessWidget {
   );
 
   static final Map<Type, Action<Intent>> _androidActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionToStartAction,
-    AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
-    ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    // EndTextIntent is not handled by this platform.
-    // HomeTextIntent is not handled by this platform.
-    // MetaArrowLeftTextIntent is not handled by this platform.
-    // MetaArrowRightTextIntent is not handled by this platform.
-    // MetaArrowUpTextIntent is not handled by this platform.
-    // MetaShiftArrowDownTextIntent is not handled by this platform.
-    // MetaShiftArrowLeftTextIntent is not handled by this platform.
-    // MetaShiftArrowRightTextIntent is not handled by this platform.
-    // MetaShiftArrowUpTextIntent is not handled by this platform.
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     // ShiftEndTextIntent is not handled by this platform.
     // ShiftHomeTextIntent is not handled by this platform.
   };
 
   static final Map<Type, Action<Intent>> _fuchsiaActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionToStartAction,
-    AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
-    ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    // EndTextIntent is not handled by this platform.
-    // HomeTextIntent is not handled by this platform.
-    // MetaArrowLeftTextIntent is not handled by this platform.
-    // MetaArrowRightTextIntent is not handled by this platform.
-    // MetaArrowUpTextIntent is not handled by this platform.
-    // MetaShiftArrowDownTextIntent is not handled by this platform.
-    // MetaShiftArrowLeftTextIntent is not handled by this platform.
-    // MetaShiftArrowRightTextIntent is not handled by this platform.
-    // MetaShiftArrowUpTextIntent is not handled by this platform.
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     // ShiftEndTextIntent is not handled by this platform.
     // ShiftHomeTextIntent is not handled by this platform.
   };
 
   static final Map<Type, Action<Intent>> _iOSActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionToStartAction,
-    AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
-    ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    // EndTextIntent is not handled by this platform.
-    // HomeTextIntent is not handled by this platform.
-    // MetaArrowLeftTextIntent is not handled by this platform.
-    // MetaArrowRightTextIntent is not handled by this platform.
-    // MetaArrowUpTextIntent is not handled by this platform.
-    // MetaShiftArrowDownTextIntent is not handled by this platform.
-    // MetaShiftArrowLeftTextIntent is not handled by this platform.
-    // MetaShiftArrowRightTextIntent is not handled by this platform.
-    // MetaShiftArrowUpTextIntent is not handled by this platform.
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     // ShiftEndTextIntent is not handled by this platform.
     // ShiftHomeTextIntent is not handled by this platform.
   };
 
   static final Map<Type, Action<Intent>> _linuxActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionToStartAction,
-    AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
-    ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    // EndTextIntent is not handled by this platform.
-    // HomeTextIntent is not handled by this platform.
-    // MetaArrowLeftTextIntent is not handled by this platform.
-    // MetaArrowRightTextIntent is not handled by this platform.
-    // MetaArrowUpTextIntent is not handled by this platform.
-    // MetaShiftArrowDownTextIntent is not handled by this platform.
-    // MetaShiftArrowLeftTextIntent is not handled by this platform.
-    // MetaShiftArrowRightTextIntent is not handled by this platform.
-    // MetaShiftArrowUpTextIntent is not handled by this platform.
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     // ShiftEndTextIntent is not handled by this platform.
     // ShiftHomeTextIntent is not handled by this platform.
   };
 
   static final Map<Type, Action<Intent>> _macActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionLeftByLineAction,
-    AltShiftArrowDownTextIntent: _extendSelectionRightByLineAction,
-    AltShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    AltShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    AltShiftArrowUpTextIntent: _expandSelectionLeftByLineAction,
-    // ControlArrowLeftTextIntent is not handled by this platform.
-    // ControlArrowRightTextIntent is not handled by this platform.
-    // ControlShiftArrowLeftTextIntent is not handled by this platform.
-    // ControlShiftArrowRightTextIntent is not handled by this platform.
-    // EndTextIntent is not handled by this platform.
-    // HomeTextIntent is not handled by this platform.
-    MetaArrowLeftTextIntent: _moveSelectionLeftByLineAction,
-    MetaArrowRightTextIntent: _moveSelectionRightByLineAction,
-    MetaArrowUpTextIntent: _moveSelectionToStartAction,
-    MetaShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    MetaShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    MetaShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    MetaShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     // ShiftEndTextIntent is not handled by this platform.
     // ShiftHomeTextIntent is not handled by this platform.
   };
 
   static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
-    AltArrowUpTextIntent: _moveSelectionToStartAction,
-    AltShiftArrowDownTextIntent: _expandSelectionToEndAction,
-    AltShiftArrowLeftTextIntent: _expandSelectionLeftByLineAction,
-    AltShiftArrowRightTextIntent: _expandSelectionRightByLineAction,
-    AltShiftArrowUpTextIntent: _expandSelectionToStartAction,
-    ControlArrowLeftTextIntent: _moveSelectionLeftByWordAction,
-    ControlArrowRightTextIntent: _moveSelectionRightByWordAction,
-    ControlShiftArrowLeftTextIntent: _extendSelectionLeftByWordAction,
-    ControlShiftArrowRightTextIntent: _extendSelectionRightByWordAction,
-    EndTextIntent: _moveSelectionRightByLineAction,
-    HomeTextIntent: _moveSelectionLeftByLineAction,
-    // MetaArrowLeftTextIntent is not handled by this platform.
-    // MetaArrowRightTextIntent is not handled by this platform.
-    // MetaArrowUpTextIntent is not handled by this platform.
-    // MetaShiftArrowDownTextIntent is not handled by this platform.
-    // MetaShiftArrowLeftTextIntent is not handled by this platform.
-    // MetaShiftArrowRightTextIntent is not handled by this platform.
-    // MetaShiftArrowUpTextIntent is not handled by this platform.
-    ShiftArrowDownTextIntent: _extendSelectionDownAction,
-    ShiftArrowLeftTextIntent: _extendSelectionLeftAction,
-    ShiftArrowRightTextIntent: _extendSelectionRightAction,
-    ShiftArrowUpTextIntent: _extendSelectionUpAction,
     ShiftEndTextIntent: _expandSelectionRightByLineAction,
     ShiftHomeTextIntent: _expandSelectionLeftByLineAction,
   };
@@ -375,12 +243,25 @@ class TextEditingActions extends StatelessWidget {
   // regardless of the platform; it's up to TextEditingShortcuts to decide which
   // are called on which platform.
   static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
+    ExtendSelectionDownTextIntent: _extendSelectionDownAction,
+    ExpandSelectionLeftByLineTextIntent: _expandSelectionLeftByLineAction,
+    ExpandSelectionRightByLineTextIntent: _expandSelectionRightByLineAction,
+    ExtendSelectionLeftTextIntent: _extendSelectionLeftAction,
+    ExpandSelectionToEndTextIntent: _expandSelectionToEndAction,
+    ExpandSelectionToStartTextIntent: _expandSelectionToStartAction,
+    ExtendSelectionLeftByWordTextIntent: _extendSelectionLeftByWordAction,
+    ExtendSelectionRightByWordTextIntent: _extendSelectionRightByWordAction,
+    ExtendSelectionRightTextIntent: _extendSelectionRightAction,
+    ExtendSelectionUpTextIntent: _extendSelectionUpAction,
     MoveSelectionDownTextIntent: _moveSelectionDown,
     MoveSelectionLeftTextIntent: _moveSelectionLeft,
     MoveSelectionLeftByLineTextIntent: _moveSelectionLeftByLineAction,
+    MoveSelectionLeftByWordTextIntent: _moveSelectionLeftByWordAction,
     MoveSelectionRightTextIntent: _moveSelectionRight,
     MoveSelectionRightByLineTextIntent: _moveSelectionRightByLineAction,
+    MoveSelectionRightByWordTextIntent: _moveSelectionRightByWordAction,
     MoveSelectionToEndTextIntent: _moveSelectionToEndAction,
+    MoveSelectionToStartTextIntent: _moveSelectionToStartAction,
     MoveSelectionUpTextIntent: _moveSelectionUp,
   };
 

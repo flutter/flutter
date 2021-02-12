@@ -4,6 +4,11 @@
 
 import 'actions.dart';
 
+/// An [Intent] to expand the selection to the end of the field.
+///
+/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
+class ExpandSelectionToEndTextIntent extends Intent {}
+
 /// An [Intent] to move the selection left by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
@@ -14,35 +19,27 @@ class MoveSelectionLeftByLineTextIntent extends Intent {}
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class MoveSelectionRightByLineTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the alt + arrow up key event.
+/// An [Intent] to move the selection to the start of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class AltArrowUpTextIntent extends Intent {}
+class MoveSelectionToStartTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the alt + shift + arrow down key event.
+/// An [Intent] to expand the selection left to the start/end of the current
+/// line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class AltShiftArrowDownTextIntent extends Intent {}
+class ExpandSelectionLeftByLineTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the alt + shift + arrow-left key event.
+/// An [Intent] to expand the selection right to the start/end of the current
+/// field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class AltShiftArrowLeftTextIntent extends Intent {}
+class ExpandSelectionRightByLineTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the alt + shift + arrow-right key event.
+/// An [Intent] to expand the selection to the start of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class AltShiftArrowRightTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the alt + shift + arrow up key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class AltShiftArrowUpTextIntent extends Intent {}
+class ExpandSelectionToStartTextIntent extends Intent {}
 
 // TODO(justinmc): Put this template in the first Intent here alphabetically.
 /// An [Intent] to move the selection down by one line.
@@ -82,63 +79,30 @@ class ContextMenuCopyTextIntent extends Intent {}
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class ControlATextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the control + arrow-left key event.
+/// An [Intent] to move the selection left past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ControlArrowLeftTextIntent extends Intent {}
+class MoveSelectionLeftByWordTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the control + arrow-right key event.
+/// An [Intent] to move the selection right past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ControlArrowRightTextIntent extends Intent {}
+class MoveSelectionRightByWordTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the control + shift + arrow-left key event.
+/// An [Intent] to extend the selection left past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ControlShiftArrowLeftTextIntent extends Intent {}
+class ExtendSelectionLeftByWordTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the control + shift + arrow-right key event.
+/// An [Intent] to extend the selection right past the nearest word.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ControlShiftArrowRightTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the end key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class EndTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the home key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class HomeTextIntent extends Intent {}
+class ExtendSelectionRightByWordTextIntent extends Intent {}
 
 /// An [Intent] to move the selection to the end of the field.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class MoveSelectionToEndTextIntent extends Intent {}
-
-/// An [Intent] to move the selection to the left.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaArrowLeftTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the meta + arrow-right key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaArrowRightTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the meta + arrow-up key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaArrowUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + c key event.
@@ -147,52 +111,31 @@ class MetaArrowUpTextIntent extends Intent {}
 class MetaCTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
-/// platform for the meta + shift + arrow-down key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaShiftArrowDownTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
 /// platform for the meta + shift + arrow-left key event.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
 class MetaShiftArrowLeftTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the meta + shift + arrow-right key event.
+/// An [Intent] to extend the selection down by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaShiftArrowRightTextIntent extends Intent {}
+class ExtendSelectionDownTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the meta + shift + arrow-up key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class MetaShiftArrowUpTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the shift + arrow-down key event.
-///
-/// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ShiftArrowDownTextIntent extends Intent {}
-
-/// An [Intent] representing the default text editing behavior for the current
+/// An [Intent] to extend the selection left by one character.
 /// platform for the shift + arrow-left key event.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ShiftArrowLeftTextIntent extends Intent {}
+class ExtendSelectionLeftTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the shift + arrow-right key event.
+/// An [Intent] to extend the selection right by one character.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ShiftArrowRightTextIntent extends Intent {}
+class ExtendSelectionRightTextIntent extends Intent {}
 
-/// An [Intent] representing the default text editing behavior for the current
-/// platform for the shift + arrow-up key event.
+/// An [Intent] to extend the selection up by one line.
 ///
 /// {@macro flutter.widgets.TextEditingIntents.seeAlso}
-class ShiftArrowUpTextIntent extends Intent {}
+class ExtendSelectionUpTextIntent extends Intent {}
 
 /// An [Intent] representing the default text editing behavior for the current
 /// platform for the shift + end key event.
