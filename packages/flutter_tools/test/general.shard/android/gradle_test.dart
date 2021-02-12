@@ -842,7 +842,7 @@ flutter:
       fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
     });
 
     testUsingContext('calls gradle', () async {
@@ -1030,7 +1030,7 @@ plugin1=${plugin1.path}
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
 
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(fileSystem.directory('irrelevant'));
 
       final Directory rootDirectory = fileSystem.currentDirectory;
       cache = Cache.test(
