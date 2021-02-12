@@ -28,6 +28,17 @@ import 'test_platform.dart';
 import 'utils.dart';
 import 'watcher.dart';
 
+/// Global list of shards that failed.
+///
+/// This is used to make sure that when there's a test failure anywhere we
+/// exit with a non-zero exit code.
+///
+/// Shards must never be removed from this list, only added.
+List<String> failedShards = <String>[];
+
+/// Whether all test shards succeeded.
+bool get allShardsPassed => failedShards.isEmpty;
+
 /// The type of tests requested by the tool user.
 enum TestTypesRequested {
   /// For running the unit tests only.
@@ -101,6 +112,15 @@ class TestCommand extends Command<bool> with ArgUtils {
         defaultsTo: 'chrome',
         help: 'An option to choose a browser to run the tests. Tests only work '
             ' on Chrome for now.',
+      )
+      ..addFlag(
+        'fail-early',
+        defaultsTo: false,
+        negatable: true,
+        help: 'If set, causes the test runner to exit upon the first test '
+              'failure. If not set, the test runner will continue running '
+              'test despite failures and will report them after all tests '
+              'finish.',
       );
 
     SupportedBrowsers.instance.argParsers
@@ -117,12 +137,14 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   bool get isWatchMode => boolArg('watch');
 
+  bool get failEarly => boolArg('fail-early');
+
   TestTypesRequested testTypesRequested = null;
 
   /// How many dart2js build tasks are running at the same time.
   final Pool _pool = Pool(8);
 
-  /// Checks if test harness preparation (such as fetching the goldens,
+  /// Whether test harness preparation (such as fetching the goldens,
   /// creating test_results directory or starting ios-simulator) has been done.
   ///
   /// If unit tests already did these steps, integration tests do not have to
@@ -211,8 +233,21 @@ class TestCommand extends Command<bool> with ArgUtils {
       // Return a never-ending future.
       return Completer<bool>().future;
     } else {
-      return true;
+      if (!allShardsPassed) {
+        io.stderr.writeln(_createFailedShardsMessage());
+      }
+      return allShardsPassed;
     }
+  }
+
+  String _createFailedShardsMessage() {
+    final StringBuffer message = StringBuffer(
+      'The following test shards failed:\n',
+    );
+    for (String failedShard in failedShards) {
+      message.writeln(' - $failedShard');
+    }
+    return message.toString();
   }
 
   Future<bool> runTestsOfType(TestTypesRequested testTypesRequested) async {
@@ -246,12 +281,14 @@ class TestCommand extends Command<bool> with ArgUtils {
   Future<bool> runIntegrationTests() async {
     // Parse additional arguments specific for integration testing.
     IntegrationTestsArgumentParser.instance.parseOptions(argResults);
-    if (!_testPreparationReady) {
-      await _prepare();
-    }
-    return IntegrationTestsManager(
+    await _prepare();
+    final bool result = await IntegrationTestsManager(
             browser, useSystemFlutter, doUpdateScreenshotGoldens)
         .runTests();
+    if (!result) {
+      failedShards.add('Integration tests');
+    }
+    return result;
   }
 
   Future<bool> runUnitTests() async {
@@ -278,6 +315,9 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// Preparations before running the tests such as booting simulators or
   /// creating directories.
   Future<void> _prepare() async {
+    if (_testPreparationReady) {
+      return;
+    }
     if (environment.webUiTestResultsDirectory.existsSync()) {
       environment.webUiTestResultsDirectory.deleteSync(recursive: true);
     }
@@ -343,8 +383,8 @@ class TestCommand extends Command<bool> with ArgUtils {
           targets: canvasKitTargets, forCanvasKit: true);
     }
 
-    _copyFilesFromTestToBuid();
-    _copyFilesFromLibToBuid();
+    _copyFilesFromTestToBuild();
+    _copyFilesFromLibToBuild();
 
     stopwatch.stop();
     print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
@@ -360,7 +400,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   ///
   /// A side effect is this file copies all the images even when only one
   /// target test is asked to run.
-  void _copyFilesFromTestToBuid() {
+  void _copyFilesFromTestToBuild() {
     final List<io.FileSystemEntity> contents =
         environment.webUiTestDir.listSync(recursive: true);
     _copyFiles(contents);
@@ -374,7 +414,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   ///
   /// This operation was handled by `build_runner` before we started using
   /// plain `dart2js`.
-  void _copyFilesFromLibToBuid() {
+  void _copyFilesFromLibToBuild() {
     final List<io.FileSystemEntity> contents =
         environment.webUiLibDir.listSync(recursive: true);
     _copyFiles(contents);
@@ -505,7 +545,10 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// them.
   Future<void> _runSpecificTests(List<FilePath> targets) async {
     await _runTestBatch(targets, concurrency: 1, expectFailure: false);
-    _checkExitCode();
+    _checkExitCode(
+      'Some of the following tests: ' +
+      targets.map((FilePath path) => path.relativeToWebUi).join(', '),
+    );
   }
 
   /// Runs as many tests as possible on the current OS/browser combination.
@@ -558,13 +601,13 @@ class TestCommand extends Command<bool> with ArgUtils {
           concurrency: 1,
           expectFailure: true,
         );
-        _checkExitCode();
+        _checkExitCode('Smoke test');
       }
     }
 
     // Run all unit-tests as a single batch.
     await _runTestBatch(unitTestFiles, concurrency: 10, expectFailure: false);
-    _checkExitCode();
+    _checkExitCode('Unit tests');
 
     if (isUnitTestsScreenshotsAvailable) {
       // Run screenshot tests one at a time.
@@ -574,18 +617,21 @@ class TestCommand extends Command<bool> with ArgUtils {
           concurrency: 1,
           expectFailure: false,
         );
-        _checkExitCode();
+        _checkExitCode('Golden tests');
       }
     }
   }
 
-  void _checkExitCode() {
+  void _checkExitCode(String shard) {
     if (io.exitCode != 0) {
       if (isWatchMode) {
         io.exitCode = 0;
         throw TestFailureException();
       } else {
-        throw ToolException('Process exited with exit code ${io.exitCode}.');
+        failedShards.add(shard);
+        if (failEarly) {
+          throw ToolException(_createFailedShardsMessage());
+        }
       }
     }
   }
@@ -685,7 +731,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   /// debug.
   ///
   /// All the files under test already copied from /test directory to /build
-  /// directory before test are build. See [_copyFilesFromTestToBuid].
+  /// directory before test are build. See [_copyFilesFromTestToBuild].
   ///
   /// Later the extra files will be deleted in [_cleanupExtraFilesUnderTestDir].
   Future<bool> _buildTest(TestBuildInput input) async {
@@ -766,10 +812,13 @@ class TestCommand extends Command<bool> with ArgUtils {
     });
 
     // We want to run tests with `web_ui` as a working directory.
-    final dynamic backupCwd = io.Directory.current;
+    final dynamic originalCwd = io.Directory.current;
     io.Directory.current = environment.webUiRootDir.path;
-    await test.main(testArgs);
-    io.Directory.current = backupCwd;
+    try {
+      await test.main(testArgs);
+    } finally {
+      io.Directory.current = originalCwd;
+    }
 
     if (expectFailure) {
       if (io.exitCode != 0) {

@@ -38,7 +38,7 @@ void main(List<String> args) async {
   try {
     final bool result = (await runner.run(args)) as bool;
     if (result == false) {
-      print('Sub-command returned false: `${args.join(' ')}`');
+      print('Sub-command failed: `${args.join(' ')}`');
       exitCode = 1;
     }
   } on UsageException catch (e) {
