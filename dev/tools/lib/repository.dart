@@ -314,9 +314,11 @@ class FrameworkRepository extends Repository {
     bool localUpstream = false,
     bool useExistingCheckout = false,
     String initialRef = FrameworkRepository.defaultBranch,
+    Remote pushRemote,
   }) : super(
           name: name,
           fetchRemote: fetchRemote,
+          pushRemote: pushRemote,
           initialRef: initialRef,
           fileSystem: checkouts.fileSystem,
           localUpstream: localUpstream,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
@@ -91,4 +92,47 @@ bool assertsEnabled() {
     return true;
   }());
   return assertsEnabled;
+}
+
+/// Either return the value from [env] or fall back to [argResults].
+///
+/// If the key does not exist in either the CLI args or environment, throws a
+/// [ConductorException].
+///
+/// The environment is favored over CLI args since the latter can have a default
+/// value, which the environment should be able to override.
+T getValueFromEnvOrArgs<T>(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final dynamic argValue = argResults[name];
+  if (argValue != null) {
+    if (T == String) {
+      print('T == String');
+      return argValue as T;
+    } else if (T == List) {
+      throw Exception('TODO implement');
+    }
+  }
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null ) {
+    if (T == String) {
+      print('T == String');
+      return env[envName] as T;
+    } else if (T == List) {
+      return env[envName].split(',') as T;
+    }
+  }
+
+  throw ConductorException(
+    'Expected either the CLI arg --$name or the environment variable $envName '
+    'to be provided!');
+}
+
+/// Translate CLI arg names to env variable names.
+///
+/// For example, 'state-file' -> 'STATE_FILE'.
+String fromArgToEnvName(String argName) {
+  return argName.toUpperCase().replaceAll(r'-', r'_');
 }

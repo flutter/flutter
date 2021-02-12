@@ -105,25 +105,44 @@ class StartCommand extends Command<void> {
 
   @override
   void run() {
-    final String candidateBranch = argResults[kCandidateOption] as String;
-    final File stateFile = checkouts.fileSystem.file(argResults['state-file']);
+    final File stateFile = checkouts.fileSystem.file(
+      getValueFromEnvOrArgs<String>(kStateOption, argResults, platform.environment),
+    );
     if (stateFile.existsSync()) {
       throw ConductorException(
           'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
           'Run `conductor cleanup` to cancel a previous release.');
     }
-    final List<String> requiredArgs = <String>[
+    final String frameworkUpstream = getValueFromEnvOrArgs<String>(
+      kFrameworkUpstreamOption,
+      argResults,
+      platform.environment,
+    );
+    final String frameworkMirror = getValueFromEnvOrArgs<String>(
       kFrameworkMirrorOption,
+      argResults,
+      platform.environment,
+    );
+    final String engineUpstream = getValueFromEnvOrArgs<String>(
+      kEngineUpstreamOption,
+      argResults,
+      platform.environment,
+    );
+    final String engineMirror = getValueFromEnvOrArgs<String>(
       kEngineMirrorOption,
-      kReleaseOption,
+      argResults,
+      platform.environment,
+    );
+    final String candidateBranch = getValueFromEnvOrArgs<String>(
       kCandidateOption,
-    ];
-    for (final String arg in requiredArgs) {
-      if (!argResults.wasParsed(arg)) {
-        throw ConductorException(
-            'The command line option `--$arg` must be provided -> ${argResults[arg]}');
-      }
-    }
+      argResults,
+      platform.environment,
+    );
+    final String releaseChannel = getValueFromEnvOrArgs<String>(
+      kReleaseOption,
+      argResults,
+      platform.environment,
+    );
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
       throw ConductorException(
           'Invalid release candidate branch "$candidateBranch". '
@@ -133,16 +152,20 @@ class StartCommand extends Command<void> {
     final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
     final pb.ConductorState state = pb.ConductorState();
 
-    state.releaseChannel = argResults[kReleaseOption] as String;
+    state.releaseChannel = releaseChannel;
     state.createdDate = unixDate;
     state.lastUpdatedDate = unixDate;
 
     final EngineRepository engine = EngineRepository(
       checkouts,
       initialRef: candidateBranch,
+      fetchRemote: Remote(
+        name: RemoteName.upstream,
+        url: engineUpstream,
+      ),
       pushRemote: Remote(
         name: RemoteName.mirror,
-        url: argResults[kEngineMirrorOption] as String,
+        url: engineMirror,
       ),
     );
     final String engineHead = engine.reverseParse('HEAD');
@@ -155,6 +178,14 @@ class StartCommand extends Command<void> {
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
       initialRef: candidateBranch,
+      fetchRemote: Remote(
+        name: RemoteName.upstream,
+        url: engineUpstream,
+      ),
+      pushRemote: Remote(
+        name: RemoteName.mirror,
+        url: frameworkMirror,
+      ),
     );
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
