@@ -44,11 +44,17 @@ void testMain() {
       sb.addPicture(ui.Offset.zero, picture);
       final LayerTree layerTree = sb.build().layerTree;
       dispatcher.rasterizer!.draw(layerTree);
-      final ClipRectEngineLayer clipRect = layerTree.rootLayer as ClipRectEngineLayer;
+      final ClipRectEngineLayer clipRect = layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
       expect(clipRect.paintBounds, ui.Rect.fromLTRB(15, 15, 30, 30));
 
       final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
       expect(transform.paintBounds, ui.Rect.fromLTRB(0, 0, 30, 30));
+    });
+
+    test('can push a leaf layer without a container layer', () async {
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      recorder.beginRecording(ui.Rect.zero);
+      LayerSceneBuilder().addPicture(ui.Offset.zero, recorder.endRecording());
     });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
