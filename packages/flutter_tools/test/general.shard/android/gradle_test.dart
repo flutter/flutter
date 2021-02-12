@@ -1704,6 +1704,52 @@ plugin1=${plugin1.path}
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('gradle exit code is properly passed on', () async {
+      final File manifestFile = fileSystem.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      fileSystem.file('.android/gradlew').createSync(recursive: true);
+
+      fileSystem.file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+
+      fileSystem.file('.android/build.gradle')
+          .createSync(recursive: true);
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 108, '', ''));
+
+      fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+      await expectLater(() async =>
+        await buildGradleAar(
+          androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+          project: FlutterProject.current(),
+          outputDirectory: fileSystem.directory('build/'),
+          target: '',
+          buildNumber: '1.0',
+        )
+      , throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('build apk uses selected local engine,the engine abi is arm', () async {
       when(mockArtifacts.getArtifactPath(
         Artifact.flutterFramework,
