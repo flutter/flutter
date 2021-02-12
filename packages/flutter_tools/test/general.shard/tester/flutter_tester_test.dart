@@ -167,7 +167,7 @@ void main() {
 Observatory listening on $observatoryUri
 Hello!
 ''',
-      ),);
+      ));
 
       final LaunchResult result = await device.startApp(app,
         mainPath: mainPath,
