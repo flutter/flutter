@@ -170,7 +170,7 @@ enum AnimationBehavior {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container(); // ...
+///     return const SizedBox(); // ...
 ///   }
 /// }
 /// ```

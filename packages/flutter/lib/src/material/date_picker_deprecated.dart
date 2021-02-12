@@ -250,7 +250,7 @@ class DayPicker extends StatelessWidget {
       if (day > daysInMonth)
         break;
       if (day < 1) {
-        labels.add(Container());
+        labels.add(const SizedBox());
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
         final bool disabled = dayToBuild.isAfter(lastDate)

@@ -71,7 +71,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// class MyApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container();
+///     return const SizedBox();
 ///   }
 /// }
 /// ```

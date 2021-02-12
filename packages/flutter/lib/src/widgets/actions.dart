@@ -304,7 +304,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 ///                   ),
 ///                 ),
 ///               )
-///             : Container(),
+///             : const SizedBox(),
 ///       ],
 ///     );
 ///   }

@@ -1623,7 +1623,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 /// void main() {
 ///   runApp(MaterialApp(
-///     home: Container(),
+///     home: const SizedBox(),
 ///     navigatorObservers: [routeObserver],
 ///   ));
 /// }
@@ -1658,7 +1658,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   }
 ///
 ///   @override
-///   Widget build(BuildContext context) => Container();
+///   Widget build(BuildContext context) => const SizedBox();
 ///
 /// }
 /// ```

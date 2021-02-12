@@ -535,7 +535,7 @@ class TextSelectionOverlay {
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
-      return Container(); // hide the second handle when collapsed
+      return const SizedBox(); // hide the second handle when collapsed
     return Visibility(
       visible: handlesVisible,
       child: _TextSelectionHandleOverlay(
@@ -553,7 +553,7 @@ class TextSelectionOverlay {
 
   Widget _buildToolbar(BuildContext context) {
     if (selectionControls == null)
-      return Container();
+      return const SizedBox();
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =

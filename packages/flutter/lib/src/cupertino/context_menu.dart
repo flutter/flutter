@@ -773,7 +773,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // animate the entire page into the scene. In the case of _ContextMenuRoute,
     // two individual pieces of the page are animated into the scene in
     // buildTransitions, and a Container is returned here.
-    return Container();
+    return const SizedBox();
   }
 
   @override
