@@ -8,9 +8,11 @@ import 'dart:async';
 
 import 'package:process/process.dart';
 
+import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -77,6 +79,7 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      AndroidBuilder: () => AndroidGradleBuilder(),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
