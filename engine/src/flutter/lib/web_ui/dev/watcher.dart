@@ -34,11 +34,14 @@ class Pipeline {
 
   Future<dynamic> _currentStepFuture;
 
-  PipelineStatus status = PipelineStatus.idle;
+  PipelineStatus get status => _status;
+  PipelineStatus _status = PipelineStatus.idle;
 
   /// Starts executing tasks of the pipeline.
+  ///
+  /// Returns a future that resolves after all steps have been performed.
   Future<void> start() async {
-    status = PipelineStatus.started;
+    _status = PipelineStatus.started;
     try {
       for (PipelineStep step in steps) {
         if (status != PipelineStatus.started) {
@@ -47,9 +50,9 @@ class Pipeline {
         _currentStepFuture = step();
         await _currentStepFuture;
       }
-      status = PipelineStatus.done;
+      _status = PipelineStatus.done;
     } catch (error, stackTrace) {
-      status = PipelineStatus.error;
+      _status = PipelineStatus.error;
       print('Error in the pipeline: $error');
       print(stackTrace);
     } finally {
@@ -61,9 +64,9 @@ class Pipeline {
   ///
   /// If a task is already being executed, it won't be interrupted.
   Future<void> stop() {
-    status = PipelineStatus.stopping;
+    _status = PipelineStatus.stopping;
     return (_currentStepFuture ?? Future<void>.value(null)).then((_) {
-      status = PipelineStatus.stopped;
+      _status = PipelineStatus.stopped;
     });
   }
 }
