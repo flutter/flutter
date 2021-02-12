@@ -166,6 +166,7 @@ class FlutterTesterDevice extends Device {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
       treeShakeIcons: buildInfo.treeShakeIcons,
+      assetDirPath: assetDirectory.path,
     );
 
     final List<String> command = <String>[
