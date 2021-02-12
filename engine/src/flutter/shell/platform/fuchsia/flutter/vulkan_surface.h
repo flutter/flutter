@@ -146,7 +146,8 @@ class VulkanSurface final : public SurfaceProducerSurface {
 
   bool AllocateDeviceMemory(fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
                             sk_sp<GrDirectContext> context,
-                            const SkISize& size);
+                            const SkISize& size,
+                            uint32_t buffer_id);
 
   bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                          const SkISize& size,
@@ -174,9 +175,9 @@ class VulkanSurface final : public SurfaceProducerSurface {
   VkMemoryAllocateInfo vk_memory_info_;
   vulkan::VulkanHandle<VkFence> command_buffer_fence_;
   sk_sp<SkSurface> sk_surface_;
-  const uint32_t buffer_id_;
+  uint32_t buffer_id_ = 0;
   uint32_t image_id_ = 0;
-  VkBufferCollectionFUCHSIA collection_;
+  vulkan::VulkanHandle<VkBufferCollectionFUCHSIA> collection_;
   zx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   std::unique_ptr<vulkan::VulkanCommandBuffer> command_buffer_;

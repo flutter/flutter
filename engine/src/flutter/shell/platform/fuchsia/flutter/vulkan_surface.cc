@@ -107,13 +107,11 @@ VulkanSurface::VulkanSurface(
     scenic::Session* session,
     const SkISize& size,
     uint32_t buffer_id)
-    : vulkan_provider_(vulkan_provider),
-      session_(session),
-      buffer_id_(buffer_id),
-      wait_(this) {
+    : vulkan_provider_(vulkan_provider), session_(session), wait_(this) {
   FML_DCHECK(session_);
 
-  if (!AllocateDeviceMemory(sysmem_allocator, std::move(context), size)) {
+  if (!AllocateDeviceMemory(sysmem_allocator, std::move(context), size,
+                            buffer_id)) {
     FML_DLOG(INFO) << "Could not allocate device memory.";
     return;
   }
@@ -135,6 +133,12 @@ VulkanSurface::VulkanSurface(
 }
 
 VulkanSurface::~VulkanSurface() {
+  if (image_id_) {
+    session_->Enqueue(scenic::NewReleaseResourceCmd(image_id_));
+  }
+  if (buffer_id_) {
+    session_->DeregisterBufferCollection(buffer_id_);
+  }
   wait_.Cancel();
   wait_.set_object(ZX_HANDLE_INVALID);
 }
@@ -221,7 +225,8 @@ bool VulkanSurface::CreateFences() {
 bool VulkanSurface::AllocateDeviceMemory(
     fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
     sk_sp<GrDirectContext> context,
-    const SkISize& size) {
+    const SkISize& size,
+    uint32_t buffer_id) {
   if (size.isEmpty()) {
     return false;
   }
@@ -237,15 +242,23 @@ bool VulkanSurface::AllocateDeviceMemory(
   status = vulkan_token->Sync();
   LOG_AND_RETURN(status != ZX_OK, "Failed to sync token");
 
-  session_->RegisterBufferCollection(buffer_id_, std::move(scenic_token));
+  session_->RegisterBufferCollection(buffer_id, std::move(scenic_token));
+  buffer_id_ = buffer_id;
 
   VkBufferCollectionCreateInfoFUCHSIA import_info;
   import_info.collectionToken = vulkan_token.Unbind().TakeChannel().release();
+  VkBufferCollectionFUCHSIA collection;
   if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().CreateBufferCollectionFUCHSIA(
-          vulkan_provider_.vk_device(), &import_info, nullptr, &collection_)) !=
+          vulkan_provider_.vk_device(), &import_info, nullptr, &collection)) !=
       VK_SUCCESS) {
     return false;
   }
+
+  collection_ = {collection, [&vulkan_provider = vulkan_provider_](
+                                 VkBufferCollectionFUCHSIA collection) {
+                   vulkan_provider.vk().DestroyBufferCollectionFUCHSIA(
+                       vulkan_provider.vk_device(), collection, nullptr);
+                 }};
 
   VulkanImage vulkan_image;
   LOG_AND_RETURN(!CreateVulkanImage(vulkan_provider_, size, &vulkan_image),
