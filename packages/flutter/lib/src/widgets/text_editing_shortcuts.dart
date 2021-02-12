@@ -79,7 +79,6 @@ class TextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.end):  MoveSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.home):  MoveSelectionLeftByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightTextIntent(),
@@ -94,12 +93,8 @@ class TextEditingShortcuts extends StatelessWidget {
     // Meta + shift + arrow left is not handled by this platform.
     // Meta + shift + arrow right is not handled by this platform.
     // Meta + shift + arrow up is not handled by this platform.
-    // ShiftEndTextIntent is not handled by this platform.
-    // ShiftHomeTextIntent is not handled by this platform.
-
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyC):  MetaCTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home):  ShiftHomeTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end):  ShiftEndTextIntent(),
+    // Shift + end is not handled by this platform.
+    // Shift + home is not handled by this platform.
   };
 
   static final Map<LogicalKeySet, Intent> _fuchsiaShortcuts = <LogicalKeySet, Intent>{
@@ -111,14 +106,14 @@ class TextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExpandSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExpandSelectionToStartTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightTextIntent(),
@@ -133,8 +128,8 @@ class TextEditingShortcuts extends StatelessWidget {
     // Meta + shift + arrow left is not handled by this platform.
     // Meta + shift + arrow right is not handled by this platform.
     // Meta + shift + arrow up is not handled by this platform.
-    // ShiftEndTextIntent is not handled by this platform.
-    // ShiftHomeTextIntent is not handled by this platform.
+    // Shift + end is not handled by this platform.
+    // Shift + home is not handled by this platform.
   };
 
   static final Map<LogicalKeySet, Intent> _iOSShortcuts = <LogicalKeySet, Intent>{
@@ -146,14 +141,14 @@ class TextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExpandSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExpandSelectionToStartTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightTextIntent(),
@@ -168,8 +163,8 @@ class TextEditingShortcuts extends StatelessWidget {
     // Meta + shift + arrow left is not handled by this platform.
     // Meta + shift + arrow right is not handled by this platform.
     // Meta + shift + arrow up is not handled by this platform.
-    // ShiftEndTextIntent is not handled by this platform.
-    // ShiftHomeTextIntent is not handled by this platform.
+    // Shift + end is not handled by this platform.
+    // Shift + home is not handled by this platform.
   };
 
   static final Map<LogicalKeySet, Intent> _linuxShortcuts = <LogicalKeySet, Intent>{
@@ -181,14 +176,14 @@ class TextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExpandSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExpandSelectionToStartTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightTextIntent(),
@@ -203,19 +198,25 @@ class TextEditingShortcuts extends StatelessWidget {
     // Meta + shift + arrow left is not handled by this platform.
     // Meta + shift + arrow right is not handled by this platform.
     // Meta + shift + arrow up is not handled by this platform.
-    // ShiftEndTextIntent is not handled by this platform.
-    // ShiftHomeTextIntent is not handled by this platform.
+    // Shift + end is not handled by this platform.
+    // Shift + home is not handled by this platform.
   };
 
   static final Map<LogicalKeySet, Intent> _macShortcuts = <LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): MoveSelectionLeftByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): MoveSelectionRightByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): MoveSelectionToStartTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExpandSelectionToEndTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExpandSelectionLeftByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExpandSelectionRightByLineTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExpandSelectionToStartTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): MoveSelectionRightByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowLeft): MoveSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowRight): MoveSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): MoveSelectionLeftByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionRightByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExtendSelectionLeftByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown):  MoveSelectionToEndTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp):  MoveSelectionToStartTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown):  ExpandSelectionToEndTextIntent(),
@@ -232,13 +233,8 @@ class TextEditingShortcuts extends StatelessWidget {
     // Control + shift + arrow right is not handled by this platform.
     // End is not handled by this platform.
     // Home is not handled by this platform.
-    // ShiftEndTextIntent is not handled by this platform.
-    // ShiftHomeTextIntent is not handled by this platform.
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown):  MoveSelectionToEndTextIntent(),
+    // Shift + end is not handled by this platform.
+    // Shift + home is not handled by this platform.
   };
 
   static final Map<LogicalKeySet, Intent> _windowsShortcuts = <LogicalKeySet, Intent>{
@@ -250,18 +246,20 @@ class TextEditingShortcuts extends StatelessWidget {
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExpandSelectionLeftByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExpandSelectionRightByLineTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExpandSelectionToStartTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): MoveSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): MoveSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowUp): MoveSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft):  MoveSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight):  MoveSelectionRightByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft):  ExtendSelectionLeftByWordTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight):  ExtendSelectionRightByWordTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): ExtendSelectionDownTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): ExtendSelectionLeftTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): ExtendSelectionRightTextIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): ExtendSelectionUpTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.end):  ExpandSelectionRightByLineTextIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.home):  ExpandSelectionLeftByLineTextIntent(),
     // Meta + arrow down is not handled by this platform.
     // Meta + arrow left is not handled by this platform.
     // Meta + arrow right is not handled by this platform.
