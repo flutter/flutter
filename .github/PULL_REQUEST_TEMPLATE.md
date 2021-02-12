@@ -10,7 +10,7 @@
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I listed at least one issue that this PR fixes in the description above.
-- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test exempt.
+- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test-exempt.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I signed the [CLA].
 - [ ] All existing and new tests are passing.

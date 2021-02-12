@@ -15,6 +15,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../desktop_device.dart';
@@ -57,11 +58,13 @@ class FlutterTesterDevice extends Device {
     String buildDirectory,
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
+       _operatingSystemUtils = operatingSystemUtils,
        super(
         deviceId,
         platformType: null,
@@ -74,6 +77,7 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Process _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -163,7 +167,7 @@ class FlutterTesterDevice extends Device {
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
+      platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
       treeShakeIcons: buildInfo.treeShakeIcons,
       assetDirPath: assetDirectory.path,
     );
@@ -269,6 +273,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     // TODO(jonahwilliams): remove after flutter rolls
     // ignore: avoid_unused_constructor_parameters
     Config config,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
@@ -276,6 +281,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
         processManager: processManager,
         logger: logger,
         flutterVersion: flutterVersion,
+        operatingSystemUtils: operatingSystemUtils,
       ),
        super('Flutter tester');
 

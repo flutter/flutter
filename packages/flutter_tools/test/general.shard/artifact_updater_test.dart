@@ -40,7 +40,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -67,7 +67,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -88,7 +88,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(
+        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
           headers: <String, List<String>>{
             'x-goog-hash': <String>[],
           }
@@ -100,7 +100,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -119,7 +119,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(
+        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
           body: <int>[0],
           headers: <String, List<String>>{
             'x-goog-hash': <String>[
@@ -135,7 +135,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -154,7 +154,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-         FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(
+         FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
            body: <int>[0],
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
@@ -163,7 +163,7 @@ void main() {
             ],
           }
         )),
-       FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(
+       FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
               'foo-bar-baz',
@@ -178,7 +178,7 @@ void main() {
 
     await expectLater(() async => await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit(message: 'k7iFrf4SQT9WfcQ==')); // validate that the hash mismatch message is included.
   });
@@ -197,8 +197,8 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///test.zip'), responseError: const HttpException('')),
-        FakeRequest(Uri.parse('http:///test.zip')),
+        FakeRequest(Uri.parse('http://test.zip'), responseError: const HttpException('')),
+        FakeRequest(Uri.parse('http://test.zip')),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
@@ -206,7 +206,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
 
@@ -224,8 +224,8 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
-        FakeRequest(Uri.parse('http:///test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
+        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
+        FakeRequest(Uri.parse('http://test.zip'), response: const FakeResponse(statusCode: HttpStatus.preconditionFailed)),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
@@ -233,7 +233,7 @@ void main() {
 
     await expectLater(() async => await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
 
@@ -281,7 +281,7 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: testPlatform,
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///test.zip'), responseError: ArgumentError()),
+        FakeRequest(Uri.parse('http://test.zip'), responseError: ArgumentError()),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
@@ -289,7 +289,7 @@ void main() {
 
     await expectLater(() async => await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsA(isA<ArgumentError>()));
 
@@ -314,7 +314,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -338,7 +338,7 @@ void main() {
 
     await artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(logger.statusText, contains('test message'));
@@ -362,7 +362,7 @@ void main() {
 
     expect(artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
@@ -386,7 +386,7 @@ void main() {
 
     expect(artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsA(isA<ToolExit>()));
     expect(fileSystem.file('te,[/test'), isNot(exists));
@@ -409,7 +409,7 @@ void main() {
 
     await artifactUpdater.downloadZippedTarball(
       'test message',
-      Uri.parse('http:///test.zip'),
+      Uri.parse('http://test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     );
     expect(fileSystem.file('out/test'), exists);

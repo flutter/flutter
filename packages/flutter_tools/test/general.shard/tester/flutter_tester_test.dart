@@ -73,8 +73,8 @@ void main() {
       final List<Device> devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
       expect(devices, hasLength(1));
     });
-
   });
+
   group('startApp', () {
     FlutterTesterDevice device;
     List<String> logLines;
@@ -108,6 +108,7 @@ void main() {
         buildDirectory: 'build',
         logger: BufferLogger.test(),
         flutterVersion: MockFlutterVersion(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -171,7 +172,7 @@ Hello!
 
       final LaunchResult result = await device.startApp(app,
         mainPath: mainPath,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       );
 
       expect(result.started, isTrue);
@@ -190,6 +191,7 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
     fileSystem: MemoryFileSystem.test(),
     config: Config.test(),
     flutterVersion: MockFlutterVersion(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
