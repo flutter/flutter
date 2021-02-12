@@ -309,15 +309,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       }
     }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _giveUpPointer(
-        event.pointer,
-        reject: event is PointerCancelEvent || _state ==_DragState.possible,
-      );
+      _giveUpPointer(event.pointer);
     }
   }
 
+  final List<int> _acceptedActivePointers = <int>[];
+
   @override
   void acceptGesture(int pointer) {
+    assert(!_acceptedActivePointers.contains(pointer));
+    _acceptedActivePointers.add(pointer);
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
@@ -384,20 +385,23 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _state = _DragState.ready;
   }
 
-  void _giveUpPointer(int pointer, {bool reject = true}) {
+  void _giveUpPointer(int pointer) {
     stopTrackingPointer(pointer);
-    if (reject)
+    // If we never accepted the pointer, we reject it since we are no longer
+    // interested in winning the gesture arena for it.
+    if (!_acceptedActivePointers.remove(pointer))
       resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   void _checkDown() {
     assert(_initialButtons == kPrimaryButton);
-    final DragDownDetails details = DragDownDetails(
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-    );
-    if (onDown != null)
+    if (onDown != null) {
+      final DragDownDetails details = DragDownDetails(
+        globalPosition: _initialPosition.global,
+        localPosition: _initialPosition.local,
+      );
       invokeCallback<void>('onDown', () => onDown!(details));
+    }
   }
 
   void _checkStart(Duration timestamp, int pointer) {
