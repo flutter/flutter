@@ -142,7 +142,7 @@ enum HeroFlightDirection {
 ///  }
 ///
 ///  void _gotoDetailsPage(BuildContext context) {
-///    Navigator.of(context)?.push(MaterialPageRoute(
+///    Navigator.of(context).push(MaterialPageRoute(
 ///      builder: (BuildContext context) => Scaffold(
 ///        appBar: AppBar(
 ///          title: const Text('second Page'),
