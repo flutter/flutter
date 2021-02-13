@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';

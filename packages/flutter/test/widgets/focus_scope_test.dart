@@ -4,9 +4,10 @@
 
 import 'dart:ui';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
@@ -1592,6 +1593,37 @@ void main() {
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+    });
+    testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode focusNode = FocusNode();
+      bool? keyEventHandled;
+      await tester.pumpWidget(
+        Focus(
+          onKey: (_, __) => true, // This one does nothing.
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      Focus.of(key1.currentContext!).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, isNull);
+
+      await tester.pumpWidget(
+        Focus(
+          onKey: (FocusNode node, RawKeyEvent event) { // The updated handler handles the key.
+            keyEventHandled = true;
+            return true;
+          },
+          focusNode: focusNode,
+          child: Container(key: key1),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(keyEventHandled, isTrue);
     });
   });
   group('ExcludeFocus', () {

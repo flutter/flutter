@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';

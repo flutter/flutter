@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../build_info.dart';
@@ -312,6 +313,7 @@ class AOTSnapshotter {
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
       TargetPlatform.linux_x64,
+      TargetPlatform.linux_arm64,
       TargetPlatform.windows_x64,
     ].contains(platform);
   }

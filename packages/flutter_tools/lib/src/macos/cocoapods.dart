@@ -6,6 +6,7 @@
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
@@ -273,9 +274,10 @@ class CocoaPods {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String include = '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig"';
-      if (!content.contains(include)) {
+      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+          .toLowerCase()}.xcconfig';
+      final String include = '#include? "$includeFile"';
+      if (!content.contains(includeFile)) {
         file.writeAsStringSync('$include\n$content', flush: true);
       }
     }

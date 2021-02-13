@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -798,17 +799,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.install() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'install',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
@@ -818,17 +817,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.uninstall() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'uninstall',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
@@ -838,17 +835,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.launch() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'launch',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(

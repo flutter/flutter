@@ -196,6 +196,31 @@ void main() {
     );
   });
 
+  testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+              valueColor: AlwaysStoppedAnimation<Color?>(null),
+              backgroundColor: Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0)),
+    );
+  });
+
   testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
