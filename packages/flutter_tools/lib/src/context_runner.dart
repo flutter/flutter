@@ -79,7 +79,9 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      AndroidBuilder: () => AndroidGradleBuilder(),
+      AndroidBuilder: () => AndroidGradleBuilder(
+        logger: globals.logger,
+      ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
