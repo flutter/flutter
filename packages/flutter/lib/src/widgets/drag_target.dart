@@ -287,11 +287,9 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
 
-  /// An optional injectable strategy that overrides the
-  /// [defaultDragAnchorStrategy] and is used to determine how this widget
-  /// should be anchored during a drag. When a custom [dragAnchorStrategy] is
-  /// injected it is asserted that the [dragAnchor] is custom, to prevent any
-  /// surprises.
+  /// A strategy that is used by this draggable to get the the anchor offset when it widget is being dragged.
+  /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is being dragged.
+  /// Defaults to [defaultDragAnchorStrategy].
   final DragAnchorStrategy dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
