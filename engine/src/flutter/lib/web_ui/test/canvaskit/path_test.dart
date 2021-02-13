@@ -157,6 +157,25 @@ void testMain() {
       expect(measure1.contourIndex, 1);
       expect(measure1.extractPath(0, 15).getBounds(), ui.Rect.fromLTRB(20, 20, 30, 25));
     });
+
+    test('Path.from', () {
+      final ui.Rect rect1 = ui.Rect.fromLTRB(0, 0, 10, 10);
+      final ui.Rect rect2 = ui.Rect.fromLTRB(10, 10, 20, 20);
+
+      final ui.Path original = ui.Path();
+      original.addRect(rect1);
+      expect(original, isA<CkPath>());
+      expect(original.getBounds(), rect1);
+
+      final ui.Path copy = ui.Path.from(original);
+      expect(copy, isA<CkPath>());
+      expect(copy.getBounds(), rect1);
+
+      // Test that when copy is mutated, the original is not affected
+      copy.addRect(rect2);
+      expect(original.getBounds(), rect1);
+      expect(copy.getBounds(), rect1.expandToInclude(rect2));
+    });
   },
       skip:
           isIosSafari); // TODO: https://github.com/flutter/flutter/issues/60040
