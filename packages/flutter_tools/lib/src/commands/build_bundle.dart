@@ -34,6 +34,7 @@ class BuildBundleCommand extends BuildSubCommand {
           'ios',
           'darwin-x64',
           'linux-x64',
+          'linux-arm64',
           'windows-x64',
         ],
       )
