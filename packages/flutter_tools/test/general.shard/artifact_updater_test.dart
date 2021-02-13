@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:file/src/interface/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';

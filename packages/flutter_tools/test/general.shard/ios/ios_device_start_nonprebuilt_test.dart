@@ -26,7 +26,6 @@ import 'package:fake_async/fake_async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
   return <String>[
