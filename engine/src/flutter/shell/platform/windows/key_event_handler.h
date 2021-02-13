@@ -27,8 +27,19 @@ class KeyEventHandler : public KeyboardHookHandler {
   using SendInputDelegate =
       std::function<UINT(UINT cInputs, LPINPUT pInputs, int cbSize)>;
 
+// the user32 SendInput function is not supported in UWP appcontainer and there
+// is no WinRT equivalent hence we pass null for SendInputDelegate param.  Since
+// this handler is one of last resort, it is only applicable for platformview
+// scenarios where the host view can handle input events in the event the
+// Flutter view does not choose to handle them. Since platformview is currently
+// not support for desktop, there is no functional gap caused by this currently.
+#ifdef WINUWP
+  explicit KeyEventHandler(flutter::BinaryMessenger* messenger,
+                           SendInputDelegate delegate = nullptr);
+#else
   explicit KeyEventHandler(flutter::BinaryMessenger* messenger,
                            SendInputDelegate delegate = SendInput);
+#endif
 
   virtual ~KeyEventHandler();
 

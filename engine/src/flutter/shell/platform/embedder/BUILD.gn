@@ -245,6 +245,9 @@ if (enable_unittests) {
     sources = [ "tests/embedder_unittests_proctable.cc" ]
 
     defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+    if (is_win) {
+      libs = [ "psapi.lib" ]
+    }
 
     deps = [
       ":embedder",
