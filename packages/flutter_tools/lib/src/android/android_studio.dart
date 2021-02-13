@@ -176,7 +176,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         return toolboxPluginsPath;
       }
 
-      if (major >= 4 && minor >= 1 && globals.platform.isLinux) {
+      if (major != null && major >= 4 && minor != null && minor >= 1 &&
+          globals.platform.isLinux) {
         return globals.fs.path.join(
           globals.fsUtils.homeDirPath,
           '.local',
