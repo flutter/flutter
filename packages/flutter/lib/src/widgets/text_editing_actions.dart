@@ -11,46 +11,12 @@ import 'framework.dart';
 import 'text_editing_action.dart';
 import 'text_editing_intents.dart';
 
-// TODO(justinmc): Update these examples now that the naming has changed.
 /// An [Actions] widget that handles the default text editing behavior for
 /// Flutter on the current platform.
 ///
 /// This default behavior can be overridden by placing an [Actions] widget lower
 /// in the widget tree than this. See [TextEditingShortcuts] for an example of
 /// remapping keyboard keys to an existing text editing [Intent].
-///
-/// {@tool snippet}
-///
-/// This example shows how to use an additional [Actions] widget to override
-/// the left arrow key [Intent] and make it move the cursor to the right
-/// instead.
-///
-/// ```dart
-/// final TextEditingController controller = TextEditingController(
-///   text: "Try using the keyboard's arrow keys and notice that left moves right.",
-/// );
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: Actions(
-///         actions: <Type, Action<Intent>>{
-///           ArrowLeftTextIntent: TextEditingAction<ArrowLeftTextIntent>(
-///             onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
-///               editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
-///             },
-///           ),
-///         },
-///         child: TextField(
-///           controller: controller,
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
