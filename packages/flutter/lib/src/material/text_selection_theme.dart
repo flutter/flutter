@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -15,6 +16,11 @@ import 'theme.dart';
 ///
 /// Use [TextSelectionTheme.of] to access the closest ancestor
 /// [TextSelectionTheme] of the current [BuildContext].
+///
+/// Note, [CupertinoTextField] can only access [TextSelectionThemeData.cursorColor],
+/// and [TextSelectionThemeData.selectionColor]. To change the `selectionHandlerColor`
+/// for [CupertinoTextField] you can set the [ThemeData.cupertinoOverrideTheme]
+/// and change the [CupertinoThemeData.primaryColor].
 ///
 /// See also:
 ///
