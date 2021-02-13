@@ -122,7 +122,12 @@ KeyEventHandler::KeyEventHandler(flutter::BinaryMessenger* messenger,
               kChannelName,
               &flutter::JsonMessageCodec::GetInstance())),
       send_input_(send_input) {
+// As described in the header, UWP doesn't support the SendInput API hence we
+// only need to assert that the delegate is null in the non-UWP case since it is
+// expected to be null in the UWP case.
+#ifndef WINUWP
   assert(send_input != nullptr);
+#endif
 }
 
 KeyEventHandler::~KeyEventHandler() = default;
@@ -190,6 +195,15 @@ void KeyEventHandler::HandleResponse(bool handled,
       std::cerr << "Unable to find event " << id << " in pending events queue.";
       return;
     }
+
+// As described in the header, the user32 SendInput function is not supported in
+// UWP appcontainer and there is no WinRT equivalent hence we pass null for
+// SendInputDelegate param.  Since this handler is one of last resort, it is
+// only applicable for platformview scenarios where the host view can handle
+// input events in the event the Flutter view does not choose to handle them.
+// Since platformview is currently not support for desktop, there is no
+// functional gap caused by this currently.
+#ifndef WINUWP
     INPUT input_event;
     input_event.type = INPUT_KEYBOARD;
     input_event.ki = *key_event;
@@ -199,6 +213,7 @@ void KeyEventHandler::HandleResponse(bool handled,
                    "with scancode "
                 << scancode << " (character " << character << ")" << std::endl;
     }
+#endif
   }
 }
 
@@ -225,6 +240,10 @@ bool KeyEventHandler::KeyboardHook(FlutterWindowsView* view,
   event.AddMember(kKeyMapKey, kWindowsKeyMap, allocator);
 #ifndef WINUWP
   event.AddMember(kModifiersKey, GetModsForKeyState(), allocator);
+#else
+  // TODO: Implement modifiers in UWP codepath
+  // TODO: https://github.com/flutter/flutter/issues/70202
+  event.AddMember(kModifiersKey, 0, allocator);
 #endif
 
   switch (action) {

@@ -105,6 +105,8 @@ def to_gn_args(args):
     gn_args['skia_use_fontconfig'] = args.enable_fontconfig
     gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
     gn_args['flutter_enable_skshaper'] = args.enable_skshaper
+    if args.target_os == 'winuwp':
+      gn_args['skia_enable_winuwp'] = True
     if args.enable_skshaper:
       gn_args['skia_use_icu'] = True
       gn_args['skia_enable_icu_ubrk_safeclone'] = True

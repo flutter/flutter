@@ -13,6 +13,14 @@ executable("testing") {
   ]
 
   sources = [ "tester_main.cc" ]
+  if (is_win) {
+    libs = [
+      "psapi.lib",
+      "user32.lib",
+      "FontSub.lib",
+      "shlwapi.lib",
+    ]
+  }
 
   deps = [
     "//flutter/assets",
