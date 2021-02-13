@@ -1623,27 +1623,52 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    return RootRestorationScope(
-      restorationId: widget.restorationScopeId,
-      child: Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-        child: TextEditingShortcuts(
-          child: TextEditingActions(
-            additionalActions: widget.actions ?? WidgetsApp.defaultActions,
-            child: FocusTraversalGroup(
-              policy: ReadingOrderTraversalPolicy(),
-              child: _MediaQueryFromWindow(
-                child: Localizations(
-                  locale: appLocale,
-                  delegates: _localizationsDelegates.toList(),
-                  child: title,
-                ),
-              ),
-            ),
-          ),
+    Widget child = FocusTraversalGroup(
+      policy: ReadingOrderTraversalPolicy(),
+      child: _MediaQueryFromWindow(
+        child: Localizations(
+          locale: appLocale,
+          delegates: _localizationsDelegates.toList(),
+          child: title,
         ),
       ),
+    );
+
+    // Passing actions or shortcuts gets rid of all default actions or shortcuts
+    // respectively, including text editing actions/shortcuts.
+    if (widget.actions == null) {
+      child = TextEditingActions(
+        child: Actions(
+          actions: WidgetsApp.defaultActions,
+          child: child,
+        ),
+      );
+    } else {
+      child = Actions(
+        actions: widget.actions!,
+        child: child,
+      );
+    }
+    if (widget.shortcuts == null) {
+      // The TextEditingShortcuts may fall through to the defaultShortcuts.
+      child = Shortcuts(
+        debugLabel: '<Default WidgetsApp Shortcuts>',
+        shortcuts: WidgetsApp.defaultShortcuts,
+        child: TextEditingShortcuts(
+          child: child,
+        ),
+      );
+    } else {
+      child = Shortcuts(
+        debugLabel: '<Default WidgetsApp Shortcuts>',
+        shortcuts: widget.shortcuts!,
+        child: child,
+      );
+    }
+
+    return RootRestorationScope(
+      restorationId: widget.restorationScopeId,
+      child: child,
     );
   }
 }

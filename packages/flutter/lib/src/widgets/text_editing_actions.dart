@@ -24,22 +24,13 @@ import 'text_editing_intents.dart';
 ///     [Intent]s that are handled here.
 class TextEditingActions extends StatelessWidget {
   /// Creates an instance of TextEditingActions.
-  TextEditingActions({
+  const TextEditingActions({
     Key? key,
-    Map<Type, Action<Intent>>? additionalActions,
     required this.child,
-  }) : additionalActions = additionalActions ?? <Type, Action<Intent>>{},
-       super(key: key);
+  }) : super(key: key);
 
   /// The child [Widget] of TextEditingActions.
   final Widget child;
-
-  /// The actions to be merged with the default text editing actions.
-  ///
-  /// The default text editing actions will override any conflicting keys in
-  /// additionalActions. To override the default text editing actions, use an
-  /// [Actions] Widget in the tree below this Widget.
-  final Map<Type, Action<Intent>> additionalActions;
 
   static final TextEditingAction<ExpandSelectionLeftByLineTextIntent> _expandSelectionLeftByLineAction = TextEditingAction<ExpandSelectionLeftByLineTextIntent>(
     onInvoke: (ExpandSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
@@ -243,7 +234,6 @@ class TextEditingActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        ...additionalActions,
         ..._shortcutsActions,
         ..._actions,
       },
