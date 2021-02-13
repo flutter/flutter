@@ -13,7 +13,7 @@ class CkPath extends ManagedSkiaObject<SkPath> implements ui.Path {
 
   CkPath.from(CkPath other)
       : _fillType = other.fillType,
-        super(SkPath(other.skiaObject)) {
+        super(other.skiaObject.copy()) {
     skiaObject.setFillType(toSkFillType(_fillType));
   }
 
