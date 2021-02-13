@@ -289,4 +289,96 @@ void main() {
     FileSystem: () => windowsFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  group('Installation detection on Linux', () {
+    FileSystemUtils fsUtils;
+
+    setUp(() {
+      fsUtils = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: linuxPlatform,
+      );
+    });
+
+    testUsingContext('Discover Android Studio <4.1', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.AndroidStudio4.0/system/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 0, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        '/home/me/.AndroidStudio4.0/config/plugins',
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Discover Android Studio >=4.1', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        '/home/me/.local/share/Google/AndroidStudio4.1',
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Discover when installed with Toolbox', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+      const String studioInstallPath =
+          '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
+      const String pluginsInstallPath = '$studioInstallPath.plugins';
+
+      globals.fs.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      globals.fs.directory(studioInstallPath).createSync(recursive: true);
+      globals.fs.directory(pluginsInstallPath).createSync();
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, Version(4, 1, 0));
+      expect(studio.studioAppName, 'AndroidStudio');
+      expect(
+        studio.pluginsPath,
+        pluginsInstallPath,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
 }
