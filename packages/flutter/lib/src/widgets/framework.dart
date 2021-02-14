@@ -975,8 +975,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// `super.initState()`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.initState()`.
   @protected
   @mustCallSuper
   void initState() {
@@ -999,8 +999,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@macro flutter.widgets.State.initState}
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// `super.didUpdateWidget(oldWidget)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didUpdateWidget(oldWidget)`.
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
@@ -1143,8 +1143,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this object and other elements in the tree (e.g. if you have provided an
   /// ancestor with a pointer to a descendant's [RenderObject]).
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// `super.deactivate()`.
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.deactivate()`.
   ///
   /// See also:
   ///
@@ -1167,8 +1167,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@macro flutter.widgets.State.initState}
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// `super.dispose()`.
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.dispose()`.
   ///
   /// See also:
   ///
@@ -3403,8 +3403,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// [RenderObjectElement.moveRenderObjectChild], and
   /// [RenderObjectElement.removeRenderObjectChild].
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// `super.mount(parent, newSlot)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.mount(parent, newSlot)`.
   @mustCallSuper
   void mount(Element? parent, dynamic newSlot) {
     assert(_lifecycleState == _ElementLifecycle.initial);
@@ -3725,8 +3725,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// `super.activate()`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.activate()`.
   @mustCallSuper
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
@@ -3759,8 +3759,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// `super.deactivate()`.
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.deactivate()`.
   @mustCallSuper
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
@@ -3800,8 +3800,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// `super.unmount()`.
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
