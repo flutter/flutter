@@ -456,6 +456,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _hitTests.clear();
   }
 
+  /// Overrides the sampling clock for debugging and testing.
+  ///
+  /// This value is ignored in non-debug builds.
+  @protected
+  SamplingClock? get debugSamplingClock => null;
+
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
@@ -470,8 +476,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   SamplingClock get _samplingClock {
     SamplingClock value = SamplingClock();
     assert(() {
-      if (debugSamplingClock != null)
-        value = debugSamplingClock!;
+      final SamplingClock? debugValue = debugSamplingClock;
+      if (debugValue != null)
+        value = debugValue;
       return true;
     }());
     return value;
@@ -503,11 +510,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// Non-negative [samplingOffset] is allowed but will effectively
   /// disable resampling.
   Duration samplingOffset = _defaultSamplingOffset;
-
-  /// Overrides the sampling clock for debugging and testing.
-  ///
-  /// This value is ignored in non-debug builds.
-  SamplingClock? debugSamplingClock;
 }
 
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture
