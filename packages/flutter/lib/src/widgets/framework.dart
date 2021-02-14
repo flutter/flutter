@@ -28,7 +28,7 @@ export 'package:flutter/foundation.dart' show FlutterError, ErrorSummary, ErrorD
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
+export 'package:flutter/rendering.dart' show RenderObject, RenderBox;
 
 // Examples can assume:
 // late BuildContext context;

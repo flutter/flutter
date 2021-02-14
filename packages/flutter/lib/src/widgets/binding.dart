@@ -387,11 +387,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.initServiceExtensions();
 
     if (!kReleaseMode) {
-      registerSignalServiceExtension(
+
+      registerServiceExtension(
         name: 'debugDumpApp',
-        callback: () {
-          debugDumpApp();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = debugDumpApp();
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
@@ -1027,20 +1030,18 @@ void runApp(Widget app) {
     ..scheduleWarmUpFrame();
 }
 
-/// Print a string representation of the currently running app.
-void debugDumpApp() {
+/// Return a string representation of the currently running app.
+String debugDumpApp() {
   assert(WidgetsBinding.instance != null);
-  String mode = 'RELEASE MODE';
-  assert(() {
-    mode = 'CHECKED MODE';
-    return true;
-  }());
-  debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
+  final String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
+  final StringBuffer buffer = StringBuffer();
+  buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance!.renderViewElement != null) {
-    debugPrint(WidgetsBinding.instance!.renderViewElement!.toStringDeep());
+    buffer.writeln(WidgetsBinding.instance!.renderViewElement!.toStringDeep());
   } else {
-    debugPrint('<no tree currently mounted>');
+    buffer.writeln('<no tree currently mounted>');
   }
+  return buffer.toString();
 }
 
 /// A bridge from a [RenderObject] to an [Element] tree.

@@ -111,11 +111,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return _forceRepaint();
         },
       );
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpLayerTree',
-        callback: () {
-          debugDumpLayerTree();
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
       return true;
@@ -123,27 +125,35 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
     if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpRenderTree',
-        callback: () {
-          debugDumpRenderTree();
-          return debugPrintDone;
-        },
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.';
+          return <String, Object>{
+            'data': data,
+          };
+        }
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInTraversalOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
 
-      registerSignalServiceExtension(
+      registerServiceExtension(
         name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-        callback: () {
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-          return debugPrintDone;
+        callback: (Map<String, String> parameters) async {
+          final String data = RendererBinding.instance?.renderView.debugSemantics
+            ?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest) ?? 'Semantics not collected.';
+          return <String, Object>{
+            'data': data,
+          };
         },
       );
     }
@@ -491,26 +501,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     instance?.renderView.visitChildren(visitor);
     return endOfFrame;
   }
-}
-
-/// Prints a textual representation of the entire render tree.
-void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.');
-}
-
-/// Prints a textual representation of the entire layer tree.
-void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
-}
-
-/// Prints a textual representation of the entire semantics tree.
-/// This will only work if there is a semantics client attached.
-/// Otherwise, a notice that no semantics are available will be printed.
-///
-/// The order in which the children of a [SemanticsNode] will be printed is
-/// controlled by the [childOrder] parameter.
-void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
