@@ -52,7 +52,8 @@ class DriveCommand extends RunCommandBase {
     @required Logger logger,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
-       _logger = logger {
+       _logger = logger,
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -65,14 +66,14 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
               'By default, "flutter drive" stops the application after tests are finished, '
-              'and --keep-app-running overrides this. On the other hand, if --use-existing-app '
+              'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '
               'is specified, then "flutter drive" instead defaults to leaving the application '
-              'running, and --no-keep-app-running overrides it.',
+              'running, and "--no-keep-app-running" overrides it.',
       )
       ..addOption('use-existing-app',
         help: 'Connect to an already running instance via the given observatory URL. '
               'If this option is given, the application will not be automatically started, '
-              'and it will only be stopped if --no-keep-app-running is explicitly set.',
+              'and it will only be stopped if "--no-keep-app-running" is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption('driver',
@@ -86,23 +87,21 @@ class DriveCommand extends RunCommandBase {
       )
       ..addFlag('build',
         defaultsTo: true,
-        help: '(Deprecated) Build the app before running. To use an existing app, pass the --use-application-binary '
-          'flag with an existing APK',
+        help: '(deprecated) Build the app before running. To use an existing app, pass the "--use-application-binary" '
+              'flag with an existing APK.',
       )
       ..addOption('driver-port',
         defaultsTo: '4444',
-        help: 'The port where Webdriver server is launched at. Defaults to 4444.',
+        help: 'The port where Webdriver server is launched at.',
         valueHelp: '4444'
       )
       ..addFlag('headless',
         defaultsTo: true,
-        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to true.',
+        help: 'Whether the driver browser is going to be launched in headless mode.',
       )
       ..addOption('browser-name',
         defaultsTo: 'chrome',
-        help: 'Name of browser where tests will be executed. \n'
-              'Following browsers are supported: \n'
-              'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
+        help: 'Name of the browser where tests will be executed.',
         allowed: <String>[
           'android-chrome',
           'chrome',
@@ -111,24 +110,31 @@ class DriveCommand extends RunCommandBase {
           'ios-safari',
           'safari',
         ],
+        allowedHelp: <String, String>{
+          'android-chrome': 'Chrome on Android (see also "--android-emulator").',
+          'chrome': 'Google Chrome on this computer (see also "--chrome-binary").',
+          'edge': 'Microsoft Edge on this computer (Windows only).',
+          'firefox': 'Mozilla Firefox on this computer.',
+          'ios-safari': 'Apple Safari on an iOS device.',
+          'safari': 'Apple Safari on this computer (macOS only).',
+        },
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',
-        help: 'The dimension of browser when running Flutter Web test. \n'
-              'This will affect screenshot and all offset-related actions. \n'
-              'By default. it is set to 1600,1024 (1600 by 1024).',
+        help: 'The dimension of the browser when running a Flutter Web test. '
+              'This will affect screenshot and all offset-related actions.',
+        valueHelp: 'width,height',
       )
       ..addFlag('android-emulator',
         defaultsTo: true,
-        help: 'Whether to perform Flutter Driver testing on Android Emulator.'
-          'Works only if \'browser-name\' is set to \'android-chrome\'')
+        help: 'Whether to perform Flutter Driver testing using an Android Emulator. '
+              'Works only if "browser-name" is set to "android-chrome".')
       ..addOption('chrome-binary',
-        help: 'Location of Chrome binary. '
-          'Works only if \'browser-name\' is set to \'chrome\'')
+        help: 'Location of the Chrome binary. '
+              'Works only if "browser-name" is set to "chrome".')
       ..addOption('write-sksl-on-exit',
-        help:
-          'Attempts to write an SkSL file when the drive process is finished '
-          'to the provided file, overwriting it if necessary.')
+        help: 'Attempts to write an SkSL file when the drive process is finished '
+              'to the provided file, overwriting it if necessary.')
       ..addMultiOption('test-arguments', help: 'Additional arguments to pass to the '
           'Dart VM running The test script.');
   }
