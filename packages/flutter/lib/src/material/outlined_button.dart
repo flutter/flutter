@@ -46,14 +46,14 @@ import 'theme_data.dart';
 /// Here is an example of a basic [OutlinedButton].
 ///
 /// ```dart
-///   Widget build(BuildContext context) {
-///     return OutlinedButton(
-///       onPressed: () {
-///         print('Received click');
-///       },
-///       child: const Text('Click Me'),
-///     );
-///   }
+/// Widget build(BuildContext context) {
+///   return OutlinedButton(
+///     onPressed: () {
+///       print('Received click');
+///     },
+///     child: const Text('Click Me'),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
