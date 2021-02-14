@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -41,11 +42,11 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 void main() {
   const TextStyle textStyle = TextStyle();
   const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+    final FocusNode focusNode = FocusNode();
 
   testWidgets('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -491,6 +492,193 @@ void main() {
       // The scroll offset should remain the same.
       expect(controller.offset, 100.0 * 15);
   });
+
+  void testShowCaretOnScreen({ required bool readOnly }) {
+    group('EditableText._showCaretOnScreen, readOnly=$readOnly', () {
+      final TextEditingController textEditingController = TextEditingController();
+      final TextInputFormatter rejectEverythingFormatter = TextInputFormatter.withFunction((TextEditingValue old, TextEditingValue value) => old);
+
+      bool isCaretOnScreen(WidgetTester tester) {
+        final EditableTextState state = tester.state<EditableTextState>(
+          find.byType(EditableText, skipOffstage: false),
+        );
+        final RenderEditable renderEditable = state.renderEditable;
+        final Rect localRect = renderEditable.getLocalRectForCaret(state.textEditingValue.selection.base);
+        final Offset caretOrigin = renderEditable.localToGlobal(localRect.topLeft);
+        final Rect caretRect = caretOrigin & localRect.size;
+        return const Rect.fromLTWH(0, 0,  800, 600).intersect(caretRect) == caretRect;
+      }
+
+      Widget buildEditableText({
+        required bool rejectUserInputs,
+        ScrollController? scrollController,
+        ScrollController? editableScrollController,
+      }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: ListView(
+              controller: scrollController,
+              cacheExtent: 1000,
+              children: <Widget>[
+                // The text field is not fully visible.
+                const SizedBox(height: 599),
+                EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: textEditingController,
+                  scrollController: editableScrollController,
+                  inputFormatters: <TextInputFormatter>[if (rejectUserInputs) rejectEverythingFormatter],
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  readOnly: readOnly,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      testWidgets('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
+        textEditingController.text = 'a' * 100;
+        textEditingController.selection = const TextSelection.collapsed(offset: 100);
+        final ScrollController scrollController = ScrollController();
+        final ScrollController editableScrollController = ScrollController();
+
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: false,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        focusNode.requestFocus();
+        await tester.pumpAndSettle();
+
+        expect(isCaretOnScreen(tester), !readOnly);
+        expect(scrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
+      });
+
+      testWidgets('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
+        textEditingController.text = 'a' * 100;
+        textEditingController.selection = const TextSelection.collapsed(offset: 80);
+        final ScrollController scrollController = ScrollController();
+        final ScrollController editableScrollController = ScrollController();
+
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: false,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        focusNode.requestFocus();
+        await tester.pumpAndSettle();
+
+        // Ensure the caret is not fully visible and the text field is focused.
+        scrollController.jumpTo(0);
+        editableScrollController.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isFalse);
+
+        final EditableTextState state = tester.state<EditableTextState>(
+          find.byType(EditableText, skipOffstage: false),
+        );
+
+        // Change the selection. Show caret on screen when readyOnly is true,
+        // as a read-only text field rejects everything from the software
+        // keyboard (except for web).
+        state.updateEditingValue(state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90)));
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), !readOnly || kIsWeb);
+        expect(scrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+
+        // Reject user input.
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: true,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        // Ensure the caret is not fully visible and the text field is focused.
+        scrollController.jumpTo(0);
+        editableScrollController.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isFalse);
+
+        state.updateEditingValue(state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100)));
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), !readOnly || kIsWeb);
+        expect(scrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+        expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
+      });
+
+      testWidgets('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
+        textEditingController.text = 'a' * 100;
+        textEditingController.selection = const TextSelection.collapsed(offset: 80);
+        final ScrollController scrollController = ScrollController();
+        final ScrollController editableScrollController = ScrollController();
+
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: false,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        focusNode.requestFocus();
+        await tester.pumpAndSettle();
+
+        // Ensure the caret is not fully visible and the text field is focused.
+        scrollController.jumpTo(0);
+        editableScrollController.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isFalse);
+
+        final EditableTextState state = tester.state<EditableTextState>(
+          find.byType(EditableText, skipOffstage: false),
+        );
+
+        // Change the selection. Show caret on screen even when readyOnly is
+        // false.
+        state.textEditingValue = state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 90));
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isTrue);
+        expect(scrollController.offset, greaterThan(0.0));
+        expect(editableScrollController.offset, greaterThan(0.0));
+
+        // Rejects user input.
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: true,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        // Ensure the caret is not fully visible and the text field is focused.
+        scrollController.jumpTo(0);
+        editableScrollController.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isFalse);
+
+        state.textEditingValue = state.textEditingValue.copyWith(selection: const TextSelection.collapsed(offset: 100));
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isTrue);
+        expect(scrollController.offset, greaterThan(0.0));
+        expect(editableScrollController.offset, greaterThan(0.0));
+      });
+    });
+  }
+
+  testShowCaretOnScreen(readOnly: true);
+  testShowCaretOnScreen(readOnly: false);
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
