@@ -58,7 +58,7 @@ class BuildAarCommand extends BuildSubCommand {
       ..addOption(
         'output-dir',
         help: 'The absolute path to the directory where the repository is generated. '
-              "By default, this is '<current-directory>android/build'. ",
+              'By default, this is "<current-directory>android/build".',
       );
   }
 
