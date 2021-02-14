@@ -503,6 +503,26 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 }
 
+/// Prints a textual representation of the entire render tree.
+void debugDumpRenderTree() {
+  debugPrint(RendererBinding.instance?.renderView.toStringDeep() ?? 'Render tree unavailable.');
+}
+
+/// Prints a textual representation of the entire layer tree.
+void debugDumpLayerTree() {
+  debugPrint(RendererBinding.instance?.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
+}
+
+/// Prints a textual representation of the entire semantics tree.
+/// This will only work if there is a semantics client attached.
+/// Otherwise, a notice that no semantics are available will be printed.
+///
+/// The order in which the children of a [SemanticsNode] will be printed is
+/// controlled by the [childOrder] parameter.
+void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  debugPrint(RendererBinding.instance?.renderView.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
+}
+
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
 ///
