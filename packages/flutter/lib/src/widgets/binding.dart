@@ -1033,7 +1033,7 @@ void runApp(Widget app) {
 /// Return a string representation of the currently running app.
 String debugDumpApp() {
   assert(WidgetsBinding.instance != null);
-  final String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
+  const String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance!.renderViewElement != null) {
