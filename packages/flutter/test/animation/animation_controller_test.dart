@@ -252,7 +252,25 @@ void main() {
     largeRangeController.stop();
   });
 
-  test('Custom springDescription can be applied', () {
+  test('Default fling springDescription can be changed', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+    final AnimationController customSpringController = AnimationController(
+      vsync: const TestVSync(),
+      springDescription: _customSpringDescription,
+    );
+
+    controller.fling();
+    customSpringController.fling();
+
+    tick(Duration.zero);
+    tick(const Duration(milliseconds: 50));
+
+    expect(customSpringController.value < controller.value, true);
+  });
+
+  test('Can fling with custom specified springDescription', () {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
@@ -261,14 +279,8 @@ void main() {
     );
 
     controller.fling();
-    // Will produce longer and smoother animation than the default.
-    customSpringController.fling(
-      springDescription: SpringDescription.withDampingRatio(
-        mass: 0.01,
-        stiffness: 10.0,
-        ratio: 2.0,
-      ),
-    );
+    customSpringController.fling(springDescription: _customSpringDescription);
+
     tick(Duration.zero);
     tick(const Duration(milliseconds: 50));
 
@@ -1068,4 +1080,13 @@ class TestSimulation extends Simulation {
 
   @override
   double x(double time) => time;
+}
+
+/// Will produce longer and smoother animation than the default.
+SpringDescription get _customSpringDescription {
+  return SpringDescription.withDampingRatio(
+    mass: 0.01,
+    stiffness: 10.0,
+    ratio: 2.0,
+  );
 }
