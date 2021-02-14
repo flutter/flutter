@@ -30,7 +30,7 @@ enum _AnimationDirection {
   reverse,
 }
 
-final SpringDescription _kFlingSpringDescription = SpringDescription.withDampingRatio(
+final SpringDescription _kSpringDescription = SpringDescription.withDampingRatio(
   mass: 1.0,
   stiffness: 500.0,
   ratio: 1.0,
@@ -237,12 +237,14 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
+    SpringDescription? springDescription,
     this.animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
        assert(upperBound >= lowerBound),
        assert(vsync != null),
+       _springDescription = springDescription,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
@@ -270,12 +272,14 @@ class AnimationController extends Animation<double>
     this.duration,
     this.reverseDuration,
     this.debugLabel,
-    required TickerProvider vsync,
+    SpringDescription? springDescription,
     this.animationBehavior = AnimationBehavior.preserve,
+    required TickerProvider vsync,
   }) : assert(value != null),
        assert(vsync != null),
        lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
+       _springDescription = springDescription,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
@@ -290,6 +294,15 @@ class AnimationController extends Animation<double>
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying animation controller instances in debug output.
   final String? debugLabel;
+
+  SpringDescription? _springDescription;
+
+  /// The spring to use with [fling] within this controller.
+  /// When null, default one will be used.
+  SpringDescription get springDescription => _springDescription ?? _kSpringDescription;
+  set springDescription(SpringDescription? value) {
+    _springDescription = value;
+  }
 
   /// The behavior of the controller when [AccessibilityFeatures.disableAnimations]
   /// is true.
@@ -682,7 +695,7 @@ class AnimationController extends Animation<double>
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   TickerFuture fling({ double velocity = 1.0, SpringDescription? springDescription, AnimationBehavior? animationBehavior }) {
-    springDescription ??= _kFlingSpringDescription;
+    springDescription ??= this.springDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
