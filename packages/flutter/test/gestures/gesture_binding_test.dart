@@ -383,6 +383,7 @@ void main() {
       );
 
       const Duration samplingOffset = Duration(milliseconds: -5);
+      const Duration frameInterval = Duration(microseconds: 16667);
 
       GestureBinding.instance!.resamplingEnabled = true;
       GestureBinding.instance!.samplingOffset = samplingOffset;
@@ -415,7 +416,8 @@ void main() {
       _binding!.postFrameCallback = null;
       expect(callback, isNotNull);
 
-      _binding!.frameTime = epoch + const Duration(milliseconds: 25);
+      final frameTime = epoch + const Duration(milliseconds: 25);
+      _binding!.frameTime = frameTime;
       callback!(Duration.zero);
 
       // Second pointer event should have been dispatched.
@@ -426,23 +428,23 @@ void main() {
       expect(events[1].delta, Offset(10.0 / ui.window.devicePixelRatio, 0.0));
 
       // Verify that resampling continues without a frame callback.
-      async.elapse(const Duration(milliseconds: 17));
+      async.elapse(frameInterval * 1.5);
 
       // Third pointer event should have been dispatched.
       expect(events.length, 3);
       expect(events[2], isA<PointerMoveEvent>());
-      expect(events[2].timeStamp, greaterThan(currentTime() + samplingOffset));
+      expect(events[2].timeStamp, frameTime + frameInterval + samplingOffset);
 
-      async.elapse(const Duration(milliseconds: 34));
+      async.elapse(frameInterval);
 
       // Remaining pointer events should have been dispatched.
       expect(events.length, 5);
       expect(events[3], isA<PointerMoveEvent>());
-      expect(events[3].timeStamp, greaterThan(currentTime() + samplingOffset));
+      expect(events[3].timeStamp, frameTime + frameInterval * 2 + samplingOffset);
       expect(events[4], isA<PointerUpEvent>());
-      expect(events[4].timeStamp, greaterThan(currentTime() + samplingOffset));
+      expect(events[4].timeStamp, frameTime + frameInterval * 2 + samplingOffset);
 
-      async.elapse(const Duration(milliseconds: 51));
+      async.elapse(frameInterval);
 
       // No more pointer events should have been dispatched.
       expect(events.length, 5);
