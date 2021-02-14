@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
@@ -26,6 +25,7 @@ import '../globals.dart' as globals hide logger, printStatus, printTrace, printE
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
+import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
