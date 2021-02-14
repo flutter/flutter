@@ -976,7 +976,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// be used there.
   ///
   /// If you override this, make sure your method starts with a call to
-  /// super.initState().
+  /// `super.initState()`.
   @protected
   @mustCallSuper
   void initState() {
@@ -1000,7 +1000,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure your method starts with a call to
-  /// super.didUpdateWidget(oldWidget).
+  /// `super.didUpdateWidget(oldWidget)`.
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
@@ -1144,7 +1144,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// ancestor with a pointer to a descendant's [RenderObject]).
   ///
   /// If you override this, make sure to end your method with a call to
-  /// super.deactivate().
+  /// `super.deactivate()`.
   ///
   /// See also:
   ///
@@ -1168,7 +1168,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@macro flutter.widgets.State.initState}
   ///
   /// If you override this, make sure to end your method with a call to
-  /// super.dispose().
+  /// `super.dispose()`.
   ///
   /// See also:
   ///
@@ -3402,6 +3402,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// [update], [visitChildren], [RenderObjectElement.insertRenderObjectChild],
   /// [RenderObjectElement.moveRenderObjectChild], and
   /// [RenderObjectElement.removeRenderObjectChild].
+  ///
+  /// If you override this, make sure your method starts with a call to
+  /// `super.mount(parent, newSlot)`.
   @mustCallSuper
   void mount(Element? parent, dynamic newSlot) {
     assert(_lifecycleState == _ElementLifecycle.initial);
@@ -3721,6 +3724,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// lifecycle state). Instead, the framework calls [mount] in that situation.
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// If you override this, make sure your method starts with a call to
+  /// `super.activate()`.
   @mustCallSuper
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
@@ -3752,6 +3758,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This is (indirectly) called by [deactivateChild].
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// If you override this, make sure to end your method with a call to
+  /// `super.deactivate()`.
   @mustCallSuper
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
@@ -3790,6 +3799,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the tree again.
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// If you override this, make sure to end your method with a call to
+  /// `super.unmount()`.
   @mustCallSuper
   void unmount() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
