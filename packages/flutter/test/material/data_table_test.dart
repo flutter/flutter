@@ -1541,6 +1541,7 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/75862
   testWidgets('DataRow renders splash correctly when pressed the right edge of the row', (WidgetTester tester) async {
     Widget buildTable() {
       return DataTable(
