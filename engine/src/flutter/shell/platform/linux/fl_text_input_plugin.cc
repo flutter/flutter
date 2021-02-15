@@ -113,7 +113,7 @@ static void update_editing_state(FlTextInputPlugin* self) {
   fl_value_append_take(args, fl_value_new_int(priv->client_id));
   g_autoptr(FlValue) value = fl_value_new_map();
 
-  TextRange selection = priv->text_model->selection();
+  flutter::TextRange selection = priv->text_model->selection();
   fl_value_set_string_take(
       value, kTextKey,
       fl_value_new_string(priv->text_model->GetText().c_str()));
@@ -195,7 +195,8 @@ static void im_preedit_changed_cb(FlTextInputPlugin* self) {
                                     &cursor_offset);
   cursor_offset += priv->text_model->composing_range().base();
   priv->text_model->UpdateComposingText(buf);
-  priv->text_model->SetSelection(TextRange(cursor_offset, cursor_offset));
+  priv->text_model->SetSelection(
+      flutter::TextRange(cursor_offset, cursor_offset));
 
   update_editing_state(self);
 }
@@ -311,7 +312,8 @@ static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
   }
 
   priv->text_model->SetText(text);
-  priv->text_model->SetSelection(TextRange(selection_base, selection_extent));
+  priv->text_model->SetSelection(
+      flutter::TextRange(selection_base, selection_extent));
 
   int64_t composing_base =
       fl_value_get_int(fl_value_lookup_string(args, kComposingBaseKey));
@@ -323,7 +325,7 @@ static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
     size_t composing_start = std::min(composing_base, composing_extent);
     size_t cursor_offset = selection_base - composing_start;
     priv->text_model->SetComposingRange(
-        TextRange(composing_base, composing_extent), cursor_offset);
+        flutter::TextRange(composing_base, composing_extent), cursor_offset);
   }
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
