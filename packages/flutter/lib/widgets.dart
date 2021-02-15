@@ -107,6 +107,7 @@ export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/shortcuts.dart';
 export 'src/widgets/single_child_scroll_view.dart';
 export 'src/widgets/size_changed_layout_notifier.dart';
+export 'src/widgets/slidable.dart';
 export 'src/widgets/sliver.dart';
 export 'src/widgets/sliver_fill.dart';
 export 'src/widgets/sliver_layout_builder.dart';
