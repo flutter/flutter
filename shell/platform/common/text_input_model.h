@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
-#define FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_COMMON_TEXT_INPUT_MODEL_H_
+#define FLUTTER_SHELL_PLATFORM_COMMON_TEXT_INPUT_MODEL_H_
 
 #include <memory>
 #include <string>
@@ -199,4 +199,4 @@ class TextInputModel {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_COMMON_TEXT_INPUT_MODEL_H_
