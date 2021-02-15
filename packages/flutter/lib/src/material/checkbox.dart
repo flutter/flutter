@@ -37,6 +37,7 @@ import 'toggleable.dart';
 /// be `Colors.red`.
 ///
 /// ```dart
+/// bool isChecked = false;
 /// Widget build(BuildContext context) {
 ///   Color getColor(Set<MaterialState> states) {
 ///     const Set<MaterialState> interactiveStates = <MaterialState>{
