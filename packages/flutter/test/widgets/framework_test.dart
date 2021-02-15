@@ -1490,7 +1490,7 @@ void main() {
     final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
-    BuildOwner(focusManager: _FakeFocusManager());
+    BuildOwner(focusManager: FocusManager());
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
@@ -1514,18 +1514,6 @@ void main() {
     await tester.pumpWidget(Container());
     expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
   });
-}
-
-class _FakeFocusManager implements FocusManager {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return super.noSuchMethod(invocation);
-  }
-
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return '_FakeFocusManager';
-  }
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {

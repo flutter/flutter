@@ -173,7 +173,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(defaultToRelease: true);
+    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -181,7 +181,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     usesBuildNameOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraDartFlagOptions();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);

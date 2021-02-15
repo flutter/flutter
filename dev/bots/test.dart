@@ -15,6 +15,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'service_worker_test.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -811,6 +812,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
+    () => runWebServiceWorkerTest(headless: true),
   ];
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);

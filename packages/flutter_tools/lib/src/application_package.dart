@@ -65,7 +65,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (_androidSdk?.licensesAvailable == true && _androidSdk?.latestVersion == null) {
-          await checkGradleDependencies();
+          await checkGradleDependencies(_logger);
         }
         if (applicationBinary == null) {
           return await AndroidApk.fromAndroidProject(
@@ -101,6 +101,7 @@ class ApplicationPackageFactory {
         }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);

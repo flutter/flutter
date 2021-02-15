@@ -66,7 +66,7 @@ void main() {
       final Testbed testbed = Testbed();
       await testbed.run(() async {
         final HttpClient client = HttpClient();
-        final HttpClientRequest request = await client.getUrl(null);
+        final HttpClientRequest request = await client.getUrl(Uri.parse('http://foo.dev'));
         final HttpClientResponse response = await request.close();
 
         expect(response.statusCode, HttpStatus.ok);

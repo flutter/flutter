@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show window;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
