@@ -18,7 +18,7 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () {
+  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -44,7 +44,7 @@ void main() {
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -58,7 +58,7 @@ void main() {
     )).called(1);
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -85,7 +85,7 @@ void main() {
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -99,7 +99,7 @@ void main() {
     )).called(1);
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -124,7 +124,7 @@ void main() {
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -171,7 +171,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () {
+  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -196,7 +196,7 @@ void main() {
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -210,7 +210,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () {
+  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -235,7 +235,7 @@ void main() {
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
