@@ -261,6 +261,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
+  // [dragDetails] is non-null means that the scroll notifications are emitted because of a drag.
+  // The indicator can only be triggered by dragging, and cannot be triggered
+  // by other non-dragging behaviors such as [ScrollController.jumpTo].
   bool _shouldStart(ScrollNotification notification) {
     return ((notification is ScrollStartNotification && notification.dragDetails != null)
             || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
