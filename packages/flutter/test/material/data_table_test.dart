@@ -1540,4 +1540,38 @@ void main() {
       const Offset(width - borderVertical, height - borderHorizontal),
     );
   });
+
+  testWidgets('DataRow renders splash correctly when pressed the right edge of the row', (WidgetTester tester) async {
+    Widget buildTable() {
+      return DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+          DataColumn(
+            label: Text('Column2'),
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Content1')),
+              DataCell(Text('Content2')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(Offset(790.0, tester.getCenter(find.text('Content1')).dy));
+    await tester.pumpAndSettle();
+
+    final RenderBox box = Material.of(tester.elementList(find.byType(InkWell)).first)! as RenderBox;
+    expect(box, paints..circle(radius:791.0)); // The radius should be greater than 790.0 pixels to cover the entire row.
+    await gesture.up();
+  });
 }

@@ -27,17 +27,17 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
 
 double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
   if (containedInkWell) {
-    final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
-    return _getSplashRadiusForPositionInSize(size, position);
+    final Rect bounds = rectCallback != null ? rectCallback() : referenceBox.paintBounds;
+    return _getSplashRadiusForPositionInSize(bounds, position);
   }
   return Material.defaultSplashRadius;
 }
 
-double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
-  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
-  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
-  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
-  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
+double _getSplashRadiusForPositionInSize(Rect bounds, Offset position) {
+  final double d1 = (position - bounds.topLeft).distance;
+  final double d2 = (position - bounds.topRight).distance;
+  final double d3 = (position - bounds.bottomLeft).distance;
+  final double d4 = (position - bounds.bottomRight).distance;
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 
