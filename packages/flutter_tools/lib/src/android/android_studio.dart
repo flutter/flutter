@@ -317,19 +317,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
       final Directory homeDir = globals.fs.directory(homeDirPath);
 
-      // List of directories to search an installation
       final List<Directory> directoriesToSearch = <Directory>[homeDir];
 
       // >=4.1 has new install location at $HOME/.cache/Google
       final String cacheDirPath =
           globals.fs.path.join(homeDirPath, '.cache', 'Google');
 
-      // Add to the directories list if exists
       if (globals.fs.isDirectorySync(cacheDirPath)) {
         directoriesToSearch.add(globals.fs.directory(cacheDirPath));
       }
 
-      // Construct a list of every potential studio installation
       final List<Directory> entities = <Directory>[];
 
       for (final Directory baseDir in directoriesToSearch) {
