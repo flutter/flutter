@@ -107,19 +107,28 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (studioAppName == null || version == null) {
       return null;
     }
+
+    final int major = version?.major;
+    final int minor = version?.minor;
+
+    // The install path is written in a .home text file,
+    // it location is in <base dir>/.home for Android Studio >= 4.1
+    // and <base dir>/system/.home for Android Studio < 4.1
+    String dotHomeFilePath;
+
+    if (major != null && major >= 4 && minor != null && minor >= 1) {
+      dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
+    } else {
+      dotHomeFilePath =
+          globals.fs.path.join(homeDotDir.path, 'system', '.home');
+    }
+
     String installPath;
+
     try {
-      installPath = globals.fs
-          .file(globals.fs.path.join(homeDotDir.path, 'system', '.home'))
-          .readAsStringSync();
+      installPath = globals.fs.file(dotHomeFilePath).readAsStringSync();
     } on Exception {
-      try {
-        installPath = globals.fs
-            .file(globals.fs.path.join(homeDotDir.path, '.home'))
-            .readAsStringSync();
-      } on Exception {
-        // ignored, installPath will be null, which is handled below
-      }
+      // ignored, installPath will be null, which is handled below
     }
 
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
