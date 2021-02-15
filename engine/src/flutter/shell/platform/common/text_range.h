@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_SHELL_PLATFORM_COMMON_TEXT_RANGE_H_
+#define FLUTTER_SHELL_PLATFORM_COMMON_TEXT_RANGE_H_
+
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
+
+namespace flutter {
 
 // A directional range of text.
 //
@@ -92,3 +97,7 @@ class TextRange {
   size_t base_;
   size_t extent_;
 };
+
+}  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_COMMON_TEXT_RANGE_H_
