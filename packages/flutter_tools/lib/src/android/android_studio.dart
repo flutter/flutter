@@ -25,6 +25,8 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 // /Applications/Android Studio.app/Contents/
 // $HOME/Applications/Android Studio.app/Contents/
 
+// Match Android Studio >= 4.1 base folder (AndroidStudio*.*)
+// and < 4.1 (.AndroidStudio*.*)
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
