@@ -333,6 +333,117 @@ class DeferredComponentsSetupValidator {
     return true;
   }
 
+  /// Checks if the base module `app`'s `strings.xml` contain string
+  /// resources for each component's name.
+  ///
+  /// Returns true if the check passed with no recommended changes, and false
+  /// otherwise.
+  ///
+  /// In each dynamic feature module's AndroidManifest.xml, the
+  /// name of the module is a string resource. This checks if
+  /// the needed string resources are in the base module `strings.xml`.
+  /// If not, this method will generate a modified `strings.xml` (or a
+  /// completely new one if the original file did not exist) in the
+  /// validator's output directory.
+  ///
+  /// For example, if there is a deferred component named `component1`,
+  /// there should be the following string resource:
+  ///
+  ///   <string name="component1Name">component1</string>
+  ///
+  /// The string element's name attribute should be the component name with
+  /// `Name` as a suffix, and the text contents should be the component name.
+  bool checkAndroidResourcesStrings(List<DeferredComponent> components) {
+    final Directory androidDir = env.projectDir.childDirectory('android');
+
+    // Add component name mapping to strings.xml
+    final File stringRes = androidDir
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('res')
+      .childDirectory('values')
+      .childFile('strings.xml');
+    _inputs.add(stringRes);
+    final File stringResOutput = _outputDir
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('res')
+      .childDirectory('values')
+      .childFile('strings.xml');
+    ErrorHandlingFileSystem.deleteIfExists(stringResOutput);
+    final Map<String, String> requiredEntriesMap  = <String, String>{};
+    for (final DeferredComponent component in components) {
+      requiredEntriesMap['${component.name}Name'] = component.name;
+    }
+    if (stringRes.existsSync()) {
+      bool modified = false;
+      XmlDocument document;
+      try {
+        document = XmlDocument.parse(stringRes.readAsStringSync());
+      } on XmlParserException {
+        _invalidFiles[stringRes.path] = 'Error parsing $stringRes '
+        'Please ensure that the strings.xml is a valid XML document and '
+        'try again.';
+        return false;
+      }
+      // Check if all required lines are present, and fix if name exists, but
+      // wrong string stored.
+      for (final XmlElement resources in document.findAllElements('resources')) {
+        for (final XmlElement element in resources.findElements('string')) {
+          final String name = element.getAttribute('name');
+          if (requiredEntriesMap.containsKey(name)) {
+            if (element.text != null && element.text != requiredEntriesMap[name]) {
+              element.innerText = requiredEntriesMap[name];
+              modified = true;
+            }
+            requiredEntriesMap.remove(name);
+          }
+        }
+        for (final String key in requiredEntriesMap.keys) {
+          modified = true;
+          final XmlElement newStringElement = XmlElement(
+            XmlName.fromString('string'),
+            <XmlAttribute>[
+              XmlAttribute(XmlName.fromString('name'), key),
+            ],
+            <XmlNode>[
+              XmlText(requiredEntriesMap[key]),
+            ],
+          );
+          resources.children.add(newStringElement);
+        }
+        break;
+      }
+      if (modified) {
+        stringResOutput.createSync(recursive: true);
+        stringResOutput.writeAsStringSync(document.toXmlString(pretty: true));
+        _modifiedFiles.add(stringResOutput.path);
+        return false;
+      }
+      return true;
+    }
+    // strings.xml does not exist, generate completely new file.
+    stringResOutput.createSync(recursive: true);
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln('''
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+''');
+    for (final String key in requiredEntriesMap.keys) {
+      buffer.write('    <string name="$key">${requiredEntriesMap[key]}</string>\n');
+    }
+    buffer.write(
+'''
+</resources>
+
+''');
+    stringResOutput.writeAsStringSync(buffer.toString(), flush: true, mode: FileMode.append);
+    _generatedFiles.add(stringResOutput.path);
+    return false;
+  }
+
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
     final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
