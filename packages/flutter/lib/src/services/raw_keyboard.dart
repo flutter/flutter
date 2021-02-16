@@ -348,6 +348,14 @@ abstract class RawKeyEvent with Diagnosticable {
             character = String.fromCharCode(characterCodePoint);
           }
           break;
+        case 'web':
+          data = RawKeyEventDataWeb(
+            code: message['code'] as String? ?? '',
+            key: message['key'] as String? ?? '',
+            metaState: message['metaState'] as int? ?? 0,
+          );
+          character = message['key'] as String?;
+          break;
         default:
           /// This exception would only be hit on platforms that haven't yet
           /// implemented raw key events, but will only be triggered if the
