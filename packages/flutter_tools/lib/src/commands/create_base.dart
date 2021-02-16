@@ -365,6 +365,8 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
+      // TODO(jonahwilliams): update after google3 uuid is updated.
+      // ignore: prefer_const_constructors
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
