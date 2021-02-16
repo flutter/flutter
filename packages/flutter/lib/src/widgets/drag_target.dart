@@ -338,7 +338,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Called when the draggable starts being dragged.
   final VoidCallback? onDragStarted;
 
-  /// Called when the draggable is being dragged.
+  /// Called when the draggable is dragged.
   ///
   /// This function will only be called while this widget is still mounted to
   /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
