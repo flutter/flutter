@@ -2307,10 +2307,66 @@ abstract class BuildContext {
 /// To assign a build owner to a tree, use the
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows how to build an off-screen widget tree used to measure
+/// the size of the rendered tree. For some use cases, the simpler [Offstage]
+/// widget may be a better alternative to this approach.
+///
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// import 'package:flutter/widgets.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   WidgetsFlutterBinding.ensureInitialized();
+///   print(measureWidget(const SizedBox(width: 640, height: 480)));
+/// }
+///
+/// Size measureWidget(Widget widget) {
+///   final PipelineOwner pipelineOwner = PipelineOwner();
+///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
+///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
+///     container: rootView,
+///     debugShortDescription: '[root]',
+///     child: widget,
+///   ).attachToRenderTree(buildOwner);
+///   try {
+///     rootView.scheduleInitialLayout();
+///     pipelineOwner.flushLayout();
+///     return rootView.size;
+///   } finally {
+///     // Clean up.
+///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
+///     buildOwner.finalizeTree();
+///   }
+/// }
+///
+/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+///   @override
+///   void performLayout() {
+///     assert(child != null);
+///     child!.layout(const BoxConstraints(), parentUsesSize: true);
+///     size = child!.size;
+///   }
+///
+///   @override
+///   void debugAssertDoesMeetConstraints() => true;
+/// }
+/// ```
+/// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
+  ///
+  /// If the `focusManager` argument is not specified or is null, this will
+  /// construct a new [FocusManager] and register its global input handlers
+  /// via [FocusManager.registerGlobalHandlers], which will modify static
+  /// state. Callers wishing to avoid altering this state can explicitly pass
+  /// a focus manager here.
   BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
-      focusManager = focusManager ?? FocusManager();
+      focusManager = focusManager ?? (FocusManager()..registerGlobalHandlers());
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2341,6 +2397,12 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
+  ///
+  /// This field will default to a [FocusManager] that has registered its
+  /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
+  /// wishing to avoid registering those handlers (and modifying the associated
+  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// constructor.
   FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt

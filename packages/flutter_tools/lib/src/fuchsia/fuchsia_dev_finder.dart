@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/logger.dart';

@@ -7,7 +7,6 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -184,19 +184,17 @@ void main() {
     });
 
     testUsingContext('fetchLatestVersion throws toolExit if HEAD is detached', () async {
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['rev-parse', '--verify', '@{u}'],
-              'fatal: HEAD does not point to a branch',
-            );
-          }
+          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          exception: ProcessException(
+            'git',
+            <String>['rev-parse', '--verify', '@{u}'],
+            'fatal: HEAD does not point to a branch',
+          ),
         ),
       ]);
 
@@ -211,19 +209,17 @@ void main() {
     });
 
     testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>[
+      processManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>[
           'git', 'fetch', '--tags'
         ]),
         FakeCommand(
-          command: const <String>['git', 'rev-parse', '--verify', '@{u}'],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['rev-parse', '--verify', '@{u}'],
-              'fatal: no upstream configured for branch',
-            );
-          },
+          command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+          exception: ProcessException(
+            'git',
+            <String>['rev-parse', '--verify', '@{u}'],
+            'fatal: no upstream configured for branch',
+          ),
         ),
       ]);
 
@@ -242,18 +238,16 @@ void main() {
     testUsingContext('git exception during attemptReset throwsToolExit', () async {
       const String revision = 'abc123';
       const String errorMessage = 'fatal: Could not parse object ´$revision´';
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['git', 'reset', '--hard', revision],
-          onRun: () {
-            throw const ProcessException(
-              'git',
-              <String>['reset', '--hard', revision],
-              errorMessage,
-            );
-          },
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['git', 'reset', '--hard', revision],
+          exception: ProcessException(
+            'git',
+            <String>['reset', '--hard', revision],
+            errorMessage,
+          ),
         ),
-      ]);
+      );
 
       await expectLater(
             () async => await realCommandRunner.attemptReset(revision),
@@ -440,7 +434,10 @@ void main() {
         });
 
         testUsingContext('upgrade continue prints welcome message', () async {
-          final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
+          final UpgradeCommand upgradeCommand = UpgradeCommand(
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          );
 
           await createTestCommandRunner(upgradeCommand).run(
             <String>[

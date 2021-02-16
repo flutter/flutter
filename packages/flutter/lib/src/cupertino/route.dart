@@ -54,27 +54,6 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   end: Offset.zero,
 );
 
-// Custom decoration from no shadow to page shadow mimicking iOS page
-// transitions using gradients.
-final DecorationTween _kGradientShadowTween = DecorationTween(
-  begin: _CupertinoEdgeShadowDecoration.none, // No decoration initially.
-  end: const _CupertinoEdgeShadowDecoration(
-    edgeGradient: LinearGradient(
-      // Spans 5% of the page.
-      begin: AlignmentDirectional(0.90, 0.0),
-      end: AlignmentDirectional.centerEnd,
-      // Eyeballed gradient used to mimic a drop shadow on the start side only.
-      colors: <Color>[
-        Color(0x00000000),
-        Color(0x04000000),
-        Color(0x12000000),
-        Color(0x38000000),
-      ],
-      stops: <double>[0.0, 0.3, 0.6, 1.0],
-    ),
-  ),
-);
-
 /// A mixin that replaces the entire screen with an iOS transition for a
 /// [PageRoute].
 ///
@@ -499,7 +478,7 @@ class CupertinoPageTransition extends StatelessWidget {
                  parent: primaryRouteAnimation,
                  curve: Curves.linearToEaseOut,
                )
-           ).drive(_kGradientShadowTween),
+           ).drive(_CupertinoEdgeShadowDecoration.kTween),
        super(key: key);
 
   // When this page is coming in to cover another page.
@@ -806,24 +785,33 @@ class _CupertinoBackGestureController<T> {
 // A custom [Decoration] used to paint an extra shadow on the start edge of the
 // box it's decorating. It's like a [BoxDecoration] with only a gradient except
 // it paints on the start side of the box instead of behind the box.
-//
-// The [edgeGradient] will be given a [TextDirection] when its shader is
-// created, and so can be direction-sensitive; in this file we set it to a
-// gradient that uses an AlignmentDirectional to position the gradient on the
-// end edge of the gradient's box (which will be the edge adjacent to the start
-// edge of the actual box we're supposed to paint in).
 class _CupertinoEdgeShadowDecoration extends Decoration {
-  const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
+  const _CupertinoEdgeShadowDecoration._([this._colors]);
 
-  // An edge shadow decoration where the shadow is null. This is used
-  // for interpolating from no shadow.
-  static const _CupertinoEdgeShadowDecoration none =
-      _CupertinoEdgeShadowDecoration();
+  static DecorationTween kTween = DecorationTween(
+    begin: const _CupertinoEdgeShadowDecoration._(), // No decoration initially.
+    end: const _CupertinoEdgeShadowDecoration._(
+      // Eyeballed gradient used to mimic a drop shadow on the start side only.
+      <Color>[
+        Color(0x38000000),
+        Color(0x12000000),
+        Color(0x04000000),
+        Color(0x00000000),
+      ],
+    ),
+  );
 
-  // A gradient to draw to the left of the box being decorated.
-  // Alignments are relative to the original box translated one box
-  // width to the left.
-  final LinearGradient? edgeGradient;
+  // Colors used to paint a gradient at the start edge of the box it is
+  // decorating.
+  //
+  // The first color in the list is used at the start of the gradient, which
+  // is located at the start edge of the decorated box.
+  //
+  // If this is null, no shadow is drawn.
+  //
+  // The list must have at least two colors in it (otherwise it would not be a
+  // gradient).
+  final List<Color>? _colors;
 
   // Linearly interpolate between two edge shadow decorations decorations.
   //
@@ -850,8 +838,19 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     assert(t != null);
     if (a == null && b == null)
       return null;
-    return _CupertinoEdgeShadowDecoration(
-      edgeGradient: LinearGradient.lerp(a?.edgeGradient, b?.edgeGradient, t),
+    if (a == null)
+      return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
+    if (b == null)
+      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors!.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+    assert(b._colors != null || a._colors != null);
+    // If it ever becomes necessary, we could allow decorations with different
+    // length' here, similarly to how it is handled in [LinearGradient.lerp].
+    assert(b._colors == null || a._colors == null || a._colors!.length == b._colors!.length);
+    return _CupertinoEdgeShadowDecoration._(
+      <Color>[
+        for (int i = 0; i < b._colors!.length; i += 1)
+          Color.lerp(a._colors?[i], b._colors?[i], t)!,
+      ]
     );
   }
 
@@ -879,16 +878,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _CupertinoEdgeShadowDecoration
-        && other.edgeGradient == edgeGradient;
+        && other._colors == _colors;
   }
 
   @override
-  int get hashCode => edgeGradient.hashCode;
+  int get hashCode => _colors.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<LinearGradient>('edgeGradient', edgeGradient));
+    properties.add(IterableProperty<Color>('colors', _colors));
   }
 }
 
@@ -898,33 +897,71 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     this._decoration,
     VoidCallback? onChange,
   ) : assert(_decoration != null),
+      assert(_decoration._colors == null || _decoration._colors!.length > 1),
       super(onChange);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    final LinearGradient? gradient = _decoration.edgeGradient;
-    if (gradient == null)
+    final List<Color>? colors = _decoration._colors;
+    if (colors == null) {
       return;
-    // The drawable space for the gradient is a rect with the same size as
-    // its parent box one box width on the start side of the box.
+    }
+
+    // The following code simulates drawing a [LinearGradient] configured as
+    // follows:
+    //
+    // LinearGradient(
+    //   begin: AlignmentDirectional(0.90, 0.0), // Spans 5% of the page.
+    //   colors: _decoration._colors,
+    // )
+    //
+    // A performance evaluation on Feb 8, 2021 showed, that drawing the gradient
+    // manually as implemented below is more performant than relying on
+    // [LinearGradient.createShader] because compiling that shader takes a long
+    // time. On an iPhone XR, the implementation below reduced the worst frame
+    // time for a cupertino page transition of a newly installed app from ~95ms
+    // down to ~30ms, mainly because there's no longer a need to compile a
+    // shader for the LinearGradient.
+    //
+    // The implementation below divides the width of the shadow into multiple
+    // bands of equal width, one for each color interval defined by
+    // `_decoration._colors`. Band x is filled with a gradient going from
+    // `_decoration._colors[x]` to `_decoration._colors[x + 1]` by drawing a
+    // bunch of 1px wide rects. The rects change their color by lerping between
+    // the two colors that define the interval of the band.
+
+    // Shadow spans 5% of the page.
+    final double shadowWidth = 0.05 * configuration.size!.width;
+    final double shadowHeight = configuration.size!.height;
+    final double bandWidth = shadowWidth / (colors.length - 1);
+
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    final double deltaX;
+    final double start;
+    final double shadowDirection; // -1 for ltr, 1 for rtl.
     switch (textDirection!) {
       case TextDirection.rtl:
-        deltaX = configuration.size!.width;
+        start = offset.dx + configuration.size!.width;
+        shadowDirection = 1;
         break;
       case TextDirection.ltr:
-        deltaX = -configuration.size!.width;
+        start = offset.dx;
+        shadowDirection = -1;
         break;
     }
-    final Rect rect = (offset & configuration.size!).translate(deltaX, 0.0);
-    final Paint paint = Paint()
-      ..shader = gradient.createShader(rect, textDirection: textDirection);
 
-    canvas.drawRect(rect, paint);
+    int bandColorIndex = 0;
+    for (int dx = 0; dx < shadowWidth; dx += 1) {
+      if (dx ~/ bandWidth != bandColorIndex) {
+        bandColorIndex += 1;
+      }
+      final Paint paint = Paint()
+        ..color = Color.lerp(colors[bandColorIndex], colors[bandColorIndex + 1], (dx % bandWidth) / bandWidth)!;
+      final double x = start + shadowDirection * dx;
+      canvas.drawRect(Rect.fromLTWH(x - 1.0, offset.dy, 1.0, shadowHeight), paint);
+    }
   }
 }
 

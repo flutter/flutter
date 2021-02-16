@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -35,30 +36,15 @@ void main() {
       platform = FakePlatform(operatingSystem: 'macos');
       final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
-      final AnsiTerminal terminal = MockAnsiTerminal();
-      logger = BufferLogger.test(
-        terminal: terminal
-      );
+      logger = BufferLogger.test();
       xcodeProjectInterpreter = XcodeProjectInterpreter(
         logger: logger,
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
-        terminal: terminal,
+        terminal: Terminal.test(),
         usage: null,
       );
-    });
-
-    // Work around https://github.com/flutter/flutter/issues/56415.
-    testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
-      when(processManager.runSync(<String>['which', 'sysctl']))
-          .thenReturn(ProcessResult(0, 0, '', ''));
-      when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-      when(processManager.runSync(<String>['xcrun', 'xcodebuild', '-version']))
-        .thenThrow(const ProcessException(xcodebuild, <String>['-version']));
-
-      expect(xcodeProjectInterpreter.versionText, isNull);
     });
 
     testWithoutContext('xcodebuild build settings flakes', () async {
@@ -104,23 +90,19 @@ void main() {
   FakePlatform platform;
   FileSystem fileSystem;
   BufferLogger logger;
-  AnsiTerminal terminal;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
-    terminal = MockAnsiTerminal();
-    logger = BufferLogger.test(
-      terminal: terminal
-    );
+    logger = BufferLogger.test();
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: null,
     );
   });
@@ -140,6 +122,19 @@ void main() {
 
     expect(xcodeProjectInterpreter.versionText, isNull);
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  });
+
+  testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kARMCheckCommand,
+      FakeCommand(
+        command: <String>['xcrun', 'xcodebuild', '-version'],
+        exception: ProcessException(xcodebuild, <String>['-version']),
+      ),
+    ]);
+
+    expect(xcodeProjectInterpreter.versionText, isNull);
   });
 
   testWithoutContext('xcodebuild versionText returns formatted version text', () {
@@ -224,7 +219,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -428,7 +423,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -455,7 +450,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -997,8 +992,3 @@ flutter:
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockAnsiTerminal extends Mock implements AnsiTerminal {
-  @override
-  bool get supportsColor => false;
-}

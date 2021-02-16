@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'artifacts.dart';
@@ -80,8 +82,10 @@ FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils
   platform: platform,
 );
 
+const ProcessManager _kLocalProcessManager = LocalProcessManager();
+
 /// The active process manager.
-ProcessManager get processManager => context.get<ProcessManager>();
+ProcessManager get processManager => context.get<ProcessManager>() ?? _kLocalProcessManager;
 ProcessUtils get processUtils => context.get<ProcessUtils>();
 
 const Platform _kLocalPlatform = LocalPlatform();

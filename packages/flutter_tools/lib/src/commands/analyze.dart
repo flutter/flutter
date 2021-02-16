@@ -5,12 +5,12 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
@@ -42,14 +42,14 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('dartdocs',
         negatable: false,
         help: 'List every public member that is lacking documentation. '
-              '(The public_member_api_docs lint must be enabled in analysis_options.yaml)',
+              '(The "public_member_api_docs" lint must be enabled in "analysis_options.yaml".)',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
         negatable: false);
     argParser.addOption('write',
         valueHelp: 'file',
-        help: 'Also output the results to a file. This is useful with --watch '
+        help: 'Also output the results to a file. This is useful with "--watch" '
               'if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk',
         valueHelp: 'path-to-sdk',
@@ -67,13 +67,13 @@ class AnalyzeCommand extends FlutterCommand {
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
         help: 'Show output even when there are no errors, warnings, hints, or lints. '
-              'Ignored if --watch is specified.',
+              'Ignored if "--watch" is specified.',
         defaultsTo: true);
     argParser.addFlag('preamble',
         defaultsTo: true,
         help: 'When analyzing the flutter repository, display the number of '
               'files that will be analyzed.\n'
-              'Ignored if --watch is specified.');
+              'Ignored if "--watch" is specified.');
     argParser.addFlag('fatal-infos',
         negatable: true,
         help: 'Treat info level issues as fatal.',

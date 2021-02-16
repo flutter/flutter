@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
@@ -15,7 +16,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../convert.dart';
 
 /// An environment variable used to override the location of Google Chrome.
@@ -344,9 +344,13 @@ class ChromiumLauncher {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
 
-    if (sourceChromeDefault.existsSync()) {
-      targetChromeDefault.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+    try {
+      if (sourceChromeDefault.existsSync()) {
+        targetChromeDefault.createSync(recursive: true);
+        _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to restore Chrome preferences: $err');
     }
   }
 

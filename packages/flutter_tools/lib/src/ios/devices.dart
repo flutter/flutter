@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -16,7 +17,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';

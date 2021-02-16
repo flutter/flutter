@@ -25,6 +25,12 @@
          "flaky": false
       },
       {
+         "name": "Linux android_stack_size_test",
+         "repo": "flutter",
+         "task_name": "linux_android_stack_size_test",
+         "flaky": true
+      },
+      {
          "name": "Linux android_view_scroll_perf__timeline_summary",
          "repo": "flutter",
          "task_name": "linux_android_view_scroll_perf__timeline_summary",
@@ -149,6 +155,12 @@
          "repo": "flutter",
          "task_name": "linux_firebase_release_smoke_test",
          "flaky": false
+      },
+      {
+         "name": "Linux flutter_engine_group_performance",
+         "repo": "flutter",
+         "task_name": "linux_flutter_engine_group_performance",
+         "flaky": true
       },
       {
          "name": "Linux flutter_gallery__back_button_memory",
@@ -664,6 +676,12 @@
          "name": "Mac_android service_extensions_test",
          "repo": "flutter",
          "task_name": "mac_android_service_extensions_test",
+         "flaky": false
+      },
+      {
+         "name": "Mac_android smoke_catalina_start_up",
+         "repo": "flutter",
+         "task_name": "mac_android_smoke_catalina_start_up",
          "flaky": false
       },
       {

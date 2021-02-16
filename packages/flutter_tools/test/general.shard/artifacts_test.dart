@@ -8,11 +8,9 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -34,12 +32,13 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         logger: BufferLogger.test(),
-        osUtils: MockOperatingSystemUtils(),
+        osUtils: FakeOperatingSystemUtils(),
       );
       artifacts = CachedArtifacts(
         fileSystem: fileSystem,
         cache: cache,
         platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
     });
 
@@ -114,6 +113,10 @@ void main() {
         artifacts.getArtifactPath(Artifact.flutterTester),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
       );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-arm64', 'flutter_tester'),
+      );
     });
 
     testWithoutContext('precompiled web artifact paths are correct', () {
@@ -183,7 +186,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         logger: BufferLogger.test(),
-        osUtils: MockOperatingSystemUtils(),
+        osUtils: FakeOperatingSystemUtils(),
       );
       artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
@@ -192,6 +195,7 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
     });
 
@@ -302,6 +306,7 @@ void main() {
         fileSystem: fileSystem,
         platform: FakePlatform(operatingSystem: 'windows'),
         processManager: FakeProcessManager.any(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
       expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
@@ -312,5 +317,3 @@ void main() {
     });
   });
 }
-
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

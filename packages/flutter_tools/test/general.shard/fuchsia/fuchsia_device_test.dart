@@ -36,6 +36,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -838,6 +839,7 @@ void main() {
       cache: cache,
       fileSystem: fileSystem,
       platform: FakePlatform(operatingSystem: 'linux'),
+      operatingSystemUtils: globals.os,
     );
     expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
