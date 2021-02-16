@@ -75,4 +75,9 @@
  */
 - (void)requestCommit;
 
+/**
+ * Called when shutting down. Unblocks everything and prevents any further synchronization.
+ */
+- (void)shutdown;
+
 @end

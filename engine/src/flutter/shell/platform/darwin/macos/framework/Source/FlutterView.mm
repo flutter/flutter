@@ -124,4 +124,8 @@
   [_reshapeListener viewDidReshape:self];
 }
 
+- (void)shutdown {
+  [_resizeSynchronizer shutdown];
+}
+
 @end

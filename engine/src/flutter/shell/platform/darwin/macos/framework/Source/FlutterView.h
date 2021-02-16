@@ -56,4 +56,10 @@
  */
 - (nonnull FlutterRenderBackingStore*)backingStoreForSize:(CGSize)size;
 
+/**
+ * Must be called when shutting down. Unblocks raster thread and prevents any further
+ * synchronization.
+ */
+- (void)shutdown;
+
 @end
