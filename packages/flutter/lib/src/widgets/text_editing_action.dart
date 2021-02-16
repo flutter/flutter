@@ -27,7 +27,7 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T inte
 ///
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
-class TextEditingAction<T extends Intent> extends Action<T> {
+class TextEditingAction<T extends Intent> extends ContextAction<T> {
   /// A constructor for a [TextEditingAction].
   ///
   /// The [onInvoke] parameter must not be null.
@@ -56,7 +56,7 @@ class TextEditingAction<T extends Intent> extends Action<T> {
   final _OnInvokeTextEditingCallback<T> onInvoke;
 
   @override
-  Object? invoke(covariant T intent) {
+  Object? invoke(covariant T intent, [BuildContext? context]) {
     // _editableTextState shouldn't be null because isEnabled will return false
     // and invoke shouldn't be called if so.
     assert(_editableTextState != null);
