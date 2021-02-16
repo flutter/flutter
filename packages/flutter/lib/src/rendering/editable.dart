@@ -979,6 +979,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionUp]
   void extendSelectionDown(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
     if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
@@ -1020,6 +1022,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionToStart]
   void expandSelectionToEnd(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (selection!.extentOffset == _plainText.length) {
       return;
     }
@@ -1044,6 +1048,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionRight]
   void extendSelectionLeft(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionLeft(cause);
     }
@@ -1070,6 +1076,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [extendSelectionRightByLine]
   ///   * [expandSelectionRightByLine]
   void extendSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -1097,6 +1105,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionLeft]
   void extendSelectionRight(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionRight(cause);
     }
@@ -1123,6 +1133,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///   * [extendSelectionLeftByLine]
   ///   * [expandSelectionRightByLine]
   void extendSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
@@ -1151,6 +1163,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionDown]
   void extendSelectionUp(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
     if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
@@ -1194,6 +1208,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionToEnd]
   void expandSelectionToStart(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (selection!.extentOffset == 0) {
       return;
     }
@@ -1222,6 +1238,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionRightByLine]
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionLeftByLine(cause);
     }
@@ -1250,6 +1268,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionRightByWord]
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _extendSelectionToStart(cause);
@@ -1275,6 +1295,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [extendSelectionLeftByWord]
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return _extendSelectionToEnd(cause);
@@ -1304,6 +1326,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [expandSelectionLeftByLine]
   void expandSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (!selectionEnabled) {
       return moveSelectionRightByLine(cause);
     }
@@ -1332,6 +1356,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionUp]
   void moveSelectionDown(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // If the selection is collapsed at the end of the field already, then
     // nothing happens.
     if (selection!.isCollapsed && selection!.extentOffset >= _plainText.length) {
@@ -1361,6 +1387,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionRight]
   void moveSelectionLeft(SelectionChangedCause cause) {
+    assert(selection != null);
+
     final TextSelection nextSelection = _moveGivenSelectionLeft(
       selection!,
       _plainText,
@@ -1378,6 +1406,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionRightByLine]
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
     // bounds, since _selectLineAtOffset finds the line boundaries without
@@ -1397,6 +1427,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionRightByWord]
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToStart(cause);
@@ -1422,6 +1454,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionLeft]
   void moveSelectionRight(SelectionChangedCause cause) {
+    assert(selection != null);
+
     final TextSelection nextSelection = _moveGivenSelectionRight(
       selection!,
       _plainText,
@@ -1438,6 +1472,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionLeftByLine]
   void moveSelectionRightByLine(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
     // for the line bounds, since _selectLineAtOffset finds the line
@@ -1457,6 +1493,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionLeftByWord]
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
+    assert(selection != null);
+
     // When the text is obscured, the whole thing is treated as one big word.
     if (obscureText) {
       return moveSelectionToEnd(cause);
@@ -1482,6 +1520,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionToStart]
   void moveSelectionToEnd(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (selection!.isCollapsed && selection!.extentOffset == _plainText.length) {
       return;
     }
@@ -1497,6 +1537,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionToEnd]
   void moveSelectionToStart(SelectionChangedCause cause) {
+    assert(selection != null);
+
     if (selection!.isCollapsed && selection!.extentOffset == 0) {
       return;
     }
@@ -1510,6 +1552,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   ///   * [moveSelectionDown]
   void moveSelectionUp(SelectionChangedCause cause) {
+    assert(selection != null);
+
     // If the selection is collapsed at the beginning of the field already, then
     // nothing happens.
     if (selection!.isCollapsed && selection!.extentOffset <= 0.0) {
