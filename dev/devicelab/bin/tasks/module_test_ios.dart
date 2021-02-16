@@ -291,10 +291,12 @@ Future<void> main() async {
       }
 
       section('Run platform unit tests');
+
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
         simulatorDeviceId = deviceId;
+        final String resultBundlePath = path.join(resultBundleTemp, 'result');
 
-        final String resultBundlePath = path.join(hostAgent.dumpDirectory.path, 'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}');
         return inDirectory(objectiveCHostApp, () =>
           exec(
             'xcodebuild',
@@ -319,6 +321,22 @@ Future<void> main() async {
           ));
         }
       );
+
+      // Zip the test results to the artifacts directory for upload.
+      await inDirectory(resultBundleTemp, () {
+        final String zipPath = path.join(hostAgent.dumpDirectory.path,
+            'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+        return exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            'result.xcresult',
+          ],
+          canFail: true, // Best effort to get the logs.
+        );
+      });
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
       final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>

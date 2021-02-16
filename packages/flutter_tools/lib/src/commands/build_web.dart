@@ -23,7 +23,7 @@ class BuildWebCommand extends BuildSubCommand {
     addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
-    addBuildModeFlags(excludeDebug: true);
+    addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
     usesWebRendererOption();
     addEnableExperimentation(hide: !verboseHelp);
@@ -33,30 +33,31 @@ class BuildWebCommand extends BuildSubCommand {
       defaultsTo: false,
       negatable: false,
       help: 'Disable dynamic generation of code in the generated output. '
-        'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+            'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
     );
     argParser.addFlag(
       'source-maps',
       defaultsTo: false,
-      help: 'Whether to generate a sourcemap file. These can be used by browsers '
-      'To view and debug the original source code of a compiled and minified Dart '
-      'application. Defaults to false (i.e. no sourcemaps produced).'
+      help: 'Generate a sourcemap file. These can be used by browsers '
+            'to view and debug the original source code of a compiled and minified Dart '
+            'application.'
     );
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
-      help:
-        'The caching strategy to be used by the PWA service worker.\n'
-        'offline-first will attempt to cache the app shell eagerly and '
-        'then lazily cache all subsequent assets as they are loaded. When '
-        'making a network request for an asset, the offline cache will be '
-        'preferred.\n'
-        'none will generate a service worker with no body. This is useful for '
-        'local testing or in cases where the service worker caching functionality '
-        'is not desirable',
+      help: 'The caching strategy to be used by the PWA service worker.',
       allowed: <String>[
         kOfflineFirst,
         kNoneWorker,
-      ]
+      ],
+      allowedHelp: <String, String>{
+        kOfflineFirst: 'Attempt to cache the application shell eagerly and '
+                       'then lazily cache all subsequent assets as they are loaded. When '
+                       'making a network request for an asset, the offline cache will be '
+                       'preferred.',
+        kNoneWorker:   'Generate a service worker with no body. This is useful for '
+                       'local testing or in cases where the service worker caching functionality '
+                       'is not desirable',
+      },
     );
   }
 

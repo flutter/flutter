@@ -23,6 +23,7 @@ import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
+import 'build_info.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
@@ -428,6 +429,10 @@ class Cache {
     } else {
       return _fileSystem.directory(_fileSystem.path.join(flutterRoot, 'bin', 'cache'));
     }
+  }
+
+  String getHostPlatformArchName() {
+    return getNameForHostPlatformArch(_osUtils.hostPlatform);
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
@@ -996,12 +1001,14 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
+    // Currently only Linux supports both arm64 and x64.
+    final String arch = cache.getHostPlatformArchName();
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
       if (cache.includeAllPlatforms) ...<List<String>>[
         <String>['windows-x64', 'windows-x64/artifacts.zip'],
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
         <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
       ]
       else if (_platform.isWindows)
@@ -1009,7 +1016,7 @@ class FlutterSdk extends EngineCachedArtifact {
       else if (_platform.isMacOS)
         <String>['darwin-x64', 'darwin-x64/artifacts.zip']
       else if (_platform.isLinux)
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
   }
 
@@ -1091,7 +1098,12 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     if (_platform.isLinux || ignorePlatformFiltering) {
-      return _linuxDesktopBinaryDirs;
+      final String arch = cache.getHostPlatformArchName();
+      return <List<String>>[
+        <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch-release', 'linux-$arch-release/linux-$arch-flutter-gtk.zip'],
+      ];
     }
     return const <List<String>>[];
   }
@@ -1480,9 +1492,11 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    const Map<String, List<String>> artifacts = <String, List<String>> {
+    // Currently only Linux supports both arm64 and x64.
+    final String arch = cache.getHostPlatformArchName();
+    final Map<String, List<String>> artifacts = <String, List<String>> {
       'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
-      'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
+      'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
     if (cache.includeAllPlatforms) {
@@ -1611,12 +1625,6 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
-];
-
-const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
-  <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
-  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
-  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
@@ -1796,7 +1804,24 @@ class ArtifactUpdater {
       final Directory destination = location.childDirectory(
         tempFile.fileSystem.path.basenameWithoutExtension(tempFile.path)
       );
-      ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
+      try {
+        ErrorHandlingFileSystem.deleteIfExists(
+          destination,
+          recursive: true,
+        );
+      } on FileSystemException catch (error) {
+        // Error that indicates another program has this file open and that it
+        // cannot be deleted. For the cache, this is either the analyzer reading
+        // the sky_engine package or a running flutter_tester device.
+        const int kSharingViolation = 32;
+        if (_platform.isWindows && error.osError.errorCode == kSharingViolation) {
+          throwToolExit(
+            'Failed to delete ${destination.path} because the local file/directory is in use '
+            'by another process. Try closing any running IDEs or editors and trying '
+            'again'
+          );
+        }
+      }
       _ensureExists(location);
 
       try {

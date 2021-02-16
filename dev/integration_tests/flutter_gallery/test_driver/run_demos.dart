@@ -33,13 +33,16 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
     print('> $demo');
     await controller.pump(const Duration(milliseconds: 250));
 
+    final Finder demoCategoryItem = find.text(demoCategory);
     if (currentDemoCategory == null) {
-      await controller.tap(find.text(demoCategory));
+      await controller.scrollUntilVisible(demoCategoryItem, 48.0);
+      await controller.tap(demoCategoryItem);
       await controller.pumpAndSettle();
     } else if (currentDemoCategory != demoCategory) {
       await controller.tap(find.byTooltip('Back'));
       await controller.pumpAndSettle();
-      await controller.tap(find.text(demoCategory));
+      await controller.scrollUntilVisible(demoCategoryItem, 48.0);
+      await controller.tap(demoCategoryItem);
       await controller.pumpAndSettle();
       // Scroll back to the top
       await controller.drag(demoList, const Offset(0.0, 10000.0));

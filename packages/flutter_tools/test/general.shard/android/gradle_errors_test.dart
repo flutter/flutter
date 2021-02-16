@@ -10,17 +10,14 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
   group('gradleErrors', () {
@@ -371,7 +368,7 @@ Command: /home/android/gradlew assembleRelease
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Usage: () => testUsage,
     });
 
@@ -406,7 +403,7 @@ Command: /home/android/gradlew assembleRelease
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Usage: () => testUsage,
     });
 
@@ -434,7 +431,7 @@ Command: /home/android/gradlew assembleRelease
       expect(status, equals(GradleBuildStatus.exit));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Usage: () => testUsage,
     });
 
@@ -468,7 +465,7 @@ Command: /home/android/gradlew assembleRelease
       expect(status, equals(GradleBuildStatus.retryWithAarPlugins));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => MockProcessManager(),
+      ProcessManager: () => FakeProcessManager.any(),
       Usage: () => testUsage,
     });
   });
@@ -529,10 +526,10 @@ Command: /home/android/gradlew assembleRelease
   });
 
   group('flavor undefined', () {
-    MockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     });
 
     testWithoutContext('pattern', () {
@@ -563,20 +560,14 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - with flavor', () async {
-      when(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          'app:tasks' ,
-          '--all',
-          '--console=auto',
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+      'gradlew',
+        'app:tasks' ,
+        '--all',
+        '--console=auto',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async {
-        return ProcessResult(
-          1,
-          0,
-          '''
+        stdout: '''
 assembleRelease
 assembleFlavor1
 assembleFlavor1Release
@@ -587,9 +578,7 @@ assembleProfile
 assembles
 assembleFooTest
           ''',
-          '',
-        );
-      });
+      ));
 
       await flavorUndefinedHandler.handler(
         project: FlutterProject.current(),
@@ -610,35 +599,28 @@ assembleFooTest
           'You must specify a --flavor option to select one of them.'
         )
       );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
     });
 
     testUsingContext('handler - without flavor', () async {
-      when(mockProcessManager.run(
-        <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'gradlew',
           'app:tasks' ,
           '--all',
           '--console=auto',
         ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async {
-        return ProcessResult(
-          1,
-          0,
-          '''
+        stdout: '''
 assembleRelease
 assembleDebug
 assembleProfile
           ''',
-          '',
-        );
-      });
+      ));
 
       await flavorUndefinedHandler.handler(
         project: FlutterProject.current(),
@@ -658,10 +640,11 @@ assembleProfile
           'You cannot use the --flavor option.'
         )
       );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       FileSystem: () => MemoryFileSystem.test(),
     });
   });

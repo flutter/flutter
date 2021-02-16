@@ -1915,6 +1915,46 @@ void main() {
     await buildFrame(iconSize: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
   });
+
+  testWidgets('does not crash in small overlay', (WidgetTester tester) async {
+    final GlobalKey navigator = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              OutlinedButton(
+                onPressed: () {
+                  showMenu<void>(
+                    context: navigator.currentContext!,
+                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    items: const <PopupMenuItem<void>>[
+                      PopupMenuItem<void>(child: Text('foo')),
+                    ],
+                  );
+                },
+                child: const Text('press'),
+              ),
+              SizedBox(
+                height: 10,
+                width: 10,
+                child: Navigator(
+                  key: navigator,
+                  onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
+                    builder: (BuildContext context) => Container(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('press'));
+    await tester.pumpAndSettle();
+    expect(find.text('foo'), findsOneWidget);
+  });
 }
 
 class TestApp extends StatefulWidget {
