@@ -179,6 +179,45 @@ class DeferredComponentsSetupValidator {
     }
   }
 
+  /// Checks if an android dynamic feature module exists for each deferred
+  /// component.
+  ///
+  /// Returns true if the check passed with no recommended changes, and false
+  /// otherwise.
+  ///
+  /// This method looks for the existence of `android/<componentname>/build.gradle`
+  /// and `android/<componentname>/src/main/AndroidManifest.xml`. If either of
+  /// these files does not exist, it will generate it in the validator output
+  /// directory based off of a template.
+  ///
+  /// This method does not check if the contents of either of the files are
+  /// valid, as there are many ways that they can be validly configured.
+  Future<bool> checkAndroidDynamicFeature(List<DeferredComponent> components) async {
+    bool changesMade = false;
+    for (final DeferredComponent component in components) {
+      final _DeferredComponentAndroidFiles androidFiles = _DeferredComponentAndroidFiles(
+        name: component.name,
+        env: env,
+        templatesDir: _templatesDir
+      );
+      if (!androidFiles.verifyFilesExist()) {
+        // generate into temp directory
+        final Map<String, List<File>> results =
+          await androidFiles.generateFiles(
+            alternateAndroidDir: _outputDir,
+            clearAlternateOutputDir: true,
+          );
+        for (final File file in results['outputs']) {
+          _generatedFiles.add(file.path);
+          changesMade = true;
+        }
+        _outputs.addAll(results['outputs']);
+        _inputs.addAll(results['inputs']);
+      }
+    }
+    return !changesMade;
+  }
+
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
     final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
