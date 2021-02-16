@@ -844,7 +844,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   // Waits one frame and cause an empty scroll event (zero delta pixels).
   //
-  // This allows the thumb to show immediately when isAlwaysShown is true.
+  // This allows the thumb to show or hide immediately when isAlwaysShown is true.
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
@@ -882,10 +882,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+    // If `isAlwaysShown` is true and does not change,
+    // it may be necessary to trigger a scroll event to show or hide the bar when the
+    // scrollable widget viewport size changed.
+    if (widget.isAlwaysShown == true || widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
         _maybeTriggerScrollbar();
-        _fadeoutAnimationController.animateTo(1.0);
       } else {
         _fadeoutAnimationController.reverse();
       }
@@ -1050,13 +1052,19 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return false;
 
     final ScrollMetrics metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent)
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      // Hide the bar when the Scrollable widget has no space to scroll.
+      if (_fadeoutAnimationController.status != AnimationStatus.dismissed
+          && _fadeoutAnimationController.status != AnimationStatus.reverse)
+        _fadeoutAnimationController.reverse();
       return false;
+    }
 
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward)
+      if (_fadeoutAnimationController.status != AnimationStatus.forward
+          && _fadeoutAnimationController.status != AnimationStatus.completed)
         _fadeoutAnimationController.forward();
 
       _fadeoutTimer?.cancel();
