@@ -735,6 +735,8 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 1);
+    // RenderEditable relies on its parent that passes onSelectionChanged to set
+    // the selection.
     editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
