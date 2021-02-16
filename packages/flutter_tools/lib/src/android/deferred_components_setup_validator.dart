@@ -218,7 +218,7 @@ class DeferredComponentsSetupValidator {
     return !changesMade;
   }
 
-
+  
   // The key used to identify the metadata element as the loading unit id to
   // deferred component mapping.
   static const String _mappingKey = 'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
@@ -560,6 +560,66 @@ class DeferredComponentsSetupValidator {
       }
     }
     return loadingUnits;
+  }
+
+  /// Writes the provided generatedLoadingUnits as `deferred_components_golden.yaml`
+  ///
+  /// This golden file is used to detect any changes in the loading units
+  /// produced by gen_snapshot. Running [checkAgainstLoadingUnitGolden] with a
+  /// mismatching or missing golden will result in a failed validation. This
+  /// prevents unexpected changes in loading units causing misconfigured
+  /// deferred components.
+  void writeGolden(List<LoadingUnit> generatedLoadingUnits) {
+    generatedLoadingUnits ??= <LoadingUnit>[];
+    final File goldenFile = env.projectDir.childFile(kDeferredComponentsGoldenFileName);
+    _outputs.add(goldenFile);
+    ErrorHandlingFileSystem.deleteIfExists(goldenFile);
+    goldenFile.createSync(recursive: true);
+
+    final StringBuffer buffer = StringBuffer();
+    buffer.write('''
+# ===============================================================================
+# The contents of this file are automatically generated and it is not recommended
+# to modify this file manually.
+# ===============================================================================
+#
+# In order to prevent unexpected splitting of deferred apps, this golden
+# file records the last generated set of loading units. It only possible
+# to obtain the final configuration of loading units after compilation is
+# complete. This means improperly setup imports can only be detected after
+# compilation.
+#
+# This golden file allows the build tool to detect any changes in the generated
+# loading units. During the next build attempt, loading units in this file are
+# compared against the newly generated loading units to check for any new or
+# removed loading units. In the case where loading units do not match, the build
+# will fail and ask the developer to verify that the `deferred-components`
+# configuration in `pubspec.yaml` is correct. Developers should make any necessary
+# changes to integrate new and changed loading units or remove no longer existing
+# loading units from the configuration. The build command should then be
+# re-run to continue the build process.
+#
+# Sometimes, changes to the generated loading units may be unintentional. If
+# the list of loading units in this golden is not what is expected, the app's
+# deferred imports should be reviewed. Third party plugins and packages may
+# also introduce deferred imports that result in unexpected loading units.
+loading-units:
+''');
+    final Set<int> usedIds = <int>{};
+    for (final LoadingUnit unit in generatedLoadingUnits) {
+      if (usedIds.contains(unit.id)) {
+        continue;
+      }
+      buffer.write('  - id: ${unit.id}\n');
+      if (unit.libraries != null && unit.libraries.isNotEmpty) {
+        buffer.write('    libraries:\n');
+        for (final String lib in unit.libraries) {
+          buffer.write('      - $lib\n');
+        }
+      }
+      usedIds.add(unit.id);
+    }
+    goldenFile.writeAsStringSync(buffer.toString(), flush: true);
   }
 
   /// Deletes all files inside of the validator's output directory.
