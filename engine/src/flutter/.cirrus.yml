@@ -55,7 +55,7 @@ task:
         bin/flutter analyze --dartdocs --flutter-repo --local-engine=host_debug_unopt
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
-        ../../bin/flutter test --local-engine=host_debug_unopt --null-assertions --sound-null-safety --enable-experiment=non-nullable
+        ../../bin/flutter test --local-engine=host_debug_unopt --null-assertions --sound-null-safety
     # TODO(fujino): remove this once ci/licenses.sh is run on LUCI
     - name: licenses_check
       build_script: |
