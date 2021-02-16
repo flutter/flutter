@@ -57,7 +57,7 @@ void testResampleEvent(String description, ResampleEventTest callback) {
     fakeAsync((FakeAsync async) {
       callback(async);
     }, initialTime: DateTime.utc(2015, 1, 1));
-  });
+  }, skip: isBrowser);
 }
 
 void main() {
