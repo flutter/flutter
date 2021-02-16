@@ -412,7 +412,7 @@ void main() {
         const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
 
-      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0);
+      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0, warnIfMissed: false); // hits the list
       await tester.pump();
 
       // Refresh indicator still being told to layout the same way.
@@ -439,7 +439,7 @@ void main() {
 
       // Scroll the top of the refresh indicator back to overscroll, it will
       // snap to the size of the refresh indicator and stay there.
-      await tester.drag(find.text('1'), const Offset(0.0, 200.0));
+      await tester.drag(find.text('1'), const Offset(0.0, 200.0), warnIfMissed: false); // hits the list
       await tester.pump();
       await tester.pump(const Duration(seconds: 2));
       expect(
@@ -652,7 +652,7 @@ void main() {
 
         // Start another drag by an amount that would have been enough to
         // trigger another refresh if it were in the right state.
-        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0);
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0.0, warnIfMissed: false);
         await tester.pump();
 
         // Instead, it's still in the done state because the sliver never
@@ -841,8 +841,7 @@ void main() {
         );
 
         await tester.fling(find.byType(Container).first, const Offset(0.0, 200.0), 2000.0);
-
-        await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
+        await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0, warnIfMissed: false); // IgnorePointer is enabled while scroll is ballistic.
 
         expect(mockHelper.invocations, isEmpty);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));

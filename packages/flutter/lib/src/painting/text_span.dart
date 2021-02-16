@@ -71,7 +71,8 @@ class TextSpan extends InlineSpan {
     TextStyle? style,
     this.recognizer,
     this.semanticsLabel,
-  }) : super(style: style);
+  }) : assert(!(text == null && semanticsLabel != null)),
+       super(style: style);
 
   /// The text contained in this span.
   ///
@@ -279,7 +280,7 @@ class TextSpan extends InlineSpan {
   @override
   void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
     assert(debugAssertIsValid());
-    if (text != null || semanticsLabel != null) {
+    if (text != null) {
       collector.add(InlineSpanSemanticsInformation(
         text!,
         semanticsLabel: semanticsLabel,

@@ -58,7 +58,7 @@ Future<void> buildWeb(
         if (serviceWorkerStrategy != null)
          kServiceWorkerStrategy: serviceWorkerStrategy,
         if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: encodeDartDefines(buildInfo.extraFrontEndOptions),
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,

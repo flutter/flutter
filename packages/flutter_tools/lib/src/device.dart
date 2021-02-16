@@ -394,6 +394,7 @@ class FlutterDeviceManager extends DeviceManager {
       config: config,
       logger: logger,
       artifacts: artifacts,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     MacOSDevices(
       processManager: processManager,

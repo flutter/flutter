@@ -27,6 +27,7 @@ import 'package:yaml/yaml.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/pubspec_schema.dart';
+import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
@@ -1283,12 +1284,10 @@ void main() {
     });
 
     group('createPluginSymlinks', () {
-      MockFeatureFlags featureFlags;
+      FeatureFlags featureFlags;
 
       setUp(() {
-        featureFlags = MockFeatureFlags();
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
       });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
@@ -2043,7 +2042,6 @@ void main() {
 }
 
 class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterManifest extends Mock implements FlutterManifest {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}

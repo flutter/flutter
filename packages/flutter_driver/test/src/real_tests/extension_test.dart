@@ -56,7 +56,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -81,7 +81,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -117,7 +117,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -142,7 +142,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -159,7 +159,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -182,7 +182,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -201,7 +201,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -230,7 +230,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -259,7 +259,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -277,7 +277,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -310,7 +310,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -359,7 +359,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -410,7 +410,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -460,7 +460,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -599,6 +599,18 @@ void main() {
                       controller: TextEditingController(text: 'Hello5'),
                     ),
                   ),
+                  Container(
+                    height: 25.0,
+                    child: RichText(
+                      key: const ValueKey<String>('text6'),
+                      text: const TextSpan(children: <TextSpan>[
+                        TextSpan(text: 'Hello'),
+                        TextSpan(text: ', '),
+                        TextSpan(text: 'World'),
+                        TextSpan(text: '!'),
+                      ]),
+                    ),
+                  ),
                 ],
               ))
           )
@@ -609,6 +621,7 @@ void main() {
       expect(await getTextInternal(ByValueKey('text3')), 'Hello3');
       expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
       expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
+      expect(await getTextInternal(ByValueKey('text6')), 'Hello, World!');
 
       // Check if error thrown for other types
       final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();
@@ -1145,7 +1158,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1171,7 +1184,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
@@ -1195,7 +1208,7 @@ void main() {
         result,
         <String, dynamic>{
           'isError': false,
-          'response': null,
+          'response': <String, dynamic>{},
         },
       );
     });
