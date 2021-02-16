@@ -7183,6 +7183,63 @@ void main() {
 
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb);
+
+  testWidgets('ignore key event from web platform', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'test\ntest',
+    );
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    bool myIntentWasCalled = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              MoveSelectionRightTextIntent: TextEditingAction<MoveSelectionRightTextIntent>(
+                onInvoke: (MoveSelectionRightTextIntent intent, EditableTextState editableTextState) {
+                  myIntentWasCalled = true;
+                  editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+                },
+              ),
+            },
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: focusNode,
+              style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    if (kIsWeb) {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
+      await tester.pump();
+      expect(myIntentWasCalled, isFalse);
+    } else {
+      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+      await tester.pump();
+      expect(myIntentWasCalled, isTrue);
+    }
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 1);
+  });
 }
 
 class UnsettableController extends TextEditingController {
