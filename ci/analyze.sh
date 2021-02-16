@@ -62,7 +62,6 @@ echo "Analyzing dart:ui library..."
 autoninja -C "$SRC_DIR/out/host_debug_unopt" generate_dart_ui
 analyze \
   --options "$FLUTTER_DIR/analysis_options.yaml" \
-  --enable-experiment=non-nullable \
   "$SRC_DIR/out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"
 
 echo "Analyzing flutter_frontend_server..."
