@@ -36,7 +36,7 @@ transforms:
     variables:
       pointerDeviceKind:
           kind: 'fragment'
-          value: 'arguments[kind]'
+          value: 'arguments[0]'
 
   # Changes made in https://github.com/flutter/flutter/pull/72043
   - title: "Migrate to 'maxLengthEnforcement'"
