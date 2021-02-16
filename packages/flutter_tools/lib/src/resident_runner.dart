@@ -400,45 +400,50 @@ class FlutterDevice {
   Future<void> debugDumpApp() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpApp(
+      final String data = await vmService.flutterDebugDumpApp(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpRenderTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpRenderTree(
+      final String data = await vmService.flutterDebugDumpRenderTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpLayerTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpLayerTree(
+      final String data = await vmService.flutterDebugDumpLayerTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
