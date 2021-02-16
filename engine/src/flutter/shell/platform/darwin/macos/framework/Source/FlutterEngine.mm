@@ -489,6 +489,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     return;
   }
 
+  if (_viewController && _viewController.flutterView) {
+    [_viewController.flutterView shutdown];
+  }
+
   FlutterEngineResult result = _embedderAPI.Deinitialize(_engine);
   if (result != kSuccess) {
     NSLog(@"Could not de-initialize the Flutter engine: error %d", result);

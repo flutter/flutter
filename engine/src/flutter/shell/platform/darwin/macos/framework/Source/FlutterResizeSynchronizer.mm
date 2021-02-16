@@ -34,6 +34,9 @@
   // Target size for resizing.
   CGSize _newSize;
 
+  // if YES prevents all synchronization
+  BOOL _shuttingDown;
+
   __weak id<FlutterResizeSynchronizerDelegate> _delegate;
 }
 @end
@@ -54,7 +57,7 @@
     return;
   }
 
-  if (!_receivedFirstFrame) {
+  if (!_receivedFirstFrame || _shuttingDown) {
     // No blocking until framework produces at least one frame
     notify();
     return;
@@ -77,7 +80,7 @@
 
   _waiting = YES;
 
-  _condBlockRequestCommit.wait(lock, [&] { return _pendingCommit; });
+  _condBlockRequestCommit.wait(lock, [&] { return _pendingCommit || _shuttingDown; });
 
   [_delegate resizeSynchronizerFlush:self];
   [_delegate resizeSynchronizerCommit:self];
@@ -104,7 +107,7 @@
 
 - (void)requestCommit {
   std::unique_lock<std::mutex> lock(_mutex);
-  if (!_acceptingCommit) {
+  if (!_acceptingCommit || _shuttingDown) {
     return;
   }
 
@@ -113,7 +116,7 @@
   _pendingCommit = YES;
   if (_waiting) {  // BeginResize is in progress, interrupt it and schedule commit call
     _condBlockRequestCommit.notify_all();
-    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit; });
+    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit || _shuttingDown; });
   } else {
     // No resize, schedule commit on platform thread and wait until either done
     // or interrupted by incoming BeginResize
@@ -128,8 +131,15 @@
         _condBlockBeginResize.notify_all();
       }
     });
-    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit; });
+    _condBlockBeginResize.wait(lock, [&]() { return !_pendingCommit || _shuttingDown; });
   }
+}
+
+- (void)shutdown {
+  std::unique_lock<std::mutex> lock(_mutex);
+  _shuttingDown = YES;
+  _condBlockBeginResize.notify_all();
+  _condBlockRequestCommit.notify_all();
 }
 
 @end
