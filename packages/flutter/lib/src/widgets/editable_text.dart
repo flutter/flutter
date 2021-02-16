@@ -407,8 +407,7 @@ class ToolbarOptions {
 ///  * When the user focuses this text field and it is not [readOnly].
 ///  * When the user changes the selection of the text field, or changes the
 ///    text when the text field is not [readOnly].
-///  * When the dimensions of the application change (e.g., when the virtual
-///    keyboard pops up, or when the display device rotates).
+///  * When the virtual keyboard pops up.
 /// {@endtemplate}
 ///
 /// See also:
@@ -2236,19 +2235,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  late ui.WindowPadding _lastBottomViewInset;
-  late Size _lastPhysicalSize;
+  late double _lastBottomViewInset;
 
   @override
   void didChangeMetrics() {
-    final ui.FlutterWindow window = WidgetsBinding.instance!.window;
-    final bool shouldScheduleShowCaretOnScreen = _lastBottomViewInset != window.viewInsets
-                                              || _lastPhysicalSize != window.physicalSize;
-    _lastBottomViewInset = window.viewInsets;
-    _lastPhysicalSize = window.physicalSize;
-    if (shouldScheduleShowCaretOnScreen) {
+    if (_lastBottomViewInset < WidgetsBinding.instance!.window.viewInsets.bottom) {
       _scheduleShowCaretOnScreen();
     }
+    _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
   }
 
   late final _WhitespaceDirectionalityFormatter _whitespaceFormatter = _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
@@ -2416,8 +2410,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance!.addObserver(this);
-      _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets;
-      _lastPhysicalSize = WidgetsBinding.instance!.window.physicalSize;
+      _lastBottomViewInset = WidgetsBinding.instance!.window.viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen();
       }
