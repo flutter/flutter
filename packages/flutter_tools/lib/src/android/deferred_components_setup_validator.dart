@@ -218,6 +218,121 @@ class DeferredComponentsSetupValidator {
     return !changesMade;
   }
 
+
+  // The key used to identify the metadata element as the loading unit id to
+  // deferred component mapping.
+  static const String _mappingKey = 'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
+
+  /// Checks if the base module `app`'s `AndroidManifest.xml` contains the
+  /// required meta-data that maps loading units to deferred components.
+  ///
+  /// Returns true if the check passed with no recommended changes, and false
+  /// otherwise.
+  ///
+  /// Flutter engine uses a manifest meta-data mapping to determine which
+  /// deferred component includes a particular loading unit id. This method
+  /// checks if `app`'s `AndroidManifest.xml` contains this metadata. If not, it
+  /// will generate a modified AndroidManifest.xml with the correct metadata
+  /// entry.
+  ///
+  /// An example mapping:
+  ///
+  ///   2:componentA,3:componentB,4:componentC
+  ///
+  /// Where loading unit 2 is included in componentA, loading unit 3 is included
+  /// in componentB, and loading unit 4 is included in componentC.
+  bool checkAppAndroidManifestComponentLoadingUnitMapping(List<DeferredComponent> components, List<LoadingUnit> generatedLoadingUnits) {
+    final Directory androidDir = env.projectDir.childDirectory('android');
+
+    // We do not use the Xml package to handle the writing, as we do not want to
+    // erase any user applied formatting and comments. The changes can be
+    // applied with dart io and custom parsing.
+    final File appManifestFile = androidDir
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory('main')
+      .childFile('AndroidManifest.xml');
+    _inputs.add(appManifestFile);
+    if (!appManifestFile.existsSync()) {
+      _invalidFiles[appManifestFile.path] = 'Error: $appManifestFile does not '
+        'exist or could not be found. Please ensure an AndroidManifest.xml '
+        'exists for the app\'s base module.';
+      return false;
+    }
+    XmlDocument document;
+    try {
+      document = XmlDocument.parse(appManifestFile.readAsStringSync());
+    } on XmlParserException {
+      _invalidFiles[appManifestFile.path] = 'Error parsing $appManifestFile '
+        'Please ensure that the android manifest is a valid XML document and '
+        'try again.';
+      return false;
+    } on FileSystemException {
+      _invalidFiles[appManifestFile.path] = 'Error reading $appManifestFile '
+        'even though it exists. Please ensure that you have read permission for '
+        'this file and try again.';
+      return false;
+    }
+    // Create loading unit mapping.
+    final Map<int, String> mapping = <int, String>{};
+    for (final DeferredComponent component in components) {
+      component.assignLoadingUnits(generatedLoadingUnits);
+      for (final LoadingUnit unit in component.loadingUnits) {
+        if (!mapping.containsKey(unit.id)) {
+          mapping[unit.id] = component.name;
+        }
+      }
+    }
+    // Encode the mapping as a string.
+    final StringBuffer mappingBuffer = StringBuffer();
+    for (final int key in mapping.keys) {
+      mappingBuffer.write('$key:${mapping[key]},');
+    }
+    String encodedMapping = mappingBuffer.toString();
+    // remove trailing comma.
+    encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
+    // Check for existing metadata entry and see if needs changes.
+    bool exists = false;
+    bool modified = false;
+    for (final XmlElement metaData in document.findAllElements('meta-data')) {
+      final String name = metaData.getAttribute('android:name');
+      if (name == _mappingKey) {
+        exists = true;
+        final String storedMappingString = metaData.getAttribute('android:value');
+        if (storedMappingString != encodedMapping) {
+          metaData.setAttribute('android:value', encodedMapping);
+          modified = true;
+        }
+      }
+    }
+    if (!exists) {
+      // Create an meta-data XmlElement that contains the mapping.
+      final XmlElement mappingMetadataElement = XmlElement(XmlName.fromString('meta-data'),
+        <XmlAttribute>[
+          XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
+          XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
+        ],
+      );
+      for (final XmlElement application in document.findAllElements('application')) {
+        application.children.add(mappingMetadataElement);
+        break;
+      }
+    }
+    if (!exists || modified) {
+      final File manifestOutput = _outputDir
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml');
+      ErrorHandlingFileSystem.deleteIfExists(manifestOutput);
+      manifestOutput.createSync(recursive: true);
+      manifestOutput.writeAsStringSync(document.toXmlString(pretty: true), flush: true);
+      _modifiedFiles.add(manifestOutput.path);
+      return false;
+    }
+    return true;
+  }
+
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
     final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
