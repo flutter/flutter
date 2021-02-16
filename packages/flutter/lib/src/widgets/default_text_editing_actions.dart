@@ -15,21 +15,21 @@ import 'text_editing_intents.dart';
 /// Flutter on the current platform.
 ///
 /// This default behavior can be overridden by placing an [Actions] widget lower
-/// in the widget tree than this. See [TextEditingShortcuts] for an example of
+/// in the widget tree than this. See [DefaultTextEditingShortcuts] for an example of
 /// remapping keyboard keys to an existing text editing [Intent].
 ///
 /// See also:
 ///
-///   * [TextEditingShortcuts], which maps keyboard keys to many of the
+///   * [DefaultTextEditingShortcuts], which maps keyboard keys to many of the
 ///     [Intent]s that are handled here.
-class TextEditingActions extends StatelessWidget {
-  /// Creates an instance of TextEditingActions.
-  const TextEditingActions({
+class DefaultTextEditingActions extends StatelessWidget {
+  /// Creates an instance of DefaultTextEditingActions.
+  const DefaultTextEditingActions({
     Key? key,
     required this.child,
   }) : super(key: key);
 
-  /// The child [Widget] of TextEditingActions.
+  /// The child [Widget] of DefaultTextEditingActions.
   final Widget child;
 
   static final TextEditingAction<ExpandSelectionLeftByLineTextIntent> _expandSelectionLeftByLineAction = TextEditingAction<ExpandSelectionLeftByLineTextIntent>(
@@ -185,8 +185,8 @@ class TextEditingActions extends StatelessWidget {
   static final Map<Type, Action<Intent>> _windowsActions = <Type, Action<Intent>>{
   };
 
-  // These Intents are triggered by TextEditingShortcuts. They are included
-  // regardless of the platform; it's up to TextEditingShortcuts to decide which
+  // These Intents are triggered by DefaultTextEditingShortcuts. They are included
+  // regardless of the platform; it's up to DefaultTextEditingShortcuts to decide which
   // are called on which platform.
   static final Map<Type, Action<Intent>> _shortcutsActions = <Type, Action<Intent>>{
     ExtendSelectionDownTextIntent: _extendSelectionDownAction,

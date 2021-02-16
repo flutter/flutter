@@ -14,7 +14,7 @@ import 'text_editing_intents.dart';
 /// behavior.
 ///
 /// This default behavior can be overridden by placing a [Shortcuts] widget
-/// lower in the widget tree than this. See [TextEditingActions] for an example
+/// lower in the widget tree than this. See [DefaultTextEditingActions] for an example
 /// of remapping a text editing [Intent] to a custom [Action].
 ///
 /// {@tool snippet}
@@ -47,12 +47,12 @@ import 'text_editing_intents.dart';
 ///
 /// See also:
 ///
-///  * [TextEditingActions], which contains all of the [Action]s that respond
+///  * [DefaultTextEditingActions], which contains all of the [Action]s that respond
 ///    to the [Intent]s in these shortcuts with the default text editing
 ///    behavior.
-class TextEditingShortcuts extends StatelessWidget {
-  /// Creates an instance of TextEditingShortcuts.
-  const TextEditingShortcuts({
+class DefaultTextEditingShortcuts extends StatelessWidget {
+  /// Creates an instance of DefaultTextEditingShortcuts.
+  const DefaultTextEditingShortcuts({
     Key? key,
     required this.child,
   }) : super(key: key);

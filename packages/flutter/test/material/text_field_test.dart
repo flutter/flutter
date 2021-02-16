@@ -76,8 +76,8 @@ Widget overlayWithEntry(OverlayEntry entry) {
       WidgetsLocalizationsDelegate(),
       MaterialLocalizationsDelegate(),
     ],
-    child: TextEditingShortcuts(
-      child: TextEditingActions(
+    child: DefaultTextEditingShortcuts(
+      child: DefaultTextEditingActions(
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(

@@ -12,6 +12,8 @@ import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'default_text_editing_actions.dart';
+import 'default_text_editing_shortcuts.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -25,8 +27,6 @@ import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
-import 'text_editing_actions.dart';
-import 'text_editing_shortcuts.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
@@ -1637,7 +1637,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     // Passing actions or shortcuts gets rid of all default actions or shortcuts
     // respectively, including text editing actions/shortcuts.
     if (widget.actions == null) {
-      child = TextEditingActions(
+      child = DefaultTextEditingActions(
         child: Actions(
           actions: WidgetsApp.defaultActions,
           child: child,
@@ -1650,11 +1650,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
     if (widget.shortcuts == null) {
-      // The TextEditingShortcuts may fall through to the defaultShortcuts.
+      // The DefaultTextEditingShortcuts may fall through to the defaultShortcuts.
       child = Shortcuts(
         debugLabel: '<Default WidgetsApp Shortcuts>',
         shortcuts: WidgetsApp.defaultShortcuts,
-        child: TextEditingShortcuts(
+        child: DefaultTextEditingShortcuts(
           child: child,
         ),
       );

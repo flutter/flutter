@@ -10,8 +10,8 @@ import 'actions.dart';
 /// {@template flutter.widgets.TextEditingIntents.seeAlso}
 /// See also:
 ///
-///   * [TextEditingActions], which responds to this [Intent].
-///   * [TextEditingShortcuts], which triggers this [Intent].
+///   * [DefaultTextEditingActions], which responds to this [Intent].
+///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
 /// {@endtemplate}
 class ExpandSelectionLeftByLineTextIntent extends Intent {}
 

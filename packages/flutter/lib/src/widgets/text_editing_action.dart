@@ -57,6 +57,8 @@ class TextEditingAction<T extends Intent> extends ContextAction<T> {
 
   @override
   bool isEnabled(Intent intent) {
+    // The Action is disabled if there is no focused EditableText, or if the
+    // platform is web, because web lets the browser handle text editing.
     return !kIsWeb && _editableTextState != null;
   }
 }
