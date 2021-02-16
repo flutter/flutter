@@ -270,7 +270,6 @@ abstract class RawKeyEvent with Diagnosticable {
 
     final String keymap = message['keymap'] as String;
     if (kIsWeb) {
-      assert(keymap == 'web');
       data = RawKeyEventDataWeb(
         code: message['code'] as String? ?? '',
         key: message['key'] as String? ?? '',
