@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -29,6 +30,7 @@ import '../../src/mocks.dart';
 
 void main() {
   group('gradle build', () {
+    BufferLogger logger;
     TestUsage testUsage;
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
@@ -41,6 +43,7 @@ void main() {
     AndroidGradleBuilder builder;
 
     setUp(() {
+      logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
       fileSystemUtils = MockFileSystemUtils();
@@ -49,7 +52,9 @@ void main() {
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
-      builder = AndroidGradleBuilder();
+      builder = AndroidGradleBuilder(
+        logger: logger,
+      );
 
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
 
@@ -660,7 +665,7 @@ void main() {
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
 
@@ -708,11 +713,11 @@ void main() {
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Built build/outputs/repo'),
       );
       expect(
-        testLogger.statusText.contains('Consuming the Module'),
+        logger.statusText.contains('Consuming the Module'),
         isFalse,
       );
 

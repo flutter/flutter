@@ -59,10 +59,10 @@ import '../vmservice.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
-    addBuildModeFlags(defaultToRelease: false, excludeRelease: true);
+    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
-    usesPortOptions();
-    usesIpv6Flag();
+    usesPortOptions(verboseHelp: verboseHelp);
+    usesIpv6Flag(verboseHelp: verboseHelp);
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
@@ -73,13 +73,13 @@ class AttachCommand extends FlutterCommand {
       ..addOption(
         'debug-port',
         hide: !verboseHelp,
-        help: 'Device port where the observatory is listening. Requires '
-        '--disable-service-auth-codes to also be provided to the Flutter '
-        'application at launch, otherwise this command will fail to connect to '
-        'the application. In general, --debug-uri should be used instead.',
+        help: '(deprecated) Device port where the observatory is listening. Requires '
+              '"--disable-service-auth-codes" to also be provided to the Flutter '
+              'application at launch, otherwise this command will fail to connect to '
+              'the application. In general, "--debug-uri" should be used instead.',
       )..addOption(
-        'debug-uri',
-        help: 'The URI at which the observatory is listening.',
+        'debug-uri', // TODO(ianh): we should support --debug-url as well (leaving this as an alias).
+        help: 'The URL at which the observatory is listening.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the app. '
@@ -99,7 +99,7 @@ class AttachCommand extends FlutterCommand {
         'report-ready',
         help: 'Print "ready" to the console after handling a keyboard command.\n'
               'This is primarily useful for tests and other automation, but consider '
-              'using --machine instead.',
+              'using "--machine" instead.',
         hide: !verboseHelp,
       )..addOption(
         'project-root',
@@ -417,8 +417,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      fileSystemRoots: stringsArg('filesystem-root'),
-      fileSystemScheme: stringArg('filesystem-scheme'),
+      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
+      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       target: targetFile,
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: buildInfo,

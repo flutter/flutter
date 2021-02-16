@@ -2327,7 +2327,7 @@ abstract class BuildContext {
 /// Size measureWidget(Widget widget) {
 ///   final PipelineOwner pipelineOwner = PipelineOwner();
 ///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
-///   final BuildOwner buildOwner = BuildOwner(focusManager: FailingFocusManager());
+///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
 ///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
 ///     container: rootView,
 ///     debugShortDescription: '[root]',
@@ -2342,17 +2342,6 @@ abstract class BuildContext {
 ///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
 ///     buildOwner.finalizeTree();
 ///   }
-/// }
-///
-/// // The default FocusManager, when created, modifies some static properties
-/// // that we don't want to modify, which is why we use a failing implementation
-/// // here.
-/// class FailingFocusManager implements FocusManager {
-///   @override
-///   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-///
-///   @override
-///   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => 'FailingFocusManager';
 /// }
 ///
 /// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -2370,8 +2359,14 @@ abstract class BuildContext {
 /// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
+  ///
+  /// If the `focusManager` argument is not specified or is null, this will
+  /// construct a new [FocusManager] and register its global input handlers
+  /// via [FocusManager.registerGlobalHandlers], which will modify static
+  /// state. Callers wishing to avoid altering this state can explicitly pass
+  /// a focus manager here.
   BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
-      focusManager = focusManager ?? FocusManager();
+      focusManager = focusManager ?? (FocusManager()..registerGlobalHandlers());
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2402,6 +2397,12 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
+  ///
+  /// This field will default to a [FocusManager] that has registered its
+  /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
+  /// wishing to avoid registering those handlers (and modifying the associated
+  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// constructor.
   FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
