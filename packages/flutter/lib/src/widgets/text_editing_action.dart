@@ -9,8 +9,9 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
-// Similar to CallbackAction's OnInvokeCallback, but includes EditableTextState.
-typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T intent, EditableTextState editableTextState);
+/// Similar to [CallbackAction]'s [OnInvokeCallback], but includes
+/// [EditableTextState] as a parameter.
+typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T intent, EditableTextState editableTextState);
 
 /// An [Action] related to editing text.
 ///
@@ -38,12 +39,13 @@ class TextEditingAction<T extends Intent> extends ContextAction<T> {
 
   /// The callback to be called when invoked.
   ///
-  /// If an EditableText is not focused, then isEnabled will be false, and this
-  /// will not be invoked.
+  /// If an EditableText is not focused and available at
+  /// `primaryFocus.context.widget`, then isEnabled will be false, and this will
+  /// not be invoked.
   ///
   /// Must not be null.
   @protected
-  final _OnInvokeTextEditingCallback<T> onInvoke;
+  final OnInvokeTextEditingCallback<T> onInvoke;
 
   @override
   Object? invoke(covariant T intent, [BuildContext? context]) {
