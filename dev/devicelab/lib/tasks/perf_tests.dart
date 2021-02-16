@@ -503,6 +503,15 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
         case DeviceOperatingSystem.androidArm64:
           await flutter('build', options: <String>[
             'apk',
@@ -1031,6 +1040,7 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         options.add('--tree-shake-icons');
@@ -1081,6 +1091,7 @@ class CompileTest {
         options.insert(0, 'ios');
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         break;
