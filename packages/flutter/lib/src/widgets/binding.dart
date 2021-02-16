@@ -387,7 +387,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.initServiceExtensions();
 
     if (!kReleaseMode) {
-
       registerServiceExtension(
         name: 'debugDumpApp',
         callback: (Map<String, String> parameters) async {
