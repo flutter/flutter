@@ -75,10 +75,12 @@ const bool canvasKitForceCpuOnly = bool.fromEnvironment(
 /// NPM, update this URL to `https://unpkg.com/canvaskit-wasm@0.34.0/bin/`.
 const String canvasKitBaseUrl = String.fromEnvironment(
   'FLUTTER_WEB_CANVASKIT_URL',
-  defaultValue: 'https://unpkg.com/canvaskit-wasm@0.22.0/bin/',
+  defaultValue: 'https://unpkg.com/canvaskit-wasm@0.23.0/bin/',
 );
-final String canvasKitBuildUrl = canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
-final String canvasKitJavaScriptBindingsUrl = canvasKitBuildUrl + 'canvaskit.js';
+final String canvasKitBuildUrl =
+    canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
+final String canvasKitJavaScriptBindingsUrl =
+    canvasKitBuildUrl + 'canvaskit.js';
 String canvasKitWasmModuleUrl(String file) => canvasKitBuildUrl + file;
 
 /// Initialize CanvasKit.
@@ -89,8 +91,10 @@ Future<void> initializeCanvasKit() {
   late StreamSubscription<html.Event> loadSubscription;
   loadSubscription = domRenderer.canvasKitScript!.onLoad.listen((_) {
     loadSubscription.cancel();
-    final CanvasKitInitPromise canvasKitInitPromise = CanvasKitInit(CanvasKitInitOptions(
-      locateFile: js.allowInterop((String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
+    final CanvasKitInitPromise canvasKitInitPromise =
+        CanvasKitInit(CanvasKitInitOptions(
+      locateFile: js.allowInterop(
+          (String file, String unusedBase) => canvasKitWasmModuleUrl(file)),
     ));
     canvasKitInitPromise.then(js.allowInterop((CanvasKit ck) {
       canvasKit = ck;
