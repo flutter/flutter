@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('onTap detection with canceled pointer and a drag listener', (WidgetTester tester) async {
