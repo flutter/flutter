@@ -444,6 +444,124 @@ class DeferredComponentsSetupValidator {
     return false;
   }
 
+  /// Compares the provided loading units against the contents of the
+  /// `deferred_components_golden.yaml` file.
+  ///
+  /// Returns true if a golden exists and all loading units match, and false
+  /// otherwise.
+  ///
+  /// This method will parse the golden file if it exists and compare it to
+  /// the provided generatedLoadingUnits. It will distinguish between newly
+  /// added loading units and no longer existing loading units. If the golden
+  /// file does not exist, then all generatedLoadingUnits will be considered
+  /// new.
+  bool checkAgainstLoadingUnitGolden(
+      List<LoadingUnit> generatedLoadingUnits) {
+    final List<LoadingUnit> goldenLoadingUnits = _parseGolden(env.projectDir.childFile(kDeferredComponentsGoldenFileName));
+    _goldenComparisonResults = <String, dynamic>{};
+    final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
+    final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
+    if (generatedLoadingUnits == null || goldenLoadingUnits == null) {
+      _goldenComparisonResults['new'] = newLoadingUnits;
+      _goldenComparisonResults['missing'] = unmatchedLoadingUnits;
+      _goldenComparisonResults['match'] = false;
+      return false;
+    }
+    _inputs.add(env.projectDir.childFile(kDeferredComponentsGoldenFileName));
+    unmatchedLoadingUnits.addAll(goldenLoadingUnits);
+    final Set<int> addedNewIds = <int>{};
+    for (final LoadingUnit genUnit in generatedLoadingUnits) {
+      bool matched = false;
+      for (final LoadingUnit goldUnit in goldenLoadingUnits) {
+        if (genUnit.equalsIgnoringPath(goldUnit)) {
+          matched = true;
+          unmatchedLoadingUnits.remove(goldUnit);
+          break;
+        }
+      }
+      if (!matched && !addedNewIds.contains(genUnit.id)) {
+        newLoadingUnits.add(genUnit);
+        addedNewIds.add(genUnit.id);
+      }
+    }
+    _goldenComparisonResults['new'] = newLoadingUnits;
+    _goldenComparisonResults['missing'] = unmatchedLoadingUnits;
+    _goldenComparisonResults['match'] = newLoadingUnits.isEmpty && unmatchedLoadingUnits.isEmpty;
+    return _goldenComparisonResults['match'] as bool;
+  }
+
+  List<LoadingUnit> _parseGolden(File goldenFile) {
+    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
+    _inputs.add(goldenFile);
+    if (!goldenFile.existsSync()) {
+      return loadingUnits;
+    }
+    final YamlMap data = loadYaml(goldenFile.readAsStringSync()) as YamlMap;
+    // validate yaml format.
+    if (!data.containsKey('loading-units')) {
+      _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+                                       'entry did not exist.';
+      return loadingUnits;
+    } else {
+      if (data['loading-units'] is! YamlList && data['loading-units'] != null) {
+        _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+                                         'is not a list.';
+        return loadingUnits;
+      }
+      if (data['loading-units'] != null) {
+        for (final dynamic loadingUnitData in data['loading-units']) {
+          if (loadingUnitData is! YamlMap) {
+            _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+                                             'is not a list of maps.';
+            return loadingUnits;
+          }
+          final YamlMap loadingUnitDataMap = loadingUnitData as YamlMap;
+          if (loadingUnitDataMap['id'] == null) {
+            _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, all '
+                                             'loading units must have an \'id\'';
+            return loadingUnits;
+          }
+          if (loadingUnitDataMap['libraries'] != null) {
+            if (loadingUnitDataMap['libraries'] is! YamlList) {
+              _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'libraries\' '
+                                               'is not a list.';
+              return loadingUnits;
+            }
+            for (final dynamic node in loadingUnitDataMap['libraries'] as YamlList) {
+              if (node is! String) {
+                _invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'libraries\' '
+                                                 'is not a list of strings.';
+                return loadingUnits;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Parse out validated yaml.
+    if (data.containsKey('loading-units')) {
+      if (data['loading-units'] != null) {
+        for (final dynamic loadingUnitData in data['loading-units']) {
+          final YamlMap loadingUnitDataMap = loadingUnitData as YamlMap;
+          final List<String> libraries = <String>[];
+          if (loadingUnitDataMap['libraries'] != null) {
+            for (final dynamic node in loadingUnitDataMap['libraries'] as YamlList) {
+              libraries.add(node as String);
+            }
+          }
+          loadingUnits.add(
+              LoadingUnit(
+                id: loadingUnitDataMap['id'] as int,
+                path: null,
+                libraries: libraries,
+              ));
+        }
+      }
+    }
+    return loadingUnits;
+  }
+
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
     final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
