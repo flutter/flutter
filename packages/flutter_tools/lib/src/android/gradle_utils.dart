@@ -78,6 +78,9 @@ class GradleUtils {
         // Don't override the existing files in the project.
         return !destinationFile.existsSync();
       },
+      onFileCopied: (File file) {
+         _operatingSystemUtils.makeExecutable(file);
+      }
     );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
     final Directory propertiesDirectory = directory
