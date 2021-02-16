@@ -12,7 +12,7 @@ bool _registeredSymbolsAndEmoji = false;
 
 final Set<int> codeUnitsWithNoKnownFont = <int>{};
 
-Future<void> _findFontsForMissingCodeunits(List<int> codeunits) async {
+Future<void> findFontsForMissingCodeunits(List<int> codeunits) async {
   _ensureNotoFontTreeCreated();
 
   // If all of the code units are known to have no Noto Font which covers them,
@@ -20,11 +20,11 @@ Future<void> _findFontsForMissingCodeunits(List<int> codeunits) async {
   if (codeunits.every((u) => codeUnitsWithNoKnownFont.contains(u))) {
     return;
   }
-  Set<_NotoFont> fonts = <_NotoFont>{};
+  Set<NotoFont> fonts = <NotoFont>{};
   Set<int> coveredCodeUnits = <int>{};
   Set<int> missingCodeUnits = <int>{};
   for (int codeunit in codeunits) {
-    List<_NotoFont> fontsForUnit = _notoTree!.intersections(codeunit);
+    List<NotoFont> fontsForUnit = _notoTree!.intersections(codeunit);
     fonts.addAll(fontsForUnit);
     if (fontsForUnit.isNotEmpty) {
       coveredCodeUnits.add(codeunit);
@@ -33,15 +33,15 @@ Future<void> _findFontsForMissingCodeunits(List<int> codeunits) async {
     }
   }
 
-  fonts = _findMinimumFontsForCodeunits(coveredCodeUnits, fonts);
+  fonts = findMinimumFontsForCodeunits(coveredCodeUnits, fonts);
 
-  for (_NotoFont font in fonts) {
+  for (NotoFont font in fonts) {
     await font.ensureResolved();
   }
 
   Set<_ResolvedNotoSubset> resolvedFonts = <_ResolvedNotoSubset>{};
   for (int codeunit in coveredCodeUnits) {
-    for (_NotoFont font in fonts) {
+    for (NotoFont font in fonts) {
       if (font.resolvedFont == null) {
         // We failed to resolve the font earlier.
         continue;
@@ -232,18 +232,20 @@ Future<void> _registerSymbolsAndEmoji() async {
 /// which finds the font which covers the most codeunits. If multiple CJK
 /// fonts match the same number of codeunits, we choose one based on the user's
 /// locale.
-Set<_NotoFont> _findMinimumFontsForCodeunits(
-    Iterable<int> codeunits, Set<_NotoFont> fonts) {
+Set<NotoFont> findMinimumFontsForCodeunits(
+    Iterable<int> codeunits, Set<NotoFont> fonts) {
+  assert(fonts.isNotEmpty || codeunits.isEmpty);
   List<int> unmatchedCodeunits = List<int>.from(codeunits);
-  Set<_NotoFont> minimumFonts = <_NotoFont>{};
-  List<_NotoFont> bestFonts = <_NotoFont>[];
-  int maxCodeunitsCovered = 0;
+  Set<NotoFont> minimumFonts = <NotoFont>{};
+  List<NotoFont> bestFonts = <NotoFont>[];
 
   String language = html.window.navigator.language;
 
   // This is guaranteed to terminate because [codeunits] is a list of fonts
   // which we've already determined are covered by [fonts].
   while (unmatchedCodeunits.isNotEmpty) {
+    int maxCodeunitsCovered = 0;
+    bestFonts.clear();
     for (var font in fonts) {
       int codeunitsCovered = 0;
       for (int codeunit in unmatchedCodeunits) {
@@ -259,10 +261,13 @@ Set<_NotoFont> _findMinimumFontsForCodeunits(
         bestFonts.add(font);
       }
     }
-    assert(bestFonts.isNotEmpty);
+    assert(
+      bestFonts.isNotEmpty,
+      'Did not find any fonts that cover code units: ${unmatchedCodeunits.join(', ')}',
+    );
     // If the list of best fonts are all CJK fonts, choose the best one based
     // on locale. Otherwise just choose the first font.
-    _NotoFont bestFont = bestFonts.first;
+    NotoFont bestFont = bestFonts.first;
     if (bestFonts.length > 1) {
       if (bestFonts.every((font) => _cjkFonts.contains(font))) {
         if (language == 'zh-Hans' ||
@@ -301,19 +306,19 @@ void _ensureNotoFontTreeCreated() {
     return;
   }
 
-  Map<_NotoFont, List<CodeunitRange>> ranges =
-      <_NotoFont, List<CodeunitRange>>{};
+  Map<NotoFont, List<CodeunitRange>> ranges =
+      <NotoFont, List<CodeunitRange>>{};
 
-  for (_NotoFont font in _notoFonts) {
+  for (NotoFont font in _notoFonts) {
     for (CodeunitRange range in font.unicodeRanges) {
       ranges.putIfAbsent(font, () => <CodeunitRange>[]).add(range);
     }
   }
 
-  _notoTree = IntervalTree<_NotoFont>.createFromRanges(ranges);
+  _notoTree = IntervalTree<NotoFont>.createFromRanges(ranges);
 }
 
-class _NotoFont {
+class NotoFont {
   final String name;
   final List<CodeunitRange> unicodeRanges;
 
@@ -321,7 +326,7 @@ class _NotoFont {
 
   _ResolvedNotoFont? resolvedFont;
 
-  _NotoFont(this.name, this.unicodeRanges);
+  NotoFont(this.name, this.unicodeRanges);
 
   bool matchesCodeunit(int codeunit) {
     for (CodeunitRange range in unicodeRanges) {
@@ -397,7 +402,7 @@ class _ResolvedNotoSubset {
   String toString() => '_ResolvedNotoSubset($family, $url)';
 }
 
-_NotoFont _notoSansSC = _NotoFont('Noto Sans SC', <CodeunitRange>[
+NotoFont _notoSansSC = NotoFont('Noto Sans SC', <CodeunitRange>[
   CodeunitRange(12288, 12591),
   CodeunitRange(12800, 13311),
   CodeunitRange(19968, 40959),
@@ -405,37 +410,37 @@ _NotoFont _notoSansSC = _NotoFont('Noto Sans SC', <CodeunitRange>[
   CodeunitRange(65280, 65519),
 ]);
 
-_NotoFont _notoSansTC = _NotoFont('Noto Sans TC', <CodeunitRange>[
+NotoFont _notoSansTC = NotoFont('Noto Sans TC', <CodeunitRange>[
   CodeunitRange(12288, 12351),
   CodeunitRange(12549, 12585),
   CodeunitRange(19968, 40959),
 ]);
 
-_NotoFont _notoSansHK = _NotoFont('Noto Sans HK', <CodeunitRange>[
+NotoFont _notoSansHK = NotoFont('Noto Sans HK', <CodeunitRange>[
   CodeunitRange(12288, 12351),
   CodeunitRange(12549, 12585),
   CodeunitRange(19968, 40959),
 ]);
 
-_NotoFont _notoSansJP = _NotoFont('Noto Sans JP', <CodeunitRange>[
+NotoFont _notoSansJP = NotoFont('Noto Sans JP', <CodeunitRange>[
   CodeunitRange(12288, 12543),
   CodeunitRange(19968, 40959),
   CodeunitRange(65280, 65519),
 ]);
 
-List<_NotoFont> _cjkFonts = <_NotoFont>[
+List<NotoFont> _cjkFonts = <NotoFont>[
   _notoSansSC,
   _notoSansTC,
   _notoSansHK,
   _notoSansJP,
 ];
 
-List<_NotoFont> _notoFonts = <_NotoFont>[
+List<NotoFont> _notoFonts = <NotoFont>[
   _notoSansSC,
   _notoSansTC,
   _notoSansHK,
   _notoSansJP,
-  _NotoFont('Noto Naskh Arabic UI', <CodeunitRange>[
+  NotoFont('Noto Naskh Arabic UI', <CodeunitRange>[
     CodeunitRange(1536, 1791),
     CodeunitRange(8204, 8206),
     CodeunitRange(8208, 8209),
@@ -444,36 +449,36 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(64336, 65023),
     CodeunitRange(65132, 65276),
   ]),
-  _NotoFont('Noto Sans Armenian', <CodeunitRange>[
+  NotoFont('Noto Sans Armenian', <CodeunitRange>[
     CodeunitRange(1328, 1424),
     CodeunitRange(64275, 64279),
   ]),
-  _NotoFont('Noto Sans Bengali UI', <CodeunitRange>[
+  NotoFont('Noto Sans Bengali UI', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(2433, 2555),
     CodeunitRange(8204, 8205),
     CodeunitRange(8377, 8377),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Myanmar UI', <CodeunitRange>[
+  NotoFont('Noto Sans Myanmar UI', <CodeunitRange>[
     CodeunitRange(4096, 4255),
     CodeunitRange(8204, 8205),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Egyptian Hieroglyphs', <CodeunitRange>[
+  NotoFont('Noto Sans Egyptian Hieroglyphs', <CodeunitRange>[
     CodeunitRange(77824, 78894),
   ]),
-  _NotoFont('Noto Sans Ethiopic', <CodeunitRange>[
+  NotoFont('Noto Sans Ethiopic', <CodeunitRange>[
     CodeunitRange(4608, 5017),
     CodeunitRange(11648, 11742),
     CodeunitRange(43777, 43822),
   ]),
-  _NotoFont('Noto Sans Georgian', <CodeunitRange>[
+  NotoFont('Noto Sans Georgian', <CodeunitRange>[
     CodeunitRange(1417, 1417),
     CodeunitRange(4256, 4351),
     CodeunitRange(11520, 11567),
   ]),
-  _NotoFont('Noto Sans Gujarati UI', <CodeunitRange>[
+  NotoFont('Noto Sans Gujarati UI', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(2688, 2815),
     CodeunitRange(8204, 8205),
@@ -481,7 +486,7 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(9676, 9676),
     CodeunitRange(43056, 43065),
   ]),
-  _NotoFont('Noto Sans Gurmukhi UI', <CodeunitRange>[
+  NotoFont('Noto Sans Gurmukhi UI', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(2561, 2677),
     CodeunitRange(8204, 8205),
@@ -490,13 +495,13 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(9772, 9772),
     CodeunitRange(43056, 43065),
   ]),
-  _NotoFont('Noto Sans Hebrew', <CodeunitRange>[
+  NotoFont('Noto Sans Hebrew', <CodeunitRange>[
     CodeunitRange(1424, 1535),
     CodeunitRange(8362, 8362),
     CodeunitRange(9676, 9676),
     CodeunitRange(64285, 64335),
   ]),
-  _NotoFont('Noto Sans Devanagari UI', <CodeunitRange>[
+  NotoFont('Noto Sans Devanagari UI', <CodeunitRange>[
     CodeunitRange(2304, 2431),
     CodeunitRange(7376, 7414),
     CodeunitRange(7416, 7417),
@@ -507,29 +512,29 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(43056, 43065),
     CodeunitRange(43232, 43259),
   ]),
-  _NotoFont('Noto Sans Kannada UI', <CodeunitRange>[
+  NotoFont('Noto Sans Kannada UI', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(3202, 3314),
     CodeunitRange(8204, 8205),
     CodeunitRange(8377, 8377),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Khmer UI', <CodeunitRange>[
+  NotoFont('Noto Sans Khmer UI', <CodeunitRange>[
     CodeunitRange(6016, 6143),
     CodeunitRange(8204, 8204),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans KR', <CodeunitRange>[
+  NotoFont('Noto Sans KR', <CodeunitRange>[
     CodeunitRange(12593, 12686),
     CodeunitRange(12800, 12828),
     CodeunitRange(12896, 12923),
     CodeunitRange(44032, 55215),
   ]),
-  _NotoFont('Noto Sans Lao UI', <CodeunitRange>[
+  NotoFont('Noto Sans Lao UI', <CodeunitRange>[
     CodeunitRange(3713, 3807),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Malayalam UI', <CodeunitRange>[
+  NotoFont('Noto Sans Malayalam UI', <CodeunitRange>[
     CodeunitRange(775, 775),
     CodeunitRange(803, 803),
     CodeunitRange(2404, 2405),
@@ -538,20 +543,20 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(8377, 8377),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Sinhala', <CodeunitRange>[
+  NotoFont('Noto Sans Sinhala', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(3458, 3572),
     CodeunitRange(8204, 8205),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Tamil UI', <CodeunitRange>[
+  NotoFont('Noto Sans Tamil UI', <CodeunitRange>[
     CodeunitRange(2404, 2405),
     CodeunitRange(2946, 3066),
     CodeunitRange(8204, 8205),
     CodeunitRange(8377, 8377),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Telugu UI', <CodeunitRange>[
+  NotoFont('Noto Sans Telugu UI', <CodeunitRange>[
     CodeunitRange(2385, 2386),
     CodeunitRange(2404, 2405),
     CodeunitRange(3072, 3199),
@@ -559,12 +564,12 @@ List<_NotoFont> _notoFonts = <_NotoFont>[
     CodeunitRange(8204, 8205),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans Thai UI', <CodeunitRange>[
+  NotoFont('Noto Sans Thai UI', <CodeunitRange>[
     CodeunitRange(3585, 3675),
     CodeunitRange(8204, 8205),
     CodeunitRange(9676, 9676),
   ]),
-  _NotoFont('Noto Sans', <CodeunitRange>[
+  NotoFont('Noto Sans', <CodeunitRange>[
     CodeunitRange(0, 255),
     CodeunitRange(305, 305),
     CodeunitRange(338, 339),
@@ -639,7 +644,7 @@ class FallbackFontDownloadQueue {
       downloads.add(Future<void>(() async {
         ByteBuffer buffer;
         try {
-          buffer = await downloader.downloadAsBytes(subset.url);
+          buffer = await downloader.downloadAsBytes(subset.url, debugDescription: subset.family);
         } catch (e) {
           html.window.console
               .warn('Failed to load font ${subset.family} at ${subset.url}');
@@ -695,7 +700,7 @@ class NotoDownloader {
   /// Downloads the [url] and returns it as a [ByteBuffer].
   ///
   /// Override this for testing.
-  Future<ByteBuffer> downloadAsBytes(String url) {
+  Future<ByteBuffer> downloadAsBytes(String url, {String? debugDescription}) {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
@@ -714,7 +719,7 @@ class NotoDownloader {
   /// Downloads the [url] and returns is as a [String].
   ///
   /// Override this for testing.
-  Future<String> downloadAsString(String url) {
+  Future<String> downloadAsString(String url, {String? debugDescription}) {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
@@ -731,6 +736,12 @@ class NotoDownloader {
 }
 
 /// The Noto font interval tree.
-IntervalTree<_NotoFont>? _notoTree;
+IntervalTree<NotoFont>? _notoTree;
+
+/// Returns the tree of Noto fonts for tests.
+IntervalTree<NotoFont> get debugNotoTree {
+  _ensureNotoFontTreeCreated();
+  return _notoTree!;
+}
 
 FallbackFontDownloadQueue notoDownloadQueue = FallbackFontDownloadQueue();
