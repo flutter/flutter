@@ -2346,6 +2346,10 @@ void main() {
     expect(isScrolled, false);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Snap animating outer slivers with pointer scrolling', (WidgetTester tester) async {
+
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {

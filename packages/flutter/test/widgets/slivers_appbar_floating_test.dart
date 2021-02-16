@@ -226,6 +226,14 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
+
+  testWidgets('Sliver appbars - floating with pointer scrolling', (WidgetTester tester) async {
+
+  });
+
+  testWidgets('Sliver appbars - snapping with pointer scrolling', (WidgetTester tester) async {
+
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
