@@ -9,14 +9,17 @@ import 'dart:io' as io; // ignore: dart_io_import;
 
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -27,6 +30,10 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     @required this.id,
+    @required this.platform,
+    @required this.fileSystem,
+    @required this.processManager,
+    @required this.logger,
     @required this.shellPath,
     @required this.debuggingOptions,
     @required this.enableObservatory,
@@ -44,7 +51,10 @@ class FlutterTesterTestDevice extends TestDevice {
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-
+  final Platform platform;
+  final FileSystem fileSystem;
+  final ProcessManager processManager;
+  final Logger logger;
   final String shellPath;
   final DebuggingOptions debuggingOptions;
   final bool enableObservatory;
@@ -71,7 +81,7 @@ class FlutterTesterTestDevice extends TestDevice {
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
-    globals.printTrace('test $id: test harness socket server is running at port:${_server.port}');
+    logger.printTrace('test $id: test harness socket server is running at port:${_server.port}');
 
     final List<String> command = <String>[
       shellPath,
@@ -112,8 +122,8 @@ class FlutterTesterTestDevice extends TestDevice {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest = globals.platform.environment.containsKey('FLUTTER_TEST')
-        ? globals.platform.environment['FLUTTER_TEST']
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']
         : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
@@ -121,24 +131,23 @@ class FlutterTesterTestDevice extends TestDevice {
       'SERVER_PORT': _server.port.toString(),
       'APP_NAME': flutterProject?.manifest?.appName ?? '',
       if (buildTestAssets)
-        'UNIT_TEST_ASSETS': globals.fs.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
+        'UNIT_TEST_ASSETS': fileSystem.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
     };
 
-    globals.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
-    _process = await globals.processManager.start(command, environment: environment);
+    logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
+    _process = await processManager.start(command, environment: environment);
 
     // Unawaited to update state.
     unawaited(_process.exitCode.then((int exitCode) {
-      globals.printTrace('test $id: flutter_tester process at pid ${_process.pid} exited with code=$exitCode');
+      logger.printTrace('test $id: flutter_tester process at pid ${_process.pid} exited with code=$exitCode');
       _exitCode.complete(exitCode);
     }));
 
-    globals.printTrace('test $id: Started flutter_tester process at pid ${_process.pid}');
+    logger.printTrace('test $id: Started flutter_tester process at pid ${_process.pid}');
 
     // Pipe stdout and stderr from the subprocess to our printStatus console.
     // We also keep track of what observatory port the engine used, if any.
     _pipeStandardStreamsToConsole(
-      id: id,
       process: _process,
       reportObservatoryUri: (Uri detectedUri) async {
         assert(!_gotProcessObservatoryUri.isCompleted);
@@ -147,28 +156,28 @@ class FlutterTesterTestDevice extends TestDevice {
 
         Uri forwardingUri;
         if (!debuggingOptions.disableDds) {
-          globals.printTrace('test $id: Starting Dart Development Service');
+          logger.printTrace('test $id: Starting Dart Development Service');
           final DartDevelopmentService dds = await startDds(detectedUri);
           forwardingUri = dds.uri;
-          globals.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
+          logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
           forwardingUri = detectedUri;
         }
 
-        globals.printTrace('Connecting to service protocol: $forwardingUri');
+        logger.printTrace('Connecting to service protocol: $forwardingUri');
         final Future<vm_service.VmService> localVmService = connectToVmService(
           forwardingUri,
           compileExpression: compileExpression,
         );
         unawaited(localVmService.then((vm_service.VmService vmservice) {
-          globals.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
+          logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         }));
 
         if (debuggingOptions.startPaused && !machine) {
-          globals.printStatus('The test process has been started.');
-          globals.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
-          globals.printStatus('  $forwardingUri');
-          globals.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
+          logger.printStatus('The test process has been started.');
+          logger.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
+          logger.printStatus('  $forwardingUri');
+          logger.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
         }
         _gotProcessObservatoryUri.complete(forwardingUri);
       },
@@ -185,10 +194,10 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
-    globals.printTrace('test $id: Terminating flutter_tester process');
+    logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
-    globals.printTrace('test $id: Shutting down test harness socket server');
+    logger.printTrace('test $id: Shutting down test harness socket server');
     await _server?.close(force: true);
     await finished;
   }
@@ -198,7 +207,7 @@ class FlutterTesterTestDevice extends TestDevice {
     final int exitCode = await _exitCode.future;
 
     // On Windows, the [exitCode] and the terminating signal have no correlation.
-    if (globals.platform.isWindows) {
+    if (platform.isWindows) {
       return;
     }
 
@@ -261,45 +270,42 @@ class FlutterTesterTestDevice extends TestDevice {
         : 'not started';
     return 'Flutter Tester ($status) for test $id';
   }
-}
 
-void _pipeStandardStreamsToConsole({
-  @required int id,
-  @required Process process,
-  @required Future<void> reportObservatoryUri(Uri uri),
-}) {
-  const String observatoryString = 'Observatory listening on ';
-  for (final Stream<List<int>> stream in <Stream<List<int>>>[
-    process.stderr,
-    process.stdout,
-  ]) {
-    stream
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(
-      (String line) async {
-        globals.printTrace('test $id: Shell: $line');
+  void _pipeStandardStreamsToConsole({
+    @required Process process,
+    @required Future<void> reportObservatoryUri(Uri uri),
+  }) {
+    const String observatoryString = 'Observatory listening on ';
+    for (final Stream<List<int>> stream in <Stream<List<int>>>[
+      process.stderr,
+      process.stdout,
+    ]) {
+      stream
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(
+            (String line) async {
+          logger.printTrace('test $id: Shell: $line');
 
-        if (line.startsWith("error: Unable to read Dart source 'package:test/")) {
-          globals.printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
-        } else if (line.startsWith(observatoryString)) {
-          try {
-            final Uri uri = Uri.parse(line.substring(observatoryString.length));
-            if (reportObservatoryUri != null) {
-              await reportObservatoryUri(uri);
+          if (line.startsWith(observatoryString)) {
+            try {
+              final Uri uri = Uri.parse(line.substring(observatoryString.length));
+              if (reportObservatoryUri != null) {
+                await reportObservatoryUri(uri);
+              }
+            } on Exception catch (error) {
+              logger.printError('Could not parse shell observatory port message: $error');
             }
-          } on Exception catch (error) {
-            globals.printError('Could not parse shell observatory port message: $error');
+          } else if (line != null) {
+            logger.printStatus('Shell: $line');
           }
-        } else if (line != null) {
-          globals.printStatus('Shell: $line');
-        }
-      },
-      onError: (dynamic error) {
-        globals.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
-      },
-      cancelOnError: true,
-    );
+        },
+        onError: (dynamic error) {
+          logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
+        },
+        cancelOnError: true,
+      );
+    }
   }
 }
 

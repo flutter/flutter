@@ -8,10 +8,12 @@ import 'dart:async';
 
 import 'package:dds/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:file/memory.dart';
@@ -22,29 +24,38 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  FakePlatform platform;
   FileSystem fileSystem;
+  ProcessManager processManager;
+  FlutterTesterTestDevice device;
+
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    // Not Windows.
+    platform = FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{},
+    );
+    processManager = FakeProcessManager.any();
   });
 
+  FlutterTesterTestDevice createDevice({
+    List<String> dartEntrypointArgs = const <String>[],
+    bool enableObservatory = false,
+  }) =>
+    TestFlutterTesterDevice(
+      platform: platform,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      enableObservatory: enableObservatory,
+      dartEntrypointArgs: dartEntrypointArgs,
+    );
+
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
-    FakePlatform fakePlatform;
-    MockProcessManager mockProcessManager;
-    FlutterTesterTestDevice device;
-
-    final Map<Type, Generator> contextOverrides = <Type, Generator>{
-      Platform: () => fakePlatform,
-      ProcessManager: () => mockProcessManager,
-      FileSystem: () => fileSystem,
-    };
-
     setUp(() {
-      // Not Windows.
-      fakePlatform = FakePlatform(operatingSystem: 'linux');
-      mockProcessManager = MockProcessManager();
-      device = TestFlutterTesterDevice(enableObservatory: false);
+      processManager = MockProcessManager();
+      device = createDevice();
 
-      fileSystem = MemoryFileSystem.test();
       fileSystem
           .file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
@@ -56,14 +67,14 @@ void main() {
           compiledEntrypointPath: 'example.dill',
       );
 
-      when(mockProcessManager.start(
-          any,
-          environment: anyNamed('environment')),
+      when(processManager.start(
+        any,
+        environment: anyNamed('environment')),
       ).thenAnswer((_) {
         return Future<Process>.value(MockProcess());
       });
-      await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
-      final VerificationResult toVerify = verify(mockProcessManager.start(
+      await untilCalled(processManager.start(any, environment: anyNamed('environment')));
+      final VerificationResult toVerify = verify(processManager.start(
         any,
         environment: captureAnyNamed('environment'),
       ));
@@ -74,82 +85,73 @@ void main() {
     }
 
     testUsingContext('as true when not originally set', () async {
-      fakePlatform.environment = <String, String>{};
       final Map<String, String> capturedEnvironment = await captureEnvironment();
       expect(capturedEnvironment['FLUTTER_TEST'], 'true');
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('as true when set to true', () async {
-      fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'true'};
+      platform.environment = <String, String>{'FLUTTER_TEST': 'true'};
       final Map<String, String> capturedEnvironment = await captureEnvironment();
       expect(capturedEnvironment['FLUTTER_TEST'], 'true');
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('as false when set to false', () async {
-      fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'false'};
+      platform.environment = <String, String>{'FLUTTER_TEST': 'false'};
       final Map<String, String> capturedEnvironment = await captureEnvironment();
       expect(capturedEnvironment['FLUTTER_TEST'], 'false');
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('unchanged when set', () async {
-      fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
+      platform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
       final Map<String, String> capturedEnvironment = await captureEnvironment();
       expect(capturedEnvironment['FLUTTER_TEST'], 'neither true nor false');
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('as null when set to null', () async {
-      fakePlatform.environment = <String, String>{'FLUTTER_TEST': null};
+      platform.environment = <String, String>{'FLUTTER_TEST': null};
       final Map<String, String> capturedEnvironment = await captureEnvironment();
       expect(capturedEnvironment['FLUTTER_TEST'], null);
-    }, overrides: contextOverrides);
+    });
   });
 
   group('Dart Entrypoint Args', () {
-    FakeProcessManager fakeProcessManager;
+    setUp(() {
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--disable-observatory',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--packages=.dart_tool/package_config.json',
+            '--foo',
+            '--bar',
+            'example.dill'
+          ],
+          stdout: 'success',
+          stderr: 'failure',
+          exitCode: 0,
+        )
+      ]);
+      device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
+    });
 
     testUsingContext('Can pass additional arguments to tester binary', () async {
-      await TestFlutterTesterDevice(
-        dartEntrypointArgs: <String>['--foo', '--bar'],
-      ).start(
-        compiledEntrypointPath: 'example.dill',
-      );
+      await device.start(compiledEntrypointPath: 'example.dill');
 
-      expect(fakeProcessManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () {
-        return fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              '/',
-              '--disable-observatory',
-              '--ipv6',
-              '--enable-checked-mode',
-              '--verify-entry-points',
-              '--enable-software-rendering',
-              '--skia-deterministic-rendering',
-              '--enable-dart-profiling',
-              '--non-interactive',
-              '--use-test-fonts',
-              '--packages=.dart_tool/package_config.json',
-              '--foo',
-              '--bar',
-              'example.dill'
-            ],
-            stdout: 'success',
-            stderr: 'failure',
-            exitCode: 0,
-          )
-        ]);
-      }
+      expect((processManager as FakeProcessManager).hasRemainingExpectations, false);
     });
   });
 
   group('DDS', () {
-    ProcessManager fakeProcessManager;
-
     setUp(() {
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
             '/',
@@ -170,17 +172,15 @@ void main() {
           exitCode: 0,
         )
       ]);
+      device = createDevice(enableObservatory: true);
     });
 
     testUsingContext('skips setting observatory port and uses the input port for for DDS instead', () async {
-      final TestFlutterTesterDevice testDevice = TestFlutterTesterDevice(enableObservatory: true);
-      await testDevice.start(compiledEntrypointPath: 'example.dill');
-      await testDevice.observatoryUri;
+      await device.start(compiledEntrypointPath: 'example.dill');
+      await device.observatoryUri;
 
-      final Uri uri = await testDevice.ddsServiceUriFuture();
+      final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => fakeProcessManager,
     });
   });
 }
@@ -190,11 +190,18 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    bool enableObservatory = false,
-    List<String> dartEntrypointArgs = const <String>[],
+    @required Platform platform,
+    @required FileSystem fileSystem,
+    @required ProcessManager processManager,
+    @required bool enableObservatory,
+    @required List<String> dartEntrypointArgs,
   }) : super(
     id: 999,
     shellPath: '/',
+    platform: platform,
+    fileSystem: fileSystem,
+    processManager: processManager,
+    logger: MockLogger(),
     debuggingOptions: DebuggingOptions.enabled(
       const BuildInfo(
         BuildMode.debug,
@@ -241,6 +248,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 
 class MockHttpServer extends Mock implements HttpServer {}
+
+class MockLogger extends Mock implements Logger {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 

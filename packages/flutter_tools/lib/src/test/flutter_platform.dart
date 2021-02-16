@@ -337,6 +337,10 @@ class FlutterPlatform extends PlatformPlugin {
   TestDevice _createTestDevice(int ourTestCount) {
     return FlutterTesterTestDevice(
       id: ourTestCount,
+      platform: globals.platform,
+      fileSystem: globals.fs,
+      processManager: globals.processManager,
+      logger: globals.logger,
       shellPath: shellPath,
       enableObservatory: enableObservatory,
       machine: machine,
