@@ -462,7 +462,7 @@ include ':app'
       globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
-      createSettingsAarGradle(tempDir);
+      createSettingsAarGradle(tempDir, testLogger);
 
       expect(testLogger.statusText, contains('created successfully'));
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
@@ -495,7 +495,7 @@ include ':app'
       globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
-      createSettingsAarGradle(tempDir);
+      createSettingsAarGradle(tempDir, testLogger);
 
       expect(testLogger.statusText, contains('created successfully'));
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
@@ -834,13 +834,15 @@ flutter:
     FakeProcessManager fakeProcessManager;
     MockAndroidSdk mockAndroidSdk;
     AndroidGradleBuilder builder;
+    BufferLogger logger;
 
     setUp(() {
+      logger = BufferLogger.test();
       fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
-      builder = AndroidGradleBuilder();
+      builder = AndroidGradleBuilder(logger: logger);
     });
 
     testUsingContext('calls gradle', () async {

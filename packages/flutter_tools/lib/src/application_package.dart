@@ -65,7 +65,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (_androidSdk?.licensesAvailable == true && _androidSdk?.latestVersion == null) {
-          await checkGradleDependencies();
+          await checkGradleDependencies(_logger);
         }
         if (applicationBinary == null) {
           return await AndroidApk.fromAndroidProject(
