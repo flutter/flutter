@@ -839,6 +839,7 @@ void main() {
       cache: cache,
       fileSystem: fileSystem,
       platform: FakePlatform(operatingSystem: 'linux'),
+      operatingSystemUtils: globals.os,
     );
     expect(artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,

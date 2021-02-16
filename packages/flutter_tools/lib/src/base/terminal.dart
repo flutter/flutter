@@ -84,7 +84,7 @@ abstract class Terminal {
   /// Create a new test [Terminal].
   ///
   /// If not specified, [supportsColor] defaults to `false`.
-  factory Terminal.test({bool supportsColor}) = _TestTerminal;
+  factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -317,7 +317,7 @@ class AnsiTerminal implements Terminal {
 }
 
 class _TestTerminal implements Terminal {
-  _TestTerminal({this.supportsColor = false});
+  _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 
   @override
   bool usesTerminalUi;
@@ -351,7 +351,7 @@ class _TestTerminal implements Terminal {
   final bool supportsColor;
 
   @override
-  bool get supportsEmoji => false;
+  final bool supportsEmoji;
 
   @override
   bool get stdinHasTerminal => false;

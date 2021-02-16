@@ -160,7 +160,7 @@
          "name": "Linux flutter_engine_group_performance",
          "repo": "flutter",
          "task_name": "linux_flutter_engine_group_performance",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Linux flutter_gallery__back_button_memory",
@@ -682,7 +682,7 @@
          "name": "Mac_android smoke_catalina_start_up",
          "repo": "flutter",
          "task_name": "mac_android_smoke_catalina_start_up",
-         "flaky": true
+         "flaky": false
       },
       {
          "name": "Mac_android textfield_perf__timeline_summary",

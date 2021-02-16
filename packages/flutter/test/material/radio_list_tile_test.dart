@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import '../rendering/mock_canvas.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -627,7 +628,7 @@ void main() {
       )
     );
 
-    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect paddingRect = tester.getRect(find.byType(SafeArea));
     final Rect radioRect = tester.getRect(find.byType(radioType));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
@@ -667,37 +668,36 @@ void main() {
   });
 
   testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
-    const Color tileColor = Colors.red;
+    final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             tileColor: tileColor,
           ),
         ),
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, tileColor);
+    expect(find.byType(Material), paints..path(color: tileColor));
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
-    const Color selectedTileColor = Colors.black;
+    final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
       wrap(
-        child: const Center(
+        child: Center(
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
             onChanged: null,
-            title: Text('Title'),
+            title: const Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
           ),
@@ -705,7 +705,6 @@ void main() {
       ),
     );
 
-    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
-    expect(coloredBox.color, equals(selectedTileColor));
+    expect(find.byType(Material), paints..path(color: selectedTileColor));
   });
 }
