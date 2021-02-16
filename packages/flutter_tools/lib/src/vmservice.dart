@@ -559,7 +559,7 @@ extension FlutterVmService on vm_service.VmService {
   Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
     @required String isolateId,
   }) async {
-     final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
