@@ -218,7 +218,7 @@ class DeferredComponentsSetupValidator {
     return !changesMade;
   }
 
-  
+
   // The key used to identify the metadata element as the loading unit id to
   // deferred component mapping.
   static const String _mappingKey = 'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
@@ -625,7 +625,7 @@ loading-units:
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
     final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
-    ErrorHandlingFileSystem.deleteIfExists(dir);
+    ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
   }
 
   /// Handles the results of all executed checks by calling [displayResults] and
@@ -784,7 +784,7 @@ class _DeferredComponentAndroidFiles {
 
   // Generates any missing basic files for the dynamic feature into a temporary directory.
   Future<Map<String, List<File>>> generateFiles({Directory alternateAndroidDir, bool clearAlternateOutputDir = false}) async {
-    final Directory outputDir = alternateAndroidDir == null ? componentDir : alternateAndroidDir.childDirectory(name);
+    final Directory outputDir = alternateAndroidDir?.childDirectory(name) ?? componentDir;
     if (clearAlternateOutputDir && alternateAndroidDir != null) {
       ErrorHandlingFileSystem.deleteIfExists(outputDir);
     }
