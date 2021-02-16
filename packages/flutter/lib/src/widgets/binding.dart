@@ -391,7 +391,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'debugDumpApp',
         callback: (Map<String, String> parameters) async {
-          final String data = debugDumpApp();
+          final String data = _debugDumpAppString();
           return <String, Object>{
             'data': data,
           };
@@ -1030,10 +1030,9 @@ void runApp(Widget app) {
     ..scheduleWarmUpFrame();
 }
 
-/// Return a string representation of the currently running app.
-String debugDumpApp() {
+String _debugDumpAppString() {
   assert(WidgetsBinding.instance != null);
-  final String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
+  const String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance!.renderViewElement != null) {
@@ -1042,6 +1041,12 @@ String debugDumpApp() {
     buffer.writeln('<no tree currently mounted>');
   }
   return buffer.toString();
+}
+
+/// Print a string representation of the currently running app.
+void debugDumpApp() {
+  final String value = _debugDumpAppString();
+  debugPrint(value);
 }
 
 /// A bridge from a [RenderObject] to an [Element] tree.
