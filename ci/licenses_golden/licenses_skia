@@ -1,4 +1,4 @@
-Signature: 84a26e58873baf4644a43c840c3c7245
+Signature: 87f0e196001e91d1692b3c3a1fbf321c
 
 UNUSED LICENSES:
 
@@ -4048,7 +4048,6 @@ FILE: ../../../third_party/skia/bench/WriterBench.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
