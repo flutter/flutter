@@ -250,7 +250,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag = topLevelResults['machine'] as bool;
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
+        final bool ci = globals.platform.environment['CI'] == 'true';
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag && !ci) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 

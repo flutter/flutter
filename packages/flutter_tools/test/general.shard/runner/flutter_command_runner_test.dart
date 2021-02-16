@@ -86,6 +86,26 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
+      testUsingContext('does not check that Flutter installation is up-to-date with CI=true in environment', () async {
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        bool versionChecked = false;
+        when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
+          versionChecked = true;
+        });
+
+        final Map<String, String> environment = globals.platform.environment;
+        environment['CI'] = 'true';
+
+        await runner.run(<String>['dummy', '--version']);
+
+        expect(versionChecked, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
+
       testUsingContext('Fetches tags when --version is used', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
 
