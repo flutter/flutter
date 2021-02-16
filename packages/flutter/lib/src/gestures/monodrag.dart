@@ -313,7 +313,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  final List<int> _acceptedActivePointers = <int>[];
+  final Set<int> _acceptedActivePointers = <int>{};
 
   @override
   void acceptGesture(int pointer) {
@@ -406,14 +406,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkStart(Duration timestamp, int pointer) {
     assert(_initialButtons == kPrimaryButton);
-    final DragStartDetails details = DragStartDetails(
-      sourceTimeStamp: timestamp,
-      globalPosition: _initialPosition.global,
-      localPosition: _initialPosition.local,
-      kind: getKindForPointer(pointer),
-    );
-    if (onStart != null)
+    if (onStart != null) {
+      final DragStartDetails details = DragStartDetails(
+        sourceTimeStamp: timestamp,
+        globalPosition: _initialPosition.global,
+        localPosition: _initialPosition.local,
+        kind: getKindForPointer(pointer),
+      );
       invokeCallback<void>('onStart', () => onStart!(details));
+    }
   }
 
   void _checkUpdate({
@@ -424,15 +425,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     Offset? localPosition,
   }) {
     assert(_initialButtons == kPrimaryButton);
-    final DragUpdateDetails details = DragUpdateDetails(
-      sourceTimeStamp: sourceTimeStamp,
-      delta: delta,
-      primaryDelta: primaryDelta,
-      globalPosition: globalPosition,
-      localPosition: localPosition,
-    );
-    if (onUpdate != null)
+    if (onUpdate != null) {
+      final DragUpdateDetails details = DragUpdateDetails(
+        sourceTimeStamp: sourceTimeStamp,
+        delta: delta,
+        primaryDelta: primaryDelta,
+        globalPosition: globalPosition,
+        localPosition: localPosition,
+      );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
+    }
   }
 
   void _checkEnd(int pointer) {
