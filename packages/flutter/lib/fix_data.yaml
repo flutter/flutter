@@ -11,6 +11,33 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/66043
+  - title: "Use withKind"
+    date: 2020-09-17
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VelocityTracker'
+    oneOf:
+      - if: "pointerDeviceKind == ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+          - kind: 'addParameter'
+            index: 0
+            name: 'kind'
+            style: required_positional
+            argumentValue:
+              expression: 'PointerDeviceKind.touch'
+      - if: "pointerDeviceKind != ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+    variables:
+      pointerDeviceKind:
+          kind: 'fragment'
+          value: 'arguments[0]'
+
   # Changes made in https://github.com/flutter/flutter/pull/72043
   - title: "Migrate to 'maxLengthEnforcement'"
     date: 2020-12-13
