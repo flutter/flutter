@@ -841,7 +841,7 @@ flutter:
       fs = MemoryFileSystem.test();
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
       builder = AndroidGradleBuilder(logger: logger);
     });
 

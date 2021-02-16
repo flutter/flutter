@@ -56,7 +56,7 @@ void main() {
         logger: logger,
       );
 
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(fileSystem.directory('irrelevant'));
 
       final Directory rootDirectory = fileSystem.currentDirectory;
       cache = Cache.test(
