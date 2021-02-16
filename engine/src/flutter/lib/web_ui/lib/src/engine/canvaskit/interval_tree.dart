@@ -18,7 +18,7 @@ class IntervalTree<T> {
   /// have a range which contains the point.
   factory IntervalTree.createFromRanges(Map<T, List<CodeunitRange>> rangesMap) {
     // Get a list of all the ranges ordered by start index.
-    List<IntervalTreeNode<T>> intervals = <IntervalTreeNode<T>>[];
+    final List<IntervalTreeNode<T>> intervals = <IntervalTreeNode<T>>[];
     rangesMap.forEach((T key, List<CodeunitRange> rangeList) {
       for (CodeunitRange range in rangeList) {
         intervals.add(IntervalTreeNode<T>(key, range.start, range.end));
@@ -92,6 +92,16 @@ class IntervalTreeNode<T> {
   IntervalTreeNode<T>? right;
 
   IntervalTreeNode(this.value, this.low, this.high) : computedHigh = high;
+
+  Iterable<T> enumerateAllElements() sync* {
+    if (left != null) {
+      yield* left!.enumerateAllElements();
+    }
+    yield value;
+    if (right != null) {
+      yield* right!.enumerateAllElements();
+    }
+  }
 
   bool contains(int x) {
     return low <= x && x <= high;

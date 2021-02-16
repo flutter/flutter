@@ -4,6 +4,7 @@
 
 // @dart = 2.12
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
@@ -206,6 +207,116 @@ void testMain() {
       expect(notoDownloadQueue.isPending, isFalse);
       expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/75836
+    // When we had this bug our font fallback resolution logic would end up in an
+    // infinite loop and this test would freeze and time out.
+    test('Can find fonts for two adjacent unmatched code units from different fonts', () async {
+      final LoggingDownloader loggingDownloader = LoggingDownloader(NotoDownloader());
+      notoDownloadQueue.downloader = loggingDownloader;
+      // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
+
+      CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
+      await notoDownloadQueue.downloader.debugWhenIdle();
+      expect(
+        loggingDownloader.log,
+        <String>[
+          'https://fonts.googleapis.com/css2?family=Noto+Sans+SC',
+          'https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada+UI',
+          'Noto Sans SC',
+          'Noto Sans Kannada UI',
+        ],
+      );
+
+      // Do the same thing but this time with loaded fonts.
+      loggingDownloader.log.clear();
+      CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
+      await notoDownloadQueue.downloader.debugWhenIdle();
+      expect(loggingDownloader.log, isEmpty);
+    });
+
+    test('findMinimumFontsForCodeunits for all supported code units', () async {
+      final LoggingDownloader loggingDownloader = LoggingDownloader(NotoDownloader());
+      notoDownloadQueue.downloader = loggingDownloader;
+
+      // Collect all supported code units from all fallback fonts in the Noto
+      // font tree.
+      final Set<String> testedFonts = <String>{};
+      final Set<int> supportedUniqueCodeUnits = <int>{};
+      for (NotoFont font in debugNotoTree.root.enumerateAllElements()) {
+        testedFonts.add(font.name);
+        for (CodeunitRange range in font.unicodeRanges) {
+          for (int codeUnit = range.start; codeUnit < range.end; codeUnit += 1) {
+            supportedUniqueCodeUnits.add(codeUnit);
+          }
+        }
+      }
+
+      expect(supportedUniqueCodeUnits.length, greaterThan(10000)); // sanity check
+      expect(testedFonts, unorderedEquals(<String>{
+        'Noto Sans',
+        'Noto Sans Malayalam UI',
+        'Noto Sans Armenian',
+        'Noto Sans Georgian',
+        'Noto Sans Hebrew',
+        'Noto Naskh Arabic UI',
+        'Noto Sans Devanagari UI',
+        'Noto Sans Telugu UI',
+        'Noto Sans Tamil UI',
+        'Noto Sans Kannada UI',
+        'Noto Sans Sinhala',
+        'Noto Sans Gurmukhi UI',
+        'Noto Sans Gujarati UI',
+        'Noto Sans Bengali UI',
+        'Noto Sans Thai UI',
+        'Noto Sans Lao UI',
+        'Noto Sans Myanmar UI',
+        'Noto Sans Ethiopic',
+        'Noto Sans Khmer UI',
+        'Noto Sans SC',
+        'Noto Sans JP',
+        'Noto Sans TC',
+        'Noto Sans HK',
+        'Noto Sans KR',
+        'Noto Sans Egyptian Hieroglyphs',
+      }));
+
+      // Construct random paragraphs out of supported code units.
+      final math.Random random = math.Random(0);
+      final List<int> supportedCodeUnits = supportedUniqueCodeUnits.toList()..shuffle(random);
+      const int paragraphLength = 3;
+
+      for (int batchStart = 0; batchStart < supportedCodeUnits.length; batchStart += paragraphLength) {
+        final int batchEnd = math.min(batchStart + paragraphLength, supportedCodeUnits.length);
+        final List<int> codeUnits = <int>[];
+        for (int i = batchStart; i < batchEnd; i += 1) {
+          codeUnits.add(supportedCodeUnits[i]);
+        }
+        final Set<NotoFont> fonts = <NotoFont>{};
+        for (int codeunit in codeUnits) {
+          List<NotoFont> fontsForUnit = debugNotoTree.intersections(codeunit);
+
+          // All code units are extracted from the same tree, so there must
+          // be at least one font supporting each code unit
+          expect(fontsForUnit, isNotEmpty);
+
+          // Make sure that every returned font indeed covers the code unit.
+          expect(fontsForUnit.every((font) => font.matchesCodeunit(codeunit)), isTrue);
+          fonts.addAll(fontsForUnit);
+        }
+
+        try {
+          findMinimumFontsForCodeunits(codeUnits, fonts);
+        } catch (e) {
+          print(
+            'findMinimumFontsForCodeunits failed:\n'
+            '  Code units: ${codeUnits.join(', ')}\n'
+            '  Fonts: ${fonts.map((f) => f.name).join(', ')}',
+          );
+          rethrow;
+        }
+      }
+    });
     // TODO: https://github.com/flutter/flutter/issues/60040
   }, skip: isIosSafari);
 }
@@ -213,11 +324,36 @@ void testMain() {
 class TestDownloader extends NotoDownloader {
   static final Map<String, String> mockDownloads = <String, String>{};
   @override
-  Future<String> downloadAsString(String url) async {
+  Future<String> downloadAsString(String url, {String? debugDescription}) async {
     if (mockDownloads.containsKey(url)) {
       return mockDownloads[url]!;
     } else {
       return '';
     }
+  }
+}
+
+class LoggingDownloader implements NotoDownloader {
+  final List<String> log = <String>[];
+
+  LoggingDownloader(this.delegate);
+
+  final NotoDownloader delegate;
+
+  @override
+  Future<void> debugWhenIdle() {
+    return delegate.debugWhenIdle();
+  }
+
+  @override
+  Future<ByteBuffer> downloadAsBytes(String url, {String? debugDescription}) {
+    log.add(debugDescription ?? url);
+    return delegate.downloadAsBytes(url);
+  }
+
+  @override
+  Future<String> downloadAsString(String url, {String? debugDescription}) {
+    log.add(debugDescription ?? url);
+    return delegate.downloadAsString(url);
   }
 }
