@@ -328,7 +328,6 @@ void main() {
     final TextEditingController controller = TextEditingController(text: testText);
     final Widget widget = MaterialApp(
       home: EditableText(
-        key: GlobalKey(),
         controller: controller,
         focusNode: FocusNode(),
         style: const TextStyle(fontSize: 20.0),

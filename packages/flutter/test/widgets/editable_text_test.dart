@@ -3825,7 +3825,6 @@ void main() {
         child: SizedBox(
           width: 400,
           child: EditableText(
-            key: GlobalKey(),
             maxLines: 10,
             controller: controller,
             showSelectionHandles: true,
@@ -7090,10 +7089,9 @@ void main() {
           width: 400,
           child: Shortcuts(
             shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowRightTextIntent(),
+              LogicalKeySet(LogicalKeyboardKey.arrowLeft): MoveSelectionRightTextIntent(),
             },
             child: EditableText(
-              key: GlobalKey(),
               maxLines: 10,
               controller: controller,
               showSelectionHandles: true,
@@ -7143,15 +7141,14 @@ void main() {
           width: 400,
           child: Actions(
             actions: <Type, Action<Intent>>{
-              ArrowLeftTextIntent: TextEditingAction<ArrowLeftTextIntent>(
-                onInvoke: (ArrowLeftTextIntent intent, EditableTextState editableTextState) {
+              MoveSelectionLeftTextIntent: TextEditingAction<MoveSelectionLeftTextIntent>(
+                onInvoke: (MoveSelectionLeftTextIntent intent, EditableTextState editableTextState) {
                   myIntentWasCalled = true;
                   editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
                 },
               ),
             },
             child: EditableText(
-              key: GlobalKey(),
               maxLines: 10,
               controller: controller,
               showSelectionHandles: true,

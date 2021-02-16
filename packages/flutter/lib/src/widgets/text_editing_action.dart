@@ -18,11 +18,6 @@ typedef _OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T inte
 /// given [onInvoke] callback. If not, then [isEnabled] will be false and
 /// [onInvoke] will not be called.
 ///
-/// The focused [EditableText] must have a [GlobalKey]. This is handled
-/// automatically by built-in text editing widgets like [TextField],
-/// [CupertinoTextField], and [SelectableText], but for custom usage of
-/// [EditableText], it is necessary to explicitly pass in a key.
-///
 /// See also:
 ///
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
@@ -31,19 +26,14 @@ class TextEditingAction<T extends Intent> extends ContextAction<T> {
   /// A constructor for a [TextEditingAction].
   ///
   /// The [onInvoke] parameter must not be null.
-  TextEditingAction({required this.onInvoke}) : assert(onInvoke != null);
+  TextEditingAction({ required this.onInvoke }) : assert(onInvoke != null);
 
   EditableTextState? get _editableTextState {
     // If an EditableText is not focused, then ignore this action.
     if (primaryFocus?.context?.widget is! EditableText) {
       return null;
     }
-    final EditableText editableText = primaryFocus!.context!.widget as EditableText;
-    if (editableText.key == null
-        || (editableText.key! as GlobalKey).currentState == null) {
-      return null;
-    }
-    return (editableText.key! as GlobalKey).currentState! as EditableTextState;
+    return (primaryFocus!.context! as StatefulElement).state as EditableTextState;
   }
 
   /// The callback to be called when invoked.
