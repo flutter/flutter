@@ -548,13 +548,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final Offset focalPointScene = _transformationController!.toScene(
       focalPoint,
     );
-    final Matrix4 nextMatrix = matrix
+    return matrix
       .clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
-
-    return _validateMatrix(nextMatrix, matrix);
   }
 
   // If the given matrix is valid, return it. If it is invalid, return the
@@ -807,6 +805,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           _transformationController!.value,
           _getMatrixRotation(_transformationController!.value) - desiredRotation,
           details.localFocalPoint,
+        );
+
+        // While rotating, translate such that the user's two fingers stay on
+        // the same places in the scene. That means that the focal point of
+        // the scale should be on the same place in the scene before and after
+        // the scale.
+        final Offset focalPointSceneRotated = _transformationController!.toScene(
+          details.localFocalPoint,
+        );
+        _transformationController!.value = _matrixTranslate(
+          _transformationController!.value,
+          focalPointSceneRotated - _referenceFocalPoint!,
         );
         break;
 
