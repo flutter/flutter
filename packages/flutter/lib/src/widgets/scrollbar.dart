@@ -787,11 +787,14 @@ class RawScrollbar extends StatefulWidget {
   /// Whether the Scrollbar should be interactive and respond to dragging on the
   /// thumb, or tapping in the track area.
   ///
-  /// Does not apply to the [CupertinoScrollbar].
+  /// Does not apply to the [CupertinoScrollbar], which is always interactive to
+  /// match native behavior. On Android, the scrollbar is not interactive by
+  /// default.
   ///
-  /// When true, the scrollbar will not respond to gesture or hover events.
+  /// When false, the scrollbar will not respond to gesture or hover events.
   ///
-  /// Defaults to true when null.
+  /// Defaults to true when null, unless on Android, which will default to false
+  /// when null.
   /// {@endtemplate}
   final bool? interactive;
 

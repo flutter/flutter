@@ -538,6 +538,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: Scrollbar(
+            interactive: true,
             isAlwaysShown: true,
             controller: scrollController,
             child: SingleChildScrollView(
@@ -707,6 +708,7 @@ void main() {
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
+            interactive: true,
             isAlwaysShown: true,
             controller: scrollController,
             child: const SingleChildScrollView(
@@ -1121,4 +1123,136 @@ void main() {
       paintsExactlyCountTimes(#drawRect, 2),
     );
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Scrollbar dragging can be disabled', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            interactive: false,
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(788.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(788.0, 0.0),
+          p2: const Offset(788.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+            const Radius.circular(8.0),
+          ),
+          color: const Color(0x1a000000),
+        ),
+    );
+
+    // Try to drag the thumb down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.up();
+    await tester.pumpAndSettle();
+    // Dragging on the thumb does not change the offset.
+    expect(scrollController.offset, 0.0);
+
+    // Drag in the track area to validate pass through to scrollable.
+    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
+    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragPassThroughTrack.up();
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount);
+
+    // Tap on the track to validate the scroll view will not page.
+    await tester.tapAt(const Offset(797.0, 200.0));
+    // The offset should not have changed.
+    expect(scrollController.offset, scrollAmount);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            isAlwaysShown: true,
+            controller: scrollController,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0)
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+          color: const Color(0x00000000),
+        )
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: const Color(0x00000000),
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          color: const Color(0xffbcbcbc),
+        ),
+    );
+
+    // Try to drag the thumb down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarThumbGesture.up();
+    await tester.pumpAndSettle();
+    // Dragging on the thumb does not change the offset.
+    expect(scrollController.offset, 0.0);
+
+    // Drag in the track area to validate pass through to scrollable.
+    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
+    await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
+    await tester.pumpAndSettle();
+    await dragPassThroughTrack.up();
+    await tester.pumpAndSettle();
+    // The scroll view received the drag.
+    expect(scrollController.offset, scrollAmount);
+
+    // Tap on the track to validate the scroll view will not page.
+    await tester.tapAt(const Offset(797.0, 200.0));
+    // The offset should not have changed.
+    expect(scrollController.offset, scrollAmount);
+  });
 }

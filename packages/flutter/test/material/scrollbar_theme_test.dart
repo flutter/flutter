@@ -192,6 +192,111 @@ void main() {
     }),
   );
 
+  testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      home: Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: const SizedBox(width: 4000.0, height: 4000.0)
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+
+    // Try to drag scrollbar.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    // Expect no change
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      home: Scrollbar(
+        interactive: true,
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: const SizedBox(width: 4000.0, height: 4000.0)
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+
+    // Drag scrollbar.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    // Gestures handled by Scrollbar.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          const Radius.circular(8.0),
+        ),
+        color: const Color(0x1a000000),
+      ),
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
   testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
     const double thickness = 4.0;
     const double hoverThickness = 4.0;
