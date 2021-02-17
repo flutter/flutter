@@ -14,6 +14,22 @@ import '../rendering/mock_canvas.dart';
 
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
+const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
+const Rect _kAndroidTrackDimensions = Rect.fromLTRB(796.0, 0.0, 800.0, 600.0);
+const Radius _kDefaultThumbRadius = Radius.circular(8.0);
+const Color _kDefaultIdleThumbColor = Color(0x1a000000);
+const Offset _kTrackBorderPoint1 = Offset(796.0, 0.0);
+const Offset _kTrackBorderPoint2 = Offset(796.0, 600.0);
+
+Rect getStartingThumbRect({ required bool isAndroid }) {
+  return isAndroid
+    // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
+    // and has no margin along the side of the viewport.
+    ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
+    // The Material Design thumb is 8 pixels wide, with a 2
+    // pixel margin to the right edge of the viewport.
+    : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+}
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -509,17 +525,17 @@ void main() {
       paints
         ..rect(
           rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..line(
           p1: const Offset(780.0, 0.0),
           p2: const Offset(780.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 300.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
@@ -556,18 +572,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -580,18 +596,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 240.0, 800.0, 600.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -604,18 +620,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
   });
@@ -639,18 +655,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -661,18 +677,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -685,14 +701,14 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
@@ -724,18 +740,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
-          color: const Color(0xffbcbcbc),
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
@@ -748,17 +764,17 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
+          rect: getStartingThumbRect(isAndroid: true),
           // Drag color
           color: const Color(0x99000000),
         ),
@@ -776,18 +792,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0xffbcbcbc),
+          color: _kAndroidThumbIdleColor,
         ),
     );
   });
@@ -813,10 +829,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -830,8 +846,8 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
         // Hover color
         color: const Color(0x80000000),
@@ -868,10 +884,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
     await tester.tapAt(const Offset(794.0, 5.0));
@@ -883,10 +899,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -908,13 +924,13 @@ void main() {
           p1: const Offset(784.0, 0.0),
           p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x1a000000),
+          color: _kDefaultIdleThumbColor,
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
             const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            const Radius.circular(8.0),
+            _kDefaultThumbRadius,
           ),
           // Hover color
           color: const Color(0x80000000),
@@ -949,10 +965,10 @@ void main() {
       find.byType(Scrollbar),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-          const Radius.circular(8.0),
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
         ),
-        color: const Color(0x1a000000),
+        color: _kDefaultIdleThumbColor,
       ),
     );
 
@@ -973,13 +989,13 @@ void main() {
           p1: const Offset(784.0, 0.0),
           p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x1a000000),
+          color: _kDefaultIdleThumbColor,
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
             // Scrollbar thumb is larger
             const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            const Radius.circular(8.0),
+            _kDefaultThumbRadius,
           ),
           // Hover color
           color: const Color(0x80000000),
@@ -1135,7 +1151,7 @@ void main() {
             isAlwaysShown: true,
             controller: scrollController,
             child: const SingleChildScrollView(
-              child: SizedBox(width: 4000.0, height: 4000.0)
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),
@@ -1148,27 +1164,28 @@ void main() {
       paints
         ..rect(
           rect: const Rect.fromLTRB(788.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..line(
           p1: const Offset(788.0, 0.0),
           p2: const Offset(788.0, 600.0),
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0),
-            const Radius.circular(8.0),
+            getStartingThumbRect(isAndroid: false),
+            _kDefaultThumbRadius,
           ),
-          color: const Color(0x1a000000),
+          color: _kDefaultIdleThumbColor,
         ),
     );
 
     // Try to drag the thumb down.
     const double scrollAmount = 10.0;
+    await tester.pumpAndSettle();
     final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
-    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.up();
     await tester.pumpAndSettle();
@@ -1186,6 +1203,7 @@ void main() {
 
     // Tap on the track to validate the scroll view will not page.
     await tester.tapAt(const Offset(797.0, 200.0));
+    await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1216,25 +1234,26 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
+          rect: _kAndroidTrackDimensions,
+          color: Colors.transparent,
         )
         ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
+          p1: _kTrackBorderPoint1,
+          p2: _kTrackBorderPoint2,
           strokeWidth: 1.0,
-          color: const Color(0x00000000),
+          color: Colors.transparent,
         )
         ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
-          color: const Color(0xffbcbcbc),
+          rect: getStartingThumbRect(isAndroid: true),
+          color: _kAndroidThumbIdleColor,
         ),
     );
 
     // Try to drag the thumb down.
     const double scrollAmount = 10.0;
+    await tester.pumpAndSettle();
     final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
-    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, -scrollAmount));
+    await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.up();
     await tester.pumpAndSettle();
@@ -1252,6 +1271,7 @@ void main() {
 
     // Tap on the track to validate the scroll view will not page.
     await tester.tapAt(const Offset(797.0, 200.0));
+    await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
   });

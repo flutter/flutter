@@ -831,6 +831,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
+  ///
+  /// Defaults to false when [isAlwaysShown] is null.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? false;
 
@@ -839,6 +841,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
+  ///
+  /// Defaults to true when [interactive] is null.
   @protected
   bool get enableGestures => widget.interactive ?? true;
 
