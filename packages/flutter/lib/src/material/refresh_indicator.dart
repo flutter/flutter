@@ -261,14 +261,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
-  // The [dragDetails] is non-null if the scroll notifications are triggered by dragging.
-  // The indicator can only be triggered by dragging, and cannot be triggered
-  // by other non-dragging behaviors such as [ScrollController.jumpTo].
-  // See also [RefreshIndicator.triggerMode].
   bool _shouldStart(ScrollNotification notification) {
-    return ((notification is ScrollStartNotification && notification.dragDetails != null) // Start dragging at zero scroll position.
-            || (notification is ScrollUpdateNotification && notification.dragDetails != null // Continue to drag when overscroll occurs.
-                && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
+    // If the notification.dragDetails is null, this scroll is not triggered by
+    // user dragging. It may be a result of ScrollController.jumpTo or a ballistic scroll.
+    // In this case we don't want to trigger the refresh indicator.
+    if (notification.dragDetails == null)
+      return fasle;
+    return (notification is ScrollStartNotification || (notification is ScrollUpdateNotification && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
       && notification.metrics.extentBefore == 0.0
       && _mode == null
       && _start(notification.metrics.axisDirection);
