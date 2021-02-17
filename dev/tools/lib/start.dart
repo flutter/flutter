@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonEncode;
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -26,6 +27,8 @@ const String kFrameworkMirrorOption = 'framework-mirror';
 const String kEngineMirrorOption = 'engine-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
 const String kEngineUpstreamOption = 'engine-upstream';
+const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
+const String kEngineCherrypicksOption = 'engine-cherrypicks';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -72,7 +75,16 @@ class StartCommand extends Command<void> {
       defaultsTo: defaultPath,
       help: 'Path to persistent state file. Defaults to $defaultPath',
     );
-
+    argParser.addMultiOption(
+      kEngineCherrypicksOption,
+      help: 'Engine cherrypick hashes to be applied.',
+      defaultsTo: <String>[],
+    );
+    argParser.addMultiOption(
+      kFrameworkCherrypicksOption,
+      help: 'Framework cherrypick hashes to be applied.',
+      defaultsTo: <String>[],
+    );
     final Git git = Git(processManager);
     conductorVersion = git.getOutput(
       <String>['rev-parse', 'HEAD'],
@@ -106,40 +118,50 @@ class StartCommand extends Command<void> {
   @override
   void run() {
     final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs<String>(kStateOption, argResults, platform.environment),
+      getValueFromEnvOrArgs(kStateOption, argResults, platform.environment),
     );
     if (stateFile.existsSync()) {
       throw ConductorException(
           'Error! A persistent state file already found at ${argResults[kStateOption]}.\n\n'
           'Run `conductor cleanup` to cancel a previous release.');
     }
-    final String frameworkUpstream = getValueFromEnvOrArgs<String>(
+    final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
       argResults,
       platform.environment,
     );
-    final String frameworkMirror = getValueFromEnvOrArgs<String>(
+    final String frameworkMirror = getValueFromEnvOrArgs(
       kFrameworkMirrorOption,
       argResults,
       platform.environment,
     );
-    final String engineUpstream = getValueFromEnvOrArgs<String>(
+    final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
       argResults,
       platform.environment,
     );
-    final String engineMirror = getValueFromEnvOrArgs<String>(
+    final String engineMirror = getValueFromEnvOrArgs(
       kEngineMirrorOption,
       argResults,
       platform.environment,
     );
-    final String candidateBranch = getValueFromEnvOrArgs<String>(
+    final String candidateBranch = getValueFromEnvOrArgs(
       kCandidateOption,
       argResults,
       platform.environment,
     );
-    final String releaseChannel = getValueFromEnvOrArgs<String>(
+    final String releaseChannel = getValueFromEnvOrArgs(
       kReleaseOption,
+      argResults,
+      platform.environment,
+    );
+    List<String> frameworkCherrypicks = getValuesFromEnvOrArgs(
+      kFrameworkCherrypicksOption,
+      argResults,
+      platform.environment,
+    );
+    List<String> engineCherrypicks = getValuesFromEnvOrArgs(
+      kEngineCherrypicksOption,
       argResults,
       platform.environment,
     );
@@ -168,24 +190,37 @@ class StartCommand extends Command<void> {
         url: engineMirror,
       ),
     );
+    engineCherrypicks = _sortCherrypicks(
+      repository: engine,
+      cherrypicks: engineCherrypicks,
+      upstreamRef: EngineRepository.defaultBranch,
+      releaseRef: candidateBranch,
+    );
     final String engineHead = engine.reverseParse('HEAD');
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
       startingGitHead: engineHead,
       currentGitHead: engineHead,
       checkoutPath: engine.checkoutDirectory.path,
+      cherrypicks: engineCherrypicks,
     );
     final FrameworkRepository framework = FrameworkRepository(
       checkouts,
       initialRef: candidateBranch,
       fetchRemote: Remote(
         name: RemoteName.upstream,
-        url: engineUpstream,
+        url: frameworkUpstream,
       ),
       pushRemote: Remote(
         name: RemoteName.mirror,
         url: frameworkMirror,
       ),
+    );
+    frameworkCherrypicks = _sortCherrypicks(
+      repository: framework,
+      cherrypicks: frameworkCherrypicks,
+      upstreamRef: FrameworkRepository.defaultBranch,
+      releaseRef: candidateBranch,
     );
     final String frameworkHead = framework.reverseParse('HEAD');
     state.framework = pb.Repository(
@@ -193,6 +228,7 @@ class StartCommand extends Command<void> {
       startingGitHead: frameworkHead,
       currentGitHead: frameworkHead,
       checkoutPath: framework.checkoutDirectory.path,
+      cherrypicks: frameworkCherrypicks,
     );
 
     state.lastPhase = ReleasePhase.INITIALIZE;
@@ -208,6 +244,53 @@ class StartCommand extends Command<void> {
       flush: true,
     );
 
-    presentState(stdio, state);
+    stdio.printStatus(presentState(state));
+  }
+
+  List<String> _sortCherrypicks({
+    @required Repository repository,
+    @required List<String> cherrypicks,
+    @required String upstreamRef,
+    @required String releaseRef,
+  }) {
+    final List<String> sortedCherrypicks = <String>[];
+    final List<String> validatedCherrypicks = cherrypicks.map<String>(
+        // Validate all hashes exist in the repo, and get the long version
+      (String cp) => repository.reverseParse(cp),
+    ).toList();
+
+    final String branchPoint = repository.branchPoint(
+      upstreamRef,
+      releaseRef,
+    );
+    final io.ProcessResult result = processManager.runSync(
+      <String>[
+        'git',
+        'rev-list',
+        '--ancestry-path',
+        '$branchPoint..upstreamRef',
+      ],
+    );
+
+    // `git rev-list` returns newest first, so reverse this list
+    final List<String> upstreamRevlist = (result.stdout as String).split('\n').reversed.toList();
+
+    for (final String upstreamRevision in upstreamRevlist) {
+      if (validatedCherrypicks.contains(upstreamRevision)) {
+        validatedCherrypicks.remove(upstreamRevision);
+        sortedCherrypicks.add(upstreamRevision);
+        if (validatedCherrypicks.isEmpty) {
+          return sortedCherrypicks;
+        }
+      }
+    }
+
+    // We were given input cherrypicks that were not present in the upstream
+    // rev-list
+    stdio.printError('The following cherrypicks were not found in the upstream $upstreamRef branch:');
+    for (final String cp in validatedCherrypicks) {
+      stdio.printError('\t$cp');
+    }
+    throw ConductorException('${validatedCherrypicks.length} unknown cherrypicks provided!');
   }
 }

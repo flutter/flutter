@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import './globals.dart' show ConductorException;
+import './globals.dart';
 import './repository.dart';
 import './state.dart';
 import './stdio.dart';
@@ -70,7 +70,7 @@ class Doctor {
   /// fails to validate them.
   static Map<String, String> requiredBinaries = <String, String>{
     'git': 'It is used for managing repositories.',
-    'gsutil.py': 'It is used for accessing cloud storage. Provided by depot_tools, see \nhttps://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up for more information.',
+    gsutilBinary: 'It is used for accessing cloud storage. Provided by depot_tools, see \nhttps://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up for more information.',
   };
 
   bool validate() {

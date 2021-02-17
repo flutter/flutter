@@ -17,6 +17,8 @@ const String kSkipTagging = 'skip-tagging';
 
 const String kUpstreamRemote = 'https://github.com/flutter/flutter.git';
 
+const String gsutilBinary = 'gsutil.py';
+
 const List<String> kReleaseChannels = <String>[
   'stable',
   'beta',
@@ -101,28 +103,46 @@ bool assertsEnabled() {
 ///
 /// The environment is favored over CLI args since the latter can have a default
 /// value, which the environment should be able to override.
-T getValueFromEnvOrArgs<T>(
+String getValueFromEnvOrArgs(
   String name,
   ArgResults argResults,
   Map<String, String> env,
 ) {
-  final dynamic argValue = argResults[name];
-  if (argValue != null) {
-    if (T == String) {
-      print('T == String');
-      return argValue as T;
-    } else if (T == List) {
-      throw Exception('TODO implement');
-    }
-  }
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null ) {
-    if (T == String) {
-      print('T == String');
-      return env[envName] as T;
-    } else if (T == List) {
-      return env[envName].split(',') as T;
-    }
+    return env[envName];
+  }
+  final String argValue = argResults[name] as String;
+  if (argValue != null) {
+    return argValue;
+  }
+
+  throw ConductorException(
+    'Expected either the CLI arg --$name or the environment variable $envName '
+    'to be provided!');
+}
+
+/// Return multiple values from the environment or fall back to [argResults].
+///
+/// Values read from an environment variable are assumed to be comma-delimited.
+///
+/// If the key does not exist in either the CLI args or environment, throws a
+/// [ConductorException].
+///
+/// The environment is favored over CLI args since the latter can have a default
+/// value, which the environment should be able to override.
+List<String> getValuesFromEnvOrArgs(
+  String name,
+  ArgResults argResults,
+  Map<String, String> env,
+) {
+  final String envName = fromArgToEnvName(name);
+  if (env[envName] != null ) {
+    return env[envName].split(',');
+  }
+  final List<String> argValues = argResults[name] as List<String>;
+  if (argValues != null) {
+    return argValues;
   }
 
   throw ConductorException(

@@ -166,6 +166,15 @@ abstract class Repository {
     return output == '';
   }
 
+  /// Return the revision for the branch point between two refs.
+  String branchPoint(String firstRef, String secondRef) {
+    return git.getOutput(
+      <String>['merge-base', firstRef, secondRef],
+      'determine the merge base between $firstRef and $secondRef',
+      workingDirectory: checkoutDirectory.path,
+    ).trim();
+  }
+
   /// Fetch all branches and associated commits and tags from [remoteName].
   void fetch(String remoteName) {
     git.run(
@@ -202,7 +211,7 @@ abstract class Repository {
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
       workingDirectory: checkoutDirectory.path,
-    ).trim();
+    );
     assert(revisionHash.isNotEmpty);
     return revisionHash;
   }

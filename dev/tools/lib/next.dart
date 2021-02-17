@@ -127,6 +127,6 @@ class NextCommand extends Command<void> {
       flush: true,
     );
 
-    presentState(stdio, state);
+    stdio.printStatus(presentState(state));
   }
 }

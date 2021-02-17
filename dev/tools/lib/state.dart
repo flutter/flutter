@@ -7,7 +7,6 @@ import 'package:platform/platform.dart';
 import './globals.dart';
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
-import './stdio.dart' show Stdio;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
@@ -19,38 +18,56 @@ String defaultStateFilePath(Platform platform) {
   ].join(platform.pathSeparator);
 }
 
-void presentState(Stdio stdio, pb.ConductorState state) {
-  stdio.printStatus('Conductor version: ${state.conductorVersion}');
-  stdio.printStatus('Release channel: ${state.releaseChannel}');
-  stdio.printStatus('');
-  stdio.printStatus(
+String presentState(pb.ConductorState state) {
+  final StringBuffer buffer = StringBuffer();
+  buffer.writeln('Conductor version: ${state.conductorVersion}');
+  buffer.writeln('Release channel: ${state.releaseChannel}');
+  buffer.writeln('');
+  buffer.writeln(
       'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
-  stdio.printStatus(
+  buffer.writeln(
       'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
-  stdio.printStatus('');
-  stdio.printStatus('Engine Repo');
-  stdio.printStatus('\tCandidate branch: ${state.engine.candidateBranch}');
-  stdio.printStatus('\tStarting git HEAD: ${state.engine.startingGitHead}');
-  stdio.printStatus('\tCurrent git HEAD: ${state.engine.currentGitHead}');
-  stdio.printStatus('\tPath to checkout: ${state.engine.checkoutPath}');
-  stdio.printStatus('Framework Repo');
-  stdio.printStatus('\tCandidate branch: ${state.framework.candidateBranch}');
-  stdio.printStatus('\tStarting git HEAD: ${state.framework.startingGitHead}');
-  stdio.printStatus('\tCurrent git HEAD: ${state.framework.currentGitHead}');
-  stdio.printStatus('\tPath to checkout: ${state.framework.checkoutPath}');
-  stdio.printStatus('');
+  buffer.writeln('');
+  buffer.writeln('Engine Repo');
+  buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
+  buffer.writeln('\tStarting git HEAD: ${state.engine.startingGitHead}');
+  buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
+  buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
+  if (state.engine.cherrypicks.isNotEmpty) {
+    buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
+    for (final String cherrypick in state.engine.cherrypicks) {
+      buffer.writeln('\t$cherrypick');
+    }
+  } else {
+    buffer.writeln('0 Engine cherrypicks.');
+  }
+  buffer.writeln('Framework Repo');
+  buffer.writeln('\tCandidate branch: ${state.framework.candidateBranch}');
+  buffer.writeln('\tStarting git HEAD: ${state.framework.startingGitHead}');
+  buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
+  buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
+  if (state.framework.cherrypicks.isNotEmpty) {
+    buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
+    for (final String cherrypick in state.framework.cherrypicks) {
+      buffer.writeln('\t$cherrypick');
+    }
+  } else {
+    buffer.writeln('0 Framework cherrypicks.');
+  }
+  buffer.writeln('');
   if (state.lastPhase == ReleasePhase.VERIFY_RELEASE) {
-    stdio.printStatus(
+    buffer.writeln(
       '${state.releaseChannel} release ${state.releaseVersion} has been published and verified.\n',
     );
-    return;
+    return buffer.toString();
   }
-  stdio.printStatus('The next step is:');
-  stdio.printStatus(presentPhases(state.lastPhase));
+  buffer.writeln('The next step is:');
+  buffer.writeln(presentPhases(state.lastPhase));
 
-  stdio.printStatus(phaseInstructions(state));
-  stdio.printStatus('');
-  stdio.printStatus('Issue `conductor next` when you are ready to proceed.');
+  buffer.writeln(phaseInstructions(state));
+  buffer.writeln('');
+  buffer.writeln('Issue `conductor next` when you are ready to proceed.');
+  return buffer.toString();
 }
 
 String presentPhases(ReleasePhase lastPhase) {

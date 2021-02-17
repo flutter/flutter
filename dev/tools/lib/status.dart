@@ -59,7 +59,7 @@ class StatusCommand extends Command<void> {
     }
     final pb.ConductorState state = pb.ConductorState();
     state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
-    presentState(stdio, state);
+    stdio.printStatus(presentState(state));
     if (argResults[kVerboseFlag] as bool) {
       stdio.printStatus('\nLogs:');
       state.logs.forEach(stdio.printStatus);
