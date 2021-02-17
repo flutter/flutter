@@ -45,7 +45,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 1.5, 800.0, 91.5),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });
@@ -72,7 +72,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(0.0, 1.5, 4.0, 91.5),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });
@@ -116,7 +116,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTWH(796.0, 0.0, 4.0, (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });

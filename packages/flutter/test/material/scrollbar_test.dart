@@ -519,7 +519,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 300.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
@@ -566,7 +566,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
 
@@ -590,7 +590,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 240.0, 800.0, 600.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
 
@@ -614,7 +614,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 360.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });
@@ -649,7 +649,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
 
@@ -671,7 +671,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
 
@@ -695,7 +695,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0),
-          color: const Color(0x14000000),
+          color: const Color(0xc6bcbcbc),
         ),
     );
   });
@@ -733,7 +733,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
 
@@ -785,7 +785,7 @@ void main() {
         )
         ..rect(
           rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0x1a000000),
+          color: const Color(0xffbcbcbc),
         ),
     );
   });

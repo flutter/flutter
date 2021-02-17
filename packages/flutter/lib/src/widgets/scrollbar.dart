@@ -612,6 +612,7 @@ class RawScrollbar extends StatefulWidget {
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
     this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.interactive,
   }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -782,6 +783,18 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final ScrollNotificationPredicate notificationPredicate;
 
+  /// {@template flutter.widgets.Scrollbar.interactive}
+  /// Whether the Scrollbar should be interactive and respond to dragging on the
+  /// thumb, or tapping in the track area.
+  ///
+  /// Does not apply to the [CupertinoScrollbar].
+  ///
+  /// When true, the scrollbar will not respond to gesture or hover events.
+  ///
+  /// Defaults to true when null.
+  /// {@endtemplate}
+  final bool? interactive;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -817,6 +830,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// theme.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? false;
+
+  /// Overridable getter to indicate is gestures should be enabled on the
+  /// scrollbar.
+  ///
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
+  @protected
+  bool get enableGestures => widget.interactive ?? true;
 
   @override
   void initState() {
@@ -1071,7 +1092,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    if (controller == null)
+    if (controller == null || !enableGestures)
       return gestures;
 
     gestures[_ThumbPressGestureRecognizer] =
@@ -1190,7 +1211,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onExit: (PointerExitEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHoverExit(event);
+                  if (enableGestures)
+                    handleHoverExit(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
@@ -1202,7 +1224,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onHover: (PointerHoverEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHover(event);
+                  if (enableGestures)
+                    handleHover(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
