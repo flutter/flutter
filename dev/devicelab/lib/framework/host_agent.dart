@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 
 /// The current host machine running the tests.
@@ -35,10 +36,43 @@ class HostAgent {
     return _dumpDirectory;
   }
 
+  void dumpFiles(List<String> paths) {
+    if (paths == null || paths.isEmpty) {
+      return;
+    }
+
+    for (final String detail in paths) {
+      final File resultFile = _fileSystem.file(detail);
+      final String destination = path.join(dumpDirectory.path, resultFile.basename);
+      if (resultFile.existsSync()) {
+        resultFile.copySync(destination);
+        continue;
+      }
+
+      final Directory resultDirectory = _fileSystem.directory(detail);
+      if (resultDirectory.existsSync()) {
+        _recursiveCopy(resultDirectory, _fileSystem.directory(destination));
+      }
+    }
+  }
+
   static Directory _dumpDirectory;
 
   @visibleForTesting
   void resetDumpDirectory() {
     _dumpDirectory = null;
+  }
+}
+
+void _recursiveCopy(Directory source, Directory target) {
+  target.createSync();
+
+  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
+    final String name = entity.basename;
+    if (entity is Directory) {
+      _recursiveCopy(entity, target.childDirectory(name));
+    } else if (entity is File) {
+      entity.copySync(path.join(target.path, name));
+    }
   }
 }
