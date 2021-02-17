@@ -251,8 +251,11 @@ class _WebGlRenderer implements _GlRenderer {
     gl.bindElementArrayBuffer(indexBuffer);
     gl.bufferElementData(_vertexIndicesForRect, gl.kStaticDraw);
 
-    Object uRes = gl.getUniformLocation(glProgram.program, 'u_resolution');
-    gl.setUniform2f(uRes, widthInPixels.toDouble(), heightInPixels.toDouble());
+    if (gl.containsUniform(glProgram.program, 'u_resolution')) {
+      Object uRes = gl.getUniformLocation(glProgram.program, 'u_resolution');
+      gl.setUniform2f(
+          uRes, widthInPixels.toDouble(), heightInPixels.toDouble());
+    }
 
     gl.clear();
     gl.viewport(0, 0, widthInPixels.toDouble(), heightInPixels.toDouble());
@@ -682,6 +685,13 @@ class _GlContext {
     } else {
       return res;
     }
+  }
+
+  /// Returns true if uniform exists.
+  bool containsUniform(Object program, String uniformName) {
+    Object? res = js_util
+        .callMethod(glContext, 'getUniformLocation', <dynamic>[program, uniformName]);
+    return res != null;
   }
 
   /// Returns reference to uniform in program.

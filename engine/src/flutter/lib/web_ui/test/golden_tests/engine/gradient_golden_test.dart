@@ -296,6 +296,54 @@ void testMain() async {
     canvas.restore();
     await _checkScreenshot(canvas, 'sweep_gradient_path');
   });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/74137.
+  test('Paints rotated and shifted linear gradient', () async {
+    final RecordingCanvas canvas =
+    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    canvas.save();
+
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = Color(0xFF000000);
+
+    List<Color> colors = <Color>[
+      Color(0xFF000000),
+      Color(0xFFFF3C38),
+      Color(0xFFFF8C42),
+      Color(0xFFFFF275),
+      Color(0xFF6699CC),
+      Color(0xFF656D78),];
+    List<double> stops = <double>[0.0, 0.05, 0.4, 0.6, 0.9, 1.0];
+
+    EngineGradient linearGradient = GradientLinear(Offset(50, 50),
+        Offset(200,130),
+        colors, stops, TileMode.clamp,
+        Matrix4.identity().storage);
+
+    const double kBoxWidth = 150;
+    const double kBoxHeight = 80;
+    // Gradient with default center.
+    Rect rectBounds = Rect.fromLTWH(10, 20, kBoxWidth, kBoxHeight);
+    canvas.drawRect(rectBounds,
+        Paint()..shader = engineLinearGradientToShader(linearGradient, rectBounds));
+    canvas.drawRect(rectBounds, borderPaint);
+
+    // Tile mode repeat
+    rectBounds = Rect.fromLTWH(10, 110, kBoxWidth, kBoxHeight);
+    linearGradient = GradientLinear(Offset(50, 50),
+        Offset(200,130),
+        colors, stops, TileMode.repeated,
+        Matrix4.identity().storage);
+
+    canvas.drawRect(rectBounds,
+        new Paint()..shader = engineLinearGradientToShader(linearGradient, rectBounds));
+    canvas.drawRect(rectBounds, borderPaint);
+
+    canvas.restore();
+    await _checkScreenshot(canvas, 'linear_gradient_rect_shifted');
+  });
 }
 
 Shader engineGradientToShader(GradientSweep gradient, Rect rect) {
@@ -307,6 +355,14 @@ Shader engineGradientToShader(GradientSweep gradient, Rect rect) {
       gradient.endAngle,
       gradient.matrix4 == null ? null :
           Float64List.fromList(gradient.matrix4),
+  );
+}
+
+Shader engineLinearGradientToShader(GradientLinear gradient, Rect rect) {
+  return Gradient.linear(gradient.from, gradient.to,
+    gradient.colors, gradient.colorStops, gradient.tileMode,
+    gradient.matrix4 == null ? null : Float64List.fromList(
+        gradient.matrix4.matrix),
   );
 }
 
