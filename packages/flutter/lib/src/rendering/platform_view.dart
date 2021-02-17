@@ -176,7 +176,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     _sizePlatformView();
   }
 
-  late Size _currentAndroidViewSize;
+  Size? _currentAndroidViewSize;
 
   Future<void> _sizePlatformView() async {
     // Android virtual displays cannot have a zero size.
@@ -207,10 +207,12 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     if (_viewController.textureId == null)
       return;
+    if (_currentAndroidViewSize == null)
+      return;
 
     // Clip the texture if it's going to paint out of the bounds of the renter box
     // (see comment in _paintTexture for an explanation of when this happens).
-    if ((size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) && clipBehavior != Clip.none) {
+    if ((size.width < _currentAndroidViewSize!.width || size.height < _currentAndroidViewSize!.height) && clipBehavior != Clip.none) {
       _clipRectLayer = context.pushClipRect(true, offset, offset & size, _paintTexture, clipBehavior: clipBehavior,
           oldLayer: _clipRectLayer);
       return;
@@ -232,7 +234,7 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidViewSize.
     context.addLayer(TextureLayer(
-      rect: offset & _currentAndroidViewSize,
+      rect: offset & _currentAndroidViewSize!,
       textureId: _viewController.textureId!,
       freeze: _state == _PlatformViewState.resizing,
     ));
