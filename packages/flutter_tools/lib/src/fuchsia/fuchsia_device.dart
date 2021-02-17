@@ -182,7 +182,10 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!_fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout))
+    final String disabledFfxDiscovery = _platform.environment.containsKey('FUCHSIA_DISABLED_ffx_discovery')
+      ? _platform.environment['FUCHSIA_DISABLED_ffx_discovery'] : '0';
+
+    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout, disabledFfxDiscovery: disabledFfxDiscovery ))
       ?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
@@ -209,14 +212,23 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return null;
     }
     final String name = words[1];
-    final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-    );
+    String resolvedHost;
+    // Uses ffx disovery workflow by default. The legacy device-finder
+    // workflow can be enabled by setting the environment variable FUCHSIA_DISABLED_ffx_discovery=1.
+    final String disabledFfxDiscovery = _platform.environment.containsKey('FUCHSIA_DISABLED_ffx_discovery')
+      ? _platform.environment['FUCHSIA_DISABLED_ffx_discovery'] : '0';
+    if (disabledFfxDiscovery == '1') {
+      resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
+        name,
+      );
+    } else {
+      resolvedHost = await _fuchsiaSdk.fuchsiaFfx.resolve(name);
+    }
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
       return null;
     }
-    return FuchsiaDevice(resolvedHost, name: name);
+    return FuchsiaDevice(resolvedHost, name: name, platform: _platform);
   }
 }
 
@@ -389,14 +401,14 @@ class FuchsiaDevice extends Device {
         }
       }
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
-          this, fuchsiaPackageServer, flutterRunnerName)) {
+        this, fuchsiaPackageServer, flutterRunnerName)) {
         globals.printError('Failed to get pkgctl to prefetch the flutter_runner');
         return LaunchResult.failed();
       }
 
       // Tell the package controller to prefetch the app.
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
-          this, fuchsiaPackageServer, appName)) {
+          this, fuchsiaPackageServer, flutterRunnerName)) {
         globals.printError('Failed to get pkgctl to prefetch the package');
         return LaunchResult.failed();
       }

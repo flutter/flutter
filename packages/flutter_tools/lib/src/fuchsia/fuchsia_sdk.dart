@@ -14,6 +14,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 
 import 'fuchsia_dev_finder.dart';
+import 'fuchsia_ffx.dart';
 import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
 
@@ -48,18 +49,34 @@ class FuchsiaSdk {
   FuchsiaKernelCompiler get fuchsiaKernelCompiler =>
       _fuchsiaKernelCompiler ??= FuchsiaKernelCompiler();
 
+  /// Interface to the 'ffx' tool.
+  FuchsiaFfx _fuchsiaFfx;
+  FuchsiaFfx get fuchsiaFfx => _fuchsiaFfx ??= FuchsiaFfx(
+      fuchsiaArtifacts: globals.fuchsiaArtifacts,
+      logger: globals.logger,
+      processManager: globals.processManager);
+
   /// Returns any attached devices is a newline-denominated String.
   ///
-  /// Example output:
+  /// Uses ffx disovery workflow by default. The legacy device-finder
+  /// workflow can be enabled by setting the environment variable FUCHSIA_DISABED_ffx_discovery=1.
   ///
-  ///     $ device-finder list -full
-  ///     > 192.168.42.56 paper-pulp-bush-angel
-  Future<String> listDevices({ Duration timeout }) async {
-    if (globals.fuchsiaArtifacts.devFinder == null ||
-        !globals.fuchsiaArtifacts.devFinder.existsSync()) {
-      return null;
+  /// Example output: abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
+  Future<String> listDevices({Duration timeout, String disabledFfxDiscovery = '0'}) async {
+    List<String> devices;
+    if (disabledFfxDiscovery == '1') {
+      if (globals.fuchsiaArtifacts.devFinder == null ||
+          !globals.fuchsiaArtifacts.devFinder.existsSync()) {
+        return null;
+      }
+      devices = await fuchsiaDevFinder.list(timeout: timeout);
+    } else {
+      if (globals.fuchsiaArtifacts.ffx == null ||
+          !globals.fuchsiaArtifacts.ffx.existsSync()) {
+        return null;
+      }
+      devices = await fuchsiaFfx.list(timeout: timeout);
     }
-    final List<String> devices = await fuchsiaDevFinder.list(timeout: timeout);
     if (devices == null) {
       return null;
     }
@@ -112,6 +129,7 @@ class FuchsiaArtifacts {
   FuchsiaArtifacts({
     this.sshConfig,
     this.devFinder,
+    this.ffx,
     this.pm,
   });
 
@@ -140,11 +158,13 @@ class FuchsiaArtifacts {
     final String fuchsia = globals.cache.getArtifactDirectory('fuchsia').path;
     final String tools = globals.fs.path.join(fuchsia, 'tools');
     final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'device-finder'));
+    final File ffx = globals.fs.file(globals.fs.path.join(tools, 'x64/ffx'));
     final File pm = globals.fs.file(globals.fs.path.join(tools, 'pm'));
 
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
       devFinder: devFinder.existsSync() ? devFinder : null,
+      ffx: ffx.existsSync() ? ffx : null,
       pm: pm.existsSync() ? pm : null,
     );
   }
@@ -159,6 +179,10 @@ class FuchsiaArtifacts {
   /// The location of the dev finder tool used to locate connected
   /// Fuchsia devices.
   final File devFinder;
+
+  /// The location of the ffx tool used to locate connected
+  /// Fuchsia devices.
+  final File ffx;
 
   /// The pm tool.
   final File pm;
