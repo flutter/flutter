@@ -1,4 +1,4 @@
-Signature: f2df1836a0dd29b3472cef7a776bd22a
+Signature: 375b51676cfe73a0106e2c07e6bb639e
 
 UNUSED LICENSES:
 
@@ -739,6 +739,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLMetalCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
+FILE: ../../../third_party/skia/src/sksl/SkSLProgramSettings.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLUtil.cpp
