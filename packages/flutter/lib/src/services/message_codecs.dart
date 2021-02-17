@@ -17,7 +17,7 @@ import 'message_codec.dart';
 /// When sending outgoing messages from Android, be sure to use direct `ByteBuffer`
 /// as opposed to indirect. The `wrap()` API provides indirect buffers by default
 /// and you will get empty `ByteData` objects in Dart.
-class BinaryCodec implements MessageCodec<ByteData> {
+class BinaryCodec implements MessageCodec<ByteData?> {
   /// Creates a [MessageCodec] with unencoded binary messages represented using
   /// [ByteData].
   const BinaryCodec();
@@ -33,7 +33,7 @@ class BinaryCodec implements MessageCodec<ByteData> {
 ///
 /// On Android, messages will be represented using `java.util.String`.
 /// On iOS, messages will be represented using `NSString`.
-class StringCodec implements MessageCodec<String> {
+class StringCodec implements MessageCodec<String?> {
   /// Creates a [MessageCodec] with UTF-8 encoded String messages.
   const StringCodec();
 
@@ -71,13 +71,7 @@ class StringCodec implements MessageCodec<String> {
 /// null/nil for null, and identical to what would result from decoding a
 /// singleton JSON array with a Boolean, number, or string value, and then
 /// extracting its single element.
-///
-/// The type returned from [decodeMessage] is `dynamic` (not `Object?`), which
-/// means *no type checking is performed on its return value*. It is strongly
-/// recommended that the return value be immediately cast to a known type to
-/// prevent runtime errors due to typos that the type checker could otherwise
-/// catch.
-class JSONMessageCodec implements MessageCodec<Object?> {
+class JSONMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as defined by the JSON codec of the
   // dart:convert package. The format used must match the Android and
   // iOS counterparts.
@@ -86,7 +80,7 @@ class JSONMessageCodec implements MessageCodec<Object?> {
   const JSONMessageCodec();
 
   @override
-  ByteData? encodeMessage(Object? message) {
+  ByteData? encodeMessage(dynamic message) {
     if (message == null)
       return null;
     return const StringCodec().encodeMessage(json.encode(message));
@@ -124,7 +118,7 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeMethodCall(MethodCall call) {
-    return const JSONMessageCodec().encodeMessage(<String, Object?>{
+    return const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'method': call.method,
       'args': call.arguments,
     })!;
@@ -132,11 +126,11 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   MethodCall decodeMethodCall(ByteData? methodCall) {
-    final Object? decoded = const JSONMessageCodec().decodeMessage(methodCall);
+    final dynamic decoded = const JSONMessageCodec().decodeMessage(methodCall);
     if (decoded is! Map)
       throw FormatException('Expected method call Map, got $decoded');
-    final Object? method = decoded['method'];
-    final Object? arguments = decoded['args'];
+    final dynamic method = decoded['method'];
+    final dynamic arguments = decoded['args'];
     if (method is String)
       return MethodCall(method, arguments);
     throw FormatException('Invalid method call: $decoded');
@@ -144,7 +138,7 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
-    final Object? decoded = const JSONMessageCodec().decodeMessage(envelope);
+    final dynamic decoded = const JSONMessageCodec().decodeMessage(envelope);
     if (decoded is! List)
       throw FormatException('Expected envelope List, got $decoded');
     if (decoded.length == 1)
@@ -171,14 +165,14 @@ class JSONMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeSuccessEnvelope(Object? result) {
-    return const JSONMessageCodec().encodeMessage(<Object?>[result])!;
+  ByteData encodeSuccessEnvelope(dynamic result) {
+    return const JSONMessageCodec().encodeMessage(<dynamic>[result])!;
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, Object? details}) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details}) {
     assert(code != null);
-    return const JSONMessageCodec().encodeMessage(<Object?>[code, message, details])!;
+    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details])!;
   }
 }
 
@@ -194,19 +188,8 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [List]s of supported values
 ///  * [Map]s from supported values to supported values
 ///
-/// Decoded values will use `List<Object?>` and `Map<Object?, Object?>`
+/// Decoded values will use `List<dynamic>` and `Map<dynamic, dynamic>`
 /// irrespective of content.
-///
-/// The type returned from [decodeMessage] is `dynamic` (not `Object?`), which
-/// means *no type checking is performed on its return value*. It is strongly
-/// recommended that the return value be immediately cast to a known type to
-/// prevent runtime errors due to typos that the type checker could otherwise
-/// catch.
-///
-/// The codec is extensible by subclasses overriding [writeValue] and
-/// [readValueOfType].
-///
-/// ## Android specifics
 ///
 /// On Android, messages are represented as follows:
 ///
@@ -223,14 +206,6 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [List]\: `java.util.ArrayList`
 ///  * [Map]\: `java.util.HashMap`
 ///
-/// When sending a `java.math.BigInteger` from Java, it is converted into a
-/// [String] with the hexadecimal representation of the integer. (The value is
-/// tagged as being a big integer; subclasses of this class could be made to
-/// support it natively; see the discussion at [writeValue].) This codec does
-/// not support sending big integers from Dart.
-///
-/// ## iOS specifics
-///
 /// On iOS, messages are represented as follows:
 ///
 ///  * null: nil
@@ -243,7 +218,16 @@ class JSONMethodCodec implements MethodCodec {
 ///    `FlutterStandardTypedData`
 ///  * [List]\: `NSArray`
 ///  * [Map]\: `NSDictionary`
-class StandardMessageCodec implements MessageCodec<Object?> {
+///
+/// When sending a `java.math.BigInteger` from Java, it is converted into a
+/// [String] with the hexadecimal representation of the integer. (The value is
+/// tagged as being a big integer; subclasses of this class could be made to
+/// support it natively; see the discussion at [writeValue].) This codec does
+/// not support sending big integers from Dart.
+///
+/// The codec is extensible by subclasses overriding [writeValue] and
+/// [readValueOfType].
+class StandardMessageCodec implements MessageCodec<dynamic> {
   /// Creates a [MessageCodec] using the Flutter standard binary encoding.
   const StandardMessageCodec();
 
@@ -305,7 +289,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   static const int _valueMap = 13;
 
   @override
-  ByteData? encodeMessage(Object? message) {
+  ByteData? encodeMessage(dynamic message) {
     if (message == null)
       return null;
     final WriteBuffer buffer = WriteBuffer();
@@ -318,7 +302,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
     if (message == null)
       return null;
     final ReadBuffer buffer = ReadBuffer(message);
-    final Object? result = readValue(buffer);
+    final dynamic result = readValue(buffer);
     if (buffer.hasRemaining)
       throw const FormatException('Message corrupted');
     return result;
@@ -360,7 +344,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// string's length as encoded by [writeSize] followed by the string bytes. On
   /// Android, that would get converted to a `java.math.BigInteger` object. On
   /// iOS, the string representation is returned.
-  void writeValue(WriteBuffer buffer, Object? value) {
+  void writeValue(WriteBuffer buffer, dynamic value) {
     if (value == null) {
       buffer.putUint8(_valueNull);
     } else if (value is bool) {
@@ -405,13 +389,13 @@ class StandardMessageCodec implements MessageCodec<Object?> {
     } else if (value is List) {
       buffer.putUint8(_valueList);
       writeSize(buffer, value.length);
-      for (final Object? item in value) {
+      for (final dynamic item in value) {
         writeValue(buffer, item);
       }
     } else if (value is Map) {
       buffer.putUint8(_valueMap);
       writeSize(buffer, value.length);
-      value.forEach((Object? key, Object? value) {
+      value.forEach((dynamic key, dynamic value) {
         writeValue(buffer, key);
         writeValue(buffer, value);
       });
@@ -424,7 +408,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   ///
   /// This method is intended for use by subclasses overriding
   /// [readValueOfType].
-  Object? readValue(ReadBuffer buffer) {
+  dynamic readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
       throw const FormatException('Message corrupted');
     final int type = buffer.getUint8();
@@ -436,7 +420,7 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// The codec can be extended by overriding this method, calling super for
   /// types that the extension does not handle. See the discussion at
   /// [writeValue].
-  Object? readValueOfType(int type, ReadBuffer buffer) {
+  dynamic readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case _valueNull:
         return null;
@@ -468,13 +452,13 @@ class StandardMessageCodec implements MessageCodec<Object?> {
         return buffer.getFloat64List(length);
       case _valueList:
         final int length = readSize(buffer);
-        final List<Object?> result = List<Object?>.filled(length, null, growable: false);
+        final List<dynamic> result = List<dynamic>.filled(length, null, growable: false);
         for (int i = 0; i < length; i++)
           result[i] = readValue(buffer);
         return result;
       case _valueMap:
         final int length = readSize(buffer);
-        final Map<Object?, Object?> result = <Object?, Object?>{};
+        final Map<dynamic, dynamic> result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++)
           result[readValue(buffer)] = readValue(buffer);
         return result;
@@ -555,8 +539,8 @@ class StandardMethodCodec implements MethodCodec {
   @override
   MethodCall decodeMethodCall(ByteData? methodCall) {
     final ReadBuffer buffer = ReadBuffer(methodCall!);
-    final Object? method = messageCodec.readValue(buffer);
-    final Object? arguments = messageCodec.readValue(buffer);
+    final dynamic method = messageCodec.readValue(buffer);
+    final dynamic arguments = messageCodec.readValue(buffer);
     if (method is String && !buffer.hasRemaining)
       return MethodCall(method, arguments);
     else
@@ -564,7 +548,7 @@ class StandardMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeSuccessEnvelope(Object? result) {
+  ByteData encodeSuccessEnvelope(dynamic result) {
     final WriteBuffer buffer = WriteBuffer();
     buffer.putUint8(0);
     messageCodec.writeValue(buffer, result);
@@ -572,7 +556,7 @@ class StandardMethodCodec implements MethodCodec {
   }
 
   @override
-  ByteData encodeErrorEnvelope({ required String code, String? message, Object? details}) {
+  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details}) {
     final WriteBuffer buffer = WriteBuffer();
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);
@@ -589,10 +573,10 @@ class StandardMethodCodec implements MethodCodec {
     final ReadBuffer buffer = ReadBuffer(envelope);
     if (buffer.getUint8() == 0)
       return messageCodec.readValue(buffer);
-    final Object? errorCode = messageCodec.readValue(buffer);
-    final Object? errorMessage = messageCodec.readValue(buffer);
-    final Object? errorDetails = messageCodec.readValue(buffer);
-    final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String? : null;
+    final dynamic errorCode = messageCodec.readValue(buffer);
+    final dynamic errorMessage = messageCodec.readValue(buffer);
+    final dynamic errorDetails = messageCodec.readValue(buffer);
+    final String? errorStacktrace = (buffer.hasRemaining) ? messageCodec.readValue(buffer) as String : null;
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
       throw PlatformException(code: errorCode, message: errorMessage as String?, details: errorDetails, stacktrace: errorStacktrace);
     else
