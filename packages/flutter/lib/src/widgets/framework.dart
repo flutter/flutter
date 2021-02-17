@@ -269,6 +269,10 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
+  @Deprecated(
+    'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
+    'This feature was deprecated after v1.12.1.'
+  )
   const TypeMatcher();
 
   /// Returns true if the given object is of type `T`.
