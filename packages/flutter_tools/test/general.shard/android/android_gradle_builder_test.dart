@@ -6,6 +6,7 @@
 
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
@@ -38,7 +39,6 @@ void main() {
     MockProcessManager mockProcessManager;
     FakePlatform android;
     FileSystem fileSystem;
-    FileSystemUtils fileSystemUtils;
     Cache cache;
     AndroidGradleBuilder builder;
 
@@ -46,7 +46,6 @@ void main() {
       logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
-      fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
       mockAndroidStudio = MockAndroidStudio();
       mockArtifacts = MockLocalEngineArtifacts();
@@ -1284,8 +1283,6 @@ void main() {
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
-      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
-
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.current(),
@@ -1308,15 +1305,11 @@ void main() {
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
       expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
-      // Verify the local engine repo is copied into the generated Maven repo.
-      final List<dynamic> copyDirectoryArguments = verify(
-        fileSystemUtils.copyDirectorySync(captureAny, captureAny)
-      ).captured;
-
-      expect(copyDirectoryArguments.length, 2);
-      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
-      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
-
+      expect(fileSystem.link(
+        'build/outputs/repo/io/flutter/flutter_embedding_release/'
+        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
+      ), exists);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
@@ -1324,7 +1317,6 @@ void main() {
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
-      FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
 
@@ -1387,8 +1379,6 @@ void main() {
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
-      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
-
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
@@ -1412,15 +1402,11 @@ void main() {
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
       expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
-      // Verify the local engine repo is copied into the generated Maven repo.
-      final List<dynamic> copyDirectoryArguments = verify(
-          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
-      ).captured;
-
-      expect(copyDirectoryArguments.length, 2);
-      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
-      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
-
+      expect(fileSystem.link(
+        'build/outputs/repo/io/flutter/flutter_embedding_release/'
+        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
+      ), exists);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
@@ -1428,7 +1414,6 @@ void main() {
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
-      FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
 
@@ -1491,8 +1476,6 @@ void main() {
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
-      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
-
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
@@ -1516,15 +1499,11 @@ void main() {
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
       expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
-      // Verify the local engine repo is copied into the generated Maven repo.
-      final List<dynamic> copyDirectoryArguments = verify(
-          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
-      ).captured;
-
-      expect(copyDirectoryArguments.length, 2);
-      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
-      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
-
+      expect(fileSystem.link(
+        'build/outputs/repo/io/flutter/flutter_embedding_release/'
+        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
+      ), exists);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
@@ -1532,12 +1511,10 @@ void main() {
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
-      FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext(
-        'build aar uses selected local engine，the engine abi is x64', () async {
+    testUsingContext('build aar uses selected local engine，the engine abi is x64', () async {
       when(mockArtifacts.getArtifactPath(
         Artifact.flutterFramework,
         platform: anyNamed('platform'),
@@ -1595,8 +1572,6 @@ void main() {
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
-      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
-
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
@@ -1620,15 +1595,11 @@ void main() {
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
       expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
-      // Verify the local engine repo is copied into the generated Maven repo.
-      final List<dynamic> copyDirectoryArguments = verify(
-          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
-      ).captured;
-
-      expect(copyDirectoryArguments.length, 2);
-      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
-      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
-
+      expect(fileSystem.link(
+        'build/outputs/repo/io/flutter/flutter_embedding_release/'
+        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+        'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
+      ), exists);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
@@ -1636,7 +1607,6 @@ void main() {
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
-      FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
   });
@@ -1653,5 +1623,4 @@ FakePlatform fakePlatform(String name) {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockAndroidStudio extends Mock implements AndroidStudio {}
-class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

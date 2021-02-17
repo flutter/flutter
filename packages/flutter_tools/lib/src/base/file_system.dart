@@ -54,25 +54,6 @@ class FileSystemUtils {
     }
   }
 
-  /// Creates `destDir` if needed, then recursively copies `srcDir` to
-  /// `destDir`, invoking [onFileCopied], if specified, for each
-  /// source/destination file pair.
-  ///
-  /// Skips files if [shouldCopyFile] returns `false`.
-  void copyDirectorySync(
-    Directory srcDir,
-    Directory destDir, {
-    bool shouldCopyFile(File srcFile, File destFile),
-    void onFileCopied(File srcFile, File destFile),
-  }) {
-    copyDirectory(
-      srcDir,
-      destDir,
-      shouldCopyFile: shouldCopyFile,
-      onFileCopied: onFileCopied,
-    );
-  }
-
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
   File getUniqueFile(Directory dir, String baseName, String ext) {
@@ -169,7 +150,10 @@ void copyDirectory(
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
-    if (entity is File) {
+    if (entity is Link) {
+      final Link newLink = destDir.fileSystem.link(newPath);
+      newLink.createSync(entity.targetSync());
+    } else if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
       if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
         continue;
@@ -184,7 +168,7 @@ void copyDirectory(
         onFileCopied: onFileCopied,
       );
     } else {
-      throw Exception('${entity.path} is neither File nor Directory');
+      throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
     }
   }
 }

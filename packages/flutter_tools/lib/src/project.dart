@@ -689,7 +689,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         framework,
         engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );

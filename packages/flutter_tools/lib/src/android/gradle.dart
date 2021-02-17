@@ -710,14 +710,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
       // Copy the local engine repo in the output directory.
       try {
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           localEngineRepo,
           getRepoDirectory(outputDirectory),
         );
-      } on FileSystemException catch (_) {
+      } on FileSystemException catch (error, st) {
         throwToolExit(
             'Failed to copy the local engine ${localEngineRepo.path} repo '
-                'in ${outputDirectory.path}'
+                'in ${outputDirectory.path}: $error, $st'
         );
       }
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
