@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -251,6 +250,11 @@ void main() {
     expect(find.text('first'), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
     expect(find.text('third'), findsOneWidget);
+  });
+
+  testWidgets('ListTile.divideTiles with empty list', (WidgetTester tester) async {
+    final Iterable<Widget> output = ListTile.divideTiles(tiles: <Widget>[], color: Colors.grey);
+    expect(output, isEmpty);
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {

@@ -11,6 +11,195 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/66043
+  - title: "Use withKind"
+    date: 2020-09-17
+    element:
+      uris: [ 'gestures.dart' ]
+      constructor: ''
+      inClass: 'VelocityTracker'
+    oneOf:
+      - if: "pointerDeviceKind == ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+          - kind: 'addParameter'
+            index: 0
+            name: 'kind'
+            style: required_positional
+            argumentValue:
+              expression: 'PointerDeviceKind.touch'
+      - if: "pointerDeviceKind != ''"
+        changes:
+          - kind: 'rename'
+            newName: 'withKind'
+    variables:
+      pointerDeviceKind:
+          kind: 'fragment'
+          value: 'arguments[0]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextFormField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'TextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'TextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      field: 'maxLengthEnforced'
+      inClass: 'CupertinoTextField'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLengthEnforcement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: 'borderless'
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/72043
+  - title: "Migrate to 'maxLengthEnforcement'"
+    date: 2020-12-13
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoTextField'
+    oneOf:
+      - if: "maxLengthEnforced == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.enforce'
+              requiredIf: "maxLengthEnforced == 'true'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+      - if: "maxLengthEnforced == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'maxLengthEnforcement'
+            style: optional_named
+            argumentValue:
+              expression: 'MaxLengthEnforcement.none'
+              requiredIf: "maxLengthEnforced == 'false'"
+          - kind: 'removeParameter'
+            name: 'maxLengthEnforced'
+    variables:
+      maxLengthEnforced:
+        kind: 'fragment'
+        value: 'arguments[maxLengthEnforced]'
+
   # Changes made in https://github.com/flutter/flutter/pull/68905.
   - title: "Migrate from 'nullOk'"
     date: 2021-01-27

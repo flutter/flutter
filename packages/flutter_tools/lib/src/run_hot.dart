@@ -5,10 +5,11 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -26,6 +27,7 @@ import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -78,6 +80,7 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -88,6 +91,7 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool benchmarkMode;
@@ -174,21 +178,17 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
-      await Future.wait(<Future<void>>[
-        connectToServiceProtocol(
-          reloadSources: _reloadSourcesService,
-          restart: _restartService,
-          compileExpression: _compileExpressionService,
-          getSkSLMethod: writeSkSL,
-          allowExistingDdsInstance: allowExistingDdsInstance,
-        ),
-        serveDevToolsGracefully(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        ),
-      ]);
+      await connectToServiceProtocol(
+        reloadSources: _reloadSourcesService,
+        restart: _restartService,
+        compileExpression: _compileExpressionService,
+        getSkSLMethod: writeSkSL,
+        allowExistingDdsInstance: allowExistingDdsInstance,
+      );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       if (error is! Exception && error is! String) {
@@ -196,6 +196,14 @@ class HotRunner extends ResidentRunner {
       }
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
+    }
+
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
 
     for (final FlutterDevice device in flutterDevices) {
@@ -217,9 +225,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
-
-    unawaited(maybeCallDevToolsUriServiceExtension());
-    unawaited(callConnectedVmServiceUriExtension());
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
@@ -306,6 +311,7 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
     firstBuildTime = DateTime.now();
@@ -356,6 +362,7 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: enableDevTools,
     );
   }
 
@@ -637,8 +644,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      unawaited(maybeCallDevToolsUriServiceExtension());
-      unawaited(callConnectedVmServiceUriExtension());
+      unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -1086,7 +1092,7 @@ class HotRunner extends ResidentRunner {
     if (canHotRestart) {
       commandHelp.R.print();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
     if (_didAttach) {
       commandHelp.d.print();
     }
@@ -1094,26 +1100,6 @@ class HotRunner extends ResidentRunner {
     commandHelp.q.print();
     if (details) {
       printHelpDetails();
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      // Caution: This log line is parsed by device lab tests.
-      globals.printStatus(
-        'An Observatory debugger and profiler on ${device.device.name} is available at: '
-        '${device.vmService.httpAddress}',
-      );
-
-      final DevToolsServerAddress devToolsServerAddress = activeDevToolsServer();
-      if (devToolsServerAddress != null) {
-        final Uri uri = devToolsServerAddress.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
-        );
-        if (uri != null) {
-          globals.printStatus(
-            '\nFlutter DevTools, a Flutter debugger and profiler, on '
-            '${device.device.name} is available at: $uri',
-          );
-        }
-      }
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
@@ -1127,6 +1113,8 @@ class HotRunner extends ResidentRunner {
         'For more information see https://dart.dev/null-safety/unsound-null-safety',
       );
     }
+    globals.printStatus('');
+    printDebuggerList();
   }
 
   Future<void> _evictDirtyAssets() async {

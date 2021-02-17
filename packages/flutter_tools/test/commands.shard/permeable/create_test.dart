@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -31,6 +30,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_http_client.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
@@ -1627,7 +1627,16 @@ void main() {
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains('void main() {}'));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() {}')),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('null-safe sample-based project have no analyzer errors', () async {
@@ -1641,7 +1650,16 @@ void main() {
       contains('String?'), // uses null-safe syntax
     );
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() { String? foo; print(foo); }'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('can write samples index to disk', () async {
@@ -1659,8 +1677,16 @@ void main() {
     expect(expectedFile, exists);
     expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: samplesIndexJson),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode(samplesIndexJson)),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('Throws tool exit on empty samples index', () async {
@@ -1680,8 +1706,15 @@ void main() {
         message: 'Unable to download samples',
     ));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: ''),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('provides an error to the user if samples json download fails', () async {
@@ -1697,8 +1730,16 @@ void main() {
     await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
     expect(globals.fs.file(outputFile), isNot(exists));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(404, result: 'not found'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: const FakeResponse(statusCode: HttpStatus.notFound),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('plugin does not support any platform by default', () async {
@@ -2637,14 +2678,14 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<Object> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    commands.add(command);
+    commands.add(command.map((Object arg) => arg.toString()).toList());
     return super.start(
       command,
       workingDirectory: workingDirectory,
@@ -2653,78 +2694,5 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
-  }
-}
-
-class MockHttpClient implements HttpClient {
-  MockHttpClient(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
-    return MockHttpClientRequest(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClient - $invocation';
-  }
-}
-
-class MockHttpClientRequest implements HttpClientRequest {
-  MockHttpClientRequest(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientResponse> close() async {
-    return MockHttpClientResponse(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientRequest - $invocation';
-  }
-}
-
-class MockHttpClientResponse implements HttpClientResponse {
-  MockHttpClientResponse(this.statusCode, {this.result});
-
-  @override
-  final int statusCode;
-
-  final String result;
-
-  @override
-  String get reasonPhrase => '<reason phrase>';
-
-  @override
-  HttpClientResponseCompressionState get compressionState {
-    return HttpClientResponseCompressionState.decompressed;
-  }
-
-  @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
-    Function onError,
-    void onDone(),
-    bool cancelOnError,
-  }) {
-    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-
-  @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) {
-    action(Uint8List.fromList(result.codeUnits));
-    return Future<void>.value();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientResponse - $invocation';
   }
 }

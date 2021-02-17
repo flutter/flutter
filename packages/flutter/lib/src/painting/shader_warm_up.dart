@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:developer';
 import 'dart:ui' as ui;
 
@@ -25,18 +24,16 @@ import 'package:flutter/foundation.dart';
 ///
 /// To determine whether a draw operation is useful for warming up shaders,
 /// check whether it improves the slowest frame rasterization time. Also,
-/// tracing with `flutter run --profile --trace-skia` may reveal whether
-/// there is shader-compilation-related jank. If there is such jank, some long
+/// tracing with `flutter run --profile --trace-skia` may reveal whether there
+/// is shader-compilation-related jank. If there is such jank, some long
 /// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
 /// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
-/// `CircularRRectOp`) would suggest Xyz draw operations are causing the
-/// shaders to be compiled. A useful shader warm-up draw operation would
-/// eliminate such long compilation calls in the animation. To double-check
-/// the warm-up, trace with
-/// `flutter run --profile --trace-skia --start-paused`.
-/// The `GrGLProgramBuilder` with the associated `XyzOp` should
-/// appear during startup rather than in the middle of a later animation.
-
+/// `CircularRRectOp`) would suggest Xyz draw operations are causing the shaders
+/// to be compiled. A useful shader warm-up draw operation would eliminate such
+/// long compilation calls in the animation. To double-check the warm-up, trace
+/// with `flutter run --profile --trace-skia --start-paused`. The
+/// `GrGLProgramBuilder` with the associated `XyzOp` should appear during
+/// startup rather than in the middle of a later animation.
 ///
 /// This warm-up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
@@ -51,8 +48,10 @@ import 'package:flutter/foundation.dart';
 ///
 ///  * [PaintingBinding.shaderWarmUp], the actual instance of [ShaderWarmUp]
 ///    that's used to warm up the shaders.
+///  * <https://flutter.dev/docs/perf/rendering/shader>
 abstract class ShaderWarmUp {
-  /// Allow const constructors for subclasses.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ShaderWarmUp();
 
   /// The size of the warm up image.
@@ -68,32 +67,33 @@ abstract class ShaderWarmUp {
   /// compilation cache.
   ///
   /// To decide which draw operations to be added to your custom warm up
-  /// process, try capture an skp using
-  /// `flutter screenshot --observatory-uri=<uri> --type=skia`
-  /// and analyze it with https://debugger.skia.org.
-  /// Alternatively, one may run the app with `flutter run --trace-skia` and
-  /// then examine the raster thread in the observatory timeline to see which
-  /// Skia draw operations are commonly used, and which shader compilations
-  /// are causing jank.
+  /// process, consider capturing an skp using `flutter screenshot
+  /// --observatory-uri=<uri> --type=skia` and analyzing it with
+  /// <https://debugger.skia.org/>. Alternatively, one may run the app with
+  /// `flutter run --trace-skia` and then examine the raster thread in the
+  /// observatory timeline to see which Skia draw operations are commonly used,
+  /// and which shader compilations are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
   /// Construct an offscreen image of [size], and execute [warmUpOnCanvas] on a
   /// canvas associated with that image.
+  ///
+  /// Currently, this has no effect when [kIsWeb] is true.
   Future<void> execute() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
-
     await warmUpOnCanvas(canvas);
-
     final ui.Picture picture = recorder.endRecording();
-    final TimelineTask shaderWarmUpTask = TimelineTask();
-    shaderWarmUpTask.start('Warm-up shader');
-    // Picture.toImage is not yet implemented on the web.
-    if (!kIsWeb) {
-      await picture.toImage(size.width.ceil(), size.height.ceil());
+    if (!kIsWeb) { // Picture.toImage is not yet implemented on the web.
+      final TimelineTask shaderWarmUpTask = TimelineTask();
+      shaderWarmUpTask.start('Warm-up shader');
+      try {
+        await picture.toImage(size.width.ceil(), size.height.ceil());
+      } finally {
+        shaderWarmUpTask.finish();
+      }
     }
-    shaderWarmUpTask.finish();
   }
 }
 
@@ -102,19 +102,37 @@ abstract class ShaderWarmUp {
 /// The draw operations being warmed up here are decided according to Flutter
 /// engineers' observation and experience based on the apps and the performance
 /// issues seen so far.
+///
+/// This is used for the default value of [PaintingBinding.shaderWarmUp].
+/// Consider setting that static property to a different value before the
+/// binding is initialized to change the warm-up sequence.
+///
+/// See also:
+///
+///  * [ShaderWarmUp], the base class for shader warm-up objects.
+///  * <https://flutter.dev/docs/perf/rendering/shader>
 class DefaultShaderWarmUp extends ShaderWarmUp {
-  /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
+  /// Create an instance of the default shader warm-up logic.
+  ///
+  /// Since this constructor is `const`, [DefaultShaderWarmUp] can be used as
+  /// the default value of parameters.
   const DefaultShaderWarmUp({
     this.drawCallSpacing = 0.0,
     this.canvasSize = const ui.Size(100.0, 100.0),
   });
 
-  /// Constant that can be used to space out draw calls for visualizing the draws
-  /// for debugging purposes (example: 80.0).  Be sure to also change your canvas
-  /// size.
+  /// Distance to place between draw calls for visualizing the draws for
+  /// debugging purposes (e.g. 80.0).
+  ///
+  /// Defaults to 0.0.
+  ///
+  /// When changing this value, the [canvasSize] must also be changed to
+  /// accomodate the bigger canvas.
   final double drawCallSpacing;
 
-  /// Value that returned by this.size to control canvas size where draws happen.
+  /// The [size] of the canvas required to paint the shapes in [warmUpOnCanvas].
+  ///
+  /// When [drawCallSpacing] is 0.0, this should be at least 100.0 by 100.0.
   final ui.Size canvasSize;
 
   @override
@@ -126,9 +144,8 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
     const ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
-
     final ui.Path circlePath = ui.Path()..addOval(
-        ui.Rect.fromCircle(center: const ui.Offset(40.0, 40.0), radius: 20.0)
+      ui.Rect.fromCircle(center: const ui.Offset(40.0, 40.0), radius: 20.0)
     );
 
     // The following path is based on

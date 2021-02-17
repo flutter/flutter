@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -583,8 +582,5 @@ void main() {
 }
 
 class MockIOSApp extends Mock implements IOSApp {}
-class MockIMobileDevice extends Mock implements IMobileDevice {}
-class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 class MockXcdevice extends Mock implements XCDevice {}
-class MockVmService extends Mock implements VmService {}

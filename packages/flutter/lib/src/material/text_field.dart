@@ -4,11 +4,9 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:characters/characters.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 

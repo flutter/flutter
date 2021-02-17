@@ -21,6 +21,7 @@ import 'package:fake_async/fake_async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 

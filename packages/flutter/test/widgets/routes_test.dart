@@ -4,13 +4,10 @@
 
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import 'semantics_tester.dart';
 
 final List<String> results = <String>[];

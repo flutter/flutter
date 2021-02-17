@@ -53,6 +53,16 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
+  testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
+    final LinuxDevice deviceArm64Host = LinuxDevice(
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
+    expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
+  });
+
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(await LinuxDevices(
       fileSystem: MemoryFileSystem.test(),
@@ -159,6 +169,15 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class MockLinuxApp extends Mock implements LinuxApp {}
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
   @override
   String get name => 'Linux';
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
 }

@@ -76,6 +76,7 @@ class WebDriverService extends DriverService {
     final Completer<void> appStartedCompleter = Completer<void>.sync();
     final int result = await _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: false,
       route: route,
     );
     _webUri = _residentRunner.uri;

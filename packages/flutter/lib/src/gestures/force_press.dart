@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'arena.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -229,14 +227,6 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != _ForceState.ready);
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
-      if (event.pressure > event.pressureMax || event.pressure < event.pressureMin) {
-        debugPrint(
-          'The reported device pressure ' + event.pressure.toString() +
-          ' is outside of the device pressure range where: ' +
-          event.pressureMin.toString() + ' <= pressure <= ' + event.pressureMax.toString(),
-        );
-      }
-
       final double pressure = interpolation(event.pressureMin, event.pressureMax, event.pressure);
       assert(
         (pressure >= 0.0 && pressure <= 1.0) || // Interpolated pressure must be between 1.0 and 0.0...

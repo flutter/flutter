@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -290,8 +291,12 @@ Future<void> main() async {
       }
 
       section('Run platform unit tests');
+
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
         simulatorDeviceId = deviceId;
+        final String resultBundlePath = path.join(resultBundleTemp, 'result');
+
         return inDirectory(objectiveCHostApp, () =>
           exec(
             'xcodebuild',
@@ -304,6 +309,8 @@ Future<void> main() async {
               'Debug',
               '-destination',
               'id=$deviceId',
+              '-resultBundlePath',
+              resultBundlePath,
               'test',
               'CODE_SIGNING_ALLOWED=NO',
               'CODE_SIGNING_REQUIRED=NO',
@@ -314,6 +321,22 @@ Future<void> main() async {
           ));
         }
       );
+
+      // Zip the test results to the artifacts directory for upload.
+      await inDirectory(resultBundleTemp, () {
+        final String zipPath = path.join(hostAgent.dumpDirectory.path,
+            'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+        return exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            zipPath,
+            'result.xcresult',
+          ],
+          canFail: true, // Best effort to get the logs.
+        );
+      });
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
       final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>

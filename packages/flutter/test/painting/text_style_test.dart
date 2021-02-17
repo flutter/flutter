@@ -7,6 +7,34 @@ import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
+void verifyDartUiTextStyleToString(ui.TextStyle textStyle, { required TextStyle matches }) {
+    final String description = textStyle.toString();
+    expect(description, startsWith('TextStyle('));
+    expect(description, endsWith(')'));
+
+    expect(description, stringContainsInOrder(<String>[
+      if (matches.color != null) 'color: ${matches.color}' else 'unspecified',
+      if (matches.decoration != null) 'decoration: ${matches.decoration}' else 'unspecified',
+      if (matches.decorationColor != null) 'decorationColor: ${matches.decorationColor}' else 'unspecified',
+      if (matches.decorationStyle != null) 'decorationStyle: ${matches.decorationStyle}' else 'unspecified',
+      if (matches.decorationThickness != null) 'decorationThickness: ${matches.decorationThickness}' else 'unspecified',
+      if (matches.fontWeight != null) 'fontWeight: ${matches.fontWeight}' else 'unspecified',
+      if (matches.fontStyle != null) 'fontStyle: ${matches.fontStyle}' else 'unspecified',
+      if (matches.textBaseline != null) 'textBaseline: ${matches.textBaseline}' else 'unspecified',
+      if (matches.fontFamily != null) 'fontFamily: ${matches.fontFamily}' else 'unspecified',
+      if (matches.fontFamilyFallback != null) 'fontFamilyFallback: ${matches.fontFamilyFallback}' else 'unspecified',
+      if (matches.fontSize != null) 'fontSize: ${matches.fontSize}' else 'unspecified',
+      if (matches.letterSpacing != null) 'letterSpacing: ${matches.letterSpacing}' else 'unspecified',
+      if (matches.wordSpacing != null) 'wordSpacing: ${matches.wordSpacing}' else 'unspecified',
+      if (matches.height != null) 'height: ${matches.height}' else 'unspecified',
+      if (matches.locale != null) 'locale: ${matches.locale}' else 'unspecified',
+      if (matches.background != null) 'background: ${matches.background}' else 'unspecified',
+      if (matches.foreground != null) 'foreground: ${matches.foreground}' else 'unspecified',
+      if (matches.shadows != null) 'shadows: ${matches.shadows}' else 'unspecified',
+      if (matches.fontFeatures != null) 'fontFeatures: ${matches.fontFeatures}' else 'unspecified',
+    ]));
+}
+
 void main() {
   test('TextStyle control test', () {
     expect(
@@ -169,10 +197,10 @@ void main() {
 
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    verifyDartUiTextStyleToString(ts5, matches: s5);
     final ui.TextStyle ts2 = s2.getTextStyle();
     expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    verifyDartUiTextStyleToString(ts2, matches: s2);
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
@@ -192,11 +220,11 @@ void main() {
   test('TextStyle using package font', () {
     const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    verifyDartUiTextStyleToString(s6.getTextStyle(), matches: s6);
 
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    verifyDartUiTextStyleToString(s7.getTextStyle(), matches: s7);
 
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback![0], 'packages/p/test');
@@ -232,7 +260,7 @@ void main() {
     expect(s4.fontFamilyFallback!.isEmpty, true);
 
     final ui.TextStyle uis1 = s2.getTextStyle();
-    expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
+    verifyDartUiTextStyleToString(uis1, matches: s2);
 
     expect(s2.apply().fontFamily, 'foo');
     expect(s2.apply().fontFamilyFallback, const <String>['Roboto', 'test']);
