@@ -7232,13 +7232,15 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'web');
       await tester.pump();
       expect(myIntentWasCalled, isFalse);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 0);
     } else {
       await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
       await tester.pump();
       expect(myIntentWasCalled, isTrue);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 1);
     }
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 1);
   });
 }
 
