@@ -272,6 +272,10 @@ class StartCommand extends Command<void> {
       ],
     );
 
+    if (result.exitCode != 0) {
+      throw ConductorException('`git rev-list` invocation failed!\n${result.stderr}');
+    }
+
     // `git rev-list` returns newest first, so reverse this list
     final List<String> upstreamRevlist = (result.stdout as String).split('\n').reversed.toList();
 
