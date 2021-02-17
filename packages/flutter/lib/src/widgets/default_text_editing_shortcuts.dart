@@ -20,27 +20,117 @@ import 'text_editing_intents.dart';
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
-/// the left arrow key [Intent] and map it to the right arrow key instead.
+/// some default text editing keyboard shortcuts to have new behavior. Instead
+/// of moving the cursor, alt + up/down will instead change the focused widget.
 ///
 /// ```dart
-/// final TextEditingController controller = TextEditingController(
-///   text: "Try using the keyboard's arrow keys and notice that left moves right.",
-/// );
-///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
-///           LogicalKeySet(LogicalKeyboardKey.arrowLeft): ArrowRightTextIntent(),
+///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowDown): NextFocusIntent(),
+///           LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.arrowUp): PreviousFocusIntent(),
 ///         },
-///         child: TextField(
-///           controller: controller,
+///         child: Column(
+///           children: <Widget>[
+///             TextField(
+///               decoration: InputDecoration(
+///                 hintText: 'alt + down moves to the next field.',
+///               ),
+///             ),
+///             TextField(
+///               decoration: InputDecoration(
+///                 hintText: 'And alt + up moves to the previous.',
+///               ),
+///             ),
+///           ],
 ///         ),
 ///       ),
 ///     ),
 ///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// This example shows how to use an additional [Shortcuts] widget to override
+/// default text editing shortcuts to have completely custom behavior. Here, the
+/// up/down arrow keys increment/decrement a counter instead of moving the
+/// cursor.
+///
+/// ```dart
+/// class IncrementCounterIntent extends Intent {}
+/// class DecrementCounterIntent extends Intent {}
+///
+/// class MyWidget extends StatefulWidget {
+///   MyWidget({ Key? key }) : super(key: key);
+///
+///   @override
+///   MyWidgetState createState() => MyWidgetState();
+/// }
+///
+/// class MyWidgetState extends State<MyWidget> {
+///
+///   int _counter = 0;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Text(
+///               'You have pushed the button this many times:',
+///             ),
+///             Text(
+///               '$_counter',
+///               style: Theme.of(context).textTheme.headline4,
+///             ),
+///             Shortcuts(
+///               shortcuts: <LogicalKeySet, Intent>{
+///                 LogicalKeySet(LogicalKeyboardKey.arrowUp): IncrementCounterIntent(),
+///                 LogicalKeySet(LogicalKeyboardKey.arrowDown): DecrementCounterIntent(),
+///               },
+///               child: Actions(
+///                 actions: <Type, Action<Intent>>{
+///                   IncrementCounterIntent: CallbackAction<IncrementCounterIntent>(
+///                     onInvoke: (IncrementCounterIntent intent) {
+///                       setState(() {
+///                         _counter++;
+///                       });
+///                     },
+///                   ),
+///                   DecrementCounterIntent: CallbackAction<DecrementCounterIntent>(
+///                     onInvoke: (DecrementCounterIntent intent) {
+///                       setState(() {
+///                         _counter--;
+///                       });
+///                     },
+///                   ),
+///                 },
+///                 child: TextField(
+///                   maxLines: 2,
+///                   decoration: InputDecoration(
+///                     hintText: 'Up/down increment/decrement here.',
+///                   ),
+///                 ),
+///               ),
+///             ),
+///             TextField(
+///               maxLines: 2,
+///               decoration: InputDecoration(
+///                 hintText: 'Up/down behave normally here.',
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
 /// }
 /// ```
 /// {@end-tool}
