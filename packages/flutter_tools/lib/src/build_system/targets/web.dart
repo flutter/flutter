@@ -357,6 +357,12 @@ class WebReleaseBundle extends Target {
         final String randomHash = Random().nextInt(4294967296).toString();
         final String resultString = inputFile.readAsStringSync()
           .replaceFirst(
+            'var serviceWorkerVersion = null',
+            "var serviceWorkerVersion = '$randomHash'",
+          )
+          // This is for legacy index.html that still use the old service
+          // worker loading mechanism.
+          .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$randomHash')",
           );
@@ -492,7 +498,7 @@ self.addEventListener("install", (event) => {
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
       return cache.addAll(
-        CORE.map((value) => new Request(value + '?revision=' + RESOURCES[value], {'cache': 'reload'})));
+        CORE.map((value) => new Request(value, {'cache': 'reload'})));
     })
   );
 });

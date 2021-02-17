@@ -6,7 +6,6 @@ import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/driver/common.dart';
 import 'package:flutter_driver/src/driver/profiling_summarizer.dart';
 import 'package:flutter_driver/src/driver/scene_display_lag_summarizer.dart';
 import 'package:path/path.dart' as path;

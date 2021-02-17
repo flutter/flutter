@@ -227,7 +227,7 @@ void main() {
       when(mockProcessManager.canRun(any)).thenReturn(false);
 
       mockAndroidSdk = MockAndroidSdk();
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {

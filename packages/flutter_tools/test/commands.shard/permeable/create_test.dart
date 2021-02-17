@@ -2678,14 +2678,14 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<Object> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    commands.add(command);
+    commands.add(command.map((Object arg) => arg.toString()).toList());
     return super.start(
       command,
       workingDirectory: workingDirectory,

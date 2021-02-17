@@ -109,18 +109,18 @@ void main() {
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
-      MockPlatform mockPlatform;
+      FakePlatform fakePlatform;
       MockProcessManager mockProcessManager;
       FlutterPlatform flutterPlatform;
       final Map<Type, Generator> contextOverrides = <Type, Generator>{
-        Platform: () => mockPlatform,
+        Platform: () => fakePlatform,
         ProcessManager: () => mockProcessManager,
         FileSystem: () => fileSystem,
       };
 
       setUp(() {
-        mockPlatform = MockPlatform();
-        when(mockPlatform.isWindows).thenReturn(false);
+        // Not Windows
+        fakePlatform = FakePlatform(operatingSystem: 'linux');
         mockProcessManager = MockProcessManager();
         flutterPlatform = TestFlutterPlatform();
       });
@@ -144,31 +144,31 @@ void main() {
       }
 
       testUsingContext('as true when not originally set', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{});
+        fakePlatform.environment = <String, String>{};
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'true');
       }, overrides: contextOverrides);
 
       testUsingContext('as true when set to true', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'true'});
+        fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'true'};
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'true');
       }, overrides: contextOverrides);
 
       testUsingContext('as false when set to false', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'false'});
+        fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'false'};
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'false');
       }, overrides: contextOverrides);
 
       testUsingContext('unchanged when set', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'neither true nor false'});
+        fakePlatform.environment = <String, String>{'FLUTTER_TEST': 'neither true nor false'};
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'neither true nor false');
       }, overrides: contextOverrides);
 
       testUsingContext('as null when set to null', () async {
-        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': null});
+        fakePlatform.environment = <String, String>{'FLUTTER_TEST': null};
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], null);
       }, overrides: contextOverrides);
@@ -278,8 +278,6 @@ class MockSuitePlatform extends Mock implements SuitePlatform {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcess extends Mock implements Process {}
-
-class MockPlatform extends Mock implements Platform {}
 
 class MockHttpServer extends Mock implements HttpServer {}
 

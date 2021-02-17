@@ -263,6 +263,12 @@ class FakeHttpClient implements HttpClient {
   int _requestCount = 0;
 
   _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri) {
+    // Ensure the fake client throws similar errors to the real client.
+    if (uri.host.isEmpty) {
+      throw ArgumentError('No host specified in URI $uri');
+    } else if (uri.scheme != 'http' && uri.scheme != 'https') {
+      throw ArgumentError("Unsupported scheme '${uri.scheme}' in URI $uri");
+    }
     final String methodString = _toMethodString(method);
     if (_any) {
       return _FakeHttpClientRequest(
