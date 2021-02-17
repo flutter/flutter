@@ -230,7 +230,7 @@ void main() {
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
   
-  group('Pointer scrolled app bars', () {
+  group('Pointer scrolled floating', () {
     Widget buildTest(Widget sliver) {
       return MaterialApp(
         home: CustomScrollView(
@@ -259,7 +259,7 @@ void main() {
       expect(geometry.paintExtent, paintExtent);
     }
 
-    testWidgets('Sliver appbars - floating with pointer scrolling', (WidgetTester tester) async {
+    testWidgets('SliverAppBar', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,
@@ -313,7 +313,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('Sliver persistent headers - floating with pointer scrolling', (WidgetTester tester) async {
+    testWidgets('SliverPersistentHeader', (WidgetTester tester) async {
       final GlobalKey headerKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverPersistentHeader(
         key: headerKey,
@@ -355,7 +355,7 @@ void main() {
       verifyGeometry(key: headerKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('Sliver appbars - snapping with pointer scrolling', (WidgetTester tester) async {
+    testWidgets('and snapping SliverAppBar', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,
