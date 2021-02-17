@@ -33,7 +33,7 @@ class SamplingClock {
 // Class that handles resampling of touch events for multiple pointer
 // devices.
 //
-// `samplingInterval` is used to determine the approximate next
+// The `samplingInterval` is used to determine the approximate next
 // time for resampling.
 // SchedulerBinding's `currentSystemFrameTimeStamp` is used to determine
 // sample time.
@@ -92,9 +92,9 @@ class _Resampler {
 
   // Sample and dispatch events.
   //
-  // `samplingOffset` is relative to the current frame time, which
+  // The `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
-  // `samplingClock` is the clock used to determine frame time age.
+  // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
