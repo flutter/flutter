@@ -48,7 +48,7 @@ void testMain() {
 
     tearDown(() async {
       spy.tearDown();
-      await window.debugResetHistory();
+      await window.resetHistory();
     });
 
     test('basic setup works', () async {
@@ -262,7 +262,7 @@ void testMain() {
 
     tearDown(() async {
       spy.tearDown();
-      await window.debugResetHistory();
+      await window.resetHistory();
     });
 
     test('basic setup works', () async {
