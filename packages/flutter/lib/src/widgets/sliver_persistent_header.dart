@@ -163,10 +163,9 @@ class SliverPersistentHeader extends StatelessWidget {
       return _SliverFloatingPinnedPersistentHeader(delegate: delegate);
     if (pinned)
       return _SliverPinnedPersistentHeader(delegate: delegate);
-    if (floating) {
+    if (floating)
       return _SliverFloatingPersistentHeader(delegate: delegate);
-    }
-      return _SliverScrollingPersistentHeader(delegate: delegate);
+    return _SliverScrollingPersistentHeader(delegate: delegate);
   }
 
   @override
