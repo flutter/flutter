@@ -33,7 +33,7 @@ void testMain() {
   });
 
   tearDown(() async {
-    await window.debugResetHistory();
+    await window.resetHistory();
     window = null;
   });
 

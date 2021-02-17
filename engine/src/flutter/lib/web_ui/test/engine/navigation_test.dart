@@ -28,7 +28,7 @@ void testMain() {
 
   tearDown(() async {
     _strategy = null;
-    await engine.window.debugResetHistory();
+    await engine.window.resetHistory();
   });
 
   test('Tracks pushed, replaced and popped routes', () async {
