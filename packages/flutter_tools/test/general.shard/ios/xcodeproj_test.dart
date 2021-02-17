@@ -36,16 +36,13 @@ void main() {
       platform = FakePlatform(operatingSystem: 'macos');
       final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
-      final AnsiTerminal terminal = MockAnsiTerminal();
-      logger = BufferLogger.test(
-        terminal: terminal
-      );
+      logger = BufferLogger.test();
       xcodeProjectInterpreter = XcodeProjectInterpreter(
         logger: logger,
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
-        terminal: terminal,
+        terminal: Terminal.test(),
         usage: null,
       );
     });
@@ -93,23 +90,19 @@ void main() {
   FakePlatform platform;
   FileSystem fileSystem;
   BufferLogger logger;
-  AnsiTerminal terminal;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
-    terminal = MockAnsiTerminal();
-    logger = BufferLogger.test(
-      terminal: terminal
-    );
+    logger = BufferLogger.test();
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: null,
     );
   });
@@ -226,7 +219,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -430,7 +423,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -457,7 +450,7 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      terminal: terminal,
+      terminal: Terminal.test(),
       usage: TestUsage(),
     );
 
@@ -999,8 +992,3 @@ flutter:
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockAnsiTerminal extends Mock implements AnsiTerminal {
-  @override
-  bool get supportsColor => false;
-}

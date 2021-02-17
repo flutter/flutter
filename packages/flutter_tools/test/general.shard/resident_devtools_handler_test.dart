@@ -6,6 +6,7 @@
 
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -16,6 +17,31 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+ final vm_service.Isolate isolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>['foo']
+);
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -58,9 +84,23 @@ final vm_service.VM fakeVM = vm_service.VM(
   systemIsolates: <vm_service.IsolateRef>[],
 );
 
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
+
 void main() {
   testWithoutContext('Does not serve devtools if launcher is null', () async {
-    final ResidentDevtoolsHandler handler = ResidentDevtoolsHandler(
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
@@ -72,7 +112,7 @@ void main() {
   });
 
   testWithoutContext('Does not serve devtools if ResidentRunner does not support the service protocol', () async {
-    final ResidentDevtoolsHandler handler = ResidentDevtoolsHandler(
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher(),
       FakeResidentRunner()..supportsServiceProtocol = false,
       BufferLogger.test(),
@@ -91,7 +131,7 @@ void main() {
       platform: FakePlatform(),
       persistentToolState: null,
     );
-    final ResidentDevtoolsHandler handler = ResidentDevtoolsHandler(
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       // Uses real devtools instance which should be a no-op if
       // URI is already set.
       launcher,
@@ -108,8 +148,8 @@ void main() {
     expect(handler.activeDevToolsServer.port, 8181);
   });
 
-  testWithoutContext('can serveAndAnnounceDevTools with attached device does not fail on null vm service', () async {
-    final ResidentDevtoolsHandler handler = ResidentDevtoolsHandler(
+  testWithoutContext('serveAndAnnounceDevTools with attached device does not fail on null vm service', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
       FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
@@ -123,33 +163,63 @@ void main() {
     );
   });
 
-  testWithoutContext('wait for extension handles an immediate extension', () {
-    final vm_service.Isolate isolate = vm_service.Isolate(
-      id: '1',
-      pauseEvent: vm_service.Event(
-        kind: vm_service.EventKind.kResume,
-        timestamp: 0
-      ),
-      breakpoints: <vm_service.Breakpoint>[],
-      exceptionPauseMode: null,
-      libraries: <vm_service.LibraryRef>[
-        vm_service.LibraryRef(
-          id: '1',
-          uri: 'file:///hello_world/main.dart',
-          name: '',
-        ),
-      ],
-      livePorts: 0,
-      name: 'test',
-      number: '1',
-      pauseOnExit: false,
-      runnable: true,
-      startTime: 0,
-      isSystemIsolate: false,
-      isolateFlags: <vm_service.IsolateFlag>[],
-      extensionRPCs: <String>['foo']
+  testWithoutContext('serveAndAnnounceDevTools with invokes devtools and vm_service setter', () async {
+    final ResidentDevtoolsHandler handler = FlutterResidentDevtoolsHandler(
+      FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
+      FakeResidentRunner(),
+      BufferLogger.test(),
     );
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Extension',
+        }
+      ),
+      FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
+      FakeVmServiceRequest(
+        method: 'getIsolate',
+        jsonResponse: isolate.toJson(),
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+      ),
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.FrameworkInitialization',
+          kind: 'test',
+        ),
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.activeDevToolsServerAddress',
+        args: <String, Object>{
+          'isolateId': '1',
+          'value': 'http://localhost:8080',
+        },
+      ),
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.connectedVmServiceUri',
+        args: <String, Object>{
+          'isolateId': '1',
+          'value': 'http://localhost:1234',
+        },
+      ),
+    ]);
 
+    final FakeFlutterDevice device = FakeFlutterDevice()
+      ..vmService = fakeVmServiceHost.vmService;
+    setHttpAddress(Uri.parse('http://localhost:1234'), fakeVmServiceHost.vmService);
+
+    await handler.serveAndAnnounceDevTools(
+      flutterDevices: <FlutterDevice>[device],
+    );
+  });
+
+  testWithoutContext('wait for extension handles an immediate extension', () {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       const FakeVmServiceRequest(
         method: 'streamListen',

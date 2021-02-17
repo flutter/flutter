@@ -696,13 +696,13 @@ class FakeProcessManager extends Fake implements ProcessManager {
   /// Used if [processResults] does not contain a matching invocation.
   ProcessResult? fallbackProcessResult;
 
-  final List<String> workingDirectories = <String>[];
+  final List<String?> workingDirectories = <String?>[];
 
   @override
   Future<ProcessResult> run(
-    List<dynamic> command, {
-    String workingDirectory = '',
-    Map<String, String> environment = const <String, String>{},
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     Encoding stdoutEncoding = systemEncoding,

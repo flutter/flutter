@@ -52,6 +52,19 @@ void main() {
       restoreVmServiceConnectFunction();
     });
 
+    test('Retries while Dart VM service is not available', () async {
+      // This test case will test the real implementation of `_waitAndConnect`.
+      restoreVmServiceConnectFunction();
+
+      // The actual behavior is to retry indefinitely until the Dart VM service
+      // becomes available. `.timeout` is used here to exit the infinite loop,
+      // expecting that no other types of error are thrown during the process.
+      expect(
+        vmServiceConnectFunction('http://foo.bar', <String, dynamic>{})
+            .timeout(const Duration(seconds: 1)),
+        throwsA(isA<TimeoutException>()),
+      );
+    });
 
     test('throws after retries if no isolate', () async {
       fakeVM.numberOfTriesBeforeResolvingIsolate = 10000;
