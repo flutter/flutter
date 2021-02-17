@@ -10,9 +10,6 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Shader);
 
-Shader::Shader(flutter::SkiaGPUObject<SkShader> shader)
-    : shader_(std::move(shader)) {}
-
 Shader::~Shader() = default;
 
 }  // namespace flutter

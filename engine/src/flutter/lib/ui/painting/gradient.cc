@@ -58,10 +58,10 @@ void CanvasGradient::initLinear(const tonic::Float32List& end_points,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeLinear(
+  sk_shader_ = UIDartState::CreateGPUObject(SkGradientShader::MakeLinear(
       reinterpret_cast<const SkPoint*>(end_points.data()),
       reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr)));
+      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr));
 }
 
 void CanvasGradient::initRadial(double center_x,
@@ -83,10 +83,10 @@ void CanvasGradient::initRadial(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeRadial(
+  sk_shader_ = UIDartState::CreateGPUObject(SkGradientShader::MakeRadial(
       SkPoint::Make(center_x, center_y), radius,
       reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr)));
+      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr));
 }
 
 void CanvasGradient::initSweep(double center_x,
@@ -109,11 +109,11 @@ void CanvasGradient::initSweep(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeSweep(
+  sk_shader_ = UIDartState::CreateGPUObject(SkGradientShader::MakeSweep(
       center_x, center_y, reinterpret_cast<const SkColor*>(colors.data()),
       color_stops.data(), colors.num_elements(), tile_mode,
       start_angle * 180.0 / M_PI, end_angle * 180.0 / M_PI, 0,
-      has_matrix ? &sk_matrix : nullptr)));
+      has_matrix ? &sk_matrix : nullptr));
 }
 
 void CanvasGradient::initTwoPointConical(double start_x,
@@ -138,11 +138,13 @@ void CanvasGradient::initTwoPointConical(double start_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeTwoPointConical(
-      SkPoint::Make(start_x, start_y), start_radius,
-      SkPoint::Make(end_x, end_y), end_radius,
-      reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr)));
+  sk_shader_ =
+      UIDartState::CreateGPUObject(SkGradientShader::MakeTwoPointConical(
+          SkPoint::Make(start_x, start_y), start_radius,
+          SkPoint::Make(end_x, end_y), end_radius,
+          reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
+          colors.num_elements(), tile_mode, 0,
+          has_matrix ? &sk_matrix : nullptr));
 }
 
 CanvasGradient::CanvasGradient() = default;
