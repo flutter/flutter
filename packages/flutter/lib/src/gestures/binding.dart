@@ -107,7 +107,7 @@ class _Resampler {
     }
 
     // Schedule periodic resampling if `_timer` is not already active.
-    if (_timer?.isActive == false) {
+    if (_timer?.isActive != true) {
        _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
     }
 
