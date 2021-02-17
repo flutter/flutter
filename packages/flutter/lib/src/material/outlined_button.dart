@@ -44,6 +44,8 @@ import 'theme_data.dart';
 /// The static [styleFrom] method is a convenient way to create a
 /// outlined button [ButtonStyle] from simple values.
 ///
+/// Note: [OutlinedButton] is available after 1.22.0
+///
 /// See also:
 ///
 ///  * [ElevatedButton], a filled material design button with a shadow.

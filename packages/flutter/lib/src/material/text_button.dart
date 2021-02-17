@@ -51,6 +51,8 @@ import 'theme_data.dart';
 /// If the [onPressed] and [onLongPress] callbacks are null, then this
 /// button will be disabled, it will not react to touch.
 ///
+/// Note: [TextButton] is available after 1.22.0
+///
 /// See also:
 ///
 ///  * [OutlinedButton], a [TextButton] with a border outline.
