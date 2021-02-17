@@ -113,7 +113,7 @@ class RefreshIndicator extends StatefulWidget {
     Key? key,
     required this.child,
     this.displacement = 40.0,
-    this.edgeDistance = 0.0,
+    this.edgeOffset = 0.0,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -142,17 +142,16 @@ class RefreshIndicator extends StatefulWidget {
   /// its actual displacement may significantly exceed this value.
   final double displacement;
 
-  /// The distance of [RefreshProgressIndicator] from the top or bottom edge of
-  /// its parent.
+  /// The offset where [RefreshProgressIndicator] starts to appear on drag start.
   ///
   /// Depending whether the indicator is showing on the top or bottom, the value
-  /// of this variable controls how far from the target edge will the progress
-  /// indicator start to appear. This may come in handy when, for example, the
-  /// UI contains a top [Widget] which covers the edge where the progress
+  /// of this variable controls how far from the parent's edge the progress
+  /// indicator starts to appear. This may come in handy when, for example, the
+  /// UI contains a top [Widget] which covers the parent's edge where the progress
   /// indicator would otherwise appear.
   ///
-  /// By default, the edge distance is set to 0.
-  final double edgeDistance;
+  /// By default, the edge offset is set to 0.
+  final double edgeOffset;
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
@@ -512,8 +511,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       children: <Widget>[
         child,
         if (_mode != null) Positioned(
-          top: _isIndicatorAtTop! ? widget.edgeDistance : null,
-          bottom: !_isIndicatorAtTop! ? widget.edgeDistance : null,
+          top: _isIndicatorAtTop! ? widget.edgeOffset : null,
+          bottom: !_isIndicatorAtTop! ? widget.edgeOffset : null,
           left: 0.0,
           right: 0.0,
           child: SizeTransition(
