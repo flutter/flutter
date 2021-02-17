@@ -21,24 +21,13 @@ import 'resampler.dart';
 
 typedef _HandleSampleTimeChangedCallback = void Function();
 
-/// Class that implements clock used for sampling.
-class SamplingClock {
-  /// Returns current time.
-  DateTime now() => DateTime.now();
-
-  /// Returns a new stopwatch that uses the current time as reported by `this`.
-  Stopwatch stopwatch() => Stopwatch();
-}
-
 // Class that handles resampling of touch events for multiple pointer
 // devices.
 //
-// The `samplingInterval` is used to determine the approximate next
-// time for resampling.
 // SchedulerBinding's `currentSystemFrameTimeStamp` is used to determine
 // sample time.
 class _Resampler {
-  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged, this._samplingInterval);
+  _Resampler(this._handlePointerEvent, this._handleSampleTimeChanged);
 
   // Resamplers used to filter incoming pointer events.
   final Map<int, PointerEventResampler> _resamplers = <int, PointerEventResampler>{};
@@ -46,11 +35,8 @@ class _Resampler {
   // Flag to track if a frame callback has been scheduled.
   bool _frameCallbackScheduled = false;
 
-  // Last frame time for resampling.
+  // Current frame time for resampling.
   Duration _frameTime = Duration.zero;
-
-  // Time since `_frameTime` was updated.
-  Stopwatch _frameTimeAge = Stopwatch();
 
   // Last sample time and time stamp of last event.
   //
@@ -64,18 +50,12 @@ class _Resampler {
   // Callback used to handle sample time changes.
   final _HandleSampleTimeChangedCallback _handleSampleTimeChanged;
 
-  // Interval used for sampling.
-  final Duration _samplingInterval;
-
-  // Timer used to schedule resampling.
-  Timer? _timer;
-
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
   void addOrDispatch(PointerEvent event) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
-    // Add touch event to resampler or dispatch pointer event directly.
+      // Add touch event to resampler or dispatch pointer event directly.
     if (event.kind == PointerDeviceKind.touch) {
       // Save last event time for debugPrint of resampling margin.
       _lastEventTime = event.timeStamp;
@@ -92,43 +72,25 @@ class _Resampler {
 
   // Sample and dispatch events.
   //
-  // The `samplingOffset` is relative to the current frame time, which
+  // `samplingOffset` is relative to the current frame time, which
   // can be in the past when we're not actively resampling.
-  // The `samplingClock` is the clock used to determine frame time age.
-  void sample(Duration samplingOffset, SamplingClock clock) {
+  // `samplingInterval` is used to determine the approximate next
+  // time for resampling.
+  // `currentSystemFrameTimeStamp` is used to determine the current
+  // frame time.
+  void sample(Duration samplingOffset, Duration samplingInterval) {
     final SchedulerBinding? scheduler = SchedulerBinding.instance;
     assert(scheduler != null);
-
-    // Initialize `_frameTime` if needed. This will be used for periodic
-    // sampling when frame callbacks are not received.
-    if (_frameTime == Duration.zero) {
-      _frameTime = Duration(milliseconds: clock.now().millisecondsSinceEpoch);
-      _frameTimeAge = clock.stopwatch()..start();
-    }
-
-    // Schedule periodic resampling if `_timer` is not already active.
-    if (_timer?.isActive == false) {
-       _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
-    }
-
-    // Calculate the effective frame time by taking the number
-    // of sampling intervals since last time `_frameTime` was
-    // updated into account. This allows us to advance sample
-    // time without having to receive frame callbacks.
-    final int samplingIntervalUs = _samplingInterval.inMicroseconds;
-    final int elapsedIntervals = _frameTimeAge.elapsedMicroseconds ~/ samplingIntervalUs;
-    final int elapsedUs = elapsedIntervals * samplingIntervalUs;
-    final Duration frameTime = _frameTime + Duration(microseconds: elapsedUs);
 
     // Determine sample time by adding the offset to the current
     // frame time. This is expected to be in the past and not
     // result in any dispatched events unless we're actively
     // resampling events.
-    final Duration sampleTime = frameTime + samplingOffset;
+    final Duration sampleTime = _frameTime + samplingOffset;
 
     // Determine next sample time by adding the sampling interval
     // to the current sample time.
-    final Duration nextSampleTime = sampleTime + _samplingInterval;
+    final Duration nextSampleTime = sampleTime + samplingInterval;
 
     // Iterate over active resamplers and sample pointer events for
     // current sample time.
@@ -144,30 +106,23 @@ class _Resampler {
     // Save last sample time for debugPrint of resampling margin.
     _lastSampleTime = sampleTime;
 
-    // Early out if another call to `sample` isn't needed.
-    if (_resamplers.isEmpty) {
-      _timer!.cancel();
-      return;
-    }
-
     // Schedule a frame callback if another call to `sample` is needed.
-    if (!_frameCallbackScheduled) {
+    if (!_frameCallbackScheduled && _resamplers.isNotEmpty) {
       _frameCallbackScheduled = true;
-      // Add a post frame callback as this avoids producing unnecessary
-      // frames but ensures that sampling phase is adjusted to frame
-      // time when frames are produced.
-      scheduler?.addPostFrameCallback((_) {
+      scheduler?.scheduleFrameCallback((_) {
         _frameCallbackScheduled = false;
         // We use `currentSystemFrameTimeStamp` here as it's critical that
         // sample time is in the same clock as the event time stamps, and
         // never adjusted or scaled like `currentFrameTimeStamp`.
         _frameTime = scheduler.currentSystemFrameTimeStamp;
-        _frameTimeAge.reset();
-        // Reset timer to match phase of latest frame callback.
-        _timer?.cancel();
-        _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
-        // Trigger an immediate sample time change.
-        _onSampleTimeChanged();
+        assert(() {
+          if (debugPrintResamplingMargin) {
+            final Duration resamplingMargin = _lastEventTime - _lastSampleTime;
+              debugPrint('$resamplingMargin');
+          }
+          return true;
+        }());
+        _handleSampleTimeChanged();
       });
     }
   }
@@ -178,18 +133,6 @@ class _Resampler {
       resampler.stop(_handlePointerEvent);
     }
     _resamplers.clear();
-    _frameTime = Duration.zero;
-  }
-
-  void _onSampleTimeChanged() {
-    assert(() {
-      if (debugPrintResamplingMargin) {
-        final Duration resamplingMargin = _lastEventTime - _lastSampleTime;
-          debugPrint('$resamplingMargin');
-      }
-      return true;
-    }());
-    _handleSampleTimeChanged();
   }
 }
 
@@ -204,8 +147,7 @@ const Duration _defaultSamplingOffset = Duration(milliseconds: -38);
 // The sampling interval.
 //
 // Sampling interval is used to determine the approximate time for subsequent
-// sampling. This is used to sample events when frame callbacks are not
-// being received and decide if early processing of up and removed events
+// sampling. This is used to decide if early processing of up and removed events
 // is appropriate. 16667 us for 60hz sampling interval.
 const Duration _samplingInterval = Duration(microseconds: 16667);
 
@@ -328,7 +270,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
     if (resamplingEnabled) {
       _resampler.addOrDispatch(event);
-      _resampler.sample(samplingOffset, _samplingClock);
+      _resampler.sample(samplingOffset, _samplingInterval);
       return;
     }
 
@@ -456,16 +398,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _hitTests.clear();
   }
 
-  /// Overrides the sampling clock for debugging and testing.
-  ///
-  /// This value is ignored in non-debug builds.
-  @protected
-  SamplingClock? get debugSamplingClock => null;
-
   void _handleSampleTimeChanged() {
     if (!locked) {
       if (resamplingEnabled) {
-        _resampler.sample(samplingOffset, _samplingClock);
+        _resampler.sample(samplingOffset, _samplingInterval);
       }
       else {
         _resampler.stop();
@@ -473,23 +409,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  SamplingClock get _samplingClock {
-    SamplingClock value = SamplingClock();
-    assert(() {
-      final SamplingClock? debugValue = debugSamplingClock;
-      if (debugValue != null)
-        value = debugValue;
-      return true;
-    }());
-    return value;
-  }
-
   // Resampler used to filter incoming pointer events when resampling
   // is enabled.
   late final _Resampler _resampler = _Resampler(
     _handlePointerEventImmediately,
     _handleSampleTimeChanged,
-    _samplingInterval,
   );
 
   /// Enable pointer event resampling for touch devices by setting
