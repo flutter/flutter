@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -705,7 +704,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           final DateTime now = DateTime.now();
 
-          if (widget.minimumDate?.isAfter(rangeEnd) == true)
+          if (widget.minimumDate?.isBefore(rangeEnd) == false)
             return null;
           if (widget.maximumDate?.isAfter(rangeStart) == false)
             return null;
@@ -719,6 +718,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             Text(dateText, style: _themeTextStyle(context)),
           );
         },
+        selectionOverlay: selectionOverlay,
       ),
     );
   }
@@ -802,6 +802,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
         }),
         looping: true,
+        selectionOverlay: selectionOverlay,
       )
     );
   }

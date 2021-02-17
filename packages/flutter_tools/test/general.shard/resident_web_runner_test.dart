@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -30,11 +32,11 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
@@ -186,7 +188,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -213,7 +215,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
   testUsingContext('profile does not supportsServiceProtocol', () {
@@ -244,7 +246,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -273,7 +275,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -293,7 +295,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -328,7 +330,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -352,7 +354,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -372,7 +374,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -410,7 +412,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -478,7 +480,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -504,7 +506,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -584,7 +586,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -668,7 +670,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -710,7 +712,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -722,7 +724,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -758,7 +760,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -791,7 +793,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -831,7 +833,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -859,7 +861,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -887,22 +889,20 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
-  testUsingContext('printHelp without details has web warning', () async {
+  testUsingContext('printHelp without details shows hot restart help message', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentWebRunner.printHelp(details: false);
 
-    expect(testLogger.statusText, contains('Warning'));
-    expect(testLogger.statusText, contains('https://flutter.dev/web'));
-    expect(testLogger.statusText, isNot(contains('https://flutter.dev/web.')));
+    expect(testLogger.statusText, contains('To hot restart changes'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -929,7 +929,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -956,7 +956,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -983,7 +983,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1010,7 +1010,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1038,7 +1038,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1079,7 +1079,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1120,7 +1120,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1161,7 +1161,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1202,7 +1202,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1243,7 +1243,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1286,7 +1286,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1329,7 +1329,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1361,7 +1361,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1387,7 +1387,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1412,7 +1412,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1487,7 +1487,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1534,7 +1534,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1551,7 +1551,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1568,7 +1568,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1585,7 +1585,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1600,7 +1600,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1627,7 +1627,7 @@ void main() {
     )),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 }
@@ -1648,7 +1648,6 @@ class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}
@@ -1660,4 +1659,3 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
-class MockPub extends Mock implements Pub {}

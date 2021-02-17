@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import 'package:flutter_tools/runner.dart' as runner;
@@ -111,6 +113,7 @@ Future<void> main(List<String> args) async {
           fileSystem: globals.fs,
           cache: globals.cache,
           platform: globals.platform,
+          operatingSystemUtils: globals.os,
         ),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,

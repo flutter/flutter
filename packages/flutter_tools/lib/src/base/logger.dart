@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -411,7 +413,6 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
-    // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
     final String windowsMessage = _terminal.supportsEmoji
       ? message
       : message.replaceAll('🔥', '')
@@ -419,7 +420,8 @@ class WindowsStdoutLogger extends StdoutLogger {
                .replaceAll('✗', 'X')
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
-               .replaceAll('💪', '');
+               .replaceAll('💪', '')
+               .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }
@@ -674,6 +676,34 @@ class VerboseLogger extends DelegatingLogger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+}
+
+class PrefixedErrorLogger extends DelegatingLogger {
+  PrefixedErrorLogger(Logger parent) : super(parent);
+
+  @override
+  void printError(
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    if (message?.trim()?.isNotEmpty == true) {
+      message = 'ERROR: $message';
+    }
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
 }
 
 enum _LogType { error, status, trace }

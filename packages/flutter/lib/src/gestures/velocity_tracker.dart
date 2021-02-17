@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' show Offset;
-
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';

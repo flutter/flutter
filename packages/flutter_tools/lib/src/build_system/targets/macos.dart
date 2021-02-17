@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -178,7 +180,7 @@ class CompileMacOSFramework extends Target {
     final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
+    final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
 
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem

@@ -275,8 +275,7 @@ class ScrollController extends ChangeNotifier {
 }
 
 // Examples can assume:
-// // @dart = 2.9
-// TrackingScrollController _trackingScrollController;
+// TrackingScrollController? _trackingScrollController;
 
 /// A [ScrollController] whose [initialScrollOffset] tracks its most recently
 /// updated [ScrollPosition].

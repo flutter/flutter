@@ -399,20 +399,30 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  ///  * [changedExternalState], which is called when the [Navigator] rebuilds.
+  ///  * [changedExternalState], which is called when the [Navigator] has
+  ///    updated in some manner that might affect the routes.
   @protected
   @mustCallSuper
   void changedInternalState() { }
 
-  /// Called whenever the [Navigator] has its widget rebuilt, to indicate that
-  /// the route may wish to rebuild as well.
+  /// Called whenever the [Navigator] has updated in some manner that might
+  /// affect routes, to indicate that the route may wish to rebuild as well.
   ///
-  /// This is called by the [Navigator] whenever the [NavigatorState]'s
-  /// [State.widget] changes, for example because the [MaterialApp] has been rebuilt.
-  /// This ensures that routes that directly refer to the state of the widget
-  /// that built the [MaterialApp] will be notified when that widget rebuilds,
-  /// since it would otherwise be difficult to notify the routes that state they
-  /// depend on may have changed.
+  /// This is called by the [Navigator] whenever the
+  /// [NavigatorState]'s [State.widget] changes (as in [State.didUpdateWidget]),
+  /// for example because the [MaterialApp] has been rebuilt. This
+  /// ensures that routes that directly refer to the state of the
+  /// widget that built the [MaterialApp] will be notified when that
+  /// widget rebuilds, since it would otherwise be difficult to notify
+  /// the routes that state they depend on may have changed.
+  ///
+  /// It is also called whenever the [Navigator]'s dependencies change
+  /// (as in [State.didChangeDependencies]). This allows routes to use the
+  /// [Navigator]'s context ([NavigatorState.context]), for example in
+  /// [ModalRoute.barrierColor], and update accordingly.
+  ///
+  /// The [ModalRoute] subclass overrides this to force the barrier
+  /// overlay to rebuild.
   ///
   /// See also:
   ///
@@ -454,10 +464,7 @@ abstract class Route<T> {
     return currentRouteEntry.route == this;
   }
 
-  /// Whether this route is the bottom-most route on the navigator.
-  ///
-  /// If this is true, then [Navigator.canPop] will return false if this route's
-  /// [willHandlePopInternally] returns false.
+  /// Whether this route is the bottom-most active route on the navigator.
   ///
   /// If [isFirst] and [isCurrent] are both true then this is the only route on
   /// the navigator (and [isActive] will also be true).
@@ -471,6 +478,20 @@ abstract class Route<T> {
     if (currentRouteEntry == null)
       return false;
     return currentRouteEntry.route == this;
+  }
+
+  /// Whether there is at least one active route underneath this route.
+  @protected
+  bool get hasActiveRouteBelow {
+    if (_navigator == null)
+      return false;
+    for (final _RouteEntry entry in _navigator!._history) {
+      if (entry.route == this)
+        return false;
+      if (_RouteEntry.isPresentPredicate(entry))
+        return true;
+    }
+    return false;
   }
 
   /// Whether this route is on the navigator.
@@ -3442,6 +3463,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.of(context));
+    for (final _RouteEntry entry in _history)
+      entry.route.changedExternalState();
   }
 
   void _updateHeroController(HeroController? newHeroController) {
@@ -4427,8 +4450,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    state restoration.
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
+    assert(_debugCheckIsPagelessRoute(route));
     _pushEntry(_RouteEntry(route, initialState: _RouteLifecycle.push));
     return route.popped;
+  }
+
+  bool _debugCheckIsPagelessRoute(Route<dynamic> route) {
+    assert((){
+      if (route.settings is Page) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError(
+              'A page-based route should not be added using the imperative api. '
+              'Provide a new list with the corresponding Page to Navigator.pages instead.'
+            ),
+            library: 'widget library',
+            stack: StackTrace.current,
+          ),
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 
   bool _debugIsStaticCallback(Function callback) {
@@ -4573,6 +4616,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   Future<T?> pushReplacement<T extends Object?, TO extends Object?>(Route<T> newRoute, { TO? result }) {
     assert(newRoute != null);
     assert(newRoute._navigator == null);
+    assert(_debugCheckIsPagelessRoute(newRoute));
     _pushReplacementEntry(_RouteEntry(newRoute, initialState: _RouteLifecycle.pushReplace), result);
     return newRoute.popped;
   }
@@ -4680,6 +4724,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(newRoute != null);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
+    assert(_debugCheckIsPagelessRoute(newRoute));
     _pushEntryAndRemoveUntil(_RouteEntry(newRoute, initialState: _RouteLifecycle.push), predicate);
     return newRoute.popped;
   }

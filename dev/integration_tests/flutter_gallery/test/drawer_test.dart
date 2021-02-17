@@ -63,7 +63,7 @@ void main() {
     expect(app.themeMode, ThemeMode.system);
 
     // Verify density settings
-    expect(app.theme!.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Popup the density menu: third menu button, choose 'Compact'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
@@ -81,7 +81,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme!.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Verify platform settings
     expect(app.theme!.platform, equals(TargetPlatform.android));

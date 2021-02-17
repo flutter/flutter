@@ -7,11 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
@@ -639,7 +637,7 @@ void main() {
     await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 18));
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.longPress,
     );
     await tester.pumpAndSettle();
@@ -1126,7 +1124,7 @@ void main() {
 
     // Can show the toolbar when focused even though there's no text.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1171,16 +1169,14 @@ void main() {
     controller.text = 'blah';
     await tester.pump();
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
 
     // Clear the text and selection.
     expect(find.text('Paste'), findsNothing);
-    state.updateEditingValue(const TextEditingValue(
-      text: '',
-    ));
+    state.updateEditingValue(TextEditingValue.empty);
     await tester.pump();
 
     // Should be able to show the toolbar.
@@ -1213,7 +1209,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1281,7 +1277,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -1320,7 +1316,7 @@ void main() {
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
-      from: const Offset(0, 0),
+      from: Offset.zero,
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
@@ -4167,6 +4163,144 @@ void main() {
       reason: 'on $platform',
     );
 
+    // Jump to end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: false,
+      lineModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: testText.length,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Jump to start.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: false,
+      lineModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Move forward a few letters
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: false,
+      lineModifier: false,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 3,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      lineModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 3,
+          extentOffset: testText.length,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to start, which extends the selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      lineModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: testText.length,
+          extentOffset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move to start again.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: false,
+      lineModifier: false,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 0,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
     // Jump forward three words.
     await sendKeys(
       tester,
@@ -5656,7 +5790,7 @@ void main() {
       await tester.pump();
 
       // Nothing called when only the remote changes.
-      expect(log.length, 0);
+      expect(log, isEmpty);
 
       controller.clear();
 
@@ -5760,7 +5894,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals(''));
     expect(state.wantKeepAlive, true);
 
-    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(TextEditingValue.empty);
     state.updateEditingValue(const TextEditingValue(text: 'a'));
     state.updateEditingValue(const TextEditingValue(text: 'aa'));
     state.updateEditingValue(const TextEditingValue(text: 'aaa'));
@@ -5858,13 +5992,13 @@ void main() {
     // Composing changes should not trigger reformat, as it could cause infinite loops on some IMEs.
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
     expect(formatter.formatCallCount, 3);
-    expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
-    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1)); // The new composing was registered in formatter.
+    expect(formatter.lastOldValue.composing, TextRange.empty);
+    expect(formatter.lastNewValue.composing, TextRange.empty); // The new composing was registered in formatter.
     // Clearing composing region should trigger reformat.
     state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
     expect(formatter.formatCallCount, 4);
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
-    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, TextRange.empty);
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
@@ -6400,7 +6534,7 @@ void main() {
       expect(updateException?.toString(), shouldAssert ? contains('composing range'): isNull);
     }
 
-    expectToAssert(const TextEditingValue(text: ''), false);
+    expectToAssert(TextEditingValue.empty, false);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 0)), true);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 9)), true);
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
@@ -6917,6 +7051,47 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72400.
+  testWidgets("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
+    final UnsettableController unsettableController = UnsettableController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            controller: unsettableController,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Wait for the autofocus to take effect.
+
+    // Delete
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: 'android',
+    );
+
+    expect(tester.takeException(), null);
+  });
+}
+
+class UnsettableController extends TextEditingController {
+  @override
+  set value(TextEditingValue v) {
+    // Do nothing for set, which causes selection to remain as -1, -1.
+  }
 }
 
 class MockTextFormatter extends TextInputFormatter {
@@ -6962,7 +7137,7 @@ class MockTextFormatter extends TextInputFormatter {
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, double textLineHeight, Offset position, List<TextSelectionPoint> endpoints, TextSelectionDelegate delegate, ClipboardStatusNotifier clipboardStatus, Offset? lastSecondaryTapDownPosition) {
     return Container();
   }
 
@@ -7133,8 +7308,8 @@ class _AccentColorTextEditingController extends TextEditingController {
   _AccentColorTextEditingController(String text) : super(text: text);
 
   @override
-  TextSpan buildTextSpan({TextStyle? style, required bool withComposing, required BuildContext context}) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     final Color color = Theme.of(context).accentColor;
-    return super.buildTextSpan(style: TextStyle(color: color), withComposing: withComposing, context: context);
+    return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
 }

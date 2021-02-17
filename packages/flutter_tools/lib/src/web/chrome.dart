@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -342,9 +344,13 @@ class ChromiumLauncher {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
 
-    if (sourceChromeDefault.existsSync()) {
-      targetChromeDefault.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+    try {
+      if (sourceChromeDefault.existsSync()) {
+        targetChromeDefault.createSync(recursive: true);
+        _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to restore Chrome preferences: $err');
     }
   }
 

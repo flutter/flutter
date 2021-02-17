@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -9,7 +11,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -19,9 +21,13 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
-    usesExtraDartFlagOptions();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     argParser
-      ..addOption('depfile', defaultsTo: defaultDepfilePath)
+      ..addOption('depfile',
+        defaultsTo: defaultDepfilePath,
+        help: 'A file path where a depfile will be written. '
+              'This contains all build inputs and outputs in a Make-style syntax.'
+      )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
         allowed: const <String>[
@@ -32,10 +38,16 @@ class BuildBundleCommand extends BuildSubCommand {
           'ios',
           'darwin-x64',
           'linux-x64',
+          'linux-arm64',
           'windows-x64',
         ],
+        help: 'The architecture for which to build the application.',
       )
-      ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory());
+      ..addOption('asset-dir',
+        defaultsTo: getAssetBuildDirectory(),
+        help: 'The output directory for the kernel_blob.bin file, the native snapshet, the assets, etc. '
+              'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+      );
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
 
@@ -97,6 +109,7 @@ class BuildBundleCommand extends BuildSubCommand {
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
+    displayNullSafetyMode(buildInfo);
 
     await bundleBuilder.build(
       platform: platform,
@@ -108,8 +121,8 @@ class BuildBundleCommand extends BuildSubCommand {
       trackWidgetCreation: boolArg('track-widget-creation'),
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-      fileSystemScheme: stringArg('filesystem-scheme'),
-      fileSystemRoots: stringsArg('filesystem-root'),
+      fileSystemRoots: stringsArg(FlutterOptions.kFileSystemRoot),
+      fileSystemScheme: stringArg(FlutterOptions.kFileSystemScheme),
       treeShakeIcons: buildInfo.treeShakeIcons,
     );
     return FlutterCommandResult.success();

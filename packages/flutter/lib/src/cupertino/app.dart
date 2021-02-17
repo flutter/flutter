@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -37,6 +36,11 @@ import 'theme.dart';
 ///
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
+///
+/// The [CupertinoApp] widget isn't a required ancestor for other Cupertino
+/// widgets, but many Cupertino widgets could depend on the [CupertinoTheme]
+/// widget, which the [CupertinoApp] composes. If you use Material widgets, a
+/// [MaterialApp] also creates the needed dependencies for Cupertino widgets.
 ///
 /// Use this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:

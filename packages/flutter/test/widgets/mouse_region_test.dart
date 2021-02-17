@@ -1738,7 +1738,7 @@ void main() {
         child: Draggable<int>(
           feedback: Container(width: 20, height: 20, color: Colors.blue),
           childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
-          child: RaisedButton(child: const Text('Drag me'), onPressed: (){}),
+          child: ElevatedButton(child: const Text('Drag me'), onPressed: (){}),
         ),
       ),
     ));

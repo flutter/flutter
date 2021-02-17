@@ -23,6 +23,7 @@ list(APPEND FLUTTER_LIBRARY_HEADERS
   "flutter_windows.h"
   "flutter_messenger.h"
   "flutter_plugin_registrar.h"
+  "flutter_texture_registrar.h"
 )
 list(TRANSFORM FLUTTER_LIBRARY_HEADERS PREPEND "${EPHEMERAL_DIR}/")
 add_library(flutter INTERFACE)

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 /// A generic usage even that does not involve custom dimensions.
@@ -283,7 +285,8 @@ class NullSafetyAnalysisEvent implements UsageEvent {
       if (package.name == currentPackage) {
         languageVersion = package.languageVersion;
       }
-      if (package.languageVersion.major >= nullSafeVersion.major &&
+      if (package.languageVersion != null &&
+          package.languageVersion.major >= nullSafeVersion.major &&
           package.languageVersion.minor >= nullSafeVersion.minor) {
         migrated += 1;
       }

@@ -4,9 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4, Matrix3;
 
@@ -807,7 +805,7 @@ void main() {
       final Offset center = tester.getCenter(find.byType(InteractiveViewer));
       await scrollAt(center, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
-      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      const Velocity noMovement = Velocity.zero;
       final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
       expect(scaleChange, greaterThan(1.0));
@@ -891,7 +889,7 @@ void main() {
       final Offset offCenter = Offset(center.dx - 20.0, center.dy - 20.0);
       await scrollAt(offCenter, tester, const Offset(0.0, -20.0));
       await tester.pumpAndSettle();
-      const Velocity noMovement = Velocity(pixelsPerSecond: Offset(0,0));
+      const Velocity noMovement = Velocity.zero;
       final double afterScaling = transformationController.value.getMaxScaleOnAxis();
 
       expect(scaleChange, greaterThan(1.0));
@@ -1134,6 +1132,49 @@ void main() {
       expect(initialScale, 1.0);
       expect(scale, greaterThan(1.0));
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
+    });
+
+    testWidgets('Check if ClipRect is present in the tree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                clipBehavior: Clip.none,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(ClipRect),
+        findsNothing,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                constrained: false,
+                minScale: 1.0,
+                maxScale: 1.0,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(ClipRect),
+        findsOneWidget,
+      );
     });
   });
 

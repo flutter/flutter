@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 library reporting;
 
 import 'dart:async';
@@ -13,7 +15,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:usage/usage_io.dart';
 
-import '../base/async_guard.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -35,6 +36,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'first_run.dart';
 
 part 'crash_reporting.dart';
 part 'disabled_usage.dart';

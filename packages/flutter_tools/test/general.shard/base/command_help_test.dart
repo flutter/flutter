@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -9,7 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputP
 import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart' show MockStdio;
+import '../../src/fakes.dart';
 
 CommandHelp _createCommandHelp({
   @required bool ansi,
@@ -21,7 +23,7 @@ CommandHelp _createCommandHelp({
   return CommandHelp(
     logger: BufferLogger.test(),
     terminal: AnsiTerminal(
-      stdio:  MockStdio(),
+      stdio:  FakeStdio(),
       platform: platform,
     ),
     platform: platform,

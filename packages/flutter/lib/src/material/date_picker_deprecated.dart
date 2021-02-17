@@ -21,11 +21,6 @@ import 'theme.dart';
 // CalendarDatePicker (if needed, as showDatePicker has already been migrated
 // and it is what most apps would have used).
 
-
-// Examples can assume:
-// // @dart = 2.9
-// BuildContext context;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
@@ -74,12 +69,16 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
   /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   DayPicker({
     Key? key,
     required this.selectedDate,
@@ -356,13 +355,17 @@ class DayPicker extends StatelessWidget {
 ///
 @Deprecated(
   'Use CalendarDatePicker instead. '
-  'This feature was deprecated after v1.15.3.'
+  'This feature was deprecated after v1.26.0-18.0.pre.'
 )
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
   /// Rarely used directly. Instead, typically used as part of the dialog shown
   /// by [showDatePicker].
+  @Deprecated(
+    'Use CalendarDatePicker instead. '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   MonthPicker({
     Key? key,
     required this.selectedDate,
