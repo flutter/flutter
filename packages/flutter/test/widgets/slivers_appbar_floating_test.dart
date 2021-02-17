@@ -229,17 +229,13 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
+  
   group('Pointer scrolled app bars', () {
-    Widget buildTest(GlobalKey appBarKey, { bool snap = false }) {
+    Widget buildTest(Widget sliver) {
       return MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverAppBar(
-              key: appBarKey,
-              floating: true,
-              snap: snap,
-              title: const Text('Test Title'),
-            ),
+            sliver,
             SliverFixedExtentList(
               itemExtent: 50.0,
               delegate: SliverChildBuilderDelegate(
@@ -265,7 +261,11 @@ void main() {
 
     testWidgets('Sliver appbars - floating with pointer scrolling', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
-      await tester.pumpWidget(buildTest(appBarKey));
+      await tester.pumpWidget(buildTest(SliverAppBar(
+        key: appBarKey,
+        floating: true,
+        title: const Text('Test Title'),
+      )));
 
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
@@ -313,9 +313,56 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
+    testWidgets('Sliver persistent headers - floating with pointer scrolling', (WidgetTester tester) async {
+      final GlobalKey headerKey = GlobalKey();
+      await tester.pumpWidget(buildTest(SliverPersistentHeader(
+        key: headerKey,
+        floating: true,
+        delegate: HeaderDelegate(),
+      )));
+
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: headerKey, visible: true, paintExtent: 56.0);
+
+      // Pointer scroll the app bar away, we will scroll back less to validate the
+      // app bar floats back in.
+      final Offset point1 = tester.getCenter(find.text('Item 5'));
+      final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(point1);
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: headerKey, paintExtent: 0.0, visible: false);
+
+      // Scroll back to float in appbar
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: headerKey, paintExtent: 50.0, visible: true);
+
+      // Float the rest of the way in.
+      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -250.0)));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: headerKey, paintExtent: 56.0, visible: true);
+    });
+
     testWidgets('Sliver appbars - snapping with pointer scrolling', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
-      await tester.pumpWidget(buildTest(appBarKey, snap: true));
+      await tester.pumpWidget(buildTest(SliverAppBar(
+        key: appBarKey,
+        floating: true,
+        snap: true,
+        title: const Text('Test Title'),
+      )));
 
       expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('Item 1'), findsOneWidget);
@@ -386,6 +433,26 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
     });
   });
+}
+
+class HeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      height: 56,
+      color: Colors.red,
+      child: const Text('Test Title'),
+    );
+  }
+
+  @override
+  double get maxExtent => 56;
+
+  @override
+  double get minExtent => 56;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

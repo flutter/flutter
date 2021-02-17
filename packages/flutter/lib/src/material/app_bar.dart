@@ -993,6 +993,8 @@ class _FloatingAppBar extends StatefulWidget {
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
+// It also informs the float when pointer scrolling by updating the last known
+// ScrollDirection when scrolling began.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition? _position;
 
@@ -1024,10 +1026,12 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    if (_position!.isScrollingNotifier.value)
+    if (_position!.isScrollingNotifier.value) {
+      header?.updateScrollStartDirection(_position!.userScrollDirection);
       header?.maybeStopSnapAnimation(_position!.userScrollDirection);
-    else
+    } else {
       header?.maybeStartSnapAnimation(_position!.userScrollDirection);
+    }
   }
 
   @override

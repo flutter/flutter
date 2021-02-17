@@ -651,10 +651,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
   }
 
+  /// Update the last known ScrollDirection when scrolling began.
+  void updateScrollStartDirection(ScrollDirection direction) {
+    _lastStartedScrollDirection = direction;
+  }
+
   /// If the header isn't already fully exposed, then scroll it into view.
   void maybeStartSnapAnimation(ScrollDirection direction) {
-    // Update the last known ScrollDirection when scrolling began.
-    _lastStartedScrollDirection = direction;
     final FloatingHeaderSnapConfiguration? snap = snapConfiguration;
     if (snap == null)
       return;
