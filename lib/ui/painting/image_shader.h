@@ -33,10 +33,20 @@ class ImageShader : public Shader {
                      SkTileMode tmy,
                      const tonic::Float64List& matrix4);
 
+  sk_sp<SkShader> shader(SkFilterQuality) override;
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   ImageShader();
+
+  sk_sp<SkImage> sk_image_;
+  SkTileMode tmx_;
+  SkTileMode tmy_;
+  SkMatrix local_matrix_;
+
+  SkFilterQuality cached_quality_ = kNone_SkFilterQuality;
+  flutter::SkiaGPUObject<SkShader> cached_shader_;
 };
 
 }  // namespace flutter
