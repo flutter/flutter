@@ -510,7 +510,7 @@ void main() {
       // Fling the child.
       const Offset flingEnd = Offset(20.0, 15.0);
       final Vector3 translationAfterRotate = transformationController.value.getTranslation();
-      await tester.flingFrom(childOffset, flingEnd, 1000.0);
+      await tester.flingFrom(childOffset, flingEnd, 2000.0);
       await tester.pump();
 
       // Immediately after the gesture, the child has moved to exactly follow
@@ -522,16 +522,16 @@ void main() {
       // A short time after the gesture was released, it continues to move with
       // inertia, and hasn't hit the boundary yet.
       await tester.pump(const Duration(milliseconds: 10));
-      Vector3 translation = transformationController.value.getTranslation();
-      expect(translation.x, greaterThan(translationAtRelease.x));
-      expect(translation.y, greaterThan(translationAtRelease.y));
+      final Vector3 translationAfterRelease = transformationController.value.getTranslation();
+      expect(translationAfterRelease.x, greaterThan(translationAtRelease.x));
+      expect(translationAfterRelease.y, greaterThan(translationAtRelease.y));
 
       // It hits the boundary in the y direction first. The y coordinate has
       // been increasing up to this point but will now start decreasing.
       await tester.pump(const Duration(milliseconds: 161));
       final Vector3 translationWhenYHitsBounds = transformationController.value.getTranslation();
-      expect(translationWhenYHitsBounds.x, greaterThan(translationAtRelease.x));
-      expect(translationWhenYHitsBounds.y, greaterThan(translationAtRelease.y));
+      expect(translationWhenYHitsBounds.x, greaterThan(translationAfterRelease.x));
+      expect(translationWhenYHitsBounds.y, greaterThan(translationAfterRelease.y));
 
       // x slides along while y is held to the boundary at the rotated angle,
       // which causes it to decrease.
@@ -546,9 +546,9 @@ void main() {
       expect(translationEnd.x, greaterThan(translationSliding.x));
       expect(translationEnd.y, lessThan(translationSliding.y));
       await tester.pumpAndSettle();
-      translation = transformationController.value.getTranslation();
-      expect(translation.x, equals(translationEnd.x));
-      expect(translation.y, equals(translationEnd.y));
+      final Vector3 translationAfterEnd = transformationController.value.getTranslation();
+      expect(translationAfterEnd.x, equals(translationEnd.x));
+      expect(translationAfterEnd.y, equals(translationEnd.y));
     });
 
     testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
@@ -1564,8 +1564,23 @@ void main() {
 
         final ClosestPoints pair = a.findClosestPointsLineSegment(b);
         expect(pair.a, const Offset(100.0, 100.0));
-        expect(pair.b.dx, moreOrLessEquals(109.1, epsilon: 0.1));
-        expect(pair.b.dy, moreOrLessEquals(109.1, epsilon: 0.1));
+        expect(pair.b.dx, moreOrLessEquals(109.9, epsilon: 0.1));
+        expect(pair.b.dy, moreOrLessEquals(101.0, epsilon: 0.1));
+      });
+
+      test("intersection isn't closest point", () {
+        const LineSegment a = LineSegment(
+          Offset(0.0, 0.0),
+          Offset(100.0, 0.0),
+        );
+        const LineSegment b = LineSegment(
+          Offset(90.0, 90.0),
+          Offset(100.0, 100.0),
+        );
+
+        final ClosestPoints pair = a.findClosestPointsLineSegment(b);
+        expect(pair.a, const Offset(90.0, 0.0));
+        expect(pair.b, const Offset(90.0, 90.0));
       });
 
       test('real vertical example', () {
@@ -1613,7 +1628,7 @@ void main() {
         const Rect rect = Rect.fromLTWH(0.0, 0.0, 300.0, 300.0);
 
         final ClosestPoints closestPoints = a.findClosestPointsRect(rect);
-        expect(closestPoints.a, const Offset(-10.0, 300.0));
+        expect(closestPoints.a, const Offset(-5.0, 305.0));
         expect(closestPoints.b, const Offset(0.0, 300.0));
       });
 

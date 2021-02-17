@@ -1272,8 +1272,9 @@ class LineSegment {
 
   /// A special case of the linesIntersectAt method.
   static Offset _isVerticalAndInterceptsNonVerticalLineAt(LineSegment vertical, LineSegment nonVertical) {
-    // Assert that vertical is indeed vertical.
+    // Assert vertical is indeed vertical and nonVertical is not vertical.
     assert(vertical.p0.dx == vertical.p1.dx);
+    assert(nonVertical.p0.dx != nonVertical.p1.dx);
 
     final double x = vertical.p0.dx;
     final double intersectionY = nonVertical.slope * x + nonVertical.lineYIntercept;
@@ -1404,7 +1405,7 @@ class LineSegment {
     }
     final double d0 = _distanceBetweenPoints(pointOnLine, p0);
     final double d1 = _distanceBetweenPoints(pointOnLine, p1);
-    return d0.abs() <= d1.abs() ? p0 : p1;
+    return d0 <= d1 ? p0 : p1;
   }
 
   /// Returns the closest point on each [LineSegment] to the other
@@ -1427,11 +1428,18 @@ class LineSegment {
       );
     }
 
-    // Otherwise, the closest points on the line segments are the closest points
-    // to the line intersection.
+    // Otherwise, find the closest points on each line segment to the
+    // intersection.
+    final Offset closestToIntersection =
+        findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection);
+    final Offset closestToIntersectionLineSegment =
+        lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection);
+
+    // The answer is the closest points on the opposite line segment to these
+    // points.
     return ClosestPoints(
-      a: findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection),
-      b: lineSegment.findClosestOffsetOnLineSegmentToOffsetOnLine(lineIntersection),
+      a: findClosestToOffset(closestToIntersectionLineSegment),
+      b: lineSegment.findClosestToOffset(closestToIntersection),
     );
   }
 
