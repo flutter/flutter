@@ -521,7 +521,7 @@ abstract class CreateBase extends FlutterCommand {
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    globals.fsUtils.copyDirectorySync(
+    copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {

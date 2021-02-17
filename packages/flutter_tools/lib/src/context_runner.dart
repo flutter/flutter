@@ -219,7 +219,13 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fuchsiaArtifacts: globals.fuchsiaArtifacts,
       ),
-      GradleUtils: () => GradleUtils(),
+      GradleUtils: () => GradleUtils(
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        cache: globals.cache,
+      ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
