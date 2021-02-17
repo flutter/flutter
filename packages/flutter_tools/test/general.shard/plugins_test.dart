@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
@@ -1153,114 +1155,6 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('generateMainDartWithPluginRegistrant', () async {
-        when(flutterProject.isModule).thenReturn(false);
-
-        final List<Directory> directories = <Directory>[];
-        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
-        final File packagesFile = flutterProject.directory
-            .childFile('.packages')
-            ..createSync(recursive: true);
-
-        final Map<String, String> plugins = <String, String>{};
-        plugins['url_launcher_macos'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        macos:
-          dartPluginClass: MacOSPlugin
-''';
-        plugins['url_launcher_linux'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        linux:
-          dartPluginClass: LinuxPlugin
-''';
-        plugins['url_launcher_windows'] = '''
-  flutter:
-    plugin:
-      implements: url_launcher
-      platforms:
-        windows:
-          dartPluginClass: WindowsPlugin
-''';
-        plugins['awesome_macos'] = '''
-  flutter:
-    plugin:
-      implements: awesome
-      platforms:
-        macos:
-          dartPluginClass: AwesomeMacOS
-''';
-        for (final MapEntry<String, String> entry in plugins.entries) {
-          final String name = fs.path.basename(entry.key);
-          final Directory pluginDirectory = fakePubCache.childDirectory(name);
-          packagesFile.writeAsStringSync(
-              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
-              mode: FileMode.writeOnlyAppend);
-          pluginDirectory.childFile('pubspec.yaml')
-              ..createSync(recursive: true)
-              ..writeAsStringSync(entry.value);
-          directories.add(pluginDirectory);
-        }
-
-        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
-
-        final Directory libDir = flutterProject.directory.childDirectory('lib');
-        libDir.createSync(recursive: true);
-
-        final File mainFile = libDir.childFile('main.dart');
-        mainFile.writeAsStringSync('''
-// @dart = 2.8
-void main() {
-}
-''');
-        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
-        final bool didGenerate = await generateMainDartWithPluginRegistrant(
-          flutterProject,
-          'package:app/main.dart',
-          flutterBuild,
-          mainFile,
-        );
-        expect(didGenerate, isTrue);
-        expect(flutterBuild.readAsStringSync(),
-            '//\n'
-            '// Generated file. Do not edit.\n'
-            '//\n'
-            '\n'
-            '// @dart = 2.8\n'
-            '\n'
-            'import \'package:app/main.dart\' as entrypoint;\n'
-            'import \'dart:io\'; // ignore: dart_io_import.\n'
-            'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
-            'import \'package:awesome_macos/awesome_macos.dart\';\n'
-            'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
-            'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
-            '\n'
-            '@pragma(\'vm:entry-point\')\n'
-            'void _registerPlugins() {\n'
-            '  if (Platform.isLinux) {\n'
-            '      LinuxPlugin.registerWith();\n'
-            '  } else if (Platform.isMacOS) {\n'
-            '      AwesomeMacOS.registerWith();\n'
-            '      MacOSPlugin.registerWith();\n'
-            '  } else if (Platform.isWindows) {\n'
-            '      WindowsPlugin.registerWith();\n'
-            '  }\n'
-            '}\n'
-            'void main() {\n'
-            '  entrypoint.main();\n'
-            '}\n'
-            '',
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
       testUsingContext('Generated plugin CMake files always use posix-style paths', () async {
         // Re-run the setup using the Windows filesystem.
         setUpProject(fsWindows);
@@ -1940,6 +1834,237 @@ void main() {
           '    implements: <plugin-interface>'
           '\n\n'
         );
+      });
+    });
+
+    group('generateMainDartWithPluginRegistrant', () {
+      testUsingContext('Generates new entrypoint', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        final List<Directory> directories = <Directory>[];
+        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+        final File packagesFile = flutterProject.directory
+            .childFile('.packages')
+            ..createSync(recursive: true);
+
+        final Map<String, String> plugins = <String, String>{};
+        plugins['url_launcher_macos'] = '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        macos:
+          dartPluginClass: MacOSPlugin
+''';
+        plugins['url_launcher_linux'] = '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        linux:
+          dartPluginClass: LinuxPlugin
+''';
+        plugins['url_launcher_windows'] = '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        windows:
+          dartPluginClass: WindowsPlugin
+''';
+        plugins['awesome_macos'] = '''
+  flutter:
+    plugin:
+      implements: awesome
+      platforms:
+        macos:
+          dartPluginClass: AwesomeMacOS
+''';
+        for (final MapEntry<String, String> entry in plugins.entries) {
+          final String name = fs.path.basename(entry.key);
+          final Directory pluginDirectory = fakePubCache.childDirectory(name);
+          packagesFile.writeAsStringSync(
+              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+              mode: FileMode.writeOnlyAppend);
+          pluginDirectory.childFile('pubspec.yaml')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+          directories.add(pluginDirectory);
+        }
+
+        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart');
+        mainFile.writeAsStringSync('''
+// @dart = 2.8
+void main() {
+}
+''');
+        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+          logger: globals.logger,
+          throwOnError: false,
+        );
+        final bool didGenerate = await generateMainDartWithPluginRegistrant(
+          flutterProject,
+          packageConfig,
+          'package:app/main.dart',
+          flutterBuild,
+          mainFile,
+        );
+        expect(didGenerate, isTrue);
+        expect(flutterBuild.readAsStringSync(),
+            '//\n'
+            '// Generated file. Do not edit.\n'
+            '//\n'
+            '\n'
+            '// @dart = 2.8\n'
+            '\n'
+            'import \'package:app/main.dart\' as entrypoint;\n'
+            'import \'dart:io\'; // ignore: dart_io_import.\n'
+            'import \'package:url_launcher_linux${fs.path.separator}url_launcher_linux.dart\';\n'
+            'import \'package:awesome_macos/awesome_macos.dart\';\n'
+            'import \'package:url_launcher_macos${fs.path.separator}url_launcher_macos.dart\';\n'
+            'import \'package:url_launcher_windows${fs.path.separator}url_launcher_windows.dart\';\n'
+            '\n'
+            '@pragma(\'vm:entry-point\')\n'
+            'void _registerPlugins() {\n'
+            '  if (Platform.isLinux) {\n'
+            '      LinuxPlugin.registerWith();\n'
+            '  } else if (Platform.isMacOS) {\n'
+            '      AwesomeMacOS.registerWith();\n'
+            '      MacOSPlugin.registerWith();\n'
+            '  } else if (Platform.isWindows) {\n'
+            '      WindowsPlugin.registerWith();\n'
+            '  }\n'
+            '}\n'
+            'void main() {\n'
+            '  entrypoint.main();\n'
+            '}\n'
+            '',
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Plugin without platform support throws tool exit', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        final List<Directory> directories = <Directory>[];
+        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+        final File packagesFile = flutterProject.directory
+            .childFile('.packages')
+            ..createSync(recursive: true);
+        final Map<String, String> plugins = <String, String>{};
+        plugins['url_launcher_macos'] = '''
+  flutter:
+    plugin:
+      implements: url_launcher
+      platforms:
+        macos:
+          invalid:
+''';
+        for (final MapEntry<String, String> entry in plugins.entries) {
+          final String name = fs.path.basename(entry.key);
+          final Directory pluginDirectory = fakePubCache.childDirectory(name);
+          packagesFile.writeAsStringSync(
+              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+              mode: FileMode.writeOnlyAppend);
+          pluginDirectory.childFile('pubspec.yaml')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+          directories.add(pluginDirectory);
+        }
+
+        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
+        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+          logger: globals.logger,
+          throwOnError: false,
+        );
+        await expectLater(
+          generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            'package:app/main.dart',
+            flutterBuild,
+            mainFile,
+          ), throwsToolExit(message:
+            'Invalid plugin specification url_launcher_macos.\n'
+            'Invalid "macos" plugin specification.'
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Plugin with platform support without dart plugin class throws tool exit', () async {
+        when(flutterProject.isModule).thenReturn(false);
+
+        final List<Directory> directories = <Directory>[];
+        final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
+        final File packagesFile = flutterProject.directory
+            .childFile('.packages')
+            ..createSync(recursive: true);
+        final Map<String, String> plugins = <String, String>{};
+        plugins['url_launcher_macos'] = '''
+  flutter:
+    plugin:
+      implements: url_launcher
+''';
+        for (final MapEntry<String, String> entry in plugins.entries) {
+          final String name = fs.path.basename(entry.key);
+          final Directory pluginDirectory = fakePubCache.childDirectory(name);
+          packagesFile.writeAsStringSync(
+              '$name:file://${pluginDirectory.childFile('lib').uri}\n',
+              mode: FileMode.writeOnlyAppend);
+          pluginDirectory.childFile('pubspec.yaml')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+          directories.add(pluginDirectory);
+        }
+
+        when(flutterManifest.dependencies).thenReturn(<String>{...plugins.keys});
+
+        final Directory libDir = flutterProject.directory.childDirectory('lib');
+        libDir.createSync(recursive: true);
+
+        final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
+        final File flutterBuild = flutterProject.directory.childFile('generated_main.dart');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
+          logger: globals.logger,
+          throwOnError: false,
+        );
+        await expectLater(
+          generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            'package:app/main.dart',
+            flutterBuild,
+            mainFile,
+          ), throwsToolExit(message:
+            'Invalid plugin specification url_launcher_macos.\n'
+            'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
+            'An instruction to format the `pubspec.yaml` can be found here: '
+            'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms'
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
 

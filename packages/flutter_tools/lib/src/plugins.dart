@@ -326,6 +326,9 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
+    if (platformsYaml[platformKey] is! YamlMap) {
+      return false;
+    }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
       return true;
     }
@@ -334,6 +337,9 @@ class Plugin {
 
   static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
     if (!platformsYaml.containsKey(platformKey)) {
+      return false;
+    }
+    if (platformsYaml[platformKey] is! YamlMap) {
       return false;
     }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
@@ -875,6 +881,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 /// For more details, see https://flutter.dev/go/federated-plugins.
 Future<bool> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
+  PackageConfig packageConfig,
   String currentMainUri,
   File newMainDart,
   File mainFile,
@@ -884,11 +891,6 @@ Future<bool> generateMainDartWithPluginRegistrant(
     plugins,
     // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
     throwOnPluginPubspecError: false,
-  );
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    rootProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-    logger: globals.logger,
-    throwOnError: false,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
