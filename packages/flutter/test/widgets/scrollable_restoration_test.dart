@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('CustomScrollView restoration', (WidgetTester tester) async {
@@ -399,7 +398,7 @@ void main() {
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
     expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
@@ -413,7 +412,7 @@ void main() {
     expect(find.text('Tile 10'), findsOneWidget);
 
     final TestRestorationData data = await tester.getRestorationData();
-    await tester.drag(find.byType(ListView), const Offset(0, 600));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, 600));
     await tester.pump();
 
     expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);

@@ -32,7 +32,7 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Force re-downloading of artifacts.');
     argParser.addFlag('android', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for Android development.',
-        hide: verboseHelp);
+        hide: !verboseHelp);
     argParser.addFlag('android_gen_snapshot', negatable: true, defaultsTo: false,
         help: 'Precache gen_snapshot for Android development.',
         hide: !verboseHelp);
@@ -57,9 +57,9 @@ class PrecacheCommand extends FlutterCommand {
     argParser.addFlag('universal', negatable: true, defaultsTo: true,
         help: 'Precache artifacts required for any development platform.');
     argParser.addFlag('flutter_runner', negatable: true, defaultsTo: false,
-        help: 'Precache the flutter runner artifacts.', hide: true);
+        help: 'Precache the flutter runner artifacts.', hide: !verboseHelp);
     argParser.addFlag('use-unsigned-mac-binaries', negatable: true, defaultsTo: false,
-        help: 'Precache the unsigned mac binaries when available.', hide: true);
+        help: 'Precache the unsigned macOS binaries when available.', hide: !verboseHelp);
   }
 
   final Cache _cache;

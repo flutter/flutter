@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:mockito/mockito.dart';
-
 import '../../src/common.dart';
 import '../../src/context.dart';
 
@@ -141,6 +140,46 @@ void main() {
 
     await chrome.close(); // does not exit with error.
     expect(logger.errorText, contains('Failed to save Chrome preferences'));
+  });
+
+  testWithoutContext('does not crash if restoring profile information fails due to a file system exception.', () async {
+    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
+    final BufferLogger logger = BufferLogger.test();
+    chromeLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+      fileSystemUtils: fileSystemUtils,
+    );
+    when(fileSystemUtils.copyDirectorySync(any, any))
+      .thenThrow(const FileSystemException());
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=1234',
+        ...kChromeArgs,
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    fileSystem.currentDirectory.childDirectory('Default').createSync();
+    final Chromium chrome = await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      cacheDir: fileSystem.currentDirectory,
+    );
+
+    // Create cache dir that the Chrome launcher will atttempt to persist.
+    fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
+      .createSync(recursive: true);
+
+    await chrome.close(); // does not exit with error.
+    expect(logger.errorText, contains('Failed to restore Chrome preferences'));
   });
 
   testWithoutContext('can launch chrome with a custom debug port', () async {

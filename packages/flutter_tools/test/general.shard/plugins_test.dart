@@ -26,6 +26,7 @@ import 'package:yaml/yaml.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/pubspec_schema.dart';
+import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
@@ -37,7 +38,7 @@ void main() {
     MockWebProject webProject;
     MockWindowsProject windowsProject;
     MockLinuxProject linuxProject;
-    SystemClock mockClock;
+    FakeSystemClock systemClock;
     FlutterVersion mockVersion;
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
@@ -112,16 +113,14 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem.test();
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
-      mockClock = MockClock();
+      systemClock = FakeSystemClock()
+        ..currentTime = DateTime(1970, 1, 1);
       mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
       flutterProject.directory.childFile('.packages').createSync(recursive: true);
 
-      when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime(1970, 1, 1)
-      );
       when(mockVersion.frameworkVersion).thenAnswer(
         (Invocation _) => '1.0.0'
       );
@@ -425,9 +424,7 @@ dependencies:
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
-        when(mockClock.now()).thenAnswer(
-          (Invocation _) => dateCreated
-        );
+        systemClock.currentTime = dateCreated;
         const String version = '1.0.0';
         when(mockVersion.frameworkVersion).thenAnswer(
           (Invocation _) => version
@@ -516,7 +513,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
 
@@ -533,7 +530,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
 
@@ -556,7 +553,7 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
+        SystemClock: () => systemClock,
         FlutterVersion: () => mockVersion
       });
     });
@@ -1171,12 +1168,10 @@ flutter:
     });
 
     group('createPluginSymlinks', () {
-      MockFeatureFlags featureFlags;
+      FeatureFlags featureFlags;
 
       setUp(() {
-        featureFlags = MockFeatureFlags();
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
       });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
@@ -1401,7 +1396,6 @@ flutter:
 }
 
 class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
@@ -1410,3 +1404,12 @@ class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class FakeSystemClock extends Fake implements SystemClock {
+  DateTime currentTime;
+
+  @override
+  DateTime now() {
+    return currentTime;
+  }
+}

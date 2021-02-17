@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton, PointerDeviceKind;
 
 import 'semantics_tester.dart';
@@ -54,7 +52,7 @@ void main() {
     );
 
     await tester.pumpWidget(subject);
-    await tester.tap(find.text('target'));
+    await tester.tap(find.text('target'), warnIfMissed: false);
     await tester.pumpWidget(subject);
     expect(tapped, isFalse,
       reason: 'because the tap is not prevented by ModalBarrier');
@@ -181,7 +179,7 @@ void main() {
       );
 
       await tester.pumpWidget(subject);
-      await tester.tap(find.text('target'));
+      await tester.tap(find.text('target'), warnIfMissed: false);
       await tester.pumpWidget(subject);
     } finally {
       SystemChannels.platform.setMockMethodCallHandler(null);

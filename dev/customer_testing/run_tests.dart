@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:file/local.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -86,7 +87,7 @@ Future<bool> run(List<String> arguments) async {
   final int shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments
     .rest
-    .expand((String path) => Glob(path).listSync())
+    .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
     .whereType<File>()
     .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
     .toList();
