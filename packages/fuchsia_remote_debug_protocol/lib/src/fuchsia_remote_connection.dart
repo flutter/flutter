@@ -654,10 +654,11 @@ class _SshPortForwarder implements PortForwarder {
     final String targetAddress = _ipV6 && _interface!.isNotEmpty
         ? '$_remoteAddress%$_interface'
         : _remoteAddress;
-    final List<String?> command = <String?>[
+    final String? sshConfigPath = _sshConfigPath;
+    final List<String> command = <String>[
       'ssh',
-      if (_sshConfigPath != null)
-        ...<String?>['-F', _sshConfigPath],
+      if (sshConfigPath != null)
+        ...<String>['-F', sshConfigPath],
       '-O',
       'cancel',
       '-L',

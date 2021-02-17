@@ -397,6 +397,9 @@ class FakeCache implements Cache {
   }
 
   @override
+  String getHostPlatformArchName() => 'x64';
+
+  @override
   File getLicenseFile() {
     return globals.fs.currentDirectory.childFile('LICENSE');
   }

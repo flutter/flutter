@@ -29,7 +29,7 @@ abstract class MessageCodec<T> {
   /// Decodes the specified [message] from binary.
   ///
   /// Returns null if the message is null.
-  T decodeMessage(ByteData? message);
+  T? decodeMessage(ByteData? message);
 }
 
 /// An command object representing the invocation of a named method.
@@ -73,16 +73,22 @@ abstract class MethodCodec {
   ///
   /// Throws [PlatformException], if [envelope] represents an error, otherwise
   /// returns the enveloped result.
+  ///
+  /// The type returned from [decodeEnvelope] is `dynamic` (not `Object?`),
+  /// which means *no type checking is performed on its return value*. It is
+  /// strongly recommended that the return value be immediately cast to a known
+  /// type to prevent runtime errors due to typos that the type checker could
+  /// otherwise catch.
   dynamic decodeEnvelope(ByteData envelope);
 
   /// Encodes a successful [result] into a binary envelope.
-  ByteData encodeSuccessEnvelope(dynamic result);
+  ByteData encodeSuccessEnvelope(Object? result);
 
   /// Encodes an error result into a binary envelope.
   ///
   /// The specified error [code], human-readable error [message] and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ required String code, String? message, dynamic details});
+  ByteData encodeErrorEnvelope({ required String code, String? message, Object? details});
 }
 
 
@@ -117,7 +123,7 @@ class PlatformException implements Exception {
   final String? message;
 
   /// Error details, possibly null.
-  final dynamic details;
+  final Object? details;
 
   /// Native stacktrace for the error, possibly null.
   /// This is strictly for native platform stacktrace.
