@@ -336,6 +336,7 @@ class ChromiumLauncher {
   void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
+    print('copy from ${sourceChromeDefault.path}');
     try {
       if (sourceChromeDefault.existsSync()) {
         targetChromeDefault.createSync(recursive: true);

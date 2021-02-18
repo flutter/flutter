@@ -2833,18 +2833,6 @@ class TestFlutterDevice extends FlutterDevice {
   Stream<Uri> _observatoryUris;
 }
 
-class ThrowingForwardingFileSystem extends ForwardingFileSystem {
-  ThrowingForwardingFileSystem(FileSystem delegate) : super(delegate);
-
-  @override
-  File file(dynamic path) {
-    if (path == 'foo') {
-      throw const FileSystemException();
-    }
-    return delegate.file(path);
-  }
-}
-
 class FakeFlutterDevice extends FlutterDevice {
   FakeFlutterDevice(
     Device device,

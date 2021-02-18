@@ -150,6 +150,7 @@ void copyDirectory(
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
+    print('copy ${entity.path} to $newPath');
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
       newLink.createSync(entity.targetSync());

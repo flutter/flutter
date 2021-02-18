@@ -30,6 +30,7 @@ const List<String> kChromeArgs = <String>[
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
+  FileExceptionHandler exceptionHandler;
   ChromiumLauncher chromeLauncher;
   FileSystem fileSystem;
   Platform platform;
@@ -37,6 +38,7 @@ void main() {
   OperatingSystemUtils operatingSystemUtils;
 
   setUp(() {
+    exceptionHandler = FileExceptionHandler();
     operatingSystemUtils = MockOperatingSystemUtils();
     when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
@@ -45,7 +47,7 @@ void main() {
     platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
       kChromeEnvironment: 'example_chrome',
     });
-    fileSystem = MemoryFileSystem.test();
+    fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     processManager = FakeProcessManager.list(<FakeCommand>[]);
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
@@ -105,10 +107,8 @@ void main() {
 
   testWithoutContext('does not crash if saving profile information fails due to a file system exception.', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ErrorThrowingFileSystem errorFileSystem = ErrorThrowingFileSystem(fileSystem);
-    errorFileSystem.addErrorEntity(FakeDirectory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default', errorFileSystem));
     chromeLauncher = ChromiumLauncher(
-      fileSystem: errorFileSystem,
+      fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
@@ -132,9 +132,18 @@ void main() {
       cacheDir: fileSystem.currentDirectory,
     );
 
-    // Create cache dir that the Chrome launcher will atttempt to persist.
-    fileSystem.directory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default/Local Storage')
+    // Create cache dir that the Chrome launcher will atttempt to persist, and a file
+    // that will thrown an exception when it is read.
+    const String directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
+    fileSystem.directory('$directoryPrefix/Local Storage')
       .createSync(recursive: true);
+    final File file = fileSystem.file('$directoryPrefix/Local Storage/foo')
+      ..createSync(recursive: true);
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
 
     await chrome.close(); // does not exit with error.
     expect(logger.errorText, contains('Failed to save Chrome preferences'));
@@ -142,11 +151,15 @@ void main() {
 
   testWithoutContext('does not crash if restoring profile information fails due to a file system exception.', () async {
     final BufferLogger logger = BufferLogger.test();
-    final ErrorThrowingFileSystem errorFileSystem = ErrorThrowingFileSystem(fileSystem);
-    errorFileSystem.addErrorEntity(FakeDirectory('/Default', errorFileSystem));
-
+    final File file = fileSystem.file('/Default/foo')
+      ..createSync(recursive: true);
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
     chromeLauncher = ChromiumLauncher(
-      fileSystem: errorFileSystem,
+      fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
@@ -169,7 +182,7 @@ void main() {
     final Chromium chrome = await chromeLauncher.launch(
       'example_url',
       skipCheck: true,
-      cacheDir: errorFileSystem.currentDirectory,
+      cacheDir: fileSystem.currentDirectory,
     );
 
     // Create cache dir that the Chrome launcher will atttempt to persist.
@@ -362,61 +375,4 @@ Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager proces
     'example_url',
     skipCheck: true,
   );
-}
-
-class FakeDirectory extends Fake implements Directory {
-  FakeDirectory(this.path, this.fileSystem);
-
-  @override
-  final FileSystem fileSystem;
-
-  @override
-  final String path;
-
-  @override
-  void createSync({bool recursive = false}) {}
-
-  @override
-  bool existsSync() {
-    return true;
-  }
-
-  @override
-  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) {
-    throw FileSystemException(path, '');
-  }
-}
-
-class ErrorThrowingFileSystem extends ForwardingFileSystem {
-  ErrorThrowingFileSystem(FileSystem delegate) : super(delegate);
-
-  final Map<String, FileSystemEntity> errorEntities = <String, FileSystemEntity>{};
-
-  void addErrorEntity(FileSystemEntity entity) {
-    errorEntities[entity.path] = entity;
-  }
-
-  @override
-  Directory directory(dynamic path) {
-    if (errorEntities.containsKey(path)) {
-      return errorEntities[path] as Directory;
-    }
-    return delegate.directory(path);
-  }
-
-  @override
-  File file(dynamic path) {
-    if (errorEntities.containsKey(path)) {
-      return errorEntities[path] as File;
-    }
-    return delegate.file(path);
-  }
-
-  @override
-  Link link(dynamic path) {
-    if (errorEntities.containsKey(path)) {
-      return errorEntities[path] as Link;
-    }
-    return delegate.link(path);
-  }
 }
