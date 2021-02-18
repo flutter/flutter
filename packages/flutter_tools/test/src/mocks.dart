@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -83,11 +82,11 @@ ro.build.version.codename=REL
 }
 
 /// A strategy for creating Process objects from a list of commands.
-typedef ProcessFactory = Process Function(List<String> command);
+typedef _ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager extends Mock implements ProcessManager {
-  ProcessFactory processFactory = (List<String> commands) => MockProcess();
+  _ProcessFactory processFactory = (List<String> commands) => FakeProcess();
   bool canRunSucceeds = true;
   bool runSucceeds = true;
   List<String> commands;
@@ -119,7 +118,7 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// A function that generates a process factory that gives processes that fail
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
-ProcessFactory flakyProcessFactory({
+_ProcessFactory flakyProcessFactory({
   int flakes,
   bool Function(List<String> command) filter,
   Duration delay,
@@ -131,10 +130,10 @@ ProcessFactory flakyProcessFactory({
   stderr ??= () => const Stream<List<int>>.empty();
   return (List<String> command) {
     if (filter != null && !filter(command)) {
-      return MockProcess();
+      return FakeProcess();
     }
     if (flakesLeft == 0) {
-      return MockProcess(
+      return FakeProcess(
         exitCode: Future<int>.value(0),
         stdout: stdout(),
         stderr: stderr(),
@@ -147,7 +146,7 @@ ProcessFactory flakyProcessFactory({
     } else {
       exitFuture = Future<int>.delayed(delay, () => Future<int>.value(-9));
     }
-    return MockProcess(
+    return FakeProcess(
       exitCode: exitFuture,
       stdout: stdout(),
       stderr: stderr(),
@@ -172,33 +171,6 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
 }
 
 class _MockBasicProcess extends Mock implements Process {}
-
-/// A process that exits successfully with no output and ignores all input.
-class MockProcess extends Mock implements Process {
-  MockProcess({
-    this.pid = 1,
-    Future<int> exitCode,
-    Stream<List<int>> stdin,
-    this.stdout = const Stream<List<int>>.empty(),
-    this.stderr = const Stream<List<int>>.empty(),
-  }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin as IOSink ?? MemoryIOSink();
-
-  @override
-  final int pid;
-
-  @override
-  final Future<int> exitCode;
-
-  @override
-  final io.IOSink stdin;
-
-  @override
-  final Stream<List<int>> stdout;
-
-  @override
-  final Stream<List<int>> stderr;
-}
 
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
