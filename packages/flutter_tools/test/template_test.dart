@@ -29,7 +29,7 @@ void main() {
     handler.addError(directory, FileSystemOp.create, const FileSystemException());
 
     expect(() => template.render(directory, <String, Object>{}),
-        throwsToolExit());
+      throwsToolExit());
   });
 
   testWithoutContext('Template.render replaces .img.tmpl files with files from the image source', () {
