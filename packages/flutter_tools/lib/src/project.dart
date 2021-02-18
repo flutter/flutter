@@ -98,8 +98,8 @@ class FlutterProject {
     );
     final FlutterManifest exampleManifest = FlutterProject._readManifest(
       FlutterProject._exampleDirectory(directory)
-          .childFile(bundle.defaultManifestPath)
-          .path,
+        .childFile(bundle.defaultManifestPath)
+        .path,
       logger: logger,
       fileSystem: fileSystem,
     );
