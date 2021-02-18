@@ -5199,7 +5199,7 @@ void main() {
       tester.testTextInput.log.clear();
 
       final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
-      state.userUpdateTextEditingValue(const TextEditingValue(text: 'remoteremoteremote'), null);
+      state.userUpdateTextEditingValue(const TextEditingValue(text: 'remoteremoteremote'), SelectionChangedCause.keyboard);
 
       // Apply in order: length formatter -> listener -> onChanged -> listener.
       expect(controller.text, 'remote listener onChanged listener');

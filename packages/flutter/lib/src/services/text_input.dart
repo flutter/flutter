@@ -780,6 +780,12 @@ enum SelectionChangedCause {
   /// by accessibility tools (e.g. TalkBack on Android).
   keyboard,
 
+  /// The user used the selection toolbar to change the selection or the
+  /// location of the cursor.
+  ///
+  /// An example is when the user taps on select all in the tool bar.
+  toolBar,
+
   /// The user used the mouse to change the selection by dragging over a piece
   /// of text.
   drag,
@@ -813,7 +819,7 @@ abstract class TextSelectionDelegate {
   /// * [EditableTextState.userUpdateTextEditingValue]: an implementation that
   ///   applies additional pre-processing to the specified [value], before
   ///   updating the text editing state.
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause);
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
   void hideToolbar();

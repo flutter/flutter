@@ -213,7 +213,7 @@ abstract class TextSelectionControls {
           offset: value.selection.start
         )
       ),
-      null,
+      SelectionChangedCause.toolBar,
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
@@ -236,7 +236,7 @@ abstract class TextSelectionControls {
         text: value.text,
         selection: TextSelection.collapsed(offset: value.selection.end),
       ),
-      null,
+      SelectionChangedCause.toolBar,
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
@@ -266,7 +266,7 @@ abstract class TextSelectionControls {
               offset: value.selection.start + data.text!.length
           ),
         ),
-        null,
+        SelectionChangedCause.toolBar,
       );
     }
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
@@ -289,7 +289,7 @@ abstract class TextSelectionControls {
           extentOffset: delegate.textEditingValue.text.length,
         ),
       ),
-      null,
+      SelectionChangedCause.toolBar,
     );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
@@ -448,18 +448,16 @@ class TextSelectionOverlay {
 
   /// Builds the handles by inserting them into the [context]'s overlay.
   void showHandles() {
-    if (_handles == null) {
-      _handles = <OverlayEntry>[
-        OverlayEntry(builder: (BuildContext context) =>
-            _buildHandle(context, _TextSelectionHandlePosition.start)),
-        OverlayEntry(builder: (BuildContext context) =>
-            _buildHandle(context, _TextSelectionHandlePosition.end)),
-      ];
+    if (_handles != null)
+      return;
 
-      Overlay.of(
-          context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
-          .insertAll(_handles!);
-    }
+    _handles = <OverlayEntry>[
+      OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
+      OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
+    ];
+
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
+      .insertAll(_handles!);
   }
 
   /// Destroys the handles by removing them from overlay.
@@ -635,7 +633,7 @@ class TextSelectionOverlay {
     }
     selectionDelegate!.userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection, composing: TextRange.empty),
-      null,
+      SelectionChangedCause.drag,
     );
     selectionDelegate!.bringIntoView(textPosition);
   }

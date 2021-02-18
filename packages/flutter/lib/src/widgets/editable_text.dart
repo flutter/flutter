@@ -2280,7 +2280,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // if the selection offset didn't change.
     if (selectionChanged ||
         (userInteraction &&
-        ((value.selection.baseOffset == 0 && value.selection.extentOffset == 0 && !_hasFocus) ||
+        (cause == SelectionChangedCause.longPress ||
          cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(value.selection, cause);
     }

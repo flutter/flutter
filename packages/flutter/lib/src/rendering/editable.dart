@@ -562,7 +562,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
-  void _setSelectionChange(TextSelection nextSelection, SelectionChangedCause cause) {
+  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
     _handleSelectionChange(nextSelection, cause);
     _setTextEditingValue(
       textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
@@ -898,7 +898,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
-    _setSelectionChange(
+    _setSelection(
       newSelection,
       SelectionChangedCause.keyboard,
     );
@@ -1512,7 +1512,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // callbacks are invoked, in which case the callbacks will crash...
 
   void _handleSetSelection(TextSelection selection) {
-    _setSelectionChange(selection, SelectionChangedCause.keyboard);
+    _setSelection(selection, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {
@@ -1521,7 +1521,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
-    _setSelectionChange(
+    _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
       SelectionChangedCause.keyboard,
     );
@@ -1533,7 +1533,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
-    _setSelectionChange(
+    _setSelection(
       TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
       SelectionChangedCause.keyboard
     );
@@ -1546,7 +1546,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextWord == null)
       return;
     final int baseOffset = extentSelection ? selection!.baseOffset : nextWord.start;
-    _setSelectionChange(
+    _setSelection(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: nextWord.start,
@@ -1562,7 +1562,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (previousWord == null)
       return;
     final int baseOffset = extentSelection ?  selection!.baseOffset : previousWord.start;
-    _setSelectionChange(
+    _setSelection(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
@@ -1989,7 +1989,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
     );
-    _setSelectionChange(newSelection, cause);
+    _setSelection(newSelection, cause);
   }
 
   /// Select a word around the location of the last tap down.
@@ -2018,7 +2018,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       extentOffset: lastWord.extent.offset,
       affinity: firstWord.affinity,
     );
-    _setSelectionChange(newSelection, cause);
+    _setSelection(newSelection, cause);
   }
 
   /// Move the selection to the beginning or end of a word.
@@ -2036,7 +2036,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
-    _setSelectionChange(newSelection, cause);
+    _setSelection(newSelection, cause);
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
