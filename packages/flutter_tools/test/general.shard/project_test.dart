@@ -118,7 +118,7 @@ void main() {
           directory.absolute.path,
         );
         expect(
-          FlutterProject.fromPath(directory.path).directory.absolute.path,
+          FlutterProject.fromDirectoryTest(directory).directory.absolute.path,
           directory.absolute.path,
         );
         expect(

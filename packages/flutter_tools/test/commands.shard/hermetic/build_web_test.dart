@@ -52,9 +52,10 @@ void main() {
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(buildWeb(
-      FlutterProject.current(),
+      project,
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,

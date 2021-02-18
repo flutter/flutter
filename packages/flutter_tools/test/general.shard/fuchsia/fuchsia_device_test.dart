@@ -175,18 +175,16 @@ void main() {
       verify(mockPortForwarder.dispose()).called(1);
     });
 
-    testUsingContext('default capabilities', () async {
+    testWithoutContext('default capabilities', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      globals.fs.directory('fuchsia').createSync(recursive: true);
-      globals.fs.file('pubspec.yaml').createSync();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      memoryFileSystem.directory('fuchsia').createSync(recursive: true);
+      memoryFileSystem.file('pubspec.yaml').createSync();
 
       expect(device.supportsHotReload, true);
       expect(device.supportsHotRestart, false);
       expect(device.supportsFlutterExit, false);
-      expect(device.isSupportedForProject(FlutterProject.current()), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(device.isSupportedForProject(project), true);
     });
 
     test('is ephemeral', () {
@@ -195,25 +193,21 @@ void main() {
       expect(device.ephemeral, true);
     });
 
-    testUsingContext('supported for project', () async {
+    testWithoutContext('supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      globals.fs.directory('fuchsia').createSync(recursive: true);
-      globals.fs.file('pubspec.yaml').createSync();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      memoryFileSystem.directory('fuchsia').createSync(recursive: true);
+      memoryFileSystem.file('pubspec.yaml').createSync();
 
-      expect(device.isSupportedForProject(FlutterProject.current()), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(device.isSupportedForProject(project), true);
     });
 
-    testUsingContext('not supported for project', () async {
+    testWithoutContext('not supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      globals.fs.file('pubspec.yaml').createSync();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      memoryFileSystem.file('pubspec.yaml').createSync();
 
-      expect(device.isSupportedForProject(FlutterProject.current()), false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(device.isSupportedForProject(project), false);
     });
 
     testUsingContext('targetPlatform does not throw when sshConfig is missing', () async {
@@ -945,7 +939,7 @@ void main() {
           ..writeAsStringSync('{}');
         globals.fs.file('.packages').createSync();
         globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-        app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
+        app = BuildableFuchsiaApp(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory).fuchsia);
       }
 
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));

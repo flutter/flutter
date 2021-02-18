@@ -931,7 +931,7 @@ flutter:
   module: {}
 ''');
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -949,7 +949,7 @@ flutter:
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -965,7 +965,7 @@ flutter:
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
