@@ -124,6 +124,20 @@ class TestTextInput {
   }
   bool _isVisible = false;
 
+  /// Simulates the user hiding the onscreen keyboard.
+  void hide() {
+    assert(isRegistered);
+    _isVisible = false;
+  }
+
+  /// Simulates the user typing the given text.
+  void enterText(String text) {
+    assert(isRegistered);
+    updateEditingValue(TextEditingValue(
+      text: text,
+    ));
+  }
+
   /// Simulates the user changing the [TextEditingValue] to the given value.
   void updateEditingValue(TextEditingValue value) {
     assert(isRegistered);
@@ -141,37 +155,6 @@ class TestTextInput {
       ),
       (ByteData? data) { /* response from framework is discarded */ },
     );
-  }
-
-  /// Simulates the user closing the text input connection.
-  ///
-  /// For example:
-  /// - User pressed the home button and sent the application to background.
-  /// - User closed the virtual keyboard.
-  void closeConnection() {
-    assert(isRegistered);
-    // Not using the `expect` function because in the case of a FlutterDriver
-    // test this code does not run in a package:test test zone.
-    if (_client == 0)
-      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    _binaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
-        MethodCall(
-          'TextInputClient.onConnectionClosed',
-           <dynamic>[_client,]
-        ),
-      ),
-      (ByteData? data) { /* response from framework is discarded */ },
-    );
-  }
-
-  /// Simulates the user typing the given text.
-  void enterText(String text) {
-    assert(isRegistered);
-    updateEditingValue(TextEditingValue(
-      text: text,
-    ));
   }
 
   /// Simulates the user pressing one of the [TextInputAction] buttons.
@@ -217,9 +200,26 @@ class TestTextInput {
     });
   }
 
-  /// Simulates the user hiding the onscreen keyboard.
-  void hide() {
+  /// Simulates the user closing the text input connection.
+  ///
+  /// For example:
+  /// - User pressed the home button and sent the application to background.
+  /// - User closed the virtual keyboard.
+  void closeConnection() {
     assert(isRegistered);
-    _isVisible = false;
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0)
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    _binaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.onConnectionClosed',
+           <dynamic>[_client,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
   }
 }
