@@ -10,6 +10,8 @@ source_set("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
+    "diff_context.cc",
+    "diff_context.h",
     "embedded_views.cc",
     "embedded_views.h",
     "instrumentation.cc",
@@ -50,6 +52,8 @@ source_set("flow") {
     "layers/transform_layer.h",
     "matrix_decomposition.cc",
     "matrix_decomposition.h",
+    "paint_region.cc",
+    "paint_region.h",
     "paint_utils.cc",
     "paint_utils.h",
     "raster_cache.cc",
@@ -103,6 +107,8 @@ if (enable_unittests) {
     testonly = true
 
     sources = [
+      "testing/diff_context_test.cc",
+      "testing/diff_context_test.h",
       "testing/gl_context_switch_test.cc",
       "testing/gl_context_switch_test.h",
       "testing/layer_test.h",

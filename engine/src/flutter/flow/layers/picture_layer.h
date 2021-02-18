@@ -22,6 +22,16 @@ class PictureLayer : public Layer {
 
   SkPicture* picture() const { return picture_.get().get(); }
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+  bool IsReplacing(DiffContext* context, const Layer* layer) const override;
+
+  void Diff(DiffContext* context, const Layer* old_layer) override;
+
+  const PictureLayer* as_picture_layer() const override { return this; }
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
   void Preroll(PrerollContext* frame, const SkMatrix& matrix) override;
 
   void Paint(PaintContext& context) const override;
@@ -33,6 +43,16 @@ class PictureLayer : public Layer {
   SkiaGPUObject<SkPicture> picture_;
   bool is_complex_ = false;
   bool will_change_ = false;
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+  sk_sp<SkData> SerializedPicture() const;
+  mutable sk_sp<SkData> cached_serialized_picture_;
+  static bool Compare(DiffContext::Statistics& statistics,
+                      const PictureLayer* l1,
+                      const PictureLayer* l2);
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
 
   FML_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };

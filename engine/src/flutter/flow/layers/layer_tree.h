@@ -49,6 +49,13 @@ class LayerTree {
   const SkISize& frame_size() const { return frame_size_; }
   float device_pixel_ratio() const { return device_pixel_ratio_; }
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+  const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
+  PaintRegionMap& paint_region_map() { return paint_region_map_; }
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
   void RecordBuildTime(fml::TimePoint vsync_start,
                        fml::TimePoint build_start,
                        fml::TimePoint target_time);
@@ -89,6 +96,10 @@ class LayerTree {
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+  PaintRegionMap paint_region_map_;
+#endif  //  FLUTTER_ENABLE_DIFF_CONTEXT
 
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };
