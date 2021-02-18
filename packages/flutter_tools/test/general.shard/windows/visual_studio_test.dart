@@ -11,11 +11,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
@@ -108,6 +106,8 @@ void setMockVswhereResponse(
   List<String> additionalArguments,
   Map<String, dynamic> response,
   String responseOverride,
+  int exitCode,
+  Exception exception,
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
@@ -130,6 +130,8 @@ void setMockVswhereResponse(
       ...?requirementArguments,
     ],
     stdout: finalResponse,
+    exception: exception,
+    exitCode: exitCode ?? 0,
   ));
 }
 
@@ -138,14 +140,19 @@ void setMockVswhereResponse(
 void setMockCompatibleVisualStudioInstallation(
   Map<String, dynamic> response,
   FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
+  FakeProcessManager processManager, [
+  int exitCode,
+  Exception exception,
+]) {
   setMockVswhereResponse(
     fileSystem,
     processManager,
     _requirements,
     <String>['-version', '16'],
     response,
+    null,
+    exitCode,
+    exception,
   );
 }
 
@@ -154,14 +161,19 @@ void setMockCompatibleVisualStudioInstallation(
 void setMockPrereleaseVisualStudioInstallation(
   Map<String, dynamic> response,
   FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
+  FakeProcessManager processManager, [
+  int exitCode,
+  Exception exception,
+]) {
   setMockVswhereResponse(
     fileSystem,
     processManager,
     _requirements,
     <String>['-version', '16', '-prerelease'],
     response,
+    null,
+    exitCode,
+    exception,
   );
 }
 
@@ -170,14 +182,19 @@ void setMockPrereleaseVisualStudioInstallation(
 void setMockCompatibleVisualStudioBuildToolsInstallation(
   Map<String, dynamic> response,
   FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
+  FakeProcessManager processManager, [
+  int exitCode,
+  Exception exception,
+]) {
   setMockVswhereResponse(
     fileSystem,
     processManager,
     _requirementsBuildTools,
     <String>['-version', '16'],
     response,
+    null,
+    exitCode,
+    exception,
   );
 }
 
@@ -186,14 +203,19 @@ void setMockCompatibleVisualStudioBuildToolsInstallation(
 void setMockPrereleaseVisualStudioBuildToolsInstallation(
   Map<String, dynamic> response,
   FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
+  FakeProcessManager processManager, [
+  int exitCode,
+  Exception exception,
+]) {
   setMockVswhereResponse(
     fileSystem,
     processManager,
     _requirementsBuildTools,
     <String>['-version', '16', '-prerelease'],
     response,
+    null,
+    exitCode,
+    exception,
   );
 }
 
@@ -202,14 +224,19 @@ void setMockPrereleaseVisualStudioBuildToolsInstallation(
 void setMockAnyVisualStudioInstallation(
   Map<String, dynamic> response,
   FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
+  FakeProcessManager processManager, [
+  int exitCode,
+  Exception exception,
+]) {
   setMockVswhereResponse(
     fileSystem,
     processManager,
     null,
     <String>['-prerelease', '-all'],
     response,
+    null,
+    exitCode,
+    exception,
   );
 }
 
@@ -315,65 +342,48 @@ void setNoViableToolchainInstallation(
 
 void main() {
   group('Visual Studio', () {
-    testWithoutContext('isInstalled returns false when vswhere is missing', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
-      )).thenThrow(const ProcessException('vswhere', <String>[]));
+    testWithoutContext('isInstalled and cmakePath correct when vswhere is missing', () {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      const Exception exception = ProcessException('vswhere', <String>[]);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+
+      setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockPrereleaseVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockPrereleaseVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, null, exception);
+      setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
+
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
+        fileSystem: fileSystem,
         platform: windowsPlatform,
-        processManager: mockProcessManager,
+        processManager: fakeProcessManager,
       );
 
       expect(visualStudio.isInstalled, false);
-    });
-
-    testWithoutContext('cmakePath returns null when vswhere is missing', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
-      )).thenThrow(const ProcessException('vswhere', <String>[]));
-      final VisualStudio visualStudio = VisualStudio(
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
-        platform: windowsPlatform,
-        processManager: mockProcessManager,
-      );
-
       expect(visualStudio.cmakePath, isNull);
     });
 
     testWithoutContext(
         'isInstalled returns false when vswhere returns non-zero', () {
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
-      )).thenAnswer((Invocation invocation) {
-        return FakeProcessResult(exitCode: 1, stderr: '', stdout: '');
-      });
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+
+      setMockCompatibleVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockCompatibleVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockPrereleaseVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockPrereleaseVisualStudioBuildToolsInstallation(null, fileSystem, fakeProcessManager, 1);
+      setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
+
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
+        fileSystem: fileSystem,
         platform: windowsPlatform,
-        processManager: mockProcessManager,
+        processManager: fakeProcessManager,
       );
 
       expect(visualStudio.isInstalled, false);
-      expect(visualStudio.isInstalled, false);
+      expect(visualStudio.cmakePath, isNull);
     });
 
     testWithoutContext('VisualStudio getters return the right values if no installation is found', () {
@@ -820,5 +830,3 @@ class VisualStudioFixture {
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

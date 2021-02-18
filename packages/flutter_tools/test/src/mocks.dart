@@ -323,31 +323,6 @@ class MockResidentCompiler extends _BasicMock implements ResidentCompiler {
   void addFileSystemRoot(String root) { }
 }
 
-/// A fake implementation of [ProcessResult].
-class FakeProcessResult implements ProcessResult {
-  FakeProcessResult({
-    this.exitCode = 0,
-    this.pid = 1,
-    this.stderr,
-    this.stdout,
-  });
-
-  @override
-  final int exitCode;
-
-  @override
-  final int pid;
-
-  @override
-  final dynamic stderr;
-
-  @override
-  final dynamic stdout;
-
-  @override
-  String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
-}
-
 class MockStdIn extends Mock implements IOSink {
   final StringBuffer stdInWrites = StringBuffer();
 
