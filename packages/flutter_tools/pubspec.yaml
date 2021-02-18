@@ -38,7 +38,7 @@ dependencies:
   uuid: 3.0.0-nullsafety.1
   web_socket_channel: 1.2.0
   stream_channel: 2.1.0
-  shelf_web_socket: 0.2.4
+  shelf_web_socket: 0.2.4+1
   shelf_static: 0.2.9+2
   pub_semver: 1.4.4
   pool: 1.5.0
@@ -108,4 +108,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 9ca9
+# PUBSPEC CHECKSUM: e106
