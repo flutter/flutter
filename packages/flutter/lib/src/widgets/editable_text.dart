@@ -2276,8 +2276,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _value = value;
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed. Also, focusing an empty field is sent as a selection change even
-    // if the selection offset didn't change.
+    // changed. Also, the user long pressing should always send a selection change
+    // as well.
     if (selectionChanged ||
         (userInteraction &&
         (cause == SelectionChangedCause.longPress ||
