@@ -215,7 +215,7 @@ enum AnimationBehavior {
 /// class _AnimationControllerDemoState extends State<AnimationControllerDemo>
 ///     with SingleTickerProviderStateMixin {
 ///   static const Duration _duration = Duration(seconds: 1);
-///   AnimationController controller;
+///   dynamic controller;
 ///
 ///   @override
 ///   void initState() {
@@ -248,7 +248,7 @@ enum AnimationBehavior {
 ///                 child: Text(
 ///                   '${controller.value.toStringAsFixed(2)}',
 ///                   style: Theme.of(context).textTheme.headline3,
-///                   textScaleFactor: 1 + controller.value,
+///                   textScaleFactor: 1.0 + controller.value,
 ///                 ),
 ///               ),
 ///               ElevatedButton(
