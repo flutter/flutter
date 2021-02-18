@@ -7,7 +7,22 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/core/SkImage.h"
+
+@interface FlutterDarwinExternalTextureSkImageWrapper : NSObject
+
++ (sk_sp<SkImage>)wrapYUVATexture:(nonnull id<MTLTexture>)yTex
+                            UVTex:(nonnull id<MTLTexture>)uvTex
+                        grContext:(nonnull GrDirectContext*)grContext
+                            width:(size_t)width
+                           height:(size_t)height;
+
++ (sk_sp<SkImage>)wrapRGBATexture:(nonnull id<MTLTexture>)rgbaTex
+                        grContext:(nonnull GrDirectContext*)grContext
+                            width:(size_t)width
+                           height:(size_t)height;
+
+@end
 
 @interface FlutterDarwinExternalTextureMetal : NSObject
 

@@ -34,6 +34,8 @@ template("embedder_source_set") {
       "embedder.cc",
       "embedder_engine.cc",
       "embedder_engine.h",
+      "embedder_external_texture_resolver.cc",
+      "embedder_external_texture_resolver.h",
       "embedder_external_view.cc",
       "embedder_external_view.h",
       "embedder_external_view_embedder.cc",
@@ -90,6 +92,8 @@ template("embedder_source_set") {
 
     if (embedder_enable_metal) {
       sources += [
+        "embedder_external_texture_metal.h",
+        "embedder_external_texture_metal.mm",
         "embedder_surface_metal.h",
         "embedder_surface_metal.mm",
       ]
@@ -156,6 +160,7 @@ test_fixtures("fixtures") {
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
     "fixtures/gradient_metal.png",
+    "fixtures/external_texture_metal.png",
     "fixtures/gradient_xform.png",
     "fixtures/scene_without_custom_compositor.png",
     "fixtures/scene_without_custom_compositor_with_xform.png",
@@ -226,7 +231,7 @@ if (enable_unittests) {
       sources += [
         "tests/embedder_test_context_metal.cc",
         "tests/embedder_test_context_metal.h",
-        "tests/embedder_unittests_metal.cc",
+        "tests/embedder_unittests_metal.mm",
       ]
 
       deps += [ "//flutter/testing:metal" ]
