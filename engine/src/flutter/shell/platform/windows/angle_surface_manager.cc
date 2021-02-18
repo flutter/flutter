@@ -205,13 +205,7 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
 
   EGLSurface surface = EGL_NO_SURFACE;
 
-  // Disable Angle's automatic surface sizing logic and provide and exlicit
-  // size.  AngleSurfaceManager is responsible for initiating Angle surface size
-  // changes to avoid race conditions with rendering when automatic mode is
-  // used.
-  const EGLint surfaceAttributes[] = {
-      EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
-      EGL_HEIGHT,           height,   EGL_NONE};
+  const EGLint surfaceAttributes[] = {EGL_NONE};
 
 #ifdef WINUWP
 #ifdef USECOREWINDOW
@@ -244,19 +238,9 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
   EGLint existing_width, existing_height;
   GetSurfaceDimensions(&existing_width, &existing_height);
   if (width != existing_width || height != existing_height) {
-    // Destroy existing surface with previous stale dimensions and create new
-    // surface at new size. Since the Windows compositor retains the front
-    // buffer until the new surface has been presented, no need to manually
-    // preserve the previous surface contents. This resize approach could be
-    // further optimized if Angle exposed a public entrypoint for
-    // SwapChain11::reset or SwapChain11::resize.
-    // a possible starting point for that could build on
-    // eglPostSubBufferNV(egl_display_, render_surface_, 1, 1, width, height);
-    DestroySurface();
-    if (!CreateSurface(render_target, width, height)) {
-      std::cerr << "AngleSurfaceManager::ResizeSurface failed to create surface"
-                << std::endl;
-    }
+    // Resize render_surface_.  Internaly this calls mSwapChain->ResizeBuffers
+    // avoiding the need to destory and recreate the underlying SwapChain.
+    eglPostSubBufferNV(egl_display_, render_surface_, 1, 1, width, height);
   }
 }
 

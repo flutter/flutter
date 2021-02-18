@@ -245,15 +245,17 @@ double FlutterWindowWinUWP::GetPosY(
 void FlutterWindowWinUWP::OnBoundsChanged(
     winrt::Windows::UI::ViewManagement::ApplicationView const& app_view,
     winrt::Windows::Foundation::IInspectable const&) {
-#ifndef USECOREWINDOW
   if (binding_handler_delegate_) {
     auto bounds = GetBounds(current_display_info_, true);
 
     binding_handler_delegate_->OnWindowSizeChanged(
         static_cast<size_t>(bounds.width), static_cast<size_t>(bounds.height));
+#ifndef USECOREWINDOW
+
     render_target_.Size({bounds.width, bounds.height});
-  }
+
 #endif
+  }
 }
 
 void FlutterWindowWinUWP::OnKeyUp(
