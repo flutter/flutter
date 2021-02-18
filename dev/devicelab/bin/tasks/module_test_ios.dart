@@ -295,49 +295,53 @@ Future<void> main() async {
       section('Run platform unit tests');
 
       final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
-      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
+      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');
 
-        return inDirectory(objectiveCHostApp, () =>
-          exec(
-            'xcodebuild',
-            <String>[
-              '-workspace',
-              'Host.xcworkspace',
-              '-scheme',
-              'Host',
-              '-configuration',
-              'Debug',
-              '-destination',
-              'id=$deviceId',
-              '-resultBundlePath',
-              resultBundlePath,
-              'test',
-              'CODE_SIGNING_ALLOWED=NO',
-              'CODE_SIGNING_REQUIRED=NO',
-              'CODE_SIGN_IDENTITY=-',
-              'EXPANDED_CODE_SIGN_IDENTITY=-',
-              'COMPILER_INDEX_STORE_ENABLE=NO',
-            ],
-          ));
-        }
-      );
-
-      // Zip the test results to the artifacts directory for upload.
-      await inDirectory(resultBundleTemp, () {
-        final String zipPath = path.join(hostAgent.dumpDirectory.path,
-            'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
-        return exec(
-          'zip',
+        final int testResultExit = await exec(
+          'xcodebuild',
           <String>[
-            '-r',
-            '-9',
-            zipPath,
-            'result.xcresult',
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            '-destination',
+            'id=$deviceId',
+            '-resultBundlePath',
+            resultBundlePath,
+            'test',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          canFail: true, // Best effort to get the logs.
+          workingDirectory: objectiveCHostApp.path,
+          canFail: true,
         );
+
+        if (testResultExit != 0) {
+          // Zip the test results to the artifacts directory for upload.
+          await inDirectory(resultBundleTemp, () {
+            final String zipPath = path.join(hostAgent.dumpDirectory.path,
+                'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+            return exec(
+              'zip',
+              <String>[
+                '-r',
+                '-9',
+                zipPath,
+                'result.xcresult',
+              ],
+              canFail: true, // Best effort to get the logs.
+            );
+          });
+
+          throw TaskResult.failure('Platform unit tests failed');
+        }
       });
 
       section('Fail building existing Objective-C iOS app if flutter script fails');
