@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -20,6 +21,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart';
 import 'utils.dart';
 
 const String _kFlutterRoot = '/flutter/flutter';
@@ -93,9 +95,6 @@ void main() {
           versionChecked = true;
         });
 
-        final Map<String, String> environment = globals.platform.environment;
-        environment['CI'] = 'true';
-
         await runner.run(<String>['dummy', '--version']);
 
         expect(versionChecked, isFalse);
@@ -103,6 +102,7 @@ void main() {
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
+        BotDetector: () => const AlwaysTrueBotDetector()
       }, initializeFlutterRoot: false);
 
 
