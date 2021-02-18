@@ -4,6 +4,9 @@
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
 
+#include "flutter/flow/layers/clip_rect_layer.h"
+#include "flutter/flow/layers/transform_layer.h"
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -212,6 +215,66 @@ TEST_F(BackdropFilterLayerTest, Readback) {
   layer2->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 }
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+using BackdropLayerDiffTest = DiffContextTest;
+
+TEST_F(BackdropLayerDiffTest, BackdropLayer) {
+  auto filter = SkImageFilters::Blur(10, 10, SkTileMode::kClamp, nullptr);
+
+  {
+    // tests later assume 30px readback area, fail early if that's not the case
+    auto readback = filter->filterBounds(SkIRect::MakeWH(10, 10), SkMatrix::I(),
+                                         SkImageFilter::kReverse_MapDirection);
+    EXPECT_EQ(readback, SkIRect::MakeLTRB(-30, -30, 40, 40));
+  }
+
+  MockLayerTree l1(SkISize::Make(100, 100));
+  l1.root()->Add(std::make_shared<BackdropFilterLayer>(filter));
+
+  // no clip, effect over entire surface
+  auto damage = DiffLayerTree(l1, MockLayerTree(SkISize::Make(100, 100)));
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeWH(100, 100));
+
+  MockLayerTree l2(SkISize::Make(100, 100));
+
+  auto clip = std::make_shared<ClipRectLayer>(SkRect::MakeLTRB(20, 20, 60, 60),
+                                              Clip::hardEdge);
+  clip->Add(std::make_shared<BackdropFilterLayer>(filter));
+  l2.root()->Add(clip);
+  damage = DiffLayerTree(l2, MockLayerTree(SkISize::Make(100, 100)));
+
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 90, 90));
+
+  MockLayerTree l3;
+  auto scale = std::make_shared<TransformLayer>(SkMatrix::Scale(2.0, 2.0));
+  scale->Add(clip);
+  l3.root()->Add(scale);
+
+  damage = DiffLayerTree(l3, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 180, 180));
+
+  MockLayerTree l4;
+  l4.root()->Add(scale);
+
+  // path just outside of readback region, doesn't affect blur
+  auto path1 = SkPath().addRect(SkRect::MakeLTRB(180, 180, 190, 190));
+  l4.root()->Add(std::make_shared<MockLayer>(path1));
+  damage = DiffLayerTree(l4, l3);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(180, 180, 190, 190));
+
+  MockLayerTree l5;
+  l5.root()->Add(scale);
+
+  // path just inside of readback region, must trigger backdrop repaint
+  auto path2 = SkPath().addRect(SkRect::MakeLTRB(179, 179, 189, 189));
+  l5.root()->Add(std::make_shared<MockLayer>(path2));
+  damage = DiffLayerTree(l5, l4);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 190, 190));
+}
+
+#endif
 
 }  // namespace testing
 }  // namespace flutter

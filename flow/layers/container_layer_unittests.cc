@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -267,6 +268,213 @@ TEST_F(ContainerLayerTest, MergedMultipleChildren) {
                    MockCanvas::DrawCall{0, MockCanvas::DrawPathData{
                                                child_path2, child_paint2}}}));
 }
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+using ContainerLayerDiffTest = DiffContextTest;
+
+// Insert PictureLayer amongst container layers
+TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
+  auto pic1 = CreatePicture(SkRect::MakeLTRB(0, 0, 50, 50), 1);
+  auto pic2 = CreatePicture(SkRect::MakeLTRB(100, 0, 150, 50), 1);
+  auto pic3 = CreatePicture(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+
+  MockLayerTree t1;
+
+  auto t1_c1 = CreateContainerLayer(CreatePictureLayer(pic1));
+  t1.root()->Add(t1_c1);
+
+  auto t1_c2 = CreateContainerLayer(CreatePictureLayer(pic2));
+  t1.root()->Add(t1_c2);
+
+  auto damage = DiffLayerTree(t1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+
+  // Add in the middle
+
+  MockLayerTree t2;
+  auto t2_c1 = CreateContainerLayer(CreatePictureLayer(pic1));
+  t2_c1->AssignOldLayer(t1_c1.get());
+  t2.root()->Add(t2_c1);
+
+  t2.root()->Add(CreatePictureLayer(pic3));
+
+  auto t2_c2 = CreateContainerLayer(CreatePictureLayer(pic2));
+  t2_c2->AssignOldLayer(t1_c2.get());
+  t2.root()->Add(t2_c2);
+
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+
+  // Add in the beginning
+
+  t2 = MockLayerTree();
+  t2.root()->Add(CreatePictureLayer(pic3));
+  t2.root()->Add(t2_c1);
+  t2.root()->Add(t2_c2);
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+
+  // Add at the end
+
+  t2 = MockLayerTree();
+  t2.root()->Add(t2_c1);
+  t2.root()->Add(t2_c2);
+  t2.root()->Add(CreatePictureLayer(pic3));
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+}
+
+// Insert picture layer amongst other picture layers
+TEST_F(ContainerLayerDiffTest, PictureInsertion) {
+  auto pic1 = CreatePicture(SkRect::MakeLTRB(0, 0, 50, 50), 1);
+  auto pic2 = CreatePicture(SkRect::MakeLTRB(100, 0, 150, 50), 1);
+  auto pic3 = CreatePicture(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+
+  MockLayerTree t1;
+  t1.root()->Add(CreatePictureLayer(pic1));
+  t1.root()->Add(CreatePictureLayer(pic2));
+
+  auto damage = DiffLayerTree(t1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+
+  MockLayerTree t2;
+  t2.root()->Add(CreatePictureLayer(pic3));
+  t2.root()->Add(CreatePictureLayer(pic1));
+  t2.root()->Add(CreatePictureLayer(pic2));
+
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+
+  MockLayerTree t3;
+  t3.root()->Add(CreatePictureLayer(pic1));
+  t3.root()->Add(CreatePictureLayer(pic3));
+  t3.root()->Add(CreatePictureLayer(pic2));
+
+  damage = DiffLayerTree(t3, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+
+  MockLayerTree t4;
+  t4.root()->Add(CreatePictureLayer(pic1));
+  t4.root()->Add(CreatePictureLayer(pic2));
+  t4.root()->Add(CreatePictureLayer(pic3));
+
+  damage = DiffLayerTree(t4, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+}
+
+TEST_F(ContainerLayerDiffTest, LayerDeletion) {
+  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto path2 = SkPath().addRect(SkRect::MakeLTRB(100, 0, 150, 50));
+  auto path3 = SkPath().addRect(SkRect::MakeLTRB(200, 0, 250, 50));
+
+  auto c1 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
+  auto c2 = CreateContainerLayer(std::make_shared<MockLayer>(path2));
+  auto c3 = CreateContainerLayer(std::make_shared<MockLayer>(path3));
+
+  MockLayerTree t1;
+  t1.root()->Add(c1);
+  t1.root()->Add(c2);
+  t1.root()->Add(c3);
+
+  auto damage = DiffLayerTree(t1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+
+  MockLayerTree t2;
+  t2.root()->Add(c2);
+  t2.root()->Add(c3);
+
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 50, 50));
+
+  MockLayerTree t3;
+  t3.root()->Add(c1);
+  t3.root()->Add(c3);
+
+  damage = DiffLayerTree(t3, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 150, 50));
+
+  MockLayerTree t4;
+  t4.root()->Add(c1);
+  t4.root()->Add(c2);
+
+  damage = DiffLayerTree(t4, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+
+  MockLayerTree t5;
+  t5.root()->Add(c1);
+
+  damage = DiffLayerTree(t5, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 250, 50));
+
+  MockLayerTree t6;
+  t6.root()->Add(c2);
+
+  damage = DiffLayerTree(t6, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+
+  MockLayerTree t7;
+  t7.root()->Add(c3);
+
+  damage = DiffLayerTree(t7, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+}
+
+TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
+  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto path2 = SkPath().addRect(SkRect::MakeLTRB(100, 0, 150, 50));
+  auto path3 = SkPath().addRect(SkRect::MakeLTRB(200, 0, 250, 50));
+
+  auto path1a = SkPath().addRect(SkRect::MakeLTRB(0, 100, 50, 150));
+  auto path2a = SkPath().addRect(SkRect::MakeLTRB(100, 100, 150, 150));
+  auto path3a = SkPath().addRect(SkRect::MakeLTRB(200, 100, 250, 150));
+
+  auto c1 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
+  auto c2 = CreateContainerLayer(std::make_shared<MockLayer>(path2));
+  auto c3 = CreateContainerLayer(std::make_shared<MockLayer>(path3));
+
+  MockLayerTree t1;
+  t1.root()->Add(c1);
+  t1.root()->Add(c2);
+  t1.root()->Add(c3);
+
+  auto damage = DiffLayerTree(t1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+
+  MockLayerTree t2;
+  t2.root()->Add(c1);
+  t2.root()->Add(c2);
+  t2.root()->Add(c3);
+
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_TRUE(damage.frame_damage.isEmpty());
+
+  MockLayerTree t3;
+  t3.root()->Add(CreateContainerLayer({std::make_shared<MockLayer>(path1a)}));
+  t3.root()->Add(c2);
+  t3.root()->Add(c3);
+
+  damage = DiffLayerTree(t3, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 50, 150));
+
+  MockLayerTree t4;
+  t4.root()->Add(c1);
+  t4.root()->Add(CreateContainerLayer(std::make_shared<MockLayer>(path2a)));
+  t4.root()->Add(c3);
+
+  damage = DiffLayerTree(t4, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 150, 150));
+
+  MockLayerTree t5;
+  t5.root()->Add(c1);
+  t5.root()->Add(c2);
+  t5.root()->Add(CreateContainerLayer(std::make_shared<MockLayer>(path3a)));
+
+  damage = DiffLayerTree(t5, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 150));
+}
+
+#endif
 
 }  // namespace testing
 }  // namespace flutter

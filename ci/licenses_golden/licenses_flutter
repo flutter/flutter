@@ -34,6 +34,8 @@ FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
 FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
+FILE: ../../../flutter/flow/diff_context.cc
+FILE: ../../../flutter/flow/diff_context.h
 FILE: ../../../flutter/flow/embedded_view_params_unittests.cc
 FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
@@ -101,6 +103,8 @@ FILE: ../../../flutter/flow/matrix_decomposition.cc
 FILE: ../../../flutter/flow/matrix_decomposition.h
 FILE: ../../../flutter/flow/matrix_decomposition_unittests.cc
 FILE: ../../../flutter/flow/mutators_stack_unittests.cc
+FILE: ../../../flutter/flow/paint_region.cc
+FILE: ../../../flutter/flow/paint_region.h
 FILE: ../../../flutter/flow/paint_utils.cc
 FILE: ../../../flutter/flow/paint_utils.h
 FILE: ../../../flutter/flow/raster_cache.cc

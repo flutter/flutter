@@ -15,11 +15,11 @@
 #include "flutter/fml/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
+namespace flutter {
+
 namespace testing {
 class ShellTest;
 }
-
-namespace flutter {
 
 /// A cache of SkData that gets stored to disk.
 ///
