@@ -1,4 +1,4 @@
-Signature: 0b498ce1c2d1916dc1d38ac7fcadb768
+Signature: b53d94a39495ceadf07756f730fd3db1
 
 UNUSED LICENSES:
 
@@ -2765,7 +2765,6 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkAlphaThresholdImageFi
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrBlend.h
