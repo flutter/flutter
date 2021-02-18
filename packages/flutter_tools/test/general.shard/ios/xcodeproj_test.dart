@@ -668,7 +668,7 @@ Information about project "Runner":
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -696,7 +696,7 @@ Information about project "Runner":
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_debug_sim_unopt'));
 
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -723,7 +723,7 @@ Information about project "Runner":
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -750,7 +750,7 @@ Information about project "Runner":
           .thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo.debug;
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -778,7 +778,7 @@ Information about project "Runner":
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
       const BuildInfo buildInfo = BuildInfo.debug;
 
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -818,7 +818,7 @@ Information about project "Runner":
       manifestFile.writeAsStringSync(manifestString);
 
       await updateGeneratedXcodeProperties(
-        project: FlutterProject.fromPath('path/to/project'),
+        project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
       );
 

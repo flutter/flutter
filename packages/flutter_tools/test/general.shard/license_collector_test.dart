@@ -430,7 +430,7 @@ void main() {
     expect(licenseResult.dependencies, isEmpty);
     expect(licenseResult.errorMessages.single,
       'package foo specified an additional license at /foo.txt, but this file could not be read:'
-      '\nFormatException: Invalid UTF-8 byte (at offset 0)',
+      '\nFileSystemException: Invalid UTF-8 byte, path = \'/foo.txt\'',
     );
   });
 }
