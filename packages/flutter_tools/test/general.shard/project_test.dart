@@ -118,10 +118,6 @@ void main() {
           directory.absolute.path,
         );
         expect(
-          FlutterProject.fromPath(directory.path).directory.absolute.path,
-          directory.absolute.path,
-        );
-        expect(
           FlutterProject.current().directory.absolute.path,
           globals.fs.currentDirectory.absolute.path,
         );

@@ -41,6 +41,7 @@ void main() {
     FakeProcessManager fakeProcessManager;
     MemoryFileSystem fs;
     Cache cache;
+
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => fakeProcessManager,
@@ -57,7 +58,7 @@ void main() {
       );
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       ).path).createSync(recursive: true);
@@ -96,7 +97,7 @@ void main() {
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
       when(sdk.latestVersion).thenReturn(null);
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final File gradle = project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       )..createSync(recursive: true);

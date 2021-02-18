@@ -194,7 +194,7 @@ void main() {
           'SWIFT_VERSION': '5.0',
         });
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift iOS podfile template');
@@ -214,7 +214,7 @@ void main() {
     testUsingContext('does not recreate Podfile when already present', () async {
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
@@ -226,7 +226,7 @@ void main() {
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.existsSync(), false);
@@ -245,7 +245,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -273,7 +273,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(legacyReleaseInclude);
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.directory('project'));
       await cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -305,7 +305,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.directory('project'));
       await injectPlugins(project, iosPlatform: true);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
