@@ -81,6 +81,8 @@ Future<T> runInContext<T>(
     fallbacks: <Type, Generator>{
       AndroidBuilder: () => AndroidGradleBuilder(
         logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
