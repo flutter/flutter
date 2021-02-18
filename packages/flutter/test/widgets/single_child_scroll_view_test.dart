@@ -4,6 +4,8 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/src/material/text_field.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -921,5 +923,41 @@ void main() {
       expect(outer.offset, 200.0);
       expect(inner.offset, 0.0);
     });
+  });
+
+  testWidgets('SingleChildScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              children: focusNodes.map((FocusNode focusNode) {
+                return Container(
+                  height: 50,
+                  child: TextField(
+                      focusNode: focusNode,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      )
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isFalse);
   });
 }
