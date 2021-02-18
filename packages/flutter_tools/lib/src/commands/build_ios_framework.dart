@@ -322,7 +322,7 @@ end
 
     try {
       // Copy xcframework engine cache framework to mode directory.
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );

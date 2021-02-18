@@ -50,6 +50,7 @@ abstract class FlutterTestRunner {
     String randomSeed,
     String reporter,
     String timeout,
+    bool runSkipped = false,
   });
 }
 
@@ -81,6 +82,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String randomSeed,
     String reporter,
     String timeout,
+    bool runSkipped = false,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -108,6 +110,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--tags', tags],
       if (excludeTags != null)
         ...<String>['--exclude-tags', excludeTags],
+      if (runSkipped)
+        '--run-skipped',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory

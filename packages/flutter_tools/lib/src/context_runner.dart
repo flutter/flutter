@@ -81,6 +81,8 @@ Future<T> runInContext<T>(
     fallbacks: <Type, Generator>{
       AndroidBuilder: () => AndroidGradleBuilder(
         logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
@@ -219,7 +221,13 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fuchsiaArtifacts: globals.fuchsiaArtifacts,
       ),
-      GradleUtils: () => GradleUtils(),
+      GradleUtils: () => GradleUtils(
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        cache: globals.cache,
+      ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
