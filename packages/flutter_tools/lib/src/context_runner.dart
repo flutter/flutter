@@ -83,6 +83,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         processManager: globals.processManager,
         fileSystem: globals.fs,
+        artifacts: globals.artifacts,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,

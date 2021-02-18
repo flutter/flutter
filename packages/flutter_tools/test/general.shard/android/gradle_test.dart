@@ -860,7 +860,12 @@ flutter:
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
-      builder = AndroidGradleBuilder(logger: logger, processManager: fakeProcessManager, fileSystem: fs);
+      builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: fakeProcessManager,
+        fileSystem: fs,
+        artifacts: Artifacts.test(),
+      );
     });
 
     testUsingContext('calls gradle', () async {
