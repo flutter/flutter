@@ -666,7 +666,7 @@ Future<void> _runFrameworkTests() async {
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), forceSingleCore: true);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), forceSingleCore: true);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
