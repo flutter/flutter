@@ -1035,11 +1035,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
   ///
   /// To just give [finder] the focus without entering any text,
-  /// see [showKeyboard].
+  /// consider [showKeyboard].
+  ///
+  /// This method does not imply a [pump], but it is recommended to
+  /// call [pump] after calling this method if the UI needs to reflect
+  /// the entered text.
+  ///
+  /// See also:
+  ///
+  ///  * [TestTextInput.updateText], which is similar but targets
+  ///    the active text field rather than a specified one.
   Future<void> enterText(Finder finder, String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
-      testTextInput.enterText(text);
+      await testTextInput.updateText(text);
       await idle();
     });
   }

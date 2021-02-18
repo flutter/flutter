@@ -166,7 +166,7 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
 
     // Entering text brings it back on screen.
-    tester.testTextInput.enterText('Hello');
+    await tester.testTextInput.updateText('Hello');
     await tester.pumpAndSettle();
     expect(scrollController.offset, greaterThan(0.0));
     expect(find.byType(EditableText), findsOneWidget);
@@ -216,7 +216,7 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
 
     // Entering text brings it not back on screen.
-    tester.testTextInput.enterText('Hello');
+    await tester.testTextInput.updateText('Hello');
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(find.byType(EditableText), findsNothing);
@@ -261,7 +261,7 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
     expect(textController.text, '');
-    tester.testTextInput.enterText('H');
+    await tester.testTextInput.updateText('H');
     final int frames = await tester.pumpAndSettle();
 
     // The text input should not trigger any animations, which would indicate
@@ -309,7 +309,7 @@ void main() {
 
     // Enter text at end, which is off-screen.
     final String textToEnter = '${controller.text} HELLO';
-    tester.testTextInput.updateEditingValue(TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(TextEditingValue(
       text: textToEnter,
       selection: TextSelection.collapsed(offset: textToEnter.length),
     ));

@@ -197,7 +197,7 @@ mixin CommandHandlerFactory {
             'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
     }
     final EnterText enterTextCommand = command as EnterText;
-    _testTextInput.enterText(enterTextCommand.text);
+    await _testTextInput.updateText(enterTextCommand.text);
     return Result.empty;
   }
 

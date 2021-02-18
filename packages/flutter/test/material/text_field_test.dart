@@ -334,7 +334,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     // Try the test again with a nonempty EditableText.
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: 'X',
       selection: TextSelection.collapsed(offset: 1),
     ));
@@ -497,7 +497,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     const String testValue = 'A B C';
-    tester.testTextInput.updateEditingValue(
+    await tester.testTextInput.updateTextAndSelection(
         const TextEditingValue(
           text: testValue
         )
@@ -864,7 +864,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     const String testValue = 'ABC';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: testValue,
       selection: TextSelection.collapsed(offset: testValue.length),
     ));
@@ -874,7 +874,7 @@ void main() {
     // Enter a character into the obscured field and verify that the character
     // is temporarily shown to the user and then changed to a bullet.
     const String newChar = 'X';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: testValue + newChar,
       selection: TextSelection.collapsed(offset: testValue.length + 1),
     ));
@@ -904,7 +904,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     const String testValue = 'ABC';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: testValue,
       selection: TextSelection.collapsed(offset: testValue.length),
     ));
@@ -914,7 +914,7 @@ void main() {
     // Enter a character into the obscured field and verify that the character
     // isn't shown to the user.
     const String newChar = 'X';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: testValue + newChar,
       selection: TextSelection.collapsed(offset: testValue.length + 1),
     ));
@@ -4108,7 +4108,7 @@ void main() {
 
     await tester.showKeyboard(find.byType(TextField));
     const String testValue = '123';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
+    await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
       text: testValue,
       selection: TextSelection.collapsed(offset: 3),
       composing: TextRange(start: 0, end: testValue.length),
@@ -4236,7 +4236,7 @@ void main() {
 
       const String testValue = 'abcdefghi';
       await tester.showKeyboard(find.byType(TextField));
-      tester.testTextInput.updateEditingValue(const TextEditingValue(
+      await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
         text: testValue,
         selection: TextSelection.collapsed(offset: 3),
         composing: TextRange(start: 0, end: testValue.length),
@@ -8492,7 +8492,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 0));
 
     if (kIsWeb) {
-      tester.testTextInput.updateEditingValue(const TextEditingValue(
+      await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
         selection: TextSelection(baseOffset: 2, extentOffset: 7),
       ));
       // Wait for all the `setState` calls to be flushed.

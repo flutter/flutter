@@ -1396,7 +1396,7 @@ void main() {
     if (kIsWeb) {
       // On the web, the input connection exists, but text updates should be
       // ignored.
-      tester.testTextInput.updateEditingValue(const TextEditingValue(
+      await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
         text: 'Foo bar',
         selection: TextSelection(baseOffset: 0, extentOffset: 3),
         composing: TextRange(start: 3, end: 4),
@@ -1443,7 +1443,7 @@ void main() {
 
     expect(tester.testTextInput.hasAnyClients, kIsWeb ? isTrue : isFalse);
     if (kIsWeb) {
-      tester.testTextInput.updateEditingValue(const TextEditingValue(
+      await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
         text: 'Foo bar',
         selection: TextSelection(baseOffset: 0, extentOffset: 3),
       ));

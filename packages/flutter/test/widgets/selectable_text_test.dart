@@ -4439,7 +4439,7 @@ void main() {
     );
 
     if (kIsWeb) {
-      tester.testTextInput.updateEditingValue(const TextEditingValue(
+      await tester.testTextInput.updateTextAndSelection(const TextEditingValue(
         selection: TextSelection(baseOffset: 2, extentOffset: 7),
       ));
       // Wait for all the `setState` calls to be flushed.

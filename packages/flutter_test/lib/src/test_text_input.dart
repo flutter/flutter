@@ -130,21 +130,94 @@ class TestTextInput {
     _isVisible = false;
   }
 
+  /// Simulates the user changing the text of the focused text field, and resets
+  /// the selection.
+  ///
+  /// Returns a [Future] which completes when the text field has responded
+  /// to the request. If no text field responds, the future never completes.
+  ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
+  ///
+  /// See also:
+  ///
+  ///  * [updateText], which is similar but takes only a String and resets the
+  ///    selection.
+  Future<void> updateText(String text) {
+    assert(isRegistered);
+    return TestAsyncUtils.guard<void>(() {
+      return updateTextAndSelection(TextEditingValue(text: text));
+    });
+  }
+
+  /// Simulates the user changing the text and selection of the focused text
+  /// field.
+  ///
+  /// Returns a [Future] which completes when the text field has responded
+  /// to the request. If no text field responds, the future never completes.
+  ///
+  /// To update the UI under test after this method is invoked, use
+  /// [WidgetTester.pump].
+  ///
+  /// See also:
+  ///
+  ///  * [updateText], which is similar but takes only a String and resets the
+  ///    selection.
+  Future<void> updateTextAndSelection(TextEditingValue value) {
+    assert(isRegistered);
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0)
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    return TestAsyncUtils.guard<void>(() async {
+      final Completer<void> completer = Completer<void>();
+      _binaryMessenger.handlePlatformMessage(
+        SystemChannels.textInput.name,
+        SystemChannels.textInput.codec.encodeMethodCall(
+          MethodCall(
+            'TextInputClient.updateEditingState',
+            <dynamic>[_client, value.toJSON()],
+          ),
+        ),
+        (ByteData? data) {
+          completer.complete();
+        },
+      );
+      return completer.future;
+    });
+  }
+
   /// Simulates the user typing the given text.
+  ///
+  /// This API no longer functions reliably, since it is synchronous but the
+  /// underlying logic is now asynchronous. For better results, use [updateText]
+  /// with `await`.
+  @Deprecated(
+    'Use updateText(), which is now asynchronous and should be awaited. '
+    'This feature was deprecated after v1.27.0-4.0.pre.'
+  )
   void enterText(String text) {
     assert(isRegistered);
-    updateEditingValue(TextEditingValue(
-      text: text,
-    ));
+    updateEditingValue(TextEditingValue(text: text));
   }
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
+  ///
+  /// This API no longer functions reliably, since it is synchronous but the
+  /// underlying logic is now asynchronous. For better results, use
+  /// [updateTextAndSelection] with `await`.
+  @Deprecated(
+    'Use updateTextAndSelection(), which is now asynchronous and should be awaited. '
+    'This feature was deprecated after v1.27.0-4.0.pre.'
+  )
   void updateEditingValue(TextEditingValue value) {
     assert(isRegistered);
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    // We don't defer to updateTextAndSelection because adding an open-ended
+    // async guard in this method would be potentially breaking.
     _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -153,7 +226,7 @@ class TestTextInput {
           <dynamic>[_client, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (ByteData? data) { /* ignored */ },
     );
   }
 
