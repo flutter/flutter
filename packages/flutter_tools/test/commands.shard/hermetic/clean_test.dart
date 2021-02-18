@@ -116,24 +116,32 @@ void main() {
 
     group('Windows', () {
       FakePlatform windowsPlatform;
+      MemoryFileSystem fileSystem;
+      FileExceptionHandler exceptionHandler;
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
+        exceptionHandler = FileExceptionHandler();
+        fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
       testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-        final MockFile mockFile = MockFile();
-        when(mockFile.existsSync()).thenReturn(true);
+        final File file = fileSystem.file('file')..createSync();
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.delete,
+          const FileSystemException('Deletion failed'),
+        );
 
-        when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
         final CleanCommand command = CleanCommand();
-        command.deleteFile(mockFile);
+        command.deleteFile(file);
         expect(testLogger.errorText, contains('A program may still be using a file'));
-        verify(mockFile.deleteSync(recursive: true)).called(1);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
         Xcode: () => xcode,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('$CleanCommand handles missing permissions;', () async {
