@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'localizations.dart';
 import 'text_selection_toolbar.dart';
@@ -308,6 +309,19 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
           textLineHeight + (handleSize.height - textLineHeight) / 2,
         );
     }
+  }
+
+  @override
+  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
+    final TextEditingValue value = delegate.textEditingValue;
+    Clipboard.setData(ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+    clipboardStatus?.update();
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
+    // Hide the toolbar, but maintain the existing selection and keep the
+    // handles on the screen.
+    delegate.hideToolbar(true);
   }
 }
 

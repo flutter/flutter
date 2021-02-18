@@ -774,7 +774,7 @@ abstract class TextSelectionDelegate {
   set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
-  void hideToolbar();
+  void hideToolbar([bool handlesOnly = false]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
