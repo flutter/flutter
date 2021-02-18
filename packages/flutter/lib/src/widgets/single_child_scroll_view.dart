@@ -4,20 +4,20 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
-import 'scroll_physics.dart';
-import 'scrollable.dart';
-import 'scroll_view.dart';
-import 'notification_listener.dart';
-import 'focus_scope.dart';
 import 'scroll_notification.dart';
-import 'focus_manager.dart';
+import 'scroll_physics.dart';
+import 'scroll_view.dart';
+import 'scrollable.dart';
 
 /// A box in which a single widget can be scrolled.
 ///
