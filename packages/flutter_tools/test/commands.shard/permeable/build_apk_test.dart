@@ -553,4 +553,3 @@ Future<BuildApkCommand> runBuildApkCommand(
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
