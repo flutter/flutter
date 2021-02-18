@@ -14,17 +14,6 @@
 
 FLUTTER_ASSERT_ARC
 
-namespace {
-
-static sk_cf_obj<const void*> SkiaTextureFromCVMetalTexture(CVMetalTextureRef cvMetalTexture) {
-  id<MTLTexture> texture = CVMetalTextureGetTexture(cvMetalTexture);
-  // CVMetal texture can be released as soon as we can the MTLTexture from it.
-  CVPixelBufferRelease(cvMetalTexture);
-  return sk_cf_obj<const void*>{(__bridge_retained const void*)texture};
-}
-
-}
-
 @implementation FlutterDarwinExternalTextureMetal {
   CVMetalTextureCacheRef _textureCache;
   NSObject<FlutterTexture>* _externalTexture;
@@ -185,31 +174,17 @@ static sk_cf_obj<const void*> SkiaTextureFromCVMetalTexture(CVMetalTextureRef cv
     }
   }
 
-  GrMtlTextureInfo ySkiaTextureInfo;
-  ySkiaTextureInfo.fTexture = SkiaTextureFromCVMetalTexture(yMetalTexture);
+  id<MTLTexture> yTex = CVMetalTextureGetTexture(yMetalTexture);
+  CVBufferRelease(yMetalTexture);
 
-  GrBackendTexture skiaBackendTextures[2];
-  skiaBackendTextures[0] = GrBackendTexture(/*width=*/textureSize.width(),
-                                            /*height=*/textureSize.height(),
-                                            /*mipMapped=*/GrMipMapped ::kNo,
-                                            /*textureInfo=*/ySkiaTextureInfo);
+  id<MTLTexture> uvTex = CVMetalTextureGetTexture(uvMetalTexture);
+  CVBufferRelease(uvMetalTexture);
 
-  GrMtlTextureInfo uvSkiaTextureInfo;
-  uvSkiaTextureInfo.fTexture = SkiaTextureFromCVMetalTexture(uvMetalTexture);
-
-  skiaBackendTextures[1] = GrBackendTexture(/*width=*/textureSize.width(),
-                                            /*height=*/textureSize.height(),
-                                            /*mipMapped=*/GrMipMapped ::kNo,
-                                            /*textureInfo=*/uvSkiaTextureInfo);
-  SkYUVAInfo yuvaInfo(skiaBackendTextures[0].dimensions(), SkYUVAInfo::PlaneConfig::kY_UV,
-                      SkYUVAInfo::Subsampling::k444, kRec601_SkYUVColorSpace);
-  GrYUVABackendTextures yuvaBackendTextures(yuvaInfo, skiaBackendTextures,
-                                            kTopLeft_GrSurfaceOrigin);
-
-  sk_sp<SkImage> image =
-      SkImage::MakeFromYUVATextures(grContext, yuvaBackendTextures, /*imageColorSpace=*/nullptr,
-                                    /*releaseProc*/ nullptr, /*releaseContext*/ nullptr);
-  return image;
+  return [FlutterDarwinExternalTextureSkImageWrapper wrapYUVATexture:yTex
+                                                               UVTex:uvTex
+                                                           grContext:grContext
+                                                               width:textureSize.width()
+                                                              height:textureSize.height()];
 }
 
 - (sk_sp<SkImage>)wrapRGBAExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -233,22 +208,64 @@ static sk_cf_obj<const void*> SkiaTextureFromCVMetalTexture(CVMetalTextureRef cv
     return nullptr;
   }
 
-  GrMtlTextureInfo skiaTextureInfo;
-  skiaTextureInfo.fTexture = SkiaTextureFromCVMetalTexture(metalTexture);
+  id<MTLTexture> rgbaTex = CVMetalTextureGetTexture(metalTexture);
+  CVBufferRelease(metalTexture);
 
-  GrBackendTexture skiaBackendTexture(/*width=*/textureSize.width(),
-                                      /*height=*/textureSize.height(),
+  return [FlutterDarwinExternalTextureSkImageWrapper wrapRGBATexture:rgbaTex
+                                                           grContext:grContext
+                                                               width:textureSize.width()
+                                                              height:textureSize.height()];
+}
+
+@end
+
+@implementation FlutterDarwinExternalTextureSkImageWrapper
+
++ (sk_sp<SkImage>)wrapYUVATexture:(id<MTLTexture>)yTex
+                            UVTex:(id<MTLTexture>)uvTex
+                        grContext:(nonnull GrDirectContext*)grContext
+                            width:(size_t)width
+                           height:(size_t)height {
+  GrMtlTextureInfo ySkiaTextureInfo;
+  ySkiaTextureInfo.fTexture = sk_cf_obj<const void*>{(__bridge_retained const void*)yTex};
+
+  GrBackendTexture skiaBackendTextures[2];
+  skiaBackendTextures[0] = GrBackendTexture(/*width=*/width,
+                                            /*height=*/height,
+                                            /*mipMapped=*/GrMipMapped::kNo,
+                                            /*textureInfo=*/ySkiaTextureInfo);
+
+  GrMtlTextureInfo uvSkiaTextureInfo;
+  uvSkiaTextureInfo.fTexture = sk_cf_obj<const void*>{(__bridge_retained const void*)uvTex};
+
+  skiaBackendTextures[1] = GrBackendTexture(/*width=*/width,
+                                            /*height=*/height,
+                                            /*mipMapped=*/GrMipMapped::kNo,
+                                            /*textureInfo=*/uvSkiaTextureInfo);
+  SkYUVAInfo yuvaInfo(skiaBackendTextures[0].dimensions(), SkYUVAInfo::PlaneConfig::kY_UV,
+                      SkYUVAInfo::Subsampling::k444, kRec601_SkYUVColorSpace);
+  GrYUVABackendTextures yuvaBackendTextures(yuvaInfo, skiaBackendTextures,
+                                            kTopLeft_GrSurfaceOrigin);
+
+  return SkImage::MakeFromYUVATextures(grContext, yuvaBackendTextures, /*imageColorSpace=*/nullptr,
+                                       /*releaseProc*/ nullptr, /*releaseContext*/ nullptr);
+}
+
++ (sk_sp<SkImage>)wrapRGBATexture:(id<MTLTexture>)rgbaTex
+                        grContext:(nonnull GrDirectContext*)grContext
+                            width:(size_t)width
+                           height:(size_t)height {
+  GrMtlTextureInfo skiaTextureInfo;
+  skiaTextureInfo.fTexture = sk_cf_obj<const void*>{(__bridge_retained const void*)rgbaTex};
+
+  GrBackendTexture skiaBackendTexture(/*width=*/width,
+                                      /*height=*/height,
                                       /*mipMapped=*/GrMipMapped ::kNo,
                                       /*textureInfo=*/skiaTextureInfo);
 
-  sk_sp<SkImage> image =
-      SkImage::MakeFromTexture(grContext, skiaBackendTexture, kTopLeft_GrSurfaceOrigin,
-                               kBGRA_8888_SkColorType, kPremul_SkAlphaType,
-                               /*imageColorSpace=*/nullptr, /*releaseProc*/ nullptr,
-                               /*releaseContext*/ nullptr
-
-      );
-  return image;
+  return SkImage::MakeFromTexture(grContext, skiaBackendTexture, kTopLeft_GrSurfaceOrigin,
+                                  kBGRA_8888_SkColorType, kPremul_SkAlphaType,
+                                  /*imageColorSpace=*/nullptr, /*releaseProc*/ nullptr,
+                                  /*releaseContext*/ nullptr);
 }
-
 @end

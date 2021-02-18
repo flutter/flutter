@@ -27,24 +27,15 @@ EmbedderEngine::EmbedderEngine(
     flutter::Settings settings,
     RunConfiguration run_configuration,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer
-#ifdef SHELL_ENABLE_GL
-    ,
-    EmbedderExternalTextureGL::ExternalTextureCallback external_texture_callback
-#endif
-    )
+    Shell::CreateCallback<Rasterizer> on_create_rasterizer,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
       shell_args_(std::make_unique<ShellArgs>(std::move(settings),
                                               on_create_platform_view,
-                                              on_create_rasterizer))
-#ifdef SHELL_ENABLE_GL
-      ,
-      external_texture_callback_(external_texture_callback)
-#endif
-{
-}
+                                              on_create_rasterizer)),
+      external_texture_resolver_(std::move(external_texture_resolver)) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
 
@@ -168,37 +159,27 @@ bool EmbedderEngine::SendPlatformMessage(
 }
 
 bool EmbedderEngine::RegisterTexture(int64_t texture) {
-#ifdef SHELL_ENABLE_GL
-  if (!IsValid() || !external_texture_callback_) {
+  if (!IsValid()) {
     return false;
   }
   shell_->GetPlatformView()->RegisterTexture(
-      std::make_unique<EmbedderExternalTextureGL>(texture,
-                                                  external_texture_callback_));
-#endif
-
+      external_texture_resolver_->ResolveExternalTexture(texture));
   return true;
 }
 
 bool EmbedderEngine::UnregisterTexture(int64_t texture) {
-#ifdef SHELL_ENABLE_GL
-  if (!IsValid() || !external_texture_callback_) {
+  if (!IsValid()) {
     return false;
   }
   shell_->GetPlatformView()->UnregisterTexture(texture);
-#endif
-
   return true;
 }
 
 bool EmbedderEngine::MarkTextureFrameAvailable(int64_t texture) {
-#ifdef SHELL_ENABLE_GL
-  if (!IsValid() || !external_texture_callback_) {
+  if (!IsValid()) {
     return false;
   }
   shell_->GetPlatformView()->MarkTextureFrameAvailable(texture);
-#endif
-
   return true;
 }
 

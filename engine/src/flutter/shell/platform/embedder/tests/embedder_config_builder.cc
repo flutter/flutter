@@ -409,6 +409,14 @@ void EmbedderConfigBuilder::InitializeMetalRendererConfig() {
         reinterpret_cast<EmbedderTestContextMetal*>(user_data);
     return metal_context->Present(texture->texture_id);
   };
+  metal_renderer_config_.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterMetalExternalTexture* texture_out) -> bool {
+    EmbedderTestContextMetal* metal_context =
+        reinterpret_cast<EmbedderTestContextMetal*>(user_data);
+    return metal_context->PopulateExternalTexture(texture_id, width, height,
+                                                  texture_out);
+  };
 }
 
 #endif  // SHELL_ENABLE_METAL

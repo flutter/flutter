@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "embedder.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -47,6 +48,23 @@ bool EmbedderTestContextMetal::Present(int64_t texture_id) {
   });
   present_count_++;
   return metal_context_->Present(texture_id);
+}
+
+void EmbedderTestContextMetal::SetExternalTextureCallback(
+    TestExternalTextureCallback external_texture_frame_callback) {
+  external_texture_frame_callback_ = external_texture_frame_callback;
+}
+
+bool EmbedderTestContextMetal::PopulateExternalTexture(
+    int64_t texture_id,
+    size_t w,
+    size_t h,
+    FlutterMetalExternalTexture* output) {
+  if (external_texture_frame_callback_ != nullptr) {
+    return external_texture_frame_callback_(texture_id, w, h, output);
+  } else {
+    return false;
+  }
 }
 
 }  // namespace testing

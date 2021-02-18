@@ -48,6 +48,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
@@ -1135,9 +1136,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         return std::make_unique<flutter::Rasterizer>(shell);
       };
 
+  using ExternalTextureResolver = flutter::EmbedderExternalTextureResolver;
+  std::unique_ptr<ExternalTextureResolver> external_texture_resolver;
+  external_texture_resolver = std::make_unique<ExternalTextureResolver>();
+
 #ifdef SHELL_ENABLE_GL
-  // TODO(chinmaygarde): This is the wrong spot for this. It belongs in the
-  // platform view jump table.
   flutter::EmbedderExternalTextureGL::ExternalTextureCallback
       external_texture_callback;
   if (config->type == kOpenGL) {
@@ -1146,54 +1149,42 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                     nullptr) != nullptr) {
       external_texture_callback =
           [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
-              int64_t texture_identifier, GrDirectContext* context,
-              const SkISize& size) -> sk_sp<SkImage> {
-        FlutterOpenGLTexture texture = {};
-
-        if (!ptr(user_data, texture_identifier, size.width(), size.height(),
-                 &texture)) {
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+        std::unique_ptr<FlutterOpenGLTexture> texture =
+            std::make_unique<FlutterOpenGLTexture>();
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
           return nullptr;
         }
-
-        GrGLTextureInfo gr_texture_info = {texture.target, texture.name,
-                                           texture.format};
-
-        size_t width = size.width();
-        size_t height = size.height();
-
-        if (texture.width != 0 && texture.height != 0) {
-          width = texture.width;
-          height = texture.height;
-        }
-
-        GrBackendTexture gr_backend_texture(width, height, GrMipMapped::kNo,
-                                            gr_texture_info);
-        SkImage::TextureReleaseProc release_proc = texture.destruction_callback;
-        auto image = SkImage::MakeFromTexture(
-            context,                   // context
-            gr_backend_texture,        // texture handle
-            kTopLeft_GrSurfaceOrigin,  // origin
-            kRGBA_8888_SkColorType,    // color type
-            kPremul_SkAlphaType,       // alpha type
-            nullptr,                   // colorspace
-            release_proc,              // texture release proc
-            texture.user_data          // texture release context
-        );
-
-        if (!image) {
-          // In case Skia rejects the image, call the release proc so that
-          // embedders can perform collection of intermediates.
-          if (release_proc) {
-            release_proc(texture.user_data);
-          }
-          FML_LOG(ERROR) << "Could not create external texture.";
-          return nullptr;
-        }
-
-        return image;
+        return texture;
       };
     }
   }
+  external_texture_resolver =
+      std::make_unique<ExternalTextureResolver>(external_texture_callback);
+#endif
+#ifdef SHELL_ENABLE_METAL
+  flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
+      external_texture_metal_callback;
+  if (config->type == kMetal) {
+    const FlutterMetalRendererConfig* metal_config = &config->metal;
+    if (SAFE_ACCESS(metal_config, external_texture_frame_callback, nullptr)) {
+      external_texture_metal_callback =
+          [ptr = metal_config->external_texture_frame_callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterMetalExternalTexture> {
+        std::unique_ptr<FlutterMetalExternalTexture> texture =
+            std::make_unique<FlutterMetalExternalTexture>();
+        texture->struct_size = sizeof(FlutterMetalExternalTexture);
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+    }
+  }
+  external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+      external_texture_metal_callback);
 #endif
 
   auto thread_host =
@@ -1245,16 +1236,13 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   // Create the engine but don't launch the shell or run the root isolate.
   auto embedder_engine = std::make_unique<flutter::EmbedderEngine>(
-      std::move(thread_host),        //
-      std::move(task_runners),       //
-      std::move(settings),           //
-      std::move(run_configuration),  //
-      on_create_platform_view,       //
-      on_create_rasterizer           //
-#ifdef SHELL_ENABLE_GL
-      ,
-      external_texture_callback  //
-#endif
+      std::move(thread_host),               //
+      std::move(task_runners),              //
+      std::move(settings),                  //
+      std::move(run_configuration),         //
+      on_create_platform_view,              //
+      on_create_rasterizer,                 //
+      std::move(external_texture_resolver)  //
   );
 
   // Release the ownership of the embedder engine to the caller.
