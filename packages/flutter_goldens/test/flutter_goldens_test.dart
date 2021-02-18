@@ -9,7 +9,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' show hashValues, hashList;
 
-mport 'package:file/file.dart' hide Directory, File;
+import 'package:file/file.dart' hide Directory, File;
 import 'package:file/memory.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
