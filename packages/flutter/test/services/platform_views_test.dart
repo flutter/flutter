@@ -286,7 +286,7 @@ void main() {
     test('create Linux view of unregistered type', () async {
       expect(
         () {
-          return PlatformViewsService.initUiKitView(
+          return PlatformViewsService.initLinuxView(
             id: 0,
             viewType: 'web',
             layoutDirection: TextDirection.ltr,
