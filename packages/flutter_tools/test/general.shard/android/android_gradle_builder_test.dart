@@ -81,7 +81,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -173,7 +173,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -280,7 +280,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -372,7 +372,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -436,7 +436,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -539,7 +539,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
        processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -637,7 +637,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -753,7 +753,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -821,7 +821,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -889,7 +889,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -950,7 +950,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1029,7 +1029,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1108,7 +1108,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1187,7 +1187,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1266,7 +1266,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
@@ -1326,7 +1326,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1416,7 +1416,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1506,7 +1506,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1596,7 +1596,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
-        usage: TestUsage(),
+        usage: testUsage,
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[

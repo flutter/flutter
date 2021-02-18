@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -308,7 +309,8 @@ void main() {
     expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
   });
 
-  testWithoutContext('AAB not found', () {
+  // Context is required due to build failure analytics event grabbing FlutterCommand.current.
+  testUsingContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
     expect(
