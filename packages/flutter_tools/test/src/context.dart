@@ -36,7 +36,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
-import '../general.shard/dart/pub_get_test.dart';
 import 'common.dart';
 import 'fake_process_manager.dart';
 import 'fakes.dart';
@@ -136,7 +135,7 @@ void testUsingContext(
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
-          BotDetector: ()=> const BotDetectorAlwaysNo(),
+          BotDetector: ()=> const AlwaysFalseBotDetector(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
