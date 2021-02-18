@@ -108,6 +108,77 @@ class DeferredComponentsSetupValidator {
     || _invalidFiles.isNotEmpty
     || (_goldenComparisonResults != null && !(_goldenComparisonResults['match'] as bool));
 
+    /// Checks if all dynamic feature modules are included in `settings.gradle`.
+  ///
+  /// Returns true if the check passed with no recommended changes, and false
+  /// otherwise.
+  ///
+  /// `android/settings.gradle` should `include` all of the dynamic feature
+  /// modules. Each dynamic feature module holds the libs and asssets for a
+  /// deferred component. If the `settings.gradle` file does not have the proper
+  /// includes, this method will generate a modified settings.gradle with the
+  /// correct include lines in the validator output directory.
+  ///
+  /// For example, if an app is configured with components named `component1`
+  /// and `component2` in pubspec.yaml, this check will look for:
+  ///
+  ///   include ':app', ':component1', ':component2'
+  ///
+  bool checkAndroidSettingsGradle(List<DeferredComponent> components) {
+    // settings.gradle add ':componentName'
+    final File settingsGradle = env.projectDir.childDirectory('android').childFile('settings.gradle');
+    if (!settingsGradle.existsSync()) {
+      _invalidFiles[settingsGradle.path] = '`android/settings.gradle` does not '
+        'exist or could not be found. Please ensure a valid settings.gradle '
+        'exists and try again.';
+        return false;
+    }
+    final File settingsGradleOutput = _outputDir.childFile('settings.gradle');
+    final List<String> lines = settingsGradle.readAsLinesSync();
+    ErrorHandlingFileSystem.deleteIfExists(settingsGradleOutput);
+    settingsGradleOutput.createSync(recursive: true);
+    // Parse out all included entries
+    final List<String> elements = <String>[];
+    for (final String line in lines) {
+      if (line.trim().startsWith('include')) {
+        elements.addAll(line.trim().substring(7).split(','));
+      }
+    }
+    // Clean and trim included entries
+    final List<String> trimmedElements = <String>[];
+    for (final String element in elements) {
+      trimmedElements.add(element.trim());
+    }
+    // Compute missing components
+    final List<String> missingComponents = <String>[];
+    for (final DeferredComponent component in components) {
+      final String componentName = '\':${component.name}\'';
+      if (!trimmedElements.contains(componentName)) {
+        missingComponents.add(componentName);
+      }
+    }
+    // Append missing components to first include line.
+    if (missingComponents.isNotEmpty) {
+      for (int i = 0; i < lines.length; i++) {
+        if (lines[i].trim().startsWith('include')) {
+          for (final String missingName in missingComponents) {
+            lines[i] += ', $missingName';
+          }
+          break;
+        }
+      }
+      // write lines.
+      final StringBuffer buffer = StringBuffer();
+      lines.forEach(buffer.writeln);
+      settingsGradleOutput.writeAsStringSync(buffer.toString(), mode: FileMode.append, flush: true);
+      _modifiedFiles.add(settingsGradleOutput.path);
+      return false;
+    } else {
+      settingsGradleOutput.deleteSync();
+      return true;
+    }
+  }
+
   /// Checks if an android dynamic feature module exists for each deferred
   /// component.
   ///
