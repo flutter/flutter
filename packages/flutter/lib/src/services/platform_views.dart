@@ -187,7 +187,7 @@ class PlatformViewsService {
   /// factory for this view type must have been registered on the platform side.
   /// Platform view factories are typically registered by plugin code.
   ///
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
+  /// The `id`, `viewType`, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
     required int id,
@@ -216,6 +216,44 @@ class PlatformViewsService {
     }
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     return UiKitViewController._(id, layoutDirection);
+  }
+
+  /// Creates a controller for a new Linux GtkWidget.
+  ///
+  /// `id` is an unique identifier generated with [platformViewsRegistry].
+  ///
+  /// `viewType` is the identifier of the GtkWidget type to be created, a
+  /// factory for this view type must have been registered on the platform side.
+  /// Platform view factories are typically registered by plugin code.
+  ///
+  /// The `id` and `viewType` parameters must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  static Future<LinuxViewController> initLinuxView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+  }) async {
+    assert(id != null);
+    assert(viewType != null);
+    assert(layoutDirection != null);
+    assert(creationParams == null || creationParamsCodec != null);
+
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+
+    if (creationParams != null) {
+      final ByteData paramsByteData =
+          creationParamsCodec!.encodeMessage(creationParams)!;
+      args['params'] = Uint8List.view(
+          paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
+    }
+
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    return LinuxViewController._(id, layoutDirection);
   }
 }
 
@@ -1113,6 +1151,84 @@ class UiKitViewController {
   Future<void> dispose() async {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+  }
+}
+
+/// Controls an Linux view.
+///
+/// Typically created with [PlatformViewsService.initLinuxView].
+class LinuxViewController {
+  LinuxViewController._(
+    this.id,
+    TextDirection layoutDirection,
+  ) : assert(id != null),
+      assert(layoutDirection != null),
+      _layoutDirection = layoutDirection;
+
+  /// The unique identifier of the Linux view controlled by this controller.
+  final int id;
+
+  bool _debugDisposed = false;
+
+  TextDirection _layoutDirection;
+
+  /// Sets the layout direction for the Linux GtkWidget.
+  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
+    assert(!_debugDisposed, 'trying to set a layout direction for a disposed Linux GtkWidget. View id: $id');
+
+    if (layoutDirection == _layoutDirection)
+      return;
+
+    assert(layoutDirection != null);
+    _layoutDirection = layoutDirection;
+
+    // TODO(huanghongxun): invoke the iOS platform views channel direction method once available.
+  }
+
+  /// Accept an active gesture.
+  ///
+  /// When a touch sequence is happening on the embedded GtkWidget all touch events are delayed.
+  /// Calling this method releases the delayed events to the embedded UIView and makes it consume
+  /// any following touch events for the pointers involved in the active gesture.
+  Future<void> acceptGesture(int pointer) {
+    final List<int> args = <int>[id, pointer];
+    return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
+  }
+
+  /// Rejects an active gesture.
+  ///
+  /// When a touch sequence is happening on the embedded GtkWidget all touch events are delayed.
+  /// Calling this method drops the buffered touch events and prevents any future touch events for
+  /// the pointers that are part of the active touch sequence from arriving to the embedded view.
+  Future<void> rejectGesture() {
+    final List<int> args = <int>[id];
+    return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
+  }
+
+  /// Disposes the view.
+  ///
+  /// The [LinuxViewController] object is unusable after calling this.
+  /// The `id` of the platform view cannot be reused after the view is
+  /// disposed.
+  Future<void> dispose() async {
+    _debugDisposed = true;
+    await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+  }
+
+  /// Notify that a mouse pointer has entered into the embedded GtkWidget.
+  ///
+  /// Calling this method to distribute following motion events to the embedded GtkWidget.
+  Future<void> enter() {
+    final List<int> args = <int>[id];
+    return SystemChannels.platform_views.invokeMethod('enter', args);
+  }
+
+  /// Notify that a mouse pointer has exited from the embedded GtkWidget.
+  ///
+  /// Calling this method to stop distributing motion events to the embedded GtkWidget.
+  Future<void> exit() {
+    final List<int> args = <int>[id];
+    return SystemChannels.platform_views.invokeMethod('exit', args);
   }
 }
 

@@ -305,6 +305,113 @@ class UiKitView extends StatefulWidget {
   State<UiKitView> createState() => _UiKitViewState();
 }
 
+/// Embeds a Linux GtkWidget in the Widget hierarchy.
+///
+/// {@macro flutter.rendering.RenderLinuxView}
+///
+/// Embedding Linux GtkWidget is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
+///
+/// {@macro flutter.widgets.AndroidView.layout}
+///
+/// {@macro flutter.widgets.AndroidView.gestures}
+///
+/// {@macro flutter.widgets.AndroidView.lifetime}
+///
+/// Construction of GtkWidget is done asynchronously, before the GtkWidget is ready this widget paints
+/// nothing while maintaining the same layout constraints.
+class LinuxView extends StatefulWidget {
+  /// Creates a widget that embeds an GtkWidget.
+  ///
+  /// {@macro flutter.widgets.AndroidView.constructorArgs}
+  const LinuxView({
+    Key? key,
+    required this.viewType,
+    this.onPlatformViewCreated,
+    this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    this.gestureRecognizers,
+    this.layoutDirection,
+    this.creationParams,
+    this.creationParamsCodec,
+  })  : assert(viewType != null),
+        assert(hitTestBehavior != null),
+        assert(creationParams == null || creationParamsCodec != null),
+        super(key: key);
+
+  /// The unique identifier for Linux view type to be embedded by this widget.
+  ///
+  /// A PlatformViewFactory for this type must have been registered.
+  final String viewType;
+
+  /// {@macro flutter.widgets.AndroidView.onPlatformViewCreated}
+  final PlatformViewCreatedCallback? onPlatformViewCreated;
+
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  /// {@macro flutter.widgets.AndroidView.layoutDirection}
+  final TextDirection? layoutDirection;
+
+  /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
+  ///
+  /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
+  final dynamic creationParams;
+
+  /// The codec used to encode `creationParams` before sending it to the
+  /// platform side. It should match the codec returned by [-\[FlutterPlatformViewFactory createArgsCodec:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createArgsCodec)
+  ///
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  ///
+  /// This must not be null if [creationParams] is not null.
+  final MessageCodec<dynamic>? creationParamsCodec;
+
+  /// Which gestures should be forwarded to the Linux view.
+  ///
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descHead}
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the UIKit
+  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: LinuxView(
+  ///     viewType: 'webview',
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// To get the [LinuxView] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: LinuxView(
+  ///       viewType: 'webview',
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.AndroidView.gestureRecognizers.descFoot}
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
+
+  @override
+  State<LinuxView> createState() => _LinuxViewState();
+}
+
 /// Embeds an HTML element in the Widget hierarchy in Flutter Web.
 ///
 /// *NOTE*: This only works in Flutter Web. To embed web content on other
@@ -645,6 +752,148 @@ class _UiKitViewState extends State<UiKitView> {
   }
 }
 
+class _LinuxViewState extends State<LinuxView> {
+  LinuxViewController? _controller;
+  TextDirection? _layoutDirection;
+  bool _initialized = false;
+
+  late bool _mouseIsConnected;
+
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+      <Factory<OneSequenceGestureRecognizer>>{};
+
+  @override
+  void initState() {
+    super.initState();
+
+    _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
+
+    // Listen to see when a mouse is added.
+    RendererBinding.instance!.mouseTracker
+        .addListener(_handleMouseTrackerChange);
+  }
+
+  // Forces a rebuild if a mouse has been added or removed.
+  void _handleMouseTrackerChange() {
+    if (!mounted) {
+      return;
+    }
+    final bool mouseIsConnected =
+        RendererBinding.instance!.mouseTracker.mouseIsConnected;
+    if (mouseIsConnected != _mouseIsConnected) {
+      setState(() {
+        _mouseIsConnected = mouseIsConnected;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const SizedBox.expand();
+    }
+    Widget result = _LinuxPlatformView(
+      controller: _controller!,
+      hitTestBehavior: widget.hitTestBehavior,
+      gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+    );
+
+    if (_mouseIsConnected) {
+      result = MouseRegion(
+        onEnter: _onEnter,
+        onExit: _onExit,
+        child: result,
+      );
+    }
+
+    return result;
+  }
+
+  void _onEnter(PointerEnterEvent event) {
+    _controller?.enter();
+  }
+
+  void _onExit(PointerExitEvent event) {
+    _controller?.exit();
+  }
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _createNewLinuxView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    _initializeOnce();
+    if (didChangeLayoutDirection) {
+      // The native view will update asynchronously, in the meantime we don't want
+      // to block the framework. (so this is intentionally not awaiting).
+      _controller?.setLayoutDirection(_layoutDirection!);
+    }
+  }
+
+  @override
+  void didUpdateWidget(LinuxView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (widget.viewType != oldWidget.viewType) {
+      _controller?.dispose();
+      _createNewLinuxView();
+      return;
+    }
+
+    if (didChangeLayoutDirection) {
+      _controller?.setLayoutDirection(_layoutDirection!);
+    }
+  }
+
+  TextDirection _findLayoutDirection() {
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    RendererBinding.instance!.mouseTracker
+        .removeListener(_handleMouseTrackerChange);
+    super.dispose();
+  }
+
+  Future<void> _createNewLinuxView() async {
+    final int id = platformViewsRegistry.getNextPlatformViewId();
+    final LinuxViewController controller = await PlatformViewsService.initLinuxView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+    );
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
+    if (widget.onPlatformViewCreated != null) {
+      widget.onPlatformViewCreated!(id);
+    }
+    setState(() {
+      _controller = controller;
+    });
+  }
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     Key? key,
@@ -707,6 +956,37 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
+    renderObject.viewController = controller;
+    renderObject.hitTestBehavior = hitTestBehavior;
+    renderObject.updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+class _LinuxPlatformView extends LeafRenderObjectWidget {
+  const _LinuxPlatformView({
+    Key? key,
+    this.id,
+    required this.controller,
+    required this.hitTestBehavior,
+    required this.gestureRecognizers,
+  }) : super(key: key);
+
+  final LinuxViewController controller;
+  final PlatformViewHitTestBehavior hitTestBehavior;
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+  final int? id;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderLinuxView(
+      viewController: controller,
+      hitTestBehavior: hitTestBehavior,
+      gestureRecognizers: gestureRecognizers,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLinuxView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);

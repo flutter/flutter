@@ -276,4 +276,82 @@ void main() {
       );
     });
   });
+
+  group('Linux', () {
+    late FakeLinuxPlatformViewsController viewsController;
+    setUp(() {
+      viewsController = FakeLinuxPlatformViewsController();
+    });
+
+    test('create Linux view of unregistered type', () async {
+      expect(
+        () {
+          return PlatformViewsService.initUiKitView(
+            id: 0,
+            viewType: 'web',
+            layoutDirection: TextDirection.ltr,
+          );
+        },
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('create Linux views', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initLinuxView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await PlatformViewsService.initLinuxView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeLinuxView>[
+          const FakeLinuxView(0, 'webview'),
+          const FakeLinuxView(1, 'webview'),
+        ]),
+      );
+    });
+
+    test('reuse Linux view id', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initLinuxView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      expect(
+            () => PlatformViewsService.initLinuxView(
+            id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('dispose Linux view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initLinuxView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+
+      viewController.dispose();
+      expect(
+          viewsController.views,
+          unorderedEquals(<FakeLinuxView>[
+            const FakeLinuxView(0, 'webview'),
+          ]));
+    });
+
+    test('dispose inexisting Linux view', () async {
+      viewsController.registerViewType('webview');
+      await PlatformViewsService.initLinuxView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+          id: 1, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.dispose();
+      expect(
+          () async {
+            await viewController.dispose();
+          },
+          throwsA(isA<PlatformException>()),
+      );
+    });
+  });
 }

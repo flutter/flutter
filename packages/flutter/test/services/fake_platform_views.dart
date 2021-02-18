@@ -394,6 +394,101 @@ class FakeIosPlatformViewsController {
   }
 }
 
+class FakeLinuxPlatformViewsController {
+  FakeLinuxPlatformViewsController() {
+    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+  }
+
+  Iterable<FakeLinuxView> get views => _views.values;
+  final Map<int, FakeLinuxView> _views = <int, FakeLinuxView>{};
+
+  final Set<String> _registeredViewTypes = <String>{};
+
+  // When this completer is non null, the 'create' method channel call will be
+  // delayed until it completes.
+  Completer<void>? creationDelay;
+
+  // Maps a view id to the number of gestures it accepted so far.
+  final Map<int, int> gesturesAccepted = <int, int>{};
+
+  // Maps a view id to the number of gestures it rejected so far.
+  final Map<int, int> gesturesRejected = <int, int>{};
+
+  void registerViewType(String viewType) {
+    _registeredViewTypes.add(viewType);
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) {
+    switch(call.method) {
+      case 'create':
+        return _create(call);
+      case 'dispose':
+        return _dispose(call);
+      case 'acceptGesture':
+        return _acceptGesture(call);
+      case 'rejectGesture':
+        return _rejectGesture(call);
+    }
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _create(MethodCall call) async {
+    if (creationDelay != null)
+      await creationDelay!.future;
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final String viewType = args['viewType'] as String;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
+
+    if (_views.containsKey(id)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create an already created platform view, view id: $id',
+      );
+    }
+
+    if (!_registeredViewTypes.contains(viewType)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create a platform view of unregistered type: $viewType',
+      );
+    }
+
+    _views[id] = FakeLinuxView(id, viewType, creationParams);
+    gesturesAccepted[id] = 0;
+    gesturesRejected[id] = 0;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _acceptGesture(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    gesturesAccepted[id] = gesturesAccepted[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _rejectGesture(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    gesturesRejected[id] = gesturesRejected[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _dispose(MethodCall call) {
+    final int id = call.arguments as int;
+
+    if (!_views.containsKey(id)) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to dispose a platform view with unknown id: $id',
+      );
+    }
+
+    _views.remove(id);
+    return Future<dynamic>.sync(() => null);
+  }
+}
+
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
     SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
@@ -553,6 +648,33 @@ class FakeUiKitView {
   @override
   String toString() {
     return 'FakeUiKitView(id: $id, type: $type, creationParams: $creationParams)';
+  }
+}
+
+@immutable
+class FakeLinuxView {
+  const FakeLinuxView(this.id, this.type, [this.creationParams]);
+
+  final int id;
+  final String type;
+  final Uint8List? creationParams;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is FakeLinuxView
+        && other.id == id
+        && other.type == type
+        && other.creationParams == creationParams;
+  }
+
+  @override
+  int get hashCode => hashValues(id, type);
+
+  @override
+  String toString() {
+    return 'FakeLinuxView(id: $id, type: $type, creationParams: $creationParams)';
   }
 }
 

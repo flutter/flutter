@@ -1991,6 +1991,793 @@ void main() {
     });
   });
 
+  group('LinuxView', () {
+    testWidgets('Create GtkWidget', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeLinuxView>[
+          FakeLinuxView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+
+    testWidgets('Change GtkWidget view type', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      viewsController.registerViewType('maps');
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'maps', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeLinuxView>[
+          FakeLinuxView(currentViewId + 2, 'maps'),
+        ]),
+      );
+    });
+
+    testWidgets('Dispose GtkWidget ', (WidgetTester tester) async {
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        isEmpty,
+      );
+    });
+
+    testWidgets('Dispose GtkWidget before creation completed ', (WidgetTester tester) async {
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      viewsController.creationDelay = Completer<void>();
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+
+      viewsController.creationDelay!.complete();
+
+      expect(
+        viewsController.views,
+        isEmpty,
+      );
+    });
+
+    testWidgets('GtkWidget survives widget tree change', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: Container(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeLinuxView>[
+          FakeLinuxView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+
+    testWidgets('Create GtkWidget with params', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              creationParams: 'creation parameters',
+              creationParamsCodec: StringCodec(),
+            ),
+          ),
+        ),
+      );
+
+      final FakeLinuxView fakeView = viewsController.views.first;
+      final Uint8List rawCreationParams = fakeView.creationParams!;
+      final ByteData byteData = ByteData.view(
+          rawCreationParams.buffer,
+          rawCreationParams.offsetInBytes,
+          rawCreationParams.lengthInBytes,
+      );
+      final dynamic actualParams = const StringCodec().decodeMessage(byteData);
+
+      expect(actualParams, 'creation parameters');
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeLinuxView>[
+          FakeLinuxView(currentViewId + 1, 'webview', fakeView.creationParams),
+        ]),
+      );
+    });
+
+    testWidgets('LinuxView accepts gestures', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+    });
+
+    testWidgets('LinuxView transparent hit test behavior', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      int numPointerDownsOnParent = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (PointerDownEvent e) {
+                  numPointerDownsOnParent++;
+                },
+              ),
+              const Positioned(
+                child: SizedBox(
+                  width: 200.0,
+                  height: 100.0,
+                  child: LinuxView(
+                    viewType: 'webview',
+                    hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+                    layoutDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+
+      expect(numPointerDownsOnParent, 1);
+    });
+
+    testWidgets('LinuxView translucent hit test behavior', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      int numPointerDownsOnParent = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (PointerDownEvent e) {
+                  numPointerDownsOnParent++;
+                },
+              ),
+              const Positioned(
+                child: SizedBox(
+                  width: 200.0,
+                  height: 100.0,
+                  child: LinuxView(
+                    viewType: 'webview',
+                    hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+                    layoutDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+
+      expect(numPointerDownsOnParent, 1);
+    });
+
+    testWidgets('LinuxView opaque hit test behavior', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      int numPointerDownsOnParent = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (PointerDownEvent e) {
+                  numPointerDownsOnParent++;
+                },
+              ),
+              const Positioned(
+                child: SizedBox(
+                  width: 200.0,
+                  height: 100.0,
+                  child: LinuxView(
+                    viewType: 'webview',
+                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                    layoutDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(numPointerDownsOnParent, 0);
+    });
+
+    testWidgets('LinuxView can lose gesture arenas', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      bool verticalDragAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: Container(
+            margin: const EdgeInsets.all(10.0),
+            child: GestureDetector(
+              onVerticalDragStart: (DragStartDetails d) {
+                verticalDragAcceptedByParent = true;
+              },
+              child: const SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.moveBy(const Offset(0.0, 100.0));
+      await gesture.up();
+
+      expect(verticalDragAcceptedByParent, true);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+    });
+
+    testWidgets('LinuxView tap gesture recognizers', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool gestureAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) {
+              gestureAcceptedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<VerticalDragGestureRecognizer>(
+                    () {
+                      return VerticalDragGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.moveBy(const Offset(0.0, 100.0));
+      await gesture.up();
+
+      expect(gestureAcceptedByParent, false);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView long press gesture recognizers', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool gestureAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onLongPress: () {
+              gestureAcceptedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<LongPressGestureRecognizer>(
+                    () {
+                      return LongPressGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      await tester.longPressAt(const Offset(50.0, 50.0));
+
+      expect(gestureAcceptedByParent, false);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView drag gesture recognizers', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool verticalDragAcceptedByParent = false;
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) {
+              verticalDragAcceptedByParent = true;
+            },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<TapGestureRecognizer>(
+                    () {
+                      return TapGestureRecognizer();
+                    },
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      await tester.tapAt(const Offset(50.0, 50.0));
+
+      expect(verticalDragAcceptedByParent, false);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView can claim gesture after all pointers are up', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      bool verticalDragAcceptedByParent = false;
+      // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
+      // This test makes sure that the Android view can win the gesture after it got the pointer up event.
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) {
+              verticalDragAcceptedByParent = true;
+            },
+            onLongPress: () { },
+            child: const SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(verticalDragAcceptedByParent, false);
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView rebuilt during gesture', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.moveBy(const Offset(0.0, 100.0));
+
+      await tester.pumpWidget(
+        const Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: LinuxView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      await gesture.up();
+
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView with eager gesture recognizer', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) { },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<OneSequenceGestureRecognizer>(
+                        () => EagerGestureRecognizer(),
+                  ),
+                },
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      await tester.startGesture(const Offset(50.0, 50.0));
+
+      // Normally (without the eager gesture recognizer) after just the pointer down event
+      // no gesture arena member will claim the arena (so no motion events will be dispatched to
+      // the Android view). Here we assert that with the eager recognizer in the gesture team the
+      // pointer down event is immediately dispatched.
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Stack(
+          alignment: Alignment.topLeft,
+          children: <Widget>[
+            const LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            Container(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              width: 100,
+              height: 100,
+            ),
+          ],
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+    });
+
+    testWidgets('LinuxView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame', (WidgetTester tester) async {
+      // LinuxView is positioned at (left=0, top=100, right=300, bottom=600).
+      // Opaque container is on top of the LinuxView positioned at (left=0, top=500, right=300, bottom=600).
+      // Touch on (550, 150) is expected to be absorbed by the container.
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Container(width: 300, height: 600,
+          child: Stack(
+            alignment: Alignment.topLeft,
+            children: <Widget>[
+              Transform.translate(
+                offset: const Offset(0, 100),
+                child: Container(
+                  width: 300,
+                  height: 500,
+                  child: const LinuxView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+              Transform.translate(
+                offset: const Offset(0, 500),
+                child: Container(
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                  width: 300,
+                  height: 100,
+              ),),
+            ],
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(150, 550));
+      await gesture.up();
+
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+    });
+
+    testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      int factoryInvocationCount = 0;
+      final ValueGetter<EagerGestureRecognizer> constructRecognizer = () {
+        factoryInvocationCount += 1;
+        return EagerGestureRecognizer();
+      };
+
+      await tester.pumpWidget(
+        LinuxView(
+          viewType: 'webview',
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+            Factory<EagerGestureRecognizer>(constructRecognizer),
+          },
+          layoutDirection: TextDirection.ltr,
+        ),
+      );
+
+      await tester.pumpWidget(
+        LinuxView(
+          viewType: 'webview',
+          hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+            Factory<EagerGestureRecognizer>(constructRecognizer),
+          },
+          layoutDirection: TextDirection.ltr,
+        ),
+      );
+
+      expect(factoryInvocationCount, 1);
+    });
+
+    testWidgets('LinuxView has correct semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      expect(currentViewId, greaterThanOrEqualTo(0));
+      final FakeLinuxPlatformViewsController viewsController = FakeLinuxPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Semantics(
+          container: true,
+          child: const Align(
+            alignment: Alignment.bottomRight,
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: LinuxView(
+                viewType: 'webview',
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final SemanticsNode semantics = tester.getSemantics(find.byType(LinuxView));
+
+      expect(semantics.platformViewId, currentViewId + 1);
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
+      // A 200x100 rect positioned at bottom right of a 800x600 box.
+      expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
+      expect(semantics.childrenCount, 0);
+
+      handle.dispose();
+    });
+  });
+
   group('Common PlatformView', () {
     late FakePlatformViewController controller;
 
