@@ -738,6 +738,11 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
+  ///     this value to override the default behavior.
   /// {@endtemplate}
   final bool? isAlwaysShown;
 
@@ -795,6 +800,11 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Defaults to true when null, unless on Android, which will default to false
   /// when null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.enableGestures], an overridable getter which uses
+  ///     this value to override the default behavior.
   /// {@endtemplate}
   final bool? interactive;
 
@@ -833,6 +843,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// theme.
   ///
   /// Defaults to false when [RawScrollbar.isAlwaysShown] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? false;
 
@@ -843,6 +857,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// theme.
   ///
   /// Defaults to true when [RawScrollbar.interactive] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.interactive], which overrides the default behavior.
   @protected
   bool get enableGestures => widget.interactive ?? true;
 
