@@ -243,6 +243,7 @@ class PlatformViewsService {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
+      'direction': LinuxViewController._getGtkTextDirection(layoutDirection),
     };
 
     if (creationParams != null) {
@@ -1165,12 +1166,31 @@ class LinuxViewController {
       assert(layoutDirection != null),
       _layoutDirection = layoutDirection;
 
+  /// Gtk's [GTK_TEXT_DIR_None](https://developer.gnome.org/gtk3/stable/GtkWidget.html#GtkTextDirection) value.
+  static const int kGtkTextDirectionNone = 0;
+
+  /// Gtk's [GTK_TEXT_DIR_LTR](https://developer.gnome.org/gtk3/stable/GtkWidget.html#GtkTextDirection) value.
+  static const int kGtkTextDirectionLtr = 1;
+
+  /// Gtk's [GTK_TEXT_DIR_RTL](https://developer.gnome.org/gtk3/stable/GtkWidget.html#GtkTextDirection) value.
+  static const int kGtkTextDirectionRtl = 2;
+
   /// The unique identifier of the Linux view controlled by this controller.
   final int id;
 
   bool _debugDisposed = false;
 
   TextDirection _layoutDirection;
+
+  static int _getGtkTextDirection(TextDirection direction) {
+    assert(direction != null);
+    switch (direction) {
+      case TextDirection.ltr:
+        return kGtkTextDirectionLtr;
+      case TextDirection.rtl:
+        return kGtkTextDirectionRtl;
+    }
+  }
 
   /// Sets the layout direction for the Linux GtkWidget.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
@@ -1182,7 +1202,8 @@ class LinuxViewController {
     assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
-    // TODO(huanghongxun): invoke the iOS platform views channel direction method once available.
+    final List<int> args = <int>[id, _getGtkTextDirection(layoutDirection)];
+    return SystemChannels.platform_views.invokeMethod('setDirection', args);
   }
 
   /// Accept an active gesture.

@@ -288,7 +288,7 @@ void main() {
         () {
           return PlatformViewsService.initLinuxView(
             id: 0,
-            viewType: 'web',
+            viewType: 'unregistered_view_type',
             layoutDirection: TextDirection.ltr,
           );
         },
@@ -305,8 +305,8 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeLinuxView>[
-          const FakeLinuxView(0, 'webview'),
-          const FakeLinuxView(1, 'webview'),
+          const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionLtr),
+          const FakeLinuxView(1, 'webview', LinuxViewController.kGtkTextDirectionRtl),
         ]),
       );
     });
@@ -336,7 +336,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeLinuxView>[
-            const FakeLinuxView(0, 'webview'),
+            const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionLtr),
           ]));
     });
 
@@ -352,6 +352,18 @@ void main() {
           },
           throwsA(isA<PlatformException>()),
       );
+    });
+
+    test("change Linux GtkWidget's directionality", () async {
+      viewsController.registerViewType('webview');
+      final LinuxViewController viewController = await PlatformViewsService.initLinuxView(
+          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
+      await viewController.setLayoutDirection(TextDirection.rtl);
+      expect(
+          viewsController.views,
+          unorderedEquals(<FakeLinuxView>[
+            const FakeLinuxView(0, 'webview', LinuxViewController.kGtkTextDirectionRtl, null),
+          ]));
     });
   });
 }

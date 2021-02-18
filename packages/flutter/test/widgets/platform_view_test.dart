@@ -2010,7 +2010,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview'),
+          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
@@ -2043,7 +2043,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 2, 'maps'),
+          FakeLinuxView(currentViewId + 2, 'maps', LinuxViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
@@ -2137,7 +2137,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview'),
+          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr),
         ]),
       );
     });
@@ -2175,7 +2175,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeLinuxView>[
-          FakeLinuxView(currentViewId + 1, 'webview', fakeView.creationParams),
+          FakeLinuxView(currentViewId + 1, 'webview', LinuxViewController.kGtkTextDirectionLtr, fakeView.creationParams),
         ]),
       );
     });

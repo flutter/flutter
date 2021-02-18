@@ -414,6 +414,12 @@ class FakeLinuxPlatformViewsController {
   // Maps a view id to the number of gestures it rejected so far.
   final Map<int, int> gesturesRejected = <int, int>{};
 
+  // Maps a view id to the times of pointers entered into it so far.
+  final Map<int, int> targetEntered = <int, int>{};
+
+  // Maps a view id to the times of pointers exiting from it so far.
+  final Map<int, int> targetExited = <int, int>{};
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -424,10 +430,16 @@ class FakeLinuxPlatformViewsController {
         return _create(call);
       case 'dispose':
         return _dispose(call);
+      case 'setDirection':
+        return _setDirection(call);
       case 'acceptGesture':
         return _acceptGesture(call);
       case 'rejectGesture':
         return _rejectGesture(call);
+      case 'enter':
+        return _enter(call);
+      case 'exit':
+        return _exit(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -438,6 +450,7 @@ class FakeLinuxPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
+    final int layoutDirection = args['direction'] as int;
     final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
@@ -454,10 +467,28 @@ class FakeLinuxPlatformViewsController {
       );
     }
 
-    _views[id] = FakeLinuxView(id, viewType, creationParams);
+    _views[id] = FakeLinuxView(id, viewType, layoutDirection, creationParams);
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
+    targetEntered[id] = 0;
+    targetExited[id] = 0;
     return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _setDirection(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    final int layoutDirection = args[1] as int;
+
+    if (!_views.containsKey(id))
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to set direction of a platform view with unknown id: $id',
+      );
+
+    _views[id] = _views[id]!.copyWith(layoutDirection: layoutDirection);
+
+    return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _acceptGesture(MethodCall call) async {
@@ -471,6 +502,20 @@ class FakeLinuxPlatformViewsController {
     final List<dynamic> args = call.arguments as List<dynamic>;
     final int id = args[0] as int;
     gesturesRejected[id] = gesturesRejected[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _enter(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    targetEntered[id] = targetEntered[id]! + 1;
+    return Future<int?>.sync(() => null);
+  }
+
+  Future<dynamic> _exit(MethodCall call) async {
+    final List<dynamic> args = call.arguments as List<dynamic>;
+    final int id = args[0] as int;
+    targetExited[id] = targetExited[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
@@ -653,11 +698,19 @@ class FakeUiKitView {
 
 @immutable
 class FakeLinuxView {
-  const FakeLinuxView(this.id, this.type, [this.creationParams]);
+  const FakeLinuxView(this.id, this.type, this.layoutDirection, [this.creationParams]);
 
   final int id;
   final String type;
   final Uint8List? creationParams;
+  final int layoutDirection;
+
+  FakeLinuxView copyWith({int? layoutDirection}) => FakeLinuxView(
+    id,
+    type,
+    layoutDirection ?? this.layoutDirection,
+    creationParams,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -666,7 +719,8 @@ class FakeLinuxView {
     return other is FakeLinuxView
         && other.id == id
         && other.type == type
-        && other.creationParams == creationParams;
+        && other.creationParams == creationParams
+        && other.layoutDirection == layoutDirection;
   }
 
   @override
@@ -674,7 +728,7 @@ class FakeLinuxView {
 
   @override
   String toString() {
-    return 'FakeLinuxView(id: $id, type: $type, creationParams: $creationParams)';
+    return 'FakeLinuxView(id: $id, type: $type, layoutDirection: $layoutDirection, creationParams: $creationParams)';
   }
 }
 
