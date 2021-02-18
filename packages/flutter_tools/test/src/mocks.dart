@@ -10,28 +10,16 @@ import 'dart:io' as io show IOSink;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
-import 'common.dart';
 import 'fakes.dart';
-
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-final Generator kNoColorTerminalPlatform = () {
-  return FakePlatform.fromPlatform(
-    const LocalPlatform()
-  )..stdoutSupportsAnsi = false;
-};
 
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
@@ -249,78 +237,6 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
-/// Common functionality for tracking mock interaction.
-class _BasicMock {
-  final List<String> messages = <String>[];
-
-  void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.of(messages);
-    messages.clear();
-    expect(actualMessages, unorderedEquals(expectedMessages));
-  }
-
-  bool contains(String match) {
-    print('Checking for `$match` in:');
-    print(messages);
-    final bool result = messages.contains(match);
-    messages.clear();
-    return result;
-  }
-}
-
-class MockResidentCompiler extends _BasicMock implements ResidentCompiler {
-  @override
-  void accept() { }
-
-  @override
-  Future<CompilerOutput> reject() async { return null; }
-
-  @override
-  void reset() { }
-
-  @override
-  Future<dynamic> shutdown() async { }
-
-  @override
-  Future<CompilerOutput> compileExpression(
-    String expression,
-    List<String> definitions,
-    List<String> typeDefinitions,
-    String libraryUri,
-    String klass,
-    bool isStatic,
-  ) async {
-    return null;
-  }
-
-  @override
-  Future<CompilerOutput> compileExpressionToJs(
-    String libraryUri,
-    int line,
-    int column,
-    Map<String, String> jsModules,
-    Map<String, String> jsFrameValues,
-    String moduleName,
-    String expression,
-  ) async {
-    return null;
-  }
-
-  @override
-  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    bool suppressErrors = false,
-  }) async {
-    globals.fs.file(outputPath).createSync(recursive: true);
-    globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
-    return CompilerOutput(outputPath, 0, <Uri>[]);
-  }
-
-  @override
-  void addFileSystemRoot(String root) { }
 }
 
 class MockStdIn extends Mock implements IOSink {
