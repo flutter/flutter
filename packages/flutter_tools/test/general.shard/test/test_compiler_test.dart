@@ -47,7 +47,7 @@ void main() {
   testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     when(residentCompiler.recompile(
@@ -72,7 +72,7 @@ void main() {
   testUsingContext('TestCompiler reports null when a compile fails', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     when(residentCompiler.recompile(
@@ -98,7 +98,7 @@ void main() {
   testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
-      FlutterProject.current(),
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
     testCompiler.compiler = residentCompiler;

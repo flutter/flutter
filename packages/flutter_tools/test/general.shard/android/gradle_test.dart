@@ -132,7 +132,6 @@ void main() {
     });
   });
 
-
   group('listApkPaths', () {
     testWithoutContext('Finds APK without flavor in release', () {
       final Iterable<String> apks = listApkPaths(
@@ -195,7 +194,7 @@ void main() {
   group('gradle build', () {
     testUsingContext('do not crash if there is no Android SDK', () async {
       expect(() {
-        updateLocalProperties(project: FlutterProject.current());
+        updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
         message: '$warningMark No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
@@ -364,7 +363,7 @@ include ':app'
 
 
       updateLocalProperties(
-        project: FlutterProject.fromPath('path/to/project'),
+        project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
       );
@@ -758,7 +757,7 @@ plugin2=${plugin2.path}
         ));
 
       await builder.buildPluginsAsAar(
-        FlutterProject.fromPath(androidDirectory.path),
+        FlutterProject.fromDirectoryTest(androidDirectory),
         const AndroidBuildInfo(BuildInfo(
           BuildMode.release,
           '',
@@ -811,7 +810,7 @@ plugin1=${plugin1.path}
         .createSync(recursive: true);
 
       await builder.buildPluginsAsAar(
-        FlutterProject.fromPath(androidDirectory.path),
+        FlutterProject.fromDirectoryTest(androidDirectory),
         const AndroidBuildInfo(BuildInfo.release),
         buildDirectory: buildDirectory,
       );

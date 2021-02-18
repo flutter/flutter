@@ -6,25 +6,20 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   FileSystem fileSystem;
-  TestUsage testUsage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    testUsage = TestUsage();
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in release mode', () {
@@ -313,8 +308,9 @@ void main() {
     expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
   });
 
-  testUsingContext('aab not found', () {
-    final FlutterProject project = FlutterProject.current();
+  testWithoutContext('AAB not found', () {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final TestUsage testUsage = TestUsage();
     expect(
       () {
         findBundleFile(
@@ -340,10 +336,6 @@ void main() {
         },
       ),
     ));
-  }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Usage: () => testUsage,
   });
 }
 

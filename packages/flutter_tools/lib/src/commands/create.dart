@@ -310,7 +310,7 @@ class CreateCommand extends CreateBase {
       _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
-      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectDirPath));
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');

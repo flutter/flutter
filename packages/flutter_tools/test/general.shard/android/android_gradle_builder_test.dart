@@ -115,7 +115,7 @@ void main() {
       bool handlerCalled = false;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -221,7 +221,7 @@ void main() {
       int testFnCalled = 0;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -314,7 +314,7 @@ void main() {
       bool handlerCalled = false;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -407,7 +407,7 @@ void main() {
 
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -488,7 +488,7 @@ void main() {
         .createSync(recursive: true);
 
       await builder.buildGradleApp(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -601,7 +601,7 @@ void main() {
         ..writeAsStringSync('{}');
 
       await builder.buildGradleApp(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -688,7 +688,7 @@ void main() {
       bool builtPluginAsAar = false;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -789,7 +789,7 @@ void main() {
         .createSync(recursive: true);
 
       await builder.buildGradleApp(
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -859,7 +859,7 @@ void main() {
 
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '1.0',
@@ -929,7 +929,7 @@ void main() {
       await expectLater(() async =>
         await builder.buildGradleAar(
           androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           outputDirectory: fileSystem.directory('build/'),
           target: '',
           buildNumber: '1.0',
@@ -1000,7 +1000,7 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1079,7 +1079,7 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1158,7 +1158,7 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1237,7 +1237,7 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1296,7 +1296,7 @@ void main() {
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.current(),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1389,7 +1389,7 @@ void main() {
 
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '2.0',
@@ -1479,7 +1479,7 @@ void main() {
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '2.0',
@@ -1569,7 +1569,7 @@ void main() {
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '2.0',
@@ -1659,7 +1659,7 @@ void main() {
       await builder.buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
-        project: FlutterProject.current(),
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
         buildNumber: '2.0',
