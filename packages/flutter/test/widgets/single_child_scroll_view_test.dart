@@ -925,39 +925,52 @@ void main() {
     });
   });
 
-  testWidgets('SingleChildScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
+  testWidgets('keyboardDismissBehavior tests', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: Column(
-              children: focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  child: TextField(
-                      focusNode: focusNode,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      )
-                  ),
-                );
-              }).toList(),
+    Future<void> boilerplate(ScrollViewKeyboardDismissBehavior behavior) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              keyboardDismissBehavior: behavior,
+              child: Column(
+                children: focusNodes.map((FocusNode focusNode) {
+                  return Container(
+                    height: 50,
+                    child: TextField(focusNode: focusNode),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-      ),
-    ));
+        ),
+      );
+    }
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    // ScrollViewKeyboardDismissBehavior.onDrag dismiss keyboard on drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
+
+    Finder finder = find.byType(TextField).first;
+    TextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.manual do no dismiss the keyboard
+    await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
   });
 }
