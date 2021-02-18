@@ -356,7 +356,6 @@ void main() {
   });
 }
 
-class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
