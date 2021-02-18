@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Selection;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.View;
@@ -55,6 +56,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -925,6 +927,92 @@ public class TextInputPluginTest {
     assertEquals(testAfm.empty, testAfm.exitId);
     textInputPlugin.destroy();
     assertEquals("1".hashCode(), testAfm.exitId);
+  }
+
+  @Test
+  public void autofill_testAutofillUpdatesTheFramework() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return;
+    }
+
+    TestAfm testAfm =
+        Shadow.extract(RuntimeEnvironment.application.getSystemService(AutofillManager.class));
+    FlutterView testView = new FlutterView(RuntimeEnvironment.application);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+
+    // Set up an autofill scenario with 2 fields.
+    final TextInputChannel.Configuration.Autofill autofill1 =
+        new TextInputChannel.Configuration.Autofill(
+            "1",
+            new String[] {"HINT1"},
+            new TextInputChannel.TextEditState("field 1", 0, 0, -1, -1));
+    final TextInputChannel.Configuration.Autofill autofill2 =
+        new TextInputChannel.Configuration.Autofill(
+            "2",
+            new String[] {"HINT2", "EXTRA"},
+            new TextInputChannel.TextEditState("field 2", 0, 0, -1, -1));
+
+    final TextInputChannel.Configuration config1 =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            autofill1,
+            null);
+    final TextInputChannel.Configuration config2 =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            autofill2,
+            null);
+
+    final TextInputChannel.Configuration autofillConfiguration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            autofill1,
+            new TextInputChannel.Configuration[] {config1, config2});
+
+    textInputPlugin.setTextInputClient(0, autofillConfiguration);
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+
+    final SparseArray<AutofillValue> autofillValues = new SparseArray();
+    autofillValues.append("1".hashCode(), AutofillValue.forText("focused field"));
+    autofillValues.append("2".hashCode(), AutofillValue.forText("unfocused field"));
+
+    // Autofill both fields.
+    textInputPlugin.autofill(autofillValues);
+
+    // Verify the Editable has been updated.
+    assertTrue(textInputPlugin.getEditable().toString().equals("focused field"));
+
+    // The autofill value of the focused field is sent via updateEditingState.
+    verify(textInputChannel, times(1))
+        .updateEditingState(anyInt(), eq("focused field"), eq(13), eq(13), eq(-1), eq(-1));
+
+    final ArgumentCaptor<HashMap> mapCaptor = ArgumentCaptor.forClass(HashMap.class);
+
+    verify(textInputChannel, times(1)).updateEditingStateWithTag(anyInt(), mapCaptor.capture());
+    final TextInputChannel.TextEditState editState =
+        (TextInputChannel.TextEditState) mapCaptor.getValue().get("2");
+    assertEquals(editState.text, "unfocused field");
   }
 
   @Test

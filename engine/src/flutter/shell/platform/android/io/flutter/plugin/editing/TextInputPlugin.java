@@ -418,6 +418,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mRestartInputPending = false;
   }
 
+  // Called by the text input channel to update the text input plugin with the
+  // latest TextEditState from the framework.
   @VisibleForTesting
   void setTextInputEditingState(View view, TextInputChannel.TextEditState state) {
     mLastKnownFrameworkTextEditingState = state;
@@ -591,7 +593,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     final int selectionEnd = mEditable.getSelectionEnd();
     final int composingStart = mEditable.getComposingStart();
     final int composingEnd = mEditable.getComposingEnd();
-    // Framework needs to sent value first.
+    // The framework needs to send value first.
     final boolean skipFrameworkUpdate =
         mLastKnownFrameworkTextEditingState == null
             || (mEditable.toString().equals(mLastKnownFrameworkTextEditingState.text)
@@ -773,11 +775,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       final TextInputChannel.TextEditState newState =
           new TextInputChannel.TextEditState(value, value.length(), value.length(), -1, -1);
 
-      // The value of the currently focused text field needs to be updated.
       if (autofill.uniqueIdentifier.equals(currentAutofill.uniqueIdentifier)) {
-        setTextInputEditingState(mView, newState);
+        // Autofilling the current client is the same as handling user input
+        // from the virtual keyboard. Setting the editable to newState and an
+        // update will be sent to the framework.
+        mEditable.setEditingState(newState);
+      } else {
+        editingValues.put(autofill.uniqueIdentifier, newState);
       }
-      editingValues.put(autofill.uniqueIdentifier, newState);
     }
 
     textInputChannel.updateEditingStateWithTag(inputTarget.id, editingValues);
