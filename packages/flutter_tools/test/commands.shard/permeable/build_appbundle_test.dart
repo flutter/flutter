@@ -154,7 +154,7 @@ void main() {
       when(mockAndroidSdk.licensesAvailable).thenReturn(true);
       when(mockAndroidSdk.platformToolsAvailable).thenReturn(true);
       when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(const <String>[]);
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {

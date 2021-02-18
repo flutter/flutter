@@ -12,7 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
-import 'android/gradle_utils.dart';
+import 'android/android_studio.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -1174,7 +1174,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     final Directory tempDir = cache.getRoot().createTempSync(
       'flutter_gradle_wrapper.',
     );
-    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
+    globals.gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(
@@ -1190,7 +1190,11 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
-        environment: gradleEnvironment);
+        environment: <String, String>{
+          if (javaPath != null)
+            'JAVA_HOME': javaPath,
+        },
+      );
       if (processResult.exitCode != 0) {
         logger.printError('Failed to download the Android dependencies');
       }

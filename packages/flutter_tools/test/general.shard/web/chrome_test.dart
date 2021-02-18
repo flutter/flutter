@@ -104,19 +104,17 @@ void main() {
   });
 
   testWithoutContext('does not crash if saving profile information fails due to a file system exception.', () async {
-    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
     final BufferLogger logger = BufferLogger.test();
+    final ErrorThrowingFileSystem errorFileSystem = ErrorThrowingFileSystem(fileSystem);
+    errorFileSystem.addErrorEntity(FakeDirectory('/.tmp_rand0/flutter_tools_chrome_device.rand0/Default', errorFileSystem));
     chromeLauncher = ChromiumLauncher(
-      fileSystem: fileSystem,
+      fileSystem: errorFileSystem,
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: logger,
-      fileSystemUtils: fileSystemUtils,
     );
-    when(fileSystemUtils.copyDirectorySync(any, any))
-      .thenThrow(const FileSystemException());
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
@@ -143,19 +141,19 @@ void main() {
   });
 
   testWithoutContext('does not crash if restoring profile information fails due to a file system exception.', () async {
-    final MockFileSystemUtils fileSystemUtils = MockFileSystemUtils();
     final BufferLogger logger = BufferLogger.test();
+    final ErrorThrowingFileSystem errorFileSystem = ErrorThrowingFileSystem(fileSystem);
+    errorFileSystem.addErrorEntity(FakeDirectory('/Default', errorFileSystem));
+
     chromeLauncher = ChromiumLauncher(
-      fileSystem: fileSystem,
+      fileSystem: errorFileSystem,
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: logger,
-      fileSystemUtils: fileSystemUtils,
     );
-    when(fileSystemUtils.copyDirectorySync(any, any))
-      .thenThrow(const FileSystemException());
+
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
@@ -171,7 +169,7 @@ void main() {
     final Chromium chrome = await chromeLauncher.launch(
       'example_url',
       skipCheck: true,
-      cacheDir: fileSystem.currentDirectory,
+      cacheDir: errorFileSystem.currentDirectory,
     );
 
     // Create cache dir that the Chrome launcher will atttempt to persist.
@@ -233,7 +231,6 @@ void main() {
   testWithoutContext('can seed chrome temp directory with existing session data', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory dataDir = fileSystem.directory('chrome-stuff');
-
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -265,7 +262,7 @@ void main() {
     );
 
     exitCompleter.complete();
-    await Future<void>.delayed(const Duration(microseconds: 1));
+    await Future<void>.delayed(const Duration(milliseconds: 1));
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
@@ -365,4 +362,61 @@ Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager proces
     'example_url',
     skipCheck: true,
   );
+}
+
+class FakeDirectory extends Fake implements Directory {
+  FakeDirectory(this.path, this.fileSystem);
+
+  @override
+  final FileSystem fileSystem;
+
+  @override
+  final String path;
+
+  @override
+  void createSync({bool recursive = false}) {}
+
+  @override
+  bool existsSync() {
+    return true;
+  }
+
+  @override
+  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) {
+    throw FileSystemException(path, '');
+  }
+}
+
+class ErrorThrowingFileSystem extends ForwardingFileSystem {
+  ErrorThrowingFileSystem(FileSystem delegate) : super(delegate);
+
+  final Map<String, FileSystemEntity> errorEntities = <String, FileSystemEntity>{};
+
+  void addErrorEntity(FileSystemEntity entity) {
+    errorEntities[entity.path] = entity;
+  }
+
+  @override
+  Directory directory(dynamic path) {
+    if (errorEntities.containsKey(path)) {
+      return errorEntities[path] as Directory;
+    }
+    return delegate.directory(path);
+  }
+
+  @override
+  File file(dynamic path) {
+    if (errorEntities.containsKey(path)) {
+      return errorEntities[path] as File;
+    }
+    return delegate.file(path);
+  }
+
+  @override
+  Link link(dynamic path) {
+    if (errorEntities.containsKey(path)) {
+      return errorEntities[path] as Link;
+    }
+    return delegate.link(path);
+  }
 }

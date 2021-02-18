@@ -63,6 +63,10 @@ class TestCommand extends FlutterCommand {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('run-skipped',
+        defaultsTo: false,
+        help: 'Run skipped tests instead of skipping them.',
+      )
       ..addFlag('disable-service-auth-codes',
         defaultsTo: false,
         negatable: false,
@@ -309,6 +313,7 @@ class TestCommand extends FlutterCommand {
       randomSeed: stringArg('test-randomize-ordering-seed'),
       reporter: stringArg('reporter'),
       timeout: stringArg('timeout'),
+      runSkipped: boolArg('run-skipped'),
     );
 
     if (collector != null) {

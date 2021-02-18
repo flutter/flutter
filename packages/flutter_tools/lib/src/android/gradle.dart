@@ -25,6 +25,7 @@ import '../globals.dart' as globals hide logger, printStatus, printTrace, printE
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
+import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
@@ -142,12 +143,15 @@ Future<void> checkGradleDependencies(Logger logger) async {
   );
   final FlutterProject flutterProject = FlutterProject.current();
   await globals.processUtils.run(<String>[
-      gradleUtils.getExecutable(flutterProject),
+      globals.gradleUtils.getExecutable(flutterProject),
       'dependencies',
     ],
     throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: gradleEnvironment,
+    environment: <String, String>{
+      if (javaPath != null)
+        'JAVA_HOME': javaPath,
+    },
   );
   globals.androidSdk?.reinitialize();
   progress.stop();
@@ -364,7 +368,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
 
     final List<String> command = <String>[
-      gradleUtils.getExecutable(project),
+      globals.gradleUtils.getExecutable(project),
     ];
     if (_logger.isVerbose) {
       command.add('-Pverbose=true');
@@ -454,7 +458,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: gradleEnvironment,
+        environment: <String, String>{
+          if (javaPath != null)
+            'JAVA_HOME': javaPath,
+        },
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -525,7 +532,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     if (isBuildingBundle) {
-      final File bundleFile = findBundleFile(project, buildInfo);
+      final File bundleFile = findBundleFile(project, buildInfo, _logger);
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsMB(bundleFile.lengthSync())})';
@@ -542,7 +549,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     // Gradle produced an APK.
     final Iterable<String> apkFilesPaths = project.isModule
-        ? findApkFilesModule(project, androidBuildInfo)
+        ? findApkFilesModule(project, androidBuildInfo, _logger)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
     final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
@@ -550,6 +557,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _exitWithExpectedFileNotFound(
         project: project,
         fileExtension: '.apk',
+        logger: _logger,
       );
     }
 
@@ -659,7 +667,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'aar_init_script.gradle',
     );
     final List<String> command = <String>[
-      gradleUtils.getExecutable(project),
+      globals.gradleUtils.getExecutable(project),
       '-I=$initScript',
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
@@ -702,14 +710,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
       // Copy the local engine repo in the output directory.
       try {
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           localEngineRepo,
           getRepoDirectory(outputDirectory),
         );
-      } on FileSystemException catch (_) {
+      } on FileSystemException catch (error, st) {
         throwToolExit(
             'Failed to copy the local engine ${localEngineRepo.path} repo '
-                'in ${outputDirectory.path}'
+                'in ${outputDirectory.path}: $error, $st'
         );
       }
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
@@ -730,7 +738,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: gradleEnvironment,
+        environment: <String, String>{
+          if (javaPath != null)
+            'JAVA_HOME': javaPath,
+        },
       );
     } finally {
       status.stop();
@@ -921,6 +932,7 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
 Iterable<String> findApkFilesModule(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
+  Logger logger,
 ) {
   final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
@@ -953,6 +965,7 @@ Iterable<String> findApkFilesModule(
     _exitWithExpectedFileNotFound(
       project: project,
       fileExtension: '.apk',
+      logger: logger,
     );
   }
   return apks.map((File file) => file.path);
@@ -991,7 +1004,7 @@ Iterable<String> listApkPaths(
 }
 
 @visibleForTesting
-File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
+File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger) {
   final List<File> fileCandidates = <File>[
     getBundleDirectory(project)
       .childDirectory(camelCase(buildInfo.modeName))
@@ -1025,6 +1038,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
   _exitWithExpectedFileNotFound(
     project: project,
     fileExtension: '.aab',
+    logger: logger,
   );
   return null;
 }
@@ -1033,12 +1047,13 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
 void _exitWithExpectedFileNotFound({
   @required FlutterProject project,
   @required String fileExtension,
+  @required Logger logger,
 }) {
   assert(project != null);
   assert(fileExtension != null);
 
   final String androidGradlePluginVersion =
-  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
+  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot, logger);
   BuildEvent('gradle-expected-file-not-found',
     settings:
     'androidGradlePluginVersion: $androidGradlePluginVersion, '

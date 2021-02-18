@@ -181,6 +181,7 @@ Future<void> main() async {
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')) {
+        print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
@@ -229,6 +230,7 @@ Future<void> main() async {
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
             || hostPodfileLockOutput.contains('android_alarm_manager')) {
+          print(hostPodfileLockOutput);
           throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
         }
 
