@@ -436,9 +436,11 @@ void main() {
 
   group('Config files', () {
     Directory tempDir;
+    FileSystem fileSystem;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
+      fileSystem = MemoryFileSystem.test();
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
     });
 
     testUsingContext('create settings_aar.gradle when current settings.gradle loads plugins', () {
@@ -468,25 +470,24 @@ include ':app'
 
       tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
 
-      final String toolGradlePath = globals.fs.path.join(
-          globals.fs.path.absolute(Cache.flutterRoot),
+      final String toolGradlePath = fileSystem.path.join(
+          fileSystem.path.absolute(Cache.flutterRoot),
           'packages',
           'flutter_tools',
           'gradle');
-      globals.fs.directory(toolGradlePath).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
+      fileSystem.directory(toolGradlePath).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
           .writeAsStringSync(currentSettingsGradle);
 
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+      fileSystem.file(fileSystem.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
       createSettingsAarGradle(tempDir, testLogger);
 
       expect(testLogger.statusText, contains('created successfully'));
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
-
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -501,25 +502,24 @@ include ':app'
 
       tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
 
-      final String toolGradlePath = globals.fs.path.join(
-          globals.fs.path.absolute(Cache.flutterRoot),
+      final String toolGradlePath = fileSystem.path.join(
+          fileSystem.path.absolute(Cache.flutterRoot),
           'packages',
           'flutter_tools',
           'gradle');
-      globals.fs.directory(toolGradlePath).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
+      fileSystem.directory(toolGradlePath).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
           .writeAsStringSync(currentSettingsGradle);
 
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+      fileSystem.file(fileSystem.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
       createSettingsAarGradle(tempDir, testLogger);
 
       expect(testLogger.statusText, contains('created successfully'));
       expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
-
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -860,7 +860,7 @@ flutter:
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn(fs.directory('irrelevant'));
-      builder = AndroidGradleBuilder(logger: logger);
+      builder = AndroidGradleBuilder(logger: logger, processManager: fakeProcessManager, fileSystem: fs);
     });
 
     testUsingContext('calls gradle', () async {
