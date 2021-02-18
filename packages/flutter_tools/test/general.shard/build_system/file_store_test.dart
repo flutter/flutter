@@ -11,7 +11,6 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/file_store.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 
