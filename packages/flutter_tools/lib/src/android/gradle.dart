@@ -22,7 +22,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals hide logger, printStatus, printTrace, printError, processManager, processUtils, fs, artifacts;
+import '../globals.dart' as globals hide logger, printStatus, printTrace, printError, processManager, processUtils, fs, artifacts, flutterUsage;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
@@ -164,15 +164,18 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
+    @required Usage usage,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
+       _usage = usage,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final Usage _usage;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -283,15 +286,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
     assert(globals.androidSdk != null);
 
     if (!project.android.isSupportedVersion()) {
-      _exitWithUnsupportedProjectMessage();
+      _exitWithUnsupportedProjectMessage(_usage);
     }
     final Directory buildDirectory = project.android.buildDirectory;
 
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
     if (usesAndroidX) {
-      BuildEvent('app-using-android-x', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('app-using-android-x', flutterUsage: _usage).send();
     } else if (!usesAndroidX) {
-      BuildEvent('app-not-using-android-x', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('app-not-using-android-x', flutterUsage: _usage).send();
       _logger.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
       _logger.printStatus(
         'To avoid potential build failures, you can quickly migrate your app '
@@ -432,11 +435,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       status.stop();
     }
 
-    globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+    _usage.sendTiming('build', 'gradle', sw.elapsed);
 
     if (exitCode != 0) {
       if (detectedGradleError == null) {
-        BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
+        BuildEvent('gradle-unknown-failure', flutterUsage: _usage).send();
         throwToolExit(
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
@@ -462,7 +465,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
                 shouldBuildPluginAsAar: shouldBuildPluginAsAar,
                 retries: retries - 1,
               );
-              BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
+              BuildEvent(successEventLabel, flutterUsage: _usage).send();
               return;
             case GradleBuildStatus.retryWithAarPlugins:
               await buildGradleApp(
@@ -474,13 +477,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
                 shouldBuildPluginAsAar: true,
                 retries: retries - 1,
               );
-              BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
+              BuildEvent(successEventLabel, flutterUsage: _usage).send();
               return;
             case GradleBuildStatus.exit:
             // noop.
           }
         }
-        BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
+        BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: _usage).send();
         throwToolExit(
           'Gradle task $assembleTask failed with exit code $exitCode',
           exitCode: exitCode,
@@ -489,7 +492,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
 
     if (isBuildingBundle) {
-      final File bundleFile = findBundleFile(project, buildInfo, _logger);
+      final File bundleFile = findBundleFile(project, buildInfo, _logger, _usage);
       final String appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsMB(bundleFile.lengthSync())})';
@@ -506,7 +509,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     // Gradle produced an APK.
     final Iterable<String> apkFilesPaths = project.isModule
-        ? findApkFilesModule(project, androidBuildInfo, _logger)
+        ? findApkFilesModule(project, androidBuildInfo, _logger, _usage)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
     final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
@@ -515,6 +518,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project,
         fileExtension: '.apk',
         logger: _logger,
+        usage: _usage,
       );
     }
 
@@ -547,7 +551,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
       fileSystem: _fileSystem,
       logger: _logger,
-      flutterUsage: globals.flutterUsage,
+      flutterUsage: _usage,
     );
     final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -704,7 +708,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } finally {
       status.stop();
     }
-    globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+    _usage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -774,7 +778,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       } on ToolExit {
         // Log the entire plugin entry in `.flutter-plugins` since it
         // includes the plugin name and the version.
-        BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: globals.flutterUsage).send();
+        BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: _usage).send();
         throwToolExit('The plugin $pluginName could not be built due to the issue above.');
       }
     }
@@ -854,8 +858,8 @@ String _calculateSha(File file) {
   return _hex(sha1.convert(bytes).bytes);
 }
 
-void _exitWithUnsupportedProjectMessage() {
-  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: globals.flutterUsage).send();
+void _exitWithUnsupportedProjectMessage(Usage usage) {
+  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: usage).send();
   throwToolExit(
     '$warningMark Your app is using an unsupported Gradle project. '
     'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
@@ -880,6 +884,7 @@ Iterable<String> findApkFilesModule(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
   Logger logger,
+  Usage usage,
 ) {
   final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
@@ -913,6 +918,7 @@ Iterable<String> findApkFilesModule(
       project: project,
       fileExtension: '.apk',
       logger: logger,
+      usage: usage,
     );
   }
   return apks.map((File file) => file.path);
@@ -951,7 +957,7 @@ Iterable<String> listApkPaths(
 }
 
 @visibleForTesting
-File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger) {
+File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, Usage usage) {
   final List<File> fileCandidates = <File>[
     getBundleDirectory(project)
       .childDirectory(camelCase(buildInfo.modeName))
@@ -986,6 +992,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger) 
     project: project,
     fileExtension: '.aab',
     logger: logger,
+    usage: usage,
   );
   return null;
 }
@@ -995,6 +1002,7 @@ void _exitWithExpectedFileNotFound({
   @required FlutterProject project,
   @required String fileExtension,
   @required Logger logger,
+  @required Usage usage,
 }) {
   assert(project != null);
   assert(fileExtension != null);
@@ -1005,7 +1013,7 @@ void _exitWithExpectedFileNotFound({
     settings:
     'androidGradlePluginVersion: $androidGradlePluginVersion, '
       'fileExtension: $fileExtension',
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: usage,
   ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
