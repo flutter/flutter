@@ -458,7 +458,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
     assert(() {
       if (item.key == null) {
         throw FlutterError(
-          'Every item of ReorderableListView must have key.'
+          'Every item of ReorderableListView must have a key.'
         );
       }
       return true;
