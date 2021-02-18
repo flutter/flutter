@@ -455,10 +455,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
 
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
+    assert(() {
+      if (item.key == null) {
+        throw FlutterError(
+          'Every item of ReorderableListView must have key.'
+        );
+      }
+      return true;
+    }());
 
     // TODO(goderbauer): The semantics stuff should probably happen inside
     //   _ReorderableItem so the widget versions can have them as well.
-    assert(item.key != null ,'Key must not be null');
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
