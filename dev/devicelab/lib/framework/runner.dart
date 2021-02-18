@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 
@@ -83,6 +84,8 @@ Future<TaskResult> runTask(
     final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
+
+    hostAgent.dumpFiles(taskResult.detailFiles);
     return taskResult;
   } finally {
     if (!runnerFinished)

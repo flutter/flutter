@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/cocoon.dart';
-import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
@@ -139,8 +138,6 @@ Future<void> _runTasks() async {
       /// Cocoon references LUCI tasks by the [luciBuilder] instead of [taskName].
       await cocoon.sendTaskResult(builderName: luciBuilder, result: result, gitBranch: gitBranch);
     }
-
-    hostAgent.dumpFiles(result.detailFiles);
 
     if (!result.succeeded) {
       exitCode = 1;

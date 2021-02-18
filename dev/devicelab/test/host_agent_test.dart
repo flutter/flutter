@@ -65,7 +65,8 @@ void main() {
         resultsDirectory.path,
       ]);
 
-      final Directory dumpDirectory = fs.directory(agent.dumpDirectory.path);
+      final Directory dumpDirectory = agent.dumpDirectory;
+      expect(dumpDirectory.existsSync(), isTrue);
       expect(dumpDirectory.childFile('results.json').existsSync(), isTrue);
 
       final Directory copiedResultsDirectory = dumpDirectory.childDirectory('results');
