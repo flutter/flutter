@@ -47,8 +47,6 @@ import 'theme_data.dart';
 /// If [onPressed] and [onLongPress] callbacks are null, then the
 /// button will be disabled.
 ///
-/// Note: [ElevatedButton] is available after 1.22.0
-///
 /// See also:
 ///
 ///  * [TextButton], a simple flat button without a shadow.
