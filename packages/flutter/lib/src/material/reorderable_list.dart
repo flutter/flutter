@@ -458,6 +458,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> {
 
     // TODO(goderbauer): The semantics stuff should probably happen inside
     //   _ReorderableItem so the widget versions can have them as well.
+    assert(item.key != null ,'Key must not be null');
     final Widget itemWithSemantics = _wrapWithSemantics(item, index);
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
