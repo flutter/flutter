@@ -383,25 +383,26 @@ void main() {
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
     const String exceptionMessage = 'Something really bad happened.';
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     fakeProcessManager.addCommand(
       const FakeCommand(command: <String>[
         'unzip',
         '-o',
         '-q',
-        null,
+        'bar.zip',
         '-d',
-        null,
+        'foo',
       ], exitCode: 1, stderr: exceptionMessage),
     );
 
-    final MockFileSystem fileSystem = MockFileSystem();
-    final MockFile mockFile = MockFile();
-    final MockDirectory mockDirectory = MockDirectory();
-    when(fileSystem.file(any)).thenReturn(mockFile);
-    when(mockFile.readAsBytesSync()).thenThrow(
-      const FileSystemException(exceptionMessage),
-    );
+    final Directory foo = fileSystem.directory('foo')
+      ..createSync();
+    final File bar = fileSystem.file('bar.zip')
+      ..createSync();
+    handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
+
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -410,7 +411,7 @@ void main() {
     );
 
     expect(
-      () => osUtils.unzip(mockFile, mockDirectory),
+      () => osUtils.unzip(bar, foo),
       throwsProcessException(message: exceptionMessage),
     );
   });
@@ -470,6 +471,3 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockDirectory extends Mock implements Directory {}
-class MockFileSystem extends Mock implements FileSystem {}
-class MockFile extends Mock implements File {}
