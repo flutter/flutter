@@ -438,6 +438,132 @@ loading-units:
     expect(logger.statusText.contains('Errors checking the following files:'), false);
   });
 
+  testWithoutContext('settings.gradle exists passes', () async {
+    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+      env,
+      exitOnFail: false,
+      title: 'test check',
+    );
+    final File settingsGradleFile = env.projectDir.childDirectory('android').childFile('settings.gradle');
+    if (settingsGradleFile.existsSync()) {
+      settingsGradleFile.deleteSync();
+    }
+    settingsGradleFile.createSync(recursive: true);
+    settingsGradleFile.writeAsStringSync(r'''
+include ':app', ':component1'
+
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
+
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''', flush: true, mode: FileMode.append);
+    validator.checkAndroidSettingsGradle(
+      <DeferredComponent>[
+        DeferredComponent(name: 'component1'),
+      ],
+    );
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    expect(logger.statusText, 'test check passed.\n');
+  });
+
+
+  testWithoutContext('settings.gradle missing adds to file', () async {
+    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+      env,
+      exitOnFail: false,
+      title: 'test check',
+    );
+    final File settingsGradleFile = env.projectDir.childDirectory('android').childFile('settings.gradle');
+    if (settingsGradleFile.existsSync()) {
+      settingsGradleFile.deleteSync();
+    }
+    settingsGradleFile.createSync(recursive: true);
+    settingsGradleFile.writeAsStringSync(r'''
+include ':app'
+
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
+
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''', flush: true, mode: FileMode.append);
+    validator.checkAndroidSettingsGradle(
+      <DeferredComponent>[
+        DeferredComponent(name: 'component1'),
+      ],
+    );
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    expect(logger.statusText.contains('Modified android files:\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/settings.gradle\n'), true);
+    final File settingsGradleFileOutput = env.projectDir.childDirectory('build').childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory).childFile('settings.gradle');
+    expect(settingsGradleFileOutput.existsSync(), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains('include \':app\', \':component1\''), true);
+    // verify existing lines were replicated.
+    expect(settingsGradleFileOutput.readAsStringSync().contains('def properties = new Properties()'), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains(r'apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"'), true);
+  });
+
+  testWithoutContext('settings.gradle multiline missing', () async {
+    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+      env,
+      exitOnFail: false,
+      title: 'test check',
+    );
+    final File settingsGradleFile = env.projectDir.childDirectory('android').childFile('settings.gradle');
+    if (settingsGradleFile.existsSync()) {
+      settingsGradleFile.deleteSync();
+    }
+    settingsGradleFile.createSync(recursive: true);
+    settingsGradleFile.writeAsStringSync(r'''
+junk text to try to include mess up it up
+include ':app'
+
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
+
+include ':nottherightone', ':component2'
+
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''', flush: true, mode: FileMode.append);
+    validator.checkAndroidSettingsGradle(
+      <DeferredComponent>[
+        DeferredComponent(name: 'component1'),
+        DeferredComponent(name: 'component2'),
+      ],
+    );
+    validator.displayResults();
+    validator.attemptToolExit();
+
+    expect(logger.statusText.contains('Modified android files:\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/settings.gradle\n'), true);
+    final File settingsGradleFileOutput = env.projectDir.childDirectory('build').childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory).childFile('settings.gradle');
+    expect(settingsGradleFileOutput.existsSync(), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains('include \':app\', \':component1\''), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains('include \':nottherightone\', \':component2\''), true);
+    // verify existing lines were replicated.
+    expect(settingsGradleFileOutput.readAsStringSync().startsWith('junk text to try to include mess up it up'), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains('def properties = new Properties()'), true);
+    expect(settingsGradleFileOutput.readAsStringSync().contains(r'apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"'), true);
+  });
+
   testUsingContext('androidComponentSetup build.gradle does not exist', () async {
     final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
     final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
