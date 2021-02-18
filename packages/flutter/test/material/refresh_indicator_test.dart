@@ -677,6 +677,38 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), findsNothing);
   });
 
+  testWidgets('ScrollController.jumpTo should not trigger the refresh indicator', (WidgetTester tester) async {
+    refreshCalled = false;
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 500.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(
+                height: 800.0,
+                child: Text('X'),
+              ),
+              SizedBox(
+                height: 800.0,
+                child: Text('Y'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(0.0);
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+
+    expect(refreshCalled, false);
+  });
+
   testWidgets('RefreshIndicator.color can be updated at runtime', (WidgetTester tester) async {
     refreshCalled = false;
     Color refreshIndicatorColor = Colors.green;

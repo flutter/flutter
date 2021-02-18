@@ -7,33 +7,81 @@ import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
-void verifyDartUiTextStyleToString(ui.TextStyle textStyle, { required TextStyle matches }) {
-    final String description = textStyle.toString();
-    expect(description, startsWith('TextStyle('));
-    expect(description, endsWith(')'));
+// This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
+// of the given TextStyle's (from painting.dart) properties.
+class _DartUiTextStyleToStringMatcher extends Matcher {
+  _DartUiTextStyleToStringMatcher(this.textStyle);
 
-    expect(description, stringContainsInOrder(<String>[
-      if (matches.color != null) 'color: ${matches.color}' else 'unspecified',
-      if (matches.decoration != null) 'decoration: ${matches.decoration}' else 'unspecified',
-      if (matches.decorationColor != null) 'decorationColor: ${matches.decorationColor}' else 'unspecified',
-      if (matches.decorationStyle != null) 'decorationStyle: ${matches.decorationStyle}' else 'unspecified',
-      if (matches.decorationThickness != null) 'decorationThickness: ${matches.decorationThickness}' else 'unspecified',
-      if (matches.fontWeight != null) 'fontWeight: ${matches.fontWeight}' else 'unspecified',
-      if (matches.fontStyle != null) 'fontStyle: ${matches.fontStyle}' else 'unspecified',
-      if (matches.textBaseline != null) 'textBaseline: ${matches.textBaseline}' else 'unspecified',
-      if (matches.fontFamily != null) 'fontFamily: ${matches.fontFamily}' else 'unspecified',
-      if (matches.fontFamilyFallback != null) 'fontFamilyFallback: ${matches.fontFamilyFallback}' else 'unspecified',
-      if (matches.fontSize != null) 'fontSize: ${matches.fontSize}' else 'unspecified',
-      if (matches.letterSpacing != null) 'letterSpacing: ${matches.letterSpacing}' else 'unspecified',
-      if (matches.wordSpacing != null) 'wordSpacing: ${matches.wordSpacing}' else 'unspecified',
-      if (matches.height != null) 'height: ${matches.height}' else 'unspecified',
-      if (matches.locale != null) 'locale: ${matches.locale}' else 'unspecified',
-      if (matches.background != null) 'background: ${matches.background}' else 'unspecified',
-      if (matches.foreground != null) 'foreground: ${matches.foreground}' else 'unspecified',
-      if (matches.shadows != null) 'shadows: ${matches.shadows}' else 'unspecified',
-      if (matches.fontFeatures != null) 'fontFeatures: ${matches.fontFeatures}' else 'unspecified',
-    ]));
+  final TextStyle textStyle;
+
+  late final List<String> propertiesInOrder = <String>[
+    _propertyToString('color', textStyle.color),
+    _propertyToString('decoration', textStyle.decoration),
+    _propertyToString('decorationColor', textStyle.decorationColor),
+    _propertyToString('decorationStyle', textStyle.decorationStyle),
+    _propertyToString('decorationThickness', textStyle.decorationThickness),
+    _propertyToString('fontWeight', textStyle.fontWeight),
+    _propertyToString('fontStyle', textStyle.fontStyle),
+    _propertyToString('textBaseline', textStyle.textBaseline),
+    _propertyToString('fontFamily', textStyle.fontFamily),
+    _propertyToString('fontFamilyFallback', textStyle.fontFamilyFallback),
+    _propertyToString('fontSize', textStyle.fontSize),
+    _propertyToString('letterSpacing', textStyle.letterSpacing),
+    _propertyToString('wordSpacing', textStyle.wordSpacing),
+    _propertyToString('height', textStyle.height),
+    _propertyToString('locale', textStyle.locale),
+    _propertyToString('background', textStyle.background),
+    _propertyToString('foreground', textStyle.foreground),
+    _propertyToString('shadows', textStyle.shadows),
+    _propertyToString('fontFeatures', textStyle.fontFeatures),
+  ];
+
+  static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
+
+  @override
+  Description describe(Description description) => description.add('is a superset of $textStyle.');
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final String description = item.toString();
+    const String prefix = 'TextStyle(';
+    const String suffix = ')';
+    if (!description.startsWith(prefix) || !description.endsWith(suffix))
+      return false;
+
+    final String propertyDescription = description.substring(
+      prefix.length,
+      description.length - suffix.length,
+    );
+    int startIndex = 0;
+    for (final String property in propertiesInOrder) {
+      startIndex = propertyDescription.indexOf(property, startIndex);
+      if (startIndex < 0) {
+        matchState['missingProperty'] = property;
+        return false;
+      }
+      startIndex += property.length;
+    }
+    return true;
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final String? property = matchState['missingProperty'] as String?;
+    if (property != null) {
+      description.add("expect property: '$property'");
+      final int propertyIndex = propertiesInOrder.indexOf(property);
+      if (propertyIndex > 0) {
+        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
+      }
+      description.add('\n');
+    }
+    return description;
+  }
 }
+
+Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
 
 void main() {
   test('TextStyle control test', () {
@@ -197,10 +245,10 @@ void main() {
 
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    verifyDartUiTextStyleToString(ts5, matches: s5);
+    expect(ts5, matchesToStringOf(s5));
     final ui.TextStyle ts2 = s2.getTextStyle();
     expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    verifyDartUiTextStyleToString(ts2, matches: s2);
+    expect(ts2, matchesToStringOf(s2));
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
@@ -220,11 +268,11 @@ void main() {
   test('TextStyle using package font', () {
     const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    verifyDartUiTextStyleToString(s6.getTextStyle(), matches: s6);
+    expect(s6.getTextStyle(), matchesToStringOf(s6));
 
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    verifyDartUiTextStyleToString(s7.getTextStyle(), matches: s7);
+    expect(s7.getTextStyle(), matchesToStringOf(s7));
 
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback![0], 'packages/p/test');
@@ -260,7 +308,7 @@ void main() {
     expect(s4.fontFamilyFallback!.isEmpty, true);
 
     final ui.TextStyle uis1 = s2.getTextStyle();
-    verifyDartUiTextStyleToString(uis1, matches: s2);
+    expect(uis1, matchesToStringOf(s2));
 
     expect(s2.apply().fontFamily, 'foo');
     expect(s2.apply().fontFamilyFallback, const <String>['Roboto', 'test']);

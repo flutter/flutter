@@ -98,6 +98,10 @@ class FlatButton extends MaterialButton {
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
   /// The [icon], [label], and [clipBehavior] arguments must not be null.
+  @Deprecated(
+    'Use TextButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   factory FlatButton.icon({
     Key? key,
     required VoidCallback? onPressed,

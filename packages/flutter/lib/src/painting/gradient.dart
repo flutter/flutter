@@ -68,7 +68,8 @@ _ColorsAndStops _interpolateColorsAndStops(
 /// a [GradientRotation] of `pi/4` radians (i.e. 45 degrees).
 @immutable
 abstract class GradientTransform {
-  /// A const constructor so that subclasses may be const.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const GradientTransform();
 
   /// When a [Gradient] creates its [Shader], it will call this method to

@@ -665,7 +665,8 @@ void main() {
   });
 
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     final Logger logger = BufferLogger.test();
     final FakeCache cache = FakeCache(
       fileSystem: fileSystem,
@@ -673,19 +674,33 @@ void main() {
       platform: FakePlatform(),
       osUtils: MockOperatingSystemUtils()
     );
-    final MockFile file = MockFile();
+    final File file = fileSystem.file('stamp');
     cache.stampFile = file;
-    when(file.existsSync()).thenReturn(false);
 
     expect(cache.getStampFor('foo'), null);
 
-    when(file.existsSync()).thenReturn(true);
-    when(file.readAsStringSync()).thenThrow(const FileSystemException());
+    file.createSync();
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
 
     expect(cache.getStampFor('foo'), null);
+  });
 
-    when(file.existsSync()).thenReturn(true);
-    when(file.readAsStringSync()).thenReturn('ABC ');
+  testWithoutContext('Cache parses stamp file', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Logger logger = BufferLogger.test();
+    final FakeCache cache = FakeCache(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        osUtils: MockOperatingSystemUtils()
+    );
+
+    final File file = fileSystem.file('stamp')..writeAsStringSync('ABC ');
+    cache.stampFile = file;
 
     expect(cache.getStampFor('foo'), 'ABC');
   });
@@ -860,7 +875,6 @@ class FakeDownloadedArtifact extends CachedArtifact {
 }
 
 class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
-class MockFile extends Mock implements File {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
@@ -868,6 +882,7 @@ class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
 class MockPub extends Mock implements Pub {}
+
 class FakeCache extends Cache {
   FakeCache({
     @required Logger logger,

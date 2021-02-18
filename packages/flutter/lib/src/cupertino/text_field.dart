@@ -292,8 +292,7 @@ class CupertinoTextField extends StatefulWidget {
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
-       // TODO(a14n): uncomment when issue is fixed, https://github.com/dart-lang/sdk/issues/43407
-       assert(obscuringCharacter != null/* && obscuringCharacter.length == 1*/),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -444,8 +443,7 @@ class CupertinoTextField extends StatefulWidget {
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
-       // TODO(a14n): uncomment when issue is fixed, https://github.com/dart-lang/sdk/issues/43407
-       assert(obscuringCharacter != null/* && obscuringCharacter.length == 1*/),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
