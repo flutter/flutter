@@ -22,7 +22,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals hide logger, printStatus, printTrace, printError, processManager, processUtils, fs;
+import '../globals.dart' as globals hide logger, printStatus, printTrace, printError, processManager, processUtils, fs, artifacts;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
@@ -216,13 +216,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required Logger logger,
     @required ProcessManager processManager,
     @required FileSystem fileSystem,
+    @required Artifacts artifacts,
   }) : _logger = logger,
        _fileSystem = fileSystem,
+       _artifacts = artifacts,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
+  final Artifacts _artifacts;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -387,8 +390,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!buildInfo.androidGradleDaemon) {
       command.add('--no-daemon');
     }
-    if (globals.artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
       final Directory localEngineRepo = _getLocalEngineRepo(
         engineOutPath: localEngineArtifacts.engineOutPath,
         androidBuildInfo: androidBuildInfo,
@@ -704,8 +707,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
 
-    if (globals.artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
       final Directory localEngineRepo = _getLocalEngineRepo(
         engineOutPath: localEngineArtifacts.engineOutPath,
         androidBuildInfo: androidBuildInfo,
@@ -1137,16 +1140,6 @@ Directory _getLocalEngineRepo({
   final String abi = _getAbiByLocalEnginePath(engineOutPath);
   final Directory localEngineRepo = fileSystem.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
-
-  // Remove the local engine repo before the tool exits.
-  shutdownHooks.addShutdownHook(() {
-      if (localEngineRepo.existsSync()) {
-        localEngineRepo.deleteSync(recursive: true);
-      }
-    },
-    ShutdownStage.CLEANUP,
-  );
-
   final String buildMode = androidBuildInfo.buildInfo.modeName;
   final String artifactVersion = _getLocalArtifactVersion(
     fileSystem.path.join(
