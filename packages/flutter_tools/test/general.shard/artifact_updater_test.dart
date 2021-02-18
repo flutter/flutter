@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_http_client.dart';
@@ -25,7 +25,7 @@ final Platform testPlatform = FakePlatform(environment: const <String, String>{}
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -48,7 +48,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -78,7 +78,7 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
     'x-goog-hash header is present but missing an md5 entry', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
 
@@ -109,7 +109,7 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
     'x-goog-hash header is present', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
 
@@ -144,7 +144,7 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
     'x-goog-hash header is present and throw if it does not match', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
 
@@ -184,7 +184,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will restart the status ticker if it needs to retry the download', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = StdoutLogger(
       terminal: Terminal.test(supportsColor: true),
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will re-attempt on a non-200 response', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
 
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will tool exit on an ArgumentError from http client with base url override', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -272,7 +272,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will rethrow on an ArgumentError from http client without base url override', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -298,7 +298,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will re-download a file if unzipping fails', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -322,7 +322,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -346,7 +346,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will bail with a tool exit if unzipping fails more than twice', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -370,7 +370,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -394,7 +394,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater can download a tar archive', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -416,7 +416,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will delete downloaded files if they exist.', () async {
-    final MockOperatingSystemUtils operatingSystemUtils = MockOperatingSystemUtils();
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -441,8 +441,8 @@ void main() {
   });
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
-  MockOperatingSystemUtils({this.windows = false});
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  FakeOperatingSystemUtils({this.windows = false});
 
   int failures = 0;
   final bool windows;
