@@ -221,7 +221,7 @@ class AndroidApk extends ApplicationPackage {
     File apkFile;
 
     if (androidProject.isUsingGradle) {
-      apkFile = await getGradleAppOut(androidProject);
+      apkFile = await getGradleAppOut(androidProject, globals.flutterUsage);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
