@@ -160,7 +160,7 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, equals(<TestUsageEvent>[
+      expect(usage.events, <TestUsageEvent>[
         const TestUsageEvent(
           'tool-command-result',
           'dummy',
@@ -172,7 +172,7 @@ void main() {
           label: 'success',
           value: 10,
         ),
-      ]));
+      ]);
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -186,7 +186,7 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(usage.events, equals(<TestUsageEvent>[
+      expect(usage.events, <TestUsageEvent>[
         const TestUsageEvent(
           'tool-command-result',
           'dummy',
@@ -198,7 +198,7 @@ void main() {
           label: 'warning',
           value: 10,
         ),
-      ]));
+      ]);
     });
 
     testUsingCommandContext('reports command that results in failure', () async {
@@ -249,7 +249,7 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        expect(usage.events, equals(<TestUsageEvent>[
+        expect(usage.events, <TestUsageEvent>[
           const TestUsageEvent(
             'tool-command-result',
             'dummy',
@@ -261,7 +261,7 @@ void main() {
             label: 'fail',
             value: 10,
           ),
-        ]));
+        ]);
       }
     });
 
@@ -350,7 +350,7 @@ void main() {
         signalController.add(mockSignal);
         await completer.future;
 
-        expect(usage.events, equals(<TestUsageEvent>[
+        expect(usage.events, <TestUsageEvent>[
           const TestUsageEvent(
             'tool-command-result',
             'dummy',
@@ -362,7 +362,7 @@ void main() {
             label: 'killed',
             value: 10,
           ),
-        ]));
+        ]);
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
