@@ -1634,22 +1634,22 @@ void main() {
   testWidgets('DataRow renders splash correctly when pressed the right edge of the row', (WidgetTester tester) async {
     Widget buildTable() {
       return DataTable(
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text('Column1'),
-            ),
-            DataColumn(
-              label: Text('Column2'),
-            ),
-          ],
-          rows: const <DataRow>[
-            DataRow(
-              cells: <DataCell>[
-                DataCell(Text('Content1')),
-                DataCell(Text('Content2')),
-              ],
-            ),
-          ]
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Column1'),
+          ),
+          DataColumn(
+            label: Text('Column2'),
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Content1')),
+              DataCell(Text('Content2')),
+            ],
+          ),
+        ]
       );
     }
 
