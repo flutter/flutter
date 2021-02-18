@@ -5,6 +5,7 @@
 #include "vulkan_surface_pool.h"
 
 #include <lib/fdio/directory.h>
+#include <lib/zx/process.h>
 
 #include <algorithm>
 #include <string>
@@ -13,6 +14,20 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter_runner {
+
+static std::string GetCurrentProcessName() {
+  char name[ZX_MAX_NAME_LEN];
+  zx_status_t status =
+      zx::process::self()->get_property(ZX_PROP_NAME, name, sizeof(name));
+  return status == ZX_OK ? std::string(name) : std::string();
+}
+
+static zx_koid_t GetCurrentProcessId() {
+  zx_info_handle_basic_t info;
+  zx_status_t status = zx::process::self()->get_info(
+      ZX_INFO_HANDLE_BASIC, &info, sizeof(info), nullptr, nullptr);
+  return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
+}
 
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
                                      sk_sp<GrDirectContext> context,
@@ -23,6 +38,8 @@ VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
   zx_status_t status = fdio_service_connect(
       "/svc/fuchsia.sysmem.Allocator",
       sysmem_allocator_.NewRequest().TakeChannel().release());
+  sysmem_allocator_->SetDebugClientInfo(GetCurrentProcessName(),
+                                        GetCurrentProcessId());
   FML_DCHECK(status != ZX_OK);
 }
 
