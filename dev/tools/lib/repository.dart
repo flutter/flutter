@@ -28,6 +28,7 @@ class Remote {
   }) : _name = name;
 
   final RemoteName _name;
+
   /// The name of the remote.
   String get name {
     switch (_name) {
@@ -205,6 +206,15 @@ abstract class Repository {
     );
   }
 
+  /// List commits in reverse chronological order.
+  List<String> revList(List<String> args) {
+    return git.getOutput(
+      <String>['rev-list', ...args],
+      'rev-list with args ${args.join(' ')}',
+      workingDirectory: checkoutDirectory.path,
+    ).trim().split('\n');
+  }
+
   /// Look up the commit for [ref].
   String reverseParse(String ref) {
     final String revisionHash = git.getOutput(
@@ -319,7 +329,8 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     String name = 'framework',
-    Remote fetchRemote = const Remote(name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
+    Remote fetchRemote = const Remote(
+        name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
     String initialRef = FrameworkRepository.defaultBranch,
@@ -351,7 +362,8 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://$upstreamPath/'),
+      fetchRemote:
+          Remote(name: RemoteName.upstream, url: 'file://$upstreamPath/'),
       localUpstream: false,
       useExistingCheckout: useExistingCheckout,
     );
@@ -376,7 +388,8 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
+      fetchRemote: Remote(
+          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
       useExistingCheckout: useExistingCheckout,
     );
   }
@@ -439,7 +452,8 @@ class EngineRepository extends Repository {
     this.checkouts, {
     String name = 'engine',
     String initialRef = EngineRepository.defaultBranch,
-    Remote fetchRemote = const Remote(name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
+    Remote fetchRemote = const Remote(
+        name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
     bool localUpstream = false,
     bool useExistingCheckout = false,
     Remote pushRemote,
@@ -469,7 +483,8 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      fetchRemote: Remote(name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
+      fetchRemote: Remote(
+          name: RemoteName.upstream, url: 'file://${checkoutDirectory.path}/'),
       useExistingCheckout: useExistingCheckout,
     );
   }

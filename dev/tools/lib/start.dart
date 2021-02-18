@@ -259,26 +259,23 @@ class StartCommand extends Command<void> {
       (String cp) => repository.reverseParse(cp),
     ).toList();
 
+    if (cherrypicks.isEmpty) {
+      return sortedCherrypicks;
+    }
+
     final String branchPoint = repository.branchPoint(
       upstreamRef,
       releaseRef,
     );
-    final io.ProcessResult result = processManager.runSync(
-      <String>[
-        'git',
-        'rev-list',
-        '--ancestry-path',
-        '$branchPoint..upstreamRef',
-      ],
-    );
-
-    if (result.exitCode != 0) {
-      throw ConductorException('`git rev-list` invocation failed!\n${result.stderr}');
-    }
 
     // `git rev-list` returns newest first, so reverse this list
-    final List<String> upstreamRevlist = (result.stdout as String).split('\n').reversed.toList();
+    final List<String> upstreamRevlist = repository.revList(<String>[
+      '--ancestry-path',
+      '$branchPoint..$upstreamRef',
+    ]).reversed.toList();
 
+    stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
+    stdio.printStatus('validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
     for (final String upstreamRevision in upstreamRevlist) {
       if (validatedCherrypicks.contains(upstreamRevision)) {
         validatedCherrypicks.remove(upstreamRevision);
