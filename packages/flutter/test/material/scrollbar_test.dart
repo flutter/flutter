@@ -1183,8 +1183,8 @@ void main() {
 
     // Try to drag the thumb down.
     const double scrollAmount = 10.0;
-    await tester.pumpAndSettle();
     final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.up();
@@ -1251,8 +1251,8 @@ void main() {
 
     // Try to drag the thumb down.
     const double scrollAmount = 10.0;
-    await tester.pumpAndSettle();
     final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.up();
