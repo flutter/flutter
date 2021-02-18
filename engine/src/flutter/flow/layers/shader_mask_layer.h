@@ -16,6 +16,12 @@ class ShaderMaskLayer : public ContainerLayer {
                   const SkRect& mask_rect,
                   SkBlendMode blend_mode);
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+  void Diff(DiffContext* context, const Layer* old_layer) override;
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 
   void Paint(PaintContext& context) const override;

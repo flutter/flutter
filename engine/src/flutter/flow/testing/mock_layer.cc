@@ -18,6 +18,25 @@ MockLayer::MockLayer(SkPath path,
       fake_needs_system_composite_(fake_needs_system_composite),
       fake_reads_surface_(fake_reads_surface) {}
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+bool MockLayer::IsReplacing(DiffContext* context, const Layer* layer) const {
+  // Similar to PictureLayer, only return true for identical mock layers;
+  // That way ContainerLayer::DiffChildren can properly detect mock layer
+  // insertion
+  auto mock_layer = layer->as_mock_layer();
+  return mock_layer && mock_layer->fake_paint_ == fake_paint_ &&
+         mock_layer->fake_paint_path_ == fake_paint_path_;
+}
+
+void MockLayer::Diff(DiffContext* context, const Layer* old_layer) {
+  DiffContext::AutoSubtreeRestore subtree(context);
+  context->AddLayerBounds(fake_paint_path_.getBounds());
+  context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
+}
+
+#endif
+
 void MockLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   parent_mutators_ = context->mutators_stack;
   parent_matrix_ = matrix;

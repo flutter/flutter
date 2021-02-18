@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/transform_layer.h"
 
+#include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -223,6 +224,116 @@ TEST_F(TransformLayerTest, NestedSeparated) {
                  MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                  MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
+
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+using TransformLayerLayerDiffTest = DiffContextTest;
+
+TEST_F(TransformLayerLayerDiffTest, Transform) {
+  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto m1 = std::make_shared<MockLayer>(path1);
+
+  auto transform1 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(10, 10));
+  transform1->Add(m1);
+
+  MockLayerTree t1;
+  t1.root()->Add(transform1);
+
+  auto damage = DiffLayerTree(t1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 60, 60));
+
+  auto transform2 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(20, 20));
+  transform2->Add(m1);
+  transform2->AssignOldLayer(transform1.get());
+
+  MockLayerTree t2;
+  t2.root()->Add(transform2);
+
+  damage = DiffLayerTree(t2, t1);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 70, 70));
+
+  auto transform3 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(20, 20));
+  transform3->Add(m1);
+  transform3->AssignOldLayer(transform2.get());
+
+  MockLayerTree t3;
+  t3.root()->Add(transform3);
+
+  damage = DiffLayerTree(t3, t2);
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeEmpty());
+}
+
+TEST_F(TransformLayerLayerDiffTest, TransformNested) {
+  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto m1 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
+  auto m2 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
+  auto m3 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
+
+  auto transform1 = std::make_shared<TransformLayer>(SkMatrix::Scale(2.0, 2.0));
+
+  auto transform1_1 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(10, 10));
+  transform1_1->Add(m1);
+  transform1->Add(transform1_1);
+
+  auto transform1_2 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(100, 100));
+  transform1_2->Add(m2);
+  transform1->Add(transform1_2);
+
+  auto transform1_3 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(200, 200));
+  transform1_3->Add(m3);
+  transform1->Add(transform1_3);
+
+  MockLayerTree l1;
+  l1.root()->Add(transform1);
+
+  auto damage = DiffLayerTree(l1, MockLayerTree());
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(20, 20, 500, 500));
+
+  auto transform2 = std::make_shared<TransformLayer>(SkMatrix::Scale(2.0, 2.0));
+
+  auto transform2_1 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(10, 10));
+  transform2_1->Add(m1);
+  transform2_1->AssignOldLayer(transform1_1.get());
+  transform2->Add(transform2_1);
+
+  // Offset 1px from transform1_2 so that they're not the same
+  auto transform2_2 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(100, 101));
+  transform2_2->Add(m2);
+  transform2_2->AssignOldLayer(transform1_2.get());
+  transform2->Add(transform2_2);
+
+  auto transform2_3 =
+      std::make_shared<TransformLayer>(SkMatrix::Translate(200, 200));
+  transform2_3->Add(m3);
+  transform2_3->AssignOldLayer(transform1_3.get());
+  transform2->Add(transform2_3);
+
+  MockLayerTree l2;
+  l2.root()->Add(transform2);
+
+  damage = DiffLayerTree(l2, l1);
+
+  // transform2 has not transform1 assigned as old layer, so it should be
+  // invalidated completely
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(20, 20, 500, 500));
+
+  // now diff the tree properly, the only difference being transform2_2 and
+  // transform_2_1
+  transform2->AssignOldLayer(transform1.get());
+  damage = DiffLayerTree(l2, l1);
+
+  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 200, 300, 302));
+}
+
+#endif
 
 }  // namespace testing
 }  // namespace flutter

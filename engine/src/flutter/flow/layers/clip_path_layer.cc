@@ -16,6 +16,26 @@ ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
   FML_DCHECK(clip_behavior != Clip::none);
 }
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+void ClipPathLayer::Diff(DiffContext* context, const Layer* old_layer) {
+  DiffContext::AutoSubtreeRestore subtree(context);
+  auto* prev = static_cast<const ClipPathLayer*>(old_layer);
+  if (!context->IsSubtreeDirty()) {
+    FML_DCHECK(prev);
+    if (clip_behavior_ != prev->clip_behavior_ ||
+        clip_path_ != prev->clip_path_) {
+      context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
+    }
+  }
+  if (context->PushCullRect(clip_path_.getBounds())) {
+    DiffChildren(context, prev);
+  }
+  context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
+}
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
 void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "ClipPathLayer::Preroll");
 

@@ -23,6 +23,38 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
       path_(path),
       clip_behavior_(clip_behavior) {}
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+void PhysicalShapeLayer::Diff(DiffContext* context, const Layer* old_layer) {
+  DiffContext::AutoSubtreeRestore subtree(context);
+  auto* prev = static_cast<const PhysicalShapeLayer*>(old_layer);
+  if (!context->IsSubtreeDirty()) {
+    FML_DCHECK(prev);
+    if (color_ != prev->color_ || shadow_color_ != prev->shadow_color_ ||
+        elevation_ != prev->elevation() || path_ != prev->path_ ||
+        clip_behavior_ != prev->clip_behavior_) {
+      context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
+    }
+  }
+
+  SkRect bounds;
+  if (elevation_ == 0) {
+    bounds = path_.getBounds();
+  } else {
+    bounds = ComputeShadowBounds(path_.getBounds(), elevation_,
+                                 context->frame_device_pixel_ratio());
+  }
+
+  context->AddLayerBounds(bounds);
+
+  if (context->PushCullRect(bounds)) {
+    DiffChildren(context, prev);
+  }
+  context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
+}
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");

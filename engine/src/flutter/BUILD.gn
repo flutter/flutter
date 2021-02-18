@@ -28,6 +28,10 @@ config("config") {
   if (is_fuchsia && flutter_enable_legacy_fuchsia_embedder) {
     defines = [ "LEGACY_FUCHSIA_EMBEDDER" ]
   }
+
+  if (is_debug) {
+    defines = [ "FLUTTER_ENABLE_DIFF_CONTEXT" ]
+  }
 }
 
 config("export_dynamic_symbols") {

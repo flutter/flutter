@@ -26,6 +26,20 @@ class PerformanceOverlayLayer : public Layer {
                                               const std::string& label_prefix,
                                               const std::string& font_path);
 
+#ifdef FLUTTER_ENABLE_DIFF_CONTEXT
+
+  bool IsReplacing(DiffContext* context, const Layer* layer) const override {
+    return layer->as_performance_overlay_layer() != nullptr;
+  }
+
+  void Diff(DiffContext* context, const Layer* old_layer) override;
+
+  const PerformanceOverlayLayer* as_performance_overlay_layer() const override {
+    return this;
+  }
+
+#endif  // FLUTTER_ENABLE_DIFF_CONTEXT
+
   explicit PerformanceOverlayLayer(uint64_t options,
                                    const char* font_path = nullptr);
 
