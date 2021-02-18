@@ -154,6 +154,7 @@ executable("flutter_desktop_darwin_unittests") {
 
   if (shell_enable_metal) {
     sources += [
+      "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
       "framework/Source/FlutterMetalRendererTest.mm",
       "framework/Source/FlutterMetalSurfaceManagerTest.mm",
     ]
@@ -177,6 +178,10 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/testing:testing_lib",
     "//third_party/ocmock:ocmock",
   ]
+
+  if (shell_enable_metal) {
+    deps += [ "//flutter/shell/platform/darwin/graphics" ]
+  }
 }
 
 copy("copy_dylib") {

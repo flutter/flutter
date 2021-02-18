@@ -1099,6 +1099,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBacki
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStoreData.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderExternalTextureUnittests.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
@@ -1152,6 +1153,10 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_engine.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_engine.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_metal.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_metal.mm
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_resolver.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_resolver.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_view.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_view.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_view_embedder.cc
@@ -1187,6 +1192,7 @@ FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_platform
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_root_layer_only.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_noxform.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/dpr_xform.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/external_texture_metal.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient_metal.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/gradient_xform.png

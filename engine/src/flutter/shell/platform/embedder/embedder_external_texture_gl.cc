@@ -5,6 +5,10 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
 
@@ -23,11 +27,11 @@ void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
                                       bool freeze,
                                       GrDirectContext* context,
                                       const SkSamplingOptions& sampling) {
-  if (auto image = external_texture_callback_(
-          Id(),                                           //
-          context,                                        //
-          SkISize::Make(bounds.width(), bounds.height())  //
-          )) {
+  if (auto image =
+          ResolveTexture(Id(),                                           //
+                         context,                                        //
+                         SkISize::Make(bounds.width(), bounds.height())  //
+                         )) {
     last_image_ = image;
   }
 
@@ -38,6 +42,55 @@ void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
       canvas.drawImage(last_image_, bounds.x(), bounds.y(), sampling, nullptr);
     }
   }
+}
+
+sk_sp<SkImage> EmbedderExternalTextureGL::ResolveTexture(
+    int64_t texture_id,
+    GrDirectContext* context,
+    const SkISize& size) {
+  std::unique_ptr<FlutterOpenGLTexture> texture =
+      external_texture_callback_(texture_id, size.width(), size.height());
+
+  if (!texture) {
+    return nullptr;
+  }
+
+  GrGLTextureInfo gr_texture_info = {texture->target, texture->name,
+                                     texture->format};
+
+  size_t width = size.width();
+  size_t height = size.height();
+
+  if (texture->width != 0 && texture->height != 0) {
+    width = texture->width;
+    height = texture->height;
+  }
+
+  GrBackendTexture gr_backend_texture(width, height, GrMipMapped::kNo,
+                                      gr_texture_info);
+  SkImage::TextureReleaseProc release_proc = texture->destruction_callback;
+  auto image =
+      SkImage::MakeFromTexture(context,                   // context
+                               gr_backend_texture,        // texture handle
+                               kTopLeft_GrSurfaceOrigin,  // origin
+                               kRGBA_8888_SkColorType,    // color type
+                               kPremul_SkAlphaType,       // alpha type
+                               nullptr,                   // colorspace
+                               release_proc,       // texture release proc
+                               texture->user_data  // texture release context
+      );
+
+  if (!image) {
+    // In case Skia rejects the image, call the release proc so that
+    // embedders can perform collection of intermediates.
+    if (release_proc) {
+      release_proc(texture->user_data);
+    }
+    FML_LOG(ERROR) << "Could not create external texture->";
+    return nullptr;
+  }
+
+  return image;
 }
 
 // |flutter::Texture|

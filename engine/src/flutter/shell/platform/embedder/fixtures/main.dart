@@ -555,6 +555,24 @@ void render_gradient() {
 }
 
 @pragma('vm:entry-point')
+void render_texture() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Size size = Size(800.0, 600.0);
+
+    SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0.0, 0.0);
+
+    builder.addTexture(/*textureId*/1, width: size.width, height: size.height);
+
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
 void render_gradient_on_non_root_backing_store() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     Size size = Size(800.0, 600.0);
