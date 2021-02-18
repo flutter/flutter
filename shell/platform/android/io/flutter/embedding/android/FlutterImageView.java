@@ -23,8 +23,6 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * Paints a Flutter UI provided by an {@link android.media.ImageReader} onto a {@link
@@ -41,7 +39,6 @@ import java.util.Queue;
 @TargetApi(19)
 public class FlutterImageView extends View implements RenderSurface {
   @NonNull private ImageReader imageReader;
-  @Nullable private Queue<Image> imageQueue;
   @Nullable private Image currentImage;
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
@@ -56,13 +53,6 @@ public class FlutterImageView extends View implements RenderSurface {
 
   /** The kind of surface. */
   private SurfaceKind kind;
-
-  /**
-   * The number of images acquired from the current {@link android.media.ImageReader} that are
-   * waiting to be painted. This counter is decreased after calling {@link
-   * android.media.Image#close()}.
-   */
-  private int pendingImages = 0;
 
   /** Whether the view is attached to the Flutter render. */
   private boolean isAttachedToFlutterRenderer = false;
@@ -89,7 +79,6 @@ public class FlutterImageView extends View implements RenderSurface {
     super(context, null);
     this.imageReader = imageReader;
     this.kind = kind;
-    this.imageQueue = new LinkedList<>();
     init();
   }
 
@@ -155,22 +144,14 @@ public class FlutterImageView extends View implements RenderSurface {
       return;
     }
     setAlpha(0.0f);
-    // Drop the lastest image as it shouldn't render this image if this view is
+    // Drop the latest image as it shouldn't render this image if this view is
     // attached to the renderer again.
     acquireLatestImage();
     // Clear drawings.
     currentBitmap = null;
 
-    // Close the images in the queue and clear the queue.
-    for (final Image image : imageQueue) {
-      image.close();
-    }
-    imageQueue.clear();
     // Close and clear the current image if any.
-    if (currentImage != null) {
-      currentImage.close();
-      currentImage = null;
-    }
+    closeCurrentImage();
     invalidate();
     isAttachedToFlutterRenderer = false;
   }
@@ -188,26 +169,20 @@ public class FlutterImageView extends View implements RenderSurface {
     if (!isAttachedToFlutterRenderer) {
       return false;
     }
-    // There's no guarantee that the image will be closed before the next call to
-    // `acquireLatestImage()`. For example, the device may not produce new frames if
-    // it's in sleep mode, so the calls to `invalidate()` will be queued up
+    // 1. `acquireLatestImage()` may return null if no new image is available.
+    // 2. There's no guarantee that `onDraw()` is called after `invalidate()`.
+    // For example, the device may not produce new frames if it's in sleep mode
+    // or some special Android devices so the calls to `invalidate()` queued up
     // until the device produces a new frame.
-    //
-    // While the engine will also stop producing frames, there is a race condition.
-    //
-    // To avoid exceptions, check if a new image can be acquired.
-    int imageOpenedCount = imageQueue.size();
-    if (currentImage != null) {
-      imageOpenedCount++;
+    // 3. While the engine will also stop producing frames, there is a race condition.
+    final Image newImage = imageReader.acquireLatestImage();
+    if (newImage != null) {
+      // Only close current image after acquiring valid new image
+      closeCurrentImage();
+      currentImage = newImage;
+      invalidate();
     }
-    if (imageOpenedCount < imageReader.getMaxImages()) {
-      final Image image = imageReader.acquireLatestImage();
-      if (image != null) {
-        imageQueue.add(image);
-      }
-    }
-    invalidate();
-    return !imageQueue.isEmpty();
+    return newImage != null;
   }
 
   /** Creates a new image reader with the provided size. */
@@ -218,29 +193,33 @@ public class FlutterImageView extends View implements RenderSurface {
     if (width == imageReader.getWidth() && height == imageReader.getHeight()) {
       return;
     }
-    imageQueue.clear();
-    currentImage = null;
+
+    // Close resources.
+    closeCurrentImage();
+
     // Close all the resources associated with the image reader,
     // including the images.
     imageReader.close();
     // Image readers cannot be resized once created.
     imageReader = createImageReader(width, height);
-    pendingImages = 0;
   }
 
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-
-    if (!imageQueue.isEmpty()) {
-      if (currentImage != null) {
-        currentImage.close();
-      }
-      currentImage = imageQueue.poll();
+    if (currentImage != null) {
       updateCurrentBitmap();
     }
     if (currentBitmap != null) {
       canvas.drawBitmap(currentBitmap, 0, 0, null);
+    }
+  }
+
+  private void closeCurrentImage() {
+    // Close and clear the current image if any.
+    if (currentImage != null) {
+      currentImage.close();
+      currentImage = null;
     }
   }
 
