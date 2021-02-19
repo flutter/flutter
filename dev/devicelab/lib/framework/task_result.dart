@@ -7,6 +7,13 @@ import 'dart:io';
 
 /// A result of running a single task.
 class TaskResult {
+  TaskResult.empty()
+       : succeeded = true,
+        data = null,
+        detailFiles = null,
+        benchmarkScoreKeys = null,
+        message = 'No tests run';
+
   /// Constructs a successful result.
   TaskResult.success(this.data, {
     this.benchmarkScoreKeys = const <String>[],
