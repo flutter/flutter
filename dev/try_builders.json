@@ -445,7 +445,7 @@
          "name": "Windows web_tool_tests",
          "repo": "flutter",
          "task_name": "win_web_tool_tests",
-         "enabled":false
+         "enabled":true
       }
    ]
 }
