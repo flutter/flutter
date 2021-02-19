@@ -7,12 +7,10 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -21,8 +19,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -31,11 +28,7 @@ void main() {
   group('gradle build', () {
     BufferLogger logger;
     TestUsage testUsage;
-    MockAndroidSdk mockAndroidSdk;
-    MockAndroidStudio mockAndroidStudio;
-    FakePlatform android;
     FileSystem fileSystem;
-    Cache cache;
     FakeProcessManager processManager;
 
     setUp(() {
@@ -43,36 +36,7 @@ void main() {
       logger = BufferLogger.test();
       testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
-      mockAndroidSdk = MockAndroidSdk();
-      mockAndroidStudio = MockAndroidStudio();
-      android = fakePlatform('android');
-      when(mockAndroidSdk.directory).thenReturn(fileSystem.directory('irrelevant'));
-
-      final Directory rootDirectory = fileSystem.currentDirectory;
-      cache = Cache.test(
-        rootOverride: rootDirectory,
-        fileSystem: fileSystem,
-      );
       Cache.flutterRoot = '';
-
-      final Directory gradleWrapperDirectory = rootDirectory
-          .childDirectory('bin')
-          .childDirectory('cache')
-          .childDirectory('artifacts')
-          .childDirectory('gradle_wrapper');
-      gradleWrapperDirectory.createSync(recursive: true);
-      gradleWrapperDirectory
-          .childFile('gradlew')
-          .writeAsStringSync('irrelevant');
-      gradleWrapperDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .createSync(recursive: true);
-      gradleWrapperDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .childFile('gradle-wrapper.jar')
-        .writeAsStringSync('irrelevant');
     });
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
@@ -82,10 +46,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-         '/android/gradlew',
+         'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -158,13 +124,6 @@ void main() {
           parameters: <String, String>{},
         ),
       ));
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
@@ -174,10 +133,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -191,7 +152,7 @@ void main() {
       ));
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -265,13 +226,6 @@ void main() {
           parameters: <String, String>{},
         ),
       ));
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
@@ -281,10 +235,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -357,13 +313,6 @@ void main() {
           parameters: <String, String>{},
         ),
       ));
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
@@ -373,10 +322,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -422,12 +373,6 @@ void main() {
       },
       throwsA(isA<ProcessException>()));
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('logs success event after a successful retry', () async {
@@ -437,10 +382,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -454,7 +401,7 @@ void main() {
       ));
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -524,13 +471,6 @@ void main() {
         ),
       ));
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('performs code size analysis and sends analytics', () async {
@@ -540,10 +480,16 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(
+          environment: <String, String>{
+            'HOME': '/home',
+          },
+        ),
       );
        processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
@@ -622,13 +568,6 @@ void main() {
           'apk',
         ),
       ));
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('Can retry gradle build with plugins built as AARs', () async {
@@ -638,10 +577,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -655,7 +596,7 @@ void main() {
       ));
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -738,13 +679,6 @@ void main() {
         ),
       ));
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      Usage: () => testUsage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
@@ -754,10 +688,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
@@ -807,12 +743,6 @@ void main() {
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
@@ -822,10 +752,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-           '/.android/gradlew',
+           'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -874,13 +806,6 @@ void main() {
         isFalse,
       );
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
@@ -890,10 +815,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/.android/gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -935,13 +862,6 @@ void main() {
           buildNumber: '1.0',
         ), throwsToolExit(exitCode: 108, message: 'Gradle task assembleAarRelease failed with exit code 108.'));
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
@@ -951,10 +871,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0',
           '-Plocal-engine-build-mode=release',
@@ -1014,13 +936,6 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
@@ -1030,10 +945,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0',
           '-Plocal-engine-build-mode=release',
@@ -1093,13 +1010,6 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
@@ -1109,10 +1019,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0',
           '-Plocal-engine-build-mode=release',
@@ -1172,13 +1084,6 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
@@ -1188,10 +1093,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0',
           '-Plocal-engine-build-mode=release',
@@ -1251,13 +1158,6 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
@@ -1267,10 +1167,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
-          '/android/gradlew',
+          'gradlew',
           '-q',
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -1311,13 +1213,6 @@ void main() {
         );
       }, throwsToolExit());
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
@@ -1327,10 +1222,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/.android/gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -1401,13 +1298,6 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
@@ -1417,10 +1307,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_arm64'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/.android/gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -1491,13 +1383,6 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
@@ -1507,10 +1392,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x86'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-          '/.android/gradlew',
+          'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -1581,13 +1468,6 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
@@ -1597,10 +1477,12 @@ void main() {
         fileSystem: fileSystem,
         artifacts: Artifacts.test(localEngine: 'out/android_x64'),
         usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
-         '/.android/gradlew',
+         'gradlew',
           '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
@@ -1671,24 +1553,13 @@ void main() {
         'flutter_embedding_release-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.pom'
       ), exists);
       expect(processManager.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      AndroidStudio: () => mockAndroidStudio,
-      Cache: () => cache,
-      Platform: () => android,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
     });
   });
 }
 
-FakePlatform fakePlatform(String name) {
-  return FakePlatform(
-    environment: <String, String>{'HOME': '/path/to/home'},
-    operatingSystem: name,
-    stdoutSupportsAnsi: false,
-  );
+class FakeGradleUtils extends Fake implements GradleUtils {
+  @override
+  String getExecutable(FlutterProject project) {
+    return 'gradlew';
+  }
 }
-
-class MockAndroidSdk extends Mock implements AndroidSdk {}
-class MockAndroidStudio extends Mock implements AndroidStudio {}

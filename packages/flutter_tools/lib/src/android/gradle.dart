@@ -15,6 +15,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -22,7 +23,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals hide logger, printStatus, printTrace, printError, processManager, processUtils, fs, artifacts, flutterUsage;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
@@ -165,10 +165,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required FileSystem fileSystem,
     @required Artifacts artifacts,
     @required Usage usage,
+    @required GradleUtils gradleUtils,
+    @required Platform platform,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
+       _gradleUtils = gradleUtils,
+       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
@@ -176,6 +180,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final Usage _usage;
+  final GradleUtils _gradleUtils;
+  final FileSystemUtils _fileSystemUtils;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -186,36 +192,32 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required String outputDirectoryPath,
     @required String buildNumber,
   }) async {
-    try {
-      Directory outputDirectory =
-        _fileSystem.directory(outputDirectoryPath ?? project.android.buildDirectory);
-      if (project.isModule) {
-        // Module projects artifacts are located in `build/host`.
-        outputDirectory = outputDirectory.childDirectory('host');
-      }
-      for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
-        await buildGradleAar(
-          project: project,
-          androidBuildInfo: androidBuildInfo,
-          target: target,
-          outputDirectory: outputDirectory,
-          buildNumber: buildNumber,
-        );
-      }
-      printHowToConsumeAar(
-        buildModes: androidBuildInfo
-          .map<String>((AndroidBuildInfo androidBuildInfo) {
-            return androidBuildInfo.buildInfo.modeName;
-          }).toSet(),
-        androidPackage: project.manifest.androidPackage,
-        repoDirectory: getRepoDirectory(outputDirectory),
-        buildNumber: buildNumber,
-        logger: _logger,
-        fileSystem: _fileSystem,
-      );
-    } finally {
-      globals.androidSdk?.reinitialize();
+    Directory outputDirectory =
+      _fileSystem.directory(outputDirectoryPath ?? project.android.buildDirectory);
+    if (project.isModule) {
+      // Module projects artifacts are located in `build/host`.
+      outputDirectory = outputDirectory.childDirectory('host');
     }
+    for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
+      await buildGradleAar(
+        project: project,
+        androidBuildInfo: androidBuildInfo,
+        target: target,
+        outputDirectory: outputDirectory,
+        buildNumber: buildNumber,
+      );
+    }
+    printHowToConsumeAar(
+      buildModes: androidBuildInfo
+        .map<String>((AndroidBuildInfo androidBuildInfo) {
+          return androidBuildInfo.buildInfo.modeName;
+        }).toSet(),
+      androidPackage: project.manifest.androidPackage,
+      repoDirectory: getRepoDirectory(outputDirectory),
+      buildNumber: buildNumber,
+      logger: _logger,
+      fileSystem: _fileSystem,
+    );
   }
 
   /// Builds the APK.
@@ -225,17 +227,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   }) async {
-    try {
-      await buildGradleApp(
-        project: project,
-        androidBuildInfo: androidBuildInfo,
-        target: target,
-        isBuildingBundle: false,
-        localGradleErrors: gradleErrors,
-      );
-    } finally {
-      globals.androidSdk?.reinitialize();
-    }
+    await buildGradleApp(
+      project: project,
+      androidBuildInfo: androidBuildInfo,
+      target: target,
+      isBuildingBundle: false,
+      localGradleErrors: gradleErrors,
+    );
   }
 
   /// Builds the App Bundle.
@@ -245,17 +243,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   }) async {
-    try {
-      await buildGradleApp(
-        project: project,
-        androidBuildInfo: androidBuildInfo,
-        target: target,
-        isBuildingBundle: true,
-        localGradleErrors: gradleErrors,
-      );
-    } finally {
-      globals.androidSdk?.reinitialize();
-    }
+    await buildGradleApp(
+      project: project,
+      androidBuildInfo: androidBuildInfo,
+      target: target,
+      isBuildingBundle: true,
+      localGradleErrors: gradleErrors,
+    );
   }
 
   /// Builds an app.
@@ -283,7 +277,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     assert(target != null);
     assert(isBuildingBundle != null);
     assert(localGradleErrors != null);
-    assert(globals.androidSdk != null);
 
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_usage);
@@ -327,7 +320,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
 
     final List<String> command = <String>[
-      globals.gradleUtils.getExecutable(project),
+      _gradleUtils.getExecutable(project),
     ];
     if (_logger.isVerbose) {
       command.add('-Pverbose=true');
@@ -565,9 +558,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       precompilerTrace: precompilerTrace,
       kind: kind,
     );
-    final File outputFile = globals.fsUtils.getUniqueFile(
+    final File outputFile = _fileSystemUtils.getUniqueFile(
       _fileSystem
-        .directory(globals.fsUtils.homeDirPath)
+        .directory(_fileSystemUtils.homeDirPath)
         .childDirectory('.flutter-devtools'), '$kind-code-size-analysis', 'json',
     )
       ..writeAsStringSync(jsonEncode(output));
@@ -605,7 +598,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     assert(target != null);
     assert(androidBuildInfo != null);
     assert(outputDirectory != null);
-    assert(globals.androidSdk != null);
 
     final FlutterManifest manifest = project.manifest;
     if (!manifest.isModule && !manifest.isPlugin) {
@@ -628,7 +620,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'aar_init_script.gradle',
     );
     final List<String> command = <String>[
-      globals.gradleUtils.getExecutable(project),
+      _gradleUtils.getExecutable(project),
       '-I=$initScript',
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
