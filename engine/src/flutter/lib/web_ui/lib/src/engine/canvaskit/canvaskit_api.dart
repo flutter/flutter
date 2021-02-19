@@ -742,7 +742,7 @@ class SkImage {
     Float32List? matrix, // 3x3 matrix
   );
   external Uint8List readPixels(int srcX, int srcY, SkImageInfo imageInfo);
-  external SkData encodeToData();
+  external Uint8List? encodeToBytes();
   external bool isAliasOf(SkImage other);
   external bool isDeleted();
 }
