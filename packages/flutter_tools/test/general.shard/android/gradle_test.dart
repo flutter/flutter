@@ -315,24 +315,22 @@ include ':app'
   });
 
   group('Gradle local.properties', () {
-    MockLocalEngineArtifacts mockArtifacts;
-    MockProcessManager mockProcessManager;
+    Artifacts localEngineArtifacts;
     FakePlatform android;
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      mockArtifacts = MockLocalEngineArtifacts();
-      mockProcessManager = MockProcessManager();
+      localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
       android = fakePlatform('android');
     });
 
     void testUsingAndroidContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
+        Artifacts: () => localEngineArtifacts,
         Platform: () => android,
         FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     }
 
@@ -349,14 +347,6 @@ include ':app'
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(
-        Artifact.flutterFramework,
-        platform: TargetPlatform.android_arm,
-        mode: anyNamed('mode'),
-        environmentType: anyNamed('environmentType'),
-      )).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'android_arm'));
-
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
@@ -1042,5 +1032,3 @@ class FakeGradleUtils extends GradleUtils {
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFlutterProject extends Mock implements FlutterProject {}
-class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
-class MockProcessManager extends Mock implements ProcessManager {}
