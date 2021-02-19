@@ -823,7 +823,10 @@ class AndroidProject extends FlutterProjectPlatform {
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// Returns true if the current version of the Gradle plugin is supported.
-  bool isSupportedVersion() {
+  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
+  bool _isSupportedVersion;
+
+  bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
     final File plugin = hostAppGradleRoot.childFile(
         fileSystem.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
