@@ -285,7 +285,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     assert(localGradleErrors != null);
     assert(globals.androidSdk != null);
 
-    if (!project.android.isSupportedVersion()) {
+    if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_usage);
     }
     final Directory buildDirectory = project.android.buildDirectory;
