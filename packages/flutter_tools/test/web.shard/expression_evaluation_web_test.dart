@@ -67,7 +67,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await checkStaticScope(_flutter);
     await cleanProject();
-  });
+ }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76398
 
   testWithoutContext('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
