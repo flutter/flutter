@@ -231,8 +231,8 @@ void SceneBuilder::pushShaderMask(Dart_Handle layer_handle,
                                   fml::RefPtr<EngineLayer> oldLayer) {
   SkRect rect = SkRect::MakeLTRB(maskRectLeft, maskRectTop, maskRectRight,
                                  maskRectBottom);
-  // TODO: should this come from the caller?
-  SkFilterQuality quality = kNone_SkFilterQuality;
+  // TODO: Quality come from the caller
+  SkFilterQuality quality = kLow_SkFilterQuality;
   auto layer = std::make_shared<flutter::ShaderMaskLayer>(
       shader->shader(quality), rect, static_cast<SkBlendMode>(blendMode));
   PushLayer(layer);
