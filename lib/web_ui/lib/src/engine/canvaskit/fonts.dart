@@ -22,15 +22,8 @@ class SkiaFontCollection {
   /// Fonts which have been registered and loaded.
   final List<_RegisteredFont> _registeredFonts = <_RegisteredFont>[];
 
-  /// Fallback fonts which have been registered and loaded.
-  final List<_RegisteredFont> _registeredFallbackFonts = <_RegisteredFont>[];
-
   final Map<String, List<SkTypeface>> familyToTypefaceMap =
       <String, List<SkTypeface>>{};
-
-  final List<String> globalFontFallbacks = <String>['Roboto'];
-
-  final Map<String, int> _fontFallbackCounts = <String, int>{};
 
   Future<void> ensureFontsLoaded() async {
     await _loadFonts();
@@ -49,7 +42,7 @@ class SkiaFontCollection {
           .add(font.typeface);
     }
 
-    for (var font in _registeredFallbackFonts) {
+    for (var font in FontFallbackData.instance.registeredFallbackFonts) {
       fontProvider!.registerFont(font.bytes, font.family);
       familyToTypefaceMap
           .putIfAbsent(font.family, () => <SkTypeface>[])
@@ -151,15 +144,6 @@ class SkiaFontCollection {
     return _RegisteredFont(bytes, family);
   }
 
-  void registerFallbackFont(String family, Uint8List bytes) {
-    _fontFallbackCounts.putIfAbsent(family, () => 0);
-    int fontFallbackTag = _fontFallbackCounts[family]!;
-    _fontFallbackCounts[family] = _fontFallbackCounts[family]! + 1;
-    String countedFamily = '$family $fontFallbackTag';
-    _registeredFallbackFonts.add(_RegisteredFont(bytes, countedFamily));
-    globalFontFallbacks.add(countedFamily);
-  }
-
   String? _readActualFamilyName(Uint8List bytes) {
     final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData([bytes])!;
     String? actualFamily = tmpFontMgr.getFamilyName(0);
@@ -172,14 +156,6 @@ class SkiaFontCollection {
     return fetchResult
         .arrayBuffer()
         .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
-  }
-
-  /// Resets the fallback fonts. Used for tests.
-  void debugResetFallbackFonts() {
-    _registeredFallbackFonts.clear();
-    globalFontFallbacks.clear();
-    globalFontFallbacks.add('Roboto');
-    _fontFallbackCounts.clear();
   }
 
   SkFontMgr? skFontMgr;
@@ -201,5 +177,9 @@ class _RegisteredFont {
 
   _RegisteredFont(this.bytes, this.family)
       : this.typeface =
-            canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes);
+            canvasKit.FontMgr.RefDefault().MakeTypefaceFromData(bytes) {
+    // This is a hack which causes Skia to cache the decoded font.
+    SkFont skFont = SkFont(typeface);
+    skFont.getGlyphBounds([0], null, null);
+  }
 }

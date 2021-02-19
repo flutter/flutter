@@ -5,48 +5,108 @@
 // @dart = 2.12
 part of engine;
 
-/// Whether or not "Noto Sans Symbols" and "Noto Color Emoji" fonts have been
-/// downloaded. We download these as fallbacks when no other font covers the
-/// given code units.
-bool _registeredSymbolsAndEmoji = false;
+/// Global static font fallback data.
+class FontFallbackData {
+  static FontFallbackData get instance => _instance;
+  static FontFallbackData _instance = FontFallbackData();
 
-final Set<int> codeUnitsWithNoKnownFont = <int>{};
+  /// Resets the fallback font data.
+  ///
+  /// After calling this method fallback fonts will be loaded from scratch.
+  ///
+  /// Used for tests.
+  static void debugReset() {
+    _instance = FontFallbackData();
+  }
 
-Future<void> findFontsForMissingCodeunits(List<int> codeunits) async {
-  _ensureNotoFontTreeCreated();
+  /// Whether or not "Noto Sans Symbols" and "Noto Color Emoji" fonts have been
+  /// downloaded. We download these as fallbacks when no other font covers the
+  /// given code units.
+  bool registeredSymbolsAndEmoji = false;
+
+  /// Code units that no known font has a glyph for.
+  final Set<int> codeUnitsWithNoKnownFont = <int>{};
+
+  /// Code units which are known to be covered by at least one fallback font.
+  final Set<int> knownCoveredCodeUnits = <int>{};
+
+  /// Index of all font families by code unit range.
+  final IntervalTree<NotoFont> notoTree = createNotoFontTree();
+
+  static IntervalTree<NotoFont> createNotoFontTree() {
+    Map<NotoFont, List<CodeunitRange>> ranges =
+        <NotoFont, List<CodeunitRange>>{};
+
+    for (NotoFont font in _notoFonts) {
+      // TODO(yjbanov): instead of mutating the font tree during reset, it's
+      //                better to construct an immutable tree of resolved fonts
+      //                pointing back to the original NotoFont objects. Then
+      //                resetting the tree would be a matter of reconstructing
+      //                the new resolved tree.
+      font.reset();
+      for (CodeunitRange range in font.approximateUnicodeRanges) {
+        ranges.putIfAbsent(font, () => <CodeunitRange>[]).add(range);
+      }
+    }
+
+    return IntervalTree<NotoFont>.createFromRanges(ranges);
+  }
+
+  /// Fallback fonts which have been registered and loaded.
+  final List<_RegisteredFont> registeredFallbackFonts = <_RegisteredFont>[];
+
+  final List<String> globalFontFallbacks = <String>['Roboto'];
+
+  final Map<String, int> fontFallbackCounts = <String, int>{};
+
+  void registerFallbackFont(String family, Uint8List bytes) {
+    fontFallbackCounts.putIfAbsent(family, () => 0);
+    int fontFallbackTag = fontFallbackCounts[family]!;
+    fontFallbackCounts[family] = fontFallbackCounts[family]! + 1;
+    String countedFamily = '$family $fontFallbackTag';
+    registeredFallbackFonts.add(_RegisteredFont(bytes, countedFamily));
+    globalFontFallbacks.add(countedFamily);
+  }
+}
+
+Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
+  final FontFallbackData data = FontFallbackData.instance;
 
   // If all of the code units are known to have no Noto Font which covers them,
   // then just give up. We have already logged a warning.
-  if (codeunits.every((u) => codeUnitsWithNoKnownFont.contains(u))) {
+  if (codeUnits.every((u) => data.codeUnitsWithNoKnownFont.contains(u))) {
     return;
   }
   Set<NotoFont> fonts = <NotoFont>{};
   Set<int> coveredCodeUnits = <int>{};
   Set<int> missingCodeUnits = <int>{};
-  for (int codeunit in codeunits) {
-    List<NotoFont> fontsForUnit = _notoTree!.intersections(codeunit);
+  for (int codeUnit in codeUnits) {
+    List<NotoFont> fontsForUnit = data.notoTree.intersections(codeUnit);
     fonts.addAll(fontsForUnit);
     if (fontsForUnit.isNotEmpty) {
-      coveredCodeUnits.add(codeunit);
+      coveredCodeUnits.add(codeUnit);
     } else {
-      missingCodeUnits.add(codeunit);
+      missingCodeUnits.add(codeUnit);
     }
   }
-
-  fonts = findMinimumFontsForCodeunits(coveredCodeUnits, fonts);
 
   for (NotoFont font in fonts) {
     await font.ensureResolved();
   }
 
+  // The call to `findMinimumFontsForCodeUnits` will remove all code units that
+  // were matched by `fonts` from `unmatchedCodeUnits`.
+  final Set<int> unmatchedCodeUnits = Set<int>.from(coveredCodeUnits);
+  fonts = findMinimumFontsForCodeUnits(unmatchedCodeUnits, fonts);
+
   Set<_ResolvedNotoSubset> resolvedFonts = <_ResolvedNotoSubset>{};
-  for (int codeunit in coveredCodeUnits) {
+  for (int codeUnit in coveredCodeUnits) {
     for (NotoFont font in fonts) {
       if (font.resolvedFont == null) {
         // We failed to resolve the font earlier.
         continue;
       }
-      resolvedFonts.addAll(font.resolvedFont!.tree.intersections(codeunit));
+      resolvedFonts.addAll(font.resolvedFont!.tree.intersections(codeUnit));
     }
   }
 
@@ -54,8 +114,12 @@ Future<void> findFontsForMissingCodeunits(List<int> codeunits) async {
     notoDownloadQueue.add(resolvedFont);
   }
 
-  if (missingCodeUnits.isNotEmpty && !notoDownloadQueue.isPending) {
-    if (!_registeredSymbolsAndEmoji) {
+  // We looked through the Noto font tree and didn't find any font families
+  // covering some code units, or we did find a font family, but when we
+  // downloaded the fonts we found that they actually didn't cover them. So
+  // we try looking them up in the symbols and emojis fonts.
+  if (missingCodeUnits.isNotEmpty || unmatchedCodeUnits.isNotEmpty) {
+    if (!data.registeredSymbolsAndEmoji) {
       _registerSymbolsAndEmoji();
     } else {
       if (!notoDownloadQueue.isPending) {
@@ -63,7 +127,7 @@ Future<void> findFontsForMissingCodeunits(List<int> codeunits) async {
             'Could not find a set of Noto fonts to display all missing '
             'characters. Please add a font asset for the missing characters.'
             ' See: https://flutter.dev/docs/cookbook/design/fonts');
-        codeUnitsWithNoKnownFont.addAll(missingCodeUnits);
+        data.codeUnitsWithNoKnownFont.addAll(missingCodeUnits);
       }
     }
   }
@@ -168,6 +232,11 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
     }
   }
 
+  if (rangesMap.isEmpty) {
+    html.window.console.warn('Parsed Google Fonts CSS was empty: $css');
+    return null;
+  }
+
   IntervalTree<_ResolvedNotoSubset> tree =
       IntervalTree<_ResolvedNotoSubset>.createFromRanges(rangesMap);
 
@@ -178,10 +247,11 @@ _ResolvedNotoFont? _makeResolvedNotoFontFromCss(String css, String name) {
 /// try the Symbols and Emoji fonts. We don't know the exact range of code units
 /// that are covered by these fonts, so we download them and hope for the best.
 Future<void> _registerSymbolsAndEmoji() async {
-  if (_registeredSymbolsAndEmoji) {
+  final FontFallbackData data = FontFallbackData.instance;
+  if (data.registeredSymbolsAndEmoji) {
     return;
   }
-  _registeredSymbolsAndEmoji = true;
+  data.registeredSymbolsAndEmoji = true;
   const String symbolsUrl =
       'https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols';
   const String emojiUrl =
@@ -226,45 +296,47 @@ Future<void> _registerSymbolsAndEmoji() async {
   }
 }
 
-/// Finds the minimum set of fonts which covers all of the [codeunits].
+/// Finds the minimum set of fonts which covers all of the [codeUnits].
+///
+/// Removes all code units covered by [fonts] from [codeUnits]. The code
+/// units remaining in the [codeUnits] set after calling this function do not
+/// have a font that covers them and can be omitted next time to avoid
+/// searching for fonts unnecessarily.
 ///
 /// Since set cover is NP-complete, we approximate using a greedy algorithm
-/// which finds the font which covers the most codeunits. If multiple CJK
-/// fonts match the same number of codeunits, we choose one based on the user's
+/// which finds the font which covers the most code units. If multiple CJK
+/// fonts match the same number of code units, we choose one based on the user's
 /// locale.
-Set<NotoFont> findMinimumFontsForCodeunits(
-    Iterable<int> codeunits, Set<NotoFont> fonts) {
-  assert(fonts.isNotEmpty || codeunits.isEmpty);
-  List<int> unmatchedCodeunits = List<int>.from(codeunits);
+Set<NotoFont> findMinimumFontsForCodeUnits(
+    Set<int> codeUnits, Set<NotoFont> fonts) {
+  assert(fonts.isNotEmpty || codeUnits.isEmpty);
   Set<NotoFont> minimumFonts = <NotoFont>{};
   List<NotoFont> bestFonts = <NotoFont>[];
 
   String language = html.window.navigator.language;
 
-  // This is guaranteed to terminate because [codeunits] is a list of fonts
-  // which we've already determined are covered by [fonts].
-  while (unmatchedCodeunits.isNotEmpty) {
-    int maxCodeunitsCovered = 0;
+  while (codeUnits.isNotEmpty) {
+    int maxCodeUnitsCovered = 0;
     bestFonts.clear();
     for (var font in fonts) {
-      int codeunitsCovered = 0;
-      for (int codeunit in unmatchedCodeunits) {
-        if (font.matchesCodeunit(codeunit)) {
-          codeunitsCovered++;
+      int codeUnitsCovered = 0;
+      for (int codeUnit in codeUnits) {
+        if (font.resolvedFont?.tree.containsDeep(codeUnit) == true) {
+          codeUnitsCovered++;
         }
       }
-      if (codeunitsCovered > maxCodeunitsCovered) {
+      if (codeUnitsCovered > maxCodeUnitsCovered) {
         bestFonts.clear();
         bestFonts.add(font);
-        maxCodeunitsCovered = codeunitsCovered;
-      } else if (codeunitsCovered == maxCodeunitsCovered) {
+        maxCodeUnitsCovered = codeUnitsCovered;
+      } else if (codeUnitsCovered == maxCodeUnitsCovered) {
         bestFonts.add(font);
       }
     }
-    assert(
-      bestFonts.isNotEmpty,
-      'Did not find any fonts that cover code units: ${unmatchedCodeunits.join(', ')}',
-    );
+    if (maxCodeUnitsCovered == 0) {
+      // Fonts cannot cover remaining unmatched characters.
+      break;
+    }
     // If the list of best fonts are all CJK fonts, choose the best one based
     // on locale. Otherwise just choose the first font.
     NotoFont bestFont = bestFonts.first;
@@ -294,48 +366,22 @@ Set<NotoFont> findMinimumFontsForCodeunits(
         }
       }
     }
-    unmatchedCodeunits
-        .removeWhere((codeunit) => bestFont.matchesCodeunit(codeunit));
-    minimumFonts.add(bestFont);
+    codeUnits.removeWhere((codeUnit) {
+      return bestFont.resolvedFont!.tree.containsDeep(codeUnit);
+    });
+    minimumFonts.addAll(bestFonts);
   }
   return minimumFonts;
 }
 
-void _ensureNotoFontTreeCreated() {
-  if (_notoTree != null) {
-    return;
-  }
-
-  Map<NotoFont, List<CodeunitRange>> ranges =
-      <NotoFont, List<CodeunitRange>>{};
-
-  for (NotoFont font in _notoFonts) {
-    for (CodeunitRange range in font.unicodeRanges) {
-      ranges.putIfAbsent(font, () => <CodeunitRange>[]).add(range);
-    }
-  }
-
-  _notoTree = IntervalTree<NotoFont>.createFromRanges(ranges);
-}
-
 class NotoFont {
   final String name;
-  final List<CodeunitRange> unicodeRanges;
+  final List<CodeunitRange> approximateUnicodeRanges;
 
   Completer<void>? _decodingCompleter;
-
   _ResolvedNotoFont? resolvedFont;
 
-  NotoFont(this.name, this.unicodeRanges);
-
-  bool matchesCodeunit(int codeunit) {
-    for (CodeunitRange range in unicodeRanges) {
-      if (range.contains(codeunit)) {
-        return true;
-      }
-    }
-    return false;
-  }
+  NotoFont(this.name, this.approximateUnicodeRanges);
 
   String get googleFontsCssUrl =>
       'https://fonts.googleapis.com/css2?family=${name.replaceAll(' ', '+')}';
@@ -354,6 +400,11 @@ class NotoFont {
         await _decodingCompleter!.future;
       }
     }
+  }
+
+  void reset() {
+    resolvedFont = null;
+    _decodingCompleter = null;
   }
 }
 
@@ -505,7 +556,7 @@ List<NotoFont> _notoFonts = <NotoFont>[
     CodeunitRange(2304, 2431),
     CodeunitRange(7376, 7414),
     CodeunitRange(7416, 7417),
-    CodeunitRange(8204, 9205),
+    CodeunitRange(8204, 8205),
     CodeunitRange(8360, 8360),
     CodeunitRange(8377, 8377),
     CodeunitRange(9676, 9676),
@@ -623,48 +674,88 @@ class FallbackFontDownloadQueue {
   NotoDownloader downloader = NotoDownloader();
 
   final Set<_ResolvedNotoSubset> downloadedSubsets = <_ResolvedNotoSubset>{};
-  final Set<_ResolvedNotoSubset> pendingSubsets = <_ResolvedNotoSubset>{};
+  final Map<String, _ResolvedNotoSubset> pendingSubsets =
+      <String, _ResolvedNotoSubset>{};
 
-  bool get isPending => pendingSubsets.isNotEmpty;
+  bool get isPending => pendingSubsets.isNotEmpty || _fontsLoading != null;
+
+  Future<void>? _fontsLoading;
+  bool get debugIsLoadingFonts => _fontsLoading != null;
+
+  Future<void> debugWhenIdle() async {
+    if (assertionsEnabled) {
+      await Future<void>.delayed(Duration.zero);
+      while (isPending) {
+        if (_fontsLoading != null) {
+          await _fontsLoading;
+        }
+        if (pendingSubsets.isNotEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          if (pendingSubsets.isEmpty) {
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+          }
+        }
+      }
+    } else {
+      throw UnimplementedError();
+    }
+  }
 
   void add(_ResolvedNotoSubset subset) {
-    if (downloadedSubsets.contains(subset) || pendingSubsets.contains(subset)) {
+    if (downloadedSubsets.contains(subset) ||
+        pendingSubsets.containsKey(subset.url)) {
       return;
     }
     bool firstInBatch = pendingSubsets.isEmpty;
-    pendingSubsets.add(subset);
+    pendingSubsets[subset.url] = subset;
     if (firstInBatch) {
       Timer.run(startDownloads);
     }
   }
 
   Future<void> startDownloads() async {
-    List<Future<void>> downloads = <Future>[];
-    for (_ResolvedNotoSubset subset in pendingSubsets) {
-      downloads.add(Future<void>(() async {
+    final Map<String, Future<void>> downloads = <String, Future<void>>{};
+    final Map<String, Uint8List> downloadedData = <String, Uint8List>{};
+    for (_ResolvedNotoSubset subset in pendingSubsets.values) {
+      downloads[subset.url] = Future<void>(() async {
         ByteBuffer buffer;
         try {
-          buffer = await downloader.downloadAsBytes(subset.url, debugDescription: subset.family);
+          buffer = await downloader.downloadAsBytes(subset.url,
+              debugDescription: subset.family);
         } catch (e) {
+          pendingSubsets.remove(subset.url);
           html.window.console
               .warn('Failed to load font ${subset.family} at ${subset.url}');
           html.window.console.warn(e);
           return;
         }
-
-        final Uint8List bytes = buffer.asUint8List();
-        skiaFontCollection.registerFallbackFont(subset.family, bytes);
-
-        pendingSubsets.remove(subset);
         downloadedSubsets.add(subset);
-        if (pendingSubsets.isEmpty) {
-          await skiaFontCollection.ensureFontsLoaded();
-          sendFontChangeMessage();
-        }
-      }));
+        downloadedData[subset.url] = buffer.asUint8List();
+      });
     }
 
-    await Future.wait<void>(downloads);
+    await Future.wait<void>(downloads.values);
+
+    // Register fallback fonts in a predictable order. Otherwise, the fonts
+    // change their precedence depending on the download order causing
+    // visual differences between app reloads.
+    final List<String> downloadOrder =
+        (downloadedData.keys.toList()..sort()).reversed.toList();
+    for (String url in downloadOrder) {
+      final _ResolvedNotoSubset subset = pendingSubsets.remove(url)!;
+      final Uint8List bytes = downloadedData[url]!;
+      FontFallbackData.instance.registerFallbackFont(subset.family, bytes);
+      if (pendingSubsets.isEmpty) {
+        _fontsLoading = skiaFontCollection.ensureFontsLoaded();
+        try {
+          await _fontsLoading;
+        } finally {
+          _fontsLoading = null;
+        }
+        sendFontChangeMessage();
+      }
+    }
+
     if (pendingSubsets.isNotEmpty) {
       await startDownloads();
     }
@@ -672,6 +763,7 @@ class FallbackFontDownloadQueue {
 }
 
 class NotoDownloader {
+  int get debugActiveDownloadCount => _debugActiveDownloadCount;
   int _debugActiveDownloadCount = 0;
 
   /// Returns a future that resolves when there are no pending downloads.
@@ -733,15 +825,6 @@ class NotoDownloader {
     }
     return result;
   }
-}
-
-/// The Noto font interval tree.
-IntervalTree<NotoFont>? _notoTree;
-
-/// Returns the tree of Noto fonts for tests.
-IntervalTree<NotoFont> get debugNotoTree {
-  _ensureNotoFontTreeCreated();
-  return _notoTree!;
 }
 
 FallbackFontDownloadQueue notoDownloadQueue = FallbackFontDownloadQueue();
