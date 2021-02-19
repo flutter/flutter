@@ -117,7 +117,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
-        '--total-hards=$totalShards',
+        '--total-shards=$totalShards',
       if (shardIndex != null)
         '--shard-index=$shardIndex',
     ];

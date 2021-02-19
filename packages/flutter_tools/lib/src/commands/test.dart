@@ -275,16 +275,16 @@ class TestCommand extends FlutterCommand {
       ];
     }
 
-    final int shardIndex = int.tryParse(stringArg('shard-index'));
-    if (shardIndex == null || shardIndex < 0 || !shardIndex.isFinite) {
+    final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
+    if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
-          'Could not parse --shard-index argument. It must be an integer greater than -1.');
+          'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int totalShards = int.tryParse(stringArg('total-shards'));
-    if (totalShards == null || totalShards <= 0 || !totalShards.isFinite) {
+    final int totalShards = int.tryParse(stringArg('total-shards') ?? '');
+    if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
-          'Could not parse --total-shards argument. It must be an integer greater than zero.');
+          'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
     }
 
     if (totalShards != null) {
