@@ -4,25 +4,27 @@
 
 #import <Foundation/Foundation.h>
 
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h"
 
 /**
  * Used to bridge FlutterTexture object and handle the texture copy request the
  * Flutter engine.
  */
-@interface FlutterExternalTextureGL : NSObject <FlutterMacOSExternalTexture>
+@interface FlutterExternalTextureMetal : NSObject <FlutterMacOSExternalTexture>
 
 /**
  * Initializes a texture adapter with |texture|.
  */
-- (nonnull instancetype)initWithFlutterTexture:(nonnull id<FlutterTexture>)texture;
+- (nonnull instancetype)initWithFlutterTexture:(nonnull id<FlutterTexture>)texture
+                            darwinMetalContext:(nonnull FlutterDarwinContextMetal*)context;
 
 /**
  * Accepts texture buffer copy request from the Flutter engine.
  * When the user side marks the textureID as available, the Flutter engine will
- * callback to this method and ask for populate the |openGLTexture| object,
+ * callback to this method and ask for populate the |metalTexture| object,
  * such as the texture type and the format of the pixel buffer and the texture object.
  */
-- (BOOL)populateTexture:(nonnull FlutterOpenGLTexture*)openGLTexture;
+- (BOOL)populateTexture:(nonnull FlutterMetalExternalTexture*)metalTexture;
 
 @end

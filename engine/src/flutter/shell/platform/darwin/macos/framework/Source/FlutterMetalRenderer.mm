@@ -6,6 +6,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -23,16 +24,27 @@ static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* 
   return [metalRenderer present:texture->texture_id];
 }
 
+static bool OnAcquireExternalTexture(FlutterEngine* engine,
+                                     int64_t textureIdentifier,
+                                     size_t width,
+                                     size_t height,
+                                     FlutterMetalExternalTexture* metalTexture) {
+  FlutterMetalRenderer* metalRenderer = reinterpret_cast<FlutterMetalRenderer*>(engine.renderer);
+  return [metalRenderer populateTextureWithIdentifier:textureIdentifier metalTexture:metalTexture];
+}
+
 #pragma mark - FlutterMetalRenderer implementation
 
 @implementation FlutterMetalRenderer {
   __weak FlutterEngine* _engine;
 
   FlutterView* _flutterView;
+
+  FlutterDarwinContextMetal* _darwinMetalContext;
 }
 
 - (instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine {
-  self = [super init];
+  self = [super initWithDelegate:self engine:flutterEngine];
   if (self) {
     _engine = flutterEngine;
 
@@ -47,6 +59,9 @@ static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* 
       NSLog(@"Could not create Metal command queue.");
       return nil;
     }
+
+    _darwinMetalContext = [[FlutterDarwinContextMetal alloc] initWithMTLDevice:_device
+                                                                  commandQueue:_commandQueue];
   }
   return self;
 }
@@ -65,6 +80,8 @@ static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* 
           reinterpret_cast<FlutterMetalTextureCallback>(OnGetNextDrawable),
       .metal.present_drawable_callback =
           reinterpret_cast<FlutterMetalPresentCallback>(OnPresentDrawable),
+      .metal.external_texture_frame_callback =
+          reinterpret_cast<FlutterMetalTextureFrameCallback>(OnAcquireExternalTexture),
   };
   return config;
 }
@@ -92,20 +109,17 @@ static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* 
 
 #pragma mark - FlutterTextureRegistrar methods.
 
-- (int64_t)registerTexture:(id<FlutterTexture>)texture {
-  NSAssert(NO, @"External textures aren't yet supported when using Metal on macOS."
-                " See: https://github.com/flutter/flutter/issues/73826");
-  return 0;
+- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
+                         metalTexture:(FlutterMetalExternalTexture*)textureOut {
+  id<FlutterMacOSExternalTexture> texture = [self getTextureWithID:textureID];
+  FlutterExternalTextureMetal* metalTexture =
+      reinterpret_cast<FlutterExternalTextureMetal*>(texture);
+  return [metalTexture populateTexture:textureOut];
 }
 
-- (void)textureFrameAvailable:(int64_t)textureID {
-  NSAssert(NO, @"External textures aren't yet supported when using Metal on macOS."
-                " See: https://github.com/flutter/flutter/issues/73826");
-}
-
-- (void)unregisterTexture:(int64_t)textureID {
-  NSAssert(NO, @"External textures aren't yet supported when using Metal on macOS."
-                " See: https://github.com/flutter/flutter/issues/73826");
+- (id<FlutterMacOSExternalTexture>)onRegisterTexture:(id<FlutterTexture>)texture {
+  return [[FlutterExternalTextureMetal alloc] initWithFlutterTexture:texture
+                                                  darwinMetalContext:_darwinMetalContext];
 }
 
 @end
