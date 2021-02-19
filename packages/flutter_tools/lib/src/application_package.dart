@@ -217,7 +217,7 @@ class AndroidApk extends ApplicationPackage {
   }) async {
     File apkFile;
 
-    if (androidProject.isUsingGradle && androidProject.isSupportedVersion()) {
+    if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
       apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
