@@ -221,5 +221,5 @@ void main() {
       await evaluateComplexExpressions(_flutter);
       await cleanProject();
     }, skip: 'https://github.com/dart-lang/sdk/issues/41480');
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76398
 }
