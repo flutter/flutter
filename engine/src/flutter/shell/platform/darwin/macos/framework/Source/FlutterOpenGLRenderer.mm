@@ -57,17 +57,13 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   // The context provided to the Flutter engine for resource loading.
   NSOpenGLContext* _resourceContext;
 
-  // A mapping of textureID to internal FlutterExternalTextureGL adapter.
-  NSMutableDictionary<NSNumber*, FlutterExternalTextureGL*>* _textures;
-
   __weak FlutterEngine* _flutterEngine;
 }
 
 - (instancetype)initWithFlutterEngine:(FlutterEngine*)flutterEngine {
-  self = [super init];
+  self = [super initWithDelegate:self engine:flutterEngine];
   if (self) {
     _flutterEngine = flutterEngine;
-    _textures = [[NSMutableDictionary alloc] init];
   }
   return self;
 }
@@ -136,37 +132,13 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID
                         openGLTexture:(FlutterOpenGLTexture*)openGLTexture {
-  return [_textures[@(textureID)] populateTexture:openGLTexture];
+  id<FlutterMacOSExternalTexture> texture = [self getTextureWithID:textureID];
+  FlutterExternalTextureGL* glTexture = reinterpret_cast<FlutterExternalTextureGL*>(texture);
+  return [glTexture populateTexture:openGLTexture];
 }
 
-- (int64_t)registerTexture:(id<FlutterTexture>)texture {
-  FlutterExternalTextureGL* externalTexture =
-      [[FlutterExternalTextureGL alloc] initWithFlutterTexture:texture];
-  int64_t textureID = [externalTexture textureID];
-  BOOL success = [_flutterEngine registerTextureWithID:textureID];
-  if (success) {
-    _textures[@(textureID)] = externalTexture;
-    return textureID;
-  } else {
-    NSLog(@"Unable to register the texture with id: %lld.", textureID);
-    return 0;
-  }
-}
-
-- (void)textureFrameAvailable:(int64_t)textureID {
-  BOOL success = [_flutterEngine markTextureFrameAvailable:textureID];
-  if (!success) {
-    NSLog(@"Unable to mark texture with id %lld as available.", textureID);
-  }
-}
-
-- (void)unregisterTexture:(int64_t)textureID {
-  bool success = [_flutterEngine unregisterTextureWithID:textureID];
-  if (success) {
-    [_textures removeObjectForKey:@(textureID)];
-  } else {
-    NSLog(@"Unable to unregister texture with id: %lld.", textureID);
-  }
+- (id<FlutterMacOSExternalTexture>)onRegisterTexture:(id<FlutterTexture>)texture {
+  return [[FlutterExternalTextureGL alloc] initWithFlutterTexture:texture];
 }
 
 - (FlutterRendererConfig)createRendererConfig {

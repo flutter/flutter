@@ -5,13 +5,14 @@
 #import <Cocoa/Cocoa.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
 /**
  * Rendering backend agnostic FlutterRendererConfig provider to be used by the embedder API.
  */
-@protocol FlutterRenderer <FlutterTextureRegistry>
+@protocol FlutterRenderer <FlutterTextureRegistry, FlutterTextureRegistrarDelegate>
 
 /**
  * Intializes the renderer with the given FlutterEngine.
