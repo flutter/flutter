@@ -17,6 +17,7 @@ class IntervalTree<T> {
   /// When the interval tree is queried, it will return a list of [T]s which
   /// have a range which contains the point.
   factory IntervalTree.createFromRanges(Map<T, List<CodeunitRange>> rangesMap) {
+    assert(rangesMap.isNotEmpty);
     // Get a list of all the ranges ordered by start index.
     final List<IntervalTreeNode<T>> intervals = <IntervalTreeNode<T>>[];
     rangesMap.forEach((T key, List<CodeunitRange> rangeList) {
@@ -24,6 +25,7 @@ class IntervalTree<T> {
         intervals.add(IntervalTreeNode<T>(key, range.start, range.end));
       }
     });
+    assert(intervals.isNotEmpty);
 
     intervals
         .sort((IntervalTreeNode<T> a, IntervalTreeNode<T> b) => a.low - b.low);
@@ -80,6 +82,11 @@ class IntervalTree<T> {
     root.searchForPoint(x, results);
     return results;
   }
+
+  /// Whether this tree contains at least one interval that includes [x].
+  bool containsDeep(int x) {
+    return root.containsDeep(x);
+  }
 }
 
 class IntervalTreeNode<T> {
@@ -103,8 +110,33 @@ class IntervalTreeNode<T> {
     }
   }
 
-  bool contains(int x) {
+  /// Whether this node contains [x].
+  ///
+  /// Does not recursively check whether child nodes contain [x].
+  bool containsShallow(int x) {
     return low <= x && x <= high;
+  }
+
+  /// Whether this sub-tree contains [x].
+  ///
+  /// Recursively checks whether child nodes contain [x].
+  bool containsDeep(int x) {
+    if (x > computedHigh) {
+      // x is above the highest possible value stored in this subtree.
+      // Don't bother checking intervals.
+      return false;
+    }
+    if (this.containsShallow(x)) {
+      return true;
+    }
+    if (left?.containsDeep(x) == true) {
+      return true;
+    }
+    if (x < low) {
+      // The right tree can't possible contain x. Don't bother checking.
+      return false;
+    }
+    return right?.containsDeep(x) == true;
   }
 
   // Searches the tree rooted at this node for all T containing [x].
@@ -113,7 +145,7 @@ class IntervalTreeNode<T> {
       return;
     }
     left?.searchForPoint(x, result);
-    if (this.contains(x)) {
+    if (this.containsShallow(x)) {
       result.add(value);
     }
     if (x < low) {

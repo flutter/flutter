@@ -1643,6 +1643,8 @@ class SkTypeface {}
 class SkFont {
   external SkFont(SkTypeface typeface);
   external Uint8List getGlyphIDs(String text);
+  external void getGlyphBounds(
+      List<int> glyphs, SkPaint? paint, Uint8List? output);
 }
 
 @JS()
