@@ -28,6 +28,10 @@ FlutterGLCompositor::FlutterGLCompositor(FlutterViewController* view_controller,
 
 bool FlutterGLCompositor::CreateBackingStore(const FlutterBackingStoreConfig* config,
                                              FlutterBackingStore* backing_store_out) {
+  if (!view_controller_) {
+    return false;
+  }
+
   CGSize size = CGSizeMake(config->size.width, config->size.height);
 
   if (!frame_started_) {
@@ -134,6 +138,10 @@ void FlutterGLCompositor::StartFrame() {
 }
 
 size_t FlutterGLCompositor::CreateCALayer() {
+  if (!view_controller_) {
+    return 0;
+  }
+
   // FlutterGLCompositor manages the lifecycle of content layers.
   // The id for a CALayer starts at 0 and increments by 1 for
   // any given frame.

@@ -60,7 +60,7 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
   // A mapping of textureID to internal FlutterExternalTextureGL adapter.
   NSMutableDictionary<NSNumber*, FlutterExternalTextureGL*>* _textures;
 
-  FlutterEngine* _flutterEngine;
+  __weak FlutterEngine* _flutterEngine;
 }
 
 - (instancetype)initWithFlutterEngine:(FlutterEngine*)flutterEngine {
