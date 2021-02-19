@@ -92,7 +92,7 @@ Future<TaskResult> runTask(
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
-      ...taskArgs,
+      ...?taskArgs,
     ],
     environment: <String, String>{
       if (deviceId != null)
