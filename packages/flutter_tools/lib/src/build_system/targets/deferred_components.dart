@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'package:meta/meta.dart';
+
 import '../../android/deferred_components_setup_validator.dart';
 import '../../base/deferred_component.dart';
 import '../../build_info.dart';
@@ -32,7 +34,9 @@ enum DeferredComponentsSetupValidatorTask {
   clearOutputDir,
 }
 
-// Rule that copies split aot library files to the intermediate dirs of each deferred component.
+/// Creates a [DeferredComponentsSetupValidator, executes the configured
+/// [tasks], and displays the validator output to the developer if
+/// changes are recommended.
 class DeferredComponentsSetupValidatorTarget extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   DeferredComponentsSetupValidatorTarget({
@@ -42,13 +46,21 @@ class DeferredComponentsSetupValidatorTarget extends Target {
     this.exitOnFail = true,
     String name = 'deferred_components_setup_validator',
   }) : _name = name;
+
+  /// The list of tasks that this target will execute.
+  ///
+  /// Each task corresponds to a method in [DeferredComponentsSetupValidator].
   final List<DeferredComponentsSetupValidatorTask> tasks;
 
   /// The [AndroidAotDeferredComponentsBundle] derived target instances this rule depends on.
   final CompositeTarget dependency;
 
+  /// The title of the [DeferredComponentsSetupValidator] that is
+  /// displayed to the developer when logging results.
   final String title;
 
+  /// Whether to exit the tool if a recommended change is found by the
+  /// [DeferredComponentsSetupValidator].
   final bool exitOnFail;
 
   /// The name of the produced Android ABI.
@@ -60,7 +72,7 @@ class DeferredComponentsSetupValidatorTarget extends Target {
     for (final Target target in dependency.dependencies) {
       if (target.dependencies.isNotEmpty) {
         abis.add(getNameForAndroidArch(
-          getAndroidArchForName(getNameForTargetPlatform((target.dependencies[0] as AndroidAotBundle).targetPlatform))));
+          getAndroidArchForName(getNameForTargetPlatform((target.dependencies.first as AndroidAotBundle).dependency.targetPlatform))));
       }
     }
     return abis;
@@ -71,9 +83,7 @@ class DeferredComponentsSetupValidatorTarget extends Target {
   final String _name;
 
   @override
-  List<Source> get inputs {
-    return const <Source>[];
-  }
+  List<Source> get inputs => const <Source>[];
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -86,6 +96,7 @@ class DeferredComponentsSetupValidatorTarget extends Target {
   @override
   List<Target> get dependencies => dependency == null ? <Target>[] : <Target>[dependency];
 
+  @visibleForTesting
   DeferredComponentsSetupValidator validator;
 
   @override
@@ -104,7 +115,11 @@ class DeferredComponentsSetupValidatorTarget extends Target {
     if (tasks.contains(DeferredComponentsSetupValidatorTask.checkAppAndroidManifestComponentLoadingUnitMapping)
         || tasks.contains(DeferredComponentsSetupValidatorTask.checkAgainstLoadingUnitGolden)
         || tasks.contains(DeferredComponentsSetupValidatorTask.writeGolden)) {
-      generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(environment.outputDir, environment.logger, abis: _androidAbiNames);
+      generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
+          environment.outputDir,
+          environment.logger,
+          abis: _androidAbiNames
+      );
     }
 
     for (final DeferredComponentsSetupValidatorTask task in tasks) {
@@ -113,7 +128,10 @@ class DeferredComponentsSetupValidatorTarget extends Target {
           await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents);
           break;
         case DeferredComponentsSetupValidatorTask.checkAppAndroidManifestComponentLoadingUnitMapping:
-          validator.checkAppAndroidManifestComponentLoadingUnitMapping(FlutterProject.current().manifest.deferredComponents, generatedLoadingUnits);
+          validator.checkAppAndroidManifestComponentLoadingUnitMapping(
+              FlutterProject.current().manifest.deferredComponents,
+              generatedLoadingUnits,
+          );
           break;
         case DeferredComponentsSetupValidatorTask.checkAndroidResourcesStrings:
           validator.checkAndroidResourcesStrings(FlutterProject.current().manifest.deferredComponents);

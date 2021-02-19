@@ -44,13 +44,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[],
@@ -82,13 +76,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
@@ -124,13 +112,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
@@ -167,13 +149,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
@@ -210,13 +186,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
@@ -252,13 +222,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
@@ -294,13 +258,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(
-      androidAotBundle,
-      components: <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib1']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib2']),
-      ],
-    );
+    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
       tasks: <DeferredComponentsSetupValidatorTask>[
