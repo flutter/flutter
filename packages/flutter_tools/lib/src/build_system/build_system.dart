@@ -250,6 +250,10 @@ abstract class Target {
   }
 }
 
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
 class CompositeTarget extends Target {
   CompositeTarget(this.dependencies);
 

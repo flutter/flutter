@@ -16,6 +16,8 @@ import 'package:flutter_tools/src/build_system/targets/common.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 
+// These tests perform a simple check to verify if the check/task was executed at all.
+// Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
 void main() {
   FileSystem fileSystem;
   BufferLogger logger;
@@ -25,7 +27,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  // Tests if the validator runs. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('empty checks passes', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -56,7 +57,6 @@ void main() {
     expect(logger.statusText.contains('test checks passed.'), true);
   });
 
-  // Tests if the validator runs checkAndroidDynamicFeature. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('checkAndroidDynamicFeature checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -92,7 +92,6 @@ void main() {
     expect(validatorTarget.validator.inputs[0].path, 'project/pubspec.yaml');
   });
 
-  // Tests if the validator runs checkAppAndroidManifestComponentLoadingUnitMapping. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -129,7 +128,6 @@ void main() {
     expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/AndroidManifest.xml');
   });
 
-  // Tests if the validator runs checkAndroidResourcesStrings. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('checkAndroidResourcesStrings checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -166,7 +164,6 @@ void main() {
     expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/res/values/strings.xml');
   });
 
-  // Tests if the validator runs checkAgainstLoadingUnitGolden. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('checkAgainstLoadingUnitGolden checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -202,7 +199,6 @@ void main() {
     expect(validatorTarget.validator.inputs[0].path, 'project/deferred_components_golden.yaml');
   });
 
-  // Tests if the validator runs writeGolden. Detailed per-task tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('writeGolden task runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -238,7 +234,6 @@ void main() {
     expect(validatorTarget.validator.outputs[0].path, 'project/deferred_components_golden.yaml');
   });
 
-  // Tests if the validator runs clearOutputDir. Detailed per-check tests are in android/deferred_components_setup_validator_test.dart.
   testUsingContext('clearOutputDir task runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
