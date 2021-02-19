@@ -135,7 +135,7 @@ void testUsingContext(
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
-          BotDetector: ()=> const AlwaysFalseBotDetector(),
+          BotDetector: () => const AlwaysFalseBotDetector(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
