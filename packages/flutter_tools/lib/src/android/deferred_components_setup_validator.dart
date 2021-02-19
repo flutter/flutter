@@ -122,6 +122,10 @@ class DeferredComponentsSetupValidator {
   /// This method does not check if the contents of either of the files are
   /// valid, as there are many ways that they can be validly configured.
   Future<bool> checkAndroidDynamicFeature(List<DeferredComponent> components) async {
+    _inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    if (components == null || components.isEmpty) {
+      return false;
+    }
     bool changesMade = false;
     for (final DeferredComponent component in components) {
       final _DeferredComponentAndroidFiles androidFiles = _DeferredComponentAndroidFiles(
@@ -147,7 +151,6 @@ class DeferredComponentsSetupValidator {
     return !changesMade;
   }
 
-
   // The key used to identify the metadata element as the loading unit id to
   // deferred component mapping.
   static const String _mappingKey = 'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
@@ -172,6 +175,7 @@ class DeferredComponentsSetupValidator {
   /// in componentB, and loading unit 4 is included in componentC.
   bool checkAppAndroidManifestComponentLoadingUnitMapping(List<DeferredComponent> components, List<LoadingUnit> generatedLoadingUnits) {
     final Directory androidDir = env.projectDir.childDirectory('android');
+    _inputs.add(env.projectDir.childFile('pubspec.yaml'));
 
     // We do not use the Xml package to handle the writing, as we do not want to
     // erase any user applied formatting and comments. The changes can be
@@ -284,6 +288,7 @@ class DeferredComponentsSetupValidator {
   /// `Name` as a suffix, and the text contents should be the component name.
   bool checkAndroidResourcesStrings(List<DeferredComponent> components) {
     final Directory androidDir = env.projectDir.childDirectory('android');
+    _inputs.add(env.projectDir.childFile('pubspec.yaml'));
 
     // Add component name mapping to strings.xml
     final File stringRes = androidDir
@@ -302,6 +307,9 @@ class DeferredComponentsSetupValidator {
       .childDirectory('values')
       .childFile('strings.xml');
     ErrorHandlingFileSystem.deleteIfExists(stringResOutput);
+    if (components == null || components.isEmpty) {
+      return true;
+    }
     final Map<String, String> requiredEntriesMap  = <String, String>{};
     for (final DeferredComponent component in components) {
       requiredEntriesMap['${component.name}Name'] = component.name;
@@ -396,7 +404,6 @@ class DeferredComponentsSetupValidator {
       _goldenComparisonResults['match'] = false;
       return false;
     }
-    _inputs.add(env.projectDir.childFile(kDeferredComponentsGoldenFileName));
     unmatchedLoadingUnits.addAll(goldenLoadingUnits);
     final Set<int> addedNewIds = <int>{};
     for (final LoadingUnit genUnit in generatedLoadingUnits) {
