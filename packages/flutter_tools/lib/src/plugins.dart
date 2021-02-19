@@ -37,12 +37,16 @@ class Plugin {
     @required this.name,
     @required this.path,
     @required this.platforms,
+    @required this.defaultPackagePlatforms,
+    @required this.pluginDartClassPlatforms,
     @required this.dependencies,
     @required this.isDirectDependency,
     this.implementsPackage,
   }) : assert(name != null),
        assert(path != null),
        assert(platforms != null),
+       assert(defaultPackagePlatforms != null),
+       assert(pluginDartClassPlatforms != null),
        assert(dependencies != null),
        assert(isDirectDependency != null);
 
@@ -137,14 +141,12 @@ class Plugin {
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey) ||
-        _providesDefaultPackageForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, LinuxPlugin.kConfigKey)) {
       platforms[LinuxPlugin.kConfigKey] =
           LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey) ||
-        _providesDefaultPackageForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, MacOSPlugin.kConfigKey)) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey] as YamlMap);
     }
@@ -154,16 +156,49 @@ class Plugin {
           WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey] as YamlMap);
     }
 
-    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey) ||
-        _providesDefaultPackageForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
+    if (_providesImplementationForPlatform(platformsYaml, WindowsPlugin.kConfigKey)) {
       platforms[WindowsPlugin.kConfigKey] =
           WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey] as YamlMap);
     }
+
+    final String defaultPackageForLinux =
+        _getDefaultPackageForPlatform(platformsYaml, LinuxPlugin.kConfigKey);
+
+    final String defaultPackageForMacOS =
+        _getDefaultPackageForPlatform(platformsYaml, MacOSPlugin.kConfigKey);
+
+    final String defaultPackageForWindows =
+        _getDefaultPackageForPlatform(platformsYaml, WindowsPlugin.kConfigKey);
+
+    final String defaultPluginDartClassForLinux =
+        _getPluginDartClassForPlatform(platformsYaml, LinuxPlugin.kConfigKey);
+
+    final String defaultPluginDartClassForMacOS =
+        _getPluginDartClassForPlatform(platformsYaml, MacOSPlugin.kConfigKey);
+
+    final String defaultPluginDartClassForWindows =
+        _getPluginDartClassForPlatform(platformsYaml, WindowsPlugin.kConfigKey);
 
     return Plugin(
       name: name,
       path: path,
       platforms: platforms,
+      defaultPackagePlatforms: <String, String>{
+        if (defaultPackageForLinux != null)
+          LinuxPlugin.kConfigKey : defaultPackageForLinux,
+        if (defaultPackageForMacOS != null)
+          MacOSPlugin.kConfigKey : defaultPackageForMacOS,
+        if (defaultPackageForWindows != null)
+          WindowsPlugin.kConfigKey : defaultPackageForWindows,
+      },
+      pluginDartClassPlatforms: <String, String>{
+        if (defaultPluginDartClassForLinux != null)
+          LinuxPlugin.kConfigKey : defaultPluginDartClassForLinux,
+        if (defaultPluginDartClassForMacOS != null)
+          MacOSPlugin.kConfigKey : defaultPluginDartClassForMacOS,
+        if (defaultPluginDartClassForWindows != null)
+          WindowsPlugin.kConfigKey : defaultPluginDartClassForWindows,
+      },
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
@@ -204,6 +239,8 @@ class Plugin {
       name: name,
       path: path,
       platforms: platforms,
+      defaultPackagePlatforms: <String, String>{},
+      pluginDartClassPlatforms: <String, String>{},
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
     );
@@ -322,24 +359,38 @@ class Plugin {
     return errors;
   }
 
-  static bool _providesDefaultPackageForPlatform(YamlMap platformsYaml, String platformKey) {
+  static bool _supportsPlatform(YamlMap platformsYaml, String platformKey) {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if (platformsYaml[platformKey] is! YamlMap) {
-      return false;
-    }
-    if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
+    if (platformsYaml[platformKey] is YamlMap) {
       return true;
     }
     return false;
   }
 
-  static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
-    if (!platformsYaml.containsKey(platformKey)) {
-      return false;
+  static String _getDefaultPackageForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!_supportsPlatform(platformsYaml, platformKey)) {
+      return null;
     }
-    if (platformsYaml[platformKey] is! YamlMap) {
+    if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
+      return (platformsYaml[platformKey] as YamlMap)[kDefaultPackage] as String;
+    }
+    return null;
+  }
+
+  static String _getPluginDartClassForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!_supportsPlatform(platformsYaml, platformKey)) {
+      return null;
+    }
+    if ((platformsYaml[platformKey] as YamlMap).containsKey(kDartPluginClass)) {
+      return (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
+    }
+    return null;
+  }
+
+  static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
+    if (!_supportsPlatform(platformsYaml, platformKey)) {
       return false;
     }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDefaultPackage)) {
@@ -360,6 +411,12 @@ class Plugin {
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
+
+  /// This is a mapping from platform config key to the default package implementation.
+  final Map<String, String> defaultPackagePlatforms;
+
+  /// This is a mapping from platform config key to the plugin class for the given platform.
+  final Map<String, String> pluginDartClassPlatforms;
 
   /// Whether this plugin is a direct dependency of the app.
   /// If [false], the plugin is a dependency of another plugin.
@@ -429,21 +486,18 @@ class PluginInterfaceResolution {
   PluginInterfaceResolution({
     @required this.plugin,
     this.platform,
-    this.dartClass,
   }) : assert(plugin != null);
 
   /// The plugin.
   final Plugin plugin;
   // The name of the platform that this plugin implements.
   final String platform;
-  // The name of the Dart class.
-  final String dartClass;
 
   Map<String, String> toMap() {
     return <String, String> {
       'pluginName': plugin.name,
-      'dartClass': dartClass,
       'platform': platform,
+      'dartClass': plugin.pluginDartClassPlatforms[platform],
     };
   }
 }
@@ -477,13 +531,13 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
       // The plugin doesn't implement this platform.
-      if (plugin.platforms[platform] == null) {
+      if (plugin.platforms[platform] == null &&
+          plugin.defaultPackagePlatforms[platform] == null) {
         continue;
       }
-      final Map<String, dynamic> platformEntries = plugin.platforms[platform].toMap();
       // The plugin doesn't implement an interface, verify that it has a default implementation.
       if (plugin.implementsPackage == null || plugin.implementsPackage.isEmpty) {
-        final String defaultImplementation = platformEntries[kDefaultPackage] as String;
+        final String defaultImplementation = plugin.defaultPackagePlatforms[platform];
         if (defaultImplementation == null) {
           globals.printError(
             'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
@@ -507,8 +561,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
         continue;
       }
-      if (platformEntries[kDartPluginClass] == null ||
-          platformEntries[kDartPluginClass] == 'none') {
+      if (plugin.pluginDartClassPlatforms[platform] == null ||
+          plugin.pluginDartClassPlatforms[platform] == 'none') {
         continue;
       }
       final String resolutionKey = '$platform/${plugin.implementsPackage}';
@@ -531,7 +585,6 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       directDependencyResolutions[resolutionKey] = PluginInterfaceResolution(
         plugin: plugin,
         platform: platform,
-        dartClass: platformEntries[kDartPluginClass] as String,
       );
     }
   }
