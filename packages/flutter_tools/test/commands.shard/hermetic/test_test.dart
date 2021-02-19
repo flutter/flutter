@@ -216,6 +216,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String reporter,
     String timeout,
     bool runSkipped = false,
+    int shardIndex,
+    int totalShards,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
