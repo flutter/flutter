@@ -122,7 +122,6 @@ void main() {
         BotDetector: () => const AlwaysTrueBotDetector()
       }, initializeFlutterRoot: false);
 
-
       testUsingContext('Fetches tags when --version is used', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
 
