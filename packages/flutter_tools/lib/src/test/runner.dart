@@ -117,9 +117,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       if (runSkipped)
         '--run-skipped',
       if (totalShards != null)
-        '--total-hards=$randomSeed',
+        '--total-hards=$totalShards',
       if (shardIndex != null)
-        '--shard-index=$randomSeed',
+        '--shard-index=$shardIndex',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
