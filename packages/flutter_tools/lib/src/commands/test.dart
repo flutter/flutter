@@ -140,13 +140,13 @@ class TestCommand extends FlutterCommand {
               'which indicates that a seed should be selected randomly. '
               'By default, tests run in the order they are declared.',
       )
-      ..addOption('--total-shards',
-        help: 'Tests can also be sharded with the --total-shards and --shard-index'
+      ..addOption('total-shards',
+        help: 'Tests can be sharded with the --total-shards and --shard-index'
               'arguments, allowing you to split up your test suites and run'
               'them separately.'
       )
-      ..addOption('--shard-index',
-          help: 'Tests can also be sharded with the --total-shards and --shard-index'
+      ..addOption('shard-index',
+          help: 'Tests can be sharded with the --total-shards and --shard-index'
               'arguments, allowing you to split up your test suites and run'
               'them separately.'
       )
