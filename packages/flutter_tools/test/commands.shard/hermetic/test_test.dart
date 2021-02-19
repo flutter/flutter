@@ -60,32 +60,27 @@ void main() {
   });
 
   testUsingContext('Pipes shard-index and total-shards to package:test',
-          () async {
-        final FakePackageTest fakePackageTest = FakePackageTest();
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
 
-        final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-        final CommandRunner<void> commandRunner =
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
         createTestCommandRunner(testCommand);
 
-        await commandRunner.run(const <String>[
-          'test',
-          '--total-shards=1',
-          '--shard-index=2',
-          '--no-pub',
-        ]);
-        expect(
-          fakePackageTest.lastArgs,
-          contains('--total-shards=1'),
-        );
-        expect(
-          fakePackageTest.lastArgs,
-          contains('--shard-index=2'),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        Cache: () => FakeCache(),
-      });
+    await commandRunner.run(const <String>[
+      'test',
+      '--total-shards=1',
+      '--shard-index=2',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, contains('--total-shards=1'));
+    expect(fakePackageTest.lastArgs, contains('--shard-index=2'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => FakeCache(),
+  });
 
   testUsingContext('Supports coverage and machine', () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
