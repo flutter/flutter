@@ -59,7 +59,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await failToEvaluateExpression(_flutter);
     await cleanProject();
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76398
 
  testWithoutContext('flutter run expression evaluation - no native javascript objects in static scope', () async {
     await initProject();
