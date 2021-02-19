@@ -105,6 +105,23 @@ void main() {
         BotDetector: () => const AlwaysTrueBotDetector()
       }, initializeFlutterRoot: false);
 
+      testUsingContext('checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check', () async {
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        bool versionChecked = false;
+        when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
+          versionChecked = true;
+        });
+
+        await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
+
+        expect(versionChecked, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        BotDetector: () => const AlwaysTrueBotDetector()
+      }, initializeFlutterRoot: false);
+
 
       testUsingContext('Fetches tags when --version is used', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
