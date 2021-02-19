@@ -45,7 +45,7 @@ void testMain() {
       notoDownloadQueue.downloader = TestDownloader();
       TestDownloader.mockDownloads.clear();
       savedCallback = ui.window.onPlatformMessage;
-      skiaFontCollection.debugResetFallbackFonts();
+      FontFallbackData.debugReset();
     });
 
     tearDown(() {
@@ -53,7 +53,7 @@ void testMain() {
     });
 
     test('Roboto is always a fallback font', () {
-      expect(skiaFontCollection.globalFontFallbacks, contains('Roboto'));
+      expect(FontFallbackData.instance.globalFontFallbacks, contains('Roboto'));
     });
 
     test('will download Noto Naskh Arabic if Arabic text is added', () async {
@@ -88,7 +88,7 @@ void testMain() {
 }
 ''';
 
-      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
+      expect(FontFallbackData.instance.globalFontFallbacks, ['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -99,7 +99,7 @@ void testMain() {
 
       await fontChangeCompleter.future;
 
-      expect(skiaFontCollection.globalFontFallbacks,
+      expect(FontFallbackData.instance.globalFontFallbacks,
           contains('Noto Naskh Arabic UI 0'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
@@ -152,7 +152,7 @@ void testMain() {
 }
 ''';
 
-      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
+      expect(FontFallbackData.instance.globalFontFallbacks, ['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -163,7 +163,7 @@ void testMain() {
 
       await fontChangeCompleter.future;
 
-      expect(skiaFontCollection.globalFontFallbacks,
+      expect(FontFallbackData.instance.globalFontFallbacks,
           contains('Noto Color Emoji Compat 0'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
@@ -192,7 +192,7 @@ void testMain() {
               'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic+UI'] =
           'invalid CSS... this should cause our parser to fail';
 
-      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
+      expect(FontFallbackData.instance.globalFontFallbacks, ['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -205,7 +205,7 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
 
       expect(notoDownloadQueue.isPending, isFalse);
-      expect(skiaFontCollection.globalFontFallbacks, ['Roboto']);
+      expect(FontFallbackData.instance.globalFontFallbacks, ['Roboto']);
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/75836
@@ -222,8 +222,10 @@ void testMain() {
         loggingDownloader.log,
         <String>[
           'https://fonts.googleapis.com/css2?family=Noto+Sans+SC',
+          'https://fonts.googleapis.com/css2?family=Noto+Sans+JP',
           'https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada+UI',
           'Noto Sans SC',
+          'Noto Sans JP',
           'Noto Sans Kannada UI',
         ],
       );
@@ -243,9 +245,10 @@ void testMain() {
       // font tree.
       final Set<String> testedFonts = <String>{};
       final Set<int> supportedUniqueCodeUnits = <int>{};
-      for (NotoFont font in debugNotoTree.root.enumerateAllElements()) {
+      final IntervalTree<NotoFont> notoTree = FontFallbackData.instance.notoTree;
+      for (NotoFont font in notoTree.root.enumerateAllElements()) {
         testedFonts.add(font.name);
-        for (CodeunitRange range in font.unicodeRanges) {
+        for (CodeunitRange range in font.approximateUnicodeRanges) {
           for (int codeUnit = range.start; codeUnit < range.end; codeUnit += 1) {
             supportedUniqueCodeUnits.add(codeUnit);
           }
@@ -288,25 +291,22 @@ void testMain() {
 
       for (int batchStart = 0; batchStart < supportedCodeUnits.length; batchStart += paragraphLength) {
         final int batchEnd = math.min(batchStart + paragraphLength, supportedCodeUnits.length);
-        final List<int> codeUnits = <int>[];
+        final Set<int> codeUnits = <int>{};
         for (int i = batchStart; i < batchEnd; i += 1) {
           codeUnits.add(supportedCodeUnits[i]);
         }
         final Set<NotoFont> fonts = <NotoFont>{};
-        for (int codeunit in codeUnits) {
-          List<NotoFont> fontsForUnit = debugNotoTree.intersections(codeunit);
+        for (int codeUnit in codeUnits) {
+          List<NotoFont> fontsForUnit = notoTree.intersections(codeUnit);
 
           // All code units are extracted from the same tree, so there must
           // be at least one font supporting each code unit
           expect(fontsForUnit, isNotEmpty);
-
-          // Make sure that every returned font indeed covers the code unit.
-          expect(fontsForUnit.every((font) => font.matchesCodeunit(codeunit)), isTrue);
           fonts.addAll(fontsForUnit);
         }
 
         try {
-          findMinimumFontsForCodeunits(codeUnits, fonts);
+          findMinimumFontsForCodeUnits(codeUnits, fonts);
         } catch (e) {
           print(
             'findMinimumFontsForCodeunits failed:\n'
@@ -356,4 +356,7 @@ class LoggingDownloader implements NotoDownloader {
     log.add(debugDescription ?? url);
     return delegate.downloadAsString(url);
   }
+
+  @override
+  int get debugActiveDownloadCount => delegate.debugActiveDownloadCount;
 }
