@@ -82,7 +82,7 @@ class GalleryTransitionTest extends BuildTestTask {
            throw Exception('$deviceOperatingSystem has no build configuration');
       }
     }
-  
+
   @override
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
     final String testDriver = driverFile ?? (semanticsEnabled

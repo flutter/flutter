@@ -68,7 +68,7 @@ Future<void> runTasks(List<String> taskNames, {
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-/// 
+///
 /// [taskArgs] are passed to the task executable for additional configuration.
 Future<TaskResult> runTask(
   String taskName, {

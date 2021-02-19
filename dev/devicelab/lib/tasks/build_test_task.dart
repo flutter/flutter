@@ -1,4 +1,4 @@
-// Copyright 2021 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// [Task] for defining build-test separation.
-/// 
+///
 /// Using this [Task] allows DeviceLab capacity to only be spent on the [test].
 abstract class BuildTestTask {
   BuildTestTask(this.args, {this.workingDirectory}) {
@@ -47,7 +47,7 @@ abstract class BuildTestTask {
   }
 
   /// Run Flutter drive test from [getTestArgs] against the application under test on the device.
-  /// 
+  ///
   /// This assumes that [build()] was called or [applicationBinaryPath] exists.
   Future<TaskResult> test() async {
     final Device device = await devices.workingDevice;

@@ -60,7 +60,7 @@ class TestCommand extends Command<void> {
       negatable: true,
       defaultsTo: false,
     );
-  } 
+  }
 
   @override
   String get name => 'test';
