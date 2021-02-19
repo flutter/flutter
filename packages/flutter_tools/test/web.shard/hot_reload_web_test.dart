@@ -33,7 +33,7 @@ void main() {
   testWithoutContext('hot restart works without error', () async {
     await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     await flutter.hotRestart();
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76421
 
   testWithoutContext('newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
@@ -51,7 +51,7 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76421
 
   testWithoutContext('newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
@@ -70,5 +70,5 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: platform.isWindows); // https://github.com/flutter/flutter/issues/76421
 }
