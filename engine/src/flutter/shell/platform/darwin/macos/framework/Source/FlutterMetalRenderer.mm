@@ -26,7 +26,7 @@ static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* 
 #pragma mark - FlutterMetalRenderer implementation
 
 @implementation FlutterMetalRenderer {
-  FlutterEngine* _engine;
+  __weak FlutterEngine* _engine;
 
   FlutterView* _flutterView;
 }

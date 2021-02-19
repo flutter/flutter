@@ -49,7 +49,7 @@ class FlutterGLCompositor {
   void SetPresentCallback(const PresentCallback& present_callback);
 
  private:
-  const FlutterViewController* view_controller_;
+  __weak const FlutterViewController* view_controller_;
   const NSOpenGLContext* open_gl_context_;
   PresentCallback present_callback_;
 
