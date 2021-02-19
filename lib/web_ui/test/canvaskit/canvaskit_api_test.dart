@@ -1313,7 +1313,7 @@ void _paragraphTests() {
     expect(paragraph.getIdeographicBaseline(), within<double>(distance: 0.5, from: 28));
     expect(paragraph.getLongestLine(), 50);
     expect(paragraph.getMaxIntrinsicWidth(), 50);
-    expect(paragraph.getMinIntrinsicWidth(), 0);
+    expect(paragraph.getMinIntrinsicWidth(), 50);
     expect(paragraph.getMaxWidth(), 55);
     expect(paragraph.getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max), <double>[]);
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
