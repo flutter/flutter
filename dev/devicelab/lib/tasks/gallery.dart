@@ -13,8 +13,10 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 import 'build_test_task.dart';
 
+final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
+
 TaskFunction createGalleryTransitionTest(List<String> args, {bool semanticsEnabled = false}) {
-  return GalleryTransitionTest(args, semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionTest(args, semanticsEnabled: semanticsEnabled, workingDirectory: galleryDirectory,);
 }
 
 TaskFunction createGalleryTransitionE2ETest(List<String> args, {bool semanticsEnabled = false}) {
@@ -28,6 +30,7 @@ TaskFunction createGalleryTransitionE2ETest(List<String> args, {bool semanticsEn
     transitionDurationFile: null,
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
+    workingDirectory: galleryDirectory,
   );
 }
 
@@ -38,6 +41,7 @@ TaskFunction createGalleryTransitionHybridTest(List<String> args, {bool semantic
     driverFile: semanticsEnabled
         ? 'transitions_perf_hybrid_with_semantics_test'
         : 'transitions_perf_hybrid_test',
+    workingDirectory: galleryDirectory,
   );
 }
 
