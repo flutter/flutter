@@ -471,9 +471,9 @@ void _validateMacOSPodfile(String appPath) {
   final File podfileLockFile = File(path.join(appPath, 'macos', 'Podfile.lock'));
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
   if (!podfileLockOutput.contains(':path: Flutter/ephemeral\n')
-      || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher/macos')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
-      || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')) {
+      || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
+      || podfileLockOutput.contains('url_launcher/')) {
     print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
@@ -501,7 +501,7 @@ void _validateMacOSPodfile(String appPath) {
     'macos',
   ));
 
-  checkDirectoryExists(path.join(
+  checkDirectoryNotExists(path.join(
     pluginSymlinks,
     'url_launcher',
   ));
