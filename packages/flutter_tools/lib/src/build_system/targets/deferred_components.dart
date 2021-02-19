@@ -58,8 +58,10 @@ class DeferredComponentsSetupValidatorTarget extends Target {
       return abis;
     }
     for (final Target target in dependency.dependencies) {
-      abis.add(getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform((target as AndroidAotDeferredComponentsBundle).dependency.targetPlatform))));
+      if (target.dependencies.isNotEmpty) {
+        abis.add(getNameForAndroidArch(
+          getAndroidArchForName(getNameForTargetPlatform((target.dependencies[0] as AndroidAotBundle).targetPlatform))));
+      }
     }
     return abis;
   }
