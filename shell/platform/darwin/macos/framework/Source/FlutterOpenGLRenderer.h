@@ -11,7 +11,7 @@
  * texture management. This is initialized during FlutterEngine creation and then attached to the
  * FlutterView once the FlutterViewController is initializer.
  */
-@interface FlutterOpenGLRenderer : NSObject <FlutterRenderer>
+@interface FlutterOpenGLRenderer : FlutterTextureRegistrar <FlutterRenderer>
 
 /**
  * The resource context used by the engine for texture uploads. FlutterViews associated with this

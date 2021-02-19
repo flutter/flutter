@@ -12,7 +12,7 @@
  * FlutterEngine creation and then attached to the FlutterView once the FlutterViewController is
  * initialized.
  */
-@interface FlutterMetalRenderer : NSObject <FlutterRenderer>
+@interface FlutterMetalRenderer : FlutterTextureRegistrar <FlutterRenderer>
 
 /**
  * Interface to the system GPU. Used to issue all the rendering commands.
@@ -33,5 +33,11 @@
  * Presents the texture specified by the texture id.
  */
 - (BOOL)present:(int64_t)textureID;
+
+/**
+ * Populates the texture registry with the provided metalTexture.
+ */
+- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
+                         metalTexture:(nonnull FlutterMetalExternalTexture*)metalTexture;
 
 @end

@@ -1109,6 +1109,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngin
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureMetal.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterFrameBufferProvider.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h
@@ -1118,6 +1120,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSur
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIntermediateKeyResponder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIntermediateKeyResponder.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMacOSExternalTexture.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRendererTest.mm
@@ -1138,6 +1141,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextI
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputModel.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm
