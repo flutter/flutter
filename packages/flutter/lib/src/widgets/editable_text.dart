@@ -2138,7 +2138,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
       _selectionOverlay!.showHandles();
     }
-
+    // TODO(chunhtai): we should make sure selection actually changed before
+    // we call the onSelectionChanged.
+    // https://github.com/flutter/flutter/issues/76349.
     try {
       widget.onSelectionChanged?.call(selection, cause);
     } catch (exception, stack) {
