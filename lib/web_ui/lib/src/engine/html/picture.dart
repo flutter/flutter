@@ -96,6 +96,7 @@ class PersistedPicture extends PersistedLeafSurface {
   final ui.Rect? localPaintBounds;
   final int hints;
   double _density = 1.0;
+
   /// Cull rect changes and density changes due to transforms should
   /// call applyPaint for picture when retain() or update() is called after
   /// preroll is complete.
@@ -111,6 +112,14 @@ class PersistedPicture extends PersistedLeafSurface {
   }
 
   @override
+  void preroll() {
+    if (PersistedShaderMask.activeShaderMaskCount != 0) {
+      picture.recordingCanvas?.renderStrategy.isInsideShaderMask = true;
+    }
+    super.preroll();
+  }
+
+  @override
   void recomputeTransformAndClip() {
     _transform = parent!._transform;
     if (dx != 0.0 || dy != 0.0) {
@@ -119,8 +128,10 @@ class PersistedPicture extends PersistedLeafSurface {
     }
     final double paintWidth = localPaintBounds!.width;
     final double paintHeight = localPaintBounds!.height;
-    final double newDensity = localPaintBounds == null || paintWidth == 0 || paintHeight == 0
-        ? 1.0 : _computePixelDensity(_transform, paintWidth, paintHeight);
+    final double newDensity =
+        localPaintBounds == null || paintWidth == 0 || paintHeight == 0
+            ? 1.0
+            : _computePixelDensity(_transform, paintWidth, paintHeight);
     if (newDensity != _density) {
       _density = newDensity;
       _requiresRepaint = true;
@@ -353,8 +364,8 @@ class PersistedPicture extends PersistedLeafSurface {
       return 1.0;
     }
 
-    final bool didRequireBitmap =
-        existingSurface.picture.recordingCanvas!.renderStrategy.hasArbitraryPaint;
+    final bool didRequireBitmap = existingSurface
+        .picture.recordingCanvas!.renderStrategy.hasArbitraryPaint;
     final bool requiresBitmap =
         picture.recordingCanvas!.renderStrategy.hasArbitraryPaint;
     if (didRequireBitmap != requiresBitmap) {
@@ -524,8 +535,9 @@ class PersistedPicture extends PersistedLeafSurface {
     if (_debugShowCanvasReuseStats) {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
-    final BitmapCanvas canvas = BitmapCanvas(bounds,
-      picture.recordingCanvas!.renderStrategy, density: _density);
+    final BitmapCanvas canvas = BitmapCanvas(
+        bounds, picture.recordingCanvas!.renderStrategy,
+        density: _density);
     canvas.setElementCache(_elementCache);
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this)
@@ -568,9 +580,8 @@ class PersistedPicture extends PersistedLeafSurface {
 
     _computeOptimalCullRect(oldSurface);
     if (identical(picture, oldSurface.picture)) {
-      bool densityChanged =
-          (_canvas is BitmapCanvas &&
-              _density != (_canvas as BitmapCanvas)._density);
+      bool densityChanged = (_canvas is BitmapCanvas &&
+          _density != (_canvas as BitmapCanvas)._density);
 
       // The picture is the same. Attempt to avoid repaint.
       if (_requiresRepaint || densityChanged) {

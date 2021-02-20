@@ -228,7 +228,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.BlendMode blendMode, {
     ui.ShaderMaskEngineLayer? oldLayer,
   }) {
-    throw UnimplementedError();
+    assert(shader != null && maskRect != null && blendMode != null); // ignore: unnecessary_null_comparison
+    return _pushSurface<PersistedShaderMask>(PersistedShaderMask(
+        oldLayer as PersistedShaderMask?,
+        shader, maskRect, blendMode));
   }
 
   /// Pushes a physical layer operation for an arbitrary shape onto the

@@ -351,9 +351,30 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
 }
 
 class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngineLayer {
+  ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode);
+
+  final ui.Shader shader;
+  final ui.Rect maskRect;
+  final ui.BlendMode blendMode;
+
   @override
   void paint(PaintContext paintContext) {
-    // TODO(yjbanov): this needs to be implemented
+    assert(needsPainting);
+
+    paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
+    paintChildren(paintContext);
+
+    CkPaint paint = CkPaint();
+    paint.shader = shader;
+    paint.blendMode = blendMode;
+
+    paintContext.leafNodesCanvas!.save();
+    paintContext.leafNodesCanvas!.translate(maskRect.left, maskRect.top);
+
+    paintContext.leafNodesCanvas!.drawRect(maskRect, paint);
+    paintContext.leafNodesCanvas!.restore();
+
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
