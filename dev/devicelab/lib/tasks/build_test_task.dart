@@ -16,23 +16,25 @@ import '../framework/utils.dart';
 abstract class BuildTestTask {
   BuildTestTask(this.args, {this.workingDirectory}) {
     final ArgResults argResults = argParser.parse(args);
-    applicationBinaryPath = argResults[kBinaryPathOption] as String;
+    buildOnly = argResults[kBuildOnlyOption] as bool;
+    testOnly = argResults[kTestOnlyOption] as bool;
   }
 
-  static const String kBinaryPathOption = 'binary-path';
-  static const String kBuildOnlyOption = 'build-only';
+  static const String kBuildOnlyOption = 'build';
+  static const String kTestOnlyOption = 'test';
 
   final ArgParser argParser = ArgParser()
-    ..addOption(kBinaryPathOption)
-    ..addFlag(kBuildOnlyOption);
+    ..addFlag(kBuildOnlyOption)
+    ..addFlag(kTestOnlyOption);
 
+  /// Args passed from the test runner via "--task-arg".
   final List<String> args;
-
-  /// If passed, `build` is skipped and `test` is run. If null, only `build` is run.
-  String applicationBinaryPath;
 
   /// If true, skip [test].
   bool buildOnly = false;
+
+  /// If true, skip [build].
+  bool testOnly = false;
 
   /// Where the test artifacts are stored, such as performance results.
   final Directory workingDirectory;
@@ -71,7 +73,7 @@ abstract class BuildTestTask {
 
   /// Run this task.
   Future<TaskResult> call() async {
-    if (applicationBinaryPath.isEmpty) {
+    if (!testOnly) {
       build();
     }
 

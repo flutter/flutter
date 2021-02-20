@@ -85,6 +85,12 @@ class GalleryTransitionTest extends BuildTestTask {
 
   @override
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
+    String applicationBinaryPath;
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
+    } else {
+      throw UnimplementedError('getTestArgs does not support $deviceOperatingSystem');
+    }
     final String testDriver = driverFile ?? (semanticsEnabled
       ? '${testFile}_with_semantics_test'
       : '${testFile}_test');
