@@ -105,7 +105,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///    without passing back a specific value from a [ValueListenable].
 ///  * [NotificationListener], which lets you rebuild based on [Notification]
 ///    coming from its descendant widgets rather than a [ValueListenable] that
-///    you have a direct reference to.
+///    you have a direct reference too.
 ///  * [StreamBuilder], where a builder can depend on a [Stream] rather than
 ///    a [ValueListenable] for more advanced use cases.
 class ValueListenableBuilder<T> extends StatefulWidget {
