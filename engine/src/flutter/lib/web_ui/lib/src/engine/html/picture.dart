@@ -417,24 +417,26 @@ class PersistedPicture extends PersistedLeafSurface {
 
   void _applyDomPaint(EngineCanvas? oldCanvas) {
     _recycleCanvas(_canvas);
-    _canvas = DomCanvas(rootElement!);
+    final DomCanvas domCanvas = DomCanvas(rootElement!);
+    _canvas = domCanvas;
     domRenderer.clearDom(rootElement!);
-    picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
+    picture.recordingCanvas!.apply(domCanvas, _optimalLocalCullRect!);
   }
 
   void _applyBitmapPaint(EngineCanvas? oldCanvas) {
     if (oldCanvas is BitmapCanvas &&
         oldCanvas.doesFitBounds(_optimalLocalCullRect!, _density) &&
         oldCanvas.isReusable()) {
+      final BitmapCanvas reusedCanvas = oldCanvas;
       if (_debugShowCanvasReuseStats) {
         DebugCanvasReuseOverlay.instance.keptCount++;
       }
       // Re-use old bitmap canvas.
-      oldCanvas.bounds = _optimalLocalCullRect!;
-      _canvas = oldCanvas;
-      oldCanvas.setElementCache(_elementCache);
-      _canvas!.clear();
-      picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
+      reusedCanvas.bounds = _optimalLocalCullRect!;
+      _canvas = reusedCanvas;
+      reusedCanvas.setElementCache(_elementCache);
+      reusedCanvas.clear();
+      picture.recordingCanvas!.apply(reusedCanvas, _optimalLocalCullRect!);
     } else {
       // We can't use the old canvas because the size has changed, so we put
       // it in a cache for later reuse.
@@ -450,19 +452,18 @@ class PersistedPicture extends PersistedLeafSurface {
       _paintQueue.add(_PaintRequest(
         canvasSize: _optimalLocalCullRect!.size,
         paintCallback: () {
-          _canvas = _findOrCreateCanvas(_optimalLocalCullRect!);
-          if (_canvas is BitmapCanvas) {
-            (_canvas as BitmapCanvas).setElementCache(_elementCache);
-          }
+          final BitmapCanvas bitmapCanvas =
+              _findOrCreateCanvas(_optimalLocalCullRect!);
+          _canvas = bitmapCanvas;
+          bitmapCanvas.setElementCache(_elementCache);
           if (_debugExplainSurfaceStats) {
-            final BitmapCanvas bitmapCanvas = _canvas as BitmapCanvas;
             _surfaceStatsFor(this).paintPixelCount +=
                 bitmapCanvas.bitmapPixelCount;
           }
           domRenderer.clearDom(rootElement!);
-          rootElement!.append(_canvas!.rootElement);
-          _canvas!.clear();
-          picture.recordingCanvas!.apply(_canvas!, _optimalLocalCullRect);
+          rootElement!.append(bitmapCanvas.rootElement);
+          bitmapCanvas.clear();
+          picture.recordingCanvas!.apply(bitmapCanvas, _optimalLocalCullRect!);
         },
       ));
     }
