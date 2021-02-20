@@ -20,8 +20,8 @@ double _measureBorderRadius(double x, double y) {
 }
 
 class RawRecordingCanvas extends BitmapCanvas implements ui.PictureRecorder {
-  RawRecordingCanvas(ui.Size size) : super(ui.Offset.zero & size,
-      RenderStrategy());
+  RawRecordingCanvas(ui.Size size)
+      : super(ui.Offset.zero & size, RenderStrategy());
 
   @override
   void dispose() {
@@ -1933,6 +1933,13 @@ class RenderStrategy {
   ///
   /// This is used to decide whether to use simplified DomCanvas.
   bool hasArbitraryPaint = false;
+
+  /// Whether commands are executed within a shadermask.
+  ///
+  /// Webkit doesn't apply filters to canvas elements in its child
+  /// element tree. When this is set to true, we prevent canvas usage in
+  /// bitmap canvas and instead render using dom primitives and svg only.
+  bool isInsideShaderMask = false;
 
   RenderStrategy();
 }
