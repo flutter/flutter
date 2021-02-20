@@ -1015,7 +1015,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
   assert(
     _legacyBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0xA88D8E5183D353F9 // Please do not modify this line.
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
