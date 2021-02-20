@@ -700,7 +700,7 @@ class FakeProcessManager extends Fake implements ProcessManager {
 
   @override
   Future<ProcessResult> run(
-    List<Object> command, {
+    List<dynamic> command, {
     String? workingDirectory,
     Map<String, String>? environment,
     bool includeParentEnvironment = true,

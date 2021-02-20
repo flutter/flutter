@@ -36,16 +36,19 @@ Future<ui.Image> captureImage(Element element) {
 /// test is running on a VM using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+  const MatchesGoldenFile(this.key, this.version, this.precisionTolerance);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version, this.precisionTolerance) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// The allowable difference when comparing image pixels.
+  final double precisionTolerance;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -66,6 +69,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw 'must provide a Finder, Image, or Future<Image>';
     }
 
+    goldenFileComparator.setPrecisionTolerance(precisionTolerance);
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;

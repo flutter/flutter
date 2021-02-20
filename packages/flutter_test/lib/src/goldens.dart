@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
@@ -71,6 +72,13 @@ abstract class GoldenFileComparator {
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
   Future<void> update(Uri golden, Uint8List imageBytes);
+
+  /// Can be used to set an acceptable tolerance level, establishing an
+  /// allowable difference between pixels.
+  @mustCallSuper
+  void setPrecisionTolerance(double precisionTolerance) {
+    assert(precisionTolerance > 0.0 && precisionTolerance < 1.0);
+  }
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
@@ -288,6 +296,11 @@ class TrivialComparator implements GoldenFileComparator {
   Uri getTestUri(Uri key, int? version) {
     return key;
   }
+
+  @override
+  void setPrecisionTolerance(double precisionTolerance) {
+    assert(precisionTolerance > 0.0 && precisionTolerance < 1.0);
+  }
 }
 
 class _TrivialWebGoldenComparator implements WebGoldenComparator {
@@ -321,6 +334,7 @@ class ComparisonResult {
     required this.passed,
     this.error,
     this.diffs,
+    this.diffPercentage = 0.0,
   });
 
   /// Indicates whether or not a pixel comparison test has failed.
@@ -335,4 +349,9 @@ class ComparisonResult {
   /// values in the execution of the pixel test.
   // TODO(jonahwilliams): fix type signature when image is updated to support web.
   final Map<String, Object>? diffs;
+
+  /// The percent difference between pixels found when a comparison fails.
+  ///
+  /// Cannot be null, defaults to 0.0 if the comparison has passed.
+  final double diffPercentage;
 }
