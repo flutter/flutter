@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
@@ -15,6 +18,303 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
+
+class Toggleable extends StatefulWidget {
+  const Toggleable({
+    Key? key,
+    required this.value,
+    this.tristate = false,
+    required this.onChanged,
+    required this.painter,
+    required this.size,
+    required this.hasFocus,
+    required this.hovering,
+  }) : assert(tristate || value != null), super(key: key);
+
+  final bool? value;
+  final bool tristate;
+  final ValueChanged<bool?>? onChanged;
+  final ToogleablePainter painter;
+  final Size size;
+  final bool hasFocus;
+  final bool hovering;
+
+  bool get isInteractive => onChanged != null;
+
+  @override
+  State<Toggleable> createState() => _ToggleableState();
+}
+
+class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
+  late AnimationController _positionController;
+  late CurvedAnimation _position;
+  late AnimationController _reactionController;
+  late Animation<double> _reaction;
+  late AnimationController _reactionHoverFadeController;
+  late Animation<double> _reactionHoverFade;
+  late AnimationController _reactionFocusFadeController;
+  late Animation<double> _reactionFocusFade;
+
+  bool? _previousValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousValue = widget.value;
+    _positionController = AnimationController(
+      duration: _kToggleDuration,
+      value: widget.value == false ? 0.0 : 1.0,
+      vsync: this,
+    );
+    _position = CurvedAnimation(
+      parent: _positionController,
+      curve: Curves.linear,
+    );
+    _reactionController = AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: this,
+    );
+    _reaction = CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _reactionHoverFadeController = AnimationController(
+      duration: _kReactionFadeDuration,
+      value: widget.hovering || widget.hasFocus ? 1.0 : 0.0,
+      vsync: this,
+    );
+    _reactionHoverFade = CurvedAnimation(
+      parent: _reactionHoverFadeController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _reactionFocusFadeController = AnimationController(
+      duration: _kReactionFadeDuration,
+      value: widget.hovering || widget.hasFocus ? 1.0 : 0.0,
+      vsync: this,
+    );
+    _reactionFocusFade = CurvedAnimation(
+      parent: _reactionFocusFadeController,
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  @override
+  void didUpdateWidget(Toggleable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _previousValue = oldWidget.value;
+      _position
+        ..curve = Curves.easeIn
+        ..reverseCurve = Curves.easeOut;
+      if (widget.tristate) {
+        if (widget.value == null)
+          _positionController.value = 0.0;
+        if (widget.value != false)
+          _positionController.forward();
+        else
+          _positionController.reverse();
+      } else {
+        if (widget.value == true)
+          _positionController.forward();
+        else
+          _positionController.reverse();
+      }
+    }
+    if (oldWidget.hasFocus != widget.hasFocus) {
+      if (widget.hasFocus) {
+        _reactionFocusFadeController.forward();
+      } else {
+        _reactionFocusFadeController.reverse();
+      }
+    }
+    if (oldWidget.hovering != widget.hovering) {
+      if (widget.hovering) {
+        _reactionHoverFadeController.forward();
+      } else {
+        _reactionHoverFadeController.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _positionController.dispose();
+    _reactionController.dispose();
+    _reactionHoverFadeController.dispose();
+    _reactionFocusFadeController.dispose();
+    super.dispose();
+  }
+
+  Offset? _downPosition;
+
+  void _handleTapDown(TapDownDetails details) {
+    if (widget.isInteractive) {
+      _downPosition = details.localPosition;
+      _reactionController.forward();
+    }
+  }
+
+  void _handleTap() {
+    if (!widget.isInteractive)
+      return;
+    switch (widget.value) {
+      case false:
+        widget.onChanged!(true);
+        break;
+      case true:
+        widget.onChanged!(widget.tristate ? null : false);
+        break;
+      case null:
+        widget.onChanged!(false);
+        break;
+    }
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _downPosition = null;
+    if (widget.isInteractive)
+      _reactionController.reverse();
+  }
+
+  void _handleTapCancel() {
+    _downPosition = null;
+    if (widget.isInteractive)
+      _reactionController.reverse();
+  }
+
+  ToggleableDetails get _toggleableDetails => ToggleableDetails._(
+    position: _position,
+    reaction: _reaction,
+    reactionFocusFade: _reactionFocusFade,
+    reactionHoverFade: _reactionHoverFade,
+    downPosition: _downPosition,
+    hasFocus: widget.hasFocus,
+    hovering: widget.hovering,
+    value: widget.value,
+    previousValue: _previousValue,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      excludeFromSemantics: !widget.isInteractive,
+      onTapDown: _handleTapDown,
+      onTap: _handleTap,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      child: Semantics(
+        enabled: widget.isInteractive,
+        child: CustomPaint(
+          size: widget.size,
+          painter: _ToggleablePainter(_toggleableDetails, widget.painter),
+        ),
+      ),
+    );
+  }
+}
+
+class ToggleableDetails {
+  ToggleableDetails._({
+    required this.position,
+    required this.reaction,
+    required this.reactionFocusFade,
+    required this.reactionHoverFade,
+    required this.downPosition,
+    required this.hasFocus,
+    required this.hovering,
+    required this.value,
+    required this.previousValue,
+  });
+
+  final CurvedAnimation position;
+  final Animation<double> reaction;
+  final Animation<double> reactionFocusFade;
+  final Animation<double> reactionHoverFade;
+  final Offset? downPosition;
+  final bool hasFocus;
+  final bool hovering;
+  final bool? value;
+  final bool? previousValue;
+}
+
+class _ToggleablePainter extends CustomPainter {
+  _ToggleablePainter(this.details, this.painter)
+     : super(repaint: Listenable.merge(<Listenable>[
+    details.position,
+    details.reaction,
+    details.reactionFocusFade,
+    details.reactionHoverFade,
+  ]));
+
+  final ToggleableDetails details;
+  final ToogleablePainter painter;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    painter.paint(canvas, size, details);
+  }
+
+  @override
+  bool shouldRepaint(_ToggleablePainter oldDelegate) => oldDelegate.painter != painter || oldDelegate.details != details;
+}
+
+abstract class ToogleablePainter {
+  ToogleablePainter({
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.splashRadius,
+    Color? hoverColor,
+    Color? focusColor,
+    Color? reactionColor,
+    Color? inactiveReactionColor,
+  }) : hoverColor = hoverColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       focusColor = focusColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       reactionColor = reactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       inactiveReactionColor = inactiveReactionColor ?? activeColor.withAlpha(kRadialReactionAlpha);
+
+  final Color activeColor;
+  final Color inactiveColor;
+  final Color hoverColor;
+  final Color focusColor;
+  final Color reactionColor;
+  final Color inactiveReactionColor;
+  final double splashRadius;
+
+  void paint(Canvas canvas, Size size, ToggleableDetails details);
+
+  /// Used by subclasses to paint the radial ink reaction for this control.
+  ///
+  /// The reaction is painted on the given canvas at the given offset. The
+  /// origin is the center point of the reaction (usually distinct from the
+  /// point at which the user interacted with the control, which is handled
+  /// automatically).
+  void paintRadialReaction(Canvas canvas, Offset origin, ToggleableDetails details) {
+    if (!details.reaction.isDismissed || !details.reactionFocusFade.isDismissed || !details.reactionHoverFade.isDismissed) {
+      final Paint reactionPaint = Paint()
+        ..color = Color.lerp(
+          Color.lerp(
+            Color.lerp(inactiveReactionColor, reactionColor, details.position.value),
+            hoverColor,
+            details.reactionHoverFade.value,
+          ),
+          focusColor,
+          details.reactionFocusFade.value,
+        )!;
+      final Offset center = Offset.lerp(details.downPosition ?? origin, origin, details.reaction.value)!;
+      final Animatable<double> radialReactionRadiusTween = Tween<double>(
+        begin: 0.0,
+        end: splashRadius,
+      );
+      final double reactionRadius = details.hasFocus || details.hovering
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(details.reaction);
+      if (reactionRadius > 0.0) {
+        canvas.drawCircle(center, reactionRadius, reactionPaint);
+      }
+    }
+  }
+}
 
 /// A base class for material style toggleable controls with toggle animations.
 ///
