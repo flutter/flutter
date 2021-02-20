@@ -126,5 +126,5 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/59127
   const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
-  newTitle = bottomNavigationBarItem.title;
+  bottomNavigationBarItem.title;
 }
