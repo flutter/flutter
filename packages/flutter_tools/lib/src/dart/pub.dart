@@ -4,10 +4,10 @@
 
 // @dart = 2.8
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -20,6 +20,7 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -389,18 +390,7 @@ class _DefaultPub implements Pub {
 
   /// The command used for running pub.
   List<String> _pubCommand(List<String> arguments) {
-    // TODO(jonahwilliams): refactor to use artifacts.
-    final String sdkPath = _fileSystem.path.joinAll(<String>[
-      Cache.flutterRoot,
-      'bin',
-      'cache',
-      'dart-sdk',
-      'bin',
-      if (_platform.isWindows)
-        'pub.bat'
-      else
-        'pub'
-    ]);
+    final String sdkPath = globals.artifacts.getArtifactPath(Artifact.pubExecutable);
     return <String>[sdkPath, ...arguments];
   }
 
