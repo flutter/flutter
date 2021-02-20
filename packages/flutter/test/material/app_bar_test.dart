@@ -926,10 +926,10 @@ void main() {
     expect(getMaterial().elevation, 8.0);
   });
 
-  testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/59158.
-    Widget buildSliverAppBar(bool forceElevated, [double? elevation]) {
+  group('SliverAppBar elevation', () {
+    Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
+        theme: ThemeData(appBarTheme: AppBarTheme(elevation: themeElevation)),
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
@@ -943,52 +943,39 @@ void main() {
       );
     }
 
-    AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
-    Material getMaterial() => tester.widget<Material>(find.byType(Material));
+    testWidgets('Respects forceElevated parameter', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/59158.
+      AppBar getAppBar() => tester.widget<AppBar>(find.byType(AppBar));
+      Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
-    // When forceElevated is off, SliverAppBar should not be elevated.
-    await tester.pumpWidget(buildSliverAppBar(false));
-    expect(getMaterial().elevation, 0.0);
+      // When forceElevated is off, SliverAppBar should not be elevated.
+      await tester.pumpWidget(buildSliverAppBar(false));
+      expect(getMaterial().elevation, 0.0);
 
-    // Default elevation should be _AppBarState._defaultElevation = 4.0, and
-    // the AppBar's elevation should not be specified by SliverAppBar.
-    await tester.pumpWidget(buildSliverAppBar(true));
-    expect(getMaterial().elevation, 4.0);
-    expect(getAppBar().elevation, null);
+      // Default elevation should be _AppBarState._defaultElevation = 4.0, and
+      // the AppBar's elevation should not be specified by SliverAppBar.
+      await tester.pumpWidget(buildSliverAppBar(true));
+      expect(getMaterial().elevation, 4.0);
+      expect(getAppBar().elevation, null);
 
-    // SliverAppBar should use the specified elevation.
-    await tester.pumpWidget(buildSliverAppBar(true, 8.0));
-    expect(getMaterial().elevation, 8.0);
-  });
+      // SliverAppBar should use the specified elevation.
+      await tester.pumpWidget(buildSliverAppBar(true, elevation: 8.0));
+      expect(getMaterial().elevation, 8.0);
+    });
 
-  testWidgets('SliverAppBar uses elevation of AppBarTheme', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/73525.
-    const double themeElevation = 12.0;
+    testWidgets('Uses elevation of AppBarTheme by default', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/73525.
+      Material getMaterial() => tester.widget<Material>(find.byType(Material));
 
-    Widget buildSliverAppBar(bool forceElevated, double elevation) {
-      return MaterialApp(
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(elevation: elevation)
-        ),
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              backwardsCompatibility: false,
-              title: const Text('Title'),
-              forceElevated: forceElevated,
-            ),
-          ],
-        ),
-      );
-    }
+      await tester.pumpWidget(buildSliverAppBar(false, themeElevation: 12.0));
+      expect(getMaterial().elevation, 0.0);
 
-    Material getMaterial() => tester.widget<Material>(find.byType(Material));
+      await tester.pumpWidget(buildSliverAppBar(true, themeElevation: 12.0));
+      expect(getMaterial().elevation, 12.0);
 
-    await tester.pumpWidget(buildSliverAppBar(false, themeElevation));
-    expect(getMaterial().elevation, 0.0);
-
-    await tester.pumpWidget(buildSliverAppBar(true, themeElevation));
-    expect(getMaterial().elevation, themeElevation);
+      await tester.pumpWidget(buildSliverAppBar(true, elevation: 8.0, themeElevation: 12.0));
+      expect(getMaterial().elevation, 8.0);
+    });
   });
 
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
