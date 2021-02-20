@@ -1,4 +1,4 @@
-Signature: af16e5eec10e9891cc9999baa90e6b1d
+Signature: 738f01f88ad47c72b061faab86c3ebc7
 
 UNUSED LICENSES:
 
@@ -4048,7 +4048,6 @@ FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
@@ -5244,6 +5243,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
