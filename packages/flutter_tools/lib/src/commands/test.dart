@@ -141,13 +141,13 @@ class TestCommand extends FlutterCommand {
               'By default, tests run in the order they are declared.',
       )
       ..addOption('total-shards',
-        help: 'Tests can be sharded with the --total-shards and --shard-index'
-              'arguments, allowing you to split up your test suites and run'
+        help: 'Tests can be sharded with the "--total-shards" and "--shard-index" '
+              'arguments, allowing you to split up your test suites and run '
               'them separately.'
       )
       ..addOption('shard-index',
-          help: 'Tests can be sharded with the --total-shards and --shard-index'
-              'arguments, allowing you to split up your test suites and run'
+          help: 'Tests can be sharded with the "--total-shards" and "--shard-index" '
+              'arguments, allowing you to split up your test suites and run '
               'them separately.'
       )
       ..addFlag('enable-vmservice',
