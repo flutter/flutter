@@ -4,10 +4,10 @@
 
 // @dart = 2.8
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';

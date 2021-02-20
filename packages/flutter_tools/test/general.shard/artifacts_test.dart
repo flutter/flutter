@@ -281,6 +281,10 @@ void main() {
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
+      expect(
+        artifacts.getArtifactPath(Artifact.pubExecutable),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin', 'pub')
+      );
     });
 
     testWithoutContext('getEngineType', () {
