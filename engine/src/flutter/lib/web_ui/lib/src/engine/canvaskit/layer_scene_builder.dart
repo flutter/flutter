@@ -193,7 +193,8 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.BlendMode blendMode, {
     ui.EngineLayer? oldLayer,
   }) {
-    throw UnimplementedError();
+    return pushLayer<ShaderMaskEngineLayer>(ShaderMaskEngineLayer(
+        shader, maskRect, blendMode));
   }
 
   @override

@@ -91,6 +91,7 @@ part 'engine/html/recording_canvas.dart';
 part 'engine/html/render_vertices.dart';
 part 'engine/html/scene.dart';
 part 'engine/html/scene_builder.dart';
+part 'engine/html/shader_mask.dart';
 part 'engine/html/shaders/normalized_gradient.dart';
 part 'engine/html/shaders/shader.dart';
 part 'engine/html/shaders/shader_builder.dart';
