@@ -561,7 +561,7 @@ class TextureLayer extends Layer {
 
   /// When true the texture will not be updated with new frames.
   ///
-  /// This is used when resizing an embedded Android views: When resizing there
+  /// This is used when resizing embedded Android views: when resizing there
   /// is a short period during which the framework cannot tell if the newest
   /// texture frame has the previous or new size, to workaround this the
   /// framework "freezes" the texture just before resizing the Android view and
