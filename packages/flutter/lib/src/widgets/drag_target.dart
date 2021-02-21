@@ -68,28 +68,22 @@ typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
 
 /// Signature for the strategy that determines the drag start point.
 ///
-/// Used for the injectable [Draggable.dragAnchorStrategy] and
-/// [defaultDragAnchorStrategy]
+/// Used for the built-in strategies switched via [DragAnchor] and the optinally
+/// injectable [Draggable.dragAnchorStrategy]
 typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
-/// The default implementation of the strategy to determine the Offset for the
-/// dragStartPoint for the Draggable feedback. When it is [DragAnchor.child] the
-/// RenderBox of the Draggable. When it is [DragAnchor.pointer] it is simply
-/// Offset(0, 0). This strategy can be overridden by passing a function as the
-/// parameter dragAnchorStrategy which follows the [DragAnchorStrategy]
-/// signature.
-Offset defaultDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
-  switch (draggable.dragAnchor) {
-    case DragAnchor.child:
-      final RenderBox renderObject = context.findRenderObject()! as RenderBox;
-      return renderObject.globalToLocal(position);
-    case DragAnchor.pointer:
-      return Offset.zero;
-    default:
-      return Offset.zero;
-  }
+/// The default DragAnchorStrategy used when [Draggable.dragAnchor] is not set
+/// or set to [DragAnchor.child]
+Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+  return renderObject.globalToLocal(position);
 }
 
+/// The DragAnchorStrategy used when [Draggable.dragAnchor] set to
+/// [DragAnchor.pointer]
+Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+  return Offset.zero;
+}
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -214,7 +208,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
     this.dragAnchor = DragAnchor.child,
-    this.dragAnchorStrategy = defaultDragAnchorStrategy,
+    this.dragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -285,7 +279,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// is transformed compared to the child.
   final Offset feedbackOffset;
 
-  /// Where this widget should be anchored during a drag.
+  /// Where this widget should be anchored during a drag. Overridable by
+  /// providing a strategy following the [DragAnchoStrategy] interface like the
+  /// built-in [childDragAnchorStrategy] and [pointerDragAnchorStrategy] or a
+  /// custom implementation.
+  @Deprecated('Use dragAnchorStrategy instead')
   final DragAnchor dragAnchor;
 
   /// A strategy that is used by this draggable to get the the anchor offset when it is dragged.
@@ -293,7 +291,7 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// The anchor offset refers to the distance between the users' fingers and the [feedback] widget when this draggable is dragged.
   ///
   /// Defaults to [defaultDragAnchorStrategy].
-  final DragAnchorStrategy dragAnchorStrategy;
+  final DragAnchorStrategy? dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
@@ -480,6 +478,19 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   void initState() {
     super.initState();
     _recognizer = widget.createRecognizer(_startDrag);
+
+    if (widget.dragAnchorStrategy == null) {
+      switch (widget.dragAnchor) {
+        case DragAnchor.child:
+          _dragAnchorStrategy = childDragAnchorStrategy;
+          break;
+        case DragAnchor.pointer:
+          _dragAnchorStrategy = pointerDragAnchorStrategy;
+          break;
+      }
+    } else {
+      _dragAnchorStrategy = widget.dragAnchorStrategy!;
+    }
   }
 
   @override
@@ -500,6 +511,8 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   GestureRecognizer? _recognizer;
   int _activeCount = 0;
 
+  late DragAnchorStrategy _dragAnchorStrategy;
+
   void _disposeRecognizerIfInactive() {
     if (_activeCount > 0)
       return;
@@ -516,7 +529,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   _DragAvatar<T>? _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    final Offset dragStartPoint = widget.dragAnchorStrategy(widget, context, position);
+    final Offset dragStartPoint = _dragAnchorStrategy(widget, context, position);
     setState(() {
       _activeCount += 1;
     });
