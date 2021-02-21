@@ -237,14 +237,12 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
-    SpringDescription? springDescription,
     this.animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
        assert(upperBound >= lowerBound),
        assert(vsync != null),
-       _springDescription = springDescription,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
@@ -272,14 +270,12 @@ class AnimationController extends Animation<double>
     this.duration,
     this.reverseDuration,
     this.debugLabel,
-    SpringDescription? springDescription,
     this.animationBehavior = AnimationBehavior.preserve,
     required TickerProvider vsync,
   }) : assert(value != null),
        assert(vsync != null),
        lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
-       _springDescription = springDescription,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
@@ -297,8 +293,9 @@ class AnimationController extends Animation<double>
 
   SpringDescription? _springDescription;
 
-  /// The spring to use with [fling] within this controller.
-  /// When null, default one will be used.
+  /// The default spring to use with [fling] in this controller.
+  ///
+  /// {@macro flutter.animation.controller.SpringDescription}
   SpringDescription get springDescription => _springDescription ?? _kSpringDescription;
   set springDescription(SpringDescription? value) {
     _springDescription = value;
@@ -681,6 +678,7 @@ class AnimationController extends Animation<double>
   /// If velocity is positive, the animation will complete, otherwise it will
   /// dismiss.
   ///
+  /// {@template flutter.animation.controller.SpringDescription}
   /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
   /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
   /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
@@ -688,6 +686,9 @@ class AnimationController extends Animation<double>
   ///
   /// The resulting spring simulation cannot be of type [SpringType.underDamped],
   /// as this can lead to unexpected look of the produced animation.
+  /// {@endtemplate}
+  ///
+  /// You can change the default spring with [AnimationController.springDescription].
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
