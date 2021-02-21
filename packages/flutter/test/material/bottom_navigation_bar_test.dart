@@ -704,6 +704,7 @@ void main() {
           data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
+              selectedFontSize: 8,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
