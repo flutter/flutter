@@ -116,6 +116,19 @@ class ScrollBehavior {
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
 
+/// [ScrollBehavior] that doesn't have a glow effect on overscroll.
+///
+/// Use [ScrollConfiguration] to apply it to the [Scrollable] widgets in a subtree.
+class GlowlessScrollBehavior extends ScrollBehavior {
+  /// Creates a [ScrollBehavior] that doesn't have a glow effect on overscroll.
+  const GlowlessScrollBehavior();
+
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+}
+
 /// Controls how [Scrollable] widgets behave in a subtree.
 ///
 /// The scroll configuration determines the [ScrollPhysics] and viewport
