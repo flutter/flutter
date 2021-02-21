@@ -53,6 +53,7 @@ Widget buildDropdown({
     bool autofocus = false,
     Color? focusColor,
     Color? dropdownColor,
+    double? menuMaxHeight,
   }) {
   final List<DropdownMenuItem<String>>? listItems = items == null
       ? null
@@ -87,6 +88,7 @@ Widget buildDropdown({
         items: listItems,
         selectedItemBuilder: selectedItemBuilder,
         itemHeight: itemHeight,
+        menuMaxHeight: menuMaxHeight,
       ),
     );
   }
@@ -111,6 +113,7 @@ Widget buildDropdown({
     items: listItems,
     selectedItemBuilder: selectedItemBuilder,
     itemHeight: itemHeight,
+    menuMaxHeight: menuMaxHeight,
   );
 }
 
@@ -139,6 +142,7 @@ Widget buildFrame({
   Color? focusColor,
   Color? dropdownColor,
   bool isFormField = false,
+  double? menuMaxHeight,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -168,7 +172,9 @@ Widget buildFrame({
             dropdownColor: dropdownColor,
             items: items,
             selectedItemBuilder: selectedItemBuilder,
-            itemHeight: itemHeight,),
+            itemHeight: itemHeight,
+            menuMaxHeight: menuMaxHeight,
+          ),
         ),
       ),
     ),
@@ -2870,7 +2876,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
   });
 
-  testWidgets('does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
+  testWidgets('Does not crash when option is selected without waiting for opening animation to complete', (WidgetTester tester) async {
     // Regression test for b/171846624.
 
     final List<String> options = <String>['first', 'second', 'third'];
@@ -2948,5 +2954,58 @@ void main() {
     // The scrollbar is shown when the list is longer than the height of the screen.
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  testWidgets("Dropdown menu's maximum height should be influenced by DropdownButton.menuMaxHeight.", (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    final Element element = tester.element(find.byType(ListView));
+    double menuHeight = element.size!.height;
+    // The default maximum height should be one item height from the edge.
+    // https://material.io/design/components/menus.html#usage
+    final double mediaHeight = MediaQuery.of(element).size.height;
+    final double defaultMenuHeight = mediaHeight - (2 * kMinInteractiveDimension);
+    expect(menuHeight, defaultMenuHeight);
+
+    await tester.tap(find.text('0').last);
+    await tester.pumpAndSettle();
+
+    // Set menuMaxHeight which is less than defaultMenuHeight
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
+      onChanged: onChanged,
+      menuMaxHeight: 7 * kMinInteractiveDimension,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    menuHeight = tester.element(find.byType(ListView)).size!.height;
+
+    expect(menuHeight == defaultMenuHeight, isFalse);
+    expect(menuHeight, kMinInteractiveDimension * 7);
+
+    await tester.tap(find.text('0').last);
+    await tester.pumpAndSettle();
+
+    // Set menuMaxHeight which is greater than defaultMenuHeight
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      items: List<String>.generate(/*length=*/64, (int index) => index.toString()),
+      onChanged: onChanged,
+      menuMaxHeight: mediaHeight,
+    ));
+
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    menuHeight = tester.element(find.byType(ListView)).size!.height;
+    expect(menuHeight, defaultMenuHeight);
   });
 }
