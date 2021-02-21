@@ -54,7 +54,7 @@ class OffscreenWidgetTree {
   }
 
   final RenderView renderView = OffscreenRenderView();
-  final BuildOwner buildOwner = BuildOwner();
+  final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
   final PipelineOwner pipelineOwner = PipelineOwner();
   RenderObjectToWidgetElement<RenderBox>? root;
 

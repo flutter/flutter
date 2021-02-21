@@ -44,7 +44,8 @@ abstract class Key {
 ///
 ///  * [Widget.key], which discusses how widgets use keys.
 abstract class LocalKey extends Key {
-  /// Default constructor, used by subclasses.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const LocalKey() : super.empty();
 }
 
