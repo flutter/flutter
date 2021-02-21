@@ -46,6 +46,13 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
   return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
 }
 
+// What was the AlertDialog's ButtonBar when many of these tests were written,
+// is now a Container with an OverflowBar child. The Container's size and location
+// match the original ButtonBar's size and location.
+Finder _findButtonBar() {
+  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
+}
+
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
 void main() {
@@ -495,7 +502,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+    final Size actionsSize = tester.getSize(_findButtonBar());
 
     expect(actionsSize.width, dialogSize.width);
   });
@@ -529,7 +536,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+    final Size actionsSize = tester.getSize(_findButtonBar());
 
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
@@ -572,25 +579,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - 8.0,
+      tester.getBottomRight(_findButtonBar()).dy - 8.0,
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + 8.0,
+      tester.getTopRight(_findButtonBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - 8.0,
+      tester.getBottomRight(_findButtonBar()).dy - 8.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(find.byType(ButtonBar)).dx - 8.0,
+      tester.getBottomRight(_findButtonBar()).dx - 8.0,
     ); // right
   });
 
@@ -636,25 +643,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(find.byType(ButtonBar)).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(find.byType(ButtonBar)).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(find.byType(ButtonBar)).dx - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findButtonBar()).dx - ((10.0 + 20.0) / 2),
     ); // right
   });
 
@@ -675,7 +682,7 @@ void main() {
     final Finder dialogFinder = find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
-    final Finder actionsFinder = find.byType(ButtonBar);
+    final Finder actionsFinder = _findButtonBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
     Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor) async {

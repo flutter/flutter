@@ -107,6 +107,10 @@ class OutlineButton extends MaterialButton {
   ///
   /// The [highlightElevation] argument must be null or a positive value. The
   /// [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
+  @Deprecated(
+    'Use OutlinedButton instead. See the migration guide in flutter.dev/go/material-button-migration-guide). '
+    'This feature was deprecated after v1.26.0-18.0.pre.'
+  )
   factory OutlineButton.icon({
     Key? key,
     required VoidCallback? onPressed,

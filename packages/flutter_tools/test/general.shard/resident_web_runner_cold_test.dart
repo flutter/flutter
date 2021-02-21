@@ -48,9 +48,10 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
+        final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
         residentWebRunner = residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
-          flutterProject: FlutterProject.current(),
+          flutterProject: project,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
           stayResident: true,

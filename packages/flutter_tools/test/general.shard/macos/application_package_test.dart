@@ -26,7 +26,7 @@ void main() {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => MockPlistUtils(),
+      PlistParser: () => FakePlistUtils(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
@@ -204,7 +204,7 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
-class MockPlistUtils extends Mock implements PlistParser {
+class FakePlistUtils extends Fake implements PlistParser {
   @override
   Map<String, dynamic> parseFile(String plistFilePath) {
     final File file = globals.fs.file(plistFilePath);

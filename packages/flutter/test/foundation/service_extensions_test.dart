@@ -226,22 +226,19 @@ void main() {
   });
 
   test('Service extensions - debugDumpApp', () async {
-    Map<String, dynamic> result;
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpApp', <String, String>{});
 
-    result = await binding.testExtension('debugDumpApp', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['TestServiceExtensionsBinding - CHECKED MODE', '<no tree currently mounted>']);
-    console.clear();
+    expect(result, <String, dynamic>{
+      'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
+    });
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
@@ -250,18 +247,15 @@ void main() {
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
@@ -275,28 +269,25 @@ void main() {
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugPaint', () async {

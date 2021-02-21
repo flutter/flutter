@@ -365,6 +365,8 @@ abstract class CreateBase extends FlutterCommand {
       'pluginClassSnakeCase': pluginClassSnakeCase,
       'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
+      // TODO(jonahwilliams): update after google3 uuid is updated.
+      // ignore: prefer_const_constructors
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
@@ -519,7 +521,7 @@ abstract class CreateBase extends FlutterCommand {
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    globals.fsUtils.copyDirectorySync(
+    copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {

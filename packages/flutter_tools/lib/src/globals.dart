@@ -8,6 +8,7 @@ import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -203,3 +204,6 @@ PlistParser _plistInstance;
 
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
+
+/// Gradle utils in the current [AppContext].
+GradleUtils get gradleUtils => context.get<GradleUtils>();
