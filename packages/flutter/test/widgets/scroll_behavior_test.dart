@@ -32,13 +32,25 @@ class TestScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
+
+  testWidgets('GlowlessScrollBehavior applied', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ScrollConfiguration(
+        behavior: GlowlessScrollBehavior(),
+        child: SingleChildScrollView(
+          child: SizedBox(height: 1000.0),
+        ),
+      ),
+    );
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 100.0));
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+  });
+
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior? behavior;
     late ScrollPositionWithSingleContext position;
 
     final Widget scrollView = SingleChildScrollView(
-      key: key,
       child: Builder(
         builder: (BuildContext context) {
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
