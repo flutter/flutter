@@ -203,7 +203,6 @@ void main(List<String> args) {
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
-    _cleanUpFiles(newCodepointsFile, oldCodepointsFile);
   }
 }
 
@@ -311,6 +310,13 @@ Error: New codepoints file does not contain all the existing codepoints.\n
         ''',
     );
     exit(1);
+  } else {
+    final int diff = newCodepointsSet.length - oldCodepointsSet.length;
+    stderr.writeln('''
+New codepoints file contains all ${oldCodepointsSet.length} existing codepoints,
+plus an additional $diff: 
+        ${newCodepointsSet.difference(oldCodepointsSet)}
+        ''');
   }
 }
 
@@ -407,10 +413,4 @@ class _Icon {
 
   @override
   String toString() => id;
-}
-
-// Replace the old codepoints file with the new.
-void _cleanUpFiles(File newCodepointsFile, File oldCodepointsFile) {
-  stderr.writeln('\nMoving new codepoints file to ${oldCodepointsFile.path}.\n');
-  newCodepointsFile.renameSync(oldCodepointsFile.path);
 }
