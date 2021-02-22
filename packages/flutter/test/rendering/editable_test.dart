@@ -693,6 +693,91 @@ void main() {
     expect(editable.maxScrollExtent, equals(10));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/42772
 
+  test('moveSelectionLeft/RightByLine stays on the current line', () async {
+    const String text = 'one two three\n\nfour five six';
+    final TextSelectionDelegate delegate = FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: 0),
+        );
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    late TextSelection currentSelection;
+
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selectPositionAt(from: Offset.zero, cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    // Move to the end of the first line.
+    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 13);
+    // RenderEditable relies on its parent that passes onSelectionChanged to set
+    // the selection.
+    editable.selection = currentSelection;
+
+    // Try moveSelectionRightByLine again and nothing happens because we're
+    // already at the end of a line.
+    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 13);
+
+    // Move back to the start of the line.
+    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+    editable.selection = currentSelection;
+
+    // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
+    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    // Move the selection to the empty line.
+    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 13);
+    editable.selection = currentSelection;
+    editable.moveSelectionRight(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 14);
+    editable.selection = currentSelection;
+
+    // Neither moveSelectionLeftByLine nor moveSelectionRightByLine do anything
+    // here, because we're at both the beginning and end of the line.
+    editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 14);
+    editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 14);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
   test('arrow keys and delete handle simple text correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState()
       ..textEditingValue = const TextEditingValue(
