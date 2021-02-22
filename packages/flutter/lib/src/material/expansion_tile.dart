@@ -91,12 +91,12 @@ class ExpansionTile extends StatefulWidget {
   /// When not null, defines the background color of tile when the sublist is collapsed.
   final Color? collapsedBackgroundColor;
 
-  /// When not null, defines the splash color on tap. set to transparent
+  /// When not null, defines the splash color on tap.
   /// When null defaults to theme splash color
   /// If want to remove the default splash behaviour, set to Colors.transparent
   final Color? splashColor;
 
-  /// When not null, defines the highlight color on tap. set to transparent
+  /// When not null, defines the highlight color on tap.
   /// When null defaults to theme splash color
   /// If want to remove the default highlight behaviour, set to Colors.transparent
   final Color? highlightColor;
