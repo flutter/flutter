@@ -54,6 +54,9 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
+    # This exists for backwards compatibility of tests that are being run
+    # on LUCI. This can be removed in coordination with a LUCI change:
+    # https://github.com/flutter/flutter/issues/76547
     if args.macos_enable_metal:
       target_dir.append('metal')
 
@@ -263,11 +266,7 @@ def to_gn_args(args):
       # build a macOS metal only shell and a gl only shell.
       gn_args['allow_deprecated_api_calls'] = True
       gn_args['skia_use_metal'] = True
-      if args.macos_enable_metal:
-        gn_args['shell_enable_metal'] = True
-        # Skia has Metal support on macOS version >= 10.14.
-        MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION = '10.14'
-        gn_args['mac_sdk_min'] = MACOS_SKIA_METAL_SUPPORTED_MIN_VERSION
+      gn_args['shell_enable_metal'] = True
 
     if args.enable_vulkan:
       # Enable vulkan in the Flutter shell.
