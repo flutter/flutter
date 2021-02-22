@@ -1,4 +1,4 @@
-Signature: 428f150652111af829942084b60627e1
+Signature: d9335ebb46ef17643f641544cfd4abfd
 
 UNUSED LICENSES:
 
@@ -3418,6 +3418,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/goldfish_sync.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io2/inotify.fidl
+FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/inotify.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/span.h
