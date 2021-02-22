@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonEncode;
-import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
