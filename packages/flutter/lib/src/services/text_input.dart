@@ -754,6 +754,43 @@ class TextEditingValue {
   );
 }
 
+/// Indicates what triggered the change in selected text (including changes to
+/// the cursor location).
+enum SelectionChangedCause {
+  /// The user tapped on the text and that caused the selection (or the location
+  /// of the cursor) to change.
+  tap,
+
+  /// The user tapped twice in quick succession on the text and that caused
+  /// the selection (or the location of the cursor) to change.
+  doubleTap,
+
+  /// The user long-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  longPress,
+
+  /// The user force-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  forcePress,
+
+  /// The user used the keyboard to change the selection or the location of the
+  /// cursor.
+  ///
+  /// Keyboard-triggered selection changes may be caused by the IME as well as
+  /// by accessibility tools (e.g. TalkBack on Android).
+  keyboard,
+
+  /// The user used the selection toolbar to change the selection or the
+  /// location of the cursor.
+  ///
+  /// An example is when the user taps on select all in the tool bar.
+  toolBar,
+
+  /// The user used the mouse to change the selection by dragging over a piece
+  /// of text.
+  drag,
+}
+
 /// An interface for manipulating the selection, to be used by the implementor
 /// of the toolbar widget.
 abstract class TextSelectionDelegate {
@@ -765,13 +802,24 @@ abstract class TextSelectionDelegate {
   ///
   /// The new [value] is treated as user input and thus may subject to input
   /// formatting.
+  @Deprecated(
+    'Use the userUpdateTextEditingValue instead. '
+    'This feature was deprecated after v1.26.0-17.2.pre.'
+  )
+  set textEditingValue(TextEditingValue value) {}
+
+  /// Indicates that the user has requested the delegate to replace its current
+  /// text editing state with [value].
+  ///
+  /// The new [value] is treated as user input and thus may subject to input
+  /// formatting.
   ///
   /// See also:
   ///
-  /// * [EditableTextState.textEditingValue]: an implementation that applies
-  ///   additional pre-processing to the specified [value], before updating the
-  ///   text editing state.
-  set textEditingValue(TextEditingValue value);
+  /// * [EditableTextState.userUpdateTextEditingValue]: an implementation that
+  ///   applies additional pre-processing to the specified [value], before
+  ///   updating the text editing state.
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
   void hideToolbar();

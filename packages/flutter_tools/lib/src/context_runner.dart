@@ -84,6 +84,9 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         fileSystem: globals.fs,
         artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
+        gradleUtils: globals.gradleUtils,
+        platform: globals.platform,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,

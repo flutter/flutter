@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
