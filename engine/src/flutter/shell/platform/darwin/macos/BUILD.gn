@@ -82,6 +82,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOpenGLRenderer.h",
     "framework/Source/FlutterOpenGLRenderer.mm",
     "framework/Source/FlutterRenderer.h",
+    "framework/Source/FlutterRenderingBackend.h",
+    "framework/Source/FlutterRenderingBackend.mm",
     "framework/Source/FlutterResizableBackingStoreProvider.h",
     "framework/Source/FlutterResizableBackingStoreProvider.mm",
     "framework/Source/FlutterResizeSynchronizer.h",
@@ -152,22 +154,16 @@ executable("flutter_desktop_darwin_unittests") {
   testonly = true
 
   sources = [
+    "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
     "framework/Source/FlutterEngineTest.mm",
     "framework/Source/FlutterGLCompositorUnittests.mm",
+    "framework/Source/FlutterMetalRendererTest.mm",
+    "framework/Source/FlutterMetalSurfaceManagerTest.mm",
+    "framework/Source/FlutterOpenGLRendererTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
     "framework/Source/FlutterViewControllerTestUtils.mm",
   ]
-
-  if (shell_enable_metal) {
-    sources += [
-      "framework/Source/FlutterEmbedderExternalTextureUnittests.mm",
-      "framework/Source/FlutterMetalRendererTest.mm",
-      "framework/Source/FlutterMetalSurfaceManagerTest.mm",
-    ]
-  } else {
-    sources += [ "framework/Source/FlutterOpenGLRendererTest.mm" ]
-  }
 
   cflags_objcc = flutter_cflags_objcc_arc
 
@@ -177,6 +173,7 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
     "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
@@ -185,10 +182,6 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/testing:testing_lib",
     "//third_party/ocmock:ocmock",
   ]
-
-  if (shell_enable_metal) {
-    deps += [ "//flutter/shell/platform/darwin/graphics" ]
-  }
 }
 
 copy("copy_dylib") {
