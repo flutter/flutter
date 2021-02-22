@@ -330,7 +330,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// Represents the logical "Escape" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b, keyLabel: r'', debugName: kReleaseMode ? null : 'Escape');
+  static const LogicalKeyboardKey escape = LogicalKeyboardKey(0x0000000001b, keyLabel: null, debugName: kReleaseMode ? null : 'Escape');
 
   /// Represents the logical "Space" key on the keyboard.
   ///

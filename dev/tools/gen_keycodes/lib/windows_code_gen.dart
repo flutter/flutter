@@ -24,7 +24,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer windowsScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.data) {
       if (entry.windowsScanCode != null) {
-        windowsScanCodeMap.writeln('    {${toHex(entry.windowsScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
+        windowsScanCodeMap.writeln('        {${toHex(entry.windowsScanCode)}, ${toHex(entry.usbHidCode)}},  // ${entry.constantName}');
       }
     }
     return windowsScanCodeMap.toString().trimRight();
@@ -35,7 +35,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     final StringBuffer result = StringBuffer();
     for (final LogicalKeyEntry entry in logicalData.data.values) {
       zipStrict(entry.windowsValues, entry.windowsNames, (int windowsValue, String windowsName) {
-        result.writeln('    {${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)}},  // $windowsName');
+        result.writeln('        {${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)}},  // $windowsName');
       });
     }
     return result.toString().trimRight();
@@ -62,7 +62,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
         print('Unexpected logical key $logicalName specified for scanCodeToLogicalMap.');
         return;
       }
-      result.writeln('    {${toHex(physicalEntry.windowsScanCode)}, ${toHex(logicalValue, digits: 10)}},  // ${physicalEntry.name}');
+      result.writeln('        {${toHex(physicalEntry.windowsScanCode)}, ${toHex(logicalValue, digits: 10)}},  // ${physicalEntry.name}');
     });
     return result.toString().trimRight();
   }

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,15 +19,18 @@
 
 namespace flutter {
 
-std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::windowsToPhysicalMap_ = {
+std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::windowsToPhysicalMap_ =
+    {
 @@@WINDOWS_SCAN_CODE_MAP@@@
 };
 
-std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::windowsToLogicalMap_ = {
+std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::windowsToLogicalMap_ =
+    {
 @@@WINDOWS_KEY_CODE_MAP@@@
 };
 
-std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::scanCodeToLogicalMap_ = {
+std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::scanCodeToLogicalMap_ =
+    {
 @@@WINDOWS_SCAN_CODE_TO_LOGICAL_MAP@@@
 };
 
