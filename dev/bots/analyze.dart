@@ -977,6 +977,12 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
   // dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink/android/app/src/main/res/mipmap-xxhdpi/flutter_splash_screen.png
   const Hash256(0xCD46C01BAFA3B243, 0xA6AA1645EEDDE481, 0x143AC8ABAB1A0996, 0x22CAA9D41F74649A),
 
+  // dev/integration_tests/flutter_driver_screenshot_test/assets/red_square.png
+  const Hash256(0x40054377E1E084F4, 0x4F4410CE8F44C210, 0xABA945DFC55ED0EF, 0x23BDF9469E32F8D3),
+
+  // dev/integration_tests/flutter_driver_screenshot_test/test_driver/goldens/red_square_image/iPhone7,2.png
+  const Hash256(0x7F9D27C7BC418284, 0x01214E21CA886B2F, 0x40D9DA2B31AE7754, 0x71D68375F9C8A824),
+
   // examples/flutter_view/assets/flutter-mark-square-64.png
   // examples/platform_view/assets/flutter-mark-square-64.png
   const Hash256(0xF416B0D8AC552EC8, 0x819D1F492D1AB5E6, 0xD4F20CF45DB47C22, 0x7BB431FEFB5B67B2),
@@ -1015,7 +1021,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBina
   assert(
     _legacyBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0xA88D8E5183D353F9 // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
   );
   legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
