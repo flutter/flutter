@@ -301,7 +301,8 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key], with an optional [version] number.
+/// golden image file identified by [key], with optional [version] number and
+/// [precisionTolerance] level.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
@@ -312,6 +313,11 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///
 /// The [version] is a number that can be used to differentiate historical
 /// golden files. This parameter is optional.
+///
+/// The [precisionTolerance] represents the allowable percent difference in
+/// pixel comparison. The value must be between 0.0 and 1.0 inclusive, and
+/// defaults to 0.0. This allows the user to set an allowable amount of
+/// difference between images.
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by

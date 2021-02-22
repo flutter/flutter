@@ -130,8 +130,7 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
 ///
 /// See also:
 ///
@@ -236,8 +235,7 @@ abstract class WebGoldenComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a comparator
-/// with tolerance levels for allowable differences.
+/// configuration).
 ///
 /// See also:
 ///
