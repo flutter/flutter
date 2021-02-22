@@ -290,7 +290,7 @@ class TestCommand extends FlutterCommand {
     if (totalShards != null) {
       if (shardIndex == null) {
         throwToolExit(
-            'If you set --total-hards you need to add --shard-index.');
+            'If you set --total-shards you need to add --shard-index.');
       }
     } else if (shardIndex != null) {
       if (totalShards == null) {
