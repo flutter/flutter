@@ -7,14 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/common/diagnostics_tree.dart';
-import 'package:flutter_driver/src/common/find.dart';
-import 'package:flutter_driver/src/common/geometry.dart';
-import 'package:flutter_driver/src/common/request_data.dart';
-import 'package:flutter_driver/src/common/text.dart';
-import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -599,6 +592,18 @@ void main() {
                       controller: TextEditingController(text: 'Hello5'),
                     ),
                   ),
+                  Container(
+                    height: 25.0,
+                    child: RichText(
+                      key: const ValueKey<String>('text6'),
+                      text: const TextSpan(children: <TextSpan>[
+                        TextSpan(text: 'Hello'),
+                        TextSpan(text: ', '),
+                        TextSpan(text: 'World'),
+                        TextSpan(text: '!'),
+                      ]),
+                    ),
+                  ),
                 ],
               ))
           )
@@ -609,6 +614,7 @@ void main() {
       expect(await getTextInternal(ByValueKey('text3')), 'Hello3');
       expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
       expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
+      expect(await getTextInternal(ByValueKey('text6')), 'Hello, World!');
 
       // Check if error thrown for other types
       final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();

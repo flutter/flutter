@@ -6,6 +6,7 @@
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 
 import '../artifacts.dart';
@@ -14,6 +15,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -21,14 +23,14 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'android_builder.dart';
+import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
 /// The directory where the APK artifact is generated.
-@visibleForTesting
 Directory getApkDirectory(FlutterProject project) {
   return project.isModule
     ? project.android.buildDirectory
@@ -104,59 +106,12 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   return <String>['app$flavorString-$buildType.apk'];
 }
 
-/// Returns true if the current version of the Gradle plugin is supported.
-bool _isSupportedVersion(AndroidProject project) {
-  final File plugin = project.hostAppGradleRoot.childFile(
-      globals.fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
-  if (plugin.existsSync()) {
-    return false;
-  }
-  final File appGradle = project.hostAppGradleRoot.childFile(
-      globals.fs.path.join('app', 'build.gradle'));
-  if (!appGradle.existsSync()) {
-    return false;
-  }
-  for (final String line in appGradle.readAsLinesSync()) {
-    if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
-        line.contains("def flutterPluginVersion = 'managed'")) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/// Returns the apk file created by [buildGradleProject]
-Future<File> getGradleAppOut(AndroidProject androidProject) async {
-  if (!_isSupportedVersion(androidProject)) {
-    _exitWithUnsupportedProjectMessage();
-  }
-  return getApkDirectory(androidProject.parent).childFile('app.apk');
-}
-
-/// Runs `gradlew dependencies`, ensuring that dependencies are resolved and
-/// potentially downloaded.
-Future<void> checkGradleDependencies() async {
-  final Status progress = globals.logger.startProgress(
-    'Ensuring gradle dependencies are up to date...',
-  );
-  final FlutterProject flutterProject = FlutterProject.current();
-  await globals.processUtils.run(<String>[
-      gradleUtils.getExecutable(flutterProject),
-      'dependencies',
-    ],
-    throwOnError: true,
-    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: gradleEnvironment,
-  );
-  globals.androidSdk?.reinitialize();
-  progress.stop();
-}
-
 /// Tries to create `settings_aar.gradle` in an app project by removing the subprojects
 /// from the existing `settings.gradle` file. This operation will fail if the existing
 /// `settings.gradle` file has local edits.
 @visibleForTesting
-void createSettingsAarGradle(Directory androidDirectory) {
+void createSettingsAarGradle(Directory androidDirectory, Logger logger) {
+  final FileSystem fileSystem = androidDirectory.fileSystem;
   final File newSettingsFile = androidDirectory.childFile('settings_aar.gradle');
   if (newSettingsFile.existsSync()) {
     return;
@@ -167,14 +122,14 @@ void createSettingsAarGradle(Directory androidDirectory) {
   }
   final String currentFileContent = currentSettingsFile.readAsStringSync();
 
-  final String newSettingsRelativeFile = globals.fs.path.relative(newSettingsFile.path);
-  final Status status = globals.logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...');
+  final String newSettingsRelativeFile = fileSystem.path.relative(newSettingsFile.path);
+  final Status status = logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...');
 
-  final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-  final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
+  final String flutterRoot = fileSystem.path.absolute(Cache.flutterRoot);
+  final File legacySettingsDotGradleFiles = fileSystem.file(fileSystem.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'settings.gradle.legacy_versions'));
   assert(legacySettingsDotGradleFiles.existsSync());
-  final String settingsAarContent = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
+  final String settingsAarContent = fileSystem.file(fileSystem.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
 
   // Get the `settings.gradle` content variants that should be patched.
@@ -190,478 +145,636 @@ void createSettingsAarGradle(Directory androidDirectory) {
   }
   if (!exactMatch) {
     status.cancel();
-    globals.printStatus('$warningMark Flutter tried to create the file `$newSettingsRelativeFile`, but failed.');
+    logger.printStatus('$warningMark Flutter tried to create the file `$newSettingsRelativeFile`, but failed.');
     // Print how to manually update the file.
-    globals.printStatus(globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
+    logger.printStatus(fileSystem.file(fileSystem.path.join(flutterRoot, 'packages','flutter_tools',
         'gradle', 'manual_migration_settings.gradle.md')).readAsStringSync());
     throwToolExit('Please create the file and run this command again.');
   }
   // Copy the new file.
   newSettingsFile.writeAsStringSync(settingsAarContent);
   status.stop();
-  globals.printStatus('$successMark `$newSettingsRelativeFile` created successfully.');
+  logger.printStatus('$successMark `$newSettingsRelativeFile` created successfully.');
 }
 
-/// Builds an app.
-///
-/// * [project] is typically [FlutterProject.current()].
-/// * [androidBuildInfo] is the build configuration.
-/// * [target] is the target dart entry point. Typically, `lib/main.dart`.
-/// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
-///   otherwise the output artifact is an `*.apk`.
-/// * The plugins are built as AARs if [shouldBuildPluginAsAar] is `true`. This isn't set by default
-///   because it makes the build slower proportional to the number of plugins.
-/// * [retries] is the max number of build retries in case one of the [GradleHandledError] handler
-///   returns [GradleBuildStatus.retry] or [GradleBuildStatus.retryWithAarPlugins].
-Future<void> buildGradleApp({
-  @required FlutterProject project,
-  @required AndroidBuildInfo androidBuildInfo,
-  @required String target,
-  @required bool isBuildingBundle,
-  @required List<GradleHandledError> localGradleErrors,
-  bool shouldBuildPluginAsAar = false,
-  int retries = 1,
-}) async {
-  assert(project != null);
-  assert(androidBuildInfo != null);
-  assert(target != null);
-  assert(isBuildingBundle != null);
-  assert(localGradleErrors != null);
-  assert(globals.androidSdk != null);
+/// An implementation of the [AndroidBuilder] that delegates to gradle.
+class AndroidGradleBuilder implements AndroidBuilder {
+  AndroidGradleBuilder({
+    @required Logger logger,
+    @required ProcessManager processManager,
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required Usage usage,
+    @required GradleUtils gradleUtils,
+    @required Platform platform,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _usage = usage,
+       _gradleUtils = gradleUtils,
+       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  if (!project.android.isUsingGradle) {
-    _exitWithProjectNotUsingGradleMessage();
-  }
-  if (!_isSupportedVersion(project.android)) {
-    _exitWithUnsupportedProjectMessage();
-  }
-  final Directory buildDirectory = project.android.buildDirectory;
+  final Logger _logger;
+  final ProcessUtils _processUtils;
+  final FileSystem _fileSystem;
+  final Artifacts _artifacts;
+  final Usage _usage;
+  final GradleUtils _gradleUtils;
+  final FileSystemUtils _fileSystemUtils;
 
-  final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
-  if (usesAndroidX) {
-    BuildEvent('app-using-android-x', flutterUsage: globals.flutterUsage).send();
-  } else if (!usesAndroidX) {
-    BuildEvent('app-not-using-android-x', flutterUsage: globals.flutterUsage).send();
-    globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
-    globals.printStatus(
-      'To avoid potential build failures, you can quickly migrate your app '
-      'by following the steps on https://goo.gl/CP92wY .',
-      indent: 4,
-    );
-  }
-  // The default Gradle script reads the version name and number
-  // from the local.properties file.
-  updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
-
-  if (shouldBuildPluginAsAar) {
-    // Create a settings.gradle that doesn't import the plugins as subprojects.
-    createSettingsAarGradle(project.android.hostAppGradleRoot);
-    await buildPluginsAsAar(
-      project,
-      androidBuildInfo,
-      buildDirectory: buildDirectory.childDirectory('app'),
-    );
-  }
-
-  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-  final String assembleTask = isBuildingBundle
-    ? getBundleTaskFor(buildInfo)
-    : getAssembleTaskFor(buildInfo);
-
-  final Status status = globals.logger.startProgress(
-    "Running Gradle task '$assembleTask'...",
-    multilineOutput: true,
-  );
-
-  final List<String> command = <String>[
-    gradleUtils.getExecutable(project),
-  ];
-  if (globals.logger.isVerbose) {
-    command.add('-Pverbose=true');
-  } else {
-    command.add('-q');
-  }
-  if (!buildInfo.androidGradleDaemon) {
-    command.add('--no-daemon');
-  }
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final Directory localEngineRepo = _getLocalEngineRepo(
-      engineOutPath: localEngineArtifacts.engineOutPath,
-      androidBuildInfo: androidBuildInfo,
-    );
-    globals.printTrace(
-      'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
-      'Local Maven repo: ${localEngineRepo.path}'
-    );
-    command.add('-Plocal-engine-repo=${localEngineRepo.path}');
-    command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-    command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
-    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-        localEngineArtifacts.engineOutPath)}');
-  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo
-        .targetArchs
-        .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
-  if (target != null) {
-    command.add('-Ptarget=$target');
-  }
-  command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
-
-  if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
-    command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-  }
-  if (buildInfo.fileSystemScheme != null) {
-    command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  }
-  if (androidBuildInfo.splitPerAbi) {
-    command.add('-Psplit-per-abi=true');
-  }
-  if (shouldBuildPluginAsAar) {
-    // Pass a system flag instead of a project flag, so this flag can be
-    // read from include_flutter.groovy.
-    command.add('-Dbuild-plugins-as-aars=true');
-    // Don't use settings.gradle from the current project since it includes the plugins as subprojects.
-    command.add('--settings-file=settings_aar.gradle');
-  }
-  if (androidBuildInfo.fastStart) {
-    command.add('-Pfast-start=true');
-  }
-  command.add(assembleTask);
-
-  GradleHandledError detectedGradleError;
-  String detectedGradleErrorLine;
-  String consumeLog(String line) {
-    // This message was removed from first-party plugins,
-    // but older plugin versions still display this message.
-    if (androidXPluginWarningRegex.hasMatch(line)) {
-      // Don't pipe.
-      return null;
+  /// Builds the AAR and POM files for the current Flutter module or plugin.
+  @override
+  Future<void> buildAar({
+    @required FlutterProject project,
+    @required Set<AndroidBuildInfo> androidBuildInfo,
+    @required String target,
+    @required String outputDirectoryPath,
+    @required String buildNumber,
+  }) async {
+    Directory outputDirectory =
+      _fileSystem.directory(outputDirectoryPath ?? project.android.buildDirectory);
+    if (project.isModule) {
+      // Module projects artifacts are located in `build/host`.
+      outputDirectory = outputDirectory.childDirectory('host');
     }
-    if (detectedGradleError != null) {
+    for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
+      await buildGradleAar(
+        project: project,
+        androidBuildInfo: androidBuildInfo,
+        target: target,
+        outputDirectory: outputDirectory,
+        buildNumber: buildNumber,
+      );
+    }
+    printHowToConsumeAar(
+      buildModes: androidBuildInfo
+        .map<String>((AndroidBuildInfo androidBuildInfo) {
+          return androidBuildInfo.buildInfo.modeName;
+        }).toSet(),
+      androidPackage: project.manifest.androidPackage,
+      repoDirectory: getRepoDirectory(outputDirectory),
+      buildNumber: buildNumber,
+      logger: _logger,
+      fileSystem: _fileSystem,
+    );
+  }
+
+  /// Builds the APK.
+  @override
+  Future<void> buildApk({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  }) async {
+    await buildGradleApp(
+      project: project,
+      androidBuildInfo: androidBuildInfo,
+      target: target,
+      isBuildingBundle: false,
+      localGradleErrors: gradleErrors,
+    );
+  }
+
+  /// Builds the App Bundle.
+  @override
+  Future<void> buildAab({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+  }) async {
+    await buildGradleApp(
+      project: project,
+      androidBuildInfo: androidBuildInfo,
+      target: target,
+      isBuildingBundle: true,
+      localGradleErrors: gradleErrors,
+    );
+  }
+
+  /// Builds an app.
+  ///
+  /// * [project] is typically [FlutterProject.current()].
+  /// * [androidBuildInfo] is the build configuration.
+  /// * [target] is the target dart entry point. Typically, `lib/main.dart`.
+  /// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
+  ///   otherwise the output artifact is an `*.apk`.
+  /// * The plugins are built as AARs if [shouldBuildPluginAsAar] is `true`. This isn't set by default
+  ///   because it makes the build slower proportional to the number of plugins.
+  /// * [retries] is the max number of build retries in case one of the [GradleHandledError] handler
+  ///   returns [GradleBuildStatus.retry] or [GradleBuildStatus.retryWithAarPlugins].
+  Future<void> buildGradleApp({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+    @required bool isBuildingBundle,
+    @required List<GradleHandledError> localGradleErrors,
+    bool shouldBuildPluginAsAar = false,
+    int retries = 1,
+  }) async {
+    assert(project != null);
+    assert(androidBuildInfo != null);
+    assert(target != null);
+    assert(isBuildingBundle != null);
+    assert(localGradleErrors != null);
+
+    if (!project.android.isSupportedVersion) {
+      _exitWithUnsupportedProjectMessage(_usage);
+    }
+    final Directory buildDirectory = project.android.buildDirectory;
+
+    final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+    if (usesAndroidX) {
+      BuildEvent('app-using-android-x', flutterUsage: _usage).send();
+    } else if (!usesAndroidX) {
+      BuildEvent('app-not-using-android-x', flutterUsage: _usage).send();
+      _logger.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
+      _logger.printStatus(
+        'To avoid potential build failures, you can quickly migrate your app '
+            'by following the steps on https://goo.gl/CP92wY .',
+        indent: 4,
+      );
+    }
+    // The default Gradle script reads the version name and number
+    // from the local.properties file.
+    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+
+    if (shouldBuildPluginAsAar) {
+      // Create a settings.gradle that doesn't import the plugins as subprojects.
+      createSettingsAarGradle(project.android.hostAppGradleRoot, _logger);
+      await buildPluginsAsAar(
+        project,
+        androidBuildInfo,
+        buildDirectory: buildDirectory.childDirectory('app'),
+      );
+    }
+
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+    final String assembleTask = isBuildingBundle
+        ? getBundleTaskFor(buildInfo)
+        : getAssembleTaskFor(buildInfo);
+
+    final Status status = _logger.startProgress(
+      "Running Gradle task '$assembleTask'...",
+      multilineOutput: true,
+    );
+
+    final List<String> command = <String>[
+      _gradleUtils.getExecutable(project),
+    ];
+    if (_logger.isVerbose) {
+      command.add('-Pverbose=true');
+    } else {
+      command.add('-q');
+    }
+    if (!buildInfo.androidGradleDaemon) {
+      command.add('--no-daemon');
+    }
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
+      final Directory localEngineRepo = _getLocalEngineRepo(
+        engineOutPath: localEngineArtifacts.engineOutPath,
+        androidBuildInfo: androidBuildInfo,
+        fileSystem: _fileSystem,
+      );
+      _logger.printTrace(
+          'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+              'Local Maven repo: ${localEngineRepo.path}'
+      );
+      command.add('-Plocal-engine-repo=${localEngineRepo.path}');
+      command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
+      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+      command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+          localEngineArtifacts.engineOutPath)}');
+    } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+      final String targetPlatforms = androidBuildInfo
+          .targetArchs
+          .map(getPlatformNameForAndroidArch).join(',');
+      command.add('-Ptarget-platform=$targetPlatforms');
+    }
+    if (target != null) {
+      command.add('-Ptarget=$target');
+    }
+    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+
+    if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
+      command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
+    }
+    if (buildInfo.fileSystemScheme != null) {
+      command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+    }
+    if (androidBuildInfo.splitPerAbi) {
+      command.add('-Psplit-per-abi=true');
+    }
+    if (shouldBuildPluginAsAar) {
+      // Pass a system flag instead of a project flag, so this flag can be
+      // read from include_flutter.groovy.
+      command.add('-Dbuild-plugins-as-aars=true');
+      // Don't use settings.gradle from the current project since it includes the plugins as subprojects.
+      command.add('--settings-file=settings_aar.gradle');
+    }
+    if (androidBuildInfo.fastStart) {
+      command.add('-Pfast-start=true');
+    }
+    command.add(assembleTask);
+
+    GradleHandledError detectedGradleError;
+    String detectedGradleErrorLine;
+    String consumeLog(String line) {
+      // This message was removed from first-party plugins,
+      // but older plugin versions still display this message.
+      if (androidXPluginWarningRegex.hasMatch(line)) {
+        // Don't pipe.
+        return null;
+      }
+      if (detectedGradleError != null) {
+        // Pipe stdout/stderr from Gradle.
+        return line;
+      }
+      for (final GradleHandledError gradleError in localGradleErrors) {
+        if (gradleError.test(line)) {
+          detectedGradleErrorLine = line;
+          detectedGradleError = gradleError;
+          // The first error match wins.
+          break;
+        }
+      }
       // Pipe stdout/stderr from Gradle.
       return line;
     }
-    for (final GradleHandledError gradleError in localGradleErrors) {
-      if (gradleError.test(line)) {
-        detectedGradleErrorLine = line;
-        detectedGradleError = gradleError;
-        // The first error match wins.
-        break;
+
+    final Stopwatch sw = Stopwatch()
+      ..start();
+    int exitCode = 1;
+    try {
+      exitCode = await _processUtils.stream(
+        command,
+        workingDirectory: project.android.hostAppGradleRoot.path,
+        allowReentrantFlutter: true,
+        environment: <String, String>{
+          if (javaPath != null)
+            'JAVA_HOME': javaPath,
+        },
+        mapFunction: consumeLog,
+      );
+    } on ProcessException catch (exception) {
+      consumeLog(exception.toString());
+      // Rethrow the exception if the error isn't handled by any of the
+      // `localGradleErrors`.
+      if (detectedGradleError == null) {
+        rethrow;
       }
+    } finally {
+      status.stop();
     }
-    // Pipe stdout/stderr from Gradle.
-    return line;
-  }
 
-  final Stopwatch sw = Stopwatch()..start();
-  int exitCode = 1;
-  try {
-    exitCode = await globals.processUtils.stream(
-      command,
-      workingDirectory: project.android.hostAppGradleRoot.path,
-      allowReentrantFlutter: true,
-      environment: gradleEnvironment,
-      mapFunction: consumeLog,
-    );
-  } on ProcessException catch (exception) {
-    consumeLog(exception.toString());
-    // Rethrow the exception if the error isn't handled by any of the
-    // `localGradleErrors`.
-    if (detectedGradleError == null) {
-      rethrow;
-    }
-  } finally {
-    status.stop();
-  }
+    _usage.sendTiming('build', 'gradle', sw.elapsed);
 
-  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+    if (exitCode != 0) {
+      if (detectedGradleError == null) {
+        BuildEvent('gradle-unknown-failure', flutterUsage: _usage).send();
+        throwToolExit(
+          'Gradle task $assembleTask failed with exit code $exitCode',
+          exitCode: exitCode,
+        );
+      } else {
+        final GradleBuildStatus status = await detectedGradleError.handler(
+          line: detectedGradleErrorLine,
+          project: project,
+          usesAndroidX: usesAndroidX,
+          shouldBuildPluginAsAar: shouldBuildPluginAsAar,
+        );
 
-  if (exitCode != 0) {
-    if (detectedGradleError == null) {
-      BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
-      throwToolExit(
-        'Gradle task $assembleTask failed with exit code $exitCode',
-        exitCode: exitCode,
-      );
-    } else {
-      final GradleBuildStatus status = await detectedGradleError.handler(
-        line: detectedGradleErrorLine,
-        project: project,
-        usesAndroidX: usesAndroidX,
-        shouldBuildPluginAsAar: shouldBuildPluginAsAar,
-      );
-
-      if (retries >= 1) {
-        final String successEventLabel = 'gradle-${detectedGradleError.eventLabel}-success';
-        switch (status) {
-          case GradleBuildStatus.retry:
-            await buildGradleApp(
-              project: project,
-              androidBuildInfo: androidBuildInfo,
-              target: target,
-              isBuildingBundle: isBuildingBundle,
-              localGradleErrors: localGradleErrors,
-              shouldBuildPluginAsAar: shouldBuildPluginAsAar,
-              retries: retries - 1,
-            );
-            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
-            return;
-          case GradleBuildStatus.retryWithAarPlugins:
-            await buildGradleApp(
-              project: project,
-              androidBuildInfo: androidBuildInfo,
-              target: target,
-              isBuildingBundle: isBuildingBundle,
-              localGradleErrors: localGradleErrors,
-              shouldBuildPluginAsAar: true,
-              retries: retries - 1,
-            );
-            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
-            return;
-          case GradleBuildStatus.exit:
+        if (retries >= 1) {
+          final String successEventLabel = 'gradle-${detectedGradleError.eventLabel}-success';
+          switch (status) {
+            case GradleBuildStatus.retry:
+              await buildGradleApp(
+                project: project,
+                androidBuildInfo: androidBuildInfo,
+                target: target,
+                isBuildingBundle: isBuildingBundle,
+                localGradleErrors: localGradleErrors,
+                shouldBuildPluginAsAar: shouldBuildPluginAsAar,
+                retries: retries - 1,
+              );
+              BuildEvent(successEventLabel, flutterUsage: _usage).send();
+              return;
+            case GradleBuildStatus.retryWithAarPlugins:
+              await buildGradleApp(
+                project: project,
+                androidBuildInfo: androidBuildInfo,
+                target: target,
+                isBuildingBundle: isBuildingBundle,
+                localGradleErrors: localGradleErrors,
+                shouldBuildPluginAsAar: true,
+                retries: retries - 1,
+              );
+              BuildEvent(successEventLabel, flutterUsage: _usage).send();
+              return;
+            case GradleBuildStatus.exit:
             // noop.
+          }
         }
+        BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: _usage).send();
+        throwToolExit(
+          'Gradle task $assembleTask failed with exit code $exitCode',
+          exitCode: exitCode,
+        );
       }
-      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
-      throwToolExit(
-        'Gradle task $assembleTask failed with exit code $exitCode',
-        exitCode: exitCode,
+    }
+
+    if (isBuildingBundle) {
+      final File bundleFile = findBundleFile(project, buildInfo, _logger, _usage);
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsMB(bundleFile.lengthSync())})';
+
+      if (buildInfo.codeSizeDirectory != null) {
+        await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
+      }
+
+      _logger.printStatus(
+        '$successMark Built ${_fileSystem.path.relative(bundleFile.path)}$appSize.',
+        color: TerminalColor.green,
+      );
+      return;
+    }
+    // Gradle produced an APK.
+    final Iterable<String> apkFilesPaths = project.isModule
+        ? findApkFilesModule(project, androidBuildInfo, _logger, _usage)
+        : listApkPaths(androidBuildInfo);
+    final Directory apkDirectory = getApkDirectory(project);
+    final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
+    if (!apkFile.existsSync()) {
+      _exitWithExpectedFileNotFound(
+        project: project,
+        fileExtension: '.apk',
+        logger: _logger,
+        usage: _usage,
       );
     }
-  }
 
-  if (isBuildingBundle) {
-    final File bundleFile = findBundleFile(project, buildInfo);
+    // Copy the first APK to app.apk, so `flutter run` can find it.
+    // TODO(egarciad): Handle multiple APKs.
+    apkFile.copySync(apkDirectory
+        .childFile('app.apk')
+        .path);
+    _logger.printTrace('calculateSha: $apkDirectory/app.apk');
+
+    final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
+    apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+
     final String appSize = (buildInfo.mode == BuildMode.debug)
-      ? '' // Don't display the size when building a debug variant.
-      : ' (${getSizeAsMB(bundleFile.lengthSync())})';
-
-    if (buildInfo.codeSizeDirectory != null) {
-      await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
-    }
-
-    globals.printStatus(
-      '$successMark Built ${globals.fs.path.relative(bundleFile.path)}$appSize.',
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(apkFile.lengthSync())})';
+    _logger.printStatus(
+      '$successMark Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
       color: TerminalColor.green,
     );
-    return;
+
+    if (buildInfo.codeSizeDirectory != null) {
+      await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+    }
   }
-  // Gradle produced an APK.
-  final Iterable<String> apkFilesPaths = project.isModule
-    ? findApkFilesModule(project, androidBuildInfo)
-    : listApkPaths(androidBuildInfo);
-  final Directory apkDirectory = getApkDirectory(project);
-  final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
-  if (!apkFile.existsSync()) {
-    _exitWithExpectedFileNotFound(
-      project: project,
-      fileExtension: '.apk',
+
+  Future<void> _performCodeSizeAnalysis(String kind,
+      File zipFile,
+      AndroidBuildInfo androidBuildInfo,) async {
+    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+      fileSystem: _fileSystem,
+      logger: _logger,
+      flutterUsage: _usage,
+    );
+    final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+    final File aotSnapshot = _fileSystem.directory(buildInfo.codeSizeDirectory)
+        .childFile('snapshot.$archName.json');
+    final File precompilerTrace = _fileSystem.directory(buildInfo.codeSizeDirectory)
+        .childFile('trace.$archName.json');
+    final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
+      zipFile: zipFile,
+      aotSnapshot: aotSnapshot,
+      precompilerTrace: precompilerTrace,
+      kind: kind,
+    );
+    final File outputFile = _fileSystemUtils.getUniqueFile(
+      _fileSystem
+        .directory(_fileSystemUtils.homeDirPath)
+        .childDirectory('.flutter-devtools'), '$kind-code-size-analysis', 'json',
+    )
+      ..writeAsStringSync(jsonEncode(output));
+    // This message is used as a sentinel in analyze_apk_size_test.dart
+    _logger.printStatus(
+      'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
+    );
+
+    // DevTools expects a file path relative to the .flutter-devtools/ dir.
+    final String relativeAppSizePath = outputFile.path
+        .split('.flutter-devtools/')
+        .last
+        .trim();
+    _logger.printStatus(
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+            'flutter pub global activate devtools; flutter pub global run devtools '
+            '--appSizeBase=$relativeAppSizePath'
     );
   }
 
-  // Copy the first APK to app.apk, so `flutter run` can find it.
-  // TODO(egarciad): Handle multiple APKs.
-  apkFile.copySync(apkDirectory.childFile('app.apk').path);
-  globals.printTrace('calculateSha: $apkDirectory/app.apk');
+  /// Builds AAR and POM files.
+  ///
+  /// * [project] is typically [FlutterProject.current()].
+  /// * [androidBuildInfo] is the build configuration.
+  /// * [outputDir] is the destination of the artifacts,
+  /// * [buildNumber] is the build number of the output aar,
+  Future<void> buildGradleAar({
+    @required FlutterProject project,
+    @required AndroidBuildInfo androidBuildInfo,
+    @required String target,
+    @required Directory outputDirectory,
+    @required String buildNumber,
+  }) async {
+    assert(project != null);
+    assert(target != null);
+    assert(androidBuildInfo != null);
+    assert(outputDirectory != null);
 
-  final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
-  apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+    final FlutterManifest manifest = project.manifest;
+    if (!manifest.isModule && !manifest.isPlugin) {
+      throwToolExit('AARs can only be built for plugin or module projects.');
+    }
 
-  final String appSize = (buildInfo.mode == BuildMode.debug)
-    ? '' // Don't display the size when building a debug variant.
-    : ' (${getSizeAsMB(apkFile.lengthSync())})';
-  globals.printStatus(
-    '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
-    color: TerminalColor.green,
-  );
-
-  if (buildInfo.codeSizeDirectory != null) {
-    await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
-  }
-}
-
-Future<void> _performCodeSizeAnalysis(
-  String kind,
-  File zipFile,
-  AndroidBuildInfo androidBuildInfo,
-) async {
-  final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    flutterUsage: globals.flutterUsage,
-  );
-  final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
-  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('snapshot.$archName.json');
-  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('trace.$archName.json');
-  final Map<String, Object> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
-    zipFile: zipFile,
-    aotSnapshot: aotSnapshot,
-    precompilerTrace: precompilerTrace,
-    kind: kind,
-  );
-  final File outputFile = globals.fsUtils.getUniqueFile(
-    globals.fs
-      .directory(globals.fsUtils.homeDirPath)
-      .childDirectory('.flutter-devtools'), '$kind-code-size-analysis', 'json',
-  )..writeAsStringSync(jsonEncode(output));
-  // This message is used as a sentinel in analyze_apk_size_test.dart
-  globals.printStatus(
-    'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
-  );
-
-  // DevTools expects a file path relative to the .flutter-devtools/ dir.
-  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-  globals.printStatus(
-    '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-    'flutter pub global activate devtools; flutter pub global run devtools '
-    '--appSizeBase=$relativeAppSizePath'
-  );
-}
-
-/// Builds AAR and POM files.
-///
-/// * [project] is typically [FlutterProject.current()].
-/// * [androidBuildInfo] is the build configuration.
-/// * [outputDir] is the destination of the artifacts,
-/// * [buildNumber] is the build number of the output aar,
-Future<void> buildGradleAar({
-  @required FlutterProject project,
-  @required AndroidBuildInfo androidBuildInfo,
-  @required String target,
-  @required Directory outputDirectory,
-  @required String buildNumber,
-}) async {
-  assert(project != null);
-  assert(target != null);
-  assert(androidBuildInfo != null);
-  assert(outputDirectory != null);
-  assert(globals.androidSdk != null);
-
-  final FlutterManifest manifest = project.manifest;
-  if (!manifest.isModule && !manifest.isPlugin) {
-    throwToolExit('AARs can only be built for plugin or module projects.');
-  }
-
-  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-  final String aarTask = getAarTaskFor(buildInfo);
-  final Status status = globals.logger.startProgress(
-    "Running Gradle task '$aarTask'...",
-    multilineOutput: true,
-  );
-
-  final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-  final String initScript = globals.fs.path.join(
-    flutterRoot,
-    'packages',
-    'flutter_tools',
-    'gradle',
-    'aar_init_script.gradle',
-  );
-  final List<String> command = <String>[
-    gradleUtils.getExecutable(project),
-    '-I=$initScript',
-    '-Pflutter-root=$flutterRoot',
-    '-Poutput-dir=${outputDirectory.path}',
-    '-Pis-plugin=${manifest.isPlugin}',
-    '-PbuildNumber=$buildNumber'
-  ];
-  if (globals.logger.isVerbose) {
-    command.add('-Pverbose=true');
-  } else {
-    command.add('-q');
-  }
-  if (!buildInfo.androidGradleDaemon) {
-    command.add('--no-daemon');
-  }
-
-  if (target != null && target.isNotEmpty) {
-    command.add('-Ptarget=$target');
-  }
-  command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
-  if (buildInfo.dartObfuscation && buildInfo.mode !=  BuildMode.release) {
-    globals.printStatus(
-      'Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)}'
-      ' mode, building as un-obfuscated.',
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+    final String aarTask = getAarTaskFor(buildInfo);
+    final Status status = _logger.startProgress(
+      "Running Gradle task '$aarTask'...",
+      multilineOutput: true,
     );
-  }
 
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final Directory localEngineRepo = _getLocalEngineRepo(
-      engineOutPath: localEngineArtifacts.engineOutPath,
-      androidBuildInfo: androidBuildInfo,
+    final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot);
+    final String initScript = _fileSystem.path.join(
+      flutterRoot,
+      'packages',
+      'flutter_tools',
+      'gradle',
+      'aar_init_script.gradle',
     );
-    globals.printTrace(
-      'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
-      'Local Maven repo: ${localEngineRepo.path}'
-    );
-    command.add('-Plocal-engine-repo=${localEngineRepo.path}');
-    command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-    command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    final List<String> command = <String>[
+      _gradleUtils.getExecutable(project),
+      '-I=$initScript',
+      '-Pflutter-root=$flutterRoot',
+      '-Poutput-dir=${outputDirectory.path}',
+      '-Pis-plugin=${manifest.isPlugin}',
+      '-PbuildNumber=$buildNumber'
+    ];
+    if (_logger.isVerbose) {
+      command.add('-Pverbose=true');
+    } else {
+      command.add('-q');
+    }
+    if (!buildInfo.androidGradleDaemon) {
+      command.add('--no-daemon');
+    }
 
-    // Copy the local engine repo in the output directory.
-    try {
-      globals.fsUtils.copyDirectorySync(
-        localEngineRepo,
-        getRepoDirectory(outputDirectory),
-      );
-    } on FileSystemException catch(_) {
-      throwToolExit(
-        'Failed to copy the local engine ${localEngineRepo.path} repo '
-        'in ${outputDirectory.path}'
+    if (target != null && target.isNotEmpty) {
+      command.add('-Ptarget=$target');
+    }
+    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
+      _logger.printStatus(
+        'Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)}'
+            ' mode, building as un-obfuscated.',
       );
     }
-    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-        localEngineArtifacts.engineOutPath)}');
-  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo.targetArchs
-        .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
+
+    if (_artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
+      final Directory localEngineRepo = _getLocalEngineRepo(
+        engineOutPath: localEngineArtifacts.engineOutPath,
+        androidBuildInfo: androidBuildInfo,
+        fileSystem: _fileSystem,
+      );
+      _logger.printTrace(
+        'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+        'Local Maven repo: ${localEngineRepo.path}'
+      );
+      command.add('-Plocal-engine-repo=${localEngineRepo.path}');
+      command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
+      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+
+      // Copy the local engine repo in the output directory.
+      try {
+        copyDirectory(
+          localEngineRepo,
+          getRepoDirectory(outputDirectory),
+        );
+      } on FileSystemException catch (error, st) {
+        throwToolExit(
+            'Failed to copy the local engine ${localEngineRepo.path} repo '
+                'in ${outputDirectory.path}: $error, $st'
+        );
+      }
+      command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+          localEngineArtifacts.engineOutPath)}');
+    } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+      final String targetPlatforms = androidBuildInfo.targetArchs
+          .map(getPlatformNameForAndroidArch).join(',');
+      command.add('-Ptarget-platform=$targetPlatforms');
+    }
+
+    command.add(aarTask);
+
+    final Stopwatch sw = Stopwatch()
+      ..start();
+    RunResult result;
+    try {
+      result = await _processUtils.run(
+        command,
+        workingDirectory: project.android.hostAppGradleRoot.path,
+        allowReentrantFlutter: true,
+        environment: <String, String>{
+          if (javaPath != null)
+            'JAVA_HOME': javaPath,
+        },
+      );
+    } finally {
+      status.stop();
+    }
+    _usage.sendTiming('build', 'gradle-aar', sw.elapsed);
+
+    if (result.exitCode != 0) {
+      _logger.printStatus(result.stdout, wrap: false);
+      _logger.printError(result.stderr, wrap: false);
+      throwToolExit(
+        'Gradle task $aarTask failed with exit code ${result.exitCode}.',
+        exitCode: result.exitCode,
+      );
+    }
+    final Directory repoDirectory = getRepoDirectory(outputDirectory);
+    if (!repoDirectory.existsSync()) {
+      _logger.printStatus(result.stdout, wrap: false);
+      _logger.printError(result.stderr, wrap: false);
+      throwToolExit(
+        'Gradle task $aarTask failed to produce $repoDirectory.',
+        exitCode: exitCode,
+      );
+    }
+    _logger.printStatus(
+      '$successMark Built ${_fileSystem.path.relative(repoDirectory.path)}.',
+      color: TerminalColor.green,
+    );
   }
 
-  command.add(aarTask);
+  /// Builds the plugins as AARs.
+  @visibleForTesting
+  Future<void> buildPluginsAsAar(
+    FlutterProject flutterProject,
+    AndroidBuildInfo androidBuildInfo, {
+    Directory buildDirectory,
+  }) async {
+    final File flutterPluginFile = flutterProject.flutterPluginsFile;
+    if (!flutterPluginFile.existsSync()) {
+      return;
+    }
+    final List<String> plugins = flutterPluginFile.readAsStringSync().split('\n');
+    for (final String plugin in plugins) {
+      final List<String> pluginParts = plugin.split('=');
+      if (pluginParts.length != 2) {
+        continue;
+      }
+      final Directory pluginDirectory = _fileSystem.directory(pluginParts.last);
+      assert(pluginDirectory.existsSync());
 
-  final Stopwatch sw = Stopwatch()..start();
-  RunResult result;
-  try {
-    result = await globals.processUtils.run(
-      command,
-      workingDirectory: project.android.hostAppGradleRoot.path,
-      allowReentrantFlutter: true,
-      environment: gradleEnvironment,
-    );
-  } finally {
-    status.stop();
+      final String pluginName = pluginParts.first;
+      final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
+      if (!buildGradleFile.existsSync()) {
+        _logger.printTrace("Skipping plugin $pluginName since it doesn't have a android/build.gradle file");
+        continue;
+      }
+      _logger.printStatus('Building plugin $pluginName...');
+      try {
+        await buildGradleAar(
+          project: FlutterProject.fromDirectory(pluginDirectory),
+          androidBuildInfo: AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release, // Plugins are built as release.
+              null, // Plugins don't define flavors.
+              treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
+              packagesPath: androidBuildInfo.buildInfo.packagesPath,
+            ),
+          ),
+          target: '',
+          outputDirectory: buildDirectory,
+          buildNumber: '1.0'
+        );
+      } on ToolExit {
+        // Log the entire plugin entry in `.flutter-plugins` since it
+        // includes the plugin name and the version.
+        BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: _usage).send();
+        throwToolExit('The plugin $pluginName could not be built due to the issue above.');
+      }
+    }
   }
-  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
-
-  if (result.exitCode != 0) {
-    globals.printStatus(result.stdout, wrap: false);
-    globals.printError(result.stderr, wrap: false);
-    throwToolExit(
-      'Gradle task $aarTask failed with exit code $exitCode.',
-      exitCode: exitCode,
-    );
-  }
-  final Directory repoDirectory = getRepoDirectory(outputDirectory);
-  if (!repoDirectory.existsSync()) {
-    globals.printStatus(result.stdout, wrap: false);
-    globals.printError(result.stderr, wrap: false);
-    throwToolExit(
-      'Gradle task $aarTask failed to produce $repoDirectory.',
-      exitCode: exitCode,
-    );
-  }
-  globals.printStatus(
-    '$successMark Built ${globals.fs.path.relative(repoDirectory.path)}.',
-    color: TerminalColor.green,
-  );
 }
 
 /// Prints how to consume the AAR from a host app.
@@ -733,33 +846,16 @@ String _hex(List<int> bytes) {
 }
 
 String _calculateSha(File file) {
-  final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
-  globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
-  sw.reset();
-  final String sha = _hex(sha1.convert(bytes).bytes);
-  globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
-  return sha;
+  return _hex(sha1.convert(bytes).bytes);
 }
 
-void _exitWithUnsupportedProjectMessage() {
-  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: globals.flutterUsage).send();
+void _exitWithUnsupportedProjectMessage(Usage usage) {
+  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: usage).send();
   throwToolExit(
     '$warningMark Your app is using an unsupported Gradle project. '
     'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
     'and then move the dart code, assets and pubspec.yaml to the new project.',
-  );
-}
-
-void _exitWithProjectNotUsingGradleMessage() {
-  BuildEvent('unsupported-project', eventError: 'app-not-using-gradle', flutterUsage: globals.flutterUsage).send();
-  throwToolExit(
-    '$warningMark The build process for Android has changed, and the '
-    'current project configuration is no longer valid. Please consult\n\n'
-    'https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
-    'for details on how to upgrade the project.'
   );
 }
 
@@ -774,62 +870,13 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
   return properties.readAsStringSync().contains('android.useAndroidX=true');
 }
 
-/// Builds the plugins as AARs.
-@visibleForTesting
-Future<void> buildPluginsAsAar(
-  FlutterProject flutterProject,
-  AndroidBuildInfo androidBuildInfo, {
-  Directory buildDirectory,
-}) async {
-  final File flutterPluginFile = flutterProject.flutterPluginsFile;
-  if (!flutterPluginFile.existsSync()) {
-    return;
-  }
-  final List<String> plugins = flutterPluginFile.readAsStringSync().split('\n');
-  for (final String plugin in plugins) {
-    final List<String> pluginParts = plugin.split('=');
-    if (pluginParts.length != 2) {
-      continue;
-    }
-    final Directory pluginDirectory = globals.fs.directory(pluginParts.last);
-    assert(pluginDirectory.existsSync());
-
-    final String pluginName = pluginParts.first;
-    final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
-    if (!buildGradleFile.existsSync()) {
-      globals.printTrace("Skipping plugin $pluginName since it doesn't have a android/build.gradle file");
-      continue;
-    }
-    globals.logger.printStatus('Building plugin $pluginName...');
-    try {
-      await buildGradleAar(
-        project: FlutterProject.fromDirectory(pluginDirectory),
-        androidBuildInfo: AndroidBuildInfo(
-          BuildInfo(
-            BuildMode.release, // Plugins are built as release.
-            null, // Plugins don't define flavors.
-            treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
-            packagesPath: androidBuildInfo.buildInfo.packagesPath,
-          ),
-        ),
-        target: '',
-        outputDirectory: buildDirectory,
-        buildNumber: '1.0'
-      );
-    } on ToolExit {
-      // Log the entire plugin entry in `.flutter-plugins` since it
-      // includes the plugin name and the version.
-      BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: globals.flutterUsage).send();
-      throwToolExit('The plugin $pluginName could not be built due to the issue above.');
-    }
-  }
-}
-
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 @visibleForTesting
 Iterable<String> findApkFilesModule(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
+  Logger logger,
+  Usage usage,
 ) {
   final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
@@ -862,6 +909,8 @@ Iterable<String> findApkFilesModule(
     _exitWithExpectedFileNotFound(
       project: project,
       fileExtension: '.apk',
+      logger: logger,
+      usage: usage,
     );
   }
   return apks.map((File file) => file.path);
@@ -900,7 +949,7 @@ Iterable<String> listApkPaths(
 }
 
 @visibleForTesting
-File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
+File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, Usage usage) {
   final List<File> fileCandidates = <File>[
     getBundleDirectory(project)
       .childDirectory(camelCase(buildInfo.modeName))
@@ -934,6 +983,8 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
   _exitWithExpectedFileNotFound(
     project: project,
     fileExtension: '.aab',
+    logger: logger,
+    usage: usage,
   );
   return null;
 }
@@ -942,17 +993,19 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
 void _exitWithExpectedFileNotFound({
   @required FlutterProject project,
   @required String fileExtension,
+  @required Logger logger,
+  @required Usage usage,
 }) {
   assert(project != null);
   assert(fileExtension != null);
 
   final String androidGradlePluginVersion =
-  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
+  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot, logger);
   BuildEvent('gradle-expected-file-not-found',
     settings:
     'androidGradlePluginVersion: $androidGradlePluginVersion, '
       'fileExtension: $fileExtension',
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: usage,
   ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
@@ -961,12 +1014,12 @@ void _exitWithExpectedFileNotFound({
   );
 }
 
-void _createSymlink(String targetPath, String linkPath) {
-  final File targetFile = globals.fs.file(targetPath);
+void _createSymlink(String targetPath, String linkPath, FileSystem fileSystem) {
+  final File targetFile = fileSystem.file(targetPath);
   if (!targetFile.existsSync()) {
     throwToolExit("The file $targetPath wasn't found in the local engine out directory.");
   }
-  final File linkFile = globals.fs.file(linkPath);
+  final File linkFile = fileSystem.file(linkPath);
   final Link symlink = linkFile.parent.childLink(linkFile.basename);
   try {
     symlink.createSync(targetPath, recursive: true);
@@ -977,8 +1030,8 @@ void _createSymlink(String targetPath, String linkPath) {
   }
 }
 
-String _getLocalArtifactVersion(String pomPath) {
-  final File pomFile = globals.fs.file(pomPath);
+String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
+  final File pomFile = fileSystem.file(pomPath);
   if (!pomFile.existsSync()) {
     throwToolExit("The file $pomPath wasn't found in the local engine out directory.");
   }
@@ -1012,38 +1065,30 @@ String _getLocalArtifactVersion(String pomPath) {
 Directory _getLocalEngineRepo({
   @required String engineOutPath,
   @required AndroidBuildInfo androidBuildInfo,
+  @required FileSystem fileSystem,
 }) {
   assert(engineOutPath != null);
   assert(androidBuildInfo != null);
 
   final String abi = _getAbiByLocalEnginePath(engineOutPath);
-  final Directory localEngineRepo = globals.fs.systemTempDirectory
+  final Directory localEngineRepo = fileSystem.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
-
-  // Remove the local engine repo before the tool exits.
-  shutdownHooks.addShutdownHook(() {
-      if (localEngineRepo.existsSync()) {
-        localEngineRepo.deleteSync(recursive: true);
-      }
-    },
-    ShutdownStage.CLEANUP,
-  );
-
   final String buildMode = androidBuildInfo.buildInfo.modeName;
   final String artifactVersion = _getLocalArtifactVersion(
-    globals.fs.path.join(
+    fileSystem.path.join(
       engineOutPath,
       'flutter_embedding_$buildMode.pom',
-    )
+    ),
+    fileSystem,
   );
   for (final String artifact in const <String>['pom', 'jar']) {
     // The Android embedding artifacts.
     _createSymlink(
-      globals.fs.path.join(
+      fileSystem.path.join(
         engineOutPath,
         'flutter_embedding_$buildMode.$artifact',
       ),
-      globals.fs.path.join(
+      fileSystem.path.join(
         localEngineRepo.path,
         'io',
         'flutter',
@@ -1051,14 +1096,15 @@ Directory _getLocalEngineRepo({
         artifactVersion,
         'flutter_embedding_$buildMode-$artifactVersion.$artifact',
       ),
+      fileSystem,
     );
     // The engine artifacts (libflutter.so).
     _createSymlink(
-      globals.fs.path.join(
+      fileSystem.path.join(
         engineOutPath,
         '${abi}_$buildMode.$artifact',
       ),
-      globals.fs.path.join(
+      fileSystem.path.join(
         localEngineRepo.path,
         'io',
         'flutter',
@@ -1066,21 +1112,23 @@ Directory _getLocalEngineRepo({
         artifactVersion,
         '${abi}_$buildMode-$artifactVersion.$artifact',
       ),
+      fileSystem,
     );
   }
   for (final String artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
     _createSymlink(
-      globals.fs.path.join(
+      fileSystem.path.join(
         engineOutPath,
         '$artifact.maven-metadata.xml',
       ),
-      globals.fs.path.join(
+      fileSystem.path.join(
         localEngineRepo.path,
         'io',
         'flutter',
         artifact,
         'maven-metadata.xml',
       ),
+      fileSystem,
     );
   }
   return localEngineRepo;

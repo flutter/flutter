@@ -231,4 +231,11 @@ void main() {
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
     expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
   });
+
+  test('TextSpan computeSemanticsInformation', () {
+    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    const TextSpan(text: 'aaa', semanticsLabel: 'bbb').computeSemanticsInformation(collector);
+    expect(collector[0].text, 'aaa');
+    expect(collector[0].semanticsLabel, 'bbb');
+  });
 }

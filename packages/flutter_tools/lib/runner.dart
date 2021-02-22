@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 
@@ -26,9 +25,6 @@ import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
-///
-/// [commands] must be either `List<FlutterCommand>` or `List<FlutterCommand> Function()`.
-// TODO(jonahwilliams): update command type once g3 has rolled.
 Future<int> run(
   List<String> args,
   List<FlutterCommand> Function() commands, {
@@ -136,7 +132,6 @@ Future<int> _handleToolError(
     globals.flutterUsage.sendException(error);
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
-        client: http.Client(),
         usage: globals.flutterUsage,
         platform: globals.platform,
         logger: globals.logger,

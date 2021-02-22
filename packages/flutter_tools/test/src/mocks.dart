@@ -6,33 +6,19 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
-import 'package:flutter_tools/src/base/bot_detector.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
-import 'common.dart';
 import 'fakes.dart';
-
-// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
-final Generator kNoColorTerminalPlatform = () {
-  return FakePlatform.fromPlatform(
-    const LocalPlatform()
-  )..stdoutSupportsAnsi = false;
-};
 
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
@@ -96,11 +82,11 @@ ro.build.version.codename=REL
 }
 
 /// A strategy for creating Process objects from a list of commands.
-typedef ProcessFactory = Process Function(List<String> command);
+typedef _ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager extends Mock implements ProcessManager {
-  ProcessFactory processFactory = (List<String> commands) => MockProcess();
+  _ProcessFactory processFactory = (List<String> commands) => FakeProcess();
   bool canRunSucceeds = true;
   bool runSucceeds = true;
   List<String> commands;
@@ -132,7 +118,7 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// A function that generates a process factory that gives processes that fail
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
-ProcessFactory flakyProcessFactory({
+_ProcessFactory flakyProcessFactory({
   int flakes,
   bool Function(List<String> command) filter,
   Duration delay,
@@ -144,10 +130,10 @@ ProcessFactory flakyProcessFactory({
   stderr ??= () => const Stream<List<int>>.empty();
   return (List<String> command) {
     if (filter != null && !filter(command)) {
-      return MockProcess();
+      return FakeProcess();
     }
     if (flakesLeft == 0) {
-      return MockProcess(
+      return FakeProcess(
         exitCode: Future<int>.value(0),
         stdout: stdout(),
         stderr: stderr(),
@@ -160,7 +146,7 @@ ProcessFactory flakyProcessFactory({
     } else {
       exitFuture = Future<int>.delayed(delay, () => Future<int>.value(-9));
     }
-    return MockProcess(
+    return FakeProcess(
       exitCode: exitFuture,
       stdout: stdout(),
       stderr: stderr(),
@@ -176,7 +162,7 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
   final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
-  final Process process = MockBasicProcess();
+  final Process process = _MockBasicProcess();
 
   when(process.stdout).thenAnswer((_) => stdoutStream);
   when(process.stderr).thenAnswer((_) => stderrStream);
@@ -184,34 +170,7 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
   return process;
 }
 
-class MockBasicProcess extends Mock implements Process {}
-
-/// A process that exits successfully with no output and ignores all input.
-class MockProcess extends Mock implements Process {
-  MockProcess({
-    this.pid = 1,
-    Future<int> exitCode,
-    Stream<List<int>> stdin,
-    this.stdout = const Stream<List<int>>.empty(),
-    this.stderr = const Stream<List<int>>.empty(),
-  }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin as IOSink ?? MemoryIOSink();
-
-  @override
-  final int pid;
-
-  @override
-  final Future<int> exitCode;
-
-  @override
-  final io.IOSink stdin;
-
-  @override
-  final Stream<List<int>> stdout;
-
-  @override
-  final Stream<List<int>> stderr;
-}
+class _MockBasicProcess extends Mock implements Process {}
 
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
@@ -252,103 +211,6 @@ class MockIOSDevice extends Mock implements IOSDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
-/// Common functionality for tracking mock interaction.
-class BasicMock {
-  final List<String> messages = <String>[];
-
-  void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.of(messages);
-    messages.clear();
-    expect(actualMessages, unorderedEquals(expectedMessages));
-  }
-
-  bool contains(String match) {
-    print('Checking for `$match` in:');
-    print(messages);
-    final bool result = messages.contains(match);
-    messages.clear();
-    return result;
-  }
-}
-
-class MockResidentCompiler extends BasicMock implements ResidentCompiler {
-  @override
-  void accept() { }
-
-  @override
-  Future<CompilerOutput> reject() async { return null; }
-
-  @override
-  void reset() { }
-
-  @override
-  Future<dynamic> shutdown() async { }
-
-  @override
-  Future<CompilerOutput> compileExpression(
-    String expression,
-    List<String> definitions,
-    List<String> typeDefinitions,
-    String libraryUri,
-    String klass,
-    bool isStatic,
-  ) async {
-    return null;
-  }
-
-  @override
-  Future<CompilerOutput> compileExpressionToJs(
-    String libraryUri,
-    int line,
-    int column,
-    Map<String, String> jsModules,
-    Map<String, String> jsFrameValues,
-    String moduleName,
-    String expression,
-  ) async {
-    return null;
-  }
-
-  @override
-  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    bool suppressErrors = false,
-  }) async {
-    globals.fs.file(outputPath).createSync(recursive: true);
-    globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
-    return CompilerOutput(outputPath, 0, <Uri>[]);
-  }
-
-  @override
-  void addFileSystemRoot(String root) { }
-}
-
-/// A fake implementation of [ProcessResult].
-class FakeProcessResult implements ProcessResult {
-  FakeProcessResult({
-    this.exitCode = 0,
-    this.pid = 1,
-    this.stderr,
-    this.stdout,
-  });
-
-  @override
-  final int exitCode;
-
-  @override
-  final int pid;
-
-  @override
-  final dynamic stderr;
-
-  @override
-  final dynamic stdout;
-
-  @override
-  String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
-}
-
 class MockStdIn extends Mock implements IOSink {
   final StringBuffer stdInWrites = StringBuffer();
 
@@ -370,18 +232,3 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
-
-class AlwaysTrueBotDetector implements BotDetector {
-  const AlwaysTrueBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => true;
-}
-
-
-class AlwaysFalseBotDetector implements BotDetector {
-  const AlwaysFalseBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => false;
-}

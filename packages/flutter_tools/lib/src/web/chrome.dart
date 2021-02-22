@@ -120,24 +120,18 @@ class ChromiumLauncher {
     @required OperatingSystemUtils operatingSystemUtils,
     @required BrowserFinder browserFinder,
     @required Logger logger,
-    @visibleForTesting FileSystemUtils fileSystemUtils,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _browserFinder = browserFinder,
-       _logger = logger,
-       _fileSystemUtils = fileSystemUtils ?? FileSystemUtils(
-         fileSystem: fileSystem,
-         platform: platform,
-       );
+       _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
   final BrowserFinder _browserFinder;
-  final FileSystemUtils _fileSystemUtils;
   final Logger _logger;
 
   bool get hasChromeInstance => _currentCompleter.isCompleted;
@@ -314,11 +308,10 @@ class ChromiumLauncher {
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir?.path ?? '', _chromeDefaultPath));
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
-
     if (sourceChromeDefault.existsSync()) {
       targetChromeDefault.createSync(recursive: true);
       try {
-        _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+        copyDirectory(sourceChromeDefault, targetChromeDefault);
       } on FileSystemException catch (err) {
         // This is a best-effort update. Display the message in case the failure is relevant.
         // one possible example is a file lock due to multiple running chrome instances.
@@ -343,10 +336,13 @@ class ChromiumLauncher {
   void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
-
-    if (sourceChromeDefault.existsSync()) {
-      targetChromeDefault.createSync(recursive: true);
-      _fileSystemUtils.copyDirectorySync(sourceChromeDefault, targetChromeDefault);
+    try {
+      if (sourceChromeDefault.existsSync()) {
+        targetChromeDefault.createSync(recursive: true);
+        copyDirectory(sourceChromeDefault, targetChromeDefault);
+      }
+    } on FileSystemException catch (err) {
+      _logger.printError('Failed to restore Chrome preferences: $err');
     }
   }
 

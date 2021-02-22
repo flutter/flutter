@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -19,8 +18,8 @@ import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses the server package.
 ///
-/// This is implemented in isolated to prevent the flutter_tool from needing
-/// a devtools dep in google3.
+/// This is implemented in `isolated/` to prevent the flutter_tool from needing
+/// a devtools dependency in google3.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     @required Platform platform,
@@ -28,22 +27,26 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     @required String pubExecutable,
     @required Logger logger,
     @required PersistentToolState persistentToolState,
+    @visibleForTesting io.HttpClient httpClient,
   })  : _processManager = processManager,
         _pubExecutable = pubExecutable,
         _logger = logger,
         _platform = platform,
-        _persistentToolState = persistentToolState;
+        _persistentToolState = persistentToolState,
+        _httpClient = httpClient ?? io.HttpClient();
 
   final ProcessManager _processManager;
   final String _pubExecutable;
   final Logger _logger;
   final Platform _platform;
   final PersistentToolState _persistentToolState;
+  final io.HttpClient _httpClient;
 
   io.Process _devToolsProcess;
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+  static const String _pubHostedUrlKey = 'PUB_HOSTED_URL';
 
   @override
   Future<void> launch(Uri vmServiceUri) async {
@@ -51,15 +54,33 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
     // this method is guaranteed not to return a Future that throws.
     try {
       bool offline = false;
+      bool useOverrideUrl = false;
       try {
-        const String pubHostedUrlKey = 'PUB_HOSTED_URL';
-        if (_platform.environment.containsKey(pubHostedUrlKey)) {
-          await http.head(Uri.parse(_platform.environment[pubHostedUrlKey]));
+        Uri uri;
+        if (_platform.environment.containsKey(_pubHostedUrlKey)) {
+          useOverrideUrl = true;
+          uri = Uri.parse(_platform.environment[_pubHostedUrlKey]);
         } else {
-          await http.head(Uri.https('pub.dev', ''));
+          uri = Uri.https('pub.dev', '');
+        }
+        final io.HttpClientRequest request = await _httpClient.headUrl(uri);
+        final io.HttpClientResponse response = await request.close();
+        await response.drain<void>();
+        if (response.statusCode != io.HttpStatus.ok) {
+          offline = true;
         }
       } on Exception {
         offline = true;
+      } on ArgumentError {
+        if (!useOverrideUrl) {
+          rethrow;
+        }
+        // The user supplied a custom pub URL that was invalid, pretend to be offline
+        // and inform them that the URL was invalid.
+        offline = true;
+        _logger.printError(
+          'PUB_HOSTED_URL was set to an invalid URL: "${_platform.environment[_pubHostedUrlKey]}".'
+        );
       }
 
       if (offline) {
@@ -153,18 +174,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         'devtools'
       ]);
       if (_devToolsActivateProcess.exitCode != 0) {
-        status.cancel();
         _logger.printError('Error running `pub global activate '
             'devtools`:\n${_devToolsActivateProcess.stderr}');
         return false;
       }
-      status.stop();
       _persistentToolState.lastDevToolsActivationTime = DateTime.now();
       return true;
     } on Exception catch (e, _) {
-      status.stop();
       _logger.printError('Error running `pub global activate devtools`: $e');
       return false;
+    } finally {
+      status.stop();
     }
   }
 
@@ -178,7 +198,9 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   @override
   Future<void> close() async {
-    devToolsUrl = null;
+    if (devToolsUrl != null) {
+      devToolsUrl = null;
+    }
     if (_devToolsProcess != null) {
       _devToolsProcess.kill();
       await _devToolsProcess.exitCode;

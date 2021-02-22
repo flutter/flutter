@@ -196,6 +196,10 @@ class Chrome {
     return data;
   }
 
+  Future<void> reloadPage({bool ignoreCache = false}) async {
+    await _debugConnection.page.reload(ignoreCache: ignoreCache);
+  }
+
   /// Stops the Chrome process.
   void stop() {
     _isStopped = true;

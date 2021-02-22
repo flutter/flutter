@@ -106,6 +106,31 @@ void main() {
     Cache: () => FakeCache(),
   });
 
+  testUsingContext('Pipes run-skipped to package:test',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--run-skipped',
+      '--',
+      'test/fake_test.dart',
+    ]);
+    expect(
+      fakePackageTest.lastArgs,
+      contains('--run-skipped'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => FakeCache(),
+  });
+
   testUsingContext('Pipes enable-observatory', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -190,6 +215,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     @override List<String> extraFrontEndOptions,
     String reporter,
     String timeout,
+    bool runSkipped = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
