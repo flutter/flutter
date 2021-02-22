@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -58,6 +59,7 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
+  Timeout timeout,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
@@ -85,7 +87,7 @@ void testUsingContext(
       'flutter_config_dir_test.',
     );
     return Config.test(
-      Config.kFlutterSettings,
+      name: Config.kFlutterSettings,
       directory: configDir,
       logger: globals.logger,
     );
@@ -124,7 +126,7 @@ void testUsingContext(
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),
-          Usage: () => FakeUsage(),
+          Usage: () => TestUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           PlistParser: () => FakePlistParser(),
@@ -174,7 +176,7 @@ void testUsingContext(
       // BotDetector implementation in the overrides.
       BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
     });
-  }, testOn: testOn, skip: skip);
+  }, testOn: testOn, skip: skip, timeout: timeout);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -330,48 +332,6 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
-class FakeUsage implements Usage {
-  @override
-  bool get suppressAnalytics => false;
-
-  @override
-  set suppressAnalytics(bool value) { }
-
-  @override
-  bool get enabled => true;
-
-  @override
-  set enabled(bool value) { }
-
-  @override
-  String get clientId => '00000000-0000-4000-0000-000000000000';
-
-  @override
-  void sendCommand(String command, { Map<String, String> parameters }) { }
-
-  @override
-  void sendEvent(String category, String parameter, {
-    String label,
-    int value,
-    Map<String, String> parameters,
-  }) { }
-
-  @override
-  void sendTiming(String category, String variableName, Duration duration, { String label }) { }
-
-  @override
-  void sendException(dynamic exception) { }
-
-  @override
-  Stream<Map<String, dynamic>> get onSend => null;
-
-  @override
-  Future<void> ensureAnalyticsSent() => Future<void>.value();
-
-  @override
-  void printWelcome() { }
-}
-
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   bool get isInstalled => true;
@@ -417,8 +377,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
-
-class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 

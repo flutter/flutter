@@ -311,7 +311,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
       _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
+          Offset.zero,
           const Offset(10.0, 10.0),
           const <Color>[Color(0x00000000), Color(0xFFFF00FF), Color(0xFFFF00FF), Color(0x00000000)],
           const <double>[0.25, 0.25, 0.75, 0.75],

@@ -159,7 +159,7 @@ class CustomConstraintsRenderSliver extends RenderSliver {
   CustomConstraintsRenderSliver(this.constraints);
 
   @override
-  SliverGeometry get geometry => const SliverGeometry();
+  SliverGeometry get geometry => SliverGeometry.zero;
 
   @override
   final SliverConstraints constraints;

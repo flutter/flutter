@@ -27,9 +27,9 @@ void main() {
       // Check a letter key
       expect(LogicalKeyboardKey.findKeyByKeyId(0x0000000061), equals(LogicalKeyboardKey.keyA));
       // Check a control key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x0100070029), equals(LogicalKeyboardKey.escape));
+      expect(LogicalKeyboardKey.findKeyByKeyId(0x000000001b), equals(LogicalKeyboardKey.escape));
       // Check a modifier key
-      expect(LogicalKeyboardKey.findKeyByKeyId(0x01000700e1), equals(LogicalKeyboardKey.shiftLeft));
+      expect(LogicalKeyboardKey.findKeyByKeyId(0x030000010d), equals(LogicalKeyboardKey.shiftLeft));
     });
     test('Control characters are recognized as such', () async {
       // Check some common control characters
@@ -51,14 +51,14 @@ void main() {
       expect(key1, equals(key2));
     });
     test('Basic synonyms can be looked up.', () async {
-      expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
-      expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.control));
-      expect(LogicalKeyboardKey.altLeft.synonyms.first, equals(LogicalKeyboardKey.alt));
-      expect(LogicalKeyboardKey.metaLeft.synonyms.first, equals(LogicalKeyboardKey.meta));
-      expect(LogicalKeyboardKey.shiftRight.synonyms.first, equals(LogicalKeyboardKey.shift));
-      expect(LogicalKeyboardKey.controlRight.synonyms.first, equals(LogicalKeyboardKey.control));
-      expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.alt));
-      expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.meta));
+      expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shiftSynonym));
+      expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.controlSynonym));
+      expect(LogicalKeyboardKey.altLeft.synonyms.first, equals(LogicalKeyboardKey.altSynonym));
+      expect(LogicalKeyboardKey.metaLeft.synonyms.first, equals(LogicalKeyboardKey.metaSynonym));
+      expect(LogicalKeyboardKey.shiftRight.synonyms.first, equals(LogicalKeyboardKey.shiftSynonym));
+      expect(LogicalKeyboardKey.controlRight.synonyms.first, equals(LogicalKeyboardKey.controlSynonym));
+      expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.altSynonym));
+      expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.metaSynonym));
     });
     test('Synonyms get collapsed properly.', () async {
       expect(LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{}), isEmpty);
@@ -70,10 +70,10 @@ void main() {
             LogicalKeyboardKey.metaLeft,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
       expect(
           LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
@@ -83,10 +83,10 @@ void main() {
             LogicalKeyboardKey.metaRight,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
       expect(
           LogicalKeyboardKey.collapseSynonyms(<LogicalKeyboardKey>{
@@ -100,10 +100,10 @@ void main() {
             LogicalKeyboardKey.metaRight,
           }),
           equals(<LogicalKeyboardKey>{
-            LogicalKeyboardKey.shift,
-            LogicalKeyboardKey.control,
-            LogicalKeyboardKey.alt,
-            LogicalKeyboardKey.meta,
+            LogicalKeyboardKey.shiftSynonym,
+            LogicalKeyboardKey.controlSynonym,
+            LogicalKeyboardKey.altSynonym,
+            LogicalKeyboardKey.metaSynonym,
           }));
     });
   });

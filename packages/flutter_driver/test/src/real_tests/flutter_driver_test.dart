@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,10 +11,10 @@ import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:vm_service/vm_service.dart' as vms;
-import 'package:quiver/testing/async.dart';
 
-import 'common.dart';
+import '../../common.dart';
 
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
@@ -31,9 +29,9 @@ void main() {
   };
 
   group('VMServiceFlutterDriver.connect', () {
-    FakeVmService fakeClient;
-    FakeVM fakeVM;
-    FakeIsolate fakeIsolate;
+    late FakeVmService fakeClient;
+    late FakeVM fakeVM;
+    late FakeIsolate fakeIsolate;
 
     void expectLogContains(String message) {
       expect(log, anyElement(contains(message)));
@@ -44,7 +42,7 @@ void main() {
       fakeIsolate = FakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
-      vmServiceConnectFunction = (String url, Map<String, dynamic> headers) async {
+      vmServiceConnectFunction = (String url, Map<String, dynamic>? headers) async {
         return fakeClient;
       };
       fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
@@ -176,10 +174,10 @@ void main() {
   });
 
   group('VMServiceFlutterDriver', () {
-    FakeVmService fakeClient;
+    late FakeVmService fakeClient;
     FakeVM fakeVM;
     FakeIsolate fakeIsolate;
-    VMServiceFlutterDriver driver;
+    late VMServiceFlutterDriver driver;
 
     setUp(() {
       fakeIsolate = FakeIsolate();
@@ -230,10 +228,6 @@ void main() {
     });
 
     group('tap', () {
-      test('requires a target reference', () async {
-        expect(driver.tap(null), throwsAssertionError);
-      });
-
       test('sends the tap command', () async {
         await driver.tap(find.text('foo'), timeout: _kTestTimeout);
         expect(fakeClient.commandLog, <String>[
@@ -243,10 +237,6 @@ void main() {
     });
 
     group('getText', () {
-      test('requires a target reference', () async {
-        expect(driver.getText(null), throwsAssertionError);
-      });
-
       test('sends the getText command', () async {
         fakeClient.responses['get_text'] = makeFakeResponse(<String, dynamic>{'text': 'hello'});
         final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
@@ -274,10 +264,6 @@ void main() {
     });
 
     group('waitFor', () {
-      test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsAssertionError);
-      });
-
       test('sends the waitFor command', () async {
         fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{});
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
@@ -363,14 +349,6 @@ void main() {
         });
       });
 
-      test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsAssertionError);
-        expect(driver.getTopLeft(null), throwsAssertionError);
-        expect(driver.getTopRight(null), throwsAssertionError);
-        expect(driver.getBottomLeft(null), throwsAssertionError);
-        expect(driver.getBottomRight(null), throwsAssertionError);
-      });
-
       test('sends the getCenter command', () async {
         final DriverOffset result = await driver.getCenter(find.byValueKey(123), timeout: _kTestTimeout);
         expect(result, const DriverOffset(11, 12));
@@ -432,7 +410,7 @@ void main() {
           'setVMTimelineFlags []',
           'getVMTimeline null null',
         ]);
-        expect(timeline.events.single.name, 'test event');
+        expect(timeline.events!.single.name, 'test event');
       });
 
       test('with clearing timeline', () async {
@@ -450,7 +428,7 @@ void main() {
           'setVMTimelineFlags []',
           'getVMTimeline 1 999999',
         ]);
-        expect(timeline.events.single.name, 'test event');
+        expect(timeline.events!.single.name, 'test event');
       });
 
       test('with time interval', () async {
@@ -479,7 +457,7 @@ void main() {
           'getVMTimeline 1 999999',
           'getVMTimeline 1000001 999999',
         ]);
-        expect(timeline.events.map((TimelineEvent event) => event.name), <String>[
+        expect(timeline.events!.map((TimelineEvent event) => event.name), <String>[
           'test event',
           'test event 2',
         ]);
@@ -508,7 +486,7 @@ void main() {
           'getVMTimeline null null'
         ]);
 
-        expect(timeline.events.single.name, 'test event');
+        expect(timeline.events!.single.name, 'test event');
       });
     });
 
@@ -545,7 +523,7 @@ void main() {
           fail('expected an exception');
         } catch (error) {
           expect(error, isA<DriverError>());
-          expect(error.message, 'Error in Flutter application: {message: This is a failure}');
+          expect((error as DriverError).message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
 
@@ -570,10 +548,10 @@ void main() {
   });
 
   group('VMServiceFlutterDriver with custom timeout', () {
-    FakeVmService fakeClient;
+    late FakeVmService fakeClient;
     FakeVM fakeVM;
     FakeIsolate fakeIsolate;
-    VMServiceFlutterDriver driver;
+    late VMServiceFlutterDriver driver;
 
     setUp(() {
       fakeIsolate = FakeIsolate();
@@ -601,8 +579,8 @@ void main() {
   });
 
   group('WebFlutterDriver', () {
-    FakeFlutterWebConnection fakeConnection;
-    WebFlutterDriver driver;
+    late FakeFlutterWebConnection fakeConnection;
+    late WebFlutterDriver driver;
 
     setUp(() {
       fakeConnection = FakeFlutterWebConnection();
@@ -648,10 +626,6 @@ void main() {
     });
 
     group('tap', () {
-      test('requires a target reference', () async {
-        expect(driver.tap(null), throwsAssertionError);
-      });
-
       test('sends the tap command', () async {
         fakeConnection.responses['tap'] = jsonEncode(makeFakeResponse(<String, dynamic>{}));
         await driver.tap(find.text('foo'), timeout: _kTestTimeout);
@@ -662,10 +636,6 @@ void main() {
     });
 
     group('getText', () {
-      test('requires a target reference', () async {
-        expect(driver.getText(null), throwsAssertionError);
-      });
-
       test('sends the getText command', () async {
         fakeConnection.responses['get_text'] = jsonEncode(makeFakeResponse(<String, dynamic>{'text': 'hello'}));
         final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
@@ -677,10 +647,6 @@ void main() {
     });
 
     group('waitFor', () {
-      test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsAssertionError);
-      });
-
       test('sends the waitFor command', () async {
         fakeConnection.responses['waitFor'] = jsonEncode(makeFakeResponse(<String, dynamic>{'text': 'hello'}));
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
@@ -736,13 +702,6 @@ void main() {
           'dx': 11,
           'dy': 12,
         }));
-      });
-      test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsAssertionError);
-        expect(driver.getTopLeft(null), throwsAssertionError);
-        expect(driver.getTopRight(null), throwsAssertionError);
-        expect(driver.getBottomLeft(null), throwsAssertionError);
-        expect(driver.getBottomRight(null), throwsAssertionError);
       });
 
       test('sends the getCenter command', () async {
@@ -824,7 +783,7 @@ void main() {
 
   group('WebFlutterDriver with non-chrome browser', () {
     FakeFlutterWebConnection fakeConnection;
-    WebFlutterDriver driver;
+    late WebFlutterDriver driver;
 
     setUp(() {
       fakeConnection = FakeFlutterWebConnection();
@@ -848,15 +807,15 @@ void main() {
 /// and return the actual script.
 /// script will be in the following format:
 //   window.flutterDriver('[actual script]')
-String _checkAndEncode(dynamic script) {
+String? _checkAndEncode(dynamic script) {
   expect(script, isA<String>());
   expect(script.startsWith(_kWebScriptPrefix), isTrue);
   expect(script.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
-  return script.substring(_kWebScriptPrefix.length, script.length - 2) as String;
+  return script.substring(_kWebScriptPrefix.length, script.length - 2) as String?;
 }
 
-vms.Response makeFakeResponse(
+vms.Response? makeFakeResponse(
   Map<String, dynamic> response, {
   bool isError = false,
 }) {
@@ -873,9 +832,9 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   Map<String, dynamic> responses = <String, dynamic>{};
   List<String> commandLog = <String>[];
   @override
-  Future<dynamic> sendCommand(String script, Duration duration) async {
+  Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
+    final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)!) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
     assert(response != null, 'Missing ${decoded['command']} in responses.');
     return response;
@@ -890,27 +849,27 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
 class FakeVmService extends Fake implements vms.VmService {
   FakeVmService(this.vm);
 
-  FakeVM vm;
+  FakeVM? vm;
   bool failOnSetFlag = false;
   bool failOnResumeWith101 = false;
 
   final List<String> connectionLog = <String>[];
 
   @override
-  Future<vms.VM> getVM() async => vm;
+  Future<vms.VM> getVM() async => vm!;
 
   @override
   Future<vms.Isolate> getIsolate(String isolateId) async {
     connectionLog.add('getIsolate');
-    if (isolateId == vm.isolate.id) {
-      return vm.isolate;
+    if (isolateId == vm!.isolate!.id) {
+      return vm!.isolate!;
     }
-    return null;
+    throw UnimplementedError('getIsolate called with unrecognized $isolateId');
   }
 
   @override
-  Future<vms.Success> resume(String isolateId, {String step, int frameIndex}) async {
-    assert(isolateId == vm.isolate.id);
+  Future<vms.Success> resume(String isolateId, {String? step, int? frameIndex}) async {
+    assert(isolateId == vm!.isolate!.id);
     connectionLog.add('resume');
     if (failOnResumeWith101) {
       throw vms.RPCError('resume', 101, '');
@@ -950,15 +909,15 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   List<String> commandLog = <String>[];
-  Map<String, vms.Response> responses = <String, vms.Response>{};
-  Future<void> artificialExtensionDelay;
+  Map<String, vms.Response?> responses = <String, vms.Response?>{};
+  Future<void>? artificialExtensionDelay;
 
   @override
-  Future<vms.Response> callServiceExtension(String method, {Map<dynamic, dynamic> args, String isolateId}) async {
+  Future<vms.Response> callServiceExtension(String method, {Map<dynamic, dynamic>? args, String? isolateId}) async {
     commandLog.add('$method $args');
     await artificialExtensionDelay;
 
-    final vms.Response response = responses[args['command']];
+    final vms.Response response = responses[args!['command']]!;
     assert(response != null, 'Failed to create a response for ${args['command']}');
     return response;
   }
@@ -993,7 +952,7 @@ class FakeVmService extends Fake implements vms.VmService {
     return vms.Success();
   }
 
-  final Map<int, vms.Timeline> timelineResponses = <int, vms.Timeline>{
+  final Map<int, vms.Timeline?> timelineResponses = <int, vms.Timeline?>{
     1: vms.Timeline.parse(<String, dynamic>{
       'traceEvents': <dynamic>[
         <String, dynamic>{
@@ -1006,15 +965,15 @@ class FakeVmService extends Fake implements vms.VmService {
   };
 
   @override
-  Future<vms.Timeline> getVMTimeline({int timeOriginMicros, int timeExtentMicros}) async {
+  Future<vms.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
     connectionLog.add('getVMTimeline $timeOriginMicros $timeExtentMicros');
-    final vms.Timeline timeline = timelineResponses[timeOriginMicros ?? 1];
+    final vms.Timeline timeline = timelineResponses[timeOriginMicros ?? 1]!;
     assert(timeline != null, 'Missing entry in timelineResponses[$timeOriginMicros]');
     return timeline;
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     connectionLog.add('dispose');
   }
 
@@ -1025,7 +984,7 @@ class FakeVmService extends Fake implements vms.VmService {
 class FakeVM extends Fake implements vms.VM {
   FakeVM(this.isolate);
 
-  vms.Isolate isolate;
+  vms.Isolate? isolate;
 
   int numberOfTriesBeforeResolvingIsolate = 0;
 
@@ -1034,7 +993,7 @@ class FakeVM extends Fake implements vms.VM {
     numberOfTriesBeforeResolvingIsolate -= 1;
     return <vms.Isolate>[
       if (numberOfTriesBeforeResolvingIsolate <= 0)
-        isolate,
+        isolate!,
     ];
   }
 }
@@ -1047,7 +1006,7 @@ class FakeIsolate extends Fake implements vms.Isolate {
   String get id => number;
 
   @override
-  vms.Event pauseEvent;
+  vms.Event? pauseEvent;
 
   @override
   List<String> get extensionRPCs => <String>[];

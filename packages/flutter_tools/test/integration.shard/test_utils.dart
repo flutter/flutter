@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -81,16 +83,20 @@ Future<void> pollForServiceExtensionValue<T>({
   @required FlutterTestDriver testDriver,
   @required String extension,
   @required T continuePollingValue,
-  @required T expectedValue,
+  @required Matcher matches,
   String valueKey = 'value',
 }) async {
-  for (int i = 10; i < 10; i++) {
+  for (int i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
-    if (response.json[valueKey] == continuePollingValue) {
+    if (response.json[valueKey] as T == continuePollingValue) {
       await Future<void>.delayed(const Duration(seconds: 1));
     } else {
-      expect(response.json[valueKey], equals(expectedValue));
-      break;
+      expect(response.json[valueKey] as T, matches);
+      return;
     }
   }
+  fail(
+    'Did not find expected value for service extension \'$extension\'. All call'
+    ' attempts responded with \'$continuePollingValue\'.',
+  );
 }

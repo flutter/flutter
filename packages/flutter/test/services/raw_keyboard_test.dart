@@ -1857,24 +1857,28 @@ void main() {
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ShiftLeft',
+        'key': 'Shift',
+        'location': 1,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
-      expect(data.keyLabel, isEmpty);
+      expect(data.keyLabel, 'Shift');
     });
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
         'code': 'ArrowDown',
+        'key': 'ArrowDown',
+        'location': 0,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
-      expect(data.keyLabel, isEmpty);
+      expect(data.keyLabel, 'ArrowDown');
     });
   });
 }

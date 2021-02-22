@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -479,7 +481,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -546,7 +548,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,

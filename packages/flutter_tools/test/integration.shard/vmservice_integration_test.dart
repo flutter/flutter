@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:matcher/matcher.dart';
@@ -133,6 +135,22 @@ void main() {
       expect(bogusResponse.json['value'], 'Brightness.light');
     });
 
-    // TODO(devoncarew): These tests fail on cirrus-ci windows.
-  }, skip: platform.isWindows);
+    testWithoutContext('ext.flutter.debugPaint can toggle debug painting', () async {
+      final Isolate isolate = await waitForExtension(vmService, 'ext.flutter.debugPaint');
+      final Response response = await vmService.callServiceExtension(
+        'ext.flutter.debugPaint',
+        isolateId: isolate.id,
+      );
+      expect(response.json['enabled'], 'false');
+
+      final Response updateResponse = await vmService.callServiceExtension(
+        'ext.flutter.debugPaint',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'enabled': 'true',
+        }
+      );
+      expect(updateResponse.json['enabled'], 'true');
+    });
+  });
 }

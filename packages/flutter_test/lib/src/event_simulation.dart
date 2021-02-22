@@ -7,6 +7,27 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'test_async_utils.dart';
 
+Map<LogicalKeyboardKey, PhysicalKeyboardKey> _buildTrivialKeyMapping() {
+  final Map<LogicalKeyboardKey, PhysicalKeyboardKey> result = <LogicalKeyboardKey, PhysicalKeyboardKey>{};
+  assert(() {
+    final Map<String, LogicalKeyboardKey> nameToLogicals = <String, LogicalKeyboardKey>{};
+    for (final LogicalKeyboardKey key in LogicalKeyboardKey.debugKnownLogicalKeys().values) {
+      if (key.debugName != null)
+        nameToLogicals[key.debugName!] = key;
+    }
+    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.debugKnownPhysicalKeys().values) {
+      if (key.debugName != null) {
+        final LogicalKeyboardKey? logical = nameToLogicals[key.debugName!];
+        if (logical != null)
+          result[logical] = key;
+      }
+    }
+    return true;
+  }());
+  return result;
+}
+late Map<LogicalKeyboardKey, PhysicalKeyboardKey> _trivialKeyMapping = _buildTrivialKeyMapping();
+
 // TODO(gspencergoog): Replace this with more robust key simulation code once
 // the new key event code is in.
 // https://github.com/flutter/flutter/issues/33521
@@ -688,8 +709,46 @@ class KeyEventSimulator {
 /// See also:
 ///
 ///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
-Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
-  return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey);
+Future<bool> simulateKeyDownEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  bool synthesized = false,
+  String? platform,
+}) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyDownEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         character: character,
+         timeStamp: timeStamp,
+         synthesized: synthesized,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyDownEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
+}
+
+Future<bool> simulateKeyRepeatEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  String? platform,
+}) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyRepeatEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         character: character,
+         timeStamp: timeStamp,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyDownEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
 }
 
 /// Simulates sending a hardware key up event through the system channel.
@@ -710,6 +769,23 @@ Future<bool> simulateKeyDownEvent(LogicalKeyboardKey key, {String? platform, Phy
 /// See also:
 ///
 ///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
-Future<bool> simulateKeyUpEvent(LogicalKeyboardKey key, {String? platform, PhysicalKeyboardKey? physicalKey}) {
-  return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+Future<bool> simulateKeyUpEvent(
+  LogicalKeyboardKey logicalKey, {
+  PhysicalKeyboardKey? physicalKey,
+  String? character,
+  Duration timeStamp = Duration.zero,
+  bool synthesized = false,
+  String? platform,
+}) async {
+  physicalKey ??= _trivialKeyMapping[logicalKey];
+  final bool fromKeyEvent = physicalKey != null
+    && ServicesBinding.instance!.handleKeyEvent(KeyUpEvent(
+         physical: physicalKey,
+         logical: logicalKey,
+         timeStamp: timeStamp,
+         synthesized: synthesized,
+       ));
+  final bool fromRawEvent = await KeyEventSimulator.simulateKeyUpEvent(
+    logicalKey, platform: platform, physicalKey: physicalKey);
+  return fromKeyEvent || fromRawEvent;
 }

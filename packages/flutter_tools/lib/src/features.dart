@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
@@ -306,7 +308,7 @@ const Feature singleWidgetReload = Feature(
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: true,
+    available: false,
     enabledByDefault: false,
   ),
 );
@@ -329,7 +331,7 @@ const Feature experimentalInvalidationStrategy = Feature(
     enabledByDefault: false,
   ),
   stable: FeatureChannelSetting(
-    available: true,
+    available: false,
     enabledByDefault: false,
   ),
 );
@@ -452,4 +454,4 @@ class FeatureChannelSetting {
   final bool enabledByDefault;
 }
 
-const bool flutterNext = false;
+const bool flutterNext = true;

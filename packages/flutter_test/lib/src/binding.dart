@@ -104,10 +104,10 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   Future<ByteData?>? send(String channel, ByteData? message) {
     final Future<ByteData?>? resultFuture = delegate.send(channel, message);
     if (resultFuture != null) {
-      // Removes the future itself from the [_pendingMessages] list when it
-      // completes.
       _pendingMessages.add(resultFuture);
-      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
+      resultFuture
+        .catchError((Object error) { /* errors are the responsibility of the caller */ })
+        .whenComplete(() => _pendingMessages.remove(resultFuture));
     }
     return resultFuture;
   }
@@ -212,7 +212,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// change the behavior of [debugPrint]. For example,
   /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
   /// synchronous, disabling its normal throttling behavior.
-  @protected
+  ///
+  /// It is also used by some other parts of the test framework (e.g.
+  /// [WidgetTester.printToConsole]) to ensure that messages from the
+  /// test framework are displayed to the developer rather than logged
+  /// by whatever code is overriding [debugPrint].
   DebugPrintCallback get debugPrintOverride => debugPrint;
 
   /// The value to set [debugDisableShadows] to while tests are running.

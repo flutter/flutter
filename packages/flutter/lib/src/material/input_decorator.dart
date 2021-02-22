@@ -396,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         child: FractionalTranslation(
           translation: Tween<Offset>(
             begin: const Offset(0.0, -0.25),
-            end: const Offset(0.0, 0.0),
+            end: Offset.zero,
           ).evaluate(_controller.view),
           child: Text(
             widget.errorText!,
@@ -935,9 +935,20 @@ class _RenderDecoration extends RenderBox {
     // baseline from the alphabetic baseline. The ideographic baseline is for
     // use post-layout and is derived from the alphabetic baseline combined with
     // the font metrics.
-    final double? baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
-    assert(baseline != null && baseline >= 0.0);
-    return baseline!;
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+
+    assert(() {
+      if (baseline >= 0)
+        return true;
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary("One of InputDecorator's children reported a negative baseline offset."),
+        ErrorDescription(
+          '${box.runtimeType}, of size ${box.size}, reported a negative '
+          'alphabetic baseline of $baseline.',
+        ),
+      ]);
+    }());
+    return baseline;
   }
 
   // Returns a value used by performLayout to position all of the renderers.
@@ -1284,7 +1295,7 @@ class _RenderDecoration extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   @override
@@ -1767,7 +1778,9 @@ class _AffixText extends StatelessWidget {
 /// [InputDecorator] can be used to create widgets that look and behave like a
 /// [TextField] but support other kinds of input.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. The [child] widget,
+/// as well as the decorative widgets specified in [decoration], must have
+/// non-negative baselines.
 ///
 /// See also:
 ///

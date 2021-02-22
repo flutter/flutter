@@ -92,15 +92,13 @@ class RawKeyEventDataIos extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey => kIosToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
 
-
   @override
   LogicalKeyboardKey get logicalKey {
-    // Look to see if the keyCode is a printable number pad key, so that a
-    // difference between regular keys (e.g. "=") and the number pad version
-    // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey? numPadKey = kIosNumPadMap[keyCode];
-    if (numPadKey != null) {
-      return numPadKey;
+    /// A number of keys can already be determined using their physical key (key
+    /// code). Check this map first.
+    final LogicalKeyboardKey? maybeFromKeyCode = kIosToLogicalKey[keyCode];
+    if (maybeFromKeyCode != null) {
+      return maybeFromKeyCode;
     }
 
     // Look to see if the [keyLabel] is one we know about and have a mapping for.
@@ -125,11 +123,9 @@ class RawKeyEventDataIos extends RawKeyEventData {
         codeUnit = (codeUnit << 16) | secondCode;
       }
 
-      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
-        keyId,
-        keyLabel: keyLabel,
-        debugName: kReleaseMode ? null : 'Key ${keyLabel.toUpperCase()}',
+      return kIosToLogicalKey[keyCode] ?? LogicalKeyboardKey(
+        LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask),
+        debugName: kReleaseMode ? null : 'Character Key ${keyLabel.toUpperCase()}',
       );
     }
 

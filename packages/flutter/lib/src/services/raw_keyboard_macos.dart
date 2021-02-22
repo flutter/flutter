@@ -109,11 +109,9 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // the physical key's HID usage and debugName. This avoids duplicating the
     // physical key map.
     if (physicalKey != PhysicalKeyboardKey.none) {
-      final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
-        keyId,
-        keyLabel: physicalKey.debugName ?? '',
-        debugName: physicalKey.debugName,
+      return kMacOsToLogicalKey[keyCode] ?? LogicalKeyboardKey(
+        physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane,
+        debugName: 'Physical ${physicalKey.debugName}',
       );
     }
 

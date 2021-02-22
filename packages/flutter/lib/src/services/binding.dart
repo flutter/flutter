@@ -19,6 +19,10 @@ import 'restoration.dart';
 import 'system_channels.dart';
 
 class _ServiceHardwareKeyboard extends HardwareKeyboard {
+  _ServiceHardwareKeyboard(KeyEventCallback onEvent) {
+    this.onEvent = onEvent;
+  }
+
   bool handleKeyEvent(KeyEvent event) {
     receivingKeyData = true;
     return dispatchKeyEvent(event);
@@ -30,7 +34,6 @@ class _ServiceHardwareKeyboard extends HardwareKeyboard {
     if (!receivingKeyData)
       dispatchKeyEvent(_eventFromRawEvent(rawEvent));
   }
-
 
   static KeyEvent _eventFromRawEvent(RawKeyEvent rawEvent) {
     final LogicalKeyboardKey logical = rawEvent.logicalKey;
@@ -67,8 +70,8 @@ KeyEvent _keyEventFromData(ui.KeyData keyData) {
       LogicalKeyboardKey.findKeyByKeyId(keyData.logical) ??
           LogicalKeyboardKey(keyData.logical);
   final Duration timeStamp = keyData.timeStamp;
-  switch (keyData.change) {
-    case ui.KeyChange.down:
+  switch (keyData.type) {
+    case ui.KeyEventType.down:
       return KeyDownEvent(
         physical: physicalKey,
         logical: logicalKey,
@@ -76,14 +79,14 @@ KeyEvent _keyEventFromData(ui.KeyData keyData) {
         character: keyData.character,
         synthesized: keyData.synthesized,
       );
-    case ui.KeyChange.up:
+    case ui.KeyEventType.up:
       return KeyUpEvent(
         physical: physicalKey,
         logical: logicalKey,
         timeStamp: timeStamp,
         synthesized: keyData.synthesized,
       );
-    case ui.KeyChange.repeat:
+    case ui.KeyEventType.repeat:
       return KeyRepeatEvent(
         physical: physicalKey,
         logical: logicalKey,
@@ -107,9 +110,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _defaultBinaryMessenger = createBinaryMessenger();
     _restorationManager = createRestorationManager();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
-    _hardwareKeyboard = _ServiceHardwareKeyboard();
-    window.onKeyData = _handleKeyData;
-    RawKeyboard.instance.addListener(_hardwareKeyboard.handleRawEvent);
+    initHardwareKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler(
         (dynamic message) => handleSystemMessage(message as Object));
@@ -121,8 +122,22 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   static ServicesBinding? get instance => _instance;
   static ServicesBinding? _instance;
 
-  HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard;
-  late _ServiceHardwareKeyboard _hardwareKeyboard;
+  KeyEventCallback? onKeyEvent;
+
+  HardwareKeyboard get hardwareKeyboard => _hardwareKeyboard!;
+  _ServiceHardwareKeyboard? _hardwareKeyboard;
+
+  @protected
+  @mustCallSuper
+  void initHardwareKeyboard() {
+    if (_hardwareKeyboard != null)
+      RawKeyboard.instance.removeListener(_hardwareKeyboard!.handleRawEvent);
+    _hardwareKeyboard = _ServiceHardwareKeyboard(
+      (KeyEvent event) => onKeyEvent?.call(event) ?? false,
+    );
+    window.onKeyData = _handleKeyData;
+    RawKeyboard.instance.addListener(_hardwareKeyboard!.handleRawEvent);
+  }
 
   bool _handleKeyData(ui.KeyData keyData) {
     return handleKeyEvent(_keyEventFromData(keyData));
@@ -130,7 +145,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Dispatch an event to the targets found by a hit test on its position.
   bool handleKeyEvent(KeyEvent event) {
-    return _hardwareKeyboard.handleKeyEvent(event);
+    return _hardwareKeyboard!.handleKeyEvent(event);
   }
 
   /// The default instance of [BinaryMessenger].

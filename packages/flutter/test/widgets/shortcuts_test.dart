@@ -11,6 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext? context, ActionDispatcher dispatcher});
 
+class ShortcutsTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  void resetHardwareKeyboard() {
+    super.initHardwareKeyboard();
+  }
+}
+
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
     required OnInvokeCallback onInvoke,
@@ -43,15 +49,18 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event, {LogicalKeySet? keysPressed}) {
-    if (event is RawKeyDownEvent) {
-      keys.add(event.logicalKey);
+  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      keys.add(event.logical);
     }
-    return super.handleKeypress(context, event, keysPressed: keysPressed);
+    return super.handleKeypress(context, event);
   }
 }
 
+final ShortcutsTestBinding binding = ShortcutsTestBinding();
+
 void main() {
+  setUp(binding.resetHardwareKeyboard);
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
@@ -291,7 +300,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
@@ -329,7 +338,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
@@ -369,7 +378,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext!), isNotNull);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, physicalKey: PhysicalKeyboardKey.shiftLeft);
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
     });
@@ -392,7 +401,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool handled = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool handled = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
       expect(handled, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
     });
@@ -426,7 +435,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
       expect(result, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.keyA]));
       expect(invoked, isTrue);
@@ -505,7 +514,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(textFieldKey.currentContext!), isNotNull);
-      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      final bool result = await tester.sendKeyEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyA, character: 'a');
       expect(result, isFalse);
       expect(invoked, isFalse);
     });
@@ -534,7 +543,7 @@ void main() {
       expect(
           description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}'));
+              'shortcuts: {{Shift Left + Key A}: ActivateIntent#00000, {Shift Left + Arrow Right}: DirectionalFocusIntent#00000}'));
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

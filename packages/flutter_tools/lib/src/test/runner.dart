@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../build_info.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
@@ -27,15 +29,12 @@ abstract class FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    Directory workDir,
+    @required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
     String tags,
     String excludeTags,
     bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableServiceAuthCodes = false,
-    bool disableDds = false,
     bool ipv6 = false,
     bool machine = false,
     String precompiledDillPath,
@@ -49,11 +48,8 @@ abstract class FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
-    bool nullAssertions = false,
-    @required BuildInfo buildInfo,
     String reporter,
     String timeout,
-    List<String> additionalArguments,
   });
 }
 
@@ -64,15 +60,12 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    Directory workDir,
+    @required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
     String tags,
     String excludeTags,
     bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableServiceAuthCodes = false,
-    bool disableDds = false,
     bool ipv6 = false,
     bool machine = false,
     String precompiledDillPath,
@@ -86,11 +79,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Directory coverageDirectory,
     bool web = false,
     String randomSeed,
-    bool nullAssertions = false,
-    @required BuildInfo buildInfo,
     String reporter,
     String timeout,
-    List<String> additionalArguments,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -99,7 +89,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     final List<String> testArgs = <String>[
       if (!globals.terminal.supportsColor)
         '--no-color',
-      if (startPaused)
+      if (debuggingOptions.startPaused)
         '--pause-after-load',
       if (machine)
         ...<String>['-r', 'json']
@@ -136,7 +126,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         projectDirectory: flutterProject.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
-        buildInfo: buildInfo,
+        buildInfo: debuggingOptions.buildInfo,
       );
       if (result == null) {
         throwToolExit('Failed to compile tests');
@@ -155,9 +145,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             updateGoldens: updateGoldens,
             shellPath: shellPath,
             flutterProject: flutterProject,
-            pauseAfterLoad: startPaused,
-            nullAssertions: nullAssertions,
-            buildInfo: buildInfo,
+            pauseAfterLoad: debuggingOptions.startPaused,
+            nullAssertions: debuggingOptions.nullAssertions,
+            buildInfo: debuggingOptions.buildInfo,
             webMemoryFS: result,
             logger: globals.logger,
             fileSystem: globals.fs,
@@ -187,12 +177,10 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
       shellPath: shellPath,
+      debuggingOptions: debuggingOptions,
       watcher: watcher,
       enableObservatory: enableObservatory,
       machine: machine,
-      startPaused: startPaused,
-      disableServiceAuthCodes: disableServiceAuthCodes,
-      disableDds: disableDds,
       serverType: serverType,
       precompiledDillPath: precompiledDillPath,
       precompiledDillFiles: precompiledDillFiles,
@@ -201,19 +189,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
-      nullAssertions: nullAssertions,
-      buildInfo: buildInfo,
-      additionalArguments: additionalArguments,
     );
 
-    // Call package:test's main method in the appropriate directory.
-    final Directory saved = globals.fs.currentDirectory;
     try {
-      if (workDir != null) {
-        globals.printTrace('switching to directory $workDir to run tests');
-        globals.fs.currentDirectory = workDir;
-      }
-
       globals.printTrace('running test package with arguments: $testArgs');
       await testWrapper.main(testArgs);
 
@@ -222,7 +200,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
       return exitCode;
     } finally {
-      globals.fs.currentDirectory = saved.path;
       await platform.close();
     }
   }

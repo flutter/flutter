@@ -1230,6 +1230,7 @@ void main() {
               const CupertinoSliverNavigationBar(
                 trailing: trailingText,
                 largeTitle: titleText,
+                stretch: true,
               ),
               SliverToBoxAdapter(
                 child: Container(

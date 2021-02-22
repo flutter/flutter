@@ -314,7 +314,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       expect(getInspectorState().selection.current, isNull);
-      await tester.tap(find.text('TOP'));
+      await tester.tap(find.text('TOP'), warnIfMissed: false);
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
@@ -338,7 +338,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // We are now back in select mode so tapping the bottom button will have
       // not trigger a click but will cause it to be selected.
-      await tester.tap(find.text('BOTTOM'));
+      await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
       expect(log, equals(<String>[]));
       log.clear();
       expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('BOTTOM'));
@@ -364,7 +364,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      await tester.tap(find.byType(Transform));
+      await tester.tap(find.byType(Transform), warnIfMissed: false);
 
       expect(true, isTrue); // Expect that we reach here without crashing.
     });
@@ -400,19 +400,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
-      await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
+      await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0, warnIfMissed: false);
       await tester.pump();
 
       // Fling does nothing as are in inspect mode.
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
-      await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0);
+      await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0, warnIfMissed: false);
       await tester.pump();
 
       // Fling still does nothing as are in inspect mode.
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
-      await tester.tap(find.byType(ListView));
+      await tester.tap(find.byType(ListView), warnIfMissed: false);
       await tester.pump();
       expect(getInspectorState().selection.current, isNotNull);
 
@@ -447,7 +447,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      await tester.longPress(find.text('target'));
+      await tester.longPress(find.text('target'), warnIfMissed: false);
       // The inspector will swallow the long press.
       expect(didLongPress, isFalse);
     });
@@ -499,7 +499,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      await tester.longPress(find.byKey(clickTarget));
+      await tester.longPress(find.byKey(clickTarget), warnIfMissed: false);
       // State type is private, hence using dynamic.
       final dynamic inspectorState = inspectorKey.currentState;
       // The object with width 95.0 wins over the object with width 94.0 because
@@ -549,7 +549,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      await tester.tap(find.byKey(childKey));
+      await tester.tap(find.byKey(childKey), warnIfMissed: false);
       await tester.pump();
 
       await expectLater(
@@ -619,11 +619,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // The selection is static, so it may be initialized from previous tests.
       selection.clear();
 
-      await tester.tap(find.text('Child 1'));
+      await tester.tap(find.text('Child 1'), warnIfMissed: false);
       await tester.pump();
       expect(paragraphText(selection.current! as RenderParagraph), equals('Child 1'));
 
-      await tester.tap(find.text('Child 2'));
+      await tester.tap(find.text('Child 2'), warnIfMissed: false);
       await tester.pump();
       expect(paragraphText(selection.current! as RenderParagraph), equals('Child 2'));
     });
@@ -1043,6 +1043,101 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nodes[3].name, 'dummy2');
       expect(nodes[4].runtimeType, DiagnosticsStackTrace);
     }, skip: WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --no-track-widget-creation flag.
+
+    testWidgets('test transformDebugCreator will add DevToolsDeepLinkProperty for overflow errors', (WidgetTester tester) async {
+      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('A RenderFlex overflowed by 273 pixels on the bottom'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 6);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, DevToolsDeepLinkProperty);
+      expect(nodes[4].runtimeType, ErrorSpacer);
+      expect(nodes[5].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+
+    testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty for non-overflow errors', (WidgetTester tester) async {
+      activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('some other error'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 4);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
+
+    testWidgets('test transformDebugCreator will not add DevToolsDeepLinkProperty if devtoolsServerAddress is unavailable', (WidgetTester tester) async {
+      activeDevToolsServerAddress = null;
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      builder.add(ErrorSummary('A RenderFlex overflowed by 273 pixels on the bottom'));
+      builder.add(DiagnosticsDebugCreator(DebugCreator(elementA)));
+      builder.add(StringProperty('dummy2', 'value'));
+
+      final List<DiagnosticsNode> nodes = List<DiagnosticsNode>.from(transformDebugCreator(builder.properties));
+      expect(nodes.length, 4);
+      expect(nodes[0].runtimeType, ErrorSummary);
+      expect(nodes[1].runtimeType, DiagnosticsBlock);
+      expect(nodes[2].runtimeType, ErrorSpacer);
+      expect(nodes[3].runtimeType, StringProperty);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked());
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2827,12 +2922,35 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
+      connectedVmServiceUri = 'http://127.0.0.1:55269/798ay5al_FM=/';
       expect(
-        WidgetInspectorService.instance.devToolsInspectorUri(
-          Uri.parse('http://127.0.0.1:55269/798ay5al_FM=/'),
-          'inspector-0',
-        ),
+        WidgetInspectorService.instance.devToolsInspectorUri('inspector-0'),
         equals('http://127.0.0.1:9100/#/inspector?uri=http%3A%2F%2F127.0.0.1%3A55269%2F798ay5al_FM%3D%2F&inspectorRef=inspector-0'),
+      );
+    });
+
+    test('DevToolsDeepLinkProperty test', () {
+      final DevToolsDeepLinkProperty node =
+      DevToolsDeepLinkProperty(
+        'description of the deep link',
+        'http://the-deeplink/',
+      );
+      expect(node.toString(), equals('description of the deep link'));
+      expect(node.name, isEmpty);
+      expect(node.value, equals('http://the-deeplink/'));
+      expect(
+        node.toJsonMap(const DiagnosticsSerializationDelegate()),
+        equals(<String, dynamic>{
+          'description': 'description of the deep link',
+          'type': 'DevToolsDeepLinkProperty',
+          'name': '',
+          'style': 'singleLine',
+          'allowNameWrap': true,
+          'missingIfNull': false,
+          'propertyType': 'String',
+          'defaultLevel': 'info',
+          'value': 'http://the-deeplink/',
+        }),
       );
     });
   }

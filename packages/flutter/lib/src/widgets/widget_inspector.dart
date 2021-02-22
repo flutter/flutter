@@ -713,12 +713,6 @@ mixin WidgetInspectorService {
     _instance = instance;
   }
 
-  /// Information about the VM service protocol for the running application.
-  ///
-  /// This information is necessary to provide Flutter DevTools deep links in
-  /// error messages.
-  developer.ServiceProtocolInfo? _serviceInfo;
-
   static bool _debugServiceExtensionsRegistered = false;
 
   /// Ground truth tracking what object(s) are currently selected used by both
@@ -982,12 +976,6 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
-    if (!kIsWeb) {
-      developer.Service.getInfo().then((developer.ServiceProtocolInfo info) {
-        _serviceInfo = info;
-      });
-    }
-
     _structuredExceptionHandler = _reportError;
     if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
@@ -1398,14 +1386,11 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a DevTools uri linking to a specific element on the inspector page.
-  String? _devToolsInspectorUriForElement(Object? object) {
-    if (activeDevToolsServerAddress != null && _serviceInfo != null) {
-      final Uri? vmServiceUri = _serviceInfo!.serverUri;
-      if (vmServiceUri != null) {
-        final String? inspectorRef = toId(object, _consoleObjectGroup);
-        if (inspectorRef != null) {
-          return devToolsInspectorUri(vmServiceUri, inspectorRef);
-        }
+  String? _devToolsInspectorUriForElement(Element element) {
+    if (activeDevToolsServerAddress != null && connectedVmServiceUri != null) {
+      final String? inspectorRef = toId(element, _consoleObjectGroup);
+      if (inspectorRef != null) {
+        return devToolsInspectorUri(inspectorRef);
       }
     }
     return null;
@@ -1414,10 +1399,13 @@ mixin WidgetInspectorService {
   /// Returns the DevTools inspector uri for the given vm service connection and
   /// inspector reference.
   @visibleForTesting
-  String devToolsInspectorUri(Uri vmServiceUri, String inspectorRef) {
+  String devToolsInspectorUri(String inspectorRef) {
+    assert(activeDevToolsServerAddress != null);
+    assert(connectedVmServiceUri != null);
+
     final Uri uri = Uri.parse(activeDevToolsServerAddress!).replace(
       queryParameters: <String, dynamic>{
-        'uri': '$vmServiceUri',
+        'uri': connectedVmServiceUri!,
         'inspectorRef': inspectorRef,
       },
     );
@@ -2504,7 +2492,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(const Size(double.infinity, double.infinity));
+    return constraints.constrain(Size.infinite);
   }
 
   @override
@@ -2885,12 +2873,19 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 /// in [WidgetsBinding.initInstances].
 Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
+  ErrorSummary? errorSummary;
+  for (final DiagnosticsNode node in properties) {
+    if (node is ErrorSummary) {
+      errorSummary = node;
+      break;
+    }
+  }
   bool foundStackTrace = false;
   for (final DiagnosticsNode node in properties) {
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {
-      yield* _parseDiagnosticsNode(node)!;
+      yield* _parseDiagnosticsNode(node, errorSummary)!;
     } else {
       if (foundStackTrace) {
         pending.add(node);
@@ -2905,15 +2900,21 @@ Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> proper
 /// Transform the input [DiagnosticsNode].
 ///
 /// Return null if input [DiagnosticsNode] is not applicable.
-Iterable<DiagnosticsNode>? _parseDiagnosticsNode(DiagnosticsNode node) {
+Iterable<DiagnosticsNode>? _parseDiagnosticsNode(
+  DiagnosticsNode node,
+  ErrorSummary? errorSummary,
+) {
   if (!_isDebugCreator(node))
     return null;
   final DebugCreator debugCreator = node.value! as DebugCreator;
   final Element element = debugCreator.element;
-  return _describeRelevantUserCode(element);
+  return _describeRelevantUserCode(element, errorSummary);
 }
 
-Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
+Iterable<DiagnosticsNode> _describeRelevantUserCode(
+  Element element,
+  ErrorSummary? errorSummary,
+) {
   if (!WidgetInspectorService.instance.isWidgetCreationTracked()) {
     return <DiagnosticsNode>[
       ErrorDescription(
@@ -2924,19 +2925,38 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
       ErrorSpacer(),
     ];
   }
+
+  bool isOverflowError() {
+    if (errorSummary != null && errorSummary.value.isNotEmpty) {
+      final Object summary = errorSummary.value.first;
+      if (summary is String && summary.startsWith('A RenderFlex overflowed by')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
   bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (debugIsLocalCreationLocation(target)) {
 
+
       DiagnosticsNode? devToolsDiagnostic;
-      final String? devToolsInspectorUri =
-          WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
-      if (devToolsInspectorUri != null) {
-        devToolsDiagnostic = DiagnosticsNode.message(
-          'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
-        );
+
+      // TODO(kenz): once the inspector is better at dealing with broken trees,
+      // we can enable deep links for more errors than just RenderFlex overflow
+      // errors. See https://github.com/flutter/flutter/issues/74918.
+      if (isOverflowError()) {
+        final String? devToolsInspectorUri =
+        WidgetInspectorService.instance._devToolsInspectorUriForElement(target);
+        if (devToolsInspectorUri != null) {
+          devToolsDiagnostic = DevToolsDeepLinkProperty(
+            'To inspect this widget in Flutter DevTools, visit: $devToolsInspectorUri',
+            devToolsInspectorUri,
+          );
+        }
       }
 
       nodes.addAll(<DiagnosticsNode>[
@@ -2956,6 +2976,26 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
   if (processElement(element))
     element.visitAncestorElements(processElement);
   return nodes;
+}
+
+/// Debugging message for DevTools deep links.
+///
+/// The [value] for this property is a string representation of the Flutter
+/// DevTools url.
+///
+/// Properties `description` and `url` must not be null.
+class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
+  /// Creates a diagnostics property that displays a deep link to Flutter DevTools.
+  ///
+  /// The [value] of this property will return a map of data for the Flutter
+  /// DevTools deep link, including the full `url`, the Flutter DevTools `screenId`,
+  /// and the `objectId` in Flutter DevTools that this diagnostic references.
+  ///
+  /// The `description` and `url` arguments must not be null.
+  DevToolsDeepLinkProperty(String description, String url)
+    : assert(description != null),
+      assert(url != null),
+      super('', url, description: description, level: DiagnosticLevel.info);
 }
 
 /// Returns if an object is user created.

@@ -995,91 +995,91 @@ class WidgetsApp extends StatefulWidget {
   /// with "s".
   static bool debugAllowBannerOverride = true;
 
-  static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+  static final Map<ShortcutPrompt, Intent> _defaultShortcuts = <ShortcutPrompt, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.enter): const ActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.space): const ActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    const KeybindingPrompt(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.tab, shift: true): const PreviousFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowUp, control: true): const ScrollIntent(direction: AxisDirection.up),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowDown, control: true): const ScrollIntent(direction: AxisDirection.down),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowLeft, control: true): const ScrollIntent(direction: AxisDirection.left),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowRight, control: true): const ScrollIntent(direction: AxisDirection.right),
+    const KeybindingPrompt(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the web platform.
-  static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+  static final Map<ShortcutPrompt, Intent> _defaultWebShortcuts = <ShortcutPrompt, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
+    const KeybindingPrompt(LogicalKeyboardKey.space): const PrioritizedIntents(
       orderedIntents: <Intent>[
         ActivateIntent(),
         ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
       ]
     ),
     // On the web, enter activates buttons, but not other controls.
-    LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.tab, shift: true): const PreviousFocusIntent(),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    const KeybindingPrompt(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the macOS platform.
-  static final Map<LogicalKeySet, Intent> _defaultAppleOsShortcuts = <LogicalKeySet, Intent>{
+  static final Map<ShortcutPrompt, Intent> _defaultAppleOsShortcuts = <ShortcutPrompt, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.enter): const ActivateIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.space): const ActivateIntent(),
 
     // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal
-    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    const KeybindingPrompt(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.tab, shift: true): const PreviousFocusIntent(),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowUp, meta: true): const ScrollIntent(direction: AxisDirection.up),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowDown, meta: true): const ScrollIntent(direction: AxisDirection.down),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowLeft, meta: true): const ScrollIntent(direction: AxisDirection.left),
+    const KeybindingPrompt(LogicalKeyboardKey.arrowRight, meta: true): const ScrollIntent(direction: AxisDirection.right),
+    const KeybindingPrompt(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const KeybindingPrompt(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   /// Generates the default shortcut key bindings based on the
   /// [defaultTargetPlatform].
   ///
   /// Used by [WidgetsApp] to assign a default value to [WidgetsApp.shortcuts].
-  static Map<LogicalKeySet, Intent> get defaultShortcuts {
+  static Map<ShortcutPrompt, Intent> get defaultShortcuts {
     if (kIsWeb) {
       return _defaultWebShortcuts;
     }

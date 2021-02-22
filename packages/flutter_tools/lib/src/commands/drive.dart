@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -196,7 +198,7 @@ class DriveCommand extends RunCommandBase {
     ) ?? PackageConfig.empty;
     final DriverService driverService = _flutterDriverFactory.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions();
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
     final File applicationBinary = stringArg('use-application-binary') == null
       ? null
       : _fileSystem.file(stringArg('use-application-binary'));

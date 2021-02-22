@@ -121,12 +121,6 @@
          "flaky": false
       },
       {
-         "name": "Linux build_gallery",
-         "repo": "flutter",
-         "task_name": "linux_build_gallery",
-         "flaky": false
-      },
-      {
          "name": "Linux build_tests",
          "repo": "flutter",
          "task_name": "linux_build_tests",
@@ -385,6 +379,12 @@
          "flaky": false
       },
       {
+         "name": "Linux tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "linux_tool_integration_tests",
+         "flaky": false
+      },
+      {
          "name": "Linux web_tool_tests",
          "repo": "flutter",
          "task_name": "linux_web_tool_tests",
@@ -448,12 +448,6 @@
          "name": "Mac build_aar_module_test",
          "repo": "flutter",
          "task_name": "mac_build_aar_module_test",
-         "flaky": false
-      },
-      {
-         "name": "Mac_android android_plugin_example_app_build_test",
-         "repo": "flutter",
-         "task_name": "mac_android_android_plugin_example_app_build_test",
          "flaky": false
       },
       {
@@ -697,12 +691,6 @@
          "flaky": false
       },
       {
-         "name": "Mac build_gallery",
-         "repo": "flutter",
-         "task_name": "mac_build_gallery",
-         "flaky": true
-      },
-      {
          "name": "Mac customer_testing",
          "repo": "flutter",
          "task_name": "mac_customer_testing",
@@ -781,6 +769,12 @@
          "flaky": false
       },
       {
+         "name": "Mac tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "mac_tool_integration_tests",
+         "flaky": false
+      },
+      {
          "name": "Windows build_aar_module_test",
          "repo": "flutter",
          "task_name": "win_build_aar_module_test",
@@ -856,6 +850,12 @@
          "name": "Windows tool_tests",
          "repo": "flutter",
          "task_name": "win_tool_tests",
+         "flaky": false
+      },
+      {
+         "name": "Windows tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_integration_tests",
          "flaky": false
       },
       {

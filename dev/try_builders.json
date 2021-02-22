@@ -33,17 +33,22 @@
          "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_drive/", "packages/flutter_localizations/", "bin/"]
       },
       {
-         "name":"Linux build_gallery",
-         "repo":"flutter",
-         "task_name":"linux_build_gallery",
-         "enabled":true
-      },
-      {
          "name":"Linux framework_tests",
          "repo":"flutter",
          "task_name":"linux_framework_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+         "run_if":[
+            "dev/",
+            "packages/flutter/",
+            "packages/flutter_driver/",
+            "packages/integration_test/",
+            "packages/flutter_localizations/",
+            "packages/fuchsia_remote_debug_protocol/",
+            "packages/flutter_test/",
+            "packages/flutter_goldens/",
+            "packages/flutter_tools/lib/src/test/",
+            "bin/"
+         ]
       },
       {
          "name":"Linux firebase_abstract_method_smoke_test",
@@ -140,6 +145,13 @@
          "run_if":["dev/", "packages/flutter_tools/", "bin/"]
       },
       {
+         "name":"Linux tool_integration_tests",
+         "repo":"flutter",
+         "task_name":"linux_tool_integration_tests",
+         "enabled":true,
+         "run_if":["dev/", "packages/flutter_tools/", "bin/"]
+      },
+      {
          "name":"Linux web_tool_tests",
          "repo":"flutter",
          "task_name":"linux_web_tool_tests",
@@ -221,17 +233,22 @@
          "enabled":true
       },
       {
-         "name":"Mac build_gallery",
-         "repo":"flutter",
-         "task_name":"mac_build_gallery",
-         "enabled":false
-      },
-      {
          "name":"Mac framework_tests",
          "repo":"flutter",
          "task_name":"mac_framework_tests",
          "enabled":true,
-         "run_if":["dev/**", "packages/flutter/**", "packages/flutter_goldens/**", "packages/flutter_goldens_client/**", "packages/flutter_test/**", "packages/flutter_tools/lib/src/test/**", "bin/**"]
+         "run_if":[
+            "dev/**",
+            "packages/flutter/**",
+            "packages/flutter_driver/**",
+            "packages/integration_test/**",
+            "packages/flutter_localizations/**",
+            "packages/fuchsia_remote_debug_protocol/**",
+            "packages/flutter_test/**",
+            "packages/flutter_goldens/**",
+            "packages/flutter_tools/lib/src/test/**",
+            "bin/**"
+         ]
       },
       {
          "name":"Mac gradle_non_android_plugin_test",
@@ -311,6 +328,13 @@
          "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
+         "name":"Mac tool_integration_tests",
+         "repo":"flutter",
+         "task_name":"mac_tool_integration_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
          "name":"Mac web_tool_tests",
          "repo":"flutter",
          "task_name":"mac_web_tool_tests",
@@ -341,7 +365,18 @@
          "repo": "flutter",
          "task_name": "win_framework_tests",
          "enabled":true,
-         "run_if":["dev/", "packages/flutter/", "packages/flutter_test/", "packages/flutter_goldens/", "packages/flutter_tools/lib/src/test/", "bin/"]
+         "run_if":[
+            "dev/",
+            "packages/flutter/",
+            "packages/flutter_driver/",
+            "packages/integration_test/",
+            "packages/flutter_localizations/",
+            "packages/fuchsia_remote_debug_protocol/",
+            "packages/flutter_test/",
+            "packages/flutter_goldens/",
+            "packages/flutter_tools/lib/src/test/",
+            "bin/"
+         ]
       },
       {
          "name": "Windows gradle_non_android_plugin_test",
@@ -396,7 +431,15 @@
         "name": "Windows tool_tests",
         "repo": "flutter",
         "task_name": "win_tool_tests",
-        "enabled":true
+        "enabled":true,
+        "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
+      },
+      {
+         "name": "Windows tool_integration_tests",
+         "repo": "flutter",
+         "task_name": "win_tool_integration_tests",
+         "enabled":true,
+         "run_if":["dev/**", "packages/flutter_tools/**", "bin/**"]
       },
       {
          "name": "Windows web_tool_tests",
