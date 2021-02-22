@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 import 'package:meta/meta.dart';
 
 import '../base/error_handling_io.dart';
@@ -11,7 +12,7 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'gradle_utils.dart';
+import 'android_studio.dart';
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -293,14 +294,17 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
-        gradleUtils.getExecutable(project),
+        globals.gradleUtils.getExecutable(project),
         'app:tasks' ,
         '--all',
         '--console=auto',
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: gradleEnvironment,
+      environment: <String, String>{
+        if (javaPath != null)
+          'JAVA_HOME': javaPath,
+      },
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};

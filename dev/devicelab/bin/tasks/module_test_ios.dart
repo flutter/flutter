@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/host_agent.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -175,11 +176,12 @@ Future<void> main() async {
 
       final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: Flutter/engine')
+      if (!podfileLockOutput.contains(':path: Flutter')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_sign_in/ios')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')) {
+        print(podfileLockOutput);
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
@@ -220,6 +222,18 @@ Future<void> main() async {
             'LANG': 'en_US.UTF-8',
           },
         );
+
+        final File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
+        final String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
+        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/engine"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/device_info/ios"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
+            || hostPodfileLockOutput.contains('android_alarm_manager')) {
+          print(hostPodfileLockOutput);
+          throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
+        }
+
         await exec(
           'xcodebuild',
           <String>[
@@ -279,34 +293,13 @@ Future<void> main() async {
       }
 
       section('Run platform unit tests');
-      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) {
-        simulatorDeviceId = deviceId;
-        return inDirectory(objectiveCHostApp, () =>
-          exec(
-            'xcodebuild',
-            <String>[
-              '-workspace',
-              'Host.xcworkspace',
-              '-scheme',
-              'Host',
-              '-configuration',
-              'Debug',
-              '-destination',
-              'id=$deviceId',
-              'test',
-              'CODE_SIGNING_ALLOWED=NO',
-              'CODE_SIGNING_REQUIRED=NO',
-              'CODE_SIGN_IDENTITY=-',
-              'EXPANDED_CODE_SIGN_IDENTITY=-',
-              'COMPILER_INDEX_STORE_ENABLE=NO',
-            ],
-          ));
-        }
-      );
 
-      section('Fail building existing Objective-C iOS app if flutter script fails');
-      final int xcodebuildExitCode = await inDirectory<int>(objectiveCHostApp, () =>
-        exec(
+      final String resultBundleTemp = Directory.systemTemp.createTempSync('module_test_ios_xcresult.').path;
+      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
+        simulatorDeviceId = deviceId;
+        final String resultBundlePath = path.join(resultBundleTemp, 'result');
+
+        final int testResultExit = await exec(
           'xcodebuild',
           <String>[
             '-workspace',
@@ -315,7 +308,54 @@ Future<void> main() async {
             'Host',
             '-configuration',
             'Debug',
-            'ARCHS=i386', // i386 is not supported in Debug mode.
+            '-destination',
+            'id=$deviceId',
+            '-resultBundlePath',
+            resultBundlePath,
+            'test',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          workingDirectory: objectiveCHostApp.path,
+          canFail: true,
+        );
+
+        if (testResultExit != 0) {
+          // Zip the test results to the artifacts directory for upload.
+          await inDirectory(resultBundleTemp, () {
+            final String zipPath = path.join(hostAgent.dumpDirectory.path,
+                'module_test_ios-objc-${DateTime.now().toLocal().toIso8601String()}.zip');
+            return exec(
+              'zip',
+              <String>[
+                '-r',
+                '-9',
+                zipPath,
+                'result.xcresult',
+              ],
+              canFail: true, // Best effort to get the logs.
+            );
+          });
+
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+      });
+
+      section('Fail building existing Objective-C iOS app if flutter script fails');
+      final String xcodebuildOutput = await inDirectory<String>(objectiveCHostApp, () =>
+        eval(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'FLUTTER_ENGINE=bogus', // Force a Flutter error.
             'CODE_SIGNING_ALLOWED=NO',
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
@@ -327,7 +367,9 @@ Future<void> main() async {
         )
       );
 
-      if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
+      if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
+          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 

@@ -63,6 +63,7 @@ void main() {
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
+        showFirstLastButtons: true,
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
@@ -97,6 +98,42 @@ void main() {
     log.clear();
 
     await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    final Finder lastPageButton = find.ancestor(of: find.byTooltip('Last page'),
+        matching: find.byWidgetPredicate((Widget widget) => widget is IconButton));
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+
+    expect(log, <String>['page-changed: 498']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNull);
+
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Donut (49)'), findsOneWidget);
+    expect(find.text('KitKat (49)'), findsOneWidget);
+
+    final Finder firstPageButton = find.ancestor(of: find.byTooltip('First page'),
+        matching: find.byWidgetPredicate((Widget widget) => widget is IconButton));
+
+    expect(tester.widget<IconButton>(firstPageButton).onPressed, isNotNull);
+
+    await tester.tap(firstPageButton);
+
+    expect(log, <String>['page-changed: 0']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(tester.widget<IconButton>(firstPageButton).onPressed, isNull);
 
     expect(find.text('Frozen yogurt (0)'), findsOneWidget);
     expect(find.text('Eclair (0)'), findsNothing);
@@ -814,6 +851,74 @@ void main() {
     await tester.pumpWidget(buildTable());
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container)).first;
     expect(tester.widget<Container>(tableContainerFinder).decoration, const BoxDecoration());
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
+  });
+
+  testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+    const double _customCheckboxHorizontalMargin = 15.0;
+    const double _customHorizontalMargin = 10.0;
+
+    const double _width = 400;
+    const double _height = 400;
+
+    final Size originalSize = binding.renderView.size;
+
+    // Ensure the containing Card is small enough that we don't expand too
+    // much, resulting in our custom margin being ignored.
+    await binding.setSurfaceSize(const Size(_width, _height));
+
+    final TestDataSource source = TestDataSource(
+      onSelectChanged: (bool? value) {},
+    );
+    Finder cellContent;
+    Finder checkbox;
+    Finder padding;
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          availableRowsPerPage: const <int>[
+            2, 4,
+          ],
+          onRowsPerPageChanged: (int? rowsPerPage) {},
+          onPageChanged: (int rowIndex) {},
+          onSelectAll: (bool? value) {},
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+          horizontalMargin: _customHorizontalMargin,
+          checkboxHorizontalMargin: _customCheckboxHorizontalMargin,
+        ),
+      ),
+    ));
+
+    // Custom checkbox padding.
+    checkbox = find.byType(Checkbox).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    expect(
+      tester.getRect(checkbox).left - tester.getRect(padding).left,
+      _customCheckboxHorizontalMargin,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(checkbox).right,
+      _customCheckboxHorizontalMargin,
+    );
+
+    // Custom first column padding.
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget.
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customHorizontalMargin,
+    );
 
     // Reset the surface size.
     await binding.setSurfaceSize(originalSize);

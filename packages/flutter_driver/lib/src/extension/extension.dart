@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -433,7 +432,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
   }
 
   @override
-  Future<Result?> handleCommand(Command command, WidgetController prober, CreateFinderFactory finderFactory) {
+  Future<Result> handleCommand(Command command, WidgetController prober, CreateFinderFactory finderFactory) {
     final String kind = command.kind;
     if(_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.call(command, prober, finderFactory, this);

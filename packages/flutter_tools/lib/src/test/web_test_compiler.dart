@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -18,6 +20,7 @@ import '../compile.dart';
 import '../dart/language_version.dart';
 import '../web/bootstrap.dart';
 import '../web/memory_fs.dart';
+import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
@@ -79,6 +82,7 @@ class WebTestCompiler {
         ..writeAsStringSync(generateTestEntrypoint(
             relativeTestPath: relativeTestSegments.join('/'),
             absolutePath: testFilePath,
+            testConfigPath: findTestConfigFile(_fileSystem.file(testFilePath))?.path,
             languageVersion: languageVersion,
         ));
       generatedFiles.add(generatedFile);

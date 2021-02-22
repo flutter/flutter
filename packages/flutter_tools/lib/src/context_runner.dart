@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:process/process.dart';
 
+import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -46,6 +50,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
@@ -74,6 +79,15 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      AndroidBuilder: () => AndroidGradleBuilder(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
+        gradleUtils: globals.gradleUtils,
+        platform: globals.platform,
+      ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
@@ -99,6 +113,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
+        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -111,6 +126,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
+        operatingSystemUtils: globals.os,
       ),
       AssetBundleFactory: () {
         return AssetBundleFactory.defaultInstance(
@@ -183,6 +199,8 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
         logger: globals.logger,
+        platform: globals.platform,
+        persistentToolState: globals.persistentToolState,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -207,7 +225,13 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fuchsiaArtifacts: globals.fuchsiaArtifacts,
       ),
-      GradleUtils: () => GradleUtils(),
+      GradleUtils: () => GradleUtils(
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        cache: globals.cache,
+      ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
@@ -278,6 +302,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
+        firstRunMessenger: FirstRunMessenger(persistentToolState: globals.persistentToolState),
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(

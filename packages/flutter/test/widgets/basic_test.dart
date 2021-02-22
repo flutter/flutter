@@ -6,9 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   group('PhysicalShape', () {
@@ -154,38 +152,38 @@ void main() {
       Offset offset = const Offset(0.4, 0.4);
 
       await tester.pumpWidget(
-          StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Directionality(
-                textDirection: TextDirection.ltr,
-                child: Center(
-                  child: Semantics(
-                    explicitChildNodes: true,
-                    child: FractionalTranslation(
-                      key: fractionalTranslationKey,
-                      translation: offset,
-                      transformHitTests: true,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            offset = const Offset(0.8, 0.8);
-                          });
-                        },
-                        child: SizedBox(
-                          width: 100.0,
-                          height: 100.0,
-                          child: Text(
-                            'foo',
-                            key: textKey,
-                          ),
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Semantics(
+                  explicitChildNodes: true,
+                  child: FractionalTranslation(
+                    key: fractionalTranslationKey,
+                    translation: offset,
+                    transformHitTests: true,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          offset = const Offset(0.8, 0.8);
+                        });
+                      },
+                      child: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                        child: Text(
+                          'foo',
+                          key: textKey,
                         ),
                       ),
                     ),
                   ),
                 ),
-              );
-            },
-          )
+              ),
+            );
+          },
+        )
       );
 
       expect(
@@ -198,7 +196,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byKey(fractionalTranslationKey));
+      await tester.tap(find.byKey(fractionalTranslationKey), warnIfMissed: false); // RenderFractionalTranslation can't be hit
       await tester.pump();
       expect(
         tester.getSemantics(find.byKey(textKey)).transform,

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
@@ -1490,22 +1489,30 @@ void main() {
     final int pointerRouterCount = GestureBinding.instance!.pointerRouter.debugGlobalRouteCount;
     final RawKeyEventHandler? rawKeyEventHandler = RawKeyboard.instance.keyEventHandler;
     expect(rawKeyEventHandler, isNotNull);
-    BuildOwner(focusManager: _FakeFocusManager());
+    BuildOwner(focusManager: FocusManager());
     expect(GestureBinding.instance!.pointerRouter.debugGlobalRouteCount, pointerRouterCount);
     expect(RawKeyboard.instance.keyEventHandler, same(rawKeyEventHandler));
   });
-}
 
-class _FakeFocusManager implements FocusManager {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return super.noSuchMethod(invocation);
-  }
+  testWidgets('Can access debugFillProperties without _LateInitializationError', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    TestRenderObjectElement().debugFillProperties(builder);
+    expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
+  });
 
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return '_FakeFocusManager';
-  }
+  testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
+    final int initialCount = tester.binding.buildOwner!.globalKeyCount;
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    await tester.pumpWidget(Container(key: key1));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container()));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 1);
+    await tester.pumpWidget(Container(key: key1, child: Container(key: key2)));
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 2);
+    await tester.pumpWidget(Container());
+    expect(tester.binding.buildOwner!.globalKeyCount, initialCount + 0);
+  });
 }
 
 class _WidgetWithNoVisitChildren extends StatelessWidget {
@@ -1836,4 +1843,8 @@ class FakeLeafRenderObject extends RenderBox {
   void performLayout() {
     size = constraints.biggest;
   }
+}
+
+class TestRenderObjectElement extends RenderObjectElement {
+  TestRenderObjectElement() : super(Table());
 }

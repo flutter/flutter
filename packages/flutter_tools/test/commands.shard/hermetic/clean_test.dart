@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -19,20 +21,24 @@ import '../../src/context.dart';
 
 void main() {
   group('clean command', () {
-    MockXcode mockXcode;
+    Xcode xcode;
+    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+
     setUp(() {
-      mockXcode = MockXcode();
+      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
     });
 
     group('general', () {
       MemoryFileSystem fs;
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       Directory buildDirectory;
       FlutterProject projectUnderTest;
 
       setUp(() {
         fs = MemoryFileSystem.test();
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
 
         final Directory currentDirectory = fs.currentDirectory;
         buildDirectory = currentDirectory.childDirectory('build');
@@ -43,6 +49,7 @@ void main() {
         projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
         projectUnderTest.dartTool.createSync(recursive: true);
+        projectUnderTest.packagesFile.createSync(recursive: true);
         projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
@@ -60,7 +67,9 @@ void main() {
       });
 
       testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
-        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+        // Xcode is installed and version satisfactory.
+        when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+        when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
         await CleanCommand().runCommand();
 
         expect(buildDirectory.existsSync(), isFalse);
@@ -80,52 +89,63 @@ void main() {
 
         expect(projectUnderTest.flutterPluginsFile.existsSync(), isFalse);
         expect(projectUnderTest.flutterPluginsDependenciesFile.existsSync(), isFalse);
+        expect(projectUnderTest.packagesFile.existsSync(), isFalse);
 
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
 
       testUsingContext('$CleanCommand cleans Xcode verbosely', () async {
-        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+        // Xcode is installed and version satisfactory.
+        when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+        when(mockXcodeProjectInterpreter.majorVersion).thenReturn(1000);
+
         await CleanCommand(verbose: true).runCommand();
         verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: true)).called(2);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
         XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       });
     });
 
     group('Windows', () {
-      MockPlatform windowsPlatform;
+      FakePlatform windowsPlatform;
+      MemoryFileSystem fileSystem;
+      FileExceptionHandler exceptionHandler;
       setUp(() {
-        windowsPlatform = MockPlatform();
+        windowsPlatform = FakePlatform(operatingSystem: 'windows');
+        exceptionHandler = FileExceptionHandler();
+        fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
       });
 
       testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
-        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
-        when(windowsPlatform.isWindows).thenReturn(true);
+        when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-        final MockFile mockFile = MockFile();
-        when(mockFile.existsSync()).thenReturn(true);
+        final File file = fileSystem.file('file')..createSync();
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.delete,
+          const FileSystemException('Deletion failed'),
+        );
 
-        when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
         final CleanCommand command = CleanCommand();
-        command.deleteFile(mockFile);
+        command.deleteFile(file);
         expect(testLogger.errorText, contains('A program may still be using a file'));
-        verify(mockFile.deleteSync(recursive: true)).called(1);
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('$CleanCommand handles missing permissions;', () async {
-        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+        when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
         final MockFile mockFile = MockFile();
         when(mockFile.existsSync()).thenThrow(const FileSystemException('OS error: Access Denied'));
@@ -137,15 +157,13 @@ void main() {
         verifyNever(mockFile.deleteSync(recursive: true));
       }, overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
-        Xcode: () => mockXcode,
+        Xcode: () => xcode,
       });
     });
   });
 }
 
 class MockFile extends Mock implements File {}
-class MockPlatform extends Mock implements Platform {}
-class MockXcode extends Mock implements Xcode {}
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override

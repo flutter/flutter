@@ -103,19 +103,6 @@ void main() {
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
-
-    // Backwards compatibility: deprecated resizeToAvoidBottomPadding flag
-    await tester.pumpWidget(boilerplate(MediaQuery(
-      data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Title')),
-        body: Container(key: bodyKey),
-        resizeToAvoidBottomPadding: false,
-      ),
-    )));
-
-    bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
@@ -478,7 +465,7 @@ void main() {
       ),
     );
 
-    await tester.drag(find.text('body'), const Offset(0.0, -1000.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -1000.0));
     expect(didPressButton, isFalse);
     await tester.tap(find.text('X'));
     expect(didPressButton, isTrue);
@@ -505,8 +492,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(10.0, 560.0));
-    expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(770.0, 560.0));
+    expect(tester.getBottomLeft(_findButtonBar()), const Offset(10.0, 560.0));
+    expect(tester.getBottomRight(_findButtonBar()), const Offset(770.0, 560.0));
   });
 
   testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
@@ -646,7 +633,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
@@ -664,7 +651,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
@@ -683,7 +670,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
@@ -702,7 +689,7 @@ void main() {
         ),
       ));
       expect(tester.element(find.byKey(testKey)).size, const Size(64.0, 48.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
     testWidgets('body size with extendBody', (WidgetTester tester) async {
@@ -1405,24 +1392,28 @@ void main() {
       await tester.tap(drawerOpenButton);
       await tester.pumpAndSettle();
       expect(true, scaffoldState.isDrawerOpen);
-      await tester.tap(endDrawerOpenButton);
+      await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       expect(false, scaffoldState.isDrawerOpen);
 
       await tester.tap(endDrawerOpenButton);
       await tester.pumpAndSettle();
       expect(true, scaffoldState.isEndDrawerOpen);
-      await tester.tap(drawerOpenButton);
+      await tester.tap(drawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       expect(false, scaffoldState.isEndDrawerOpen);
 
       scaffoldState.openDrawer();
       expect(true, scaffoldState.isDrawerOpen);
-      await tester.tap(drawerOpenButton);
+      await tester.tap(endDrawerOpenButton, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
+      expect(false, scaffoldState.isDrawerOpen);
 
       scaffoldState.openEndDrawer();
       expect(true, scaffoldState.isEndDrawerOpen);
+
+      scaffoldState.openDrawer();
+      expect(true, scaffoldState.isDrawerOpen);
     });
 
     testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
@@ -1454,7 +1445,7 @@ void main() {
       // not open the drawer.
       await tester.tap(find.byType(IconButton).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(IconButton).last);
+      await tester.tap(find.byType(IconButton).last, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
 
       expect(find.text('endDrawer'), findsNothing);
@@ -1469,7 +1460,7 @@ void main() {
 
       // Tapping on the end drawer and then on the drawer should close the
       // drawer and then reopen it.
-      await tester.tap(find.byType(IconButton).last);
+      await tester.tap(find.byType(IconButton).last, warnIfMissed: false); // hits the modal barrier
       await tester.pumpAndSettle();
       await tester.tap(find.byType(IconButton).first);
       await tester.pumpAndSettle();
@@ -2112,6 +2103,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return GestureDetector(
+                key: tapTarget,
                 onTap: () {
                   scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
                 },
@@ -2119,7 +2111,6 @@ void main() {
                 child: Container(
                   height: 100.0,
                   width: 100.0,
-                  key: tapTarget,
                 ),
               );
             }
@@ -2149,6 +2140,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return GestureDetector(
+                key: tapTarget,
                 onTap: () {
                   ScaffoldMessenger.of(context);
                 },
@@ -2156,7 +2148,6 @@ void main() {
                 child: Container(
                   height: 100.0,
                   width: 100.0,
-                  key: tapTarget,
                 ),
               );
             }
@@ -2301,4 +2292,11 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
   }
+}
+
+// What was the Scaffold's ButtonBar when many of these tests were written,
+// is now a Container with an OverflowBar child. The Container's size and location
+// match the original ButtonBar's size and location.
+Finder _findButtonBar() {
+  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
 }

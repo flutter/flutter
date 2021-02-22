@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -745,8 +744,6 @@ void _tests() {
       textScaleFactor: 1.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     final double minutesDisplayHeight = tester.getSize(find.text('41')).height;
     final double amHeight = tester.getSize(find.text('AM')).height;
@@ -761,8 +758,6 @@ void _tests() {
       textScaleFactor: 2.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     final double amHeight2x = tester.getSize(find.text('AM')).height;
     expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
@@ -778,8 +773,6 @@ void _tests() {
       textScaleFactor: 3.0,
       initialTime: const TimeOfDay(hour: 7, minute: 41),
     );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
     expect(tester.getSize(find.text('AM')).height, equals(amHeight2x));
@@ -958,7 +951,7 @@ class PickerObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is DialogRoute) {
       pickerCount++;
     }
     super.didPush(route, previousRoute);
@@ -966,14 +959,14 @@ class PickerObserver extends NavigatorObserver {
 }
 
 Future<void> mediaQueryBoilerplate(
-    WidgetTester tester,
-    bool alwaysUse24HourFormat, {
-      TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
-      double textScaleFactor = 1.0,
-      TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
-      String? helpText,
-      bool accessibleNavigation = false,
-    }) async {
+  WidgetTester tester,
+  bool alwaysUse24HourFormat, {
+  TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+  double textScaleFactor = 1.0,
+  TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
+  String? helpText,
+  bool accessibleNavigation = false,
+}) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -1012,7 +1005,6 @@ Future<void> mediaQueryBoilerplate(
       ),
     ),
   );
-
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle();
 }

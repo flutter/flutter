@@ -21,10 +21,10 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 import 'package:process/process.dart';
 
-const String gsBase = 'gs://flutter_infra';
+const String gsBase = 'gs://flutter_infra_release';
 const String releaseFolder = '/releases';
 const String gsReleaseFolder = '$gsBase$releaseFolder';
-const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.

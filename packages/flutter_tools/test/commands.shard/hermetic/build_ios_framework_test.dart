@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:io';
 
 import 'package:file/memory.dart';
@@ -208,7 +210,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -226,7 +228,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-profile/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-profile/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -244,7 +246,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-release/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/ios-release/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,10 +22,10 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -47,16 +48,17 @@ void main() {
     });
     testbed = Testbed(
       setup: () {
+        final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
         residentWebRunner = residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
-          flutterProject: FlutterProject.current(),
+          flutterProject: project,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
           stayResident: true,
           urlTunneller: null,
         ) as ResidentWebRunner;
       }, overrides: <Type, Generator>{
-        Pub: () => MockPub(),
+        Pub: () => FakePub(),
       }
     );
   });
@@ -189,8 +191,6 @@ void main() {
 
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockWebDevice extends Mock implements Device {}
-class MockDebugConnection extends Mock implements DebugConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
@@ -199,5 +199,4 @@ class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockPub extends Mock implements Pub {}
 class MockChromiumLauncher extends Mock implements ChromiumLauncher {}

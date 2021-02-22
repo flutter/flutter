@@ -4,9 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -440,7 +438,7 @@ void main() {
     final PaintingContext context = _MockPaintingContext();
     late FlutterError error;
     try {
-      decoratedBox.paint(context, const Offset(0, 0));
+      decoratedBox.paint(context, Offset.zero);
     } on FlutterError catch (e) {
       error = e;
     }
@@ -493,7 +491,7 @@ void main() {
                 height: 100.0,
                 key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                transformAlignment: const Alignment(1.0, 0.0),
+                transformAlignment: Alignment.centerRight,
                 child: Container(
                   color: const Color(0xFF00FFFF),
                 ),
@@ -627,7 +625,7 @@ void main() {
       ),
     ));
 
-    await tester.tap(find.byType(Container));
+    await tester.tap(find.byType(Container), warnIfMissed: false);
     expect(tapped, false);
   });
 

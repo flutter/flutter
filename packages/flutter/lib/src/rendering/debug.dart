@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -135,8 +132,9 @@ bool debugPrintLayouts = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 ///
-/// By default this is turned off since these checks are expensive, but it is
-/// enabled by the test framework.
+/// By default this is turned off since these checks are expensive. If you are
+/// implementing your own children of [RenderBox] with custom intrinsics, turn
+/// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] layout.

@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
@@ -1451,7 +1450,7 @@ abstract class BaseSliderTrackShape {
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
 
-    final double trackLeft = offset.dx + overlayWidth / 2;
+    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
     final double trackBottom = trackTop + trackHeight;
@@ -1487,7 +1486,13 @@ abstract class BaseSliderTrackShape {
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
-  const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
+  const RectangularSliderTrackShape({
+    @Deprecated(
+      'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
+      'This feature was deprecated after v1.26.0-18.0.pre.'
+    )
+    this.disabledThumbGapWidth = 2.0
+  });
 
   /// Horizontal spacing, or gap, between the disabled thumb and the track.
   ///
@@ -1497,7 +1502,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   /// thumb radius.
   @Deprecated(
     'It no longer has any effect because the thumb does not shrink when the slider is disabled now. '
-    'This feature was deprecated after v1.5.7.'
+    'This feature was deprecated after v1.26.0-18.0.pre.'
   )
   final double disabledThumbGapWidth;
 

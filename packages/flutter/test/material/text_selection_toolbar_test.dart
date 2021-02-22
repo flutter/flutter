@@ -6,9 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
-import '../widgets/text.dart' show textOffsetToPosition;
+import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
@@ -24,6 +23,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1

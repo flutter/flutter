@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:meta/meta.dart';
-import 'package:pool/pool.dart';
+// @dart = 2.8
 
-import 'base/async_guard.dart';
+import 'dart:async';
+
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+import 'package:pool/pool.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -23,7 +26,9 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 import 'reporting/reporting.dart';
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -76,6 +81,7 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -86,6 +92,7 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool benchmarkMode;
@@ -105,6 +112,7 @@ class HotRunner extends ResidentRunner {
   /// reload process do not have this issue.
   bool _swap = false;
 
+  /// Whether the resident runner has correctly attached to the running application.
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -121,7 +129,6 @@ class HotRunner extends ResidentRunner {
     bool force = false,
     bool pause = false,
   }) async {
-    // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pause: pause);
     if (!result.isOk) {
       throw vm_service.RPCError(
@@ -172,6 +179,7 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   }) async {
     _didAttach = true;
     try {
@@ -189,6 +197,14 @@ class HotRunner extends ResidentRunner {
       }
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
+    }
+
+    if (enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
 
     for (final FlutterDevice device in flutterDevices) {
@@ -210,6 +226,7 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
+
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -281,7 +298,7 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
       return 0;
     }
-    writeVmserviceFile();
+    writeVmServiceFile();
 
     int result = 0;
     if (stayResident) {
@@ -295,8 +312,18 @@ class HotRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   }) async {
+    File mainFile = globals.fs.file(mainPath);
+    // `generated_main.dart` contains the Dart plugin registry.
+    final Directory buildDir = FlutterProject.current()
+        .directory
+        .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
+    final File newMainDart = buildDir?.childFile('generated_main.dart');
+    if (newMainDart != null && newMainDart.existsSync()) {
+      mainFile = newMainDart;
+    }
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
@@ -309,7 +336,7 @@ class HotRunner extends ResidentRunner {
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
-            globals.fs.file(mainPath).uri,
+            mainFile.uri,
             <Uri>[],
             // When running without a provided applicationBinary, the tool will
             // simultaneously run the initial frontend_server compilation and
@@ -345,6 +372,7 @@ class HotRunner extends ResidentRunner {
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
+      enableDevTools: enableDevTools,
     );
   }
 
@@ -469,8 +497,6 @@ class HotRunner extends ResidentRunner {
     String reason,
   }) async {
     final Stopwatch restartTimer = Stopwatch()..start();
-    // TODO(aam): Add generator reset logic once we switch to using incremental
-    // compiler for full application recompilation on restart.
     final UpdateFSReport updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS.success) {
       for (final FlutterDevice device in flutterDevices) {
@@ -592,6 +618,9 @@ class HotRunner extends ResidentRunner {
     bool silent = false,
     bool pause = false,
   }) async {
+    if (flutterDevices.any((FlutterDevice device) => device.devFS == null)) {
+      return OperationResult(1, 'Device initialization has not completed.');
+    }
     String targetPlatform;
     String sdkName;
     bool emulator;
@@ -625,6 +654,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
+      unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -666,13 +696,7 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      // The current implementation of the vmservice and JSON rpc may throw
-      // unhandled exceptions into the zone that cannot be caught with a regular
-      // try catch. The usage is [asyncGuard] is required to normalize the error
-      // handling, at least until we can refactor the underlying code.
-      result = await asyncGuard(() => _restartFromSources(
-        reason: reason,
-      ));
+      result = await _restartFromSources(reason: reason,);
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
@@ -1078,7 +1102,7 @@ class HotRunner extends ResidentRunner {
     if (canHotRestart) {
       commandHelp.R.print();
     }
-    commandHelp.h.print();
+    commandHelp.h.print(); // TODO(ianh): print different message if "details" is false
     if (_didAttach) {
       commandHelp.d.print();
     }
@@ -1086,13 +1110,6 @@ class HotRunner extends ResidentRunner {
     commandHelp.q.print();
     if (details) {
       printHelpDetails();
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      // Caution: This log line is parsed by device lab tests.
-      globals.printStatus(
-        'An Observatory debugger and profiler on ${device.device.name} is available at: '
-        '${device.vmService.httpAddress}',
-      );
     }
     globals.printStatus('');
     if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
@@ -1106,6 +1123,8 @@ class HotRunner extends ResidentRunner {
         'For more information see https://dart.dev/null-safety/unsound-null-safety',
       );
     }
+    globals.printStatus('');
+    printDebuggerList();
   }
 
   Future<void> _evictDirtyAssets() async {

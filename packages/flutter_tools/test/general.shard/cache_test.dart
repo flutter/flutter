@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 import 'package:flutter_tools/src/base/io.dart';
@@ -16,12 +18,40 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
+const FakeCommand unameCommandForX64 = FakeCommand(
+  command: <String>[
+    'uname',
+    '-m',
+  ],
+  stdout: 'x86_64',
+);
+
+const FakeCommand unameCommandForArm64 = FakeCommand(
+  command: <String>[
+    'uname',
+    '-m',
+  ],
+  stdout: 'aarch64',
+);
+
 void main() {
+  FakeProcessManager fakeProcessManager;
+
+  setUp(() {
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+  });
+
+  Cache createCache(Platform platform) {
+    return Cache.test(
+      platform: platform,
+      processManager: fakeProcessManager
+    );
+  }
+
   group('Cache.checkLockAcquired', () {
     setUp(() {
       Cache.enableLocking();
@@ -244,7 +274,7 @@ void main() {
 
   testWithoutContext('flattenNameSubdirs', () {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar'), MemoryFileSystem.test()), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar'), MemoryFileSystem.test()), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://api.flutter.dev/foo/bar'), MemoryFileSystem.test()), 'api.flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()), 'www.flutter.dev');
   });
 
@@ -363,16 +393,28 @@ void main() {
     expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
   });
 
-  testWithoutContext('FontSubset artifacts on linux', () {
-    final Cache cache = Cache.test();
+  testWithoutContext('FontSubset artifacts on x64 linux', () {
+    fakeProcessManager.addCommand(unameCommandForX64);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
   });
 
+  testWithoutContext('FontSubset artifacts on arm64 linux', () {
+    fakeProcessManager.addCommand(unameCommandForArm64);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+    cache.includeAllPlatforms = false;
+
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-arm64', 'linux-arm64/font-subset.zip']]);
+  });
+
   testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = Cache.test();
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'windows'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'windows'));
     cache.includeAllPlatforms = false;
 
@@ -380,7 +422,24 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'which',
+          'sysctl'
+        ],
+        stdout: '/sbin/sysctl',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'sysctl',
+          'hw.optional.arm64',
+        ],
+        stdout: 'hw.optional.arm64: 0',
+      ),
+    ]);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
     cache.includeAllPlatforms = false;
 
@@ -388,23 +447,41 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on fuchsia', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(unameCommandForX64);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: fuchsia'));
   });
 
-  testWithoutContext('FontSubset artifacts for all platforms', () {
-    final Cache cache = Cache.test();
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
-    cache.includeAllPlatforms = true;
+  testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
+      fakeProcessManager.addCommand(unameCommandForX64);
 
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
-      <String>['linux-x64', 'linux-x64/font-subset.zip'],
-      <String>['windows-x64', 'windows-x64/font-subset.zip'],
-    ]);
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
+      cache.includeAllPlatforms = true;
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
+        <String>['linux-x64', 'linux-x64/font-subset.zip'],
+        <String>['windows-x64', 'windows-x64/font-subset.zip'],
+      ]);
+  });
+
+  testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
+      fakeProcessManager.addCommand(unameCommandForArm64);
+
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+      final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
+      cache.includeAllPlatforms = true;
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['darwin-x64', 'darwin-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+        <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
+        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 macOS hosts are not supported now
+      ]);
   });
 
   testWithoutContext('macOS desktop artifacts ignore filtering when requested', () {
@@ -442,7 +519,9 @@ void main() {
   });
 
   testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
-    final Cache cache = Cache.test();
+    fakeProcessManager.addCommand(unameCommandForX64);
+
+    final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
     final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -453,17 +532,36 @@ void main() {
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
 
-  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
-    final Cache cache = Cache.test();
-    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'linux'),
-    );
+  testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
+      fakeProcessManager.addCommand(unameCommandForX64);
 
-    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
-      contains(contains('profile')),
-      contains(contains('release')),
-    ]));
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+      final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+        cache,
+        platform: FakePlatform(operatingSystem: 'linux'),
+      );
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
+        <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
+      ]);
+  });
+
+  testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
+      fakeProcessManager.addCommand(unameCommandForArm64);
+
+      final Cache cache = createCache(FakePlatform(operatingSystem: 'linux'));
+      final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+        cache,
+        platform: FakePlatform(operatingSystem: 'linux'),
+      );
+
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['linux-arm64', 'linux-arm64/linux-arm64-flutter-gtk.zip'],
+        <String>['linux-arm64-profile', 'linux-arm64-profile/linux-arm64-flutter-gtk.zip'],
+        <String>['linux-arm64-release', 'linux-arm64-release/linux-arm64-flutter-gtk.zip'],
+      ]);
   });
 
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
@@ -566,7 +664,8 @@ void main() {
   });
 
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
     final Logger logger = BufferLogger.test();
     final FakeCache cache = FakeCache(
       fileSystem: fileSystem,
@@ -574,19 +673,33 @@ void main() {
       platform: FakePlatform(),
       osUtils: MockOperatingSystemUtils()
     );
-    final MockFile file = MockFile();
+    final File file = fileSystem.file('stamp');
     cache.stampFile = file;
-    when(file.existsSync()).thenReturn(false);
 
     expect(cache.getStampFor('foo'), null);
 
-    when(file.existsSync()).thenReturn(true);
-    when(file.readAsStringSync()).thenThrow(const FileSystemException());
+    file.createSync();
+    exceptionHandler.addError(
+      file,
+      FileSystemOp.read,
+      const FileSystemException(),
+    );
 
     expect(cache.getStampFor('foo'), null);
+  });
 
-    when(file.existsSync()).thenReturn(true);
-    when(file.readAsStringSync()).thenReturn('ABC ');
+  testWithoutContext('Cache parses stamp file', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Logger logger = BufferLogger.test();
+    final FakeCache cache = FakeCache(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        osUtils: MockOperatingSystemUtils()
+    );
+
+    final File file = fileSystem.file('stamp')..writeAsStringSync('ABC ');
+    cache.stampFile = file;
 
     expect(cache.getStampFor('foo'), 'ABC');
   });
@@ -653,24 +766,25 @@ void main() {
 
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
-    MockProcessManager processManager;
     Cache cache;
+    FakeAndroidSdk fakeAndroidSdk;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      processManager = MockProcessManager();
       cache = Cache.test(
         fileSystem: memoryFileSystem,
         processManager: FakeProcessManager.any(),
       );
+      fakeAndroidSdk = FakeAndroidSdk();
     });
 
-    testWithoutContext('development artifact', () async {
+    testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
-    testUsingContext('update', () async {
+    testUsingContext('AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present', () async {
+      Cache.flutterRoot = '';
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
@@ -678,16 +792,29 @@ void main() {
       gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
-      when(processManager.run(any, environment: captureAnyNamed('environment')))
-        .thenAnswer((Invocation invocation) {
-          final List<String> args = invocation.positionalArguments[0] as List<String>;
-          expect(args.length, 6);
-          expect(args[1], '-b');
-          expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
-          expect(args[5], 'resolveDependencies');
-          expect(invocation.namedArguments[#environment], gradleEnvironment);
-          return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
-        });
+      await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
+
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      expect(fakeAndroidSdk.reinitialized, true);
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>[
+          '/cache/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
+          '-b',
+          'packages/flutter_tools/gradle/resolve_dependencies.gradle',
+          '--project-cache-dir',
+          'cache/bin/cache/flutter_gradle_wrapper.rand0',
+          'resolveDependencies',
+        ])
+      ]),
+      AndroidSdk: () => fakeAndroidSdk
+    });
+
+    testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache, platform: FakePlatform(operatingSystem: 'linux'));
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
 
       await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
 
@@ -695,7 +822,8 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+      AndroidSdk: () => null // Android SDK was not located.
     });
   });
 }
@@ -749,11 +877,6 @@ class FakeDownloadedArtifact extends CachedArtifact {
 }
 
 class MockArtifactUpdater extends Mock implements ArtifactUpdater {}
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockFileSystem extends Mock implements FileSystem {}
-class MockFile extends Mock implements File {}
-class MockDirectory extends Mock implements Directory {}
-class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
@@ -761,6 +884,7 @@ class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
 class MockPub extends Mock implements Pub {}
+
 class FakeCache extends Cache {
   FakeCache({
     @required Logger logger,
@@ -780,5 +904,13 @@ class FakeCache extends Cache {
   @override
   File getStampFileFor(String artifactName) {
     return stampFile;
+  }
+}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  bool reinitialized = false;
+
+  @override
+  void reinitialize() {
+    reinitialized = true;
   }
 }

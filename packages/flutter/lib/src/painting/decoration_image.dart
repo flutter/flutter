@@ -473,9 +473,7 @@ void paintImage({
   final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
-  if (sourceSize != destinationSize) {
-    paint.filterQuality = filterQuality;
-  }
+  paint.filterQuality = filterQuality;
   paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
@@ -504,7 +502,7 @@ void paintImage({
           exception: 'Image $debugImageLabel has a display size of '
             '$outputWidth×$outputHeight but a decode size of '
             '${image.width}×${image.height}, which uses an additional '
-            '${overheadInKilobytes}kb.\n\n'
+            '${overheadInKilobytes}KB.\n\n'
             'Consider resizing the asset ahead of time, supplying a cacheWidth '
             'parameter of $outputWidth, a cacheHeight parameter of '
             '$outputHeight, or using a ResizeImage.',

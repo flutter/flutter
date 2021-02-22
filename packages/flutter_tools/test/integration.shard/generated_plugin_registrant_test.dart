@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/testbed.dart';
 
 void main() {
   Directory tempDir;

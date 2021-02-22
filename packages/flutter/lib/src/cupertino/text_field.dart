@@ -4,12 +4,14 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -100,6 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -290,8 +293,7 @@ class CupertinoTextField extends StatefulWidget {
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
-       // TODO(a14n): uncomment when issue is fixed, https://github.com/dart-lang/sdk/issues/43407
-       assert(obscuringCharacter != null/* && obscuringCharacter.length == 1*/),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -442,8 +444,7 @@ class CupertinoTextField extends StatefulWidget {
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
-       // TODO(a14n): uncomment when issue is fixed, https://github.com/dart-lang/sdk/issues/43407
-       assert(obscuringCharacter != null/* && obscuringCharacter.length == 1*/),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -1064,7 +1065,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
-    final TextSelectionControls textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
+
+    TextSelectionControls? textSelectionControls = widget.selectionControls;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        textSelectionControls ??= cupertinoTextSelectionControls;
+        break;
+
+      case TargetPlatform.macOS:
+        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        break;
+    }
+
     final bool enabled = widget.enabled ?? true;
     final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -1184,9 +1200,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       ),
     );
 
-    return Semantics(
+    final Widget child = Semantics(
       enabled: enabled,
-      onTap: !enabled ? null : () {
+      onTap: !enabled || widget.readOnly ? null : () {
         if (!controller.selection.isValid) {
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }
@@ -1208,5 +1224,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
+
+    if (kIsWeb) {
+      return Shortcuts(
+        shortcuts: scrollShortcutOverrides,
+        child: child,
+      );
+    }
+    return child;
   }
 }

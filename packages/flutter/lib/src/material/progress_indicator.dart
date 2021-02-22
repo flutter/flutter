@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 import 'theme.dart';
@@ -305,7 +304,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     Key? key,
     double? value,
     Color? backgroundColor,
-    Animation<Color>? valueColor,
+    Animation<Color?>? valueColor,
     this.minHeight,
     String? semanticsLabel,
     String? semanticsValue,

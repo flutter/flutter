@@ -52,7 +52,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia, fake }
+enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -63,6 +63,10 @@ abstract class DeviceDiscovery {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return AndroidDeviceDiscovery();
+      case DeviceOperatingSystem.androidArm:
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm);
+      case DeviceOperatingSystem.androidArm64:
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm64);
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
@@ -155,12 +159,19 @@ abstract class Device {
   }
 }
 
+enum _AndroidCPU {
+  arm,
+  arm64,
+}
+
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery() {
-    return _instance ??= AndroidDeviceDiscovery._();
+  factory AndroidDeviceDiscovery({_AndroidCPU cpu}) {
+    return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
-  AndroidDeviceDiscovery._();
+  AndroidDeviceDiscovery._(this.cpu);
+
+  final _AndroidCPU cpu;
 
   // Parses information about a device. Example:
   //
@@ -185,6 +196,18 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return _workingDevice;
   }
 
+  Future<bool> _matchesCPURequirement(AndroidDevice device) async {
+    if (cpu == null)
+      return true;
+    switch (cpu) {
+      case _AndroidCPU.arm64:
+        return device.isArm64();
+      case _AndroidCPU.arm:
+        return device.isArm();
+    }
+    return true;
+  }
+
   /// Picks a random Android device out of connected devices and sets it as
   /// [workingDevice].
   @override
@@ -196,8 +219,22 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     if (allDevices.isEmpty)
       throw const DeviceException('No Android devices detected');
 
-    // TODO(yjbanov): filter out and warn about those with low battery level
-    _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    if (cpu != null) {
+      for (final AndroidDevice device in allDevices) {
+        if (await _matchesCPURequirement(device)) {
+          _workingDevice = device;
+          break;
+        }
+      }
+
+    } else {
+      // TODO(yjbanov): filter out and warn about those with low battery level
+      _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    }
+
+    if (_workingDevice == null)
+      throw const DeviceException('Cannot find a suitable Android device');
+
     print('Device chosen: $_workingDevice');
   }
 
@@ -206,6 +243,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final String matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = AndroidDevice(deviceId: matchedId);
+      if (cpu != null) {
+        if (!await _matchesCPURequirement(_workingDevice)) {
+          throw DeviceException('The selected device $matchedId does not match the cpu requirement');
+        }
+      }
       print('Choose device by ID: $matchedId');
       return;
     }
@@ -442,6 +484,16 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
+  }
+
+  Future<bool> isArm64() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('arm64');
+  }
+
+  Future<bool> isArm() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('armeabi');
   }
 
   Future<void> _updateDeviceInfo() async {
@@ -751,7 +803,7 @@ class IosDevice extends Device {
 
   @override
   Future<void> reboot() {
-    return Process.run('idevicesyslog', <String>['reboot', '-u', deviceId]);
+    return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
 }
 

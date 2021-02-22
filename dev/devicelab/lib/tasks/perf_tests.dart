@@ -172,16 +172,6 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'animated_placeholder_perf',
-    measureCpuGpu: measureCpuGpu,
-    testDriver: 'test_driver/animated_placeholder_perf_test.dart',
-  ).run;
-}
-
 TaskFunction createAnimatedPlaceholderPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -281,6 +271,59 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createStackSizeTest() {
+  final String testDirectory =
+      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
+  const String testTarget = 'test_driver/run_app.dart';
+  const String testDriver = 'test_driver/stack_size_perf_test.dart';
+  return () {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('drive', options: <String>[
+        '--no-android-gradle-daemon',
+        '-v',
+        '--verbose-system-logs',
+        '--profile',
+        '-t', testTarget,
+        '--driver', testDriver,
+        '-d',
+        deviceId,
+      ]);
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/stack_size.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+
+      final Map<String, dynamic> result = <String, dynamic>{
+        'stack_size_per_nesting_level': data['stack_size'],
+      };
+      return TaskResult.success(
+        result,
+        benchmarkScoreKeys: result.keys.toList(),
+      );
+    });
+  };
+}
+
+TaskFunction createFullscreenTextfieldPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'fullscreen_textfield_perf',
+    testDriver: 'test_driver/fullscreen_textfield_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createFullscreenTextfieldPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/fullscreen_textfield_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -315,15 +358,6 @@ TaskFunction createImageFilteredTransformAnimationPerfTest() {
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
-  ).run;
-}
-
-TaskFunction createsMultiWidgetConstructPerfTest() {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/run_app.dart',
-    'multi_widget_construction_perf',
-    testDriver: 'test_driver/multi_widget_construction_perf_test.dart',
   ).run;
 }
 
@@ -469,6 +503,24 @@ class StartupTest {
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
           break;
+        case DeviceOperatingSystem.androidArm:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
+        case DeviceOperatingSystem.androidArm64:
+          await flutter('build', options: <String>[
+            'apk',
+            '-v',
+            '--profile',
+            '--target-platform=android-arm64',
+          ]);
+          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          break;
         case DeviceOperatingSystem.ios:
           await flutter('build', options: <String>[
             'ios',
@@ -487,6 +539,7 @@ class StartupTest {
       for (int i = 0; i < iterations; i += 1) {
         final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
+          '--no-publish-port',
           '--verbose',
           '--profile',
           '--trace-startup',
@@ -670,8 +723,8 @@ class PerfTest {
           if (measureMemory && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_memory_usage'] != null) 'average_memory_usage',
-            '90th_percentile_memory_usage',
-            '99th_percentile_memory_usage',
+            if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+            if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
           ],
         ],
       );
@@ -786,6 +839,7 @@ class PerfTestWithSkSL extends PerfTest {
         '--verbose',
         '--verbose-system-logs',
         '--purge-persistent-cache',
+        '--no-publish-port',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,
@@ -986,8 +1040,23 @@ class CompileTest {
           metrics.addAll(await getSizesFromIosApp(appPath));
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
+        releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes)
+          metrics.addAll(await getSizesFromApk(apkPath));
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
@@ -1022,8 +1091,13 @@ class CompileTest {
         options.insert(0, 'ios');
         break;
       case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        break;
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
@@ -1289,6 +1363,7 @@ class DevToolsMemoryTest {
         'run',
         '--verbose',
         '--profile',
+        '--no-publish-port',
         '-d', _device.deviceId,
         driverTest,
       ],
@@ -1404,6 +1479,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-publish-port',
         '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',

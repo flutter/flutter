@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -94,7 +96,7 @@ void main() {
 
     print(result.stdout);
     print(result.stderr);
-    expect(result.stderr.toString(), contains('--analyze-size can only be used on release builds'));
+    expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
 
     expect(result.exitCode, 1);
   });
@@ -111,7 +113,7 @@ void main() {
       '--split-debug-info=infos'
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
-    expect(result.stderr.toString(), contains('--analyze-size cannot be combined with --split-debug-info'));
+    expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
 
     expect(result.exitCode, 1);
   });

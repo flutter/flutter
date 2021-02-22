@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
@@ -21,10 +23,12 @@ import '../runner/flutter_command.dart';
 import 'create_base.dart';
 
 class CreateCommand extends CreateBase {
-  CreateCommand() {
+  CreateCommand({
+    bool verboseHelp = false,
+  }) : super(verboseHelp: verboseHelp) {
     addPlatformsOptions(customHelp: 'The platforms supported by this project. '
-        'This argument only works when the --template is set to app or plugin. '
         'Platform folders (e.g. android/) will be generated in the target project. '
+        'This argument only works when "--template" is set to app or plugin. '
         'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
         'Adding desktop platforms requires the corresponding desktop config setting to be enabled.');
     argParser.addOption(
@@ -48,17 +52,17 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'sample',
       abbr: 's',
-      help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.dev). An example can be found at '
-        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
+      help: 'Specifies the Flutter code sample to use as the "main.dart" for an application. Implies '
+        '"--template=app". The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.dev/). An example can be found at: '
+        'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
       valueHelp: 'id',
     );
     argParser.addOption(
       'list-samples',
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
-        'that can be created with --sample.',
+        'that can be created with "--sample".',
       valueHelp: 'path',
     );
   }
@@ -92,8 +96,8 @@ class CreateCommand extends CreateBase {
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
+        ? 'api.flutter.dev'
+        : 'master-api.flutter.dev';
 
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -216,7 +220,7 @@ class CreateCommand extends CreateBase {
 
     if (boolArg('with-driver-test')) {
       globals.printError(
-        '--with-driver-test has been deprecated and will no longer add a flutter '
+        'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
         'visiting https://pub.dev/packages/integration_test .'
       );
@@ -236,6 +240,8 @@ class CreateCommand extends CreateBase {
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      // Enable null-safety for sample code, which is - unlike our regular templates - already migrated.
+      dartSdkVersionBounds: sampleCode != null ? '">=2.12.0-0 <3.0.0"' : '">=2.7.0 <3.0.0"'
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -296,13 +302,19 @@ class CreateCommand extends CreateBase {
       } else if (_getSupportedPlatformsInPlugin(projectDir).isEmpty){
         _printNoPluginMessage();
       }
-      _printAddPlatformMessage(relativePluginPath);
+
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
+      }
+      _printPluginAddPlatformMessage(relativePluginPath);
     } else  {
       // Tell the user the next steps.
-      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectDirPath));
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
+      final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
@@ -311,9 +323,20 @@ In order to run your $application, type:
   \$ cd $relativeAppPath
   \$ flutter run
 
+To enable null safety, type:
+
+  \$ cd $relativeAppPath
+  \$ dart migrate --apply-changes
+
 Your $application code is in $relativeAppMain.
 ''');
+      // Show warning if any selected platform is not enabled
+      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      if (platformsToWarn.isNotEmpty) {
+        _printWarningDisabledPlatform(platformsToWarn);
+      }
     }
+
     return FlutterCommandResult.success();
   }
 
@@ -491,21 +514,64 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
   globals.printStatus('''
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
-
 ''', emphasis: true, color: TerminalColor.red);
 }
 
 void _printNoPluginMessage() {
     globals.printError('''
 You've created a plugin project that doesn't yet support any platforms.
-
 ''');
 }
 
-void _printAddPlatformMessage(String pluginPath) {
+void _printPluginAddPlatformMessage(String pluginPath) {
   globals.printStatus('''
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
 
 ''');
+}
+
+// returns a list disabled, but requested platforms
+List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+  final List<String> platformsToWarn = <String>[
+  if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
+    'web',
+  if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled)
+    'macos',
+  if (requestedPlatforms.contains('windows') && !featureFlags.isWindowsEnabled)
+    'windows',
+  if (requestedPlatforms.contains('linux') && !featureFlags.isLinuxEnabled)
+    'linux',
+  ];
+
+  return platformsToWarn;
+}
+
+void _printWarningDisabledPlatform(List<String> platforms) {
+  final List<String> desktop = <String>[];
+  final List<String> web = <String>[];
+
+  for (final String platform in platforms) {
+    if (platform == 'web') {
+      web.add(platform);
+    } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
+      desktop.add(platform);
+    }
+  }
+
+  if (desktop.isNotEmpty) {
+    final String platforms = desktop.length > 1 ? 'platforms' : 'platform';
+    final String verb = desktop.length > 1 ? 'are' : 'is';
+
+    globals.printStatus('''
+The desktop $platforms: ${desktop.join(', ')} $verb currently not supported on your local environment.
+For more details, see: https://flutter.dev/desktop
+''');
+  }
+  if (web.isNotEmpty) {
+    globals.printStatus('''
+The web is currently not supported on your local environment.
+For more details, see: https://flutter.dev/docs/get-started/web
+''');
+  }
 }

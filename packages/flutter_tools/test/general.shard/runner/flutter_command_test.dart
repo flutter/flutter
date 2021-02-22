@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -23,27 +25,23 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    MockitoCache cache;
-    MockitoUsage usage;
-    MockClock clock;
+    MockCache cache;
+    TestUsage usage;
+    FakeClock clock;
     MockProcessInfo mockProcessInfo;
-    List<int> mockTimes;
 
     setUp(() {
       Cache.disableLocking();
-      cache = MockitoCache();
-      usage = MockitoUsage();
-      clock = MockClock();
+      cache = MockCache();
+      usage = TestUsage();
+      clock = FakeClock();
       mockProcessInfo = MockProcessInfo();
 
-      when(usage.isFirstRun).thenReturn(false);
-      when(clock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
       when(mockProcessInfo.maxRss).thenReturn(10);
     });
 
@@ -153,7 +151,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in success', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -162,29 +160,24 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'success',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'success',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'success',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -193,29 +186,24 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'warning',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'warning',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'warning',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in failure', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -249,7 +237,7 @@ void main() {
 
     testUsingCommandContext('reports command that results in error', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -257,29 +245,23 @@ void main() {
           return null; // unreachable
         }
       );
-
       try {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'fail',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'fail',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'fail',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }
     });
 
@@ -289,6 +271,48 @@ void main() {
 
     test('FlutterCommandResult.warning()', () async {
       expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
+    testUsingContext('devToolsServerAddress returns parsed uri', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+      await createTestCommandRunner(command).run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'http://127.0.0.1:9105',
+      ]);
+      expect(command.devToolsServerAddress.toString(), equals('http://127.0.0.1:9105'));
+    });
+
+    testUsingContext('devToolsServerAddress returns null for bad input', () async {
+      final DummyFlutterCommand command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        'hello-world',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
+
+      await runner.run(<String>[
+        'dummy',
+        '--${FlutterCommand.kDevToolsServerAddress}',
+        '127.0.0.1:9101',
+      ]);
+      expect(command.devToolsServerAddress, isNull);
     });
 
     group('signals tests', () {
@@ -305,7 +329,7 @@ void main() {
 
       testUsingContext('reports command that is killed', () async {
         // Crash if called a third time which is unexpected.
-        mockTimes = <int>[1000, 2000];
+        clock.times = <int>[1000, 2000];
 
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
@@ -326,24 +350,19 @@ void main() {
         signalController.add(mockSignal);
         await completer.future;
 
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'killed',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'killed',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'killed',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -355,7 +374,7 @@ void main() {
       });
 
       testUsingContext('command release lock on kill signal', () async {
-        mockTimes = <int>[1000, 2000];
+        clock.times = <int>[1000, 2000];
         final Completer<void> completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
           expect(exitCode, 0);
@@ -394,41 +413,34 @@ void main() {
 
     testUsingCommandContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
-      verify(clock.now()).called(2);
 
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 1000),
-          'fail',
-        ],
-      );
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        )));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
-      verify(clock.now()).called(2);
-      verifyNever(usage.sendTiming(
-                   any, any, any,
-                   label: anyNamed('label')));
+
+      expect(usage.timings, isEmpty);
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
@@ -441,23 +453,19 @@ void main() {
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
-      verify(clock.now()).called(2);
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
-          'success-blah1-blah2-blah3',
-        ],
-      );
+          Duration(milliseconds: 500),
+          label: 'success-blah1-blah2-blah3',
+        )));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
       // Crash if called a third time which is unexpected.
-      mockTimes = <int>[1000, 2000];
+      clock.times = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
@@ -470,20 +478,13 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        // Should have still checked time twice.
-        verify(clock.now()).called(2);
-
-        expect(
-          verify(usage.sendTiming(
-                  captureAny, captureAny, captureAny,
-                  label: captureAnyNamed('label'))).captured,
-          <dynamic>[
+        expect(usage.timings, contains(
+          const TestTimingEvent(
             'flutter',
             'dummy',
-            const Duration(milliseconds: 1000),
-            'fail',
-          ],
-        );
+            Duration(milliseconds: 1000),
+            label: 'fail',
+          )));
       }
     });
 
@@ -516,14 +517,28 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
-        'cd49': '1', 'cd50': '1',
-      })).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+      expect(usage.events, containsAll(<TestUsageEvent>[
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'runtime-mode',
+          label: 'NullSafetyMode.sound',
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'stats',
+          parameters: <String, String>{
+            'cd49': '1', 'cd50': '1',
+          },
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'language-version',
+          label: '2.12',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
-      Usage: () => MockitoUsage(),
+      Usage: () => usage,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -638,16 +653,13 @@ class FakeSignals implements Signals {
   Stream<Object> get errors => delegate.errors;
 }
 
-class FakePub extends Fake implements Pub {
+class FakeClock extends Fake implements SystemClock {
+  List<int> times = <int>[];
+
   @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
-    bool checkUpToDate = false,
-  }) async { }
+  DateTime now() {
+    return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
+  }
 }
+
+class MockCache extends Mock implements Cache {}

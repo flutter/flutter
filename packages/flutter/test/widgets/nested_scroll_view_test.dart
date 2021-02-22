@@ -2139,7 +2139,7 @@ void main() {
 
       // Tap after releasing the overscroll to trigger secondary inner ballistic
       // scroll activity with 0 velocity.
-      await tester.tap(find.text('Item 49'));
+      await tester.tap(find.text('Item 49'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // If handled correctly, the ballistic scroll activity should finish
@@ -2302,6 +2302,49 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)));
 
     expect(lastUserScrollingDirection, ScrollDirection.forward);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/72257
+  testWidgets('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (WidgetTester tester) async {
+    bool? isScrolled;
+    final Widget myApp = MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Focus(
+              onFocusChange: (_) => setState( (){} ),
+              child: NestedScrollView(
+                headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+                  isScrolled = boxIsScrolled;
+                  return <Widget>[
+                    const SliverAppBar(
+                      expandedHeight: 200,
+                      title: Text('Test'),
+                    )
+                  ];
+                },
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          return const Text('');
+                        },
+                        childCount: 10,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(myApp, Duration.zero, EnginePhase.build);
+    expect(isScrolled, false);
+    expect(tester.takeException(), isNull);
   });
 }
 

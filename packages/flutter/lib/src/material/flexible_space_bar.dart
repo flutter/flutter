@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -38,6 +37,8 @@ enum StretchMode {
 
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}
 ///
 /// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]

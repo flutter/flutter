@@ -89,6 +89,60 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// is always ready to go on the platform thread when the operating system needs
 /// it.
 ///
+/// ## State Restoration on iOS
+///
+/// To enable state restoration on iOS, a restoration identifier has to be
+/// assigned to the [FlutterViewController](https://api.flutter.dev/objcdoc/Classes/FlutterViewController.html).
+/// If the standard embedding (produced by `flutter create`) is used, this can
+/// be accomplished with the following steps:
+///
+///  1. In the app's directory, open `ios/Runner.xcodeproj` with Xcode.
+///  2. Select `Main.storyboard` under `Runner/Runner` in the Project Navigator
+///     on the left.
+///  3. Select the `Flutter View Controller` under
+///     `Flutter View Controller Scene` in the view hierarchy.
+///  4. Navigate to the Identity Inspector in the panel on the right.
+///  5. Enter a unique restoration ID in the provided field.
+///  6. Save the project.
+///
+/// ## Development with hot restart and hot reload
+///
+/// Changes applied to your app with hot reload and hot restart are not
+/// persisted on the device. They are lost when the app is fully terminated and
+/// restarted, e.g. by the operating system. Therefore, your app may not restore
+/// correctly during development if you have made changes and applied them with
+/// hot restart or hot reload. To test state restoration, always make sure to
+/// fully re-compile your application (e.g. by re-executing `flutter run`) after
+/// making a change.
+///
+/// ## Testing State Restoration
+///
+/// {@template flutter.widgets.RestorationManager}
+/// To test state restoration on Android:
+///   1. Turn on "Don't keep activities", which destroys the Android activity
+///      as soon as the user leaves it. This option should become available
+///      when Developer Options are turned on for the device.
+///   2. Run the code sample on an Android device.
+///   3. Create some in-memory state in the app on the phone,
+///      e.g. by navigating to a different screen.
+///   4. Background the Flutter app, then return to it. It will restart
+///      and restore its state.
+///
+/// To test state restoration on iOS:
+///   1. Open `ios/Runner.xcworkspace/` in Xcode.
+///   2. (iOS 14+ only): Switch to build in profile or release mode, as
+///      launching an app from the home screen is not supported in debug
+///      mode.
+///   2. Press the Play button in Xcode to build and run the app.
+///   3. Create some in-memory state in the app on the phone,
+///      e.g. by navigating to a different screen.
+///   4. Background the app on the phone, e.g. by going back to the home screen.
+///   5. Press the Stop button in Xcode to terminate the app while running in
+///      the background.
+///   6. Open the app again on the phone (not via Xcode). It will restart
+///      and restore its state.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [ServicesBinding.restorationManager], which holds the singleton instance
@@ -172,7 +226,7 @@ class RestorationManager extends ChangeNotifier {
   bool _isReplacing = false;
 
   Future<void> _getRootBucketFromEngine() async {
-    final Map<dynamic, dynamic>? config = await SystemChannels.restoration.invokeMethod<Map<dynamic, dynamic>>('get');
+    final Map<Object?, Object?>? config = await SystemChannels.restoration.invokeMethod<Map<Object?, Object?>>('get');
     if (_pendingRootBucket == null) {
       // The restoration data was obtained via other means (e.g. by calling
       // [handleRestorationDataUpdate] while the request to the engine was
@@ -183,9 +237,9 @@ class RestorationManager extends ChangeNotifier {
     _parseAndHandleRestorationUpdateFromEngine(config);
   }
 
-  void _parseAndHandleRestorationUpdateFromEngine(Map<dynamic, dynamic>? update) {
+  void _parseAndHandleRestorationUpdateFromEngine(Map<Object?, Object?>? update) {
     handleRestorationUpdateFromEngine(
-      enabled: update != null && update['enabled'] as bool,
+      enabled: update != null && update['enabled']! as bool,
       data: update == null ? null : update['data'] as Uint8List?,
     );
   }
@@ -251,25 +305,25 @@ class RestorationManager extends ChangeNotifier {
     );
   }
 
-  Future<dynamic> _methodHandler(MethodCall call) async {
+  Future<Object?> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'push':
-        _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<dynamic, dynamic>);
+        _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
         break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
   }
 
-  Map<dynamic, dynamic>? _decodeRestorationData(Uint8List? data) {
+  Map<Object?, Object?>? _decodeRestorationData(Uint8List? data) {
     if (data == null) {
       return null;
     }
     final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
-    return const StandardMessageCodec().decodeMessage(encoded) as Map<dynamic, dynamic>;
+    return const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
   }
 
-  Uint8List _encodeRestorationData(Map<dynamic, dynamic> data) {
+  Uint8List _encodeRestorationData(Map<Object?, Object?> data) {
     final ByteData encoded = const StandardMessageCodec().encodeMessage(data)!;
     return encoded.buffer.asUint8List(encoded.offsetInBytes, encoded.lengthInBytes);
   }
@@ -451,7 +505,7 @@ class RestorationBucket {
     required Object? debugOwner,
   }) : assert(restorationId != null),
        _restorationId = restorationId,
-       _rawData = <String, dynamic>{} {
+       _rawData = <String, Object?>{} {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -483,10 +537,10 @@ class RestorationBucket {
   /// The `manager` argument must not be null.
   RestorationBucket.root({
     required RestorationManager manager,
-    required Map<dynamic, dynamic>? rawData,
+    required Map<Object?, Object?>? rawData,
   }) : assert(manager != null),
        _manager = manager,
-       _rawData = rawData ?? <dynamic, dynamic>{},
+       _rawData = rawData ?? <Object?, Object?>{},
        _restorationId = 'root' {
     assert(() {
       _debugOwner = manager;
@@ -513,7 +567,7 @@ class RestorationBucket {
        assert(parent._rawChildren[restorationId] != null),
        _manager = parent._manager,
        _parent = parent,
-       _rawData = parent._rawChildren[restorationId] as Map<dynamic, dynamic>,
+       _rawData = parent._rawChildren[restorationId]! as Map<Object?, Object?>,
        _restorationId = restorationId {
     assert(() {
       _debugOwner = debugOwner;
@@ -524,7 +578,7 @@ class RestorationBucket {
   static const String _childrenMapKey = 'c';
   static const String _valuesMapKey = 'v';
 
-  final Map<dynamic, dynamic> _rawData;
+  final Map<Object?, Object?> _rawData;
 
   /// The owner of the bucket that was provided when the bucket was claimed via
   /// [claimChild].
@@ -562,9 +616,9 @@ class RestorationBucket {
   String _restorationId;
 
   // Maps a restoration ID to the raw map representation of a child bucket.
-  Map<dynamic, dynamic> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  Map<Object?, Object?> get _rawChildren => _rawData.putIfAbsent(_childrenMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
   // Maps a restoration ID to a value that is stored in this bucket.
-  Map<dynamic, dynamic> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <dynamic, dynamic>{}) as Map<dynamic, dynamic>;
+  Map<Object?, Object?> get _rawValues => _rawData.putIfAbsent(_valuesMapKey, () => <Object?, Object?>{})! as Map<Object?, Object?>;
 
   // Get and store values.
 

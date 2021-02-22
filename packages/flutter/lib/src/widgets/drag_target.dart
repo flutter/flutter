@@ -199,6 +199,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
     this.rootOverlay = false,
+    this.hitTestBehavior = HitTestBehavior.deferToChild,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -350,6 +351,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to false.
   final bool rootOverlay;
 
+  /// How to behave during hit test.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  final HitTestBehavior hitTestBehavior;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -371,6 +377,11 @@ class Draggable<T extends Object> extends StatefulWidget {
 }
 
 /// Makes its child draggable starting from long press.
+///
+/// See also:
+///
+///  * [Draggable], similar to the [LongPressDraggable] widget but happens immediately.
+///  * [DragTarget], a widget that receives data when a [Draggable] widget is dropped.
 class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
@@ -393,6 +404,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     VoidCallback? onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
+    this.delay = kLongPressTimeout,
   }) : super(
     key: key,
     child: child,
@@ -414,9 +426,14 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
+  /// The duration that a user has to press down before a long press is registered.
+  ///
+  /// Defaults to [kLongPressTimeout].
+  final Duration delay;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer()
+    return DelayedMultiDragGestureRecognizer(delay: delay)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart)
@@ -528,6 +545,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
                          _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
+      behavior: widget.hitTestBehavior,
       onPointerDown: canDrag ? _routePointer : null,
       child: showChild ? widget.child : widget.childWhenDragging,
     );
@@ -605,6 +623,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
+    this.hitTestBehavior = HitTestBehavior.translucent,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -640,6 +659,11 @@ class DragTarget<T extends Object> extends StatefulWidget {
   ///
   /// Note that this includes entering and leaving the target.
   final DragTargetMove? onMove;
+
+  /// How to behave during hit testing.
+  ///
+  /// Defaults to [HitTestBehavior.translucent].
+  final HitTestBehavior hitTestBehavior;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -716,7 +740,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     assert(widget.builder != null);
     return MetaData(
       metaData: this,
-      behavior: HitTestBehavior.translucent,
+      behavior: widget.hitTestBehavior,
       child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
     );
   }

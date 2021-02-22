@@ -6,8 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -360,7 +358,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -416,7 +414,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -539,7 +537,7 @@ void main() {
     // Initial value of null displays hint
     expect(value, equals(null));
     expect(getIndex(), 4);
-    await tester.tap(find.text('Select Value'));
+    await tester.tap(find.text('Select Value'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
@@ -586,6 +584,51 @@ void main() {
     expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
   });
 
+  testWidgets('Dropdown menu can position correctly inside a nested navigator', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66870
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Column(
+            children: <Widget>[
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings s) {
+                    return MaterialPageRoute<void>(builder: (BuildContext context) {
+                      return Center(
+                        child: DropdownButton<int>(
+                          value: 1,
+                          items: const <DropdownMenuItem<int>>[
+                            DropdownMenuItem<int>(
+                              child: Text('First Item'),
+                              value: 1,
+                            ),
+                            DropdownMenuItem<int>(
+                              child: Text('Second Item'),
+                              value: 2,
+                            ),
+                          ],
+                          onChanged: (_) { },
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('First Item'));
+    await tester.pump();
+    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
+    expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
+    expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
+  });
+
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int? value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
@@ -626,7 +669,7 @@ void main() {
     expect(tester.elementList(find.text('19')), hasLength(1));
 
     expect(value, 4);
-    await tester.tap(find.byWidget(button));
+    await tester.tap(find.byWidget(button), warnIfMissed: false);
     expect(value, 4);
     // this waits for the route's completer to complete, which calls handleChanged
     await tester.idle();
@@ -946,6 +989,42 @@ void main() {
     );
   });
 
+  testWidgets('Dropdown menu scrolls to last item in long lists', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '99',
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+
+    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    // Make sure there is no overscroll
+    expect(scrollController.offset, scrollController.position.maxScrollExtent);
+
+    // Find the selected item in the scrollable dropdown list
+    final Finder menuItemFinder = find.byType(Scrollable);
+    final RenderBox menuItemContainer = tester.renderObject<RenderBox>(menuItemFinder);
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(
+      find.descendant(
+        of: menuItemFinder,
+        matching: find.byKey(const ValueKey<String>('99')),
+      ),
+    );
+
+    // kMaterialListPadding.vertical is 8.
+    const Offset menuPaddingOffset = Offset(0.0, -8.0);
+    final Offset selectedItemOffset = selectedItem.localToGlobal(Offset.zero);
+    final Offset menuItemContainerOffset = menuItemContainer.localToGlobal(menuPaddingOffset);
+    // Selected item should be aligned to the bottom of the dropdown menu.
+    expect(
+      selectedItem.size.bottomCenter(selectedItemOffset).dy,
+      menuItemContainer.size.bottomCenter(menuItemContainerOffset).dy,
+    );
+  });
+
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     String? value;
@@ -1014,7 +1093,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // Tap on item 'one', which must appear over the button.
-    await tester.tap(find.byKey(buttonKey));
+    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -1084,7 +1163,7 @@ void main() {
       await tester.pumpAndSettle();
       menuRect = getMenuRect();
       buttonRect = getExpandedButtonRect();
-      await tester.tap(find.byType(dropdownButtonType));
+      await tester.tap(find.byType(dropdownButtonType), warnIfMissed: false);
     }
 
     // Dropdown button is along the top of the app. The top of the menu is
@@ -1788,8 +1867,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1825,8 +1903,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1862,8 +1939,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1899,8 +1975,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
-      final ScrollController scrollController = listView.controller!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -2089,7 +2164,7 @@ void main() {
 
     // Initially shows the hint text
     expect(find.text('Please select an item'), findsOneWidget);
-    await tester.tap(find.text('Please select an item'));
+    await tester.tap(find.text('Please select an item'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
@@ -2315,7 +2390,7 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
 
     // Show the popup menu.
-    await tester.tap(find.text('-item0-'));
+    await tester.tap(find.text('-item0-'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
@@ -2696,7 +2771,7 @@ void main() {
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
@@ -2762,7 +2837,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -2778,7 +2853,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('two'));
+    await tester.tap(find.text('two'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -2841,5 +2916,37 @@ void main() {
     expect(find.text('third').hitTestable(), findsOneWidget);
     expect(find.text('first').hitTestable(), findsNothing);
     expect(find.text('second').hitTestable(), findsNothing);
+  });
+
+  testWidgets('Dropdown menu should persistently show a scrollbar if it is scrollable', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      // menu is short enough to fit onto the screen.
+      items: List<String>.generate(/*length=*/10, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    // The scrollbar shouldn't show if the list fits into the screen.
+    expect(scrollController.position.maxScrollExtent, 0);
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    await tester.tap(find.text('0').last);
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(buildFrame(
+      value: '0',
+      // menu is too long to fit onto the screen.
+      items: List<String>.generate(/*length=*/100, (int index) => index.toString()),
+      onChanged: onChanged,
+    ));
+    await tester.tap(find.text('0'));
+    await tester.pumpAndSettle();
+
+    scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    // The scrollbar is shown when the list is longer than the height of the screen.
+    expect(scrollController.position.maxScrollExtent > 0, isTrue);
+    expect(find.byType(Scrollbar), paints..rect());
   });
 }

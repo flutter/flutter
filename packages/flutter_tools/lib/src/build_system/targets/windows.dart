@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
@@ -22,6 +24,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_export.h',
   'flutter_messenger.h',
   'flutter_plugin_registrar.h',
+  'flutter_texture_registrar.h',
   'flutter_windows.h',
 ];
 

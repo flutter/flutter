@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'back_button.dart';
-import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -1199,18 +1198,16 @@ class _MasterDetailFlow extends StatefulWidget {
   /// ```dart
   /// _MasterDetailFlow.of(context).openDetailPage(arguments);
   /// ```
-  static _MasterDetailFlowProxy? of(
-      BuildContext context, {
-        bool nullOk = false,
-      }) {
+  static _MasterDetailFlowProxy? of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
-      if (pageOpener == null && !nullOk) {
+      if (pageOpener == null) {
         throw FlutterError(
-            'Master Detail operation requested with a context that does not include a Master Detail'
-                ' Flow.\nThe context used to open a detail page from the Master Detail Flow must be'
-                ' that of a widget that is a descendant of a Master Detail Flow widget.');
+          'Master Detail operation requested with a context that does not include a Master Detail '
+          'Flow.\nThe context used to open a detail page from the Master Detail Flow must be '
+          'that of a widget that is a descendant of a Master Detail Flow widget.'
+        );
       }
       return true;
     }());
@@ -1536,13 +1533,17 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints:
-                    BoxConstraints.tightFor(width: masterViewWidth),
+                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: ButtonBar(
-                        children:
-                        widget.actionBuilder!(context, _ActionLevel.view),
+                      child: Container(
+                        alignment: AlignmentDirectional.centerEnd,
+                        padding: const EdgeInsets.all(8),
+                        child: OverflowBar(
+                          spacing: 8,
+                          overflowAlignment: OverflowBarAlignment.end,
+                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        ),
                       ),
                     ),
                   )
