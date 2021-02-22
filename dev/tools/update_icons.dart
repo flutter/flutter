@@ -205,6 +205,7 @@ void main(List<String> args) {
   } else {
     stderr.writeln('\nWriting to ${iconClassFile.path}.');
     iconClassFile.writeAsStringSync(newIconData);
+    _overwriteOldCodepoints(newCodepointsFile, oldCodepointsFile);
   }
 }
 
@@ -317,6 +318,12 @@ Error: New codepoints file does not contain all the existing codepoints.\n
       stderr.writeln('It also contains $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
     }
   }
+}
+
+// Replace the old codepoints file with the new.
+void _overwriteOldCodepoints(File newCodepointsFile, File oldCodepointsFile) {
+  stderr.writeln('\Copying new codepoints file to ${oldCodepointsFile.path}.\n');
+  newCodepointsFile.copySync(oldCodepointsFile.path);
 }
 
 enum IconStyle {
