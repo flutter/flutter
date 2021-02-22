@@ -6,9 +6,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icons.dart';
+import 'ink_well.dart';
 import 'list_tile.dart';
 import 'theme.dart';
-import 'ink_well.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
