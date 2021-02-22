@@ -171,6 +171,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     ${flutter_engine_flag}                                                \
     ${local_engine_flag}                                                  \
     assemble                                                              \
+    --no-version-check                                                    \
     --output="${BUILT_PRODUCTS_DIR}/"                                     \
     ${performance_measurement_option}                                     \
     -dTargetPlatform=ios                                                  \
