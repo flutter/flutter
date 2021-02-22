@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -28,6 +29,7 @@ class ColdRunner extends ResidentRunner {
     bool ipv6 = false,
     bool stayResident = true,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -36,6 +38,7 @@ class ColdRunner extends ResidentRunner {
           stayResident: stayResident,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool traceStartup;
@@ -73,13 +76,6 @@ class ColdRunner extends ResidentRunner {
       return 1;
     }
 
-    if (enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-      ));
-    }
-
     // Connect to observatory.
     if (debuggingEnabled) {
       try {
@@ -89,6 +85,14 @@ class ColdRunner extends ResidentRunner {
         appFailedToStart();
         return 2;
       }
+    }
+
+    if (enableDevTools && debuggingEnabled) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
     }
 
     if (flutterDevices.first.observatoryUris != null) {
@@ -124,10 +128,6 @@ class ColdRunner extends ResidentRunner {
       appFinished();
     }
 
-    if (debuggingEnabled) {
-      unawaited(callConnectedVmServiceUriExtension());
-    }
-
     appStartedCompleter?.complete();
 
     writeVmServiceFile();
@@ -157,13 +157,6 @@ class ColdRunner extends ResidentRunner {
       return 2;
     }
 
-    if (enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-      ));
-    }
-
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
@@ -174,7 +167,13 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    unawaited(callConnectedVmServiceUriExtension());
+    if (enableDevTools && debuggingEnabled) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+      ));
+    }
 
     appStartedCompleter?.complete();
     if (stayResident) {

@@ -269,6 +269,10 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 @optionalTypeArgs
 class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
+  @Deprecated(
+    'TypeMatcher has been deprecated because it is no longer used in framework(only in deprecated methods). '
+    'This feature was deprecated after v1.12.1.'
+  )
   const TypeMatcher();
 
   /// Returns true if the given object is of type `T`.
@@ -975,8 +979,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// super.initState().
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.initState()`.
   @protected
   @mustCallSuper
   void initState() {
@@ -999,8 +1003,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@macro flutter.widgets.State.initState}
   ///
-  /// If you override this, make sure your method starts with a call to
-  /// super.didUpdateWidget(oldWidget).
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didUpdateWidget(oldWidget)`.
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
@@ -1143,8 +1147,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this object and other elements in the tree (e.g. if you have provided an
   /// ancestor with a pointer to a descendant's [RenderObject]).
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// super.deactivate().
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.deactivate()`.
   ///
   /// See also:
   ///
@@ -1167,8 +1171,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@macro flutter.widgets.State.initState}
   ///
-  /// If you override this, make sure to end your method with a call to
-  /// super.dispose().
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.dispose()`.
   ///
   /// See also:
   ///
@@ -2307,10 +2311,66 @@ abstract class BuildContext {
 /// To assign a build owner to a tree, use the
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
+///
+/// {@tool dartpad --template=freeform}
+/// This example shows how to build an off-screen widget tree used to measure
+/// the size of the rendered tree. For some use cases, the simpler [Offstage]
+/// widget may be a better alternative to this approach.
+///
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// import 'package:flutter/widgets.dart';
+/// ```
+///
+/// ```dart
+/// void main() {
+///   WidgetsFlutterBinding.ensureInitialized();
+///   print(measureWidget(const SizedBox(width: 640, height: 480)));
+/// }
+///
+/// Size measureWidget(Widget widget) {
+///   final PipelineOwner pipelineOwner = PipelineOwner();
+///   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
+///   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+///   final RenderObjectToWidgetElement<RenderBox> element = RenderObjectToWidgetAdapter<RenderBox>(
+///     container: rootView,
+///     debugShortDescription: '[root]',
+///     child: widget,
+///   ).attachToRenderTree(buildOwner);
+///   try {
+///     rootView.scheduleInitialLayout();
+///     pipelineOwner.flushLayout();
+///     return rootView.size;
+///   } finally {
+///     // Clean up.
+///     element.update(RenderObjectToWidgetAdapter<RenderBox>(container: rootView));
+///     buildOwner.finalizeTree();
+///   }
+/// }
+///
+/// class MeasurementView extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+///   @override
+///   void performLayout() {
+///     assert(child != null);
+///     child!.layout(const BoxConstraints(), parentUsesSize: true);
+///     size = child!.size;
+///   }
+///
+///   @override
+///   void debugAssertDoesMeetConstraints() => true;
+/// }
+/// ```
+/// {@end-tool}
 class BuildOwner {
   /// Creates an object that manages widgets.
+  ///
+  /// If the `focusManager` argument is not specified or is null, this will
+  /// construct a new [FocusManager] and register its global input handlers
+  /// via [FocusManager.registerGlobalHandlers], which will modify static
+  /// state. Callers wishing to avoid altering this state can explicitly pass
+  /// a focus manager here.
   BuildOwner({ this.onBuildScheduled, FocusManager? focusManager }) :
-      focusManager = focusManager ?? FocusManager();
+      focusManager = focusManager ?? (FocusManager()..registerGlobalHandlers());
 
   /// Called on each build pass when the first buildable element is marked
   /// dirty.
@@ -2341,6 +2401,12 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
+  ///
+  /// This field will default to a [FocusManager] that has registered its
+  /// global input handlers via [FocusManager.registerGlobalHandlers]. Callers
+  /// wishing to avoid registering those handlers (and modifying the associated
+  /// static state) can explicitly pass a focus manager to the [new BuildOwner]
+  /// constructor.
   FocusManager focusManager;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
@@ -3340,6 +3406,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// [update], [visitChildren], [RenderObjectElement.insertRenderObjectChild],
   /// [RenderObjectElement.moveRenderObjectChild], and
   /// [RenderObjectElement.removeRenderObjectChild].
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.mount(parent, newSlot)`.
   @mustCallSuper
   void mount(Element? parent, dynamic newSlot) {
     assert(_lifecycleState == _ElementLifecycle.initial);
@@ -3659,6 +3728,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// lifecycle state). Instead, the framework calls [mount] in that situation.
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.activate()`.
   @mustCallSuper
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
@@ -3690,6 +3762,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This is (indirectly) called by [deactivateChild].
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.deactivate()`.
   @mustCallSuper
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
@@ -3728,6 +3803,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the tree again.
   ///
   /// See the lifecycle documentation for [Element] for additional information.
+  ///
+  /// Implementations of this method should end with a call to the inherited
+  /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
     assert(_lifecycleState == _ElementLifecycle.inactive);

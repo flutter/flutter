@@ -101,6 +101,70 @@ enum HeroFlightDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows a [Hero] used within a [ListTile].
+///
+/// Tapping on the Hero-wrapped rectangle triggers a hero
+/// animation as a new [MaterialPageRoute] is pushed. Both the size
+/// and location of the rectangle animates.
+///
+/// Both widgets use the same [Hero.tag].
+///
+/// The Hero widget uses the matching tags to identify and execute this
+/// animation.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    return Column(
+///      crossAxisAlignment: CrossAxisAlignment.start,
+///      children: <Widget>[
+///        const SizedBox(
+///          height: 20.0,
+///        ),
+///        ListTile(
+///          leading: Hero(
+///            tag: 'hero-rectangle',
+///            child: _blueRectangle(Size(50,50)),
+///          ),
+///          onTap: () => _gotoDetailsPage(context),
+///          title: const Text('Tap on the icon to view hero animation transition.'),
+///        ),
+///      ],
+///    );
+///  }
+///
+///  Widget _blueRectangle(Size size) {
+///   return Container(
+///     width: size.width,
+///     height: size.height,
+///     color: Colors.blue,
+///    );
+///  }
+///
+///  void _gotoDetailsPage(BuildContext context) {
+///    Navigator.of(context).push(MaterialPageRoute(
+///      builder: (BuildContext context) => Scaffold(
+///        appBar: AppBar(
+///          title: const Text('second Page'),
+///        ),
+///        body: Center(
+///          child: Column(
+///            mainAxisAlignment: MainAxisAlignment.center,
+///            children: <Widget>[
+///              Hero(
+///                tag: 'hero-rectangle',
+///                child: _blueRectangle(Size(200,200)),
+///              ),
+///            ],
+///          ),
+///        ),
+///      ),
+///    ));
+///  }
+///
+/// ```
+/// {@end-tool}
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for

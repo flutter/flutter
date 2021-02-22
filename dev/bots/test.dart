@@ -15,6 +15,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'service_worker_test.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -344,8 +345,14 @@ Future<void> _runWebToolTests() async {
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
@@ -811,6 +818,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
+    () => runWebServiceWorkerTest(headless: true),
   ];
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);

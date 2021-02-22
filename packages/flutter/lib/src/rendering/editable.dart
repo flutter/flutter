@@ -31,38 +31,12 @@ const Radius _kFloatingCaretRadius = Radius.circular(1.0);
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
+@Deprecated(
+  'Signature of a deprecated class method, '
+  'textSelectionDelegate.userUpdateTextEditingValue. '
+  'This feature was deprecated after v1.26.0-17.2.pre.'
+)
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
-
-/// Indicates what triggered the change in selected text (including changes to
-/// the cursor location).
-enum SelectionChangedCause {
-  /// The user tapped on the text and that caused the selection (or the location
-  /// of the cursor) to change.
-  tap,
-
-  /// The user tapped twice in quick succession on the text and that caused
-  /// the selection (or the location of the cursor) to change.
-  doubleTap,
-
-  /// The user long-pressed the text and that caused the selection (or the
-  /// location of the cursor) to change.
-  longPress,
-
-  /// The user force-pressed the text and that caused the selection (or the
-  /// location of the cursor) to change.
-  forcePress,
-
-  /// The user used the keyboard to change the selection or the location of the
-  /// cursor.
-  ///
-  /// Keyboard-triggered selection changes may be caused by the IME as well as
-  /// by accessibility tools (e.g. TalkBack on Android).
-  keyboard,
-
-  /// The user used the mouse to change the selection by dragging over a piece
-  /// of text.
-  drag,
-}
 
 /// Signature for the callback that reports when the caret location changes.
 ///
@@ -158,10 +132,6 @@ bool _isWhitespace(int codeUnit) {
 /// If, when the render object paints, the caret is found to have changed
 /// location, [onCaretChanged] is called.
 ///
-/// The user may interact with the render object by tapping or long-pressing.
-/// When the user does so, the selection is updated, and [onSelectionChanged] is
-/// called.
-///
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
@@ -198,6 +168,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     double textScaleFactor = 1.0,
     TextSelection? selection,
     required ViewportOffset offset,
+    @Deprecated(
+      'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
+      'This feature was deprecated after v1.26.0-17.2.pre.'
+    )
     this.onSelectionChanged,
     this.onCaretChanged,
     this.ignorePointer = false,
@@ -401,6 +375,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Called when the selection changes.
   ///
   /// If this is null, then selection changes will be ignored.
+  @Deprecated(
+    'Uses the textSelectionDelegate.userUpdateTextEditingValue instead. '
+    'This feature was deprecated after v1.26.0-17.2.pre.'
+  )
   SelectionChangedHandler? onSelectionChanged;
 
   double? _textLayoutLastMaxWidth;
@@ -579,7 +557,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
-  // Call through to onSelectionChanged.
+  void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    textSelectionDelegate.textEditingValue = newValue;
+    textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
+  }
+
+  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+    _handleSelectionChange(nextSelection, cause);
+    _setTextEditingValue(
+      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+      cause,
+    );
+  }
+
   void _handleSelectionChange(
     TextSelection nextSelection,
     SelectionChangedCause cause,
@@ -642,7 +632,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
-    if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
+    if (keyEvent is! RawKeyDownEvent)
       return;
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
@@ -908,12 +898,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
-    _handleSelectionChange(
+    _setSelection(
       newSelection,
       SelectionChangedCause.keyboard,
     );
-    // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
@@ -961,13 +949,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       );
     }
     if (value != null) {
-      if (textSelectionDelegate.textEditingValue.selection != value.selection) {
-        _handleSelectionChange(
-          value.selection,
-          SelectionChangedCause.keyboard,
-        );
-      }
-      textSelectionDelegate.textEditingValue = value;
+      _setTextEditingValue(
+        value,
+        SelectionChangedCause.keyboard,
+      );
     }
   }
 
@@ -994,15 +979,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
     final TextSelection newSelection = TextSelection.collapsed(offset: cursorPosition);
-    if (selection != newSelection) {
-      _handleSelectionChange(
-        newSelection,
-        SelectionChangedCause.keyboard,
-      );
-    }
-    textSelectionDelegate.textEditingValue = TextEditingValue(
-      text: textBefore + textAfter,
-      selection: newSelection,
+    _setTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter,
+        selection: newSelection,
+      ),
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -1530,7 +1512,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // callbacks are invoked, in which case the callbacks will crash...
 
   void _handleSetSelection(TextSelection selection) {
-    _handleSelectionChange(selection, SelectionChangedCause.keyboard);
+    _setSelection(selection, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {
@@ -1539,8 +1521,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
-    _handleSelectionChange(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
+    _setSelection(
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
+      SelectionChangedCause.keyboard,
     );
   }
 
@@ -1550,8 +1533,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : selection!.baseOffset;
-    _handleSelectionChange(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
+    _setSelection(
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
+      SelectionChangedCause.keyboard
     );
   }
 
@@ -1562,7 +1546,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (nextWord == null)
       return;
     final int baseOffset = extentSelection ? selection!.baseOffset : nextWord.start;
-    _handleSelectionChange(
+    _setSelection(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: nextWord.start,
@@ -1578,12 +1562,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (previousWord == null)
       return;
     final int baseOffset = extentSelection ?  selection!.baseOffset : previousWord.start;
-    _handleSelectionChange(
+    _setSelection(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
-      SelectionChangedCause.keyboard,
+      SelectionChangedCause.keyboard
     );
   }
 
@@ -1639,6 +1623,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
+    if (_listenerAttached)
+      RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
@@ -1817,7 +1803,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
-  /// This does not required the layout to be updated.
+  /// This does not require the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
@@ -1892,7 +1878,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         textSpan.recognizer?.addPointer(event);
       }
 
-      if (!ignorePointer && onSelectionChanged != null) {
+      if (!ignorePointer) {
         // Propagates the pointer event to selection handlers.
         _tap.addPointer(event);
         _longPress.addPointer(event);
@@ -1990,9 +1976,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(cause != null);
     assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (onSelectionChanged == null) {
-      return;
-    }
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextPosition? toPosition = to == null
       ? null
@@ -2006,8 +1989,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       extentOffset: extentOffset,
       affinity: fromPosition.affinity,
     );
-    // Call [onSelectionChanged] only when the selection actually changed.
-    _handleSelectionChange(newSelection, cause);
+    _setSelection(newSelection, cause);
   }
 
   /// Select a word around the location of the last tap down.
@@ -2027,22 +2009,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(cause != null);
     assert(from != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (onSelectionChanged == null) {
-      return;
-    }
     final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextSelection firstWord = _selectWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
       firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
-
-    _handleSelectionChange(
-      TextSelection(
-        baseOffset: firstWord.base.offset,
-        extentOffset: lastWord.extent.offset,
-        affinity: firstWord.affinity,
-      ),
-      cause,
+    final TextSelection newSelection = TextSelection(
+      baseOffset: firstWord.base.offset,
+      extentOffset: lastWord.extent.offset,
+      affinity: firstWord.affinity,
     );
+    _setSelection(newSelection, cause);
   }
 
   /// Move the selection to the beginning or end of a word.
@@ -2052,22 +2028,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(cause != null);
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     assert(_lastTapDownPosition != null);
-    if (onSelectionChanged == null) {
-      return;
-    }
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
     final TextRange word = _textPainter.getWordBoundary(position);
+    late TextSelection newSelection;
     if (position.offset - word.start <= 1) {
-      _handleSelectionChange(
-        TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
-        cause,
-      );
+      newSelection = TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream);
     } else {
-      _handleSelectionChange(
-        TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
-        cause,
-      );
+      newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
     }
+    _setSelection(newSelection, cause);
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
@@ -2708,22 +2677,21 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     caretRect = caretRect.shift(renderEditable._paintOffset);
     final Rect integralRect = caretRect.shift(renderEditable._snapToPhysicalPixel(caretRect.topLeft));
 
-    if (shouldPaint) {
-      final Radius? radius = cursorRadius;
-      caretPaint.color = caretColor;
-      if (radius == null) {
-        canvas.drawRect(integralRect, caretPaint);
-      } else {
-        final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
-        canvas.drawRRect(caretRRect, caretPaint);
-      }
+    final Radius? radius = cursorRadius;
+    caretPaint.color = caretColor;
+    if (radius == null) {
+      canvas.drawRect(integralRect, caretPaint);
+    } else {
+      final RRect caretRRect = RRect.fromRectAndRadius(integralRect, radius);
+      canvas.drawRRect(caretRRect, caretPaint);
     }
     caretPaintCallback(integralRect);
   }
 
   @override
   void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
-    // Compute the caret location even when `shouldPaint` is false.
+    if (!shouldPaint)
+      return;
 
     assert(renderEditable != null);
     final TextSelection? selection = renderEditable.selection;
@@ -2748,7 +2716,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
     // Floating Cursor.
-    if (floatingCursorRect == null || floatingCursorColor == null || !shouldPaint)
+    if (floatingCursorRect == null || floatingCursorColor == null)
       return;
 
     canvas.drawRRect(

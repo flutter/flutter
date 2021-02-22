@@ -51,6 +51,70 @@ import 'theme_data.dart';
 /// If the [onPressed] and [onLongPress] callbacks are null, then this
 /// button will be disabled, it will not react to touch.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to render a disabled TextButton, an enabled TextButton
+/// and lastly a TextButton with gradient background.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         TextButton(
+///            style: TextButton.styleFrom(
+///              textStyle: TextStyle(fontSize: 20),
+///            ),
+///            onPressed: null,
+///            child: const Text('Disabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         TextButton(
+///           style: TextButton.styleFrom(
+///             textStyle: TextStyle(fontSize: 20),
+///           ),
+///           onPressed: () {},
+///           child: const Text('Enabled'),
+///         ),
+///         const SizedBox(height: 30),
+///         ClipRRect(
+///           borderRadius: BorderRadius.circular(4),
+///           child: Stack(
+///             children: <Widget>[
+///               Positioned.fill(
+///                 child: Container(
+///                   decoration: const BoxDecoration(
+///                     gradient: LinearGradient(
+///                       colors: <Color>[
+///                         Color(0xFF0D47A1),
+///                         Color(0xFF1976D2),
+///                         Color(0xFF42A5F5),
+///                       ],
+///                     ),
+///                   ),
+///                 ),
+///               ),
+///               TextButton(
+///                 style: TextButton.styleFrom(
+///                   padding: const EdgeInsets.all(16.0),
+///                   primary: Colors.white,
+///                   textStyle: TextStyle(fontSize: 20),
+///                 ),
+///                 onPressed: () {},
+///                  child: const Text('Gradient'),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [OutlinedButton], a [TextButton] with a border outline.

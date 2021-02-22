@@ -24,7 +24,7 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
 
   final SerializableFinder scrollable = find.byValueKey(kScrollableName);
   expect(scrollable, isNotNull);
-  final SerializableFinder button = find.byValueKey(kStackSizeRouteName);
+  final SerializableFinder button = find.byValueKey(routeName);
   expect(button, isNotNull);
   await driver.scrollUntilVisible(scrollable, button, dyScroll: -50.0);
   await driver.tap(button);
