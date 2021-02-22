@@ -709,6 +709,202 @@ void main() {
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
   });
+
+  testWidgets('showAboutDialog overrides text style for action buttons in AboutDialog', (WidgetTester tester) async {
+    const TextStyle themeButtonTextStyle = TextStyle(
+      fontSize: 16,
+      color: Colors.red,
+    );
+
+    const TextStyle actionButtonTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.blue,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            button: themeButtonTextStyle,
+          ),
+        ),
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    showAboutDialog(
+                      context: context,
+                      buttonTextStyle: actionButtonTextStyle,
+                    );
+                  },
+                  child: const Text('Show About Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    expect(find.text('VIEW LICENSES'), findsOneWidget);
+    expect(find.text('CLOSE'), findsOneWidget);
+
+    final Text viewLicensesButtonText = tester.widget(find.text('VIEW LICENSES'));
+    final Text closeButtonText = tester.widget(find.text('CLOSE'));
+
+    expect(viewLicensesButtonText.style, isNot(themeButtonTextStyle));
+    expect(closeButtonText.style, isNot(themeButtonTextStyle));
+    expect(viewLicensesButtonText.style, actionButtonTextStyle);
+    expect(closeButtonText.style, actionButtonTextStyle);
+  });
+
+  testWidgets('AboutListTile overrides text style for action buttons in AboutDialog', (WidgetTester tester) async {
+    const TextStyle themeButtonTextStyle = TextStyle(
+      fontSize: 16,
+      color: Colors.red,
+    );
+
+    const TextStyle actionButtonTextStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.blue,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            button: themeButtonTextStyle,
+          ),
+        ),
+        title: 'Test App',
+        home: Scaffold(
+          body: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<dynamic>(
+                builder: (BuildContext context) {
+                  return const AboutListTile(
+                    buttonTextStyle: actionButtonTextStyle,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    expect(find.text('VIEW LICENSES'), findsOneWidget);
+    expect(find.text('CLOSE'), findsOneWidget);
+
+    final Text viewLicensesButtonText = tester.widget(find.text('VIEW LICENSES'));
+    final Text closeButtonText = tester.widget(find.text('CLOSE'));
+
+    expect(viewLicensesButtonText.style, isNot(themeButtonTextStyle));
+    expect(closeButtonText.style, isNot(themeButtonTextStyle));
+    expect(viewLicensesButtonText.style, actionButtonTextStyle);
+    expect(closeButtonText.style, actionButtonTextStyle);
+  });
+
+  testWidgets('showAboutDialog uses theme text style for action buttons in AboutDialog when none passed', (WidgetTester tester) async {
+    const TextStyle themeButtonTextStyle = TextStyle(
+      fontSize: 16,
+      color: Colors.red,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            button: themeButtonTextStyle,
+          ),
+        ),
+        home: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    showAboutDialog(
+                      context: context,
+                      buttonTextStyle: themeButtonTextStyle,
+                    );
+                  },
+                  child: const Text('Show About Dialog'),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    expect(find.text('VIEW LICENSES'), findsOneWidget);
+    expect(find.text('CLOSE'), findsOneWidget);
+
+    final Text viewLicensesButtonText = tester.widget(find.text('VIEW LICENSES'));
+    final Text closeButtonText = tester.widget(find.text('CLOSE'));
+
+    expect(viewLicensesButtonText.style, themeButtonTextStyle);
+    expect(closeButtonText.style, themeButtonTextStyle);
+  });
+
+  testWidgets('AboutListTile uses theme text style for action buttons in AboutDialog when none passed', (WidgetTester tester) async {
+    const TextStyle themeButtonTextStyle = TextStyle(
+      fontSize: 16,
+      color: Colors.red,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryTextTheme: const TextTheme(
+            button: themeButtonTextStyle,
+          ),
+        ),
+        title: 'Test App',
+        home: Scaffold(
+          body: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<dynamic>(
+                builder: (BuildContext context) {
+                  return const AboutListTile(
+                    buttonTextStyle: themeButtonTextStyle,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    expect(find.text('VIEW LICENSES'), findsOneWidget);
+    expect(find.text('CLOSE'), findsOneWidget);
+
+    final Text viewLicensesButtonText = tester.widget(find.text('VIEW LICENSES'));
+    final Text closeButtonText = tester.widget(find.text('CLOSE'));
+
+    expect(viewLicensesButtonText.style, themeButtonTextStyle);
+    expect(closeButtonText.style, themeButtonTextStyle);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
