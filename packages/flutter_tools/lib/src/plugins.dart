@@ -539,22 +539,24 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       if (plugin.implementsPackage == null || plugin.implementsPackage.isEmpty) {
         final String defaultImplementation = plugin.defaultPackagePlatforms[platform];
         if (defaultImplementation == null) {
-          globals.printError(
-            'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
-            'a default implementation in pubspec.yaml.\n\n'
-            'To set a default implementation, use:\n'
-            'flutter:\n'
-            '  plugin:\n'
-            '    platforms:\n'
-            '      $platform:\n'
-            '        $kDefaultPackage: <plugin-implementation>\n'
-            '\n'
-            'To implement an interface, use:\n'
-            'flutter:\n'
-            '  plugin:\n'
-            '    implements: <plugin-interface>'
-            '\n'
-          );
+          if (throwOnPluginPubspecError) {
+            globals.printError(
+              'Plugin `${plugin.name}` doesn\'t implement a plugin interface, nor sets '
+              'a default implementation in pubspec.yaml.\n\n'
+              'To set a default implementation, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    platforms:\n'
+              '      $platform:\n'
+              '        $kDefaultPackage: <plugin-implementation>\n'
+              '\n'
+              'To implement an interface, use:\n'
+              'flutter:\n'
+              '  plugin:\n'
+              '    implements: <plugin-interface>'
+              '\n'
+            );
+          }
           didFindError = true;
           continue;
         }
@@ -569,12 +571,14 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       if (directDependencyResolutions.containsKey(resolutionKey)) {
         final PluginInterfaceResolution currResolution = directDependencyResolutions[resolutionKey];
         if (currResolution.plugin.isDirectDependency && plugin.isDirectDependency) {
-          globals.printError(
-            'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
-            'implemented by plugin `${currResolution.plugin.name}`.\n'
-            'To fix this issue, remove either dependency from pubspec.yaml.'
-            '\n\n'
-          );
+          if (throwOnPluginPubspecError) {
+            globals.printError(
+              'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
+              'implemented by plugin `${currResolution.plugin.name}`.\n'
+              'To fix this issue, remove either dependency from pubspec.yaml.'
+              '\n\n'
+            );
+          }
           didFindError = true;
         }
         if (currResolution.plugin.isDirectDependency) {
@@ -931,19 +935,22 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 /// Returns [true] if it's necessary to create a plugin registrant, and
 /// if the new entrypoint was written to disk.
 ///
+/// This method also validates each plugin's pubspec.yaml, but errors are only
+/// reported if [throwOnPluginPubspecError] is [true].
+///
 /// For more details, see https://flutter.dev/go/federated-plugins.
 Future<bool> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
   File newMainDart,
-  File mainFile,
-) async {
+  File mainFile, {
+  bool throwOnPluginPubspecError,
+}) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
-    // TODO(egarciad): Turn this on after fixing the pubspec.yaml of the plugins used in tests.
-    throwOnPluginPubspecError: false,
+    throwOnPluginPubspecError: throwOnPluginPubspecError,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
