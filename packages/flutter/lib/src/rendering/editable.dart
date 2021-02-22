@@ -1400,13 +1400,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the start of the current line.
+  /// Move the current selection to the leftmost of the current line.
   ///
   /// See also:
   ///
   ///   * [moveSelectionRightByLine]
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
+
+    // If the previous character is the edge of a line, don't do anything.
+    final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
+    final TextSelection line = _selectLineAtOffset(TextPosition(offset: previousPoint));
+    if (line.extentOffset == previousPoint) {
+      return;
+    }
 
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
@@ -1466,13 +1473,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the end of the current line.
+  /// Move the current selection to the rightmost point of the current line.
   ///
   /// See also:
   ///
   ///   * [moveSelectionLeftByLine]
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     assert(selection != null);
+
+    // If already at the right edge of the line, do nothing.
+    final TextSelection currentLine = _selectLineAtOffset(TextPosition(
+      offset: selection!.extentOffset,
+    ));
+    if (currentLine.extentOffset == selection!.extentOffset) {
+      return;
+    }
 
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
