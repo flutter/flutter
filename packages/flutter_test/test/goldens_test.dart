@@ -134,7 +134,7 @@ void main() {
     group('compare', () {
       Future<bool> doComparison({ String? golden, double tolerance = 0.0 }) {
         final Uri uri = fs.file(fix(golden ?? 'golden.png')).uri;
-        comparator.setPrecisionTolerance(tolerance);
+        comparator.precisionTolerance = tolerance;
         return comparator.compare(
           Uint8List.fromList(_kExpectedPngBytes),
           uri,

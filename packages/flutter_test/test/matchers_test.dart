@@ -696,7 +696,7 @@ class _FakeComparator implements GoldenFileComparator {
   }
 
   @override
-  void setPrecisionTolerance(double precisionTolerance) { }
+  double precisionTolerance = 0.0;
 }
 
 class _FakeSemanticsNode extends SemanticsNode {

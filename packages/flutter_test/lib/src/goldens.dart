@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
@@ -75,13 +74,19 @@ abstract class GoldenFileComparator {
 
   /// Can be used to set an acceptable tolerance level, establishing an
   /// allowable difference between pixels.
-  @mustCallSuper
-  void setPrecisionTolerance(double precisionTolerance) {
+  ///
+  /// Must be between 0.0 and 1.0. For example, a tolerance of 0.01 would allow
+  /// for golden file images under test to have a 1% difference.
+  double get precisionTolerance => _precisionTolerance;
+  double _precisionTolerance = 0.0;
+  /// Sets an allowable percentage of difference between golden file images.
+  set precisionTolerance(double value) {
     assert(
       precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
       'The precision tolerance for testing golden files must be between 0.0 and'
       '1.0 inclusive, expressing the allowable percentage in pixel difference.'
     );
+    _precisionTolerance = value;
   }
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
@@ -137,7 +142,7 @@ abstract class GoldenFileComparator {
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
 GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
+GoldenFileComparator _goldenFileComparator = TrivialComparator._();
 set goldenFileComparator(GoldenFileComparator value) {
   _goldenFileComparator = value;
 }
@@ -213,6 +218,20 @@ abstract class WebGoldenComparator {
         .join() + '.' + version.toString() + extension
     );
   }
+
+  /// Can be used to set an acceptable tolerance level, establishing an
+  /// allowable difference between pixels.
+  double get precisionTolerance => _precisionTolerance;
+  double _precisionTolerance = 0.0;
+  /// Sets an allowable percentage of difference between golden file images.
+  set precisionTolerance(double value) {
+    assert(
+    precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
+    'The precision tolerance for testing golden files must be between 0.0 and'
+      '1.0 inclusive, expressing the allowable percentage in pixel difference.'
+    );
+    _precisionTolerance = value;
+  }
 }
 
 /// Compares pixels against those of a golden image file.
@@ -244,7 +263,7 @@ abstract class WebGoldenComparator {
 ///  * [goldenFileComparator], the comparator used when tests are not running on
 ///    a web browser.
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
-WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
+WebGoldenComparator _webGoldenComparator = _TrivialWebGoldenComparator._();
 set webGoldenComparator(WebGoldenComparator value) {
   _webGoldenComparator = value;
 }
@@ -280,8 +299,8 @@ bool autoUpdateGoldenFiles = false;
 ///
 /// This class can't be constructed. It represents the default value of
 /// [goldenFileComparator].
-class TrivialComparator implements GoldenFileComparator {
-  const TrivialComparator._();
+class TrivialComparator extends GoldenFileComparator {
+  TrivialComparator._();
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
@@ -300,17 +319,11 @@ class TrivialComparator implements GoldenFileComparator {
   }
 
   @override
-  void setPrecisionTolerance(double precisionTolerance) {
-    assert(
-      precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
-      'The precision tolerance for testing golden files must be between 0.0 and'
-      '1.0 inclusive, expressing the allowable percentage in pixel difference.'
-    );
-  }
+  final double precisionTolerance = 0.0;
 }
 
-class _TrivialWebGoldenComparator implements WebGoldenComparator {
-  const _TrivialWebGoldenComparator._();
+class _TrivialWebGoldenComparator extends WebGoldenComparator {
+   _TrivialWebGoldenComparator._();
 
   @override
   Future<bool> compare(double width, double height, Uri golden) {
@@ -327,6 +340,9 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   Uri getTestUri(Uri key, int? version) {
     return key;
   }
+
+  @override
+  final double precisionTolerance = 0.0;
 }
 
 /// The result of a pixel comparison test.
@@ -358,6 +374,9 @@ class ComparisonResult {
 
   /// The percent difference between pixels found when a comparison fails.
   ///
-  /// Cannot be null, defaults to 0.0 if the comparison has passed.
+  /// Cannot be null. Must be between 0.0 and 1.0 inclusive, with 1.0
+  /// representing a 100% difference between images.
+  ///
+  /// Defaults to 0.0 if the comparison has passed.
   final double diffPercentage;
 }

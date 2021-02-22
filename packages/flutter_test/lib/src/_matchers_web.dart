@@ -23,16 +23,22 @@ Future<ui.Image> captureImage(Element element) {
 /// test is running in a web browser using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+  const MatchesGoldenFile(this.key, this.version, this.precisionTolerance);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(String path, this.version, this.precisionTolerance) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
 
   /// The [version] of the golden image.
   final int? version;
+
+  /// The allowable difference when comparing image pixels.
+  ///
+  /// Must be between 0.0 and 1.0. For example, a tolerance of 0.01 would allow
+  /// for golden file images under test to have a 1% difference.
+  final double precisionTolerance;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -62,6 +68,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
+        webGoldenComparator.precisionTolerance = precisionTolerance;
         final bool success = await webGoldenComparator.compare(size.width, size.height, key);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {

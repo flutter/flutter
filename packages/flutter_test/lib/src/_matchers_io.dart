@@ -48,6 +48,9 @@ class MatchesGoldenFile extends AsyncMatcher {
   final int? version;
 
   /// The allowable difference when comparing image pixels.
+  ///
+  /// Must be between 0.0 and 1.0. For example, a tolerance of 0.01 would allow
+  /// for golden file images under test to have a 1% difference.
   final double precisionTolerance;
 
   @override
@@ -69,7 +72,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw 'must provide a Finder, Image, or Future<Image>';
     }
 
-    goldenFileComparator.setPrecisionTolerance(precisionTolerance);
+    goldenFileComparator.precisionTolerance = precisionTolerance;
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;

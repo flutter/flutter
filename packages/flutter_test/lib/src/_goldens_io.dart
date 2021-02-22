@@ -89,14 +89,6 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   /// platform to test behaviors with arbitrary path styles.
   final path.Context _path;
 
-  double _tolerance = 0.0;
-
-  @override
-  void setPrecisionTolerance(double precisionTolerance) {
-    super.setPrecisionTolerance(precisionTolerance);
-    _tolerance = precisionTolerance;
-  }
-
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
@@ -112,12 +104,12 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     // Users can specify a tolerance level for pixel diff.
-    if (!result.passed && result.diffPercentage > _tolerance) {
+    if (!result.passed && result.diffPercentage > precisionTolerance) {
       final String error = await generateFailureOutput(result, golden, basedir);
       throw FlutterError(error);
     }
 
-    return result.passed || result.diffPercentage >= _tolerance;
+    return result.passed || result.diffPercentage <= precisionTolerance;
   }
 
   @override
