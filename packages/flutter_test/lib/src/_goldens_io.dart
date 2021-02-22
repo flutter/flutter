@@ -116,7 +116,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       final String error = await generateFailureOutput(result, golden, basedir);
       throw FlutterError(error);
     }
-    return result.passed;
+
+    return result.passed || result.diffPercentage >= _tolerance;
   }
 
   @override
@@ -263,7 +264,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
         'maskedDiff' : await _createImage(maskedDiffRgba, width, height),
         'isolatedDiff' : await _createImage(isolatedDiffRgba, width, height),
       },
-      diffPercentage: diffPercent,
+      diffPercentage: diffPercent / 100,
     );
   }
   return ComparisonResult(passed: true);

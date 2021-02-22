@@ -694,6 +694,9 @@ class _FakeComparator implements GoldenFileComparator {
   Uri getTestUri(Uri key, int? version) {
     return key;
   }
+
+  @override
+  void setPrecisionTolerance(double precisionTolerance) { }
 }
 
 class _FakeSemanticsNode extends SemanticsNode {

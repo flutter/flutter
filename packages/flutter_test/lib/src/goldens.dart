@@ -77,7 +77,11 @@ abstract class GoldenFileComparator {
   /// allowable difference between pixels.
   @mustCallSuper
   void setPrecisionTolerance(double precisionTolerance) {
-    assert(precisionTolerance > 0.0 && precisionTolerance < 1.0);
+    assert(
+      precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
+      'The precision tolerance for testing golden files must be between 0.0 and'
+      '1.0 inclusive, expressing the allowable percentage in pixel difference.'
+    );
   }
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
@@ -299,7 +303,11 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   void setPrecisionTolerance(double precisionTolerance) {
-    assert(precisionTolerance > 0.0 && precisionTolerance < 1.0);
+    assert(
+      precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
+      'The precision tolerance for testing golden files must be between 0.0 and'
+      '1.0 inclusive, expressing the allowable percentage in pixel difference.'
+    );
   }
 }
 

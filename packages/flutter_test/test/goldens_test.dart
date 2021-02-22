@@ -28,7 +28,7 @@ const List<int> _kColorFailurePngBytes =
 // 1x2 transparent pixel
 const List<int> _kSizeFailurePngBytes =
   <int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-    1, 0, 0,0, 2, 8, 6, 0, 0, 0, 153, 129, 182, 39, 0, 0, 0, 14, 73, 68, 65, 84,
+    1, 0, 0, 0, 2, 8, 6, 0, 0, 0, 153, 129, 182, 39, 0, 0, 0, 14, 73, 68, 65, 84,
     120, 1, 99, 97, 0, 2, 22, 16, 1, 0, 0, 70, 0, 9, 112, 117, 150, 160, 0, 0,
     0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
@@ -132,8 +132,9 @@ void main() {
     });
 
     group('compare', () {
-      Future<bool> doComparison([ String golden = 'golden.png' ]) {
-        final Uri uri = fs.file(fix(golden)).uri;
+      Future<bool> doComparison({ String? golden, double tolerance = 0.0 }) {
+        final Uri uri = fs.file(fix(golden ?? 'golden.png')).uri;
+        comparator.setPrecisionTolerance(tolerance);
         return comparator.compare(
           Uint8List.fromList(_kExpectedPngBytes),
           uri,
@@ -151,7 +152,18 @@ void main() {
           fs.file(fix('/sub/foo.png'))
             ..createSync(recursive: true)
             ..writeAsBytesSync(_kExpectedPngBytes);
-          final bool success = await doComparison('sub/foo.png');
+          final bool success = await doComparison(golden: 'sub/foo.png');
+          expect(success, isTrue);
+        });
+
+        test('when difference is below tolerance level', () async {
+          fs.file(fix('/sub/foo.png'))
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(_kColorFailurePngBytes);
+          final bool success = await doComparison(
+            golden: 'sub/foo.png',
+            tolerance: 1.0,
+          );
           expect(success, isTrue);
         });
 
@@ -162,7 +174,7 @@ void main() {
               ..writeAsBytesSync(_kExpectedPngBytes);
             fs.currentDirectory = fix('/foo/bar');
             comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
-            final bool success = await doComparison('golden.png');
+            final bool success = await doComparison();
             expect(success, isTrue);
           });
 
@@ -172,7 +184,7 @@ void main() {
               ..writeAsBytesSync(_kExpectedPngBytes);
             fs.currentDirectory = fix('/foo/bar');
             comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
-            final bool success = await doComparison('baz/golden.png');
+            final bool success = await doComparison(golden: 'baz/golden.png');
             expect(success, isTrue);
           });
         });
@@ -213,7 +225,7 @@ void main() {
             ..createSync(recursive:true)
             ..writeAsBytesSync(_kColorFailurePngBytes);
           try {
-            await doComparison('subdir/golden.png');
+            await doComparison(golden: 'subdir/golden.png');
             fail('TestFailure expected but not thrown.');
           } on FlutterError catch (error) {
             expect(error.message, contains('% diff detected'));
@@ -242,6 +254,36 @@ void main() {
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('Could not be compared against non-existent file'));
+          }
+        });
+
+        test('when difference is above tolerance level', () async {
+          await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
+          try {
+            await doComparison(tolerance: 0.5);
+            fail('TestFailure expected but not thrown.');
+          } on FlutterError catch (error) {
+            expect(error.message, contains('% diff detected'));
+          }
+        });
+
+        test('asserting tolerance too high', () async {
+          await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
+          try {
+            await doComparison(tolerance: 1.5);
+            fail('TestFailure expected but not thrown.');
+          } catch (error) {
+            expect(error.toString(), contains('The precision tolerance for testing'));
+          }
+        });
+
+        test('asserting tolerance too low', () async {
+          await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
+          try {
+            await doComparison(tolerance: -1.0);
+            fail('TestFailure expected but not thrown.');
+          } catch (error) {
+            expect(error.toString(), contains('The precision tolerance for testing'));
           }
         });
 
