@@ -78,13 +78,6 @@ TaskFunction createCodegenerationIntegrationTest() {
   );
 }
 
-TaskFunction createImageLoadingIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/image_loading',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
