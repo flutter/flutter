@@ -662,7 +662,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end = 0.0,
     this.bottom = 0.0,
   });
-  
+
   /// Creates insets where all the offsets are `value`.
   ///
   /// {@tool snippet}
