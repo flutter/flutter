@@ -84,6 +84,20 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
+  // g3-only
+  '2d': 'two_d',	
+  '30fps': 'thirty_fps',	
+  '30fps_select': 'thirty_fps_select',
+  '3g_mobiledata': 'three_g_mobiledata',	
+  '3p': 'three_p',	
+  '4g_mobiledata': 'four_g_mobiledata',	
+  '4g_plus_mobiledata': 'four_g_plus_mobiledata',	
+  '60fps': 'sixty_fps',	
+  '60fps_select': 'sixty_fps_select',
+  '1x_mobiledata': 'one_x_mobiledata',
+  'door_back': 'door_back_door',	
+  'door_front': 'door_front_door',	
+  'try': 'try_sms_star',
 };
 
 const Set<String> _iconsMirroredWhenRTL = <String>{
