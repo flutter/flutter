@@ -89,6 +89,7 @@ import 'theme.dart';
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
+///              buttonTextStyle: aboutButtonTextStyle,
 ///            ),
 ///          ),
 ///        ),
@@ -104,6 +105,7 @@ import 'theme.dart';
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
+///              buttonTextStyle: aboutButtonTextStyle, 
 ///            );
 ///          },
 ///        ),
@@ -128,6 +130,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationLegalese,
     this.aboutBoxChildren,
     this.dense,
+    this.buttonTextStyle,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -193,6 +196,13 @@ class AboutListTile extends StatelessWidget {
   /// Dense list tiles default to a smaller height.
   final bool? dense;
 
+  /// [TextStyle] of the text in the action buttons of [AboutDialog].
+  ///
+  /// Defines the style of the VIEW LICENSES and CLOSE action buttons.
+  ///
+  /// Defaults to [TextTheme.button].
+  final TextStyle? buttonTextStyle;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -211,6 +221,7 @@ class AboutListTile extends StatelessWidget {
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
           children: aboutBoxChildren,
+          buttonTextStyle: buttonTextStyle,
         );
       },
     );
@@ -233,6 +244,9 @@ class AboutListTile extends StatelessWidget {
 ///
 /// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
 /// [showDialog], the documentation for which discusses how it is used.
+/// 
+/// The [buttonTextStyle] argument is passed to override the default style of the
+/// action buttons in the [AboutDialog].
 void showAboutDialog({
   required BuildContext context,
   String? applicationName,
@@ -242,6 +256,7 @@ void showAboutDialog({
   List<Widget>? children,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  TextStyle? buttonTextStyle,
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
@@ -255,6 +270,7 @@ void showAboutDialog({
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
+        buttonTextStyle: buttonTextStyle,
       );
     },
     routeSettings: routeSettings,
@@ -332,6 +348,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
+    this.buttonTextStyle,
   }) : super(key: key);
 
   /// The name of the application.
@@ -370,6 +387,13 @@ class AboutDialog extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget>? children;
 
+  /// [TextStyle] of the text in the action buttons of [AboutDialog].
+  ///
+  /// Defines the style of the VIEW LICENSES and CLOSE action buttons.
+  ///
+  /// Defaults to [TextTheme.button].
+  final TextStyle? buttonTextStyle;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -403,7 +427,10 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
+          child: Text(
+            MaterialLocalizations.of(context).viewLicensesButtonLabel,
+            style: buttonTextStyle,
+          ),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -415,7 +442,10 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+          child: Text(
+            MaterialLocalizations.of(context).closeButtonLabel,
+            style: buttonTextStyle,
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
