@@ -82,7 +82,7 @@ abstract class GoldenFileComparator {
   /// Sets an allowable percentage of difference between golden file images.
   set precisionTolerance(double value) {
     assert(
-      precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
+      value >= 0.0 && value <= 1.0,
       'The precision tolerance for testing golden files must be between 0.0 and'
       '1.0 inclusive, expressing the allowable percentage in pixel difference.'
     );
@@ -226,8 +226,8 @@ abstract class WebGoldenComparator {
   /// Sets an allowable percentage of difference between golden file images.
   set precisionTolerance(double value) {
     assert(
-    precisionTolerance >= 0.0 && precisionTolerance <= 1.0,
-    'The precision tolerance for testing golden files must be between 0.0 and'
+      value >= 0.0 && value <= 1.0,
+      'The precision tolerance for testing golden files must be between 0.0 and'
       '1.0 inclusive, expressing the allowable percentage in pixel difference.'
     );
     _precisionTolerance = value;

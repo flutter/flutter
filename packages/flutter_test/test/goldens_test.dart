@@ -280,7 +280,7 @@ void main() {
         test('asserting tolerance too low', () async {
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           try {
-            await doComparison(tolerance: -1.0);
+            await doComparison(tolerance: -1.5);
             fail('TestFailure expected but not thrown.');
           } catch (error) {
             expect(error.toString(), contains('The precision tolerance for testing'));
