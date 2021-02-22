@@ -36,10 +36,17 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 };
 
 const Map<String, String> _identifierRewrites = <String, String>{
+  '1x': 'one_x',
   '360': 'threesixty',
-  '3d_rotation': 'threed_rotation',
+  '2d': 'two_d',
+  '3d': 'threed',
+  '3p': 'three_p',
   '6_ft': 'six_ft',
+  '3g': 'three_g',
+  '4g': 'four_g',
   '5g': 'five_g',
+  '30fps': 'thirty_fps',
+  '60fps': 'sixty_fps',
   '1k': 'one_k',
   '2k': 'two_k',
   '3k': 'three_k',
@@ -50,15 +57,6 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '8k': 'eight_k',
   '9k': 'nine_k',
   '10k': 'ten_k',
-  '1k_plus': 'one_k_plus',
-  '2k_plus': 'two_k_plus',
-  '3k_plus': 'three_k_plus',
-  '4k_plus': 'four_k_plus',
-  '5k_plus': 'five_k_plus',
-  '6k_plus': 'six_k_plus',
-  '7k_plus': 'seven_k_plus',
-  '8k_plus': 'eight_k_plus',
-  '9k_plus': 'nine_k_plus',
   '1mp': 'one_mp',
   '2mp': 'two_mp',
   '3mp': 'three_mp',
@@ -84,6 +82,10 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
+  // TODO(guidezpl): figure out if these are needed
+  'door_back': 'door_back_door',
+  'door_front': 'door_front_door',
+  'try': 'try_sms_star',
 };
 
 const Set<String> _iconsMirroredWhenRTL = <String>{
@@ -312,11 +314,10 @@ Error: New codepoints file does not contain all the existing codepoints.\n
     exit(1);
   } else {
     final int diff = newCodepointsSet.length - oldCodepointsSet.length;
-    stderr.writeln('''
-New codepoints file contains all ${oldCodepointsSet.length} existing codepoints,
-plus an additional $diff: 
-        ${newCodepointsSet.difference(oldCodepointsSet)}
-        ''');
+    stderr.writeln('New codepoints file contains all ${oldCodepointsSet.length} existing codepoints.');
+    if (diff > 0) {
+      stderr.writeln('It also contains $diff new codepoints: ${newCodepointsSet.difference(oldCodepointsSet)}');
+    }
   }
 }
 
