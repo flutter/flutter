@@ -105,7 +105,7 @@ import 'theme.dart';
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '\u{a9} 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
-///              buttonTextStyle: aboutButtonTextStyle, 
+///              buttonTextStyle: aboutButtonTextStyle,
 ///            );
 ///          },
 ///        ),
@@ -244,7 +244,7 @@ class AboutListTile extends StatelessWidget {
 ///
 /// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
 /// [showDialog], the documentation for which discusses how it is used.
-/// 
+///
 /// The [buttonTextStyle] argument is passed to override the default style of the
 /// action buttons in the [AboutDialog].
 void showAboutDialog({
