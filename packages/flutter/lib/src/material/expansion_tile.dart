@@ -8,6 +8,7 @@ import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
+import 'ink_well.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -46,6 +47,8 @@ class ExpansionTile extends StatefulWidget {
     this.expandedAlignment,
     this.childrenPadding,
     this.collapsedBackgroundColor,
+    this.splashColor,
+    this.highlightColor,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
@@ -87,6 +90,16 @@ class ExpansionTile extends StatefulWidget {
 
   /// When not null, defines the background color of tile when the sublist is collapsed.
   final Color? collapsedBackgroundColor;
+
+  /// When not null, defines the splash color on tap. set to transparent
+  /// When null defaults to theme splash color
+  /// If want to remove the default splash behaviour, set to Colors.transparent
+  final Color? splashColor;
+
+  /// When not null, defines the highlight color on tap. set to transparent
+  /// When null defaults to theme splash color
+  /// If want to remove the default highlight behaviour, set to Colors.transparent
+  final Color? highlightColor;
 
   /// A widget to display instead of a rotating arrow icon.
   final Widget? trailing;
@@ -230,15 +243,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ListTileTheme.merge(
             iconColor: _iconColor.value,
             textColor: _headerColor.value,
-            child: ListTile(
+            child: InkWell(
               onTap: _handleTap,
-              contentPadding: widget.tilePadding,
-              leading: widget.leading,
-              title: widget.title,
-              subtitle: widget.subtitle,
-              trailing: widget.trailing ?? RotationTransition(
-                turns: _iconTurns,
-                child: const Icon(Icons.expand_more),
+              splashColor: widget.splashColor,
+              highlightColor: widget.highlightColor,
+              child: ListTile(
+                contentPadding: widget.tilePadding,
+                leading: widget.leading,
+                title: widget.title,
+                subtitle: widget.subtitle,
+                trailing: widget.trailing ?? RotationTransition(
+                  turns: _iconTurns,
+                  child: const Icon(Icons.expand_more),
+                ),
               ),
             ),
           ),
