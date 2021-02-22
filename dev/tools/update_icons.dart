@@ -82,7 +82,7 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  // TODO(guidezpl): figure out if these are needed
+  // TODO(guidezpl): will clean these up in g3
   'door_back': 'door_back_door',
   'door_front': 'door_front_door',
   'try': 'try_sms_star',
@@ -223,7 +223,6 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-// Do not make this method private as it is used by g3 roll.
 Map<String, String> stringToTokenPairMap(String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
       .map((String line) => line.trim())
@@ -242,7 +241,6 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
   return pairs;
 }
 
-// Do not make this method private as it is used by g3 roll.
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final Iterable<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry));
   final StringBuffer buf = StringBuffer();
