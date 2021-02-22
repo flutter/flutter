@@ -197,7 +197,7 @@ void main(List<String> args) {
 
   final String iconClassFileData = iconClassFile.readAsStringSync();
 
-  stderr.writeln('Generating new token pairs.');
+  stderr.writeln('Generating icons file...');
   final String newIconData = regenerateIconsFile(iconClassFileData, newTokenPairMap);
 
   if (argResults[_dryRunOption] as bool) {
