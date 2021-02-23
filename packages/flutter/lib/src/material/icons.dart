@@ -17544,4 +17544,3 @@ class Icons {
   static const IconData zoom_in = IconData(0xe5f6, fontFamily: 'MaterialIcons');
   // END GENERATED ICONS
 }
-
