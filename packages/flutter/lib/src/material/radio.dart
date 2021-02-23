@@ -420,7 +420,7 @@ class Radio<T> extends StatelessWidget {
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: _selected,
-        child: Toggleable(
+      child: Toggleable(
         size: size,
         value: _selected,
         tristate: toggleable,
