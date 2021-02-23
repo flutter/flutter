@@ -1,4 +1,4 @@
-Signature: c85b5a34168529c9c0cebd4ef6f6f97f
+Signature: 617b3ad870bd7e07bdb3594807495df3
 
 UNUSED LICENSES:
 
@@ -1934,8 +1934,8 @@ FILE: ../../../third_party/skia/src/gpu/gl/builders/GrGLProgramBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/builders/GrGLProgramBuilder.h
 FILE: ../../../third_party/skia/src/gpu/gl/builders/GrGLShaderStringBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/builders/GrGLShaderStringBuilder.h
-FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeEGLInterface.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeGLXInterface.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/iOS/GrGLMakeNativeInterface_iOS.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentShaderBuilder.h
@@ -5199,12 +5199,16 @@ FILE: ../../../third_party/skia/gm/crbug_1174186.cpp
 FILE: ../../../third_party/skia/gm/lazytiling.cpp
 FILE: ../../../third_party/skia/gm/particles.cpp
 FILE: ../../../third_party/skia/gm/runtimeeffectimage.cpp
+FILE: ../../../third_party/skia/include/gpu/gl/egl/GrGLMakeEGLInterface.h
+FILE: ../../../third_party/skia/include/gpu/gl/glx/GrGLMakeGLXInterface.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/gpu/GrInnerFanTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWritePixelsRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVATextureProxies.h
+FILE: ../../../third_party/skia/src/gpu/gl/egl/GrGLMakeNativeInterface_egl.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/glx/GrGLMakeNativeInterface_glx.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLBuiltinTypes.cpp
@@ -5442,6 +5446,59 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLCodeStringExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/experimental/ddlbench/ddlbench.cpp
+FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.h
+FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2021 Google LLC.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -5952,58 +6009,6 @@ FILE: ../../../third_party/skia/src/gpu/mock/GrMockRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockSurfaceProxy.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google Inc.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/dsl_processor_test.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/gm/dsl_processor_test.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathTessellator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatingStencilFillOp.h
-FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLFPs.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariable.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2021 Google LLC.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6701,18 +6706,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/modules/canvaskit/canvaskit/LICENSE
+ORIGIN: ../../../third_party/skia/modules/canvaskit/npm_build/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package-lock.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/shaping.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/canvaskit-wasm-tests.ts
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/index.d.ts
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tsconfig.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/types/tslint.json
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/example.html
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/extra.html
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/node.example.js
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package-lock.json
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/shaping.html
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/types/index.d.ts
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/types/tsconfig.json
+FILE: ../../../third_party/skia/modules/canvaskit/npm_build/types/tslint.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
