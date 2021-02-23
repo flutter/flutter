@@ -322,7 +322,7 @@ Error: New codepoints file does not contain all the existing codepoints.\n
 
 // Replace the old codepoints file with the new.
 void _overwriteOldCodepoints(File newCodepointsFile, File oldCodepointsFile) {
-  stderr.writeln('\Copying new codepoints file to ${oldCodepointsFile.path}.\n');
+  stderr.writeln('Copying new codepoints file to ${oldCodepointsFile.path}.\n');
   newCodepointsFile.copySync(oldCodepointsFile.path);
 }
 
