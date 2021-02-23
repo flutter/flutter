@@ -91,4 +91,8 @@ void main() {
   AnimatedList.of(context);
   SliverAnimatedList.maybeOf(context);
   SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  bottomNavigationBarItem.label;
 }
