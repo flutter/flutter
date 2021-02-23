@@ -321,7 +321,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     // Hide the toolbar, but maintain the existing selection and keep the
     // handles on the screen.
-    delegate.hideToolbar(true);
+    delegate.hideToolbar(false);
   }
 }
 

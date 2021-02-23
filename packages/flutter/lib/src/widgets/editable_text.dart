@@ -2505,11 +2505,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void hideToolbar([bool handlesOnly = false]) {
-    if (handlesOnly) {
-      _selectionOverlay?.hideToolbar();
-    } else {
+  void hideToolbar([bool hideHandles = true]) {
+    if (hideHandles) {
+      // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
+    } else {
+      // Hide only the toolbar but not the handles.
+      _selectionOverlay?.hideToolbar();
     }
   }
 
