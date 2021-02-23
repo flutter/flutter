@@ -337,18 +337,18 @@ Future<void> _runBuildTests() async {
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
-        () => _runExampleProjectBuildTests(exampleDirectory),
+      () => _runExampleProjectBuildTests(exampleDirectory),
     ...<ShardRunner>[
       // Web compilation tests.
-        () =>  _flutterBuildDart2js(
-        path.join('dev', 'integration_tests', 'web'),
-        path.join('lib', 'main.dart'),
-      ),
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web'),
+            path.join('lib', 'main.dart'),
+          ),
       // Should not fail to compile with dart:io.
-        () =>  _flutterBuildDart2js(
-        path.join('dev', 'integration_tests', 'web_compile_tests'),
-        path.join('lib', 'dart_io_import.dart'),
-      ),
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web_compile_tests'),
+            path.join('lib', 'dart_io_import.dart'),
+          ),
     ],
   ]..shuffle(math.Random(0));
 
