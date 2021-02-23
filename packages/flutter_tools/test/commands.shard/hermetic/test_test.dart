@@ -96,8 +96,8 @@ void main() {
         '--no-pub',
       ]);
 
-      expect(fakePackageTest.lastArgs, isNot(contains('--total-shards=1')));
-      expect(fakePackageTest.lastArgs, isNot(contains('--shard-index=2')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--total-shards')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--shard-index')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
