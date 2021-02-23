@@ -94,8 +94,8 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
         FlutterProject.current().manifest.deferredComponents,
         generatedLoadingUnits,
     );
-    validator.checkAgainstLoadingUnitGolden(generatedLoadingUnits);
-    validator.writeGolden(generatedLoadingUnits);
+    validator.checkAgainstLoadingUnitsCache(generatedLoadingUnits);
+    validator.writeLoadingUnitsCache(generatedLoadingUnits);
 
     validator.handleResults();
 

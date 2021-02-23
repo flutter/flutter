@@ -151,36 +151,36 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   }
 
   /// Compares the provided loading units against the contents of the
-  /// `deferred_components_golden.yaml` file.
+  /// `deferred_components_loading_units.yaml` file.
   ///
-  /// Returns true if a golden exists and all loading units match, and false
-  /// otherwise.
+  /// Returns true if a loading unit cache file exists and all loading units
+  /// match, and false otherwise.
   ///
-  /// This method will parse the golden file if it exists and compare it to
-  /// the provided generatedLoadingUnits. It will distinguish between newly
-  /// added loading units and no longer existing loading units. If the golden
-  /// file does not exist, then all generatedLoadingUnits will be considered
-  /// new.
-  bool checkAgainstLoadingUnitGolden(
+  /// This method will parse the cached loading units file if it exists and
+  /// compare it to the provided generatedLoadingUnits. It will distinguish
+  /// between newly added loading units and no longer existing loading units. If
+  /// the cache file does not exist, then all generatedLoadingUnits will be
+  /// considered new.
+  bool checkAgainstLoadingUnitsCache(
       List<LoadingUnit> generatedLoadingUnits) {
-    final List<LoadingUnit> goldenLoadingUnits = _parseGolden(env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName));
-    goldenComparisonResults = <String, dynamic>{};
+    final List<LoadingUnit> cachedLoadingUnits = _parseLodingUnitsCache(env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
+    loadingUnitComparisonResults = <String, dynamic>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
-    if (generatedLoadingUnits == null || goldenLoadingUnits == null) {
-      goldenComparisonResults['new'] = newLoadingUnits;
-      goldenComparisonResults['missing'] = unmatchedLoadingUnits;
-      goldenComparisonResults['match'] = false;
+    if (generatedLoadingUnits == null || cachedLoadingUnits == null) {
+      loadingUnitComparisonResults['new'] = newLoadingUnits;
+      loadingUnitComparisonResults['missing'] = unmatchedLoadingUnits;
+      loadingUnitComparisonResults['match'] = false;
       return false;
     }
-    unmatchedLoadingUnits.addAll(goldenLoadingUnits);
+    unmatchedLoadingUnits.addAll(cachedLoadingUnits);
     final Set<int> addedNewIds = <int>{};
     for (final LoadingUnit genUnit in generatedLoadingUnits) {
       bool matched = false;
-      for (final LoadingUnit goldUnit in goldenLoadingUnits) {
-        if (genUnit.equalsIgnoringPath(goldUnit)) {
+      for (final LoadingUnit cacheUnit in cachedLoadingUnits) {
+        if (genUnit.equalsIgnoringPath(cacheUnit)) {
           matched = true;
-          unmatchedLoadingUnits.remove(goldUnit);
+          unmatchedLoadingUnits.remove(cacheUnit);
           break;
         }
       }
@@ -189,52 +189,52 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         addedNewIds.add(genUnit.id);
       }
     }
-    goldenComparisonResults['new'] = newLoadingUnits;
-    goldenComparisonResults['missing'] = unmatchedLoadingUnits;
-    goldenComparisonResults['match'] = newLoadingUnits.isEmpty && unmatchedLoadingUnits.isEmpty;
-    return goldenComparisonResults['match'] as bool;
+    loadingUnitComparisonResults['new'] = newLoadingUnits;
+    loadingUnitComparisonResults['missing'] = unmatchedLoadingUnits;
+    loadingUnitComparisonResults['match'] = newLoadingUnits.isEmpty && unmatchedLoadingUnits.isEmpty;
+    return loadingUnitComparisonResults['match'] as bool;
   }
 
-  List<LoadingUnit> _parseGolden(File goldenFile) {
+  List<LoadingUnit> _parseLodingUnitsCache(File cacheFile) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
-    inputs.add(goldenFile);
-    if (!goldenFile.existsSync()) {
+    inputs.add(cacheFile);
+    if (!cacheFile.existsSync()) {
       return loadingUnits;
     }
-    final YamlMap data = loadYaml(goldenFile.readAsStringSync()) as YamlMap;
+    final YamlMap data = loadYaml(cacheFile.readAsStringSync()) as YamlMap;
     // validate yaml format.
     if (!data.containsKey('loading-units')) {
-      invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+      invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
                                        'entry did not exist.';
       return loadingUnits;
     } else {
       if (data['loading-units'] is! YamlList && data['loading-units'] != null) {
-        invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+        invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
                                          'is not a list.';
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
         for (final dynamic loadingUnitData in data['loading-units']) {
           if (loadingUnitData is! YamlMap) {
-            invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'loading-units\' '
+            invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'loading-units\' '
                                              'is not a list of maps.';
             return loadingUnits;
           }
           final YamlMap loadingUnitDataMap = loadingUnitData as YamlMap;
           if (loadingUnitDataMap['id'] == null) {
-            invalidFiles[goldenFile.path] = 'Invalid golden yaml file, all '
+            invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, all '
                                              'loading units must have an \'id\'';
             return loadingUnits;
           }
           if (loadingUnitDataMap['libraries'] != null) {
             if (loadingUnitDataMap['libraries'] is! YamlList) {
-              invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'libraries\' '
+              invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'libraries\' '
                                                'is not a list.';
               return loadingUnits;
             }
             for (final dynamic node in loadingUnitDataMap['libraries'] as YamlList) {
               if (node is! String) {
-                invalidFiles[goldenFile.path] = 'Invalid golden yaml file, \'libraries\' '
+                invalidFiles[cacheFile.path] = 'Invalid loading units yaml file, \'libraries\' '
                                                  'is not a list of strings.';
                 return loadingUnits;
               }
@@ -267,45 +267,44 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     return loadingUnits;
   }
 
-  /// Writes the provided generatedLoadingUnits as `deferred_components_golden.yaml`
+  /// Writes the provided generatedLoadingUnits as `deferred_components_loading_units.yaml`
   ///
-  /// This golden file is used to detect any changes in the loading units
-  /// produced by gen_snapshot. Running [checkAgainstLoadingUnitGolden] with a
-  /// mismatching or missing golden will result in a failed validation. This
+  /// This cache file is used to detect any changes in the loading units
+  /// produced by gen_snapshot. Running [checkAgainstLoadingUnitCache] with a
+  /// mismatching or missing cache will result in a failed validation. This
   /// prevents unexpected changes in loading units causing misconfigured
   /// deferred components.
-  void writeGolden(List<LoadingUnit> generatedLoadingUnits) {
+  void writeLoadingUnitsCache(List<LoadingUnit> generatedLoadingUnits) {
     generatedLoadingUnits ??= <LoadingUnit>[];
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    outputs.add(goldenFile);
-    ErrorHandlingFileSystem.deleteIfExists(goldenFile);
-    goldenFile.createSync(recursive: true);
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    outputs.add(cacheFile);
+    ErrorHandlingFileSystem.deleteIfExists(cacheFile);
+    cacheFile.createSync(recursive: true);
 
     final StringBuffer buffer = StringBuffer();
     buffer.write('''
-# ===============================================================================
-# The contents of this file are automatically generated and it is not recommended
-# to modify this file manually.
-# ===============================================================================
+# ==============================================================================
+# The contents of this file are automatically generated and it is not
+# recommended to modify this file manually.
+# ==============================================================================
 #
-# In order to prevent unexpected splitting of deferred apps, this golden
-# file records the last generated set of loading units. It only possible
-# to obtain the final configuration of loading units after compilation is
-# complete. This means improperly setup imports can only be detected after
-# compilation.
+# In order to prevent unexpected splitting of deferred apps, this file records
+# the last generated set of loading units. It only possible to obtain the final
+# configuration of loading units after compilation is complete. This means
+# improperly setup deferred imports can only be detected after compilation.
 #
-# This golden file allows the build tool to detect any changes in the generated
+# This file allows the build tool to detect any changes in the generated
 # loading units. During the next build attempt, loading units in this file are
 # compared against the newly generated loading units to check for any new or
 # removed loading units. In the case where loading units do not match, the build
 # will fail and ask the developer to verify that the `deferred-components`
-# configuration in `pubspec.yaml` is correct. Developers should make any necessary
-# changes to integrate new and changed loading units or remove no longer existing
-# loading units from the configuration. The build command should then be
-# re-run to continue the build process.
+# configuration in `pubspec.yaml` is correct. Developers should make any
+# necessary changes to integrate new and changed loading units or remove no
+# longer existing loading units from the configuration. The build command should
+# then be re-run to continue the build process.
 #
 # Sometimes, changes to the generated loading units may be unintentional. If
-# the list of loading units in this golden is not what is expected, the app's
+# the list of loading units in this file is not what is expected, the app's
 # deferred imports should be reviewed. Third party plugins and packages may
 # also introduce deferred imports that result in unexpected loading units.
 loading-units:
@@ -324,6 +323,6 @@ loading-units:
       }
       usedIds.add(unit.id);
     }
-    goldenFile.writeAsStringSync(buffer.toString(), flush: true);
+    cacheFile.writeAsStringSync(buffer.toString(), flush: true);
   }
 }

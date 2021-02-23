@@ -58,17 +58,17 @@ void main() {
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testWithoutContext('writeGolden passes', () async {
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+  testWithoutContext('writeCache passes', () async {
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    validator.writeGolden(
+    validator.writeCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
@@ -79,7 +79,7 @@ void main() {
 
     expect(logger.statusText, 'test check passed.\n');
 
-    final File expectedFile = env.projectDir.childFile('deferred_components_golden.yaml');
+    final File expectedFile = env.projectDir.childFile('deferred_components_loading_units.yaml');
 
     expect(expectedFile.existsSync(), true);
     const String expectedContents =
@@ -96,18 +96,18 @@ loading-units:
     expect(expectedFile.readAsStringSync().contains(expectedContents), true);
   });
 
-  testWithoutContext('loadingUnitGolden identical passes', () async {
+  testWithoutContext('loadingUnitCache identical passes', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -117,7 +117,7 @@ loading-units:
       - lib2
       - lib3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
@@ -129,25 +129,25 @@ loading-units:
     expect(logger.statusText, 'test check passed.\n');
   });
 
-  testWithoutContext('loadingUnitGolden finds new loading units', () async {
+  testWithoutContext('loadingUnitCache finds new loading units', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 3
     libraries:
       - lib2
       - lib3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
@@ -159,18 +159,18 @@ loading-units:
     expect(logger.statusText.contains('New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), true);
   });
 
-  testWithoutContext('loadingUnitGolden finds missing loading units', () async {
+  testWithoutContext('loadingUnitCache finds missing loading units', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -180,7 +180,7 @@ loading-units:
       - lib2
       - lib3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -191,17 +191,17 @@ loading-units:
     expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), true);
   });
 
-  testWithoutContext('missing golden file counts as all new loading units', () async {
+  testWithoutContext('missing cache file counts as all new loading units', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
       ],
@@ -212,18 +212,18 @@ loading-units:
     expect(logger.statusText.contains('New loading units were found:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: missing main entry', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: missing main entry', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units-spelled-wrong:
   - id: 2
     libraries:
@@ -233,7 +233,7 @@ loading-units-spelled-wrong:
       - lib2
       - lib3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -242,26 +242,26 @@ loading-units-spelled-wrong:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, \'loading-units\' entry did not exist.'), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' entry did not exist.'), true);
 
     expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: not a list', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units: hello
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -270,26 +270,26 @@ loading-units: hello
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, \'loading-units\' is not a list.'), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' is not a list.'), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: not a list', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - 2
   - 3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -298,21 +298,21 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, \'loading-units\' is not a list of maps.'), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' is not a list of maps.'), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: missing id', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -321,7 +321,7 @@ loading-units:
       - lib2
       - lib3
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -330,21 +330,21 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, all loading units must have an \'id\''), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, all loading units must have an \'id\''), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: libraries is list', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -352,7 +352,7 @@ loading-units:
   - id: 3
     libraries: hello
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -361,21 +361,21 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, \'libraries\' is not a list.'), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, \'libraries\' is not a list.'), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: libraries is list of strings', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list of strings', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -385,7 +385,7 @@ loading-units:
       - blah: hello
         blah2: hello2
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
@@ -394,21 +394,21 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid golden yaml file, \'libraries\' is not a list of strings.'), true);
+    expect(logger.statusText.contains('Invalid loading unit yaml file, \'libraries\' is not a list of strings.'), true);
   });
 
-  testWithoutContext('loadingUnitGolden validator detects malformed file: empty libraries allowed', () async {
+  testWithoutContext('loadingUnitCache validator detects malformed file: empty libraries allowed', () async {
     final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
-    if (goldenFile.existsSync()) {
-      goldenFile.deleteSync();
+    final File cacheFile = env.projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName);
+    if (cacheFile.existsSync()) {
+      cacheFile.deleteSync();
     }
-    goldenFile.createSync(recursive: true);
-    goldenFile.writeAsStringSync('''
+    cacheFile.createSync(recursive: true);
+    cacheFile.writeAsStringSync('''
 loading-units:
   - id: 2
     libraries:
@@ -416,7 +416,7 @@ loading-units:
   - id: 3
     libraries:
 ''', flush: true, mode: FileMode.append);
-    validator.checkAgainstLoadingUnitGolden(
+    validator.checkAgainstLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
       ],
