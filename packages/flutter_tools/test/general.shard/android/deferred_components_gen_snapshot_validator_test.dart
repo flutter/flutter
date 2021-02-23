@@ -68,7 +68,7 @@ void main() {
       exitOnFail: false,
       title: 'test check',
     );
-    validator.writeCache(
+    validator.writeLoadingUnitsCache(
       <LoadingUnit>[
         LoadingUnit(id: 2, libraries: <String>['lib1']),
         LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
@@ -242,7 +242,7 @@ loading-units-spelled-wrong:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' entry did not exist.'), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, \'loading-units\' entry did not exist.'), true);
 
     expect(logger.statusText.contains('Previously existing loading units no longer exist:\n\n  LoadingUnit 2\n    Libraries:\n    - lib1\n'), false);
   });
@@ -270,7 +270,7 @@ loading-units: hello
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' is not a list.'), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, \'loading-units\' is not a list.'), true);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
@@ -298,7 +298,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, \'loading-units\' is not a list of maps.'), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, \'loading-units\' is not a list of maps.'), true);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
@@ -330,7 +330,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, all loading units must have an \'id\''), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, all loading units must have an \'id\''), true);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list', () async {
@@ -361,7 +361,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, \'libraries\' is not a list.'), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, \'libraries\' is not a list.'), true);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: libraries is list of strings', () async {
@@ -394,7 +394,7 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), true);
-    expect(logger.statusText.contains('Invalid loading unit yaml file, \'libraries\' is not a list of strings.'), true);
+    expect(logger.statusText.contains('Invalid loading units yaml file, \'libraries\' is not a list of strings.'), true);
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: empty libraries allowed', () async {

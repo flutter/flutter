@@ -196,7 +196,7 @@ The recommended changes can be quickly applied by running:
 It is recommended to verify that the changed loading units are expected
 and to update the `deferred-components` section in `pubspec.yaml` to
 incorporate any changes. The full list of generated loading units can be
-referenced in the $kDeferredComponentsGoldenFileName file located alongside
+referenced in the $kLoadingUnitsCacheFileName file located alongside
 pubspec.yaml.
 
 This loading unit check will not fail again on the next build attempt
