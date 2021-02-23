@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -798,17 +797,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.install() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'install',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
@@ -818,17 +815,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.uninstall() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'uninstall',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
@@ -838,17 +833,15 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
     });
 
     testWithoutContext('.launch() handles exceptions', () async {
-      fakeProcessManager.addCommand(FakeCommand(
-        command: const <String>[
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
           'xcrun',
           'simctl',
           'launch',
           deviceId,
           appId,
         ],
-        onRun: () {
-          throw const ProcessException('xcrun', <String>[]);
-        },
+        exception: ProcessException('xcrun', <String>[]),
       ));
 
       expect(
@@ -936,7 +929,7 @@ flutter:
   module: {}
 ''');
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -954,7 +947,7 @@ flutter:
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',
@@ -970,7 +963,7 @@ flutter:
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
         'test',

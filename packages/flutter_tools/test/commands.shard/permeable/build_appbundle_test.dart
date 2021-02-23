@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
@@ -153,7 +154,7 @@ void main() {
       when(mockAndroidSdk.licensesAvailable).thenReturn(true);
       when(mockAndroidSdk.platformToolsAvailable).thenReturn(true);
       when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(const <String>[]);
-      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+      when(mockAndroidSdk.directory).thenReturn(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -161,27 +162,6 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=app']);
-
-        await expectLater(
-          runBuildAppBundleCommand(
-            projectPath,
-            arguments: <String>['--no-pub'],
-          ),
-          throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'),
-        );
-
-        verifyNever(mockAndroidSdk.validateSdkWellFormed());
-        verify(mockAndroidSdk.reinitialize()).called(1);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
-      });
-
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template=app']);
@@ -348,4 +328,3 @@ Matcher not(Matcher target){
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}

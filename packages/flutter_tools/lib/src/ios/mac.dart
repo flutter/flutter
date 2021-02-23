@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -434,7 +435,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           // (for example, kernel binary files produced from previous run).
           globals.fs.directory(outputDir).deleteSync(recursive: true);
         }
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           globals.fs.directory(expectedOutputDirectory),
           globals.fs.directory(outputDir),
         );

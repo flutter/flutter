@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -46,14 +45,12 @@ void main() {
   });
 
   testUsingContext('AndroidStudioValidator gives doctor error on java crash', () async {
-    fakeProcessManager.addCommand(FakeCommand(
-      command: const <String>[
+    fakeProcessManager.addCommand(const FakeCommand(
+      command: <String>[
         '/opt/android-studio-with-cheese-5.0/jre/bin/java',
         '-version',
       ],
-      onRun: () {
-        throw const ProcessException('java', <String>['-version']);
-      },
+      exception: ProcessException('java', <String>['-version']),
     ));
     const String installPath = '/opt/android-studio-with-cheese-5.0';
     const String studioHome = '$home/.AndroidStudioWithCheese5.0';

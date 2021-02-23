@@ -10,12 +10,12 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
@@ -26,6 +26,7 @@ void main() {
     androidWorkflow = AndroidWorkflow(
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -36,6 +37,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -56,6 +58,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk('adb'),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
@@ -75,6 +78,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -116,6 +120,7 @@ void main() {
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),

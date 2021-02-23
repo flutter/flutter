@@ -10,7 +10,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
@@ -20,6 +19,7 @@ import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -99,6 +99,31 @@ void main() {
     expect(
       fakePackageTest.lastArgs,
       contains('--pause-after-load'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => FakeCache(),
+  });
+
+  testUsingContext('Pipes run-skipped to package:test',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--run-skipped',
+      '--',
+      'test/fake_test.dart',
+    ]);
+    expect(
+      fakePackageTest.lastArgs,
+      contains('--run-skipped'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -190,6 +215,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     @override List<String> extraFrontEndOptions,
     String reporter,
     String timeout,
+    bool runSkipped = false,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

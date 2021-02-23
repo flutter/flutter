@@ -275,6 +275,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.mouseCursor,
+    this.enableFeedback,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -410,6 +411,16 @@ class BottomNavigationBar extends StatefulWidget {
   /// If this property is null, [SystemMouseCursors.click] will be used.
   final MouseCursor? mouseCursor;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool? enableFeedback;
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -434,6 +445,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.showUnselectedLabels,
     this.indexLabel,
     required this.mouseCursor,
+    required this.enableFeedback,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
@@ -458,6 +470,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
   final MouseCursor mouseCursor;
+  final bool enableFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -542,6 +555,7 @@ class _BottomNavigationTile extends StatelessWidget {
     Widget result = InkResponse(
       onTap: onTap,
       mouseCursor: mouseCursor,
+      enableFeedback: enableFeedback,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
         child: Column(
@@ -969,6 +983,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         unselectedIconTheme: widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,
+        enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
         onTap: () {
           if (widget.onTap != null)
             widget.onTap!(i);

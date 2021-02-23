@@ -30,7 +30,7 @@ void main() {
     } on PreparePackageException catch (e) {
       expect(
         e.message,
-        contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
+        contains('Invalid argument(s): Failed to resolve this_executable_better_not_exist_2857632534321 to an executable.'),
       );
     }
   });

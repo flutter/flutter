@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -13,9 +14,9 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../doctor.dart';
 import '../features.dart';
@@ -45,14 +46,19 @@ class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     @required AndroidSdk androidSdk,
     @required FeatureFlags featureFlags,
+    @required OperatingSystemUtils operatingSystemUtils,
   }) : _androidSdk = androidSdk,
-       _featureFlags = featureFlags;
+       _featureFlags = featureFlags,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final AndroidSdk _androidSdk;
   final FeatureFlags _featureFlags;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
+    // Android Studio is not currently supported on Linux Arm64 Hosts.
+    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
 
   @override
   bool get canListDevices => _androidSdk != null
@@ -183,7 +189,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages);
     }
 
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(_androidSdk.directory)));
+    messages.add(ValidationMessage(_userMessages.androidSdkLocation(_androidSdk.directory?.path)));
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {

@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -77,7 +78,6 @@ void main() {
       MockPortForwarder portForwarder;
       MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
-      MockHttpClient httpClient;
 
       setUp(() {
         fakeLogReader = FakeDeviceLogReader();
@@ -97,13 +97,6 @@ void main() {
         when(mockDds.startDartDevelopmentService(any, any, false, any)).thenReturn(null);
         when(mockDds.uri).thenReturn(Uri.parse('http://localhost:8181'));
         when(mockDds.done).thenAnswer((_) => noopCompleter.future);
-        final HttpClientRequest httpClientRequest = MockHttpClientRequest();
-        httpClient = MockHttpClient();
-        when(httpClient.putUrl(any))
-          .thenAnswer((_) => Future<HttpClientRequest>.value(httpClientRequest));
-        when(httpClientRequest.headers).thenReturn(MockHttpHeaders());
-        when(httpClientRequest.close())
-          .thenAnswer((_) => Future<HttpClientResponse>.value(MockHttpClientResponse()));
 
         // We cannot add the device to a device manager because that is
         // only enabled by the context of each testUsingContext call.
@@ -924,6 +917,3 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 }
 
 class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
-class MockHttpClientRequest extends Mock implements HttpClientRequest {}
-class MockHttpClientResponse extends Mock implements HttpClientResponse {}
-class MockHttpHeaders extends Mock implements HttpHeaders {}

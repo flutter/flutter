@@ -4,8 +4,11 @@
 
 // @dart = 2.8
 
+import 'package:process/process.dart';
+
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/gradle_utils.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -80,8 +83,10 @@ FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils
   platform: platform,
 );
 
+const ProcessManager _kLocalProcessManager = LocalProcessManager();
+
 /// The active process manager.
-ProcessManager get processManager => context.get<ProcessManager>();
+ProcessManager get processManager => context.get<ProcessManager>() ?? _kLocalProcessManager;
 ProcessUtils get processUtils => context.get<ProcessUtils>();
 
 const Platform _kLocalPlatform = LocalPlatform();
@@ -199,3 +204,6 @@ PlistParser _plistInstance;
 
 /// The global template renderer.
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
+
+/// Gradle utils in the current [AppContext].
+GradleUtils get gradleUtils => context.get<GradleUtils>();
