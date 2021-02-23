@@ -7,11 +7,9 @@
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
-import '../base/common.dart';
 import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
-import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -35,21 +33,12 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsPrebuildValidator(this.env, {
-    this.exitOnFail = true,
+  DeferredComponentsPrebuildValidator(Environment env, {
+    bool exitOnFail = true,
     String title,
     Directory templatesDir,
-  }) : _outputDir = env.projectDir
-        .childDirectory('build')
-        .childDirectory(kDeferredComponentsTempDirectory),
-      _inputs = <File>[],
-      _outputs = <File>[],
-      _title = title ?? 'Deferred components setup verification',
-      _templatesDir = templatesDir,
-      _generatedFiles = <String>[],
-      _modifiedFiles = <String>[],
-      _invalidFiles = <String, String>{},
-      _diffLines = <String>[];
+  }) : _templatesDir = templatesDir,
+       super(env, exitOnFail: exitOnFail, title: title);
 
   final Directory _templatesDir;
 
@@ -67,7 +56,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// This method does not check if the contents of either of the files are
   /// valid, as there are many ways that they can be validly configured.
   Future<bool> checkAndroidDynamicFeature(List<DeferredComponent> components) async {
-    _inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    inputs.add(env.projectDir.childFile('pubspec.yaml'));
     if (components == null || components.isEmpty) {
       return false;
     }
@@ -82,15 +71,15 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
         // generate into temp directory
         final Map<String, List<File>> results =
           await androidFiles.generateFiles(
-            alternateAndroidDir: _outputDir,
+            alternateAndroidDir: outputDir,
             clearAlternateOutputDir: true,
           );
         for (final File file in results['outputs']) {
-          _generatedFiles.add(file.path);
+          generatedFiles.add(file.path);
           changesMade = true;
         }
-        _outputs.addAll(results['outputs']);
-        _inputs.addAll(results['inputs']);
+        outputs.addAll(results['outputs']);
+        inputs.addAll(results['inputs']);
       }
     }
     return !changesMade;
@@ -118,7 +107,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// `Name` as a suffix, and the text contents should be the component name.
   bool checkAndroidResourcesStrings(List<DeferredComponent> components) {
     final Directory androidDir = env.projectDir.childDirectory('android');
-    _inputs.add(env.projectDir.childFile('pubspec.yaml'));
+    inputs.add(env.projectDir.childFile('pubspec.yaml'));
 
     // Add component name mapping to strings.xml
     final File stringRes = androidDir
@@ -128,8 +117,8 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       .childDirectory('res')
       .childDirectory('values')
       .childFile('strings.xml');
-    _inputs.add(stringRes);
-    final File stringResOutput = _outputDir
+    inputs.add(stringRes);
+    final File stringResOutput = outputDir
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -150,7 +139,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       try {
         document = XmlDocument.parse(stringRes.readAsStringSync());
       } on XmlParserException {
-        _invalidFiles[stringRes.path] = 'Error parsing $stringRes '
+        invalidFiles[stringRes.path] = 'Error parsing $stringRes '
         'Please ensure that the strings.xml is a valid XML document and '
         'try again.';
         return false;
@@ -186,7 +175,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       if (modified) {
         stringResOutput.createSync(recursive: true);
         stringResOutput.writeAsStringSync(document.toXmlString(pretty: true));
-        _modifiedFiles.add(stringResOutput.path);
+        modifiedFiles.add(stringResOutput.path);
         return false;
       }
       return true;
@@ -207,13 +196,13 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 
 ''');
     stringResOutput.writeAsStringSync(buffer.toString(), flush: true, mode: FileMode.append);
-    _generatedFiles.add(stringResOutput.path);
+    generatedFiles.add(stringResOutput.path);
     return false;
   }
 
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
-    final Directory dir = env.projectDir.childDirectory('build').childDirectory(kDeferredComponentsTempDirectory);
+    final Directory dir = env.projectDir.childDirectory('build').childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory);
     ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
   }
 }

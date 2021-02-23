@@ -6,7 +6,7 @@
 
 import 'package:meta/meta.dart';
 
-import '../../android/deferred_components_setup_validator.dart';
+import '../../android/deferred_components_gen_snapshot_validator.dart';
 import '../../base/deferred_component.dart';
 import '../../build_info.dart';
 import '../../project.dart';
@@ -70,7 +70,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   List<Target> get dependencies => dependency == null ? <Target>[] : <Target>[dependency];
 
   @visibleForTesting
-  DeferredComponentsSetupValidator validator;
+  DeferredComponentsGenSnapshotValidator validator;
 
   @override
   Future<void> build(Environment environment) async {

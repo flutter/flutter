@@ -27,71 +27,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
-  testUsingContext('empty checks passes', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      outputDir: fileSystem.directory('out')..createSync(),
-      buildDir: fileSystem.directory('build')..createSync(),
-      defines: <String, String>{
-        kSplitAot: 'true',
-      },
-      artifacts: null,
-      processManager: null,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
-    environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[],
-      dependency: compositeTarget,
-      title: 'test checks',
-      exitOnFail: false,
-    );
-
-    await validatorTarget.build(environment);
-
-    expect(logger.statusText.contains('test checks passed.'), true);
-  });
-
-  testUsingContext('checkAndroidDynamicFeature checks runs', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      outputDir: fileSystem.directory('out')..createSync(),
-      buildDir: fileSystem.directory('build')..createSync(),
-      projectDir: fileSystem.directory('project')..createSync(),
-      defines: <String, String>{
-        kSplitAot: 'true',
-      },
-      artifacts: null,
-      processManager: null,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
-    environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.checkAndroidDynamicFeature
-      ],
-      dependency: compositeTarget,
-      title: 'test checks',
-      exitOnFail: false,
-    );
-
-    await validatorTarget.build(environment);
-
-    // We check the inputs to determine if the task was executed.
-    expect(validatorTarget.validator.inputs.length, 1);
-    expect(validatorTarget.validator.inputs[0].path, 'project/pubspec.yaml');
-  });
-
   testUsingContext('checkAppAndroidManifestComponentLoadingUnitMapping checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -111,10 +46,7 @@ void main() {
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
     final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.checkAppAndroidManifestComponentLoadingUnitMapping
-      ],
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
       title: 'test checks',
       exitOnFail: false,
@@ -123,45 +55,9 @@ void main() {
     await validatorTarget.build(environment);
 
     // We check the inputs to determine if the task was executed.
-    expect(validatorTarget.validator.inputs.length, 2);
+    expect(validatorTarget.validator.inputs.length, 3);
     expect(validatorTarget.validator.inputs[0].path, 'project/pubspec.yaml');
     expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/AndroidManifest.xml');
-  });
-
-  testUsingContext('checkAndroidResourcesStrings checks runs', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      outputDir: fileSystem.directory('out')..createSync(),
-      buildDir: fileSystem.directory('build')..createSync(),
-      projectDir: fileSystem.directory('project')..createSync(),
-      defines: <String, String>{
-        kSplitAot: 'true',
-      },
-      artifacts: null,
-      processManager: null,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
-    environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.checkAndroidResourcesStrings
-      ],
-      dependency: compositeTarget,
-      title: 'test checks',
-      exitOnFail: false,
-    );
-
-    await validatorTarget.build(environment);
-
-    // We check the inputs to determine if the task was executed.
-    expect(validatorTarget.validator.inputs.length, 2);
-    expect(validatorTarget.validator.inputs[0].path, 'project/pubspec.yaml');
-    expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/res/values/strings.xml');
   });
 
   testUsingContext('checkAgainstLoadingUnitGolden checks runs', () async {
@@ -183,10 +79,7 @@ void main() {
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
     final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.checkAgainstLoadingUnitGolden
-      ],
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
       title: 'test checks',
       exitOnFail: false,
@@ -195,8 +88,8 @@ void main() {
     await validatorTarget.build(environment);
 
     // We check the inputs to determine if the task was executed.
-    expect(validatorTarget.validator.inputs.length, 1);
-    expect(validatorTarget.validator.inputs[0].path, 'project/deferred_components_golden.yaml');
+    expect(validatorTarget.validator.inputs.length, 3);
+    expect(validatorTarget.validator.inputs[2].path, 'project/deferred_components_golden.yaml');
   });
 
   testUsingContext('writeGolden task runs', () async {
@@ -218,10 +111,7 @@ void main() {
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
     final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.writeGolden
-      ],
+    final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
       title: 'test checks',
       exitOnFail: false,
@@ -232,41 +122,5 @@ void main() {
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.outputs.length, 1);
     expect(validatorTarget.validator.outputs[0].path, 'project/deferred_components_golden.yaml');
-  });
-
-  testUsingContext('clearOutputDir task runs', () async {
-    final Environment environment = Environment.test(
-      fileSystem.currentDirectory,
-      outputDir: fileSystem.directory('out')..createSync(),
-      buildDir: fileSystem.directory('build')..createSync(),
-      projectDir: fileSystem.directory('project')..createSync(),
-      defines: <String, String>{
-        kSplitAot: 'true',
-      },
-      artifacts: null,
-      processManager: null,
-      fileSystem: fileSystem,
-      logger: logger,
-    );
-    environment.buildDir.createSync(recursive: true);
-    const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-    const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
-    final DeferredComponentsSetupValidatorTarget validatorTarget = DeferredComponentsSetupValidatorTarget(
-      tasks: <DeferredComponentsSetupValidatorTask>[
-        DeferredComponentsSetupValidatorTask.clearOutputDir
-      ],
-      dependency: compositeTarget,
-      title: 'test checks',
-      exitOnFail: false,
-    );
-    final Directory outputDir = fileSystem.directory('project/build/android_deferred_components_setup_files')..createSync(recursive: true);
-    expect(outputDir.existsSync(), true);
-
-    await validatorTarget.build(environment);
-
-    // We check the inputs to determine if the task was executed.
-    expect(outputDir.existsSync(), false);
   });
 }

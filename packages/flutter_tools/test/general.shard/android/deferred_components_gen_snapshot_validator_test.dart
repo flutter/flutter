@@ -6,6 +6,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/deferred_components_gen_snapshot_validator.dart';
+import 'package:flutter_tools/src/android/deferred_components_validator.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   FileSystem fileSystem;
@@ -59,7 +59,7 @@ void main() {
   });
 
   testWithoutContext('writeGolden passes', () async {
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -102,7 +102,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -135,7 +135,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -165,7 +165,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -197,7 +197,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -218,7 +218,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -253,7 +253,7 @@ loading-units-spelled-wrong:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -279,7 +279,7 @@ loading-units: hello
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -307,7 +307,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -339,7 +339,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -370,7 +370,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -403,7 +403,7 @@ loading-units:
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -425,72 +425,6 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Errors checking the following files:'), false);
-  });
-
-  testWithoutContext('androidStringMapping creates new file', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
-      env,
-      exitOnFail: false,
-      title: 'test check',
-    );
-    final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
-    final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
-    if (manifest.existsSync()) {
-      manifest.deleteSync();
-    }
-    manifest.createSync(recursive: true);
-    manifest.writeAsStringSync('''
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.splitaot">
-    <application
-        android:name="io.flutter.app.FlutterPlayStoreSplitApplication"
-        android:label="splitaot"
-        android:extractNativeLibs="false">
-        <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize">
-        </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
-        <meta-data
-            android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping"
-            android:value="invalidmapping" />
-    </application>
-</manifest>
-''', flush: true, mode: FileMode.append);
-    validator.checkAppAndroidManifestComponentLoadingUnitMapping(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
-      ],
-      <LoadingUnit>[
-        LoadingUnit(id: 2, libraries: <String>['lib1']),
-        LoadingUnit(id: 3, libraries: <String>['lib2', 'lib3']),
-        LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
-      ],
-    );
-    validator.displayResults();
-    validator.attemptToolExit();
-
-    expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('Newly generated android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
-
-    final File manifestOutput = env.projectDir
-      .childDirectory('build')
-      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childFile('AndroidManifest.xml');
-    expect(manifestOutput.existsSync(), true);
-    expect(manifestOutput.readAsStringSync().contains('<meta-data android:name="io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping" android:value="3:component1,2:component2,4:component2"/>'), true);
-    expect(manifestOutput.readAsStringSync().contains('android:value="invalidmapping"'), false);
-    expect(manifestOutput.readAsStringSync().contains('<!-- Don\'t delete the meta-data below.'), true);
   });
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
@@ -542,21 +476,15 @@ loading-units:
         LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
       ],
     );
-    validator.checkAndroidResourcesStrings(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
-      ],
-    );
     validator.displayResults();
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -614,11 +542,11 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -683,11 +611,11 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
