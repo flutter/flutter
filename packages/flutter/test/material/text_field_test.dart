@@ -18,8 +18,6 @@ import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize,
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
-
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -127,16 +125,6 @@ double getOpacity(WidgetTester tester, Finder finder) {
       matching: find.byType(FadeTransition),
     ),
   ).opacity.value;
-}
-
-class TestFormatter extends TextInputFormatter {
-  TestFormatter(this.onFormatEditUpdate);
-  FormatEditUpdateCallback onFormatEditUpdate;
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    onFormatEditUpdate(oldValue, newValue);
-    return newValue;
-  }
 }
 
 void main() {
@@ -485,47 +473,6 @@ void main() {
       ),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-
-  testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
-    late TextEditingValue actualOldValue;
-    late TextEditingValue actualNewValue;
-    final FormatEditUpdateCallback callBack = (TextEditingValue oldValue, TextEditingValue newValue) {
-      actualOldValue = oldValue;
-      actualNewValue = newValue;
-    };
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController(text: '123');
-    await tester.pumpWidget(
-      boilerplate(
-        child: TextField(
-          controller: controller,
-          focusNode: focusNode,
-          inputFormatters: <TextInputFormatter>[TestFormatter(callBack)],
-        ),
-      ),
-    );
-
-    await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-    await tester.pumpAndSettle();
-
-    expect(
-      actualOldValue,
-      const TextEditingValue(
-        text: '123',
-        selection: TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
-      ),
-    );
-    expect(
-      actualNewValue,
-      const TextEditingValue(
-        text: '12',
-        selection: TextSelection.collapsed(offset: 2),
-      ),
-    );
-  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1124,9 +1071,11 @@ void main() {
     ));
 
     expect(find.text('Paste'), findsNothing);
+
     final Offset emptyPos = textOffsetToPosition(tester, 0);
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
+
     expect(find.text('Paste'), findsOneWidget);
   });
 
