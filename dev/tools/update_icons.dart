@@ -243,7 +243,9 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 }
 
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
-  final Iterable<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry));
+  final List<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry)).toList();
+  newIcons.sort((_Icon a, _Icon b) => a.compareTo(b));
+  
   final StringBuffer buf = StringBuffer();
   bool generating = false;
 
@@ -412,6 +414,14 @@ class _Icon {
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.fullFlutterId} : Icons.${iOSIcon.fullFlutterId};
 ''';
+
+  /// Analogous to [String.compareTo]
+  int compareTo(_Icon b) {
+    // Sort regular icons before their variants.
+    if (flutterId == b.flutterId && style == IconStyle.regular)
+      return -1;
+    return flutterId.compareTo(b.flutterId);
+  }
 
   @override
   String toString() => id;
