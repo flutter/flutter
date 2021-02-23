@@ -287,15 +287,13 @@ class TestCommand extends FlutterCommand {
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
     }
 
-    if (totalShards != null) {
-      if (shardIndex == null) {
-        throwToolExit(
-            'If you set --total-hards you need to add --shard-index.');
-      }
-    } else if (shardIndex != null) {
-      if (totalShards == null) {
-        throwToolExit('If you set --shard-index you need to add --total-hard.');
-      }
+    if (totalShards != null && shardIndex == null) {
+      throwToolExit(
+          'If you set --total-shards you need to also set --shard-index.');
+    }
+    if (shardIndex != null && totalShards == null) {
+      throwToolExit(
+          'If you set --shard-index you need to also set --total-shards.');
     }
 
     final bool machine = boolArg('machine');
