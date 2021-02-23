@@ -547,22 +547,31 @@ class TextSelectionOverlay {
   }
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
+    Widget handle;
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
-      return Container(); // hide the second handle when collapsed
-    return Visibility(
-      visible: handlesVisible,
-      child: _TextSelectionHandleOverlay(
-        onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-        onSelectionHandleTapped: onSelectionHandleTapped,
-        startHandleLayerLink: startHandleLayerLink,
-        endHandleLayerLink: endHandleLayerLink,
-        renderObject: renderObject,
-        selection: _selection,
-        selectionControls: selectionControls,
-        position: position,
-        dragStartBehavior: dragStartBehavior,
-    ));
+      handle = Container(); // hide the second handle when collapsed
+    else {
+      handle = Visibility(
+        visible: handlesVisible,
+        child: _TextSelectionHandleOverlay(
+          onSelectionHandleChanged: (TextSelection newSelection) {
+            _handleSelectionHandleChanged(newSelection, position);
+          },
+          onSelectionHandleTapped: onSelectionHandleTapped,
+          startHandleLayerLink: startHandleLayerLink,
+          endHandleLayerLink: endHandleLayerLink,
+          renderObject: renderObject,
+          selection: _selection,
+          selectionControls: selectionControls,
+          position: position,
+          dragStartBehavior: dragStartBehavior,
+        )
+      );
+    }
+    return ExcludeSemantics(
+      child: handle,
+    );
   }
 
   Widget _buildToolbar(BuildContext context) {
