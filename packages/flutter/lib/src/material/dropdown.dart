@@ -1102,9 +1102,13 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The maximum height of the menu.
   ///
-  /// The [menuMaxHeight] should be less than or equal to the maximum height of
-  /// the less line. If the set height value is greater than the allowed
-  /// maximum height, the allowed maximum height will be used by default.
+  /// The maximum height of the menu must be at least one row shorter than
+  /// the height of the app's view. This ensures that a tappable area 
+  /// outside of the simple menu is present so the user can dismiss the menu.
+  ///
+  /// If this property is set above the maximum allowable height threshold
+  /// mentioned above, then the menu defaults to being padded at the top 
+  /// and bottom of the menu by at one menu item's height.
   final double? menuMaxHeight;
 
   @override
