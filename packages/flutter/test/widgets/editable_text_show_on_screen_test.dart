@@ -674,6 +674,55 @@ void main() {
         expect(scrollController.offset, greaterThan(0.0));
         expect(editableScrollController.offset, greaterThan(0.0));
       });
+
+      // Regression text for https://github.com/flutter/flutter/pull/74722.
+      testWidgets('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
+        textEditingController.text = 'a' * 100;
+        textEditingController.selection = const TextSelection.collapsed(offset: 1);
+        final ScrollController scrollController = ScrollController(initialScrollOffset: 100);
+        final ScrollController editableScrollController = ScrollController();
+        final bool deterministicCursor = EditableText.debugDeterministicCursor;
+        EditableText.debugDeterministicCursor = false;
+
+        await tester.pumpWidget(
+          buildEditableText(
+            rejectUserInputs: false,
+            scrollController: scrollController,
+            editableScrollController: editableScrollController,
+          ),
+        );
+
+        final EditableTextState state = tester.state<EditableTextState>(
+          find.byType(EditableText, skipOffstage: false),
+        );
+
+        // Ensure the text was initially visible.
+        expect(isCaretOnScreen(tester), true);
+        expect(editableScrollController.offset, 0.0);
+
+        // Change the text but keep the cursor location.
+        state.updateEditingValue(textEditingController.value.copyWith(
+          text: 'a' * 101,
+        ));
+
+        await tester.pumpAndSettle();
+
+        // The caret should be stay where it was, since the selection didn't
+        // change.
+        expect(isCaretOnScreen(tester), true);
+        expect(editableScrollController.offset, 0.0);
+
+        // Now move the hide the cursor.
+        editableScrollController.jumpTo(100.0);
+
+        // Does not trigger showCaretOnScreen.
+        await tester.pump();
+        await tester.pumpAndSettle();
+        expect(isCaretOnScreen(tester), isFalse);
+        expect(editableScrollController.offset, 100.0);
+
+        EditableText.debugDeterministicCursor = deterministicCursor;
+      });
     });
   }
 
