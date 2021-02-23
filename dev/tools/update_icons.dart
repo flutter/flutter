@@ -364,36 +364,34 @@ class _Icon {
 
     if (id.endsWith('_outlined') && id!='insert_chart_outlined') {
       style = IconStyle.outlined;
-      shortId = id.replaceAll('_outlined', '');
+      shortId = id.replaceFirst('_outlined', '');
     } else if (id.endsWith('_rounded')) {
       style = IconStyle.rounded;
-      shortId = id.replaceAll('_rounded', '');
+      shortId = id.replaceFirst('_rounded', '');
     } else if (id.endsWith('_sharp')) {
       style = IconStyle.sharp;
-      shortId = id.replaceAll('_sharp', '');
+      shortId = id.replaceFirst('_sharp', '');
     } else {
       style = IconStyle.regular;
       shortId = id;
     }
 
-    flutterId = id;
+    flutterId = shortId;
     for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
-      if (id.startsWith(rewritePair.key)) {
-        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+      if (shortId.startsWith(rewritePair.key)) {
+        flutterId = shortId.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
       }
     }
-  }
 
-  // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
-  String id;
-  // e.g. 5g
-  String shortId;
-  // e.g. five_g
-  String flutterId;
-  // e.g. IconStyle.outlined
-  IconStyle style;
-  // e.g. e547
-  String hexCodepoint;
+    fullFlutterId = flutterId + style.idSuffix();
+  }
+  
+  String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
+  String shortId;       // e.g. 5g
+  String flutterId;     // e.g. five_g
+  String fullFlutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  IconStyle style;      // e.g. IconStyle.outlined
+  String hexCodepoint;  // e.g. e547
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
 
@@ -403,7 +401,7 @@ class _Icon {
       '<i class="material-icons${style.htmlSuffix()} md-36">$shortId</i> &#x2014; material icon named "$name"';
 
   String get declaration =>
-      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
+      "static const IconData $fullFlutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
 
   String get fullDeclaration => '''
 
@@ -411,10 +409,10 @@ class _Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(String flutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
+  static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
-  IconData get $flutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
+  IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.fullFlutterId} : Icons.${iOSIcon.fullFlutterId};
 ''';
 
   @override
