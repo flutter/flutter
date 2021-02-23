@@ -45,7 +45,7 @@ void main() {
   FileSystem fileSystem;
   FakeProcessManager processManager;
   Artifacts artifacts;
-  Logger logger;
+  BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -298,6 +298,276 @@ void main() {
       );
 
       await const DebugUnpackIOS().build(environment);
+    });
+  });
+
+  group('thin frameworks', () {
+    testWithoutContext('fails when frameworks missing', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks');
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+        },
+      );
+      expect(
+        const ThinIosApplicationFrameworks().build(environment),
+        throwsA(isA<Exception>().having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('App.framework/App does not exist, cannot thin'),
+        )));
+    });
+
+    testWithoutContext('fails when requested archs missing from framework', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          appBinary.path,
+        ], stdout: 'Architectures in the fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          appBinary.path,
+          '-verify_arch',
+          'arm64',
+          'armv7',
+        ], exitCode: 1),
+      );
+
+      expect(
+          const ThinIosApplicationFrameworks().build(environment),
+          throwsA(isA<Exception>().having(
+                (Exception exception) => exception.toString(),
+            'description',
+            contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+          )));
+    });
+
+    testWithoutContext('fails when lipo extract fails', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          appBinary.path,
+        ], stdout: 'Architectures in the fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          appBinary.path,
+          '-verify_arch',
+          'arm64',
+          'armv7',
+        ]),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-output',
+          appBinary.path,
+          '-extract',
+          'arm64',
+          '-extract',
+          'armv7',
+          appBinary.path,
+        ], exitCode: 1,
+        stderr: 'lipo error'),
+      );
+
+      expect(
+        const ThinIosApplicationFrameworks().build(environment),
+        throwsA(isA<Exception>().having(
+              (Exception exception) => exception.toString(),
+          'description',
+          contains('Failed to extract arm64 armv7 for Runner.app/Frameworks/App.framework/App.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+        )));
+    });
+
+    testWithoutContext('skips thin frameworks', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+      final File flutterBinary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          appBinary.path,
+        ], stdout: 'Non-fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          appBinary.path,
+          '-verify_arch',
+          'arm64',
+        ]),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          flutterBinary.path,
+        ], stdout: 'Non-fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          flutterBinary.path,
+          '-verify_arch',
+          'arm64',
+        ]),
+      );
+      await const ThinIosApplicationFrameworks().build(environment);
+
+      expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/App.framework/App'));
+      expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/Flutter.framework/Flutter'));
+
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext('thins fat frameworks', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+      final File flutterBinary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          appBinary.path,
+        ], stdout: 'Architectures in the fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          appBinary.path,
+          '-verify_arch',
+          'arm64',
+          'armv7',
+        ]),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-output',
+          appBinary.path,
+          '-extract',
+          'arm64',
+          '-extract',
+          'armv7',
+          appBinary.path,
+        ]),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          flutterBinary.path,
+        ], stdout: 'Architectures in the fat file:'),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          flutterBinary.path,
+          '-verify_arch',
+          'arm64',
+          'armv7',
+        ]),
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-output',
+          flutterBinary.path,
+          '-extract',
+          'arm64',
+          '-extract',
+          'armv7',
+          flutterBinary.path,
+        ]),
+      );
+
+      await const ThinIosApplicationFrameworks().build(environment);
+      expect(processManager.hasRemainingExpectations, isFalse);
     });
   });
 }
