@@ -1119,7 +1119,7 @@ void main() {
     expect(fadeFinder, findsNothing);
   });
 
-  testWidgets('selection handle is exclude from semantics', (WidgetTester tester) async {
+  testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
 
