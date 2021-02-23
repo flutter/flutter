@@ -323,9 +323,6 @@ public final class FlutterActivityDelegate
     if (observatoryPort > 0) {
       args.add("--observatory-port=" + Integer.toString(observatoryPort));
     }
-    if (intent.getBooleanExtra("disable-service-auth-codes", false)) {
-      args.add("--disable-service-auth-codes");
-    }
     if (intent.getBooleanExtra("endless-trace-buffer", false)) {
       args.add("--endless-trace-buffer");
     }
