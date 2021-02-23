@@ -36,13 +36,6 @@
 tasks:
   # Tests of compiling in a variety of modes
 
-  complex_layout_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the Complex
-      Layout sample app for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   complex_layout_win__compile:
     description: >
       Collects various performance metrics of compiling the Complex
@@ -50,26 +43,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  basic_material_app_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the default
-      app for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   basic_material_app_win__compile:
     description: >
       Collects various performance metrics of compiling the default
       app for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-
-  flutter_gallery_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the Flutter
-      Gallery for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_win__compile:
     description: >
@@ -100,22 +79,9 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  ios_content_validation_test:
-    description: >
-      Builds an obfuscated app and verifies contents and structure
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    on_luci: true
-
   tiles_scroll_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_views_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -124,24 +90,6 @@ tasks:
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-
-  flavors_test_ios:
-    description: >
-      Checks that flavored builds work on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  external_ui_integration_test_ios:
-    description: >
-      Checks that external UIs work on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  channels_integration_test_ios:
-    description: >
-      Checks that platform channels work on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
 
   platform_interaction_test_ios:
     description: >
@@ -167,34 +115,15 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  backdrop_filter_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   post_backdrop_filter_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  complex_layout_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of the Complex Layout sample app on
-      iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   flutter_gallery_ios__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  complex_layout_ios__start_up:
-    description: >
-      Measures the startup time of the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
