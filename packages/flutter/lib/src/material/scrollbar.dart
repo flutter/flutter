@@ -35,18 +35,15 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// become larger when hovering, unless overridden by [hoverThickness].
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
-///
 /// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
 /// The Scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
-///
 /// ```dart
-///
 /// Widget build(BuildContext context) {
 ///   return Scrollbar(
 ///     child: GridView.builder(
 ///       itemCount: 120,
 ///       gridDelegate:
-///           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///         SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
@@ -55,20 +52,14 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///     ),
 ///   );
 /// }
-///
 /// ```
 /// {@end-tool}
-/// 
-/// /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
-/// This sample shows a [Scrollbar] that executes a fade animation as scrolling occurs.
-/// If you want to persist [Scrollbar] then set [isAlwaysShown] is true along with
-/// [ScrollController].
-///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// The Scrollbar should be provided a ScrollController that is also provided to the associated Scrollable.
 /// ```dart
-///
 /// final ScrollController _controllerOne = ScrollController();
-/// 
+///
 /// Widget build(BuildContext context) {
 ///   return Scrollbar(
 ///     controller: _controllerOne,
@@ -77,7 +68,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///       controller: _controllerOne,
 ///       itemCount: 120,
 ///       gridDelegate:
-///           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+///         SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
 ///       itemBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: Text('item $index'),
@@ -86,7 +77,6 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 ///     ),
 ///   );
 /// }
-///
 /// ```
 /// {@end-tool}
 ///
