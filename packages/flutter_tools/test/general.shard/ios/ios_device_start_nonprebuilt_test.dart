@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -119,10 +120,22 @@ void main() {
       setUpIOSProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+      fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
-      processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
+      processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings'], stdout: r'''
+      TARGET_BUILD_DIR=build/ios/Release-iphoneos
+      WRAPPER_NAME=My Super Awesome App.app
+      '''
+      ));
+      processManager.addCommand(const FakeCommand(command: <String>[
+        'rsync',
+        '-av',
+        '--delete',
+        'build/ios/Release-iphoneos/My Super Awesome App.app',
+        'build/ios/iphoneos',
+      ]));
       processManager.addCommand(FakeCommand(
         command: <String>[
           iosDeployPath,
@@ -130,6 +143,8 @@ void main() {
           '123',
           '--bundle',
           'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
           '--no-wifi',
           '--justlaunch',
           '--args',
@@ -146,6 +161,7 @@ void main() {
         platformArgs: <String, Object>{},
       );
 
+      expect(fileSystem.directory('build/ios/iphoneos'), exists);
       expect(launchResult.started, true);
       expect(processManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
@@ -169,6 +185,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
         final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+        fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
         processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -183,7 +200,18 @@ void main() {
           const FakeCommand(
             command: <String>[...kRunReleaseArgs, '-showBuildSettings'],
             exitCode: 0,
+            stdout: r'''
+      TARGET_BUILD_DIR=build/ios/Release-iphoneos
+      WRAPPER_NAME=My Super Awesome App.app
+      '''
           ));
+        processManager.addCommand(const FakeCommand(command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          'build/ios/Release-iphoneos/My Super Awesome App.app',
+          'build/ios/iphoneos',
+        ]));
         processManager.addCommand(FakeCommand(
           command: <String>[
             iosDeployPath,
@@ -191,6 +219,8 @@ void main() {
             '123',
             '--bundle',
             'build/ios/iphoneos/My Super Awesome App.app',
+            '--app_deltas',
+            'build/ios/app-delta',
             '--no-wifi',
             '--justlaunch',
             '--args',
@@ -221,6 +251,7 @@ void main() {
       });
 
       expect(launchResult?.started, true);
+      expect(fileSystem.directory('build/ios/iphoneos'), exists);
       expect(processManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
