@@ -16,16 +16,20 @@ import '../framework/utils.dart';
 abstract class BuildTestTask {
   BuildTestTask(this.args, {this.workingDirectory}) {
     final ArgResults argResults = argParser.parse(args);
-    buildOnly = argResults[kBuildOnlyOption] as bool;
-    testOnly = argResults[kTestOnlyOption] as bool;
+    applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String;
+    buildOnly = argResults[kBuildOnlyFlag] as bool;
+    testOnly = argResults[kTestOnlyFlag] as bool;
+
   }
 
-  static const String kBuildOnlyOption = 'build';
-  static const String kTestOnlyOption = 'test';
+  static const String kApplicationBinaryPathOption = 'application-binary-path';
+  static const String kBuildOnlyFlag = 'build';
+  static const String kTestOnlyFlag = 'test';
 
   final ArgParser argParser = ArgParser()
-    ..addFlag(kBuildOnlyOption)
-    ..addFlag(kTestOnlyOption);
+    ..addOption(kApplicationBinaryPathOption)
+    ..addFlag(kBuildOnlyFlag)
+    ..addFlag(kTestOnlyFlag);
 
   /// Args passed from the test runner via "--task-arg".
   final List<String> args;
@@ -36,6 +40,11 @@ abstract class BuildTestTask {
   /// If true, skip [build].
   bool testOnly = false;
 
+  /// Path to a built application to use in [test].
+  /// 
+  /// If not given, will default to child's expected location.
+  String applicationBinaryPath;
+
   /// Where the test artifacts are stored, such as performance results.
   final Directory workingDirectory;
 
@@ -43,6 +52,7 @@ abstract class BuildTestTask {
   Future<void> build() async {
     await inDirectory<void>(workingDirectory, () async {
       section('BUILDING APPLICATION');
+      await flutter('clean');
       await flutter('build', options: getBuildArgs(deviceOperatingSystem));
     });
 
@@ -71,8 +81,24 @@ abstract class BuildTestTask {
   /// Logic to construct [TaskResult] from this test's results.
   Future<TaskResult> parseTaskResult() => throw UnimplementedError('parseTaskResult is not implemented');
 
+  /// Path to the built application under test.
+  ///
+  /// Tasks can override to support default values. Otherwise, it will default
+  /// to needing to be passed as an argument in the test runner.
+  String getApplicationBinaryPath() => applicationBinaryPath;
+
   /// Run this task.
+  /// 
+  /// Throws [Exception] when unnecessary arguments are passed.
   Future<TaskResult> call() async {
+    if (buildOnly && testOnly) {
+      throw Exception('Both build and test should not be passed. Pass only one.');
+    }
+
+    if (buildOnly && applicationBinaryPath != null) {
+      throw Exception('Application binary path is only used for tests');
+    }
+
     if (!testOnly) {
       build();
     }

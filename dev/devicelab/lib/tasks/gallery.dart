@@ -85,12 +85,6 @@ class GalleryTransitionTest extends BuildTestTask {
 
   @override
   List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
-    String applicationBinaryPath;
-    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
-      applicationBinaryPath = 'build/app/outputs/flutter-apk/app-profile.apk';
-    } else {
-      throw UnimplementedError('getTestArgs does not support $deviceOperatingSystem');
-    }
     final String testDriver = driverFile ?? (semanticsEnabled
       ? '${testFile}_with_semantics_test'
       : '${testFile}_test');
@@ -98,7 +92,7 @@ class GalleryTransitionTest extends BuildTestTask {
         '--profile',
         if (needFullTimeline)
           '--trace-startup',
-        '--use-application-binary=$applicationBinaryPath',
+        '--use-application-binary=${getApplicationBinaryPath()}',
         '--driver', 'test_driver/$testDriver.dart',
         '-d', deviceId,
       ];
@@ -142,6 +136,20 @@ class GalleryTransitionTest extends BuildTestTask {
         '99th_percentile_frame_rasterizer_time_millis',
       ],
     );
+  }
+
+  @override
+  String getApplicationBinaryPath() {
+    if (applicationBinaryPath != null) {
+      return applicationBinaryPath;
+    }
+
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.android:
+        return 'build/app/outputs/flutter-apk/app-profile.apk';
+      default: 
+        throw UnimplementedError('getApplicationBinaryPath does not support $deviceOperatingSystem');
+    }
   }
 }
 

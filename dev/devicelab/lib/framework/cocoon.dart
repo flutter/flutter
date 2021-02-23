@@ -137,9 +137,9 @@ class Cocoon {
     @required String gitBranch,
   }) {
     final Map<String, dynamic> updateRequest = <String, dynamic>{
-      'CommitBranch': gitBranch,
+      'CommitBranch': Uri.encodeFull(gitBranch),
       'CommitSha': commitSha,
-      'BuilderName': builderName,
+      'BuilderName': Uri.encodeFull(builderName),
       'NewStatus': result.succeeded ? 'Succeeded' : 'Failed',
     };
     logger.fine('Update request: $updateRequest');
