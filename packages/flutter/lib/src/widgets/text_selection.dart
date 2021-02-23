@@ -228,12 +228,26 @@ abstract class TextSelectionControls {
       text: value.selection.textInside(value.text),
     ));
     clipboardStatus?.update();
-    delegate.textEditingValue = TextEditingValue(
-      text: value.text,
-      selection: TextSelection.collapsed(offset: value.selection.end),
-    );
     delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    delegate.hideToolbar();
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        // Hide the toolbar, but keep the selection and keep the handles.
+        delegate.hideToolbar(false);
+        return;
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Collapse the selection and hide the toolbar and handles.
+        delegate.textEditingValue = TextEditingValue(
+          text: value.text,
+          selection: TextSelection.collapsed(offset: value.selection.end),
+        );
+        delegate.hideToolbar();
+        return;
+    }
   }
 
   /// Paste the current clipboard selection (obtained from [Clipboard]) into
