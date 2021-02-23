@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/deferred_components_setup_validator.dart';
+import 'package:flutter_tools/src/android/deferred_components_gen_snapshot_validator.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -48,34 +48,22 @@ void main() {
   });
 
   testWithoutContext('No checks passes', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
     validator.displayResults();
     validator.attemptToolExit();
-    expect(logger.statusText, 'test check passed.\n');
-  });
-
-  testWithoutContext('clearTempDir passes', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
-      env,
-      exitOnFail: false,
-      title: 'test check',
-    );
-    validator.displayResults();
-    validator.attemptToolExit();
-
     expect(logger.statusText, 'test check passed.\n');
   });
 
   testWithoutContext('writeGolden passes', () async {
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -109,12 +97,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden identical passes', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -142,12 +130,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden finds new loading units', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -172,12 +160,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden finds missing loading units', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -204,12 +192,12 @@ loading-units:
   });
 
   testWithoutContext('missing golden file counts as all new loading units', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -225,12 +213,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: missing main entry', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -260,12 +248,12 @@ loading-units-spelled-wrong:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: not a list', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -286,12 +274,12 @@ loading-units: hello
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: not a list', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -314,12 +302,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: missing id', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -346,12 +334,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: libraries is list', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -377,12 +365,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: libraries is list of strings', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -410,12 +398,12 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitGolden validator detects malformed file: empty libraries allowed', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
-    final File goldenFile = env.projectDir.childFile(DeferredComponentsSetupValidator.kDeferredComponentsGoldenFileName);
+    final File goldenFile = env.projectDir.childFile(DeferredComponentsGenSnapshotValidator.kDeferredComponentsGoldenFileName);
     if (goldenFile.existsSync()) {
       goldenFile.deleteSync();
     }
@@ -439,133 +427,13 @@ loading-units:
     expect(logger.statusText.contains('Errors checking the following files:'), false);
   });
 
-  testUsingContext('androidComponentSetup build.gradle does not exist', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
-    final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
-    final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
-    if (templatesDir.existsSync()) {
-      templatesDir.deleteSync(recursive: true);
-    }
-    buildGradleTemplate.createSync(recursive: true);
-    androidManifestTemplate.createSync(recursive: true);
-    buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
-
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
-      env,
-      exitOnFail: false,
-      title: 'test check',
-      templatesDir: templatesDir,
-    );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
-    final File file = componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
-    file.createSync(recursive: true);
-    await validator.checkAndroidDynamicFeature(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1'),
-      ],
-    );
-    validator.displayResults();
-    validator.attemptToolExit();
-
-    file.deleteSync();
-    expect(logger.statusText.contains('Newly generated android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/component1/build.gradle\n'), true);
-  });
-
-  testUsingContext('androidComponentSetup AndroidManifest.xml does not exist', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
-    final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
-    final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
-    if (templatesDir.existsSync()) {
-      templatesDir.deleteSync(recursive: true);
-    }
-    buildGradleTemplate.createSync(recursive: true);
-    androidManifestTemplate.createSync(recursive: true);
-    buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
-
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
-      env,
-      exitOnFail: false,
-      title: 'test check',
-      templatesDir: templatesDir,
-    );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
-    final File file = componentDir.childFile('build.gradle');
-    if (file.existsSync()) {
-      file.deleteSync();
-    }
-    file.createSync(recursive: true);
-    await validator.checkAndroidDynamicFeature(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1'),
-      ],
-    );
-    validator.displayResults();
-    validator.attemptToolExit();
-
-    file.deleteSync();
-    expect(logger.statusText.contains('Newly generated android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/component1/src/main/AndroidManifest.xml\n'), true);
-  });
-
-  testUsingContext('androidComponentSetup all files exist passes', () async {
-    final Directory templatesDir = env.flutterRootDir.childDirectory('templates').childDirectory('deferred_component');
-    final File buildGradleTemplate = templatesDir.childFile('build.gradle.tmpl');
-    final File androidManifestTemplate = templatesDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml.tmpl');
-    if (templatesDir.existsSync()) {
-      templatesDir.deleteSync(recursive: true);
-    }
-    buildGradleTemplate.createSync(recursive: true);
-    androidManifestTemplate.createSync(recursive: true);
-    buildGradleTemplate.writeAsStringSync('fake build.gradle template {{componentName}}', flush: true, mode: FileMode.append);
-    androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
-
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
-      env,
-      exitOnFail: false,
-      title: 'test check',
-      templatesDir: templatesDir,
-    );
-    final Directory componentDir = env.projectDir.childDirectory('android').childDirectory('component1');
-    final File buildGradle = componentDir.childFile('build.gradle');
-    if (buildGradle.existsSync()) {
-      buildGradle.deleteSync();
-    }
-    buildGradle.createSync(recursive: true);
-    final File manifest = componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
-    if (manifest.existsSync()) {
-      manifest.deleteSync();
-    }
-    manifest.createSync(recursive: true);
-    await validator.checkAndroidDynamicFeature(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1'),
-      ],
-    );
-    validator.displayResults();
-    validator.attemptToolExit();
-
-    manifest.deleteSync();
-    buildGradle.deleteSync();
-    expect(logger.statusText, 'test check passed.\n');
-  });
-
   testWithoutContext('androidStringMapping creates new file', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
     final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
-    final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
-    if (stringRes.existsSync()) {
-      stringRes.deleteSync();
-    }
     final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (manifest.existsSync()) {
       manifest.deleteSync();
@@ -605,36 +473,16 @@ loading-units:
         LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
       ],
     );
-    validator.checkAndroidResourcesStrings(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
-      ],
-    );
     validator.displayResults();
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
     expect(logger.statusText.contains('Newly generated android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
-
-    final File stringsOutput = env.projectDir
-      .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('res')
-      .childDirectory('values')
-      .childFile('strings.xml');
-    expect(stringsOutput.existsSync(), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component1Name">component1</string>'), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component2Name">component2</string>'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -646,24 +494,12 @@ loading-units:
   });
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
     final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
-    final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
-    if (stringRes.existsSync()) {
-      stringRes.deleteSync();
-    }
-    stringRes.createSync(recursive: true);
-    stringRes.writeAsStringSync('''
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="component1Name">component1</string>
-</resources>
-
-''', flush: true, mode: FileMode.append);
     final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (manifest.existsSync()) {
       manifest.deleteSync();
@@ -716,25 +552,11 @@ loading-units:
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
-
-    final File stringsOutput = env.projectDir
-      .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('res')
-      .childDirectory('values')
-      .childFile('strings.xml');
-    expect(stringsOutput.existsSync(), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component1Name">component1</string>'), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component2Name">component2</string>'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -746,24 +568,12 @@ loading-units:
   });
 
   testWithoutContext('androidStringMapping adds mapping when no existing mapping', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
     final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
-    final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
-    if (stringRes.existsSync()) {
-      stringRes.deleteSync();
-    }
-    stringRes.createSync(recursive: true);
-    stringRes.writeAsStringSync('''
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="component1Name">component1</string>
-</resources>
-
-''', flush: true, mode: FileMode.append);
     final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (manifest.existsSync()) {
       manifest.deleteSync();
@@ -800,35 +610,15 @@ loading-units:
         LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
       ],
     );
-    validator.checkAndroidResourcesStrings(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
-      ],
-    );
     validator.displayResults();
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
-
-    final File stringsOutput = env.projectDir
-      .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('res')
-      .childDirectory('values')
-      .childFile('strings.xml');
-    expect(stringsOutput.existsSync(), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component1Name">component1</string>'), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component2Name">component2</string>'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
@@ -840,24 +630,12 @@ loading-units:
 
   // Tests if all of the regexp whitespace detection is working.
   testWithoutContext('androidStringMapping handles whitespace within entry', () async {
-    final DeferredComponentsSetupValidator validator = DeferredComponentsSetupValidator(
+    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
     );
     final Directory baseModuleDir = env.projectDir.childDirectory('android').childDirectory('app');
-    final File stringRes = baseModuleDir.childDirectory('src').childDirectory('main').childDirectory('res').childDirectory('values').childFile('strings.xml');
-    if (stringRes.existsSync()) {
-      stringRes.deleteSync();
-    }
-    stringRes.createSync(recursive: true);
-    stringRes.writeAsStringSync('''
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="component1Name">component1</string>
-</resources>
-
-''', flush: true, mode: FileMode.append);
     final File manifest = baseModuleDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
     if (manifest.existsSync()) {
       manifest.deleteSync();
@@ -901,35 +679,15 @@ loading-units:
         LoadingUnit(id: 4, libraries: <String>['lib4', 'lib5']),
       ],
     );
-    validator.checkAndroidResourcesStrings(
-      <DeferredComponent>[
-        DeferredComponent(name: 'component1', libraries: <String>['lib2']),
-        DeferredComponent(name: 'component2', libraries: <String>['lib1', 'lib4']),
-      ],
-    );
     validator.displayResults();
     validator.attemptToolExit();
 
     expect(logger.statusText.contains('Modified android files:\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
-    expect(logger.statusText.contains('build/${DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory}/app/src/main/res/values/strings.xml\n'), true);
-
-    final File stringsOutput = env.projectDir
-      .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('res')
-      .childDirectory('values')
-      .childFile('strings.xml');
-    expect(stringsOutput.existsSync(), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component1Name">component1</string>'), true);
-    expect(stringsOutput.readAsStringSync().contains('<string name="component2Name">component2</string>'), true);
+    expect(logger.statusText.contains('build/${DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory}/app/src/main/AndroidManifest.xml\n'), true);
 
     final File manifestOutput = env.projectDir
       .childDirectory('build')
-      .childDirectory(DeferredComponentsSetupValidator.kDeferredComponentsTempDirectory)
+      .childDirectory(DeferredComponentsGenSnapshotValidator.kDeferredComponentsTempDirectory)
       .childDirectory('app')
       .childDirectory('src')
       .childDirectory('main')
