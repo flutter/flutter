@@ -2323,4 +2323,54 @@ void main() {
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
     expect(snackBarTopRight.dy, 465.0);
   });
+
+  testWidgets('ScaffoldMessengerState clearSnackBars works as expected', (WidgetTester tester) async {
+    final List<String> snackBars = <String>['Hello Snackbar', 'Hi Snackbar', 'Bye Snackbar'];
+    int snackBarCounter = 0;
+    const Key tapTarget = Key('tap-target');
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                key: tapTarget,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(snackBars[snackBarCounter++]),
+                    duration: const Duration(seconds: 2),
+                  ));
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+    await tester.pump(); // schedule animation
+    expect(find.text(snackBars[0]), findsOneWidget);
+    scaffoldMessengerKey.currentState!.clearSnackBars();
+    expect(find.text(snackBars[0]), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text(snackBars[0]), findsNothing);
+    expect(find.text(snackBars[1]), findsNothing);
+    expect(find.text(snackBars[2]), findsNothing);
+  });
 }
