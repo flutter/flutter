@@ -174,4 +174,8 @@ void main() {
   textField.maxLengthEnforcement;
   TextFormField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
   TextFormField(maxLengthEnforcement: MaxLengthEnforcement.none);
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  bottomNavigationBarItem.label;
 }
