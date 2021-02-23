@@ -45,6 +45,7 @@ class DataTableThemeData with Diagnosticable {
     this.horizontalMargin,
     this.columnSpacing,
     this.dividerThickness,
+    this.checkboxHorizontalMargin,
   });
 
   /// {@macro flutter.material.dataTable.decoration}
@@ -79,6 +80,9 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.dividerThickness}
   final double? dividerThickness;
 
+  /// {@macro flutter.material.dataTable.checkboxHorizontalMargin}
+  final double? checkboxHorizontalMargin;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -92,6 +96,7 @@ class DataTableThemeData with Diagnosticable {
     double? horizontalMargin,
     double? columnSpacing,
     double? dividerThickness,
+    double? checkboxHorizontalMargin,
   }) {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
@@ -104,6 +109,7 @@ class DataTableThemeData with Diagnosticable {
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
+      checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
     );
   }
 
@@ -124,7 +130,8 @@ class DataTableThemeData with Diagnosticable {
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
-      dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t)
+      dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
+      checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t)
     );
   }
 
@@ -141,6 +148,7 @@ class DataTableThemeData with Diagnosticable {
       horizontalMargin,
       columnSpacing,
       dividerThickness,
+      checkboxHorizontalMargin,
     );
   }
 
@@ -160,7 +168,8 @@ class DataTableThemeData with Diagnosticable {
       && other.headingTextStyle == headingTextStyle
       && other.horizontalMargin == horizontalMargin
       && other.columnSpacing == columnSpacing
-      && other.dividerThickness == dividerThickness;
+      && other.dividerThickness == dividerThickness
+      && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
   }
 
   @override
@@ -176,6 +185,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
+    properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
   }
 
   static MaterialStateProperty<T>? _lerpProperties<T>(MaterialStateProperty<T>? a, MaterialStateProperty<T>? b, double t, T Function(T?, T?, double) lerpFunction ) {

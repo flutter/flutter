@@ -332,6 +332,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           _formKey.currentState!.save();
           _entryMode = DatePickerEntryMode.calendar;
           break;
+        case DatePickerEntryMode.calendarOnly:
+        case DatePickerEntryMode.inputOnly:
+          assert(false, 'Can not change entry mode from _entryMode');
+          break;
       }
     });
   }
@@ -344,6 +348,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
+      case DatePickerEntryMode.calendarOnly:
         switch (orientation) {
           case Orientation.portrait:
             return _calendarPortraitDialogSize;
@@ -351,6 +356,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
             return _calendarLandscapeDialogSize;
         }
       case DatePickerEntryMode.input:
+      case DatePickerEntryMode.inputOnly:
         switch (orientation) {
           case Orientation.portrait:
             return _inputPortraitDialogSize;
@@ -377,12 +383,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
     final String dateText = localizations.formatMediumDate(_selectedDate);
-    final Color dateColor = colorScheme.brightness == Brightness.light
+    final Color onPrimarySurface = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
     final TextStyle? dateStyle = orientation == Orientation.landscape
-      ? textTheme.headline5?.copyWith(color: dateColor)
-      : textTheme.headline4?.copyWith(color: dateColor);
+      ? textTheme.headline5?.copyWith(color: onPrimarySurface)
+      : textTheme.headline4?.copyWith(color: onPrimarySurface);
 
     final Widget actions = Container(
       alignment: AlignmentDirectional.centerEnd,
@@ -403,58 +409,83 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ),
     );
 
+    CalendarDatePicker calendarDatePicker() {
+      return CalendarDatePicker(
+        key: _calendarPickerKey,
+        initialDate: _selectedDate,
+        firstDate: widget.firstDate,
+        lastDate: widget.lastDate,
+        currentDate: widget.currentDate,
+        onDateChanged: _handleDateChanged,
+        selectableDayPredicate: widget.selectableDayPredicate,
+        initialCalendarMode: widget.initialCalendarMode,
+      );
+    }
+
+    Form inputDatePicker() {
+      return Form(
+        key: _formKey,
+        autovalidate: _autoValidate,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
+          child: Shortcuts(
+            shortcuts: _formShortcutMap,
+            child: Column(
+              children: <Widget>[
+                const Spacer(),
+                InputDatePickerFormField(
+                  initialDate: _selectedDate,
+                  firstDate: widget.firstDate,
+                  lastDate: widget.lastDate,
+                  onDateSubmitted: _handleDateChanged,
+                  onDateSaved: _handleDateChanged,
+                  selectableDayPredicate: widget.selectableDayPredicate,
+                  errorFormatText: widget.errorFormatText,
+                  errorInvalidText: widget.errorInvalidText,
+                  fieldHintText: widget.fieldHintText,
+                  fieldLabelText: widget.fieldLabelText,
+                  autofocus: true,
+                ),
+                const Spacer(),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final Widget picker;
-    final IconData entryModeIcon;
-    final String entryModeTooltip;
+    final Widget? entryModeButton;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
-        picker = CalendarDatePicker(
-          key: _calendarPickerKey,
-          initialDate: _selectedDate,
-          firstDate: widget.firstDate,
-          lastDate: widget.lastDate,
-          currentDate: widget.currentDate,
-          onDateChanged: _handleDateChanged,
-          selectableDayPredicate: widget.selectableDayPredicate,
-          initialCalendarMode: widget.initialCalendarMode,
+        picker = calendarDatePicker();
+        entryModeButton = IconButton(
+          icon: const Icon(Icons.edit),
+          color: onPrimarySurface,
+          tooltip: localizations.inputDateModeButtonLabel,
+          onPressed: _handleEntryModeToggle,
         );
-        entryModeIcon = Icons.edit;
-        entryModeTooltip = localizations.inputDateModeButtonLabel;
+        break;
+
+      case DatePickerEntryMode.calendarOnly:
+        picker = calendarDatePicker();
+        entryModeButton = null;
         break;
 
       case DatePickerEntryMode.input:
-        picker = Form(
-          key: _formKey,
-          autovalidate: _autoValidate,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
-            child: Shortcuts(
-              shortcuts: _formShortcutMap,
-              child: Column(
-                children: <Widget>[
-                  const Spacer(),
-                  InputDatePickerFormField(
-                    initialDate: _selectedDate,
-                    firstDate: widget.firstDate,
-                    lastDate: widget.lastDate,
-                    onDateSubmitted: _handleDateChanged,
-                    onDateSaved: _handleDateChanged,
-                    selectableDayPredicate: widget.selectableDayPredicate,
-                    errorFormatText: widget.errorFormatText,
-                    errorInvalidText: widget.errorInvalidText,
-                    fieldHintText: widget.fieldHintText,
-                    fieldLabelText: widget.fieldLabelText,
-                    autofocus: true,
-                  ),
-                  const Spacer(),
-                ],
-              ),
-            ),
-          ),
+        picker = inputDatePicker();
+        entryModeButton = IconButton(
+          icon: const Icon(Icons.calendar_today),
+          color: onPrimarySurface,
+          tooltip: localizations.calendarModeButtonLabel,
+          onPressed: _handleEntryModeToggle,
         );
-        entryModeIcon = Icons.calendar_today;
-        entryModeTooltip = localizations.calendarModeButtonLabel;
+        break;
+
+      case DatePickerEntryMode.inputOnly:
+        picker = inputDatePicker();
+        entryModeButton = null;
         break;
     }
 
@@ -464,9 +495,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       titleStyle: dateStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
-      icon: entryModeIcon,
-      iconTooltip: entryModeTooltip,
-      onIconPressed: _handleEntryModeToggle,
+      entryModeButton: entryModeButton,
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
@@ -526,8 +555,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// These types include:
 ///
 /// * Single Date picker with calendar mode.
-/// * Single Date picker with manual input mode.
-/// * Date Range picker with manual input mode.
+/// * Single Date picker with text input mode.
+/// * Date Range picker with text input mode.
 ///
 /// [helpText], [orientation], [icon], [onIconPressed] are required and must be
 /// non-null.
@@ -542,9 +571,7 @@ class _DatePickerHeader extends StatelessWidget {
     required this.titleStyle,
     required this.orientation,
     this.isShort = false,
-    required this.icon,
-    required this.iconTooltip,
-    required this.onIconPressed,
+    this.entryModeButton,
   }) : assert(helpText != null),
        assert(orientation != null),
        assert(isShort != null),
@@ -581,19 +608,7 @@ class _DatePickerHeader extends StatelessWidget {
   /// landscape orientation, in order to account for the keyboard height.
   final bool isShort;
 
-  /// The mode-switching icon that will be displayed in the lower right
-  /// in portrait, and lower left in landscape.
-  ///
-  /// The available icons are described in [Icons].
-  final IconData icon;
-
-  /// The text that is displayed for the tooltip of the icon.
-  final String iconTooltip;
-
-  /// Callback when the user taps the icon in the header.
-  ///
-  /// The picker will use this to toggle between entry modes.
-  final VoidCallback onIconPressed;
+  final Widget? entryModeButton;
 
   @override
   Widget build(BuildContext context) {
@@ -623,12 +638,6 @@ class _DatePickerHeader extends StatelessWidget {
       maxLines: orientation == Orientation.portrait ? 1 : 2,
       overflow: TextOverflow.ellipsis,
     );
-    final IconButton icon = IconButton(
-      icon: Icon(this.icon),
-      color: onPrimarySurfaceColor,
-      tooltip: iconTooltip,
-      onPressed: onIconPressed,
-    );
 
     switch (orientation) {
       case Orientation.portrait:
@@ -650,7 +659,8 @@ class _DatePickerHeader extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Expanded(child: title),
-                      icon,
+                      if (entryModeButton != null)
+                        entryModeButton!,
                     ],
                   ),
                 ],
@@ -682,12 +692,11 @@ class _DatePickerHeader extends StatelessWidget {
                     child: title,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
+                if (entryModeButton != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: entryModeButton,
                   ),
-                  child: icon,
-                ),
               ],
             ),
           ),
@@ -1009,6 +1018,11 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           }
           _entryMode = DatePickerEntryMode.calendar;
           break;
+
+        case DatePickerEntryMode.calendarOnly:
+        case DatePickerEntryMode.inputOnly:
+          assert(false, 'Can not change entry mode from $_entryMode');
+          break;
       }
     });
   }
@@ -1029,14 +1043,22 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     final Orientation orientation = mediaQuery.orientation;
     final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color onPrimarySurface = colors.brightness == Brightness.light
+      ? colors.onPrimary
+      : colors.onSurface;
 
     final Widget contents;
     final Size size;
     ShapeBorder? shape;
     final double elevation;
     final EdgeInsets insetPadding;
+    final bool showEntryModeButton =
+      _entryMode == DatePickerEntryMode.calendar ||
+      _entryMode == DatePickerEntryMode.input;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
+      case DatePickerEntryMode.calendarOnly:
         contents = _CalendarRangePickerDialog(
           key: _calendarPickerKey,
           selectedStartDate: _selectedStart,
@@ -1048,19 +1070,26 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           onEndDateChanged: _handleEndDateChanged,
           onConfirm: _hasSelectedDateRange ? _handleOk : null,
           onCancel: _handleCancel,
-          onToggleEntryMode: _handleEntryModeToggle,
+          entryModeButton: showEntryModeButton
+            ? IconButton(
+                icon: const Icon(Icons.edit),
+                padding: EdgeInsets.zero,
+                color: onPrimarySurface,
+                tooltip: localizations.inputDateModeButtonLabel,
+                onPressed: _handleEntryModeToggle,
+              )
+            : null,
           confirmText: widget.saveText ?? localizations.saveButtonLabel,
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         size = mediaQuery.size;
         insetPadding = EdgeInsets.zero;
-        shape = const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero
-        );
+        shape = const RoundedRectangleBorder(borderRadius: BorderRadius.zero);
         elevation = 0;
         break;
 
       case DatePickerEntryMode.input:
+      case DatePickerEntryMode.inputOnly:
         contents = _InputDateRangePickerDialog(
           selectedStartDate: _selectedStart,
           selectedEndDate: _selectedEnd,
@@ -1098,7 +1127,15 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           ),
           onConfirm: _handleOk,
           onCancel: _handleCancel,
-          onToggleEntryMode: _handleEntryModeToggle,
+          entryModeButton: showEntryModeButton
+            ? IconButton(
+                icon: const Icon(Icons.calendar_today),
+                padding: EdgeInsets.zero,
+                color: onPrimarySurface,
+                tooltip: localizations.calendarModeButtonLabel,
+                onPressed: _handleEntryModeToggle,
+              )
+            : null,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
           cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
@@ -1146,9 +1183,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.onEndDateChanged,
     required this.onConfirm,
     required this.onCancel,
-    required this.onToggleEntryMode,
     required this.confirmText,
     required this.helpText,
+    this.entryModeButton,
   }) : super(key: key);
 
   final DateTime? selectedStartDate;
@@ -1160,9 +1197,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final ValueChanged<DateTime?> onEndDateChanged;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
-  final VoidCallback? onToggleEntryMode;
   final String confirmText;
   final String helpText;
+  final Widget? entryModeButton;
 
   @override
   Widget build(BuildContext context) {
@@ -1188,14 +1225,6 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         color: onConfirm != null ? headerForeground : headerDisabledForeground
     );
 
-    final IconButton entryModeIcon = IconButton(
-      padding: EdgeInsets.zero,
-      color: headerForeground,
-      icon: const Icon(Icons.edit),
-      tooltip: localizations.inputDateModeButtonLabel,
-      onPressed: onToggleEntryMode,
-    );
-
     return SafeArea(
       top: false,
       left: false,
@@ -1206,7 +1235,8 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             onPressed: onCancel,
           ),
           actions: <Widget>[
-            if (orientation == Orientation.landscape) entryModeIcon,
+            if (orientation == Orientation.landscape && entryModeButton != null)
+              entryModeButton!,
             TextButton(
               onPressed: onConfirm,
               child: Text(confirmText, style: saveButtonStyle),
@@ -1255,10 +1285,10 @@ class _CalendarRangePickerDialog extends StatelessWidget {
                   ),
                 ),
               ),
-              if (orientation == Orientation.portrait)
+              if (orientation == Orientation.portrait && entryModeButton != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: entryModeIcon,
+                  child: entryModeButton!,
                 ),
             ]),
             preferredSize: const Size(double.infinity, 64),
@@ -2256,7 +2286,6 @@ class _HighlightPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-
 class _InputDateRangePickerDialog extends StatelessWidget {
   const _InputDateRangePickerDialog({
     Key? key,
@@ -2266,10 +2295,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.picker,
     required this.onConfirm,
     required this.onCancel,
-    required this.onToggleEntryMode,
     required this.confirmText,
     required this.cancelText,
     required this.helpText,
+    required this.entryModeButton,
   }) : super(key: key);
 
   final DateTime? selectedStartDate;
@@ -2278,10 +2307,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final Widget picker;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
-  final VoidCallback onToggleEntryMode;
   final String? confirmText;
   final String? cancelText;
   final String? helpText;
+  final Widget? entryModeButton;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -2305,12 +2334,12 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
 
-    final Color dateColor = colorScheme.brightness == Brightness.light
+    final Color onPrimarySurfaceColor = colorScheme.brightness == Brightness.light
         ? colorScheme.onPrimary
         : colorScheme.onSurface;
     final TextStyle? dateStyle = orientation == Orientation.landscape
-        ? textTheme.headline5?.apply(color: dateColor)
-        : textTheme.headline4?.apply(color: dateColor);
+        ? textTheme.headline5?.apply(color: onPrimarySurfaceColor)
+        : textTheme.headline4?.apply(color: onPrimarySurfaceColor);
     final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate!);
     final String semanticDateText = selectedStartDate != null && selectedEndDate != null
         ? '${localizations.formatMediumDate(selectedStartDate!)} – ${localizations.formatMediumDate(selectedEndDate!)}'
@@ -2323,9 +2352,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       titleStyle: dateStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
-      icon: Icons.calendar_today,
-      iconTooltip: localizations.calendarModeButtonLabel,
-      onIconPressed: onToggleEntryMode,
+      entryModeButton: entryModeButton,
     );
 
     final Widget actions = Container(

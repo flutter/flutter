@@ -23,6 +23,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -51,9 +52,10 @@ void main() {
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(buildWeb(
-      FlutterProject.current(),
+      project,
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
@@ -65,7 +67,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -78,7 +80,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -93,7 +95,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -108,7 +110,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => MockBuildSystem(),
   });
@@ -119,7 +121,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -129,7 +131,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
@@ -145,7 +147,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => MockBuildSystem(),
   });
@@ -208,7 +210,6 @@ class UrlLauncherPlugin {}
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockPub extends Mock implements Pub {}
 
 class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({ bool verboseHelp = false }) :

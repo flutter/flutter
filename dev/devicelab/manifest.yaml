@@ -273,12 +273,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac-catalina/ios"]
 
-  smoke_catalina_start_up:
-    description: >
-      A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
-    stage: devicelab
-    required_agent_capabilities: ["mac-catalina/android"]
-
   # macOS target platform tests
   hot_mode_dev_cycle_macos_target__benchmark:
     description: >
@@ -340,10 +334,3 @@ tasks:
       Measures memory, cpu, and gpu usage when rotating through a series of large images.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-
-  # android_splash_screen_integration_test:
-  #   description: >
-  #     Runs end-to-end test of Flutter's Android splash behavior.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true

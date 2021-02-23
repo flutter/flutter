@@ -113,6 +113,7 @@ class Scrollbar extends StatefulWidget {
     this.thickness,
     this.radius,
     this.notificationPredicate,
+    this.interactive,
   }) : super(key: key);
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -155,6 +156,9 @@ class Scrollbar extends StatefulWidget {
   /// default [Radius.circular] of 8.0 pixels.
   final Radius? radius;
 
+  /// {@macro flutter.widgets.Scrollbar.interactive}
+  final bool? interactive;
+
   /// {@macro flutter.widgets.Scrollbar.notificationPredicate}
   final ScrollNotificationPredicate? notificationPredicate;
 
@@ -188,6 +192,7 @@ class _ScrollbarState extends State<Scrollbar> {
       thickness: widget.thickness,
       radius: widget.radius,
       notificationPredicate: widget.notificationPredicate,
+      interactive: widget.interactive,
     );
   }
 }
@@ -203,6 +208,7 @@ class _MaterialScrollbar extends RawScrollbar {
     double? thickness,
     Radius? radius,
     ScrollNotificationPredicate? notificationPredicate,
+    bool? interactive,
   }) : super(
          key: key,
          child: child,
@@ -214,6 +220,7 @@ class _MaterialScrollbar extends RawScrollbar {
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+         interactive: interactive,
        );
 
   final bool? showTrackOnHover;
@@ -235,6 +242,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
 
+  @override
+  bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
+
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
@@ -252,12 +262,16 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
-        idleColor = onSurface.withOpacity(0.1);
+        idleColor = _useAndroidScrollbar
+          ? Theme.of(context).highlightColor.withOpacity(1.0)
+          : onSurface.withOpacity(0.1);
         break;
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
-        idleColor = onSurface.withOpacity(0.3);
+        idleColor = _useAndroidScrollbar
+          ? Theme.of(context).highlightColor.withOpacity(1.0)
+          : onSurface.withOpacity(0.3);
         break;
     }
 

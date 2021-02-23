@@ -89,95 +89,107 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
-  await runner.run(args, () => <FlutterCommand>[
-    AnalyzeCommand(
+  await runner.run(
+    args,
+    () => generateCommands(
       verboseHelp: verboseHelp,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      logger: globals.logger,
-      terminal: globals.terminal,
-      artifacts: globals.artifacts,
+      verbose: verbose,
     ),
-    AssembleCommand(),
-    AttachCommand(verboseHelp: verboseHelp),
-    BuildCommand(verboseHelp: verboseHelp),
-    ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(verbose: verbose),
-    ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(),
-    DaemonCommand(hidden: !verboseHelp),
-    DevicesCommand(),
-    DoctorCommand(verbose: verbose),
-    DowngradeCommand(),
-    DriveCommand(verboseHelp: verboseHelp,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    ),
-    EmulatorsCommand(),
-    FormatCommand(),
-    GenerateCommand(),
-    GenerateLocalizationsCommand(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    ),
-    InstallCommand(),
-    LogsCommand(),
-    MakeHostAppEditableCommand(),
-    PackagesCommand(),
-    PrecacheCommand(
-      verboseHelp: verboseHelp,
-      cache: globals.cache,
-      logger: globals.logger,
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    ),
-    RunCommand(verboseHelp: verboseHelp),
-    ScreenshotCommand(),
-    ShellCompletionCommand(),
-    TestCommand(verboseHelp: verboseHelp),
-    UpgradeCommand(),
-    SymbolizeCommand(
-      stdio: globals.stdio,
-      fileSystem: globals.fs,
-    ),
-    // Development-only commands. These are always hidden,
-    IdeConfigCommand(),
-    UpdatePackagesCommand(),
-  ], verbose: verbose,
-     muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp,
-     overrides: <Type, Generator>{
-       // The web runner is not supported in google3 because it depends
-       // on dwds.
-       WebRunnerFactory: () => DwdsWebRunnerFactory(),
-       // The mustache dependency is different in google3
-       TemplateRenderer: () => const MustacheTemplateRenderer(),
-       // The devtools launcher is not supported in google3 because it depends on
-       // devtools source code.
-       DevtoolsLauncher: () => DevtoolsServerLauncher(
-         processManager: globals.processManager,
-         pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
-         logger: globals.logger,
-         platform: globals.platform,
-         persistentToolState: globals.persistentToolState,
-       ),
-       Logger: () {
-        final LoggerFactory loggerFactory = LoggerFactory(
-          outputPreferences: globals.outputPreferences,
-          terminal: globals.terminal,
-          stdio: globals.stdio,
-        );
-        return loggerFactory.createLogger(
-          daemon: daemon,
-          machine: runMachine,
-          verbose: verbose && !muteCommandLogging,
-          prefixedErrors: prefixedErrors,
-          windows: globals.platform.isWindows,
-        );
-       }
-     });
+    verbose: verbose,
+    muteCommandLogging: muteCommandLogging,
+    verboseHelp: verboseHelp,
+    overrides: <Type, Generator>{
+      // The web runner is not supported in google3 because it depends
+      // on dwds.
+      WebRunnerFactory: () => DwdsWebRunnerFactory(),
+      // The mustache dependency is different in google3
+      TemplateRenderer: () => const MustacheTemplateRenderer(),
+      // The devtools launcher is not supported in google3 because it depends on
+      // devtools source code.
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        pubExecutable: globals.artifacts.getArtifactPath(Artifact.pubExecutable),
+        logger: globals.logger,
+        platform: globals.platform,
+        persistentToolState: globals.persistentToolState,
+      ),
+      Logger: () {
+       final LoggerFactory loggerFactory = LoggerFactory(
+         outputPreferences: globals.outputPreferences,
+         terminal: globals.terminal,
+         stdio: globals.stdio,
+       );
+       return loggerFactory.createLogger(
+         daemon: daemon,
+         machine: runMachine,
+         verbose: verbose && !muteCommandLogging,
+         prefixedErrors: prefixedErrors,
+         windows: globals.platform.isWindows,
+       );
+      },
+    },
+  );
 }
+
+List<FlutterCommand> generateCommands({
+  @required bool verboseHelp,
+  @required bool verbose,
+}) => <FlutterCommand>[
+  AnalyzeCommand(
+    verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    terminal: globals.terminal,
+    artifacts: globals.artifacts,
+  ),
+  AssembleCommand(verboseHelp: verboseHelp),
+  AttachCommand(verboseHelp: verboseHelp),
+  BuildCommand(verboseHelp: verboseHelp),
+  ChannelCommand(verboseHelp: verboseHelp),
+  CleanCommand(verbose: verbose),
+  ConfigCommand(verboseHelp: verboseHelp),
+  CreateCommand(verboseHelp: verboseHelp),
+  DaemonCommand(hidden: !verboseHelp),
+  DevicesCommand(verboseHelp: verboseHelp),
+  DoctorCommand(verbose: verbose),
+  DowngradeCommand(verboseHelp: verboseHelp),
+  DriveCommand(verboseHelp: verboseHelp,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  ),
+  EmulatorsCommand(),
+  FormatCommand(),
+  GenerateCommand(),
+  GenerateLocalizationsCommand(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  ),
+  InstallCommand(),
+  LogsCommand(),
+  MakeHostAppEditableCommand(),
+  PackagesCommand(),
+  PrecacheCommand(
+    verboseHelp: verboseHelp,
+    cache: globals.cache,
+    logger: globals.logger,
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  ),
+  RunCommand(verboseHelp: verboseHelp),
+  ScreenshotCommand(),
+  ShellCompletionCommand(),
+  TestCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(verboseHelp: verboseHelp),
+  SymbolizeCommand(
+    stdio: globals.stdio,
+    fileSystem: globals.fs,
+  ),
+  // Development-only commands. These are always hidden,
+  IdeConfigCommand(),
+  UpdatePackagesCommand(),
+];
 
 /// An abstraction for instantiation of the correct logger type.
 ///

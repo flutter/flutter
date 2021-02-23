@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -180,14 +179,16 @@ flutter:
   });
 
   testUsingContext('Failed directory delete shows message', () async {
-    final MockDirectory mockDirectory = MockDirectory();
-    when(mockDirectory.existsSync()).thenReturn(true);
-    when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
-    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: testLogger);
+    final Directory directory = fileSystem.directory('foo')
+      ..createSync();
+    handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
 
-    verify(mockDirectory.createSync(recursive: true)).called(1);
-    expect(testLogger.errorText, contains('ABCD'));
+    await writeBundle(directory, <String, DevFSContent>{}, loggerOverride: testLogger);
+
+    expect(testLogger.errorText, contains('Expected Error Text'));
   });
 
   testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
@@ -450,7 +451,7 @@ flutter:
 ''');
     globals.fs.file('assets/foo.txt').createSync(recursive: true);
 
-    // Potential build artifacts outisde of build directory.
+    // Potential build artifacts outside of build directory.
     globals.fs.file('linux/flutter/foo.txt').createSync(recursive: true);
     globals.fs.file('windows/flutter/foo.txt').createSync(recursive: true);
     globals.fs.file('windows/CMakeLists.txt').createSync();
@@ -468,5 +469,3 @@ flutter:
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 }
-
-class MockDirectory extends Mock implements Directory {}

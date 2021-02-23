@@ -400,45 +400,50 @@ class FlutterDevice {
   Future<void> debugDumpApp() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpApp(
+      final String data = await vmService.flutterDebugDumpApp(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpRenderTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpRenderTree(
+      final String data = await vmService.flutterDebugDumpRenderTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpLayerTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpLayerTree(
+      final String data = await vmService.flutterDebugDumpLayerTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
@@ -758,6 +763,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -775,7 +781,7 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    _residentDevtoolsHandler = ResidentDevtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
   @protected
@@ -914,6 +920,7 @@ abstract class ResidentRunner {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
@@ -969,7 +976,7 @@ abstract class ResidentRunner {
     await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
-    await exitApp();
+    await exitApp(); // calls appFinished
     await shutdownDartDevelopmentService();
   }
 
@@ -1452,17 +1459,27 @@ class TerminalHandler {
     @required Logger logger,
     @required Terminal terminal,
     @required Signals signals,
+    @required io.ProcessInfo processInfo,
+    @required bool reportReady,
+    String pidFile,
   }) : _logger = logger,
        _terminal = terminal,
-       _signals = signals;
+       _signals = signals,
+       _processInfo = processInfo,
+       _reportReady = reportReady,
+       _pidFile = pidFile;
 
   final Logger _logger;
   final Terminal _terminal;
   final Signals _signals;
+  final io.ProcessInfo _processInfo;
+  final bool _reportReady;
+  final String _pidFile;
 
   final ResidentRunner residentRunner;
   bool _processingUserRequest = false;
   StreamSubscription<void> subscription;
+  File _actualPidFile;
 
   @visibleForTesting
   String lastReceivedCommand;
@@ -1476,7 +1493,6 @@ class TerminalHandler {
     subscription = _terminal.keystrokes.listen(processTerminalInput);
   }
 
-
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
   void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
@@ -1485,19 +1501,30 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-
     _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
     _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
-    if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart) {
-      return;
+    if (residentRunner.supportsServiceProtocol && residentRunner.supportsRestart) {
+      _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
+      if (_pidFile != null) {
+        _logger.printTrace('Writing pid to: $_pidFile');
+        _actualPidFile = _processInfo.writePidFile(_pidFile);
+      }
     }
-    _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
-    _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
   }
 
   /// Unregisters terminal signal and keystroke handlers.
   void stop() {
     assert(residentRunner.stayResident);
+    if (_actualPidFile != null) {
+      try {
+        _logger.printTrace('Deleting pid file (${_actualPidFile.path}).');
+        _actualPidFile.deleteSync();
+      } on FileSystemException catch (error) {
+        _logger.printError('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
+      }
+      _actualPidFile = null;
+    }
     for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
       _signals.removeHandler(entry.key, entry.value);
     }
@@ -1623,6 +1650,9 @@ class TerminalHandler {
       rethrow;
     } finally {
       _processingUserRequest = false;
+      if (_reportReady) {
+        _logger.printStatus('ready');
+      }
     }
   }
 
