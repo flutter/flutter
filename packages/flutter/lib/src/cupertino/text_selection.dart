@@ -310,19 +310,6 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         );
     }
   }
-
-  @override
-  void handleCopy(TextSelectionDelegate delegate, ClipboardStatusNotifier? clipboardStatus) {
-    final TextEditingValue value = delegate.textEditingValue;
-    Clipboard.setData(ClipboardData(
-      text: value.selection.textInside(value.text),
-    ));
-    clipboardStatus?.update();
-    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
-    // Hide the toolbar, but maintain the existing selection and keep the
-    // handles on the screen.
-    delegate.hideToolbar(false);
-  }
 }
 
 /// Text selection controls that follows iOS design conventions.
