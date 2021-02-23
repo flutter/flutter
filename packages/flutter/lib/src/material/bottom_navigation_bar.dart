@@ -1018,9 +1018,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
-
-    // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
+    final double additionalBottomPadding = MediaQuery.of(context).padding.bottom;
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:

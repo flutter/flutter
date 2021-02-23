@@ -721,9 +721,35 @@ void main() {
       ),
     );
 
-    const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
-    const double additionalPadding = 40.0 - labelBottomMargin;
-    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
+  testWidgets('BottomNavigationBar adds bottom padding to height with a custom font size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+          child: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              selectedFontSize: 8,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double expectedHeight = kBottomNavigationBarHeight + 40.0;
     expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
