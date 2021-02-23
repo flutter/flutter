@@ -255,7 +255,6 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
     // Generate for _PlatformAdaptiveIcons
     if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
-
       final List<String> platformAdaptiveDeclarations = <String>[];
       _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
         // Automatically finds and generates styled icon declarations.
@@ -280,7 +279,6 @@ String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
           }
         }
       });
-
       buf.write(platformAdaptiveDeclarations.join());
     } else if (line.contains(_endPlatformAdaptiveGeneratedMark)) {
       generating = false;
@@ -384,18 +382,18 @@ class _Icon {
     }
 
     fullFlutterId = flutterId + style.idSuffix();
+    name = id.replaceAll('_', ' ');
   }
   
   String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   String shortId;       // e.g. 5g
   String flutterId;     // e.g. five_g
   String fullFlutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
   IconStyle style;      // e.g. IconStyle.outlined
   String hexCodepoint;  // e.g. e547
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId) ? ', matchTextDirection: true' : '';
-
-  String get name => id.replaceAll('_', ' ');
 
   String get dartDoc =>
       '<i class="material-icons${style.htmlSuffix()} md-36">$shortId</i> &#x2014; material icon named "$name"';
