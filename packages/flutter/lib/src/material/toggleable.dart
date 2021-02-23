@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'material_state.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
 const Duration _kToggleDuration = Duration(milliseconds: 200);
@@ -19,25 +20,34 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
+typedef ToggleablePainterBuilder = CustomPainter Function(BuildContext context, ToggleableDetails data);
+
 class Toggleable extends StatefulWidget {
   const Toggleable({
     Key? key,
     required this.value,
     this.tristate = false,
     required this.onChanged,
-    required this.painter,
     required this.size,
-    required this.hasFocus,
-    required this.hovering,
+    required this.mouseCursor,
+    required this.painterBuilder,
+    this.focusNode,
+    this.autofocus = false,
   }) : assert(tristate || value != null), super(key: key);
 
   final bool? value;
   final bool tristate;
   final ValueChanged<bool?>? onChanged;
-  final ToogleablePainter painter;
   final Size size;
-  final bool hasFocus;
-  final bool hovering;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  final MaterialStateProperty<MouseCursor> mouseCursor;
+  final ToggleablePainterBuilder painterBuilder;
 
   bool get isInteractive => onChanged != null;
 
@@ -54,13 +64,15 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
   late Animation<double> _reactionHoverFade;
   late AnimationController _reactionFocusFadeController;
   late Animation<double> _reactionFocusFade;
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
 
   bool? _previousValue;
 
   @override
   void initState() {
     super.initState();
-    _previousValue = widget.value;
     _positionController = AnimationController(
       duration: _kToggleDuration,
       value: widget.value == false ? 0.0 : 1.0,
@@ -80,7 +92,7 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     );
     _reactionHoverFadeController = AnimationController(
       duration: _kReactionFadeDuration,
-      value: widget.hovering || widget.hasFocus ? 1.0 : 0.0,
+      value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
     );
     _reactionHoverFade = CurvedAnimation(
@@ -89,7 +101,7 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     );
     _reactionFocusFadeController = AnimationController(
       duration: _kReactionFadeDuration,
-      value: widget.hovering || widget.hasFocus ? 1.0 : 0.0,
+      value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
     );
     _reactionFocusFade = CurvedAnimation(
@@ -120,20 +132,6 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
           _positionController.reverse();
       }
     }
-    if (oldWidget.hasFocus != widget.hasFocus) {
-      if (widget.hasFocus) {
-        _reactionFocusFadeController.forward();
-      } else {
-        _reactionFocusFadeController.reverse();
-      }
-    }
-    if (oldWidget.hovering != widget.hovering) {
-      if (widget.hovering) {
-        _reactionHoverFadeController.forward();
-      } else {
-        _reactionHoverFadeController.reverse();
-      }
-    }
   }
 
   @override
@@ -154,7 +152,7 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     }
   }
 
-  void _handleTap() {
+  void _handleTap([Intent? _]) {
     if (!widget.isInteractive)
       return;
     switch (widget.value) {
@@ -183,31 +181,70 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
       _reactionController.reverse();
   }
 
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    if (focused != _focused) {
+      setState(() { _focused = focused; });
+      if (focused) {
+        _reactionFocusFadeController.forward();
+      } else {
+        _reactionFocusFadeController.reverse();
+      }
+    }
+  }
+
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
+      if (hovering) {
+        _reactionHoverFadeController.forward();
+      } else {
+        _reactionHoverFadeController.reverse();
+      }
+    }
+  }
+
   ToggleableDetails get _toggleableDetails => ToggleableDetails._(
     position: _position,
     reaction: _reaction,
     reactionFocusFade: _reactionFocusFade,
     reactionHoverFade: _reactionHoverFade,
     downPosition: _downPosition,
-    hasFocus: widget.hasFocus,
-    hovering: widget.hovering,
+    states: _states,
     value: widget.value,
     previousValue: _previousValue,
   );
 
+  Set<MaterialState> get _states => <MaterialState>{
+    if (!widget.isInteractive) MaterialState.disabled,
+    if (_hovering) MaterialState.hovered,
+    if (_focused) MaterialState.focused,
+    if (widget.value == null || widget.value!) MaterialState.selected,
+  };
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      excludeFromSemantics: !widget.isInteractive,
-      onTapDown: _handleTapDown,
-      onTap: _handleTap,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      child: Semantics(
-        enabled: widget.isInteractive,
-        child: CustomPaint(
-          size: widget.size,
-          painter: _ToggleablePainter(_toggleableDetails, widget.painter),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: widget.isInteractive,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: widget.mouseCursor.resolve(_states),
+      child: GestureDetector(
+        excludeFromSemantics: !widget.isInteractive,
+        onTapDown: _handleTapDown,
+        onTap: _handleTap,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        child: Semantics(
+          enabled: widget.isInteractive,
+          child: CustomPaint(
+            size: widget.size,
+            painter: widget.painterBuilder(context, _toggleableDetails),
+          ),
         ),
       ),
     );
@@ -221,46 +258,26 @@ class ToggleableDetails {
     required this.reactionFocusFade,
     required this.reactionHoverFade,
     required this.downPosition,
-    required this.hasFocus,
-    required this.hovering,
+    required Set<MaterialState> states,
     required this.value,
     required this.previousValue,
-  });
+  }) : _states = states;
 
   final CurvedAnimation position;
   final Animation<double> reaction;
   final Animation<double> reactionFocusFade;
   final Animation<double> reactionHoverFade;
   final Offset? downPosition;
-  final bool hasFocus;
-  final bool hovering;
   final bool? value;
   final bool? previousValue;
+
+  final Set<MaterialState> _states;
+  Set<MaterialState> get states => _states.toSet();
 }
 
-class _ToggleablePainter extends CustomPainter {
-  _ToggleablePainter(this.details, this.painter)
-     : super(repaint: Listenable.merge(<Listenable>[
-    details.position,
-    details.reaction,
-    details.reactionFocusFade,
-    details.reactionHoverFade,
-  ]));
-
-  final ToggleableDetails details;
-  final ToogleablePainter painter;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    painter.paint(canvas, size, details);
-  }
-
-  @override
-  bool shouldRepaint(_ToggleablePainter oldDelegate) => oldDelegate.painter != painter || oldDelegate.details != details;
-}
-
-abstract class ToogleablePainter {
-  ToogleablePainter({
+abstract class ToggleablePainter extends CustomPainter {
+  ToggleablePainter({
+    required this.data,
     required this.activeColor,
     required this.inactiveColor,
     required this.splashRadius,
@@ -271,8 +288,15 @@ abstract class ToogleablePainter {
   }) : hoverColor = hoverColor ?? activeColor.withAlpha(kRadialReactionAlpha),
        focusColor = focusColor ?? activeColor.withAlpha(kRadialReactionAlpha),
        reactionColor = reactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
-       inactiveReactionColor = inactiveReactionColor ?? activeColor.withAlpha(kRadialReactionAlpha);
+       inactiveReactionColor = inactiveReactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
+       super(repaint: Listenable.merge(<Listenable>[
+         data.position,
+         data.reaction,
+         data.reactionFocusFade,
+         data.reactionHoverFade,
+      ]));
 
+  final ToggleableDetails data;
   final Color activeColor;
   final Color inactiveColor;
   final Color hoverColor;
@@ -281,7 +305,17 @@ abstract class ToogleablePainter {
   final Color inactiveReactionColor;
   final double splashRadius;
 
-  void paint(Canvas canvas, Size size, ToggleableDetails details);
+  @override
+  bool shouldRepaint(ToggleablePainter oldDelegate) {
+    return oldDelegate.data != data
+        || oldDelegate.activeColor != activeColor
+        || oldDelegate.inactiveColor != inactiveColor
+        || oldDelegate.hoverColor != hoverColor
+        || oldDelegate.focusColor != focusColor
+        || oldDelegate.reactionColor != reactionColor
+        || oldDelegate.inactiveReactionColor != inactiveReactionColor
+        || oldDelegate.splashRadius != splashRadius;
+  }
 
   /// Used by subclasses to paint the radial ink reaction for this control.
   ///
@@ -289,26 +323,26 @@ abstract class ToogleablePainter {
   /// origin is the center point of the reaction (usually distinct from the
   /// point at which the user interacted with the control, which is handled
   /// automatically).
-  void paintRadialReaction(Canvas canvas, Offset origin, ToggleableDetails details) {
-    if (!details.reaction.isDismissed || !details.reactionFocusFade.isDismissed || !details.reactionHoverFade.isDismissed) {
+  void paintRadialReaction(Canvas canvas, Offset origin) {
+    if (!data.reaction.isDismissed || !data.reactionFocusFade.isDismissed || !data.reactionHoverFade.isDismissed) {
       final Paint reactionPaint = Paint()
         ..color = Color.lerp(
           Color.lerp(
-            Color.lerp(inactiveReactionColor, reactionColor, details.position.value),
+            Color.lerp(inactiveReactionColor, reactionColor, data.position.value),
             hoverColor,
-            details.reactionHoverFade.value,
+            data.reactionHoverFade.value,
           ),
           focusColor,
-          details.reactionFocusFade.value,
+          data.reactionFocusFade.value,
         )!;
-      final Offset center = Offset.lerp(details.downPosition ?? origin, origin, details.reaction.value)!;
+      final Offset center = Offset.lerp(data.downPosition ?? origin, origin, data.reaction.value)!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
       );
-      final double reactionRadius = details.hasFocus || details.hovering
+      final double reactionRadius = data.states.contains(MaterialState.focused) || data.states.contains(MaterialState.hovered)
           ? splashRadius
-          : radialReactionRadiusTween.evaluate(details.reaction);
+          : radialReactionRadiusTween.evaluate(data.reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(center, reactionRadius, reactionPaint);
       }

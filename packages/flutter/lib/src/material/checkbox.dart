@@ -38,7 +38,7 @@ import 'toggleable.dart';
 ///  * [Slider], for selecting a value in a range.
 ///  * <https://material.io/design/components/selection-controls.html#checkboxes>
 ///  * <https://material.io/design/components/lists.html#types>
-class Checkbox extends StatefulWidget {
+class Checkbox extends StatelessWidget {
   /// Creates a material design checkbox.
   ///
   /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -286,75 +286,19 @@ class Checkbox extends StatefulWidget {
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
-  @override
-  _CheckboxState createState() => _CheckboxState();
-}
-
-class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
-  bool get enabled => widget.onChanged != null;
-  late Map<Type, Action<Intent>> _actionMap;
-
-  @override
-  void initState() {
-    super.initState();
-    _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _actionHandler),
-    };
-  }
-
-  void _actionHandler(ActivateIntent intent) {
-    if (widget.onChanged != null) {
-      switch (widget.value) {
-        case false:
-          widget.onChanged!(true);
-          break;
-        case true:
-          widget.onChanged!(widget.tristate ? null : false);
-          break;
-        case null:
-          widget.onChanged!(false);
-          break;
-      }
-    }
-    final RenderObject renderObject = context.findRenderObject()!;
-    renderObject.sendSemanticsEvent(const TapSemanticEvent());
-  }
-
-  bool _focused = false;
-  void _handleFocusHighlightChanged(bool focused) {
-    if (focused != _focused) {
-      setState(() { _focused = focused; });
-    }
-  }
-
-  bool _hovering = false;
-  void _handleHoverChanged(bool hovering) {
-    if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
-    }
-  }
-
-  Set<MaterialState> get _states => <MaterialState>{
-    if (!enabled) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (widget.value == null || widget.value!) MaterialState.selected,
-  };
-
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return null;
       }
       if (states.contains(MaterialState.selected)) {
-        return widget.activeColor;
+        return activeColor;
       }
       return null;
     });
   }
 
-  MaterialStateProperty<Color> get _defaultFillColor {
-    final ThemeData themeData = Theme.of(context);
+  MaterialStateProperty<Color> _defaultFillColor(ThemeData themeData) {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return themeData.disabledColor;
@@ -370,10 +314,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
-    final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
       ?? themeData.checkboxTheme.materialTapTargetSize
       ?? themeData.materialTapTargetSize;
-    final VisualDensity effectiveVisualDensity = widget.visualDensity
+    final VisualDensity effectiveVisualDensity = visualDensity
       ?? themeData.checkboxTheme.visualDensity
       ?? themeData.visualDensity;
     Size size;
@@ -386,66 +330,65 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, _states)
-      ?? themeData.checkboxTheme.mouseCursor?.resolve(_states)
-      ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, _states);
-    // Colors need to be resolved in selected and non selected states separately
-    // so that they can be lerped between.
-    final Set<MaterialState> activeStates = _states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = _states..remove(MaterialState.selected);
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-      ?? _widgetFillColor.resolve(activeStates)
-      ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
-      ?? _defaultFillColor.resolve(activeStates);
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-      ?? _widgetFillColor.resolve(inactiveStates)
-      ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
-      ?? _defaultFillColor.resolve(inactiveStates);
 
-    final Set<MaterialState> focusedStates = _states..add(MaterialState.focused);
-    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
-      ?? widget.focusColor
-      ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
-      ?? themeData.focusColor;
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+      return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
+          ?? themeData.checkboxTheme.mouseCursor?.resolve(states)
+          ?? MaterialStateMouseCursor.clickable.resolve(states);
+    });
 
-    final Set<MaterialState> hoveredStates = _states..add(MaterialState.hovered);
-    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
-        ?? themeData.hoverColor;
+    return Semantics(
+      checked: value == true,
+      child: Toggleable(
+        size: size,
+        value: value,
+        tristate: tristate,
+        onChanged: onChanged,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        mouseCursor: effectiveMouseCursor,
+        painterBuilder: (BuildContext context, ToggleableDetails data) {
+          // Colors need to be resolved in selected and non selected states separately
+          // so that they can be lerped between.
+          final Set<MaterialState> activeStates = data.states..add(MaterialState.selected);
+          final Set<MaterialState> inactiveStates = data.states..remove(MaterialState.selected);
+          final Color effectiveActiveColor = fillColor?.resolve(activeStates)
+              ?? _widgetFillColor.resolve(activeStates)
+              ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
+              ?? _defaultFillColor(themeData).resolve(activeStates);
+          final Color effectiveInactiveColor = fillColor?.resolve(inactiveStates)
+              ?? _widgetFillColor.resolve(inactiveStates)
+              ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
+              ?? _defaultFillColor(themeData).resolve(inactiveStates);
 
-    final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
-    final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+          final Set<MaterialState> focusedStates = data.states..add(MaterialState.focused);
+          final Color effectiveFocusOverlayColor = overlayColor?.resolve(focusedStates)
+              ?? focusColor
+              ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
+              ?? themeData.focusColor;
 
-    final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
-    final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+          final Set<MaterialState> hoveredStates = data.states..add(MaterialState.hovered);
+          final Color effectiveHoverOverlayColor = overlayColor?.resolve(hoveredStates)
+              ?? hoverColor
+              ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
+              ?? themeData.hoverColor;
 
-    final Color effectiveCheckColor =  widget.checkColor
-      ?? themeData.checkboxTheme.checkColor?.resolve(_states)
-      ?? const Color(0xFFFFFFFF);
+          final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
+          final Color effectiveActivePressedOverlayColor = overlayColor?.resolve(activePressedStates)
+              ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
+              ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
-    return FocusableActionDetector(
-      actions: _actionMap,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      enabled: enabled,
-      onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: effectiveMouseCursor,
-      child: Semantics(
-        checked: widget.value == true,
-        child: Toggleable(
-          size: size,
-          value: widget.value,
-          tristate: widget.tristate,
-          onChanged: widget.onChanged,
-          hasFocus: _focused,
-          hovering: _hovering,
-          painter: _CheckboxPainter(
+          final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
+          final Color effectiveInactivePressedOverlayColor = overlayColor?.resolve(inactivePressedStates)
+              ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+              ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+
+          final Color effectiveCheckColor = checkColor
+              ?? themeData.checkboxTheme.checkColor?.resolve(data.states)
+              ?? const Color(0xFFFFFFFF);
+
+          return _CheckboxPainter(
+            data: data,
             activeColor: effectiveActiveColor,
             checkColor: effectiveCheckColor,
             inactiveColor: effectiveInactiveColor,
@@ -453,13 +396,13 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
             hoverColor: effectiveHoverOverlayColor,
             reactionColor: effectiveActivePressedOverlayColor,
             inactiveReactionColor: effectiveInactivePressedOverlayColor,
-            splashRadius: widget.splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
-            side: widget.side ?? themeData.checkboxTheme.side,
-            shape: widget.shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
+            splashRadius: splashRadius ?? themeData.checkboxTheme.splashRadius ?? kRadialReactionRadius,
+            side: side ?? themeData.checkboxTheme.side,
+            shape: shape ?? themeData.checkboxTheme.shape ?? const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(1.0)),
             ),
-          ),
-        ),
+          );
+        }
       ),
     );
   }
@@ -468,8 +411,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
 const double _kEdgeSize = Checkbox.width;
 const double _kStrokeWidth = 2.0;
 
-class _CheckboxPainter extends ToogleablePainter {
+class _CheckboxPainter extends ToggleablePainter {
   _CheckboxPainter({
+    required ToggleableDetails data,
     required Color activeColor,
     required this.checkColor,
     required Color inactiveColor,
@@ -481,6 +425,7 @@ class _CheckboxPainter extends ToogleablePainter {
     required this.shape,
     required this.side,
   }) : super(
+         data: data,
          activeColor: activeColor,
          inactiveColor: inactiveColor,
          focusColor: focusColor,
@@ -493,6 +438,14 @@ class _CheckboxPainter extends ToogleablePainter {
   final Color checkColor;
   final OutlinedBorder shape;
   final BorderSide? side;
+
+  @override
+  bool shouldRepaint(_CheckboxPainter oldDelegate) {
+    return super.shouldRepaint(oldDelegate)
+        || oldDelegate.checkColor != checkColor
+        || oldDelegate.shape != shape
+        || oldDelegate.side != side;
+  }
 
   // The square outer bounds of the checkbox at t, with the specified origin.
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
@@ -565,19 +518,19 @@ class _CheckboxPainter extends ToogleablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size, ToggleableDetails details) {
-    paintRadialReaction(canvas, size.center(Offset.zero), details);
+  void paint(Canvas canvas, Size size) {
+    paintRadialReaction(canvas, size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
     final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
-    final AnimationStatus status = details.position.status;
+    final AnimationStatus status = data.position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
-      ? details.position.value
-      : 1.0 - details.position.value;
+      ? data.position.value
+      : 1.0 - data.position.value;
 
     // Four cases: false to null, false to true, null to false, true to false
-    if (details.previousValue == false || details.value == false) {
-      final double t = details.value == false ? 1.0 - tNormalized : tNormalized;
+    if (data.previousValue == false || data.value == false) {
+      final double t = data.value == false ? 1.0 - tNormalized : tNormalized;
       final Rect outer = _outerRectAt(origin, t);
       final Path emptyCheckboxPath = shape.copyWith(side: side).getOuterPath(outer);
       final Paint paint = Paint()..color = _colorAt(t);
@@ -588,7 +541,7 @@ class _CheckboxPainter extends ToogleablePainter {
         canvas.drawPath(emptyCheckboxPath, paint);
 
         final double tShrink = (t - 0.5) * 2.0;
-        if (details.previousValue == null || details.value == null)
+        if (data.previousValue == null || data.value == null)
           _drawDash(canvas, origin, tShrink, strokePaint);
         else
           _drawCheck(canvas, origin, tShrink, strokePaint);
@@ -600,13 +553,13 @@ class _CheckboxPainter extends ToogleablePainter {
 
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
-        if (details.previousValue == true)
+        if (data.previousValue == true)
           _drawCheck(canvas, origin, tShrink, strokePaint);
         else
           _drawDash(canvas, origin, tShrink, strokePaint);
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
-        if (details.value == true)
+        if (data.value == true)
           _drawCheck(canvas, origin, tExpand, strokePaint);
         else
           _drawDash(canvas, origin, tExpand, strokePaint);

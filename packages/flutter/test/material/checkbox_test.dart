@@ -290,7 +290,7 @@ void main() {
     );
 
     await tester.tap(find.byType(Checkbox));
-    final RenderObject object = tester.firstRenderObject(find.byType(Focus));
+    final RenderObject object = tester.firstRenderObject(find.byType(Checkbox));
 
     expect(checkboxValue, true);
     expect(semanticEvent, <String, dynamic>{
@@ -1176,17 +1176,9 @@ void main() {
   testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
     Widget buildCheckbox(bool show) {
       return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
-                child: Material(
-                  child: show ? Checkbox(value: true, onChanged: (_) { }) : Container(),
-                ),
-              );
-            },
+        home: Material(
+          child: Center(
+            child: show ? Checkbox(value: true, onChanged: (_) { }) : Container(),
           ),
         ),
       );
