@@ -287,7 +287,6 @@ abstract class CustomPainter extends Listenable {
 ///  * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
-
   /// Creates semantics information describing a rectangle on a canvas.
   ///
   /// Arguments `rect` and `properties` must not be null.

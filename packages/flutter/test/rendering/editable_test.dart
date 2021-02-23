@@ -19,7 +19,10 @@ class FakeEditableTextState with TextSelectionDelegate {
   TextEditingValue textEditingValue = TextEditingValue.empty;
 
   @override
-  void hideToolbar([bool hideHandles = true]) {}
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) { }
+
+  @override
+  void hideToolbar([bool hideHandles = true]) { }
 
   @override
   void bringIntoView(TextPosition position) { }

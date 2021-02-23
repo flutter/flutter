@@ -52,6 +52,12 @@ void main() {
     });
   });
 
+  group('respects the group skip flag', () {
+    testWidgets('should be skipped', (WidgetTester tester) async {
+      expect(false, true);
+    });
+  }, skip: true);
+
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
