@@ -122,8 +122,16 @@ abstract class ResidentWebRunner extends ResidentRunner {
   WipConnection _wipConnection;
   ChromiumLauncher _chromiumLauncher;
 
-  vmservice.VmService get _vmService =>
-      _connectionResult?.debugConnection?.vmService;
+  FlutterVmService get _vmService {
+    if (_instance != null) {
+      return _instance;
+    }
+    final vmservice.VmService service =_connectionResult?.debugConnection?.vmService;
+    final Uri websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+    final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
+    return _instance ??= FlutterVmService(service, wsAddress: websocketUri, httpAddress: httpUri);
+  }
+  FlutterVmService _instance;
 
   @override
   bool get canHotRestart {
@@ -137,7 +145,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     Map<String, dynamic> params,
   }) async {
     final vmservice.Response response =
-        await _vmService.callServiceExtension(method, args: params);
+        await _vmService.service.callServiceExtension(method, args: params);
     return response.toJson();
   }
 
@@ -598,7 +606,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        await _vmService.callMethod('hotRestart');
+        await _vmService.service.callMethod('hotRestart');
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
@@ -771,36 +779,36 @@ class _ResidentWebRunner extends ResidentWebRunner {
         globals.printStatus(message);
       }
 
-      _stdOutSub = _vmService.onStdoutEvent.listen(onLogEvent);
-      _stdErrSub = _vmService.onStderrEvent.listen(onLogEvent);
+      _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
+      _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
       _extensionEventSub =
-          _vmService.onExtensionEvent.listen(printStructuredErrorLog);
+          _vmService.service.onExtensionEvent.listen(printStructuredErrorLog);
       try {
-        await _vmService.streamListen(vmservice.EventStreams.kStdout);
+        await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen(vmservice.EventStreams.kStderr);
+        await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen(vmservice.EventStreams.kIsolate);
+        await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen(vmservice.EventStreams.kExtension);
+        await _vmService.service.streamListen(vmservice.EventStreams.kExtension);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
-      unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
-      _vmService.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
+      unawaited(_vmService.service.registerService('reloadSources', 'FlutterTools'));
+      _vmService.service.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
         final bool pause = params['pause'] as bool ?? false;
         await restart(benchmarkMode: false, pause: pause, fullRestart: false);
         return <String, Object>{'type': 'Success'};
@@ -808,9 +816,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       device.vmService = _vmService;
-      // Update caches to enable the FlutterVmService extensions.
-      setHttpAddress(_httpUriFromWebsocketUri(websocketUri), device.vmService);
-      setWsAddress(websocketUri, device.vmService);
 
       // Run main immediately if the app is not started paused or if there
       // is no debugger attached. Otherwise, runMain when a resume event
@@ -865,10 +870,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
     await device.exitApps();
     appFinished();
   }
+}
 
-  Uri _httpUriFromWebsocketUri(Uri websocketUri) {
-    const String wsPath = '/ws';
-    final String path = websocketUri.path;
-    return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
-  }
+Uri _httpUriFromWebsocketUri(Uri websocketUri) {
+  const String wsPath = '/ws';
+  final String path = websocketUri.path;
+  return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));
 }
