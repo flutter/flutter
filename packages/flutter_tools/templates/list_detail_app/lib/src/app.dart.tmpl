@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
     return AnimatedBuilder(
       animation: settingsController,
-      builder: (context, _) {
+      builder: (BuildContext context, Widget child) {
         return MaterialApp(
           // Provide the generated AppLocalizations to the MaterialApp. This
           // allows descendant Widgets to display the correct translations
@@ -42,7 +42,6 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
           themeMode: settingsController.themeMode,
-          debugShowCheckedModeBanner: false,
 
           // Define a function to handle named routes in order to support
           // Flutter web url navigation and deep linking.

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:{{projectName}}/src/dummy_feature/dummy_item.dart';
-import 'package:{{projectName}}/src/dummy_feature/dummy_item_details_view.dart';
-import 'package:{{projectName}}/src/settings/settings_view.dart';
+
+import '../settings/settings_view.dart';
+import 'dummy_item.dart';
+import 'dummy_item_details_view.dart';
 
 /// Displays a list of DummyItems.
 class DummyItemListView extends StatelessWidget {
@@ -37,7 +38,7 @@ class DummyItemListView extends StatelessWidget {
       // builds Widgets as they’re scrolled into view.
       body: ListView.builder(
         itemCount: items.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (BuildContext context, int index) {
           final item = items[index];
 
           return ListTile(
