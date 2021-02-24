@@ -1,4 +1,4 @@
-Signature: 02bc09dfad421d6bce0609fa77598785
+Signature: 1ae21f3cc8372d39ef70201b78802913
 
 UNUSED LICENSES:
 
@@ -5490,6 +5490,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLErrorHandling.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
