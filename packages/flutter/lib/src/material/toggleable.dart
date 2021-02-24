@@ -20,67 +20,69 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
-typedef ToggleablePainterBuilder = CustomPainter Function(BuildContext context, ToggleableDetails data);
+@optionalTypeArgs
+mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
+  /// Used by subclasses to manipulate the visual value of the control.
+  ///
+  /// Some controls respond to user input by updating their visual value. For
+  /// example, the thumb of a switch moves from one position to another when
+  /// dragged. These controls manipulate this animation controller to update
+  /// their [position] and eventually trigger an [onChanged] callback when the
+  /// animation reaches either 0.0 or 1.0.
+  AnimationController get positionController => _positionController;
+  late AnimationController _positionController;
 
-class Toggleable extends StatefulWidget {
-  const Toggleable({
-    Key? key,
-    required this.value,
-    this.tristate = false,
-    required this.onChanged,
-    required this.size,
-    required this.mouseCursor,
-    required this.painterBuilder,
-    this.focusNode,
-    this.autofocus = false,
-  }) : assert(tristate || value != null), super(key: key);
+  /// The visual value of the control.
+  ///
+  /// When the control is inactive, the [value] is false and this animation has
+  /// the value 0.0. When the control is active, the value either true or tristate
+  /// is true and the value is null. When the control is active the animation
+  /// has a value of 1.0. When the control is changing from inactive
+  /// to active (or vice versa), [value] is the target value and this animation
+  /// gradually updates from 0.0 to 1.0 (or vice versa).
+  CurvedAnimation get position => _position;
+  late CurvedAnimation _position;
 
-  final bool? value;
-  final bool tristate;
-  final ValueChanged<bool?>? onChanged;
-  final Size size;
+  AnimationController get reactionController => _reactionController;
+  late AnimationController _reactionController;
 
-  /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode? focusNode;
+  Animation<double> get reaction => _reaction;
+  late Animation<double> _reaction;
 
-  /// {@macro flutter.widgets.Focus.autofocus}
-  final bool autofocus;
+  AnimationController get reactionHoverFadeController => _reactionHoverFadeController;
+  late AnimationController _reactionHoverFadeController;
 
-  final MaterialStateProperty<MouseCursor> mouseCursor;
-  final ToggleablePainterBuilder painterBuilder;
+  Animation<double> get reactionHoverFade => _reactionHoverFade;
+  late Animation<double> _reactionHoverFade;
+
+  AnimationController get reactionFocusFadeController => _reactionFocusFadeController;
+  late AnimationController _reactionFocusFadeController;
+
+  Animation<double> get reactionFocusFade => _reactionFocusFade;
+  late Animation<double> _reactionFocusFade;
 
   bool get isInteractive => onChanged != null;
 
-  @override
-  State<Toggleable> createState() => _ToggleableState();
-}
-
-class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
-  late AnimationController _positionController;
-  late CurvedAnimation _position;
-  late AnimationController _reactionController;
-  late Animation<double> _reaction;
-  late AnimationController _reactionHoverFadeController;
-  late Animation<double> _reactionHoverFade;
-  late AnimationController _reactionFocusFadeController;
-  late Animation<double> _reactionFocusFade;
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
   };
 
-  bool? _previousValue;
+  ValueChanged<bool?>? get onChanged;
+  bool? get value;
+  bool get tristate;
 
   @override
   void initState() {
     super.initState();
     _positionController = AnimationController(
       duration: _kToggleDuration,
-      value: widget.value == false ? 0.0 : 1.0,
+      value: value == false ? 0.0 : 1.0,
       vsync: this,
     );
     _position = CurvedAnimation(
       parent: _positionController,
-      curve: Curves.linear,
+      curve: Curves.easeIn,
+      reverseCurve: Curves.easeOut,
     );
     _reactionController = AnimationController(
       duration: kRadialReactionDuration,
@@ -110,27 +112,19 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     );
   }
 
-  @override
-  void didUpdateWidget(Toggleable oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      _previousValue = oldWidget.value;
-      _position
-        ..curve = Curves.easeIn
-        ..reverseCurve = Curves.easeOut;
-      if (widget.tristate) {
-        if (widget.value == null)
-          _positionController.value = 0.0;
-        if (widget.value != false)
-          _positionController.forward();
-        else
-          _positionController.reverse();
-      } else {
-        if (widget.value == true)
-          _positionController.forward();
-        else
-          _positionController.reverse();
-      }
+  void animateToValue() {
+    if (tristate) {
+      if (value == null)
+        _positionController.value = 0.0;
+      if (value != false)
+        _positionController.forward();
+      else
+        _positionController.reverse();
+    } else {
+      if (value == true)
+        _positionController.forward();
+      else
+        _positionController.reverse();
     }
   }
 
@@ -143,42 +137,40 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Offset? get downPosition => _downPosition;
   Offset? _downPosition;
 
   void _handleTapDown(TapDownDetails details) {
-    if (widget.isInteractive) {
-      _downPosition = details.localPosition;
+    if (isInteractive) {
+      setState(() {
+        _downPosition = details.localPosition;
+      });
       _reactionController.forward();
     }
   }
 
   void _handleTap([Intent? _]) {
-    if (!widget.isInteractive)
+    if (!isInteractive)
       return;
-    switch (widget.value) {
+    switch (value) {
       case false:
-        widget.onChanged!(true);
+        onChanged!(true);
         break;
       case true:
-        widget.onChanged!(widget.tristate ? null : false);
+        onChanged!(tristate ? null : false);
         break;
       case null:
-        widget.onChanged!(false);
+        onChanged!(false);
         break;
     }
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    _downPosition = null;
-    if (widget.isInteractive)
-      _reactionController.reverse();
-  }
-
-  void _handleTapCancel() {
-    _downPosition = null;
-    if (widget.isInteractive)
-      _reactionController.reverse();
+  void _handleTapEnd([TapUpDetails? _]) {
+    setState(() {
+      _downPosition = null;
+    });
+    _reactionController.reverse();
   }
 
   bool _focused = false;
@@ -205,45 +197,39 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
     }
   }
 
-  ToggleableDetails get _toggleableDetails => ToggleableDetails._(
-    position: _position,
-    reaction: _reaction,
-    reactionFocusFade: _reactionFocusFade,
-    reactionHoverFade: _reactionHoverFade,
-    downPosition: _downPosition,
-    states: _states,
-    value: widget.value,
-    previousValue: _previousValue,
-  );
-
-  Set<MaterialState> get _states => <MaterialState>{
-    if (!widget.isInteractive) MaterialState.disabled,
+  Set<MaterialState> get states => <MaterialState>{
+    if (!isInteractive) MaterialState.disabled,
     if (_hovering) MaterialState.hovered,
     if (_focused) MaterialState.focused,
-    if (widget.value == null || widget.value!) MaterialState.selected,
+    if (value != false) MaterialState.selected,
   };
 
-  @override
-  Widget build(BuildContext context) {
+  Widget buildToggleable({
+    FocusNode? focusNode,
+    bool autofocus = false,
+    required MaterialStateProperty<MouseCursor> mouseCursor,
+    required Size size,
+    required CustomPainter painter,
+  }) {
     return FocusableActionDetector(
       actions: _actionMap,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      enabled: widget.isInteractive,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      enabled: isInteractive,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: widget.mouseCursor.resolve(_states),
+      mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
-        excludeFromSemantics: !widget.isInteractive,
+        excludeFromSemantics: !isInteractive,
         onTapDown: _handleTapDown,
         onTap: _handleTap,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
+        onTapUp: _handleTapEnd,
+        onTapCancel: _handleTapEnd,
         child: Semantics(
-          enabled: widget.isInteractive,
+          enabled: isInteractive,
           child: CustomPaint(
-            size: widget.size,
-            painter: widget.painterBuilder(context, _toggleableDetails),
+            size: size,
+            painter: painter,
           ),
         ),
       ),
@@ -251,103 +237,211 @@ class _ToggleableState extends State<Toggleable> with TickerProviderStateMixin {
   }
 }
 
-class ToggleableDetails {
-  ToggleableDetails._({
-    required this.position,
-    required this.reaction,
-    required this.reactionFocusFade,
-    required this.reactionHoverFade,
-    required this.downPosition,
-    required Set<MaterialState> states,
-    required this.value,
-    required this.previousValue,
-  }) : _states = states;
+abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter  {
+  Animation<double> get position => _position!;
+  Animation<double>? _position;
+  set position(Animation<double> value) {
+    if (value == _position) {
+      return;
+    }
+    _position?.removeListener(notifyListeners);
+    value.addListener(notifyListeners);
+    _position = value;
+    notifyListeners();
+  }
 
-  final CurvedAnimation position;
-  final Animation<double> reaction;
-  final Animation<double> reactionFocusFade;
-  final Animation<double> reactionHoverFade;
-  final Offset? downPosition;
-  final bool? value;
-  final bool? previousValue;
+  Animation<double> get reaction => _reaction!;
+  Animation<double>? _reaction;
+  set reaction(Animation<double> value) {
+    if (value == _reaction) {
+      return;
+    }
+    _reaction?.removeListener(notifyListeners);
+    value.addListener(notifyListeners);
+    _reaction = value;
+    notifyListeners();
+  }
 
-  final Set<MaterialState> _states;
-  Set<MaterialState> get states => _states.toSet();
-}
+  Animation<double> get reactionFocusFade => _reactionFocusFade!;
+  Animation<double>? _reactionFocusFade;
+  set reactionFocusFade(Animation<double> value) {
+    if (value == _reactionFocusFade) {
+      return;
+    }
+    _reactionFocusFade?.removeListener(notifyListeners);
+    value.addListener(notifyListeners);
+    _reactionFocusFade = value;
+    notifyListeners();
+  }
 
-abstract class ToggleablePainter extends CustomPainter {
-  ToggleablePainter({
-    required this.data,
-    required this.activeColor,
-    required this.inactiveColor,
-    required this.splashRadius,
-    Color? hoverColor,
-    Color? focusColor,
-    Color? reactionColor,
-    Color? inactiveReactionColor,
-  }) : hoverColor = hoverColor ?? activeColor.withAlpha(kRadialReactionAlpha),
-       focusColor = focusColor ?? activeColor.withAlpha(kRadialReactionAlpha),
-       reactionColor = reactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
-       inactiveReactionColor = inactiveReactionColor ?? activeColor.withAlpha(kRadialReactionAlpha),
-       super(repaint: Listenable.merge(<Listenable>[
-         data.position,
-         data.reaction,
-         data.reactionFocusFade,
-         data.reactionHoverFade,
-      ]));
+  Animation<double> get reactionHoverFade => _reactionHoverFade!;
+  Animation<double>? _reactionHoverFade;
+  set reactionHoverFade(Animation<double> value) {
+    if (value == _reactionHoverFade) {
+      return;
+    }
+    _reactionHoverFade?.removeListener(notifyListeners);
+    value.addListener(notifyListeners);
+    _reactionHoverFade = value;
+    notifyListeners();
+  }
 
-  final ToggleableDetails data;
-  final Color activeColor;
-  final Color inactiveColor;
-  final Color hoverColor;
-  final Color focusColor;
-  final Color reactionColor;
-  final Color inactiveReactionColor;
-  final double splashRadius;
+  Color get activeColor => _activeColor!;
+  Color? _activeColor;
+  set activeColor(Color value) {
+    if (_activeColor == value) {
+      return;
+    }
+    _activeColor = value;
+    notifyListeners();
+  }
 
-  @override
-  bool shouldRepaint(ToggleablePainter oldDelegate) {
-    return oldDelegate.data != data
-        || oldDelegate.activeColor != activeColor
-        || oldDelegate.inactiveColor != inactiveColor
-        || oldDelegate.hoverColor != hoverColor
-        || oldDelegate.focusColor != focusColor
-        || oldDelegate.reactionColor != reactionColor
-        || oldDelegate.inactiveReactionColor != inactiveReactionColor
-        || oldDelegate.splashRadius != splashRadius;
+  Color get inactiveColor => _inactiveColor!;
+  Color? _inactiveColor;
+  set inactiveColor(Color value) {
+    if (_inactiveColor == value) {
+      return;
+    }
+    _inactiveColor = value;
+    notifyListeners();
+  }
+
+  Color get inactiveReactionColor => _inactiveReactionColor!;
+  Color? _inactiveReactionColor;
+  set inactiveReactionColor(Color value) {
+    if (value == _inactiveReactionColor) {
+      return;
+    }
+    _inactiveReactionColor = value;
+    notifyListeners();
+  }
+
+  Color get reactionColor => _reactionColor!;
+  Color? _reactionColor;
+  set reactionColor(Color value) {
+    if (value == _reactionColor) {
+      return;
+    }
+    _reactionColor = value;
+    notifyListeners();
+  }
+
+  Color get hoverColor => _hoverColor!;
+  Color? _hoverColor;
+  set hoverColor(Color value) {
+    if (value == _hoverColor) {
+      return;
+    }
+    _hoverColor = value;
+    notifyListeners();
+  }
+
+  Color get focusColor => _focusColor!;
+  Color? _focusColor;
+  set focusColor(Color value) {
+    if (value == _focusColor) {
+      return;
+    }
+    _focusColor = value;
+    notifyListeners();
+  }
+
+  double get splashRadius => _splashRadius!;
+  double? _splashRadius;
+  set splashRadius(double value) {
+    if (value == _splashRadius) {
+      return;
+    }
+    _splashRadius = value;
+    notifyListeners();
+  }
+
+  Offset? get downPosition => _downPosition;
+  Offset? _downPosition;
+  set downPosition(Offset? value) {
+    if (value == _downPosition) {
+      return;
+    }
+    _downPosition = value;
+    notifyListeners();
+  }
+
+  bool get isFocused => _isFocused!;
+  bool? _isFocused;
+  set isFocused(bool? value) {
+    if (value == _isFocused) {
+      return;
+    }
+    _isFocused = value;
+    notifyListeners();
+  }
+
+  bool get isHovered => _isHovered!;
+  bool? _isHovered;
+  set isHovered(bool? value) {
+    if (value == _isHovered) {
+      return;
+    }
+    _isHovered = value;
+    notifyListeners();
   }
 
   /// Used by subclasses to paint the radial ink reaction for this control.
   ///
   /// The reaction is painted on the given canvas at the given offset. The
   /// origin is the center point of the reaction (usually distinct from the
-  /// point at which the user interacted with the control, which is handled
-  /// automatically).
-  void paintRadialReaction(Canvas canvas, Offset origin) {
-    if (!data.reaction.isDismissed || !data.reactionFocusFade.isDismissed || !data.reactionHoverFade.isDismissed) {
+  /// [downPosition] at which the user interacted with the control).
+  void paintRadialReaction({
+    required Canvas canvas,
+    Offset offset = Offset.zero,
+    required Offset origin,
+  }) {
+    if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
       final Paint reactionPaint = Paint()
         ..color = Color.lerp(
           Color.lerp(
-            Color.lerp(inactiveReactionColor, reactionColor, data.position.value),
+            Color.lerp(inactiveReactionColor, reactionColor, position.value),
             hoverColor,
-            data.reactionHoverFade.value,
+            reactionHoverFade.value,
           ),
           focusColor,
-          data.reactionFocusFade.value,
+          reactionFocusFade.value,
         )!;
-      final Offset center = Offset.lerp(data.downPosition ?? origin, origin, data.reaction.value)!;
+      final Offset center = Offset.lerp(downPosition ?? origin, origin, reaction.value)!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
       );
-      final double reactionRadius = data.states.contains(MaterialState.focused) || data.states.contains(MaterialState.hovered)
+      final double reactionRadius = isFocused || isHovered
           ? splashRadius
-          : radialReactionRadiusTween.evaluate(data.reaction);
+          : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
-        canvas.drawCircle(center, reactionRadius, reactionPaint);
+        canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
       }
     }
   }
+
+
+  @override
+  void dispose() {
+    _position?.removeListener(notifyListeners);
+    _reaction?.removeListener(notifyListeners);
+    _reactionFocusFade?.removeListener(notifyListeners);
+    _reactionHoverFade?.removeListener(notifyListeners);
+    super.dispose();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+
+  @override
+  bool? hitTest(Offset position) => null;
+
+  @override
+  SemanticsBuilderCallback? get semanticsBuilder => null;
+
+  @override
+  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
 }
 
 /// A base class for material style toggleable controls with toggle animations.

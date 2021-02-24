@@ -99,7 +99,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Toggleable)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       // isFocusable is delayed by 1 frame.
@@ -108,7 +108,7 @@ void main() {
 
     await tester.pump();
     // isFocusable should be false now after the 1 frame delay.
-    expect(tester.getSemantics(find.byType(Toggleable)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
     ));
@@ -120,7 +120,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Toggleable)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -320,7 +320,7 @@ void main() {
     }
 
     RenderBox getCheckboxRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(Toggleable));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(false));
@@ -376,7 +376,7 @@ void main() {
     }
 
     RenderBox getCheckboxRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(Toggleable));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(checkColor: checkColor));
@@ -820,7 +820,7 @@ void main() {
     }
 
     RenderBox getCheckboxRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(Toggleable));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(enabled: true));
@@ -871,7 +871,7 @@ void main() {
     }
 
     RenderBox getCheckboxRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(Toggleable));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame());
