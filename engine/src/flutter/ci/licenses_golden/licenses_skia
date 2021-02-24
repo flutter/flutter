@@ -1,4 +1,4 @@
-Signature: 925975edede4f4dc83ce750593bdaca8
+Signature: 2f0cc065484e4ac20fd42386f8d8d38d
 
 UNUSED LICENSES:
 
@@ -604,8 +604,7 @@ FILE: ../../../third_party/skia/src/core/SkSpecialSurface.h
 FILE: ../../../third_party/skia/src/core/SkSwizzle.cpp
 FILE: ../../../third_party/skia/src/effects/SkOverdrawColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkPaintImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkPaintImageFilter.h
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkShaderImageFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAppliedClip.h
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAuditTrail.h
