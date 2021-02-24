@@ -26,6 +26,10 @@ void main() async {
   }
 }
 
+/// TODO: unskip webkit tests once flakiness is resolved. See
+/// https://github.com/flutter/flutter/issues/76713
+bool get isWebkit => browserEngine == BrowserEngine.webkit;
+
 void testMain() async {
   setUp(() async {
     debugShowClipLayers = true;
@@ -44,51 +48,51 @@ void testMain() async {
     _renderScene(BlendMode.dst);
     await matchGoldenFile('shadermask_linear_dst.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   /// Should render the gradient only where circles have alpha channel.
   test('Renders shader mask with linear gradient BlendMode srcIn', () async {
     _renderScene(BlendMode.srcIn);
     await matchGoldenFile('shadermask_linear_srcin.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode color', () async {
     _renderScene(BlendMode.color);
     await matchGoldenFile('shadermask_linear_color.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode xor', () async {
     _renderScene(BlendMode.xor);
     await matchGoldenFile('shadermask_linear_xor.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode plus', () async {
     _renderScene(BlendMode.plus);
     await matchGoldenFile('shadermask_linear_plus.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode modulate', () async {
     _renderScene(BlendMode.modulate);
     await matchGoldenFile('shadermask_linear_modulate.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   test('Renders shader mask with linear gradient BlendMode overlay', () async {
     _renderScene(BlendMode.overlay);
     await matchGoldenFile('shadermask_linear_overlay.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 
   /// Should render the gradient opaque on top of content.
   test('Renders shader mask with linear gradient BlendMode src', () async {
     _renderScene(BlendMode.src);
     await matchGoldenFile('shadermask_linear_src.png',
         region: Rect.fromLTWH(0, 0, 360, 200));
-  });
+  }, skip: isWebkit);
 }
 
 Picture _drawTestPictureWithCircles(
