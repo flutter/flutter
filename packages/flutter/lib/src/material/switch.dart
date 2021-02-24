@@ -897,6 +897,7 @@ class _SwitchPainter extends ToggleablePainter {
     }
 
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, currentValue)!;
+    print('i: $inactiveTrackColor, a: $activeColor, t: $trackColor, v:$currentValue, l: $trackInnerLength');
     final Color lerpedThumbColor = Color.lerp(inactiveColor, activeColor, currentValue)!;
     // Blend the thumb color against a `surfaceColor` background in case the
     // thumbColor is not opaque. This way we do not see through the thumb to the

@@ -1058,8 +1058,7 @@ void main() {
       ),
     );
 
-    final RenderToggleable oldSwitchRenderObject = tester
-      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+    final ToggleableStateMixin oldSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
     stateSetter(() { value = false; });
     await tester.pump();
@@ -1067,14 +1066,12 @@ void main() {
     stateSetter(() { enabled = false; });
     await tester.pump();
 
-    final RenderToggleable updatedSwitchRenderObject = tester
-      .renderObject(find.byWidgetPredicate((Widget widget) => widget is LeafRenderObjectWidget));
+    final ToggleableStateMixin updatedSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
-
-    expect(updatedSwitchRenderObject.isInteractive, false);
-    expect(updatedSwitchRenderObject, oldSwitchRenderObject);
-    expect(updatedSwitchRenderObject.position.isCompleted, false);
-    expect(updatedSwitchRenderObject.position.isDismissed, false);
+    expect(updatedSwitchState.isInteractive, false);
+    expect(updatedSwitchState, oldSwitchState);
+    expect(updatedSwitchState.position.isCompleted, false);
+    expect(updatedSwitchState.position.isDismissed, false);
   });
 
   testWidgets('Switch thumb color resolves in active/enabled states', (WidgetTester tester) async {
