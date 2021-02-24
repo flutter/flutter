@@ -36,7 +36,9 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "ClipRectLayer::Preroll");
 
   SkRect previous_cull_rect = context->cull_rect;
-  context->cull_rect.intersect(clip_rect_);
+  if (!context->cull_rect.intersect(clip_rect_)) {
+    context->cull_rect.setEmpty();
+  }
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
   context->mutators_stack.PushClipRect(clip_rect_);

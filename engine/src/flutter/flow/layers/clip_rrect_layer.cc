@@ -37,7 +37,9 @@ void ClipRRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
   SkRect previous_cull_rect = context->cull_rect;
   SkRect clip_rrect_bounds = clip_rrect_.getBounds();
-  context->cull_rect.intersect(clip_rrect_bounds);
+  if (!context->cull_rect.intersect(clip_rrect_bounds)) {
+    context->cull_rect.setEmpty();
+  }
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
   context->mutators_stack.PushClipRRect(clip_rrect_);
