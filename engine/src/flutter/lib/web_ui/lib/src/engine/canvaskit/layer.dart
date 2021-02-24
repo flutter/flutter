@@ -41,6 +41,28 @@ class PrerollContext {
   final MutatorsStack mutatorsStack = MutatorsStack();
 
   PrerollContext(this.rasterCache, this.viewEmbedder);
+
+  ui.Rect get cullRect {
+    ui.Rect cullRect = ui.Rect.largest;
+    for (Mutator m in mutatorsStack) {
+      ui.Rect clipRect;
+      switch (m.type) {
+        case MutatorType.clipRect:
+          clipRect = m.rect!;
+          break;
+        case MutatorType.clipRRect:
+          clipRect = m.rrect!.outerRect;
+          break;
+        case MutatorType.clipPath:
+          clipRect = m.path!.getBounds();
+          break;
+        default:
+          continue;
+      }
+      cullRect = cullRect.intersect(clipRect);
+    }
+    return cullRect;
+  }
 }
 
 /// A context shared by all layers during the paint pass.
@@ -132,6 +154,12 @@ class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFil
   final ui.ImageFilter _filter;
 
   BackdropFilterEngineLayer(this._filter);
+
+  @override
+  void preroll(PrerollContext preRollContext, Matrix4 matrix) {
+    ui.Rect childBounds = prerollChildren(preRollContext, matrix);
+    paintBounds = childBounds.expandToInclude(preRollContext.cullRect);
+  }
 
   @override
   void paint(PaintContext context) {
