@@ -5,19 +5,22 @@
 // @dart = 2.8
 
 import 'package:flutter_tools/src/test/event_printer.dart';
-import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('EventPrinter handles a null parent', () {
     final EventPrinter eventPrinter = EventPrinter(out: StringBuffer());
-    final ProcessEvent processEvent = ProcessEvent(0, FakeProcess());
+    final _Device device = _Device();
+    final Uri observatoryUri = Uri.parse('http://localhost:1234');
 
-    expect(() => eventPrinter.handleFinishedTest(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleStartedProcess(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleTestCrashed(processEvent), returnsNormally);
-    expect(() => eventPrinter.handleTestTimedOut(processEvent), returnsNormally);
+    expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
+    expect(() => eventPrinter.handleStartedDevice(observatoryUri), returnsNormally);
+    expect(() => eventPrinter.handleTestCrashed(device), returnsNormally);
+    expect(() => eventPrinter.handleTestTimedOut(device), returnsNormally);
   });
 }
+
+class _Device extends Mock implements TestDevice {}

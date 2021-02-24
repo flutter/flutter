@@ -11,7 +11,6 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';

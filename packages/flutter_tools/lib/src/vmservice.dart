@@ -515,49 +515,55 @@ extension FlutterVmService on vm_service.VmService {
     await onRunnable;
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpApp({
+  Future<String> flutterDebugDumpApp({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
+  }) async {
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpApp',
       isolateId: isolateId,
     );
+    return response['data']?.toString();
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpRenderTree({
+  Future<String> flutterDebugDumpRenderTree({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
+  }) async {
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpRenderTree',
       isolateId: isolateId,
+      args: <String, Object>{}
     );
+    return response['data']?.toString();
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpLayerTree({
+  Future<String> flutterDebugDumpLayerTree({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
+  }) async {
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpLayerTree',
       isolateId: isolateId,
     );
+    return response['data']?.toString();
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInTraversalOrder({
+  Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
+  }) async {
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
       isolateId: isolateId,
     );
+    return response['data']?.toString();
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
+  Future<String> flutterDebugDumpSemanticsTreeInInverseHitTestOrder({
     @required String isolateId,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
+  }) async {
+    final Map<String, Object> response = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
       isolateId: isolateId,
     );
+    return response['data']?.toString();
   }
 
   Future<Map<String, dynamic>> _flutterToggle(String name, {

@@ -3475,7 +3475,6 @@ void main() {
         from: tester.getTopRight(find.byType(CupertinoApp)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       // -1 because we want to reach the end of the line, not the start of a new line.
@@ -3536,7 +3535,6 @@ void main() {
         from: tester.getCenter(find.byType(EditableText)),
         cause: SelectionChangedCause.tap,
       );
-      expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection!.baseOffset);

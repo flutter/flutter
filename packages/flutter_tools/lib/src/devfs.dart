@@ -518,6 +518,20 @@ class DevFS {
     // dill files that depend on the invalidated files.
     _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
 
+    // `generated_main.dart` contains the Dart plugin registry.
+    if (projectRootPath != null) {
+      final File generatedMainDart = _fileSystem.file(
+        _fileSystem.path.join(
+          projectRootPath,
+          '.dart_tool',
+          'flutter_build',
+          'generated_main.dart',
+        ),
+      );
+      if (generatedMainDart != null && generatedMainDart.existsSync()) {
+        mainUri = generatedMainDart.uri;
+      }
+    }
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
     final Future<CompilerOutput> pendingCompilerOutput = generator.recompile(

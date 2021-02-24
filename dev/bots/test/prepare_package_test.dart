@@ -30,7 +30,7 @@ void main() {
     } on PreparePackageException catch (e) {
       expect(
         e.message,
-        contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
+        contains('Invalid argument(s): Failed to resolve this_executable_better_not_exist_2857632534321 to an executable.'),
       );
     }
   });
@@ -241,6 +241,7 @@ void main() {
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
       final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
+      final String newGsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
         processManager = FakeProcessManager();
@@ -255,6 +256,7 @@ void main() {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
+        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra/releases",
@@ -300,9 +302,16 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- stat $newGsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
+          '$gsutilCall -- rm $newGsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
+          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
@@ -310,6 +319,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -354,6 +364,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -376,6 +387,7 @@ void main() {
           Branch.stable,
           'v1.2.3',
           outputFile,
+          false,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -383,6 +395,7 @@ void main() {
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
+        final String newGsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
         final String releasesJson = '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra/releases",
@@ -426,6 +439,11 @@ void main() {
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsJsonPath': null,
           '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- rm $newGsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $newGsArchivePath': null,
+          '$gsutilCall -- cp $newGsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $newGsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $newGsJsonPath': null,
         };
         processManager.fakeResults = calls;
         assert(tempDir.existsSync());

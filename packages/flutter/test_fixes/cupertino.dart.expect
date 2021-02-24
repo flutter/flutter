@@ -115,4 +115,12 @@ void main() {
   NoDefaultCupertinoThemeData.resolveFrom(context);
   CupertinoTextThemeData.resolveFrom(context);
   CupertinoTextThemeData.resolveFrom(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  CupertinoTextField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  CupertinoTextField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  CupertinoTextField.borderless(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  CupertinoTextField.borderless(maxLengthEnforcement: MaxLengthEnforcement.none);
+  final CupertinoTextField textField;
+  textField.maxLengthEnforcement;
 }

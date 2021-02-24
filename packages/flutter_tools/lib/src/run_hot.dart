@@ -5,10 +5,11 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -25,7 +26,9 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 import 'reporting/reporting.dart';
+import 'resident_devtools_handler.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -78,6 +81,7 @@ class HotRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
     bool machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : super(
           devices,
           target: target,
@@ -88,6 +92,7 @@ class HotRunner extends ResidentRunner {
           dillOutputPath: dillOutputPath,
           ipv6: ipv6,
           machine: machine,
+          devtoolsHandler: devtoolsHandler,
         );
 
   final bool benchmarkMode;
@@ -196,8 +201,9 @@ class HotRunner extends ResidentRunner {
 
     if (enableDevTools) {
       // The method below is guaranteed never to return a failing future.
-      unawaited(serveAndAnnounceDevTools(
+      unawaited(residentDevtoolsHandler.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
       ));
     }
 
@@ -220,8 +226,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
-
-    unawaited(callConnectedVmServiceUriExtension());
 
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
@@ -311,6 +315,15 @@ class HotRunner extends ResidentRunner {
     bool enableDevTools = false,
     String route,
   }) async {
+    File mainFile = globals.fs.file(mainPath);
+    // `generated_main.dart` contains the Dart plugin registry.
+    final Directory buildDir = FlutterProject.current()
+        .directory
+        .childDirectory(globals.fs.path.join('.dart_tool', 'flutter_build'));
+    final File newMainDart = buildDir?.childFile('generated_main.dart');
+    if (newMainDart != null && newMainDart.existsSync()) {
+      mainFile = newMainDart;
+    }
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
@@ -323,7 +336,7 @@ class HotRunner extends ResidentRunner {
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
-            globals.fs.file(mainPath).uri,
+            mainFile.uri,
             <Uri>[],
             // When running without a provided applicationBinary, the tool will
             // simultaneously run the initial frontend_server compilation and
@@ -641,8 +654,7 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      unawaited(maybeCallDevToolsUriServiceExtension());
-      unawaited(callConnectedVmServiceUriExtension());
+      unawaited(residentDevtoolsHandler.hotRestart(flutterDevices));
       return result;
     }
     final OperationResult result = await _hotReloadHelper(

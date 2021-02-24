@@ -118,6 +118,7 @@ void main() {
       cache: globals.cache,
       fileSystem: fileSystem,
       platform: platform,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     Cache.flutterRoot = Cache.defaultFlutterRoot(
       fileSystem: fileSystem,

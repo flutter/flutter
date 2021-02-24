@@ -13,17 +13,17 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager;
+import '../../src/mocks.dart' show MockAndroidSdk, MockProcessManager;
 import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 void main() {
   AndroidSdk sdk;
@@ -41,16 +41,17 @@ void main() {
     stdio = FakeStdio();
   });
 
-  MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
+  FakeProcess Function(List<String>) processMetaFactory(List<String> stdout) {
     final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
         stdout.map<List<int>>((String s) => s.codeUnits));
-    return (List<String> command) => MockProcess(stdout: stdoutStream);
+    return (List<String> command) => FakeProcess(stdout: stdoutStream);
   }
 
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
       androidSdk: null,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(androidWorkflow.canLaunchDevices, false);
@@ -64,6 +65,7 @@ void main() {
     final AndroidWorkflow androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
       androidSdk: androidSdk,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(androidWorkflow.canLaunchDevices, false);
@@ -71,6 +73,18 @@ void main() {
     expect(androidWorkflow.canListEmulators, false);
   });
 
+  // Android Studio is not currently supported on Linux Arm64 hosts.
+  testWithoutContext('Not supported AndroidStudio on Linux Arm Hosts', () {
+    final MockAndroidSdk androidSdk = MockAndroidSdk();
+    when(androidSdk.adbPath).thenReturn(null);
+    final AndroidWorkflow androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdk: androidSdk,
+      operatingSystemUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
+
+    expect(androidWorkflow.appliesToHostPlatform, false);
+  });
 
   testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
     processManager.canRunSucceeds = false;
@@ -395,4 +409,18 @@ void main() {
       true,
     );
   });
+}
+
+class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
+  CustomFakeOperatingSystemUtils({
+    HostPlatform hostPlatform = HostPlatform.linux_x64
+  })  : _hostPlatform = hostPlatform;
+
+  final HostPlatform _hostPlatform;
+
+  @override
+  String get name => 'Linux';
+
+  @override
+  HostPlatform get hostPlatform => _hostPlatform;
 }

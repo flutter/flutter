@@ -115,7 +115,7 @@ void main() {
   });
 
   testUsingContext('VmService registers flutterMemoryInfo service', () async {
-    final MockDevice mockDevice = MockDevice();
+    final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
     setUpVmService(
@@ -183,7 +183,7 @@ void main() {
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => MockFlutterVersion(),
+    FlutterVersion: () => FakeFlutterVersion(),
   });
 
   testUsingContext('VMService prints messages for connection failures', () {
@@ -467,11 +467,11 @@ void main() {
   });
 }
 
-class MockDevice extends Mock implements Device {}
 class MockVMService extends Mock implements vm_service.VmService {}
-class MockFlutterVersion extends Mock implements FlutterVersion {
+class FakeDevice extends Fake implements Device {}
+class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
+  Map<String, Object> toJson() => const <String, Object>{'Fake': 'Version'};
 }
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].

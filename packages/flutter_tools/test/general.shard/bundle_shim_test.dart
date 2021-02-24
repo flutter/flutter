@@ -35,7 +35,7 @@ void main() {
     });
     await buildWithAssemble(
       buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       outputDir: 'example',
       targetPlatform: TargetPlatform.ios,
@@ -57,7 +57,7 @@ void main() {
 
     expect(() => buildWithAssemble(
       buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: 'lib/main.dart',
       outputDir: 'example',
       targetPlatform: TargetPlatform.linux_x64,

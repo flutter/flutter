@@ -34,6 +34,9 @@ void main() {
   });
 
   testWidgets('CheckboxListTile checkColor test', (WidgetTester tester) async {
+    const Color checkBoxBorderColor = Color(0xff1e88e5);
+    Color checkBoxCheckColor = const Color(0xffFFFFFF);
+
     Widget buildFrame(Color? color) {
       return wrap(
         child: CheckboxListTile(
@@ -50,11 +53,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: checkBoxBorderColor)..path(color: checkBoxCheckColor));
 
-    await tester.pumpWidget(buildFrame(const Color(0xFF000000)));
+    checkBoxCheckColor = const Color(0xFF000000);
+
+    await tester.pumpWidget(buildFrame(checkBoxCheckColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: checkBoxBorderColor)..path(color: checkBoxCheckColor));
   });
 
   testWidgets('CheckboxListTile activeColor test', (WidgetTester tester) async {
@@ -76,11 +81,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFF000000)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF)));
+    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
   });
 
   testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {

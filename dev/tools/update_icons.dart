@@ -174,12 +174,12 @@ void main(List<String> args) {
     stderr.writeln('Error: Icons file not found: ${iconClassFile.path}');
     exit(1);
   }
-  final File newCodepointsFile = File(path.absolute(path.normalize(argResults[_newCodepointsPathOption] as String)));
+  final File newCodepointsFile = File(argResults[_newCodepointsPathOption] as String);
   if (!newCodepointsFile.existsSync()) {
     stderr.writeln('Error: New codepoints file not found: ${newCodepointsFile.path}');
     exit(1);
   }
-  final File oldCodepointsFile = File(path.absolute(argResults[_oldCodepointsPathOption] as String));
+  final File oldCodepointsFile = File(argResults[_oldCodepointsPathOption] as String);
   if (!oldCodepointsFile.existsSync()) {
     stderr.writeln('Error: Old codepoints file not found: ${oldCodepointsFile.path}');
     exit(1);

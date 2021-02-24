@@ -77,11 +77,7 @@ void main() {
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
 
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: sourceMemoryFs,
-        platform: FakePlatform(),
-      );
-      fsUtils.copyDirectorySync(sourceDirectory, targetDirectory);
+      copyDirectory(sourceDirectory, targetDirectory);
 
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
@@ -97,10 +93,6 @@ void main() {
 
     testWithoutContext('Skip files if shouldCopyFile returns false', () {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-      );
       final Directory origin = fileSystem.directory('/origin');
       origin.createSync();
       fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
@@ -109,7 +101,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
       final Directory destination = fileSystem.directory('/destination');
-      fsUtils.copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+      copyDirectory(origin, destination, shouldCopyFile: (File origin, File dest) {
         return origin.basename == 'b.txt';
       });
 

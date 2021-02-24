@@ -30,6 +30,7 @@ import '../version.dart';
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
+    bool verboseHelp = false,
     PersistentToolState persistentToolState,
     Logger logger,
     ProcessManager processManager,
@@ -46,14 +47,17 @@ class DowngradeCommand extends FlutterCommand {
        _fileSystem = fileSystem {
     argParser.addOption(
       'working-directory',
-      hide: true,
-      help: 'Override the downgrade working directory for integration testing.'
+      hide: !verboseHelp,
+      help: 'Override the downgrade working directory. '
+            'This is only intended to enable integration testing of the tool itself.'
     );
     argParser.addFlag(
       'prompt',
       defaultsTo: true,
-      hide: true,
-      help: 'Disable the downgrade prompt for integration testing.'
+      hide: !verboseHelp,
+      help: 'Show the downgrade prompt. '
+            'The ability to disable this using "--no-prompt" is only provided for '
+            'integration testing of the tool itself.'
     );
   }
 
@@ -74,7 +78,7 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Note: commands do not necessarily have access to the correct zone injected
+    // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
     _terminal ??= globals.terminal;

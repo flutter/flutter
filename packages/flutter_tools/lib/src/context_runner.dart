@@ -8,9 +8,11 @@ import 'dart:async';
 
 import 'package:process/process.dart';
 
+import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
+import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -77,6 +79,15 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      AndroidBuilder: () => AndroidGradleBuilder(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts,
+        usage: globals.flutterUsage,
+        gradleUtils: globals.gradleUtils,
+        platform: globals.platform,
+      ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
@@ -102,6 +113,7 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
+        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => ApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -114,6 +126,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
+        operatingSystemUtils: globals.os,
       ),
       AssetBundleFactory: () {
         return AssetBundleFactory.defaultInstance(
@@ -212,7 +225,13 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fuchsiaArtifacts: globals.fuchsiaArtifacts,
       ),
-      GradleUtils: () => GradleUtils(),
+      GradleUtils: () => GradleUtils(
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        cache: globals.cache,
+      ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,

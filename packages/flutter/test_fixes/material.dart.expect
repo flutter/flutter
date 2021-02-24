@@ -166,4 +166,12 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/68905
   MaterialBasedCupertinoThemeData.resolveFrom(context);
   MaterialBasedCupertinoThemeData.resolveFrom(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  TextField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  TextField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  final TextField textField;
+  textField.maxLengthEnforcement;
+  TextFormField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  TextFormField(maxLengthEnforcement: MaxLengthEnforcement.none);
 }

@@ -223,7 +223,7 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
-  /// Creates an AndroidPointerProperties.
+  /// Creates an [AndroidPointerProperties] object.
   ///
   /// All parameters must not be null.
   const AndroidPointerProperties({

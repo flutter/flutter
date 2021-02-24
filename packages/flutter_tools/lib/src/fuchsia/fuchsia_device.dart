@@ -211,7 +211,6 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     final String name = words[1];
     final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
       name,
-      local: false,
     );
     if (resolvedHost == null) {
       _logger.printError('Failed to resolve host for Fuchsia device `$name`');
@@ -297,14 +296,7 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: true,
-    );
-    if (host == null) {
-      globals.printError('Failed to resolve host for Fuchsia device');
-      return LaunchResult.failed();
-    }
+    final String host = await hostAddress;
     // Find out who the device thinks we are.
     final int port = await globals.os.findFreePort();
     if (port == 0) {

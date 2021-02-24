@@ -49,11 +49,11 @@ class TestCommand extends FlutterCommand {
       )
       ..addOption('tags',
         abbr: 't',
-        help: 'Run only tests associated with tags',
+        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
       )
       ..addOption('exclude-tags',
         abbr: 'x',
-        help: 'Run only tests WITHOUT given tags',
+        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
       )
       ..addFlag('start-paused',
         defaultsTo: false,
@@ -63,12 +63,16 @@ class TestCommand extends FlutterCommand {
               'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
+      ..addFlag('run-skipped',
+        defaultsTo: false,
+        help: 'Run skipped tests instead of skipping them.',
+      )
       ..addFlag('disable-service-auth-codes',
-        hide: !verboseHelp,
         defaultsTo: false,
         negatable: false,
-        help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).',
+        hide: !verboseHelp,
+        help: '(deprecated) Allow connections to the VM service without using authentication codes. '
+              '(Not recommended! This can open your device to remote code execution attacks!)'
       )
       ..addFlag('coverage',
         defaultsTo: false,
@@ -79,11 +83,11 @@ class TestCommand extends FlutterCommand {
         defaultsTo: false,
         negatable: false,
         help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
-              'Implies collecting coverage data. (Requires lcov)',
+              'Implies collecting coverage data. (Requires lcov.)',
       )
       ..addFlag('ipv6',
         negatable: false,
-        hide: true,
+        hide: !verboseHelp,
         help: 'Whether to use IPv6 for the test harness server socket.',
       )
       ..addOption('coverage-path',
@@ -93,12 +97,12 @@ class TestCommand extends FlutterCommand {
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
-        help: 'Handle machine structured JSON command input\n'
+        help: 'Handle machine structured JSON command input '
               'and provide output and progress in machine friendly format.',
       )
       ..addFlag('update-goldens',
         negatable: false,
-        help: 'Whether matchesGoldenFile() calls within your test methods should '
+        help: 'Whether "matchesGoldenFile()" calls within your test methods should '
               'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',
@@ -110,8 +114,9 @@ class TestCommand extends FlutterCommand {
       ..addFlag('test-assets',
         defaultsTo: true,
         negatable: true,
-        help: 'Whether to build the assets bundle for testing.\n'
-              'Consider using --no-test-assets if assets are not required.',
+        help: 'Whether to build the assets bundle for testing. '
+              'This takes additional time before running the tests. '
+              'Consider using "--no-test-assets" if assets are not required.',
       )
       // --platform is not supported to be used by Flutter developers. It only
       // exists to test the Flutter framework itself and may be removed entirely
@@ -119,33 +124,47 @@ class TestCommand extends FlutterCommand {
       // `package:integration_test` instead.
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
-        hide: true,
+        hide: !verboseHelp,
         defaultsTo: 'tester',
+        help: 'Selects the test backend.',
+        allowedHelp: <String, String>{
+          'tester': 'Run tests using the default VM-based test environment.',
+          'chrome': '(deprecated) Run tests using the Google Chrome web browser. '
+                    'This value is intended for testing the Flutter framework '
+                    'itself and may be removed at any time.',
+        },
       )
       ..addOption('test-randomize-ordering-seed',
-        help: 'The seed to randomize the execution order of test cases.\n'
-              'Must be a 32bit unsigned integer or "random".\n'
-              'If "random", pick a random seed to use.\n'
-              'If not passed, do not randomize test case execution order.',
+        help: 'The seed to randomize the execution order of test cases within test files. '
+              'Must be a 32bit unsigned integer or the string "random", '
+              'which indicates that a seed should be selected randomly. '
+              'By default, tests run in the order they are declared.',
       )
       ..addFlag('enable-vmservice',
         defaultsTo: false,
         hide: !verboseHelp,
-        help: 'Enables the vmservice without --start-paused. This flag is '
-              'intended for use with tests that will use dart:developer to '
-              'interact with the vmservice at runtime.\n'
-              'This flag is ignored if --start-paused or coverage are requested. '
-              'The vmservice will be enabled no matter what in those cases.'
+        help: 'Enables the VM service without "--start-paused". This flag is '
+              'intended for use with tests that will use "dart:developer" to '
+              'interact with the VM service at runtime.\n'
+              'This flag is ignored if "--start-paused" or coverage are requested, as '
+              'the VM service will be enabled in those cases regardless.'
       )
       ..addOption('reporter',
         abbr: 'r',
         defaultsTo: 'compact',
-        help: 'Set how to print test results.\n'
-        '[compact] (default)         A single line, updated continuously.\n'
-        '[expanded]                  A separate line for each update.\n'
-        '[json]                      A machine-readable format (see https://dart.dev/go/test-docs/json_reporter.md).\n')
+        help: 'Set how to print test results.',
+        allowed: <String>['compact', 'expanded', 'json'],
+        allowedHelp: <String, String>{
+          'compact':  'A single line that updates dynamically.',
+          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
+        },
+      )
       ..addOption('timeout',
-        help: 'The default test timeout. For example: 15s, 2x, none. Defaults to "30s"',
+        help: 'The default test timeout, specified either '
+              'in seconds (e.g. "60s"), '
+              'as a multiplier of the default timeout (e.g. "2x"), '
+              'or as the string "none" to disable the timeout entirely.',
         defaultsTo: '30s',
       );
       addDdsOptions(verboseHelp: verboseHelp);
@@ -294,6 +313,7 @@ class TestCommand extends FlutterCommand {
       randomSeed: stringArg('test-randomize-ordering-seed'),
       reporter: stringArg('reporter'),
       timeout: stringArg('timeout'),
+      runSkipped: boolArg('run-skipped'),
     );
 
     if (collector != null) {

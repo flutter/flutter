@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:clock/clock.dart';
@@ -897,7 +896,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
-    buildOwner!.focusManager = FocusManager();
+    buildOwner!.focusManager.dispose();
+    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.

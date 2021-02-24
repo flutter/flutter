@@ -41,6 +41,22 @@ import 'theme_data.dart';
 /// outlined buttons in an app can be overridden with the [Theme]'s
 /// [ThemeData.outlinedButtonTheme] property.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// Here is an example of a basic [OutlinedButton].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return OutlinedButton(
+///     onPressed: () {
+///       print('Received click');
+///     },
+///     child: const Text('Click Me'),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// The static [styleFrom] method is a convenient way to create a
 /// outlined button [ButtonStyle] from simple values.
 ///

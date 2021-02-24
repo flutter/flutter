@@ -434,7 +434,7 @@ abstract class PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a [FadeUpwardsPageTransitionsBuilder].
+  /// Constructs a page transition animation that slides the page up.
   const FadeUpwardsPageTransitionsBuilder();
 
   @override
@@ -461,7 +461,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a [OpenUpwardsPageTransitionsBuilder].
+  /// Constructs a page transition animation that matches the transition used on
+  /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
 
   @override
@@ -492,7 +493,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a [ZoomPageTransitionsBuilder].
+  /// Constructs a page transition animation that matches the transition used on
+  /// Android 10.
   const ZoomPageTransitionsBuilder();
 
   @override
@@ -522,7 +524,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [ZoomPageTransitionsBuilder], which defines a page transition similar
 ///    to the one provided in Android 10.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a [CupertinoPageTransitionsBuilder].
+  /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
 
   @override
@@ -558,12 +560,12 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 @immutable
 class PageTransitionsTheme with Diagnosticable {
-  /// Construct a PageTransitionsTheme.
+  /// Constructs an object that selects a transition based on the platform.
   ///
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder>? builders }) : _builders = builders;
+  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -574,8 +576,8 @@ class PageTransitionsTheme with Diagnosticable {
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
-  Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders ?? _defaultBuilders;
-  final Map<TargetPlatform, PageTransitionsBuilder>? _builders;
+  Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
+  final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
   /// Delegates to the builder for the current [ThemeData.platform]
   /// or [FadeUpwardsPageTransitionsBuilder].

@@ -43,7 +43,7 @@ if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
 }
 $dartZipName = "dart-sdk-windows-x64.zip"
-$dartSdkUrl = "$dartSdkBaseUrl/flutter_infra/flutter/$engineVersion/$dartZipName"
+$dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"
 
 if (Test-Path $dartSdkPath) {
     # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).

@@ -435,7 +435,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           // (for example, kernel binary files produced from previous run).
           globals.fs.directory(outputDir).deleteSync(recursive: true);
         }
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           globals.fs.directory(expectedOutputDirectory),
           globals.fs.directory(outputDir),
         );

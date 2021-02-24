@@ -41,9 +41,12 @@ const List<Target> _kDefaultTargets = <Target>[
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
-  DebugBundleLinuxAssets(),
-  ProfileBundleLinuxAssets(),
-  ReleaseBundleLinuxAssets(),
+  DebugBundleLinuxAssets(TargetPlatform.linux_x64),
+  DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
+  ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
+  ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
+  ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
+  ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
   WebServiceWorker(),
   ReleaseAndroidApplication(),
@@ -70,14 +73,20 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseBundleWindowsAssets(),
 ];
 
+// TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames
+// and just switch to arguments that use the regular style, which still supporting the old names.
+// When fixing this, remove the hack in test/general.shard/args_test.dart that ignores these names.
+const bool useLegacyNames = true;
+
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand() {
+  AssembleCommand({ bool verboseHelp = false }) {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
-      help: 'Allows passing configuration to a target with --define=target=key=value.',
+      valueHelp: 'target=key=value',
+      help: 'Allows passing configuration to a target, as in "--define=target=key=value".',
     );
     argParser.addOption(
       'performance-measurement-file',
@@ -86,28 +95,28 @@ class AssembleCommand extends FlutterCommand {
     argParser.addMultiOption(
       'input',
       abbr: 'i',
-      help: 'Allows passing additional inputs with --input=key=value. Unlike '
-      'defines, additional inputs do not generate a new configuration, instead '
+      help: 'Allows passing additional inputs with "--input=key=value". Unlike '
+      'defines, additional inputs do not generate a new configuration; instead '
       'they are treated as dependencies of the targets that use them.'
     );
-    argParser.addOption('depfile', help: 'A file path where a depfile will be written. '
-      'This contains all build inputs and outputs in a make style syntax'
+    argParser.addOption('depfile',
+      help: 'A file path where a depfile will be written. '
+            'This contains all build inputs and outputs in a Make-style syntax.'
     );
-    argParser.addOption('build-inputs', help: 'A file path where a newline '
-        'separated file containing all inputs used will be written after a build.'
-        ' This file is not included as a build input or output. This file is not'
-        ' written if the build fails for any reason.');
-    argParser.addOption('build-outputs', help: 'A file path where a newline '
-        'separated file containing all outputs used will be written after a build.'
-        ' This file is not included as a build input or output. This file is not'
-        ' written if the build fails for any reason.');
+    argParser.addOption('build-inputs', help: 'A file path where a newline-separated '
+        'file containing all inputs used will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.');
+    argParser.addOption('build-outputs', help: 'A file path where a newline-separated '
+        'file containing all outputs created will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.');
     argParser.addOption('output', abbr: 'o', help: 'A directory where output '
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
-    argParser.addOption(kExtraGenSnapshotOptions);
-    argParser.addOption(kExtraFrontEndOptions);
-    argParser.addOption(kDartDefines);
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
+    usesDartDefineOption(useLegacyNames: useLegacyNames);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -186,7 +195,8 @@ class AssembleCommand extends FlutterCommand {
       processManager: globals.processManager,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision
+        : globals.flutterVersion.engineRevision,
+      generateDartPluginRegistry: true,
     );
     return result;
   }
@@ -202,15 +212,14 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    // Workaround for extraGenSnapshot formatting.
-    if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
+    if (argResults.wasParsed(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = (argResults[useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argResults.wasParsed(kDartDefines)) {
-      results[kDartDefines] = argResults[kDartDefines] as String;
+    if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
+      results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
-    if (argResults.wasParsed(kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] = argResults[kExtraFrontEndOptions] as String;
+    if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
     return results;
   }

@@ -118,7 +118,9 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
-    ), throwsToolExit(message: 'No macOS desktop project configured'));
+    ), throwsToolExit(message: 'No macOS desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding macOS support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,

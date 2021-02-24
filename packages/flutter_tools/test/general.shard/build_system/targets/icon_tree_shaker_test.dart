@@ -5,7 +5,7 @@
 // @dart = 2.8
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' hide Directory, File;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';

@@ -7,7 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -27,89 +26,6 @@ void main() {
 
   setUp(() {
     logger = BufferLogger.test();
-  });
-
-  // Group exists to work around https://github.com/flutter/flutter/issues/56415.
-  // Do not add more `MockProcessManager` tests.
-  group('MockProcessManager', () {
-    ProcessManager processManager;
-
-    setUp(() {
-      processManager = MockProcessManager();
-    });
-
-    group('Xcode', () {
-      Xcode xcode;
-      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-
-      setUp(() {
-        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-        xcode = Xcode.test(
-          processManager: processManager,
-          xcodeProjectInterpreter: mockXcodeProjectInterpreter,
-        );
-      });
-
-      testWithoutContext('xcodeSelectPath returns null when xcode-select is not installed', () {
-        when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
-        expect(xcode.xcodeSelectPath, isNull);
-        when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'));
-
-        expect(xcode.xcodeSelectPath, isNull);
-      });
-
-      testWithoutContext('eulaSigned is false when clang is not installed', () {
-        when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
-
-        when(processManager.runSync(<String>['which', 'sysctl']))
-            .thenReturn(ProcessResult(1, 0, '', ''));
-        when(processManager.runSync(<String>['sysctl', 'hw.optional.arm64']))
-            .thenReturn(ProcessResult(123, 1, '', ''));
-        when(processManager.runSync(<String>['xcrun', 'clang']))
-          .thenThrow(const ProcessException('xcrun', <String>['clang']));
-
-        expect(xcode.eulaSigned, isFalse);
-      });
-    });
-
-    group('xcdevice', () {
-      XCDevice xcdevice;
-      Xcode xcode;
-
-      setUp(() {
-        xcode = Xcode.test(
-          processManager: FakeProcessManager.any(),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: FakeProcessManager.any(),
-          ),
-        );
-        xcdevice = XCDevice(
-          processManager: processManager,
-          logger: logger,
-          xcode: xcode,
-          platform: null,
-          artifacts: Artifacts.test(),
-          cache: Cache.test(),
-          iproxy: IProxy.test(logger: logger, processManager: processManager),
-        );
-      });
-
-      testWithoutContext('available devices xcdevice fails', () async {
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
-          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
-
-        expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
-      });
-
-      testWithoutContext('diagnostics xcdevice fails', () async {
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
-          .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
-
-        expect(await xcdevice.getDiagnostics(), isEmpty);
-      });
-    });
   });
 
   group('FakeProcessManager', () {
@@ -197,6 +113,24 @@ void main() {
           ));
 
           expect(xcode.xcodeSelectPath, xcodePath);
+          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        });
+
+        testWithoutContext('xcodeSelectPath returns null when xcode-select is not installed', () {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['/usr/bin/xcode-select', '--print-path'],
+            exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
+          ));
+
+          expect(xcode.xcodeSelectPath, isNull);
+          expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+
+          fakeProcessManager.addCommand(FakeCommand(
+            command: const <String>['/usr/bin/xcode-select', '--print-path'],
+            exception: ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'),
+          ));
+
+          expect(xcode.xcodeSelectPath, isNull);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
@@ -341,6 +275,18 @@ void main() {
 
           expect(xcode.eulaSigned, isFalse);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+        });
+
+        testWithoutContext('eulaSigned is false when clang is not installed', () {
+          when(mockXcodeProjectInterpreter.xcrunCommand()).thenReturn(<String>['xcrun']);
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>['xcrun', 'clang'],
+              exception: ProcessException('xcrun', <String>['clang']),
+            ),
+          );
+
+          expect(xcode.eulaSigned, isFalse);
         });
 
         testWithoutContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
@@ -609,6 +555,15 @@ void main() {
           Artifacts: () => Artifacts.test(),
         });
 
+        testWithoutContext('available devices xcdevice fails', () async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            exception: ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']),
+          ));
+
+          expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
+        });
+
         testWithoutContext('uses timeout', () async {
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '20'],
@@ -737,6 +692,15 @@ void main() {
           Platform: () => macPlatform,
         });
 
+        testWithoutContext('diagnostics xcdevice fails', () async {
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            exception: ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']),
+          ));
+
+          expect(await xcdevice.getDiagnostics(), isEmpty);
+        });
+
         testUsingContext('returns error message', () async {
           const String devicesOutput = '''
 [
@@ -843,5 +807,4 @@ void main() {
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}

@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/src/extension/wait_conditions.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -390,9 +389,10 @@ mixin CommandHandlerFactory {
       text = (widget as Text).data;
     } else if (widget.runtimeType == RichText) {
       final RichText richText = widget as RichText;
-      if (richText.text.runtimeType == TextSpan) {
-        text = (richText.text as TextSpan).text;
-      }
+      text = richText.text.toPlainText(
+        includeSemanticsLabels: false,
+        includePlaceholders: false,
+      );
     } else if (widget.runtimeType == TextField) {
       text = (widget as TextField).controller?.text;
     } else if (widget.runtimeType == TextFormField) {

@@ -13,13 +13,6 @@ import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
-import '../common/error.dart';
-import '../common/frame_sync.dart';
-import '../common/health.dart';
-import '../common/message.dart';
-import 'common.dart';
-import 'driver.dart';
-import 'timeline.dart';
 
 /// An implementation of the Flutter Driver over the vmservice protocol.
 class VMServiceFlutterDriver extends FlutterDriver {
@@ -561,7 +554,7 @@ String _getWebSocketUrl(String url) {
 Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
-  late WebSocket socket;
+  WebSocket? socket;
   while (true) {
     try {
       socket = await WebSocket.connect(webSocketUrl, headers: headers);
@@ -575,7 +568,7 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
         controller.stream,
         socket.add,
         log: null,
-        disposeHandler: () => socket.close(),
+        disposeHandler: () => socket!.close(),
         streamClosed: streamClosedCompleter.future
       );
       // This call is to ensure we are able to establish a connection instead of
@@ -583,7 +576,7 @@ Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers)
       await service.getVersion();
       return service;
     } catch (e) {
-      await socket.close();
+      await socket?.close();
       if (attempts > 5) {
         _log('It is taking an unusually long time to connect to the VM...');
       }
