@@ -137,7 +137,7 @@ class ListenableEditingState extends SpannableStringBuilder {
     beginBatchEdit();
     replace(0, length(), newState.text);
 
-    if (newState.selectionStart >= 0) {
+    if (newState.hasSelection()) {
       Selection.setSelection(this, newState.selectionStart, newState.selectionEnd);
     } else {
       Selection.removeSelection(this);
