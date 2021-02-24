@@ -11,6 +11,7 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
@@ -3567,9 +3568,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   /// The created custom actions will be added to each of its semantics children
   /// to imitate how iOS adds the native accesibility actions of a UIView to its
   /// child views during the switch control mode.  
-  Map<SemanticsAction, String> get semanticsActionLabelOverrides => _semanticsActionLabelOverrides;
-  Map<SemanticsAction, String> _semanticsActionLabelOverrides;
-  set semanticsActionLabelOverrides(Map<SemanticsAction, String> value) {
+  Map<SemanticsAction, String>? get semanticsActionLabelOverrides => _semanticsActionLabelOverrides;
+  Map<SemanticsAction, String>? _semanticsActionLabelOverrides;
+  set semanticsActionLabelOverrides(Map<SemanticsAction, String>? value) {
     if (mapEquals<SemanticsAction, String>(value, _semanticsActionLabelOverrides))
       return;
     _semanticsActionLabelOverrides = value;
@@ -3634,7 +3635,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    final bool switchControlEnabled = RendererBinding.instance.window.accessibilityFeatures.switchControl;
+    final bool switchControlEnabled = RendererBinding.instance!.window.accessibilityFeatures.switchControl;
     final Map<CustomSemanticsAction, VoidCallback> overrides = <CustomSemanticsAction, VoidCallback>{};
     if (onTap != null && _isValidAction(SemanticsAction.tap))
       config.onTap = onTap;
@@ -3671,11 +3672,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
 
   void _insertSemanticsActionLabelOverride(
     SemanticsAction action,
-    Map<CustomSemanticsAction, VoidCallback> overrides
+    Map<CustomSemanticsAction, VoidCallback?> overrides
   ) {
     final CustomSemanticsAction override = CustomSemanticsAction.overridingActionLabel(
       action: action,
-      label: _semanticsActionLabelOverrides[action],
+      label: _semanticsActionLabelOverrides![action],
     );
     // Overrides do not need a handler.
     overrides[override] = null;
@@ -3683,7 +3684,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
 
   bool _hasLabelOverride(SemanticsAction action) {
     return _semanticsActionLabelOverrides == null ||
-           _semanticsActionLabelOverrides.containsKey(action);
+           _semanticsActionLabelOverrides!.containsKey(action);
   }
 
   bool _isValidAction(SemanticsAction action) {
