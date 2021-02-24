@@ -213,7 +213,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
 }) async {
   final FlutterVmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(vmService.vmService, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
   await vmService.dispose();
   return result;
 }

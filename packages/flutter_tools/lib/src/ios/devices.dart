@@ -674,11 +674,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
     try {
       // The VM service will not publish logging events unless the debug stream is being listened to.
       // Listen to this stream as a side effect.
-      unawaited(connectedVmService.vmService.streamListen('Debug'));
+      unawaited(connectedVmService.service.streamListen('Debug'));
 
       await Future.wait(<Future<void>>[
-        connectedVmService.vmService.streamListen(vm_service.EventStreams.kStdout),
-        connectedVmService.vmService.streamListen(vm_service.EventStreams.kStderr),
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStdout),
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStderr),
       ]);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
@@ -696,8 +696,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     _loggingSubscriptions.addAll(<StreamSubscription<void>>[
-      connectedVmService.vmService.onStdoutEvent.listen(logMessage),
-      connectedVmService.vmService.onStderrEvent.listen(logMessage),
+      connectedVmService.service.onStdoutEvent.listen(logMessage),
+      connectedVmService.service.onStderrEvent.listen(logMessage),
     ]);
   }
 

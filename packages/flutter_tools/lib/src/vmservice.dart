@@ -395,9 +395,9 @@ class FlutterView {
 
 /// Flutter specific VM Service functionality.
 class FlutterVmService {
-  FlutterVmService(this.vmService, {this.wsAddress, this.httpAddress});
+  FlutterVmService(this.service, {this.wsAddress, this.httpAddress});
 
-  final vm_service.VmService vmService;
+  final vm_service.VmService service;
   final Uri wsAddress;
   final Uri httpAddress;
 
@@ -407,7 +407,7 @@ class FlutterVmService {
     Map<String, dynamic> args
   }) async {
     try {
-      return await vmService.callMethod(method, isolateId: isolateId, args: args);
+      return await service.callMethod(method, isolateId: isolateId, args: args);
     } on vm_service.RPCError catch (e) {
       // If the service disappears mid-request the tool is unable to recover
       // and should begin to shutdown due to the service connection closing.
@@ -479,11 +479,11 @@ class FlutterVmService {
     @required Uri assetsDirectory,
   }) async {
     try {
-      await vmService.streamListen('Isolate');
+      await service.streamListen('Isolate');
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
-    final Future<void> onRunnable = vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
+    final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
     await callMethodWrapper(
@@ -723,7 +723,7 @@ class FlutterVmService {
     Map<String, dynamic> args,
   }) async {
     try {
-      return await vmService.callServiceExtension(method, args: args);
+      return await service.callServiceExtension(method, args: args);
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
@@ -787,7 +787,7 @@ class FlutterVmService {
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
   /// been collected.
   Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
-    return vmService.getIsolate(isolateId)
+    return service.getIsolate(isolateId)
       .catchError((dynamic error, StackTrace stackTrace) {
         return null;
       }, test: (dynamic error) {
@@ -800,7 +800,7 @@ class FlutterVmService {
   Future<vm_service.Response> createDevFS(String fsName) {
     // Call the unchecked version of `callServiceExtension` because the caller
     // has custom handling of certain RPCErrors.
-    return vmService.callServiceExtension(
+    return service.callServiceExtension(
       '_createDevFS',
       args: <String, dynamic>{'fsName': fsName},
     );
@@ -841,7 +841,7 @@ class FlutterVmService {
     // TODO(dnfield): Remove ignore once internal repo is up to date
     // https://github.com/flutter/flutter/issues/74518
     // ignore: await_only_futures
-     await vmService.dispose();
+     await service.dispose();
   }
 }
 

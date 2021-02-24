@@ -539,10 +539,10 @@ class HotRunner extends ResidentRunner {
             // disabled and then the isolate resumed.
             final List<Future<void>> breakpointRemoval = <Future<void>>[
               for (final vm_service.Breakpoint breakpoint in isolate.breakpoints)
-                device.vmService.vmService.removeBreakpoint(isolate.id, breakpoint.id)
+                device.vmService.service.removeBreakpoint(isolate.id, breakpoint.id)
             ];
             await Future.wait(breakpointRemoval);
-            await device.vmService.vmService.resume(view.uiIsolate.id);
+            await device.vmService.service.resume(view.uiIsolate.id);
           }
         }));
       }
@@ -550,12 +550,12 @@ class HotRunner extends ResidentRunner {
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
       // will not be restarted, and so they must be manually killed.
-      final vm_service.VM vm = await device.vmService.vmService.getVM();
+      final vm_service.VM vm = await device.vmService.service.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (uiIsolatesIds.contains(isolateRef.id)) {
           continue;
         }
-        operations.add(device.vmService.vmService.kill(isolateRef.id)
+        operations.add(device.vmService.service.kill(isolateRef.id)
           .catchError((dynamic error, StackTrace stackTrace) {
             // Do nothing on a SentinelException since it means the isolate
             // has already been killed.
@@ -788,10 +788,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     final String deviceEntryUri = device.devFS.baseUri
       .resolve(entryPath).toString();
-    final vm_service.VM vm = await device.vmService.vmService.getVM();
+    final vm_service.VM vm = await device.vmService.service.getVM();
     return <Future<vm_service.ReloadReport>>[
       for (final vm_service.IsolateRef isolateRef in vm.isolates)
-        device.vmService.vmService.reloadSources(
+        device.vmService.service.reloadSources(
           isolateRef.id,
           pause: pause,
           rootLibUri: deviceEntryUri,

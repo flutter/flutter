@@ -362,7 +362,7 @@ class FlutterDevice {
         ));
       }
     }
-    return vmService.vmService.onDone
+    return vmService.service.onDone
       .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
           'unhandled error waiting for vm service exit:\n $error',
@@ -553,7 +553,7 @@ class FlutterDevice {
   }
 
   Future<void> initLogReader() async {
-    final vm_service.VM vm = await vmService.vmService.getVM();
+    final vm_service.VM vm = await vmService.service.getVM();
     final DeviceLogReader logReader = await device.getLogReader(app: package);
     logReader.appPid = vm.pid;
   }
@@ -1272,7 +1272,7 @@ abstract class ResidentRunner {
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
-      unawaited(device.vmService.vmService.onDone.then<void>(
+      unawaited(device.vmService.service.onDone.then<void>(
         _serviceProtocolDone,
         onError: _serviceProtocolError,
       ).whenComplete(_serviceDisconnected));

@@ -235,7 +235,7 @@ void main() {
         },
       ),
     ]);
-    waitForExtension(fakeVmServiceHost.vmService.vmService, 'foo');
+    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
   });
 
   testWithoutContext('wait for extension handles no isolates', () {
@@ -269,7 +269,7 @@ void main() {
         ),
       ),
     ]);
-    waitForExtension(fakeVmServiceHost.vmService.vmService, 'foo');
+    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
   });
 }
 
