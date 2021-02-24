@@ -140,6 +140,16 @@ class TestCommand extends FlutterCommand {
               'which indicates that a seed should be selected randomly. '
               'By default, tests run in the order they are declared.',
       )
+      ..addOption('total-shards',
+        help: 'Tests can be sharded with the "--total-shards" and "--shard-index" '
+              'arguments, allowing you to split up your test suites and run '
+              'them separately.'
+      )
+      ..addOption('shard-index',
+          help: 'Tests can be sharded with the "--total-shards" and "--shard-index" '
+              'arguments, allowing you to split up your test suites and run '
+              'them separately.'
+      )
       ..addFlag('enable-vmservice',
         defaultsTo: false,
         hide: !verboseHelp,
@@ -265,6 +275,27 @@ class TestCommand extends FlutterCommand {
       ];
     }
 
+    final int shardIndex = int.tryParse(stringArg('shard-index') ?? '');
+    if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
+      throwToolExit(
+          'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
+    }
+
+    final int totalShards = int.tryParse(stringArg('total-shards') ?? '');
+    if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
+      throwToolExit(
+          'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
+    }
+
+    if (totalShards != null && shardIndex == null) {
+      throwToolExit(
+          'If you set --total-shards you need to also set --shard-index.');
+    }
+    if (shardIndex != null && totalShards == null) {
+      throwToolExit(
+          'If you set --shard-index you need to also set --total-shards.');
+    }
+
     final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
@@ -314,6 +345,8 @@ class TestCommand extends FlutterCommand {
       reporter: stringArg('reporter'),
       timeout: stringArg('timeout'),
       runSkipped: boolArg('run-skipped'),
+      shardIndex: shardIndex,
+      totalShards: totalShards,
     );
 
     if (collector != null) {

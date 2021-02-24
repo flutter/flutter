@@ -59,6 +59,52 @@ void main() {
     Cache: () => FakeCache(),
   });
 
+  group('shard-index and total-shards', () {
+    testUsingContext('with the params they are Piped to package:test',
+        () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner =
+          createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--total-shards=1',
+        '--shard-index=2',
+        '--no-pub',
+      ]);
+
+      expect(fakePackageTest.lastArgs, contains('--total-shards=1'));
+      expect(fakePackageTest.lastArgs, contains('--shard-index=2'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => FakeCache(),
+    });
+
+    testUsingContext('without the params they not Piped to package:test',
+        () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner =
+          createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+
+      expect(fakePackageTest.lastArgs, isNot(contains('--total-shards')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--shard-index')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => FakeCache(),
+    });
+  });
+
   testUsingContext('Supports coverage and machine', () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
@@ -216,6 +262,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String reporter,
     String timeout,
     bool runSkipped = false,
+    int shardIndex,
+    int totalShards,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;
