@@ -306,57 +306,13 @@ class InputConnectionAdaptor extends BaseInputConnection
 
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
       if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
-        int selStart = Selection.getSelectionStart(mEditable);
-        int selEnd = Selection.getSelectionEnd(mEditable);
-        if (selStart == selEnd && !event.isShiftPressed()) {
-          int newSel = Math.max(flutterTextUtils.getOffsetBefore(mEditable, selStart), 0);
-          setSelection(newSel, newSel);
-        } else {
-          int newSelEnd = Math.max(flutterTextUtils.getOffsetBefore(mEditable, selEnd), 0);
-          setSelection(selStart, newSelEnd);
-        }
-        return true;
+        return handleHorizontalMovement(true, event.isShiftPressed());
       } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
-        int selStart = Selection.getSelectionStart(mEditable);
-        int selEnd = Selection.getSelectionEnd(mEditable);
-        if (selStart == selEnd && !event.isShiftPressed()) {
-          int newSel =
-              Math.min(flutterTextUtils.getOffsetAfter(mEditable, selStart), mEditable.length());
-          setSelection(newSel, newSel);
-        } else {
-          int newSelEnd =
-              Math.min(flutterTextUtils.getOffsetAfter(mEditable, selEnd), mEditable.length());
-          setSelection(selStart, newSelEnd);
-        }
-        return true;
+        return handleHorizontalMovement(false, event.isShiftPressed());
       } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP) {
-        int selStart = Selection.getSelectionStart(mEditable);
-        int selEnd = Selection.getSelectionEnd(mEditable);
-        if (selStart == selEnd && !event.isShiftPressed()) {
-          Selection.moveUp(mEditable, mLayout);
-          int newSelStart = Selection.getSelectionStart(mEditable);
-          setSelection(newSelStart, newSelStart);
-        } else {
-          Selection.extendUp(mEditable, mLayout);
-          int newSelStart = Selection.getSelectionStart(mEditable);
-          int newSelEnd = Selection.getSelectionEnd(mEditable);
-          setSelection(newSelStart, newSelEnd);
-        }
-        return true;
+        return handleVerticalMovement(true, event.isShiftPressed());
       } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN) {
-        int selStart = Selection.getSelectionStart(mEditable);
-        int selEnd = Selection.getSelectionEnd(mEditable);
-        if (selStart == selEnd && !event.isShiftPressed()) {
-          Selection.moveDown(mEditable, mLayout);
-          int newSelStart = Selection.getSelectionStart(mEditable);
-          setSelection(newSelStart, newSelStart);
-        } else {
-          Selection.extendDown(mEditable, mLayout);
-          int newSelStart = Selection.getSelectionStart(mEditable);
-          int newSelEnd = Selection.getSelectionEnd(mEditable);
-          setSelection(newSelStart, newSelEnd);
-        }
-        return true;
+        return handleVerticalMovement(false, event.isShiftPressed());
         // When the enter key is pressed on a non-multiline field, consider it a
         // submit instead of a newline.
       } else if ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER
@@ -366,17 +322,20 @@ class InputConnectionAdaptor extends BaseInputConnection
         return true;
       } else {
         // Enter a character.
-        int character = event.getUnicodeChar();
-        if (character == 0) {
+        final int selStart = Selection.getSelectionStart(mEditable);
+        final int selEnd = Selection.getSelectionEnd(mEditable);
+        final int character = event.getUnicodeChar();
+        if (selStart < 0 || selEnd < 0 || character == 0) {
           return false;
         }
-        int selStart = Math.max(0, Selection.getSelectionStart(mEditable));
-        int selEnd = Math.max(0, Selection.getSelectionEnd(mEditable));
-        int selMin = Math.min(selStart, selEnd);
-        int selMax = Math.max(selStart, selEnd);
+
+        final int selMin = Math.min(selStart, selEnd);
+        final int selMax = Math.max(selStart, selEnd);
+        beginBatchEdit();
         if (selMin != selMax) mEditable.delete(selMin, selMax);
         mEditable.insert(selMin, String.valueOf((char) character));
         setSelection(selMin + 1, selMin + 1);
+        endBatchEdit();
         return true;
       }
     }
@@ -388,6 +347,60 @@ class InputConnectionAdaptor extends BaseInputConnection
       return true;
     }
     return false;
+  }
+
+  private boolean handleHorizontalMovement(boolean isLeft, boolean isShiftPressed) {
+    final int selStart = Selection.getSelectionStart(mEditable);
+    final int selEnd = Selection.getSelectionEnd(mEditable);
+
+    if (selStart < 0 || selEnd < 0) {
+      return false;
+    }
+
+    final int newSelectionEnd =
+        isLeft
+            ? Math.max(flutterTextUtils.getOffsetBefore(mEditable, selEnd), 0)
+            : Math.min(flutterTextUtils.getOffsetAfter(mEditable, selEnd), mEditable.length());
+
+    final boolean shouldCollapse = selStart == selEnd && !isShiftPressed;
+
+    if (shouldCollapse) {
+      setSelection(newSelectionEnd, newSelectionEnd);
+    } else {
+      setSelection(selStart, newSelectionEnd);
+    }
+    return true;
+  };
+
+  private boolean handleVerticalMovement(boolean isUp, boolean isShiftPressed) {
+    final int selStart = Selection.getSelectionStart(mEditable);
+    final int selEnd = Selection.getSelectionEnd(mEditable);
+
+    if (selStart < 0 || selEnd < 0) {
+      return false;
+    }
+
+    final boolean shouldCollapse = selStart == selEnd && !isShiftPressed;
+
+    beginBatchEdit();
+    if (shouldCollapse) {
+      if (isUp) {
+        Selection.moveUp(mEditable, mLayout);
+      } else {
+        Selection.moveDown(mEditable, mLayout);
+      }
+      final int newSelection = Selection.getSelectionStart(mEditable);
+      setSelection(newSelection, newSelection);
+    } else {
+      if (isUp) {
+        Selection.extendUp(mEditable, mLayout);
+      } else {
+        Selection.extendDown(mEditable, mLayout);
+      }
+      setSelection(Selection.getSelectionStart(mEditable), Selection.getSelectionEnd(mEditable));
+    }
+    endBatchEdit();
+    return true;
   }
 
   @Override

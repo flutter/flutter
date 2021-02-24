@@ -84,6 +84,7 @@ public class InputConnectionAdaptorTest {
     TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
     AndroidKeyProcessor mockKeyProcessor = mock(AndroidKeyProcessor.class);
     ListenableEditingState mEditable = new ListenableEditingState(null, testView);
+    Selection.setSelection(mEditable, 0, 0);
     ListenableEditingState spyEditable = spy(mEditable);
     EditorInfo outAttrs = new EditorInfo();
     outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
@@ -909,6 +910,37 @@ public class InputConnectionAdaptorTest {
     // Checks the caret moved right (to some following character). Selection.moveDown() behaves
     // different in tests than on a real device, we can't verify the exact position.
     assertTrue(Selection.getSelectionStart(editable) > selStart);
+  }
+
+  @Test
+  public void testSendKeyEvent_MovementKeysAreNopWhenNoSelection() {
+    // Regression test for https://github.com/flutter/flutter/issues/76283.
+    ListenableEditingState editable = sampleEditable(-1, -1);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
+    boolean didConsume = adaptor.sendKeyEvent(keyEvent);
+    assertFalse(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), -1);
+    assertEquals(Selection.getSelectionEnd(editable), -1);
+
+    keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
+    didConsume = adaptor.sendKeyEvent(keyEvent);
+    assertFalse(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), -1);
+    assertEquals(Selection.getSelectionEnd(editable), -1);
+
+    keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
+    didConsume = adaptor.sendKeyEvent(keyEvent);
+    assertFalse(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), -1);
+    assertEquals(Selection.getSelectionEnd(editable), -1);
+
+    keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
+    didConsume = adaptor.sendKeyEvent(keyEvent);
+    assertFalse(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), -1);
+    assertEquals(Selection.getSelectionEnd(editable), -1);
   }
 
   @Test

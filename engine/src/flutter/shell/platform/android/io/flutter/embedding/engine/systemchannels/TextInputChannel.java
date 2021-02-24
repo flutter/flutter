@@ -735,5 +735,11 @@ public class TextInputChannel {
       this.composingStart = composingStart;
       this.composingEnd = composingEnd;
     }
+
+    public boolean hasSelection() {
+      // When selectionStart == -1, it's guaranteed that selectionEnd will also
+      // be -1.
+      return selectionStart >= 0;
+    }
   }
 }
