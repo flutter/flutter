@@ -245,7 +245,7 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 String regenerateIconsFile(String iconData, Map<String, String> tokenPairMap) {
   final List<_Icon> newIcons = tokenPairMap.entries.map((MapEntry<String, String> entry) => _Icon(entry)).toList();
   newIcons.sort((_Icon a, _Icon b) => a.compareTo(b));
-  
+
   final StringBuffer buf = StringBuffer();
   bool generating = false;
 
@@ -386,7 +386,7 @@ class _Icon {
     fullFlutterId = flutterId + style.idSuffix();
     name = id.replaceAll('_', ' ');
   }
-  
+
   String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   String shortId;       // e.g. 5g
   String flutterId;     // e.g. five_g
