@@ -52,7 +52,7 @@ abstract class FeatureFlags {
   bool get isSingleWidgetReloadEnabled => false;
 
   /// Whether the CFE experimental invalidation strategy is enabled.
-  bool get isExperimentalInvalidationStrategyEnabled => false;
+  bool get isExperimentalInvalidationStrategyEnabled => true;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -324,15 +324,15 @@ const Feature experimentalInvalidationStrategy = Feature(
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
-    available: false,
-    enabledByDefault: false,
+    available: true,
+    enabledByDefault: true,
   ),
 );
 
