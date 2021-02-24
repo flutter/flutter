@@ -2439,22 +2439,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
     final TextSpan textSpan = buildTextSpan();
-    var text = StringBuffer();
+    final text = StringBuffer();
     textSpan.computeToPlainText(text);
     final Rect firstRect = renderEditable.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: 1)).first.toRect();
-    final double scrollOffset = _scrollController.offset;
-    if (_scrollController.position.userScrollDirection == ScrollDirection.idle && text.toString() != _cachedText ||
+    final double scrollOffset = _scrollController?.offset ?? 0.0;
+    final ScrollDirection scrollDirection = _scrollController?.position?.userScrollDirection ?? ScrollDirection.idle;
+    if (scrollDirection == ScrollDirection.idle && text.toString() != _cachedText ||
         scrollOffset != _cachedScrollOffset ||
         _cachedFirstRect != firstRect) {
       _cachedText = text.toString();
       _cachedScrollOffset = scrollOffset;
       _cachedFirstRect = firstRect;
-      final Offset rectOffset = Offset(_isMultiline ? 0.0 : -1 * _scrollController.offset, _isMultiline ? -1 * _scrollController.offset : 0.0);
+      final Offset rectOffset = Offset(_isMultiline ? 0.0 : -1 * scrollOffset, _isMultiline ? -1 * scrollOffset : 0.0);
       final List<Rect> rects = List<Rect>.generate(
               text.length, (int i) => renderEditable.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)).first.toRect())
           .map((Rect rect) => rect.translate(rectOffset.dx, rectOffset.dy))
           .toList();
-      _textInputConnection.setSelectionRects(rects);
+      _textInputConnection!.setSelectionRects(rects);
     }
   }
 
@@ -2972,7 +2973,7 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
   RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
 
   static int _nextElementIdentifier = 1;
-  String _elementIdentifier;
+  final String _elementIdentifier;
 
   @override
   String get elementIdentifier => _elementIdentifier;
@@ -3002,8 +3003,8 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
       intersection.bottomCenter,
       intersection.bottomRight
     ].any((Offset point) {
-      final result = HitTestResult();
-      WidgetsBinding.instance.hitTest(result, point);
+      final HitTestResult result = HitTestResult();
+      WidgetsBinding.instance?.hitTest(result, point);
       return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
     });
   }
