@@ -440,6 +440,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows', () async {
+    const int kSharingViolation = 32;
     final FileExceptionHandler handler = FileExceptionHandler();
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
@@ -458,7 +459,7 @@ void main() {
       .childDirectory('out')
       .childDirectory('test')
       ..createSync(recursive: true);
-    handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', 32)));
+    handler.addError(errorDirectory, FileSystemOp.delete, const FileSystemException('', '', OSError('', kSharingViolation)));
 
     await expectLater(() async => await artifactUpdater.downloadZippedTarball(
       'test message',
