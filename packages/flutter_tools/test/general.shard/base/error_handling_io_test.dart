@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:io' as io; // ignore: dart_io_import;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -852,6 +854,21 @@ void main() {
     });
   });
 
+  testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
+    final FakeSignalProcessManager fakeProcessManager = FakeSignalProcessManager();
+    final ProcessManager processManager = ErrorHandlingProcessManager(
+      delegate: fakeProcessManager,
+      platform: linuxPlatform,
+    );
+
+    expect(processManager.killPid(1, io.ProcessSignal.sigterm), true);
+    expect(processManager.killPid(3, io.ProcessSignal.sigkill), true);
+    expect(fakeProcessManager.killedProcesses, <int, io.ProcessSignal>{
+      1: io.ProcessSignal.sigterm,
+      3: io.ProcessSignal.sigkill,
+    });
+  });
+
   group('CopySync' , () {
     const int eaccess = 13;
     MockFileSystem mockFileSystem;
@@ -987,4 +1004,14 @@ void main() {
       Usage: () => TestUsage(),
     });
   });
+}
+
+class FakeSignalProcessManager extends Fake implements ProcessManager {
+  final Map<int, io.ProcessSignal> killedProcesses = <int, io.ProcessSignal>{};
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    killedProcesses[pid] = signal;
+    return true;
+  }
 }
