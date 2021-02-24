@@ -41,9 +41,6 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
   textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
   id<MTLTexture> mtlTexture =
       [darwinContextMetal.device newTextureWithDescriptor:textureDescriptor];
-  std::vector<FlutterMetalTextureHandle> textures = {
-      (__bridge FlutterMetalTextureHandle)mtlTexture,
-  };
 
   // callback to resolve the texture.
   EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
@@ -57,6 +54,11 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
     texture->height = h;
     texture->width = w;
     texture->pixel_format = FlutterMetalExternalTexturePixelFormat::kRGBA;
+
+    std::vector<FlutterMetalTextureHandle> textures = {
+        (__bridge FlutterMetalTextureHandle)mtlTexture,
+    };
+
     texture->textures = textures.data();
 
     return std::unique_ptr<FlutterMetalExternalTexture>(texture);
