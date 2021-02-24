@@ -384,7 +384,7 @@ class _Icon {
     fullFlutterId = flutterId + style.idSuffix();
     name = id.replaceAll('_', ' ');
   }
-  
+
   String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   String shortId;       // e.g. 5g
   String flutterId;     // e.g. five_g
