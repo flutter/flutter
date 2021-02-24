@@ -115,8 +115,8 @@ void main() {
     final OperatingSystemUtils osUtils = MockOperatingSystemUtils();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[failingCreateDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
     );
-    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
@@ -138,9 +138,8 @@ void main() {
         createDevFSRequest,
         failingDeleteDevFSRequest,
       ],
+      httpAddress: Uri.parse('http://localhost'),
     );
-    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
-
 
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
@@ -162,8 +161,8 @@ void main() {
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
     );
-    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
     when(residentCompiler.recompile(
       any,
@@ -215,8 +214,9 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
     );
-    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
+
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,
       'test',
@@ -258,8 +258,8 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
+      httpAddress: Uri.parse('http://localhost'),
     );
-    setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
     final DevFS devFS = DevFS(
       fakeVmServiceHost.vmService,

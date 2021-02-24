@@ -224,8 +224,9 @@ void main() {
       const Stream<String>.empty(),
       completer.complete,
     );
+    final FlutterVmService flutterVmService = FlutterVmService(vmService);
 
-    unawaited(vmService.setAssetDirectory(
+    unawaited(flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(path: 'abc', scheme: 'file'),
       viewId: 'abc',
       uiIsolateId: 'def',
@@ -249,8 +250,9 @@ void main() {
       const Stream<String>.empty(),
       completer.complete,
     );
+    final FlutterVmService flutterVmService = FlutterVmService(vmService);
 
-    unawaited(vmService.getSkSLs(
+    unawaited(flutterVmService.getSkSLs(
       viewId: 'abc',
     ));
 
@@ -266,12 +268,13 @@ void main() {
 
   testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
+    final vm_service.VmService vmService = vm_service.VmService(
       const Stream<String>.empty(),
       completer.complete,
     );
+    final FlutterVmService flutterVmService = FlutterVmService(vmService);
 
-    unawaited(vmService.flushUIThreadTasks(
+    unawaited(flutterVmService.flushUIThreadTasks(
       uiIsolateId: 'def',
     ));
 
@@ -447,13 +450,6 @@ void main() {
       isEmpty,
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  });
-
-  testWithoutContext('expandos are null safe', () {
-    vm_service.VmService vmService;
-
-    expect(vmService.httpAddress, null);
-    expect(vmService.wsAddress, null);
   });
 
   testWithoutContext('Can process log events from the vm service', () {

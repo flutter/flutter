@@ -747,6 +747,7 @@ void main() {
             },
           ),
         ],
+        httpAddress: Uri.parse('example'),
       );
       final MockFuchsiaDevice fuchsiaDevice =
         MockFuchsiaDevice('123', portForwarder, false);
@@ -766,7 +767,6 @@ void main() {
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
-      setHttpAddress(Uri.parse('example'), fakeVmServiceHost.vmService);
       return await discoveryProtocol.uri;
     }
 

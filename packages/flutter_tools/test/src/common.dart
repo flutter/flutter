@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -287,11 +288,13 @@ class NoContext implements AppContext {
 class FakeVmServiceHost {
   FakeVmServiceHost({
     @required List<VmServiceExpectation> requests,
+    Uri httpAddress,
+    Uri wsAddress,
   }) : _requests = requests {
-    _vmService = vm_service.VmService(
+    _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    );
+    ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object> request = json.decode(data) as Map<String, Object>;
@@ -331,8 +334,9 @@ class FakeVmServiceHost {
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
-  vm_service.VmService get vmService => _vmService;
-  vm_service.VmService _vmService;
+  FlutterVmService get vmService => _vmService;
+  FlutterVmService _vmService;
+
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 

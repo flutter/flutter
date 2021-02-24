@@ -132,7 +132,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runSkia(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final vm_service.VmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri);
     final vm_service.Response skp = await vmService.screenshotSkp();
     if (skp == null) {
       globals.printError(
@@ -156,7 +156,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runRasterizer(File outputFile) async {
     final Uri observatoryUri = Uri.parse(stringArg(_kObservatoryUri));
-    final vm_service.VmService vmService = await connectToVmService(observatoryUri);
+    final FlutterVmService vmService = await connectToVmService(observatoryUri);
     final vm_service.Response response = await vmService.screenshot();
     if (response == null) {
       globals.printError(

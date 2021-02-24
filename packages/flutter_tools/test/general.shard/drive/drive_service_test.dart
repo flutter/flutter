@@ -363,7 +363,7 @@ void main() {
 FlutterDriverService setUpDriverService({
   Logger logger,
   ProcessManager processManager,
-  vm_service.VmService vmService,
+  FlutterVmService vmService,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
