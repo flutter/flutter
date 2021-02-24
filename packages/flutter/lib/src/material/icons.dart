@@ -168,189 +168,6 @@ class Icons {
   // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
   // BEGIN GENERATED ICONS
 
-  /// <i class="material-icons md-36">10k</i> &#x2014; material icon named "10k".
-  static const IconData ten_k = IconData(0xe52a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">10mp</i> &#x2014; material icon named "10mp".
-  static const IconData ten_mp = IconData(0xe52b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">11mp</i> &#x2014; material icon named "11mp".
-  static const IconData eleven_mp = IconData(0xe52c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">12mp</i> &#x2014; material icon named "12mp".
-  static const IconData twelve_mp = IconData(0xe52d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">13mp</i> &#x2014; material icon named "13mp".
-  static const IconData thirteen_mp = IconData(0xe52e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">14mp</i> &#x2014; material icon named "14mp".
-  static const IconData fourteen_mp = IconData(0xe52f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">15mp</i> &#x2014; material icon named "15mp".
-  static const IconData fifteen_mp = IconData(0xe530, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">16mp</i> &#x2014; material icon named "16mp".
-  static const IconData sixteen_mp = IconData(0xe531, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">17mp</i> &#x2014; material icon named "17mp".
-  static const IconData seventeen_mp = IconData(0xe532, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">18mp</i> &#x2014; material icon named "18mp".
-  static const IconData eighteen_mp = IconData(0xe533, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">19mp</i> &#x2014; material icon named "19mp".
-  static const IconData nineteen_mp = IconData(0xe534, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">1k</i> &#x2014; material icon named "1k".
-  static const IconData one_k = IconData(0xe535, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">1k_plus</i> &#x2014; material icon named "1k plus".
-  static const IconData one_k_plus = IconData(0xe536, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">20mp</i> &#x2014; material icon named "20mp".
-  static const IconData twenty_mp = IconData(0xe537, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">21mp</i> &#x2014; material icon named "21mp".
-  static const IconData twenty_one_mp = IconData(0xe538, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">22mp</i> &#x2014; material icon named "22mp".
-  static const IconData twenty_two_mp = IconData(0xe539, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">23mp</i> &#x2014; material icon named "23mp".
-  static const IconData twenty_three_mp = IconData(0xe53a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">24mp</i> &#x2014; material icon named "24mp".
-  static const IconData twenty_four_mp = IconData(0xe53b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">2k</i> &#x2014; material icon named "2k".
-  static const IconData two_k = IconData(0xe53c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">2k_plus</i> &#x2014; material icon named "2k plus".
-  static const IconData two_k_plus = IconData(0xe53d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">2mp</i> &#x2014; material icon named "2mp".
-  static const IconData two_mp = IconData(0xe53e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">360</i> &#x2014; material icon named "360".
-  static const IconData threesixty = IconData(0xe53f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">360</i> &#x2014; material icon named "360 outlined".
-  static const IconData threesixty_outlined = IconData(0xe000, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">360</i> &#x2014; material icon named "360 rounded".
-  static const IconData threesixty_rounded = IconData(0xf02e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">360</i> &#x2014; material icon named "360 sharp".
-  static const IconData threesixty_sharp = IconData(0xeb00, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">3d_rotation</i> &#x2014; material icon named "3d rotation".
-  static const IconData threed_rotation = IconData(0xe540, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">3d_rotation</i> &#x2014; material icon named "3d rotation outlined".
-  static const IconData threed_rotation_outlined = IconData(0xe001, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">3d_rotation</i> &#x2014; material icon named "3d rotation rounded".
-  static const IconData threed_rotation_rounded = IconData(0xf02f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">3d_rotation</i> &#x2014; material icon named "3d rotation sharp".
-  static const IconData threed_rotation_sharp = IconData(0xeb01, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">3k</i> &#x2014; material icon named "3k".
-  static const IconData three_k = IconData(0xe541, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">3k_plus</i> &#x2014; material icon named "3k plus".
-  static const IconData three_k_plus = IconData(0xe542, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">3mp</i> &#x2014; material icon named "3mp".
-  static const IconData three_mp = IconData(0xe543, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">4k</i> &#x2014; material icon named "4k".
-  static const IconData four_k = IconData(0xe544, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">4k</i> &#x2014; material icon named "4k outlined".
-  static const IconData four_k_outlined = IconData(0xe002, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">4k_plus</i> &#x2014; material icon named "4k plus".
-  static const IconData four_k_plus = IconData(0xe545, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">4k</i> &#x2014; material icon named "4k rounded".
-  static const IconData four_k_rounded = IconData(0xf030, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">4k</i> &#x2014; material icon named "4k sharp".
-  static const IconData four_k_sharp = IconData(0xeb02, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">4mp</i> &#x2014; material icon named "4mp".
-  static const IconData four_mp = IconData(0xe546, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">5g</i> &#x2014; material icon named "5g".
-  static const IconData five_g = IconData(0xe547, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">5g</i> &#x2014; material icon named "5g outlined".
-  static const IconData five_g_outlined = IconData(0xe003, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">5g</i> &#x2014; material icon named "5g rounded".
-  static const IconData five_g_rounded = IconData(0xf031, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">5g</i> &#x2014; material icon named "5g sharp".
-  static const IconData five_g_sharp = IconData(0xeb03, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">5k</i> &#x2014; material icon named "5k".
-  static const IconData five_k = IconData(0xe548, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">5k_plus</i> &#x2014; material icon named "5k plus".
-  static const IconData five_k_plus = IconData(0xe549, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">5mp</i> &#x2014; material icon named "5mp".
-  static const IconData five_mp = IconData(0xe54a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart".
-  static const IconData six_ft_apart = IconData(0xe54b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart outlined".
-  static const IconData six_ft_apart_outlined = IconData(0xe004, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart rounded".
-  static const IconData six_ft_apart_rounded = IconData(0xf032, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart sharp".
-  static const IconData six_ft_apart_sharp = IconData(0xeb04, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">6k</i> &#x2014; material icon named "6k".
-  static const IconData six_k = IconData(0xe54c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">6k_plus</i> &#x2014; material icon named "6k plus".
-  static const IconData six_k_plus = IconData(0xe54d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">6mp</i> &#x2014; material icon named "6mp".
-  static const IconData six_mp = IconData(0xe54e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">7k</i> &#x2014; material icon named "7k".
-  static const IconData seven_k = IconData(0xe54f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">7k_plus</i> &#x2014; material icon named "7k plus".
-  static const IconData seven_k_plus = IconData(0xe550, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">7mp</i> &#x2014; material icon named "7mp".
-  static const IconData seven_mp = IconData(0xe551, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">8k</i> &#x2014; material icon named "8k".
-  static const IconData eight_k = IconData(0xe552, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">8k_plus</i> &#x2014; material icon named "8k plus".
-  static const IconData eight_k_plus = IconData(0xe553, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">8mp</i> &#x2014; material icon named "8mp".
-  static const IconData eight_mp = IconData(0xe554, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">9k</i> &#x2014; material icon named "9k".
-  static const IconData nine_k = IconData(0xe555, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">9k_plus</i> &#x2014; material icon named "9k plus".
-  static const IconData nine_k_plus = IconData(0xe556, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">9mp</i> &#x2014; material icon named "9mp".
-  static const IconData nine_mp = IconData(0xe557, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">ac_unit</i> &#x2014; material icon named "ac unit".
   static const IconData ac_unit = IconData(0xe558, fontFamily: 'MaterialIcons');
 
@@ -402,6 +219,15 @@ class Icons {
   /// <i class="material-icons md-36">accessibility</i> &#x2014; material icon named "accessibility".
   static const IconData accessibility = IconData(0xe55c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">accessibility</i> &#x2014; material icon named "accessibility outlined".
+  static const IconData accessibility_outlined = IconData(0xe00a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">accessibility</i> &#x2014; material icon named "accessibility rounded".
+  static const IconData accessibility_rounded = IconData(0xf038, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">accessibility</i> &#x2014; material icon named "accessibility sharp".
+  static const IconData accessibility_sharp = IconData(0xeb0a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">accessibility_new</i> &#x2014; material icon named "accessibility new".
   static const IconData accessibility_new = IconData(0xe55d, fontFamily: 'MaterialIcons');
 
@@ -414,17 +240,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">accessibility_new</i> &#x2014; material icon named "accessibility new sharp".
   static const IconData accessibility_new_sharp = IconData(0xeb09, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">accessibility</i> &#x2014; material icon named "accessibility outlined".
-  static const IconData accessibility_outlined = IconData(0xe00a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">accessibility</i> &#x2014; material icon named "accessibility rounded".
-  static const IconData accessibility_rounded = IconData(0xf038, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">accessibility</i> &#x2014; material icon named "accessibility sharp".
-  static const IconData accessibility_sharp = IconData(0xeb0a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">accessible</i> &#x2014; material icon named "accessible".
   static const IconData accessible = IconData(0xe55e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">accessible</i> &#x2014; material icon named "accessible outlined".
+  static const IconData accessible_outlined = IconData(0xe00c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">accessible</i> &#x2014; material icon named "accessible rounded".
+  static const IconData accessible_rounded = IconData(0xf03a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">accessible</i> &#x2014; material icon named "accessible sharp".
+  static const IconData accessible_sharp = IconData(0xeb0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">accessible_forward</i> &#x2014; material icon named "accessible forward".
   static const IconData accessible_forward = IconData(0xe55f, fontFamily: 'MaterialIcons');
@@ -437,15 +263,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">accessible_forward</i> &#x2014; material icon named "accessible forward sharp".
   static const IconData accessible_forward_sharp = IconData(0xeb0b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">accessible</i> &#x2014; material icon named "accessible outlined".
-  static const IconData accessible_outlined = IconData(0xe00c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">accessible</i> &#x2014; material icon named "accessible rounded".
-  static const IconData accessible_rounded = IconData(0xf03a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">accessible</i> &#x2014; material icon named "accessible sharp".
-  static const IconData accessible_sharp = IconData(0xeb0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">account_balance</i> &#x2014; material icon named "account balance".
   static const IconData account_balance = IconData(0xe560, fontFamily: 'MaterialIcons');
@@ -471,17 +288,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">account_balance_wallet</i> &#x2014; material icon named "account balance wallet sharp".
   static const IconData account_balance_wallet_sharp = IconData(0xeb0e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">account_box</i> &#x2014; material icon named "account box sharp".
+  static const IconData account_box_sharp = IconData(0xeb0f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">account_box</i> &#x2014; material icon named "account box".
   static const IconData account_box = IconData(0xe562, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">account_box</i> &#x2014; material icon named "account box outlined".
-  static const IconData account_box_outlined = IconData(0xe00f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">account_box</i> &#x2014; material icon named "account box rounded".
   static const IconData account_box_rounded = IconData(0xf03d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">account_box</i> &#x2014; material icon named "account box sharp".
-  static const IconData account_box_sharp = IconData(0xeb0f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">account_box</i> &#x2014; material icon named "account box outlined".
+  static const IconData account_box_outlined = IconData(0xe00f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">account_circle</i> &#x2014; material icon named "account circle".
   static const IconData account_circle = IconData(0xe563, fontFamily: 'MaterialIcons');
@@ -531,23 +348,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">adb</i> &#x2014; material icon named "adb sharp".
   static const IconData adb_sharp = IconData(0xeb13, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">add</i> &#x2014; material icon named "add sharp".
+  static const IconData add_sharp = IconData(0xeb21, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">add</i> &#x2014; material icon named "add".
   static const IconData add = IconData(0xe567, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">add</i> &#x2014; material icon named "add outlined".
+  static const IconData add_outlined = IconData(0xe01f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">add</i> &#x2014; material icon named "add rounded".
+  static const IconData add_rounded = IconData(0xf04f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">add_a_photo</i> &#x2014; material icon named "add a photo".
   static const IconData add_a_photo = IconData(0xe568, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">add_a_photo</i> &#x2014; material icon named "add a photo sharp".
+  static const IconData add_a_photo_sharp = IconData(0xeb14, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">add_a_photo</i> &#x2014; material icon named "add a photo outlined".
   static const IconData add_a_photo_outlined = IconData(0xe014, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">add_a_photo</i> &#x2014; material icon named "add a photo rounded".
   static const IconData add_a_photo_rounded = IconData(0xf042, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">add_a_photo</i> &#x2014; material icon named "add a photo sharp".
-  static const IconData add_a_photo_sharp = IconData(0xeb14, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">add_alarm</i> &#x2014; material icon named "add alarm".
-  static const IconData add_alarm = IconData(0xe569, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">add_alarm</i> &#x2014; material icon named "add alarm outlined".
   static const IconData add_alarm_outlined = IconData(0xe015, fontFamily: 'MaterialIcons');
@@ -557,6 +380,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">add_alarm</i> &#x2014; material icon named "add alarm sharp".
   static const IconData add_alarm_sharp = IconData(0xeb15, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">add_alarm</i> &#x2014; material icon named "add alarm".
+  static const IconData add_alarm = IconData(0xe569, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">add_alert</i> &#x2014; material icon named "add alert".
   static const IconData add_alert = IconData(0xe56a, fontFamily: 'MaterialIcons');
@@ -603,18 +429,6 @@ class Icons {
   /// <i class="material-icons md-36">add_circle</i> &#x2014; material icon named "add circle".
   static const IconData add_circle = IconData(0xe56f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline".
-  static const IconData add_circle_outline = IconData(0xe570, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline outlined".
-  static const IconData add_circle_outline_outlined = IconData(0xe019, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline rounded".
-  static const IconData add_circle_outline_rounded = IconData(0xf047, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline sharp".
-  static const IconData add_circle_outline_sharp = IconData(0xeb19, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">add_circle</i> &#x2014; material icon named "add circle outlined".
   static const IconData add_circle_outlined = IconData(0xe01a, fontFamily: 'MaterialIcons');
 
@@ -623,6 +437,18 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">add_circle</i> &#x2014; material icon named "add circle sharp".
   static const IconData add_circle_sharp = IconData(0xeb1a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline".
+  static const IconData add_circle_outline = IconData(0xe570, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline rounded".
+  static const IconData add_circle_outline_rounded = IconData(0xf047, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline sharp".
+  static const IconData add_circle_outline_sharp = IconData(0xeb19, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline outlined".
+  static const IconData add_circle_outline_outlined = IconData(0xe019, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">add_comment</i> &#x2014; material icon named "add comment".
   static const IconData add_comment = IconData(0xe571, fontFamily: 'MaterialIcons');
@@ -654,6 +480,15 @@ class Icons {
   /// <i class="material-icons md-36">add_location</i> &#x2014; material icon named "add location".
   static const IconData add_location = IconData(0xe574, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">add_location</i> &#x2014; material icon named "add location outlined".
+  static const IconData add_location_outlined = IconData(0xe01e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">add_location</i> &#x2014; material icon named "add location rounded".
+  static const IconData add_location_rounded = IconData(0xf04c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">add_location</i> &#x2014; material icon named "add location sharp".
+  static const IconData add_location_sharp = IconData(0xeb1e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">add_location_alt</i> &#x2014; material icon named "add location alt".
   static const IconData add_location_alt = IconData(0xe575, fontFamily: 'MaterialIcons');
 
@@ -666,23 +501,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">add_location_alt</i> &#x2014; material icon named "add location alt sharp".
   static const IconData add_location_alt_sharp = IconData(0xeb1d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">add_location</i> &#x2014; material icon named "add location outlined".
-  static const IconData add_location_outlined = IconData(0xe01e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">add_location</i> &#x2014; material icon named "add location rounded".
-  static const IconData add_location_rounded = IconData(0xf04c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">add_location</i> &#x2014; material icon named "add location sharp".
-  static const IconData add_location_sharp = IconData(0xeb1e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">add_moderator</i> &#x2014; material icon named "add moderator".
   static const IconData add_moderator = IconData(0xe576, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">add</i> &#x2014; material icon named "add outlined".
-  static const IconData add_outlined = IconData(0xe01f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">add_photo_alternate</i> &#x2014; material icon named "add photo alternate".
-  static const IconData add_photo_alternate = IconData(0xe577, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">add_photo_alternate</i> &#x2014; material icon named "add photo alternate outlined".
   static const IconData add_photo_alternate_outlined = IconData(0xe020, fontFamily: 'MaterialIcons');
@@ -692,6 +512,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">add_photo_alternate</i> &#x2014; material icon named "add photo alternate sharp".
   static const IconData add_photo_alternate_sharp = IconData(0xeb1f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">add_photo_alternate</i> &#x2014; material icon named "add photo alternate".
+  static const IconData add_photo_alternate = IconData(0xe577, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">add_road</i> &#x2014; material icon named "add road".
   static const IconData add_road = IconData(0xe578, fontFamily: 'MaterialIcons');
@@ -704,12 +527,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">add_road</i> &#x2014; material icon named "add road sharp".
   static const IconData add_road_sharp = IconData(0xeb20, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">add</i> &#x2014; material icon named "add rounded".
-  static const IconData add_rounded = IconData(0xf04f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">add</i> &#x2014; material icon named "add sharp".
-  static const IconData add_sharp = IconData(0xeb21, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">add_shopping_cart</i> &#x2014; material icon named "add shopping cart".
   static const IconData add_shopping_cart = IconData(0xe579, fontFamily: 'MaterialIcons');
@@ -738,17 +555,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">add_to_home_screen</i> &#x2014; material icon named "add to home screen sharp".
   static const IconData add_to_home_screen_sharp = IconData(0xeb23, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">add_to_photos</i> &#x2014; material icon named "add to photos".
-  static const IconData add_to_photos = IconData(0xe57c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">add_to_photos</i> &#x2014; material icon named "add to photos outlined".
-  static const IconData add_to_photos_outlined = IconData(0xe024, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">add_to_photos</i> &#x2014; material icon named "add to photos rounded".
   static const IconData add_to_photos_rounded = IconData(0xf052, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">add_to_photos</i> &#x2014; material icon named "add to photos sharp".
   static const IconData add_to_photos_sharp = IconData(0xeb24, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">add_to_photos</i> &#x2014; material icon named "add to photos".
+  static const IconData add_to_photos = IconData(0xe57c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">add_to_photos</i> &#x2014; material icon named "add to photos outlined".
+  static const IconData add_to_photos_outlined = IconData(0xe024, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">add_to_queue</i> &#x2014; material icon named "add to queue".
   static const IconData add_to_queue = IconData(0xe57d, fontFamily: 'MaterialIcons');
@@ -810,20 +627,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">agriculture</i> &#x2014; material icon named "agriculture sharp".
   static const IconData agriculture_sharp = IconData(0xeb29, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">airline_seat_flat</i> &#x2014; material icon named "airline seat flat sharp".
+  static const IconData airline_seat_flat_sharp = IconData(0xeb2b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">airline_seat_flat</i> &#x2014; material icon named "airline seat flat".
   static const IconData airline_seat_flat = IconData(0xe582, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled".
-  static const IconData airline_seat_flat_angled = IconData(0xe583, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled outlined".
-  static const IconData airline_seat_flat_angled_outlined = IconData(0xe02a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled rounded".
-  static const IconData airline_seat_flat_angled_rounded = IconData(0xf058, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled sharp".
-  static const IconData airline_seat_flat_angled_sharp = IconData(0xeb2a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">airline_seat_flat</i> &#x2014; material icon named "airline seat flat outlined".
   static const IconData airline_seat_flat_outlined = IconData(0xe02b, fontFamily: 'MaterialIcons');
@@ -831,8 +639,17 @@ class Icons {
   /// <i class="material-icons-round md-36">airline_seat_flat</i> &#x2014; material icon named "airline seat flat rounded".
   static const IconData airline_seat_flat_rounded = IconData(0xf059, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">airline_seat_flat</i> &#x2014; material icon named "airline seat flat sharp".
-  static const IconData airline_seat_flat_sharp = IconData(0xeb2b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled".
+  static const IconData airline_seat_flat_angled = IconData(0xe583, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled sharp".
+  static const IconData airline_seat_flat_angled_sharp = IconData(0xeb2a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled outlined".
+  static const IconData airline_seat_flat_angled_outlined = IconData(0xe02a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">airline_seat_flat_angled</i> &#x2014; material icon named "airline seat flat angled rounded".
+  static const IconData airline_seat_flat_angled_rounded = IconData(0xf058, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">airline_seat_individual_suite</i> &#x2014; material icon named "airline seat individual suite".
   static const IconData airline_seat_individual_suite = IconData(0xe584, fontFamily: 'MaterialIcons');
@@ -870,17 +687,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">airline_seat_legroom_normal</i> &#x2014; material icon named "airline seat legroom normal sharp".
   static const IconData airline_seat_legroom_normal_sharp = IconData(0xeb2e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced sharp".
+  static const IconData airline_seat_legroom_reduced_sharp = IconData(0xeb2f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced".
   static const IconData airline_seat_legroom_reduced = IconData(0xe587, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced outlined".
-  static const IconData airline_seat_legroom_reduced_outlined = IconData(0xe02f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced rounded".
   static const IconData airline_seat_legroom_reduced_rounded = IconData(0xf05d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced sharp".
-  static const IconData airline_seat_legroom_reduced_sharp = IconData(0xeb2f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">airline_seat_legroom_reduced</i> &#x2014; material icon named "airline seat legroom reduced outlined".
+  static const IconData airline_seat_legroom_reduced_outlined = IconData(0xe02f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">airline_seat_recline_extra</i> &#x2014; material icon named "airline seat recline extra".
   static const IconData airline_seat_recline_extra = IconData(0xe588, fontFamily: 'MaterialIcons');
@@ -945,14 +762,14 @@ class Icons {
   /// <i class="material-icons md-36">airplanemode_on</i> &#x2014; material icon named "airplanemode on".
   static const IconData airplanemode_on = IconData(0xe58a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">airplanemode_on</i> &#x2014; material icon named "airplanemode on outlined".
-  static const IconData airplanemode_on_outlined = IconData(0xe032, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">airplanemode_on</i> &#x2014; material icon named "airplanemode on rounded".
   static const IconData airplanemode_on_rounded = IconData(0xf060, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">airplanemode_on</i> &#x2014; material icon named "airplanemode on sharp".
   static const IconData airplanemode_on_sharp = IconData(0xeb32, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">airplanemode_on</i> &#x2014; material icon named "airplanemode on outlined".
+  static const IconData airplanemode_on_outlined = IconData(0xe032, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">airplay</i> &#x2014; material icon named "airplay".
   static const IconData airplay = IconData(0xe58c, fontFamily: 'MaterialIcons');
@@ -978,8 +795,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">airport_shuttle</i> &#x2014; material icon named "airport shuttle sharp".
   static const IconData airport_shuttle_sharp = IconData(0xeb35, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">alarm</i> &#x2014; material icon named "alarm sharp".
+  static const IconData alarm_sharp = IconData(0xeb39, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">alarm</i> &#x2014; material icon named "alarm".
   static const IconData alarm = IconData(0xe58e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">alarm</i> &#x2014; material icon named "alarm outlined".
+  static const IconData alarm_outlined = IconData(0xe039, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">alarm</i> &#x2014; material icon named "alarm rounded".
+  static const IconData alarm_rounded = IconData(0xf067, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">alarm_add</i> &#x2014; material icon named "alarm add".
   static const IconData alarm_add = IconData(0xe58f, fontFamily: 'MaterialIcons');
@@ -1008,23 +834,14 @@ class Icons {
   /// <i class="material-icons md-36">alarm_on</i> &#x2014; material icon named "alarm on".
   static const IconData alarm_on = IconData(0xe591, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">alarm_on</i> &#x2014; material icon named "alarm on outlined".
-  static const IconData alarm_on_outlined = IconData(0xe038, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">alarm_on</i> &#x2014; material icon named "alarm on rounded".
   static const IconData alarm_on_rounded = IconData(0xf066, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">alarm_on</i> &#x2014; material icon named "alarm on sharp".
   static const IconData alarm_on_sharp = IconData(0xeb38, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">alarm</i> &#x2014; material icon named "alarm outlined".
-  static const IconData alarm_outlined = IconData(0xe039, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">alarm</i> &#x2014; material icon named "alarm rounded".
-  static const IconData alarm_rounded = IconData(0xf067, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">alarm</i> &#x2014; material icon named "alarm sharp".
-  static const IconData alarm_sharp = IconData(0xeb39, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">alarm_on</i> &#x2014; material icon named "alarm on outlined".
+  static const IconData alarm_on_outlined = IconData(0xe038, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">album</i> &#x2014; material icon named "album".
   static const IconData album = IconData(0xe592, fontFamily: 'MaterialIcons');
@@ -1137,14 +954,14 @@ class Icons {
   /// <i class="material-icons md-36">android</i> &#x2014; material icon named "android".
   static const IconData android = IconData(0xe59b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">android</i> &#x2014; material icon named "android sharp".
+  static const IconData android_sharp = IconData(0xeb43, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">android</i> &#x2014; material icon named "android outlined".
   static const IconData android_outlined = IconData(0xe043, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">android</i> &#x2014; material icon named "android rounded".
   static const IconData android_rounded = IconData(0xf071, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">android</i> &#x2014; material icon named "android sharp".
-  static const IconData android_sharp = IconData(0xeb43, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">animation</i> &#x2014; material icon named "animation".
   static const IconData animation = IconData(0xe59c, fontFamily: 'MaterialIcons');
@@ -1251,20 +1068,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">archive</i> &#x2014; material icon named "archive sharp".
   static const IconData archive_sharp = IconData(0xeb4b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">arrow_back</i> &#x2014; material icon named "arrow back sharp".
+  static const IconData arrow_back_sharp = IconData(0xeb4d, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back".
   static const IconData arrow_back = IconData(0xe5a7, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".
-  static const IconData arrow_back_ios = IconData(0xe5a8, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios outlined".
-  static const IconData arrow_back_ios_outlined = IconData(0xe04c, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios rounded".
-  static const IconData arrow_back_ios_rounded = IconData(0xf07a, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios sharp".
-  static const IconData arrow_back_ios_sharp = IconData(0xeb4c, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-outlined md-36">arrow_back</i> &#x2014; material icon named "arrow back outlined".
   static const IconData arrow_back_outlined = IconData(0xe04d, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -1272,8 +1080,17 @@ class Icons {
   /// <i class="material-icons-round md-36">arrow_back</i> &#x2014; material icon named "arrow back rounded".
   static const IconData arrow_back_rounded = IconData(0xf07b, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-sharp md-36">arrow_back</i> &#x2014; material icon named "arrow back sharp".
-  static const IconData arrow_back_sharp = IconData(0xeb4d, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-round md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios rounded".
+  static const IconData arrow_back_ios_rounded = IconData(0xf07a, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios sharp".
+  static const IconData arrow_back_ios_sharp = IconData(0xeb4c, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".
+  static const IconData arrow_back_ios = IconData(0xe5a8, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios outlined".
+  static const IconData arrow_back_ios_outlined = IconData(0xe04c, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">arrow_circle_down</i> &#x2014; material icon named "arrow circle down".
   static const IconData arrow_circle_down = IconData(0xe5a9, fontFamily: 'MaterialIcons');
@@ -1314,6 +1131,15 @@ class Icons {
   /// <i class="material-icons md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down".
   static const IconData arrow_drop_down = IconData(0xe5ac, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down outlined".
+  static const IconData arrow_drop_down_outlined = IconData(0xe052, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down rounded".
+  static const IconData arrow_drop_down_rounded = IconData(0xf080, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down sharp".
+  static const IconData arrow_drop_down_sharp = IconData(0xeb52, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">arrow_drop_down_circle</i> &#x2014; material icon named "arrow drop down circle".
   static const IconData arrow_drop_down_circle = IconData(0xe5ad, fontFamily: 'MaterialIcons');
 
@@ -1326,29 +1152,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">arrow_drop_down_circle</i> &#x2014; material icon named "arrow drop down circle sharp".
   static const IconData arrow_drop_down_circle_sharp = IconData(0xeb51, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down outlined".
-  static const IconData arrow_drop_down_outlined = IconData(0xe052, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down rounded".
-  static const IconData arrow_drop_down_rounded = IconData(0xf080, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">arrow_drop_down</i> &#x2014; material icon named "arrow drop down sharp".
-  static const IconData arrow_drop_down_sharp = IconData(0xeb52, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up".
-  static const IconData arrow_drop_up = IconData(0xe5ae, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up outlined".
   static const IconData arrow_drop_up_outlined = IconData(0xe053, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up rounded".
-  static const IconData arrow_drop_up_rounded = IconData(0xf081, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up sharp".
   static const IconData arrow_drop_up_sharp = IconData(0xeb53, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up".
+  static const IconData arrow_drop_up = IconData(0xe5ae, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">arrow_drop_up</i> &#x2014; material icon named "arrow drop up rounded".
+  static const IconData arrow_drop_up_rounded = IconData(0xf081, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">arrow_forward</i> &#x2014; material icon named "arrow forward".
   static const IconData arrow_forward = IconData(0xe5af, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">arrow_forward</i> &#x2014; material icon named "arrow forward outlined".
+  static const IconData arrow_forward_outlined = IconData(0xe055, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">arrow_forward</i> &#x2014; material icon named "arrow forward rounded".
+  static const IconData arrow_forward_rounded = IconData(0xf083, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">arrow_forward</i> &#x2014; material icon named "arrow forward sharp".
+  static const IconData arrow_forward_sharp = IconData(0xeb55, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios".
   static const IconData arrow_forward_ios = IconData(0xe5b0, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -1361,15 +1187,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios sharp".
   static const IconData arrow_forward_ios_sharp = IconData(0xeb54, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">arrow_forward</i> &#x2014; material icon named "arrow forward outlined".
-  static const IconData arrow_forward_outlined = IconData(0xe055, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">arrow_forward</i> &#x2014; material icon named "arrow forward rounded".
-  static const IconData arrow_forward_rounded = IconData(0xf083, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">arrow_forward</i> &#x2014; material icon named "arrow forward sharp".
-  static const IconData arrow_forward_sharp = IconData(0xeb55, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">arrow_left</i> &#x2014; material icon named "arrow left".
   static const IconData arrow_left = IconData(0xe5b1, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -1386,6 +1203,15 @@ class Icons {
   /// <i class="material-icons md-36">arrow_right</i> &#x2014; material icon named "arrow right".
   static const IconData arrow_right = IconData(0xe5b2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-outlined md-36">arrow_right</i> &#x2014; material icon named "arrow right outlined".
+  static const IconData arrow_right_outlined = IconData(0xe058, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">arrow_right</i> &#x2014; material icon named "arrow right rounded".
+  static const IconData arrow_right_rounded = IconData(0xf086, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">arrow_right</i> &#x2014; material icon named "arrow right sharp".
+  static const IconData arrow_right_sharp = IconData(0xeb58, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">arrow_right_alt</i> &#x2014; material icon named "arrow right alt".
   static const IconData arrow_right_alt = IconData(0xe5b3, fontFamily: 'MaterialIcons');
 
@@ -1397,15 +1223,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">arrow_right_alt</i> &#x2014; material icon named "arrow right alt sharp".
   static const IconData arrow_right_alt_sharp = IconData(0xeb57, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">arrow_right</i> &#x2014; material icon named "arrow right outlined".
-  static const IconData arrow_right_outlined = IconData(0xe058, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">arrow_right</i> &#x2014; material icon named "arrow right rounded".
-  static const IconData arrow_right_rounded = IconData(0xf086, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">arrow_right</i> &#x2014; material icon named "arrow right sharp".
-  static const IconData arrow_right_sharp = IconData(0xeb58, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">arrow_upward</i> &#x2014; material icon named "arrow upward".
   static const IconData arrow_upward = IconData(0xe5b4, fontFamily: 'MaterialIcons');
@@ -1467,8 +1284,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">assessment</i> &#x2014; material icon named "assessment sharp".
   static const IconData assessment_sharp = IconData(0xeb5d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">assignment</i> &#x2014; material icon named "assignment sharp".
+  static const IconData assignment_sharp = IconData(0xeb62, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">assignment</i> &#x2014; material icon named "assignment".
   static const IconData assignment = IconData(0xe5b9, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">assignment</i> &#x2014; material icon named "assignment rounded".
+  static const IconData assignment_rounded = IconData(0xf090, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">assignment</i> &#x2014; material icon named "assignment outlined".
+  static const IconData assignment_outlined = IconData(0xe060, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">assignment_ind</i> &#x2014; material icon named "assignment ind".
   static const IconData assignment_ind = IconData(0xe5ba, fontFamily: 'MaterialIcons');
@@ -1476,17 +1302,11 @@ class Icons {
   /// <i class="material-icons-outlined md-36">assignment_ind</i> &#x2014; material icon named "assignment ind outlined".
   static const IconData assignment_ind_outlined = IconData(0xe05e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">assignment_ind</i> &#x2014; material icon named "assignment ind rounded".
-  static const IconData assignment_ind_rounded = IconData(0xf08c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">assignment_ind</i> &#x2014; material icon named "assignment ind sharp".
   static const IconData assignment_ind_sharp = IconData(0xeb5e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">assignment_late</i> &#x2014; material icon named "assignment late".
-  static const IconData assignment_late = IconData(0xe5bb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">assignment_late</i> &#x2014; material icon named "assignment late outlined".
-  static const IconData assignment_late_outlined = IconData(0xe05f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">assignment_ind</i> &#x2014; material icon named "assignment ind rounded".
+  static const IconData assignment_ind_rounded = IconData(0xf08c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">assignment_late</i> &#x2014; material icon named "assignment late rounded".
   static const IconData assignment_late_rounded = IconData(0xf08d, fontFamily: 'MaterialIcons');
@@ -1494,8 +1314,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">assignment_late</i> &#x2014; material icon named "assignment late sharp".
   static const IconData assignment_late_sharp = IconData(0xeb5f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">assignment</i> &#x2014; material icon named "assignment outlined".
-  static const IconData assignment_outlined = IconData(0xe060, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons md-36">assignment_late</i> &#x2014; material icon named "assignment late".
+  static const IconData assignment_late = IconData(0xe5bb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">assignment_late</i> &#x2014; material icon named "assignment late outlined".
+  static const IconData assignment_late_outlined = IconData(0xe05f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">assignment_return</i> &#x2014; material icon named "assignment return".
   static const IconData assignment_return = IconData(0xe5bc, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -1521,12 +1344,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">assignment_returned</i> &#x2014; material icon named "assignment returned sharp".
   static const IconData assignment_returned_sharp = IconData(0xeb61, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">assignment</i> &#x2014; material icon named "assignment rounded".
-  static const IconData assignment_rounded = IconData(0xf090, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">assignment</i> &#x2014; material icon named "assignment sharp".
-  static const IconData assignment_sharp = IconData(0xeb62, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons md-36">assignment_turned_in</i> &#x2014; material icon named "assignment turned in".
   static const IconData assignment_turned_in = IconData(0xe5be, fontFamily: 'MaterialIcons');
 
@@ -1539,17 +1356,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">assignment_turned_in</i> &#x2014; material icon named "assignment turned in sharp".
   static const IconData assignment_turned_in_sharp = IconData(0xeb63, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">assistant</i> &#x2014; material icon named "assistant rounded".
+  static const IconData assistant_rounded = IconData(0xf093, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">assistant</i> &#x2014; material icon named "assistant sharp".
+  static const IconData assistant_sharp = IconData(0xeb65, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">assistant</i> &#x2014; material icon named "assistant".
   static const IconData assistant = IconData(0xe5bf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">assistant</i> &#x2014; material icon named "assistant outlined".
+  static const IconData assistant_outlined = IconData(0xe064, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">assistant_direction</i> &#x2014; material icon named "assistant direction".
   static const IconData assistant_direction = IconData(0xe5c0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">assistant_navigation</i> &#x2014; material icon named "assistant navigation".
   static const IconData assistant_navigation = IconData(0xe5c1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">assistant</i> &#x2014; material icon named "assistant outlined".
-  static const IconData assistant_outlined = IconData(0xe064, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">assistant_photo</i> &#x2014; material icon named "assistant photo".
   static const IconData assistant_photo = IconData(0xe5c2, fontFamily: 'MaterialIcons');
@@ -1562,12 +1385,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">assistant_photo</i> &#x2014; material icon named "assistant photo sharp".
   static const IconData assistant_photo_sharp = IconData(0xeb64, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">assistant</i> &#x2014; material icon named "assistant rounded".
-  static const IconData assistant_rounded = IconData(0xf093, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">assistant</i> &#x2014; material icon named "assistant sharp".
-  static const IconData assistant_sharp = IconData(0xeb65, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">atm</i> &#x2014; material icon named "atm".
   static const IconData atm = IconData(0xe5c3, fontFamily: 'MaterialIcons');
@@ -1608,14 +1425,14 @@ class Icons {
   /// <i class="material-icons md-36">attach_money</i> &#x2014; material icon named "attach money".
   static const IconData attach_money = IconData(0xe5c6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">attach_money</i> &#x2014; material icon named "attach money outlined".
-  static const IconData attach_money_outlined = IconData(0xe069, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">attach_money</i> &#x2014; material icon named "attach money sharp".
+  static const IconData attach_money_sharp = IconData(0xeb69, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">attach_money</i> &#x2014; material icon named "attach money rounded".
   static const IconData attach_money_rounded = IconData(0xf097, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">attach_money</i> &#x2014; material icon named "attach money sharp".
-  static const IconData attach_money_sharp = IconData(0xeb69, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">attach_money</i> &#x2014; material icon named "attach money outlined".
+  static const IconData attach_money_outlined = IconData(0xe069, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">attachment</i> &#x2014; material icon named "attachment".
   static const IconData attachment = IconData(0xe5c7, fontFamily: 'MaterialIcons');
@@ -1872,14 +1689,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">battery_std</i> &#x2014; material icon named "battery std sharp".
   static const IconData battery_std_sharp = IconData(0xeb7c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">battery_unknown</i> &#x2014; material icon named "battery unknown rounded".
+  static const IconData battery_unknown_rounded = IconData(0xf0ab, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">battery_unknown</i> &#x2014; material icon named "battery unknown".
   static const IconData battery_unknown = IconData(0xe5e3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-outlined md-36">battery_unknown</i> &#x2014; material icon named "battery unknown outlined".
   static const IconData battery_unknown_outlined = IconData(0xe07d, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">battery_unknown</i> &#x2014; material icon named "battery unknown rounded".
-  static const IconData battery_unknown_rounded = IconData(0xf0ab, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-sharp md-36">battery_unknown</i> &#x2014; material icon named "battery unknown sharp".
   static const IconData battery_unknown_sharp = IconData(0xeb7d, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -1944,23 +1761,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">bike_scooter</i> &#x2014; material icon named "bike scooter sharp".
   static const IconData bike_scooter_sharp = IconData(0xeb82, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">biotech</i> &#x2014; material icon named "biotech sharp".
+  static const IconData biotech_sharp = IconData(0xeb83, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">biotech</i> &#x2014; material icon named "biotech".
   static const IconData biotech = IconData(0xe5e9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">biotech</i> &#x2014; material icon named "biotech outlined".
-  static const IconData biotech_outlined = IconData(0xe083, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">biotech</i> &#x2014; material icon named "biotech rounded".
   static const IconData biotech_rounded = IconData(0xf0b1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">biotech</i> &#x2014; material icon named "biotech sharp".
-  static const IconData biotech_sharp = IconData(0xeb83, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">biotech</i> &#x2014; material icon named "biotech outlined".
+  static const IconData biotech_outlined = IconData(0xe083, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">block</i> &#x2014; material icon named "block".
   static const IconData block = IconData(0xe5ea, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">block_flipped</i> &#x2014; material icon named "block flipped".
-  static const IconData block_flipped = IconData(0xe5eb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">block</i> &#x2014; material icon named "block outlined".
   static const IconData block_outlined = IconData(0xe084, fontFamily: 'MaterialIcons');
@@ -1971,8 +1785,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">block</i> &#x2014; material icon named "block sharp".
   static const IconData block_sharp = IconData(0xeb84, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">block_flipped</i> &#x2014; material icon named "block flipped".
+  static const IconData block_flipped = IconData(0xe5eb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">bluetooth</i> &#x2014; material icon named "bluetooth sharp".
+  static const IconData bluetooth_sharp = IconData(0xeb89, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">bluetooth</i> &#x2014; material icon named "bluetooth".
   static const IconData bluetooth = IconData(0xe5ec, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">bluetooth</i> &#x2014; material icon named "bluetooth outlined".
+  static const IconData bluetooth_outlined = IconData(0xe088, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">bluetooth</i> &#x2014; material icon named "bluetooth rounded".
+  static const IconData bluetooth_rounded = IconData(0xf0b6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">bluetooth_audio</i> &#x2014; material icon named "bluetooth audio".
   static const IconData bluetooth_audio = IconData(0xe5ed, fontFamily: 'MaterialIcons');
@@ -2010,12 +1836,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">bluetooth_disabled</i> &#x2014; material icon named "bluetooth disabled sharp".
   static const IconData bluetooth_disabled_sharp = IconData(0xeb87, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">bluetooth</i> &#x2014; material icon named "bluetooth outlined".
-  static const IconData bluetooth_outlined = IconData(0xe088, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">bluetooth</i> &#x2014; material icon named "bluetooth rounded".
-  static const IconData bluetooth_rounded = IconData(0xf0b6, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">bluetooth_searching</i> &#x2014; material icon named "bluetooth searching".
   static const IconData bluetooth_searching = IconData(0xe5f0, fontFamily: 'MaterialIcons');
 
@@ -2027,9 +1847,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">bluetooth_searching</i> &#x2014; material icon named "bluetooth searching sharp".
   static const IconData bluetooth_searching_sharp = IconData(0xeb88, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">bluetooth</i> &#x2014; material icon named "bluetooth sharp".
-  static const IconData bluetooth_sharp = IconData(0xeb89, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">blur_circular</i> &#x2014; material icon named "blur circular".
   static const IconData blur_circular = IconData(0xe5f1, fontFamily: 'MaterialIcons');
@@ -2082,11 +1899,17 @@ class Icons {
   /// <i class="material-icons md-36">bolt</i> &#x2014; material icon named "bolt".
   static const IconData bolt = IconData(0xe5f5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">book</i> &#x2014; material icon named "book sharp".
+  static const IconData book_sharp = IconData(0xeb8f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">book</i> &#x2014; material icon named "book".
   static const IconData book = IconData(0xe5f6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">book_online</i> &#x2014; material icon named "book online".
-  static const IconData book_online = IconData(0xe5f7, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">book</i> &#x2014; material icon named "book rounded".
+  static const IconData book_rounded = IconData(0xf0bd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">book</i> &#x2014; material icon named "book outlined".
+  static const IconData book_outlined = IconData(0xe08f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">book_online</i> &#x2014; material icon named "book online outlined".
   static const IconData book_online_outlined = IconData(0xe08e, fontFamily: 'MaterialIcons');
@@ -2097,17 +1920,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">book_online</i> &#x2014; material icon named "book online sharp".
   static const IconData book_online_sharp = IconData(0xeb8e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">book</i> &#x2014; material icon named "book outlined".
-  static const IconData book_outlined = IconData(0xe08f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">book</i> &#x2014; material icon named "book rounded".
-  static const IconData book_rounded = IconData(0xf0bd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">book</i> &#x2014; material icon named "book sharp".
-  static const IconData book_sharp = IconData(0xeb8f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">book_online</i> &#x2014; material icon named "book online".
+  static const IconData book_online = IconData(0xe5f7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">bookmark</i> &#x2014; material icon named "bookmark".
   static const IconData bookmark = IconData(0xe5f8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">bookmark</i> &#x2014; material icon named "bookmark outlined".
+  static const IconData bookmark_outlined = IconData(0xe091, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">bookmark</i> &#x2014; material icon named "bookmark rounded".
+  static const IconData bookmark_rounded = IconData(0xf0bf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">bookmark</i> &#x2014; material icon named "bookmark sharp".
+  static const IconData bookmark_sharp = IconData(0xeb91, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">bookmark_border</i> &#x2014; material icon named "bookmark border".
   static const IconData bookmark_border = IconData(0xe5f9, fontFamily: 'MaterialIcons');
@@ -2133,15 +1959,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">bookmark_outline</i> &#x2014; material icon named "bookmark outline sharp".
   static const IconData bookmark_outline_sharp = IconData(0xeb90, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">bookmark</i> &#x2014; material icon named "bookmark outlined".
-  static const IconData bookmark_outlined = IconData(0xe091, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">bookmark</i> &#x2014; material icon named "bookmark rounded".
-  static const IconData bookmark_rounded = IconData(0xf0bf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">bookmark</i> &#x2014; material icon named "bookmark sharp".
-  static const IconData bookmark_sharp = IconData(0xeb91, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">bookmarks</i> &#x2014; material icon named "bookmarks".
   static const IconData bookmarks = IconData(0xe5fa, fontFamily: 'MaterialIcons');
 
@@ -2157,11 +1974,11 @@ class Icons {
   /// <i class="material-icons md-36">border_all</i> &#x2014; material icon named "border all".
   static const IconData border_all = IconData(0xe5fb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">border_all</i> &#x2014; material icon named "border all outlined".
-  static const IconData border_all_outlined = IconData(0xe093, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">border_all</i> &#x2014; material icon named "border all rounded".
   static const IconData border_all_rounded = IconData(0xf0c1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">border_all</i> &#x2014; material icon named "border all outlined".
+  static const IconData border_all_outlined = IconData(0xe093, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">border_all</i> &#x2014; material icon named "border all sharp".
   static const IconData border_all_sharp = IconData(0xeb93, fontFamily: 'MaterialIcons');
@@ -2220,11 +2037,11 @@ class Icons {
   /// <i class="material-icons md-36">border_left</i> &#x2014; material icon named "border left".
   static const IconData border_left = IconData(0xe601, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">border_left</i> &#x2014; material icon named "border left outlined".
-  static const IconData border_left_outlined = IconData(0xe098, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">border_left</i> &#x2014; material icon named "border left rounded".
   static const IconData border_left_rounded = IconData(0xf0c6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">border_left</i> &#x2014; material icon named "border left outlined".
+  static const IconData border_left_outlined = IconData(0xe098, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">border_left</i> &#x2014; material icon named "border left sharp".
   static const IconData border_left_sharp = IconData(0xeb98, fontFamily: 'MaterialIcons');
@@ -2277,6 +2094,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">border_top</i> &#x2014; material icon named "border top sharp".
   static const IconData border_top_sharp = IconData(0xeb9c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">border_vertical</i> &#x2014; material icon named "border vertical sharp".
+  static const IconData border_vertical_sharp = IconData(0xeb9d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">border_vertical</i> &#x2014; material icon named "border vertical".
   static const IconData border_vertical = IconData(0xe606, fontFamily: 'MaterialIcons');
 
@@ -2285,9 +2105,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">border_vertical</i> &#x2014; material icon named "border vertical rounded".
   static const IconData border_vertical_rounded = IconData(0xf0cb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">border_vertical</i> &#x2014; material icon named "border vertical sharp".
-  static const IconData border_vertical_sharp = IconData(0xeb9d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">branding_watermark</i> &#x2014; material icon named "branding watermark".
   static const IconData branding_watermark = IconData(0xe607, fontFamily: 'MaterialIcons');
@@ -2415,11 +2232,11 @@ class Icons {
   /// <i class="material-icons md-36">brightness_low</i> &#x2014; material icon named "brightness low".
   static const IconData brightness_low = IconData(0xe612, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">brightness_low</i> &#x2014; material icon named "brightness low outlined".
-  static const IconData brightness_low_outlined = IconData(0xe0a8, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">brightness_low</i> &#x2014; material icon named "brightness low rounded".
   static const IconData brightness_low_rounded = IconData(0xf0d6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">brightness_low</i> &#x2014; material icon named "brightness low outlined".
+  static const IconData brightness_low_outlined = IconData(0xe0a8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">brightness_low</i> &#x2014; material icon named "brightness low sharp".
   static const IconData brightness_low_sharp = IconData(0xeba8, fontFamily: 'MaterialIcons');
@@ -2475,17 +2292,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">brush</i> &#x2014; material icon named "brush sharp".
   static const IconData brush_sharp = IconData(0xebac, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">bubble_chart</i> &#x2014; material icon named "bubble chart sharp".
+  static const IconData bubble_chart_sharp = IconData(0xebad, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">bubble_chart</i> &#x2014; material icon named "bubble chart".
   static const IconData bubble_chart = IconData(0xe618, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">bubble_chart</i> &#x2014; material icon named "bubble chart outlined".
-  static const IconData bubble_chart_outlined = IconData(0xe0ad, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">bubble_chart</i> &#x2014; material icon named "bubble chart rounded".
   static const IconData bubble_chart_rounded = IconData(0xf0db, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">bubble_chart</i> &#x2014; material icon named "bubble chart sharp".
-  static const IconData bubble_chart_sharp = IconData(0xebad, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">bubble_chart</i> &#x2014; material icon named "bubble chart outlined".
+  static const IconData bubble_chart_outlined = IconData(0xe0ad, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">bug_report</i> &#x2014; material icon named "bug report".
   static const IconData bug_report = IconData(0xe619, fontFamily: 'MaterialIcons');
@@ -2502,6 +2319,15 @@ class Icons {
   /// <i class="material-icons md-36">build</i> &#x2014; material icon named "build".
   static const IconData build = IconData(0xe61a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">build</i> &#x2014; material icon named "build outlined".
+  static const IconData build_outlined = IconData(0xe0b0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">build</i> &#x2014; material icon named "build rounded".
+  static const IconData build_rounded = IconData(0xf0de, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">build</i> &#x2014; material icon named "build sharp".
+  static const IconData build_sharp = IconData(0xebb0, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">build_circle</i> &#x2014; material icon named "build circle".
   static const IconData build_circle = IconData(0xe61b, fontFamily: 'MaterialIcons');
 
@@ -2513,15 +2339,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">build_circle</i> &#x2014; material icon named "build circle sharp".
   static const IconData build_circle_sharp = IconData(0xebaf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">build</i> &#x2014; material icon named "build outlined".
-  static const IconData build_outlined = IconData(0xe0b0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">build</i> &#x2014; material icon named "build rounded".
-  static const IconData build_rounded = IconData(0xf0de, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">build</i> &#x2014; material icon named "build sharp".
-  static const IconData build_sharp = IconData(0xebb0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">burst_mode</i> &#x2014; material icon named "burst mode".
   static const IconData burst_mode = IconData(0xe61c, fontFamily: 'MaterialIcons');
@@ -2538,29 +2355,29 @@ class Icons {
   /// <i class="material-icons md-36">bus_alert</i> &#x2014; material icon named "bus alert".
   static const IconData bus_alert = IconData(0xe61d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">business</i> &#x2014; material icon named "business sharp".
+  static const IconData business_sharp = IconData(0xebb3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">business</i> &#x2014; material icon named "business".
   static const IconData business = IconData(0xe61e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">business_center</i> &#x2014; material icon named "business center".
-  static const IconData business_center = IconData(0xe61f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">business_center</i> &#x2014; material icon named "business center outlined".
-  static const IconData business_center_outlined = IconData(0xe0b2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">business_center</i> &#x2014; material icon named "business center rounded".
-  static const IconData business_center_rounded = IconData(0xf0e0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">business_center</i> &#x2014; material icon named "business center sharp".
-  static const IconData business_center_sharp = IconData(0xebb2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">business</i> &#x2014; material icon named "business outlined".
-  static const IconData business_outlined = IconData(0xe0b3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">business</i> &#x2014; material icon named "business rounded".
   static const IconData business_rounded = IconData(0xf0e1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">business</i> &#x2014; material icon named "business sharp".
-  static const IconData business_sharp = IconData(0xebb3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">business</i> &#x2014; material icon named "business outlined".
+  static const IconData business_outlined = IconData(0xe0b3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">business_center</i> &#x2014; material icon named "business center outlined".
+  static const IconData business_center_outlined = IconData(0xe0b2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">business_center</i> &#x2014; material icon named "business center sharp".
+  static const IconData business_center_sharp = IconData(0xebb2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">business_center</i> &#x2014; material icon named "business center".
+  static const IconData business_center = IconData(0xe61f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">business_center</i> &#x2014; material icon named "business center rounded".
+  static const IconData business_center_rounded = IconData(0xf0e0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">cached</i> &#x2014; material icon named "cached".
   static const IconData cached = IconData(0xe620, fontFamily: 'MaterialIcons');
@@ -2613,17 +2430,26 @@ class Icons {
   /// <i class="material-icons md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day".
   static const IconData calendar_view_day = IconData(0xe624, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day outlined".
-  static const IconData calendar_view_day_outlined = IconData(0xe0b8, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day rounded".
   static const IconData calendar_view_day_rounded = IconData(0xf0e6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day outlined".
+  static const IconData calendar_view_day_outlined = IconData(0xe0b8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day sharp".
   static const IconData calendar_view_day_sharp = IconData(0xebb8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">call</i> &#x2014; material icon named "call rounded".
+  static const IconData call_rounded = IconData(0xf0ed, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">call</i> &#x2014; material icon named "call".
   static const IconData call = IconData(0xe625, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">call</i> &#x2014; material icon named "call outlined".
+  static const IconData call_outlined = IconData(0xe0be, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">call</i> &#x2014; material icon named "call sharp".
+  static const IconData call_sharp = IconData(0xebbf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">call_end</i> &#x2014; material icon named "call end".
   static const IconData call_end = IconData(0xe626, fontFamily: 'MaterialIcons');
@@ -2664,29 +2490,26 @@ class Icons {
   /// <i class="material-icons md-36">call_missed</i> &#x2014; material icon named "call missed".
   static const IconData call_missed = IconData(0xe629, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing".
-  static const IconData call_missed_outgoing = IconData(0xe62a, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing outlined".
-  static const IconData call_missed_outgoing_outlined = IconData(0xe0bc, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing rounded".
-  static const IconData call_missed_outgoing_rounded = IconData(0xf0ea, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing sharp".
-  static const IconData call_missed_outgoing_sharp = IconData(0xebbc, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-round md-36">call_missed</i> &#x2014; material icon named "call missed rounded".
+  static const IconData call_missed_rounded = IconData(0xf0eb, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-outlined md-36">call_missed</i> &#x2014; material icon named "call missed outlined".
   static const IconData call_missed_outlined = IconData(0xe0bd, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-round md-36">call_missed</i> &#x2014; material icon named "call missed rounded".
-  static const IconData call_missed_rounded = IconData(0xf0eb, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons-sharp md-36">call_missed</i> &#x2014; material icon named "call missed sharp".
   static const IconData call_missed_sharp = IconData(0xebbd, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">call</i> &#x2014; material icon named "call outlined".
-  static const IconData call_outlined = IconData(0xe0be, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing rounded".
+  static const IconData call_missed_outgoing_rounded = IconData(0xf0ea, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing outlined".
+  static const IconData call_missed_outgoing_outlined = IconData(0xe0bc, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing".
+  static const IconData call_missed_outgoing = IconData(0xe62a, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing sharp".
+  static const IconData call_missed_outgoing_sharp = IconData(0xebbc, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">call_received</i> &#x2014; material icon named "call received".
   static const IconData call_received = IconData(0xe62b, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -2699,12 +2522,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">call_received</i> &#x2014; material icon named "call received sharp".
   static const IconData call_received_sharp = IconData(0xebbe, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">call</i> &#x2014; material icon named "call rounded".
-  static const IconData call_rounded = IconData(0xf0ed, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">call</i> &#x2014; material icon named "call sharp".
-  static const IconData call_sharp = IconData(0xebbf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">call_split</i> &#x2014; material icon named "call split".
   static const IconData call_split = IconData(0xe62c, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -2730,8 +2547,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">call_to_action</i> &#x2014; material icon named "call to action sharp".
   static const IconData call_to_action_sharp = IconData(0xebc1, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">camera</i> &#x2014; material icon named "camera sharp".
+  static const IconData camera_sharp = IconData(0xebc7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">camera</i> &#x2014; material icon named "camera rounded".
+  static const IconData camera_rounded = IconData(0xf0f5, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">camera</i> &#x2014; material icon named "camera".
   static const IconData camera = IconData(0xe62e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">camera</i> &#x2014; material icon named "camera outlined".
+  static const IconData camera_outlined = IconData(0xe0c5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">camera_alt</i> &#x2014; material icon named "camera alt".
   static const IconData camera_alt = IconData(0xe62f, fontFamily: 'MaterialIcons');
@@ -2748,11 +2574,11 @@ class Icons {
   /// <i class="material-icons md-36">camera_enhance</i> &#x2014; material icon named "camera enhance".
   static const IconData camera_enhance = IconData(0xe630, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">camera_enhance</i> &#x2014; material icon named "camera enhance outlined".
-  static const IconData camera_enhance_outlined = IconData(0xe0c3, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">camera_enhance</i> &#x2014; material icon named "camera enhance rounded".
   static const IconData camera_enhance_rounded = IconData(0xf0f1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">camera_enhance</i> &#x2014; material icon named "camera enhance outlined".
+  static const IconData camera_enhance_outlined = IconData(0xe0c3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">camera_enhance</i> &#x2014; material icon named "camera enhance sharp".
   static const IconData camera_enhance_sharp = IconData(0xebc3, fontFamily: 'MaterialIcons');
@@ -2768,9 +2594,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">camera_front</i> &#x2014; material icon named "camera front sharp".
   static const IconData camera_front_sharp = IconData(0xebc4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">camera</i> &#x2014; material icon named "camera outlined".
-  static const IconData camera_outlined = IconData(0xe0c5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">camera_rear</i> &#x2014; material icon named "camera rear".
   static const IconData camera_rear = IconData(0xe632, fontFamily: 'MaterialIcons');
@@ -2796,12 +2619,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">camera_roll</i> &#x2014; material icon named "camera roll sharp".
   static const IconData camera_roll_sharp = IconData(0xebc6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">camera</i> &#x2014; material icon named "camera rounded".
-  static const IconData camera_rounded = IconData(0xf0f5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">camera</i> &#x2014; material icon named "camera sharp".
-  static const IconData camera_sharp = IconData(0xebc7, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">campaign</i> &#x2014; material icon named "campaign".
   static const IconData campaign = IconData(0xe634, fontFamily: 'MaterialIcons');
 
@@ -2820,6 +2637,12 @@ class Icons {
   /// <i class="material-icons-outlined md-36">cancel</i> &#x2014; material icon named "cancel outlined".
   static const IconData cancel_outlined = IconData(0xe0c9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">cancel</i> &#x2014; material icon named "cancel rounded".
+  static const IconData cancel_rounded = IconData(0xf0f8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">cancel</i> &#x2014; material icon named "cancel sharp".
+  static const IconData cancel_sharp = IconData(0xebcb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">cancel_presentation</i> &#x2014; material icon named "cancel presentation".
   static const IconData cancel_presentation = IconData(0xe636, fontFamily: 'MaterialIcons');
 
@@ -2832,9 +2655,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">cancel_presentation</i> &#x2014; material icon named "cancel presentation sharp".
   static const IconData cancel_presentation_sharp = IconData(0xebc9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">cancel</i> &#x2014; material icon named "cancel rounded".
-  static const IconData cancel_rounded = IconData(0xf0f8, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">cancel_schedule_send</i> &#x2014; material icon named "cancel schedule send".
   static const IconData cancel_schedule_send = IconData(0xe637, fontFamily: 'MaterialIcons');
 
@@ -2846,9 +2666,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">cancel_schedule_send</i> &#x2014; material icon named "cancel schedule send sharp".
   static const IconData cancel_schedule_send_sharp = IconData(0xebca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">cancel</i> &#x2014; material icon named "cancel sharp".
-  static const IconData cancel_sharp = IconData(0xebcb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">car_rental</i> &#x2014; material icon named "car rental".
   static const IconData car_rental = IconData(0xe638, fontFamily: 'MaterialIcons');
@@ -2868,14 +2685,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">card_giftcard</i> &#x2014; material icon named "card giftcard sharp".
   static const IconData card_giftcard_sharp = IconData(0xebcc, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">card_membership</i> &#x2014; material icon named "card membership rounded".
+  static const IconData card_membership_rounded = IconData(0xf0fb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">card_membership</i> &#x2014; material icon named "card membership".
   static const IconData card_membership = IconData(0xe63b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">card_membership</i> &#x2014; material icon named "card membership outlined".
   static const IconData card_membership_outlined = IconData(0xe0cd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">card_membership</i> &#x2014; material icon named "card membership rounded".
-  static const IconData card_membership_rounded = IconData(0xf0fb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">card_membership</i> &#x2014; material icon named "card membership sharp".
   static const IconData card_membership_sharp = IconData(0xebcd, fontFamily: 'MaterialIcons');
@@ -2919,8 +2736,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">casino</i> &#x2014; material icon named "casino sharp".
   static const IconData casino_sharp = IconData(0xebd0, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">cast</i> &#x2014; material icon named "cast rounded".
+  static const IconData cast_rounded = IconData(0xf101, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">cast</i> &#x2014; material icon named "cast".
   static const IconData cast = IconData(0xe640, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">cast</i> &#x2014; material icon named "cast outlined".
+  static const IconData cast_outlined = IconData(0xe0d3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">cast</i> &#x2014; material icon named "cast sharp".
+  static const IconData cast_sharp = IconData(0xebd3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">cast_connected</i> &#x2014; material icon named "cast connected".
   static const IconData cast_connected = IconData(0xe641, fontFamily: 'MaterialIcons');
@@ -2937,23 +2763,14 @@ class Icons {
   /// <i class="material-icons md-36">cast_for_education</i> &#x2014; material icon named "cast for education".
   static const IconData cast_for_education = IconData(0xe642, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">cast_for_education</i> &#x2014; material icon named "cast for education outlined".
-  static const IconData cast_for_education_outlined = IconData(0xe0d2, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">cast_for_education</i> &#x2014; material icon named "cast for education rounded".
   static const IconData cast_for_education_rounded = IconData(0xf100, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">cast_for_education</i> &#x2014; material icon named "cast for education outlined".
+  static const IconData cast_for_education_outlined = IconData(0xe0d2, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">cast_for_education</i> &#x2014; material icon named "cast for education sharp".
   static const IconData cast_for_education_sharp = IconData(0xebd2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">cast</i> &#x2014; material icon named "cast outlined".
-  static const IconData cast_outlined = IconData(0xe0d3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">cast</i> &#x2014; material icon named "cast rounded".
-  static const IconData cast_rounded = IconData(0xf101, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">cast</i> &#x2014; material icon named "cast sharp".
-  static const IconData cast_sharp = IconData(0xebd3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">category</i> &#x2014; material icon named "category".
   static const IconData category = IconData(0xe643, fontFamily: 'MaterialIcons');
@@ -2985,14 +2802,14 @@ class Icons {
   /// <i class="material-icons md-36">center_focus_weak</i> &#x2014; material icon named "center focus weak".
   static const IconData center_focus_weak = IconData(0xe646, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">center_focus_weak</i> &#x2014; material icon named "center focus weak sharp".
+  static const IconData center_focus_weak_sharp = IconData(0xebd6, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">center_focus_weak</i> &#x2014; material icon named "center focus weak outlined".
   static const IconData center_focus_weak_outlined = IconData(0xe0d6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">center_focus_weak</i> &#x2014; material icon named "center focus weak rounded".
   static const IconData center_focus_weak_rounded = IconData(0xf104, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">center_focus_weak</i> &#x2014; material icon named "center focus weak sharp".
-  static const IconData center_focus_weak_sharp = IconData(0xebd6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">change_history</i> &#x2014; material icon named "change history".
   static const IconData change_history = IconData(0xe647, fontFamily: 'MaterialIcons');
@@ -3021,8 +2838,26 @@ class Icons {
   /// <i class="material-icons md-36">chat</i> &#x2014; material icon named "chat".
   static const IconData chat = IconData(0xe649, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">chat</i> &#x2014; material icon named "chat outlined".
+  static const IconData chat_outlined = IconData(0xe0db, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">chat</i> &#x2014; material icon named "chat rounded".
+  static const IconData chat_rounded = IconData(0xf109, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">chat</i> &#x2014; material icon named "chat sharp".
+  static const IconData chat_sharp = IconData(0xebdb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">chat_bubble</i> &#x2014; material icon named "chat bubble".
   static const IconData chat_bubble = IconData(0xe64a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">chat_bubble</i> &#x2014; material icon named "chat bubble outlined".
+  static const IconData chat_bubble_outlined = IconData(0xe0da, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">chat_bubble</i> &#x2014; material icon named "chat bubble rounded".
+  static const IconData chat_bubble_rounded = IconData(0xf108, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">chat_bubble</i> &#x2014; material icon named "chat bubble sharp".
+  static const IconData chat_bubble_sharp = IconData(0xebda, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">chat_bubble_outline</i> &#x2014; material icon named "chat bubble outline".
   static const IconData chat_bubble_outline = IconData(0xe64b, fontFamily: 'MaterialIcons');
@@ -3036,26 +2871,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">chat_bubble_outline</i> &#x2014; material icon named "chat bubble outline sharp".
   static const IconData chat_bubble_outline_sharp = IconData(0xebd9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">chat_bubble</i> &#x2014; material icon named "chat bubble outlined".
-  static const IconData chat_bubble_outlined = IconData(0xe0da, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">check</i> &#x2014; material icon named "check sharp".
+  static const IconData check_sharp = IconData(0xebe0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">chat_bubble</i> &#x2014; material icon named "chat bubble rounded".
-  static const IconData chat_bubble_rounded = IconData(0xf108, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">check</i> &#x2014; material icon named "check outlined".
+  static const IconData check_outlined = IconData(0xe0e0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">chat_bubble</i> &#x2014; material icon named "chat bubble sharp".
-  static const IconData chat_bubble_sharp = IconData(0xebda, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">chat</i> &#x2014; material icon named "chat outlined".
-  static const IconData chat_outlined = IconData(0xe0db, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">chat</i> &#x2014; material icon named "chat rounded".
-  static const IconData chat_rounded = IconData(0xf109, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">chat</i> &#x2014; material icon named "chat sharp".
-  static const IconData chat_sharp = IconData(0xebdb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">check</i> &#x2014; material icon named "check rounded".
+  static const IconData check_rounded = IconData(0xf10e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">check</i> &#x2014; material icon named "check".
   static const IconData check = IconData(0xe64c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">check_box</i> &#x2014; material icon named "check box rounded".
+  static const IconData check_box_rounded = IconData(0xf10b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">check_box</i> &#x2014; material icon named "check box outlined".
+  static const IconData check_box_outlined = IconData(0xe0dd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">check_box</i> &#x2014; material icon named "check box sharp".
+  static const IconData check_box_sharp = IconData(0xebdd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">check_box</i> &#x2014; material icon named "check box".
   static const IconData check_box = IconData(0xe64d, fontFamily: 'MaterialIcons');
@@ -3072,17 +2907,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">check_box_outline_blank</i> &#x2014; material icon named "check box outline blank sharp".
   static const IconData check_box_outline_blank_sharp = IconData(0xebdc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">check_box</i> &#x2014; material icon named "check box outlined".
-  static const IconData check_box_outlined = IconData(0xe0dd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">check_box</i> &#x2014; material icon named "check box rounded".
-  static const IconData check_box_rounded = IconData(0xf10b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">check_box</i> &#x2014; material icon named "check box sharp".
-  static const IconData check_box_sharp = IconData(0xebdd, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">check_circle</i> &#x2014; material icon named "check circle".
   static const IconData check_circle = IconData(0xe64f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">check_circle</i> &#x2014; material icon named "check circle outlined".
+  static const IconData check_circle_outlined = IconData(0xe0df, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">check_circle</i> &#x2014; material icon named "check circle rounded".
+  static const IconData check_circle_rounded = IconData(0xf10d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">check_circle</i> &#x2014; material icon named "check circle sharp".
+  static const IconData check_circle_sharp = IconData(0xebdf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">check_circle_outline</i> &#x2014; material icon named "check circle outline".
   static const IconData check_circle_outline = IconData(0xe650, fontFamily: 'MaterialIcons');
@@ -3096,23 +2931,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">check_circle_outline</i> &#x2014; material icon named "check circle outline sharp".
   static const IconData check_circle_outline_sharp = IconData(0xebde, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">check_circle</i> &#x2014; material icon named "check circle outlined".
-  static const IconData check_circle_outlined = IconData(0xe0df, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">check_circle</i> &#x2014; material icon named "check circle rounded".
-  static const IconData check_circle_rounded = IconData(0xf10d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">check_circle</i> &#x2014; material icon named "check circle sharp".
-  static const IconData check_circle_sharp = IconData(0xebdf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">check</i> &#x2014; material icon named "check outlined".
-  static const IconData check_outlined = IconData(0xe0e0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">check</i> &#x2014; material icon named "check rounded".
-  static const IconData check_rounded = IconData(0xf10e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">check</i> &#x2014; material icon named "check sharp".
-  static const IconData check_sharp = IconData(0xebe0, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">checkroom</i> &#x2014; material icon named "checkroom sharp".
+  static const IconData checkroom_sharp = IconData(0xebe1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">checkroom</i> &#x2014; material icon named "checkroom".
   static const IconData checkroom = IconData(0xe651, fontFamily: 'MaterialIcons');
@@ -3123,12 +2943,6 @@ class Icons {
   /// <i class="material-icons-round md-36">checkroom</i> &#x2014; material icon named "checkroom rounded".
   static const IconData checkroom_rounded = IconData(0xf10f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">checkroom</i> &#x2014; material icon named "checkroom sharp".
-  static const IconData checkroom_sharp = IconData(0xebe1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">chevron_left</i> &#x2014; material icon named "chevron left".
-  static const IconData chevron_left = IconData(0xe652, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons-outlined md-36">chevron_left</i> &#x2014; material icon named "chevron left outlined".
   static const IconData chevron_left_outlined = IconData(0xe0e2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
@@ -3138,17 +2952,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">chevron_left</i> &#x2014; material icon named "chevron left sharp".
   static const IconData chevron_left_sharp = IconData(0xebe2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">chevron_right</i> &#x2014; material icon named "chevron right".
-  static const IconData chevron_right = IconData(0xe653, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons md-36">chevron_left</i> &#x2014; material icon named "chevron left".
+  static const IconData chevron_left = IconData(0xe652, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">chevron_right</i> &#x2014; material icon named "chevron right sharp".
+  static const IconData chevron_right_sharp = IconData(0xebe3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-outlined md-36">chevron_right</i> &#x2014; material icon named "chevron right outlined".
   static const IconData chevron_right_outlined = IconData(0xe0e3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons md-36">chevron_right</i> &#x2014; material icon named "chevron right".
+  static const IconData chevron_right = IconData(0xe653, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons-round md-36">chevron_right</i> &#x2014; material icon named "chevron right rounded".
   static const IconData chevron_right_rounded = IconData(0xf111, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">chevron_right</i> &#x2014; material icon named "chevron right sharp".
-  static const IconData chevron_right_sharp = IconData(0xebe3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">child_care</i> &#x2014; material icon named "child care".
   static const IconData child_care = IconData(0xe654, fontFamily: 'MaterialIcons');
@@ -3195,14 +3012,14 @@ class Icons {
   /// <i class="material-icons md-36">class</i> &#x2014; material icon named "class".
   static const IconData class_ = IconData(0xe659, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">class</i> &#x2014; material icon named "class sharp".
+  static const IconData class__sharp = IconData(0xebe7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">class</i> &#x2014; material icon named "class outlined".
   static const IconData class__outlined = IconData(0xe0e7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">class</i> &#x2014; material icon named "class rounded".
   static const IconData class__rounded = IconData(0xf115, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">class</i> &#x2014; material icon named "class sharp".
-  static const IconData class__sharp = IconData(0xebe7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">clean_hands</i> &#x2014; material icon named "clean hands".
   static const IconData clean_hands = IconData(0xe65a, fontFamily: 'MaterialIcons');
@@ -3228,8 +3045,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">cleaning_services</i> &#x2014; material icon named "cleaning services sharp".
   static const IconData cleaning_services_sharp = IconData(0xebe9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">clear</i> &#x2014; material icon named "clear sharp".
+  static const IconData clear_sharp = IconData(0xebeb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">clear</i> &#x2014; material icon named "clear rounded".
+  static const IconData clear_rounded = IconData(0xf119, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">clear</i> &#x2014; material icon named "clear outlined".
+  static const IconData clear_outlined = IconData(0xe0eb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">clear</i> &#x2014; material icon named "clear".
   static const IconData clear = IconData(0xe65c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">clear_all</i> &#x2014; material icon named "clear all sharp".
+  static const IconData clear_all_sharp = IconData(0xebea, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">clear_all</i> &#x2014; material icon named "clear all".
   static const IconData clear_all = IconData(0xe65d, fontFamily: 'MaterialIcons');
@@ -3240,20 +3069,20 @@ class Icons {
   /// <i class="material-icons-round md-36">clear_all</i> &#x2014; material icon named "clear all rounded".
   static const IconData clear_all_rounded = IconData(0xf118, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">clear_all</i> &#x2014; material icon named "clear all sharp".
-  static const IconData clear_all_sharp = IconData(0xebea, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">close</i> &#x2014; material icon named "close rounded".
+  static const IconData close_rounded = IconData(0xf11b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">clear</i> &#x2014; material icon named "clear outlined".
-  static const IconData clear_outlined = IconData(0xe0eb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">clear</i> &#x2014; material icon named "clear rounded".
-  static const IconData clear_rounded = IconData(0xf119, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">clear</i> &#x2014; material icon named "clear sharp".
-  static const IconData clear_sharp = IconData(0xebeb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">close</i> &#x2014; material icon named "close outlined".
+  static const IconData close_outlined = IconData(0xe0ed, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">close</i> &#x2014; material icon named "close".
   static const IconData close = IconData(0xe65e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">close</i> &#x2014; material icon named "close sharp".
+  static const IconData close_sharp = IconData(0xebed, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">close_fullscreen</i> &#x2014; material icon named "close fullscreen sharp".
+  static const IconData close_fullscreen_sharp = IconData(0xebec, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">close_fullscreen</i> &#x2014; material icon named "close fullscreen".
   static const IconData close_fullscreen = IconData(0xe65f, fontFamily: 'MaterialIcons');
@@ -3264,20 +3093,17 @@ class Icons {
   /// <i class="material-icons-round md-36">close_fullscreen</i> &#x2014; material icon named "close fullscreen rounded".
   static const IconData close_fullscreen_rounded = IconData(0xf11a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">close_fullscreen</i> &#x2014; material icon named "close fullscreen sharp".
-  static const IconData close_fullscreen_sharp = IconData(0xebec, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">close</i> &#x2014; material icon named "close outlined".
-  static const IconData close_outlined = IconData(0xe0ed, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">close</i> &#x2014; material icon named "close rounded".
-  static const IconData close_rounded = IconData(0xf11b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">close</i> &#x2014; material icon named "close sharp".
-  static const IconData close_sharp = IconData(0xebed, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">closed_caption</i> &#x2014; material icon named "closed caption".
   static const IconData closed_caption = IconData(0xe660, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">closed_caption</i> &#x2014; material icon named "closed caption outlined".
+  static const IconData closed_caption_outlined = IconData(0xe0ef, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">closed_caption</i> &#x2014; material icon named "closed caption rounded".
+  static const IconData closed_caption_rounded = IconData(0xf11d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">closed_caption</i> &#x2014; material icon named "closed caption sharp".
+  static const IconData closed_caption_sharp = IconData(0xebef, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">closed_caption_disabled</i> &#x2014; material icon named "closed caption disabled".
   static const IconData closed_caption_disabled = IconData(0xe661, fontFamily: 'MaterialIcons');
@@ -3294,29 +3120,29 @@ class Icons {
   /// <i class="material-icons md-36">closed_caption_off</i> &#x2014; material icon named "closed caption off".
   static const IconData closed_caption_off = IconData(0xe662, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">closed_caption</i> &#x2014; material icon named "closed caption outlined".
-  static const IconData closed_caption_outlined = IconData(0xe0ef, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">cloud</i> &#x2014; material icon named "cloud outlined".
+  static const IconData cloud_outlined = IconData(0xe0f4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">closed_caption</i> &#x2014; material icon named "closed caption rounded".
-  static const IconData closed_caption_rounded = IconData(0xf11d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">cloud</i> &#x2014; material icon named "cloud sharp".
+  static const IconData cloud_sharp = IconData(0xebf5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">closed_caption</i> &#x2014; material icon named "closed caption sharp".
-  static const IconData closed_caption_sharp = IconData(0xebef, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">cloud</i> &#x2014; material icon named "cloud rounded".
+  static const IconData cloud_rounded = IconData(0xf123, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">cloud</i> &#x2014; material icon named "cloud".
   static const IconData cloud = IconData(0xe663, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">cloud_circle</i> &#x2014; material icon named "cloud circle".
-  static const IconData cloud_circle = IconData(0xe664, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">cloud_circle</i> &#x2014; material icon named "cloud circle outlined".
   static const IconData cloud_circle_outlined = IconData(0xe0f0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">cloud_circle</i> &#x2014; material icon named "cloud circle rounded".
-  static const IconData cloud_circle_rounded = IconData(0xf11e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">cloud_circle</i> &#x2014; material icon named "cloud circle sharp".
   static const IconData cloud_circle_sharp = IconData(0xebf0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">cloud_circle</i> &#x2014; material icon named "cloud circle".
+  static const IconData cloud_circle = IconData(0xe664, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">cloud_circle</i> &#x2014; material icon named "cloud circle rounded".
+  static const IconData cloud_circle_rounded = IconData(0xf11e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">cloud_done</i> &#x2014; material icon named "cloud done".
   static const IconData cloud_done = IconData(0xe665, fontFamily: 'MaterialIcons');
@@ -3342,23 +3168,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">cloud_download</i> &#x2014; material icon named "cloud download sharp".
   static const IconData cloud_download_sharp = IconData(0xebf2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">cloud_off</i> &#x2014; material icon named "cloud off sharp".
+  static const IconData cloud_off_sharp = IconData(0xebf3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">cloud_off</i> &#x2014; material icon named "cloud off rounded".
+  static const IconData cloud_off_rounded = IconData(0xf121, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">cloud_off</i> &#x2014; material icon named "cloud off".
   static const IconData cloud_off = IconData(0xe667, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">cloud_off</i> &#x2014; material icon named "cloud off outlined".
   static const IconData cloud_off_outlined = IconData(0xe0f3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">cloud_off</i> &#x2014; material icon named "cloud off rounded".
-  static const IconData cloud_off_rounded = IconData(0xf121, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">cloud_off</i> &#x2014; material icon named "cloud off sharp".
-  static const IconData cloud_off_sharp = IconData(0xebf3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">cloud</i> &#x2014; material icon named "cloud outlined".
-  static const IconData cloud_outlined = IconData(0xe0f4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">cloud_queue</i> &#x2014; material icon named "cloud queue".
-  static const IconData cloud_queue = IconData(0xe668, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">cloud_queue</i> &#x2014; material icon named "cloud queue outlined".
   static const IconData cloud_queue_outlined = IconData(0xe0f5, fontFamily: 'MaterialIcons');
@@ -3369,11 +3189,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">cloud_queue</i> &#x2014; material icon named "cloud queue sharp".
   static const IconData cloud_queue_sharp = IconData(0xebf4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">cloud</i> &#x2014; material icon named "cloud rounded".
-  static const IconData cloud_rounded = IconData(0xf123, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">cloud</i> &#x2014; material icon named "cloud sharp".
-  static const IconData cloud_sharp = IconData(0xebf5, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">cloud_queue</i> &#x2014; material icon named "cloud queue".
+  static const IconData cloud_queue = IconData(0xe668, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">cloud_upload</i> &#x2014; material icon named "cloud upload".
   static const IconData cloud_upload = IconData(0xe669, fontFamily: 'MaterialIcons');
@@ -3402,6 +3219,15 @@ class Icons {
   /// <i class="material-icons md-36">collections</i> &#x2014; material icon named "collections".
   static const IconData collections = IconData(0xe66b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">collections</i> &#x2014; material icon named "collections outlined".
+  static const IconData collections_outlined = IconData(0xe0f9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">collections</i> &#x2014; material icon named "collections rounded".
+  static const IconData collections_rounded = IconData(0xf127, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">collections</i> &#x2014; material icon named "collections sharp".
+  static const IconData collections_sharp = IconData(0xebf9, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">collections_bookmark</i> &#x2014; material icon named "collections bookmark".
   static const IconData collections_bookmark = IconData(0xe66c, fontFamily: 'MaterialIcons');
 
@@ -3414,26 +3240,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">collections_bookmark</i> &#x2014; material icon named "collections bookmark sharp".
   static const IconData collections_bookmark_sharp = IconData(0xebf8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">collections</i> &#x2014; material icon named "collections outlined".
-  static const IconData collections_outlined = IconData(0xe0f9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">collections</i> &#x2014; material icon named "collections rounded".
-  static const IconData collections_rounded = IconData(0xf127, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">collections</i> &#x2014; material icon named "collections sharp".
-  static const IconData collections_sharp = IconData(0xebf9, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">color_lens</i> &#x2014; material icon named "color lens".
   static const IconData color_lens = IconData(0xe66d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">color_lens</i> &#x2014; material icon named "color lens sharp".
+  static const IconData color_lens_sharp = IconData(0xebfa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">color_lens</i> &#x2014; material icon named "color lens outlined".
   static const IconData color_lens_outlined = IconData(0xe0fa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">color_lens</i> &#x2014; material icon named "color lens rounded".
   static const IconData color_lens_rounded = IconData(0xf128, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">color_lens</i> &#x2014; material icon named "color lens sharp".
-  static const IconData color_lens_sharp = IconData(0xebfa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">colorize</i> &#x2014; material icon named "colorize".
   static const IconData colorize = IconData(0xe66e, fontFamily: 'MaterialIcons');
@@ -3450,6 +3267,15 @@ class Icons {
   /// <i class="material-icons md-36">comment</i> &#x2014; material icon named "comment".
   static const IconData comment = IconData(0xe66f, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">comment</i> &#x2014; material icon named "comment outlined".
+  static const IconData comment_outlined = IconData(0xe0fd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">comment</i> &#x2014; material icon named "comment rounded".
+  static const IconData comment_rounded = IconData(0xf12b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">comment</i> &#x2014; material icon named "comment sharp".
+  static const IconData comment_sharp = IconData(0xebfd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">comment_bank</i> &#x2014; material icon named "comment bank".
   static const IconData comment_bank = IconData(0xe670, fontFamily: 'MaterialIcons');
 
@@ -3461,15 +3287,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">comment_bank</i> &#x2014; material icon named "comment bank sharp".
   static const IconData comment_bank_sharp = IconData(0xebfc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">comment</i> &#x2014; material icon named "comment outlined".
-  static const IconData comment_outlined = IconData(0xe0fd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">comment</i> &#x2014; material icon named "comment rounded".
-  static const IconData comment_rounded = IconData(0xf12b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">comment</i> &#x2014; material icon named "comment sharp".
-  static const IconData comment_sharp = IconData(0xebfd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">commute</i> &#x2014; material icon named "commute".
   static const IconData commute = IconData(0xe671, fontFamily: 'MaterialIcons');
@@ -3483,8 +3300,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">commute</i> &#x2014; material icon named "commute sharp".
   static const IconData commute_sharp = IconData(0xebfe, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">compare</i> &#x2014; material icon named "compare sharp".
+  static const IconData compare_sharp = IconData(0xec00, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">compare</i> &#x2014; material icon named "compare".
   static const IconData compare = IconData(0xe672, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">compare</i> &#x2014; material icon named "compare rounded".
+  static const IconData compare_rounded = IconData(0xf12e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">compare</i> &#x2014; material icon named "compare outlined".
+  static const IconData compare_outlined = IconData(0xe100, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">compare_arrows</i> &#x2014; material icon named "compare arrows".
   static const IconData compare_arrows = IconData(0xe673, fontFamily: 'MaterialIcons');
@@ -3492,20 +3318,11 @@ class Icons {
   /// <i class="material-icons-outlined md-36">compare_arrows</i> &#x2014; material icon named "compare arrows outlined".
   static const IconData compare_arrows_outlined = IconData(0xe0ff, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">compare_arrows</i> &#x2014; material icon named "compare arrows rounded".
-  static const IconData compare_arrows_rounded = IconData(0xf12d, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">compare_arrows</i> &#x2014; material icon named "compare arrows sharp".
   static const IconData compare_arrows_sharp = IconData(0xebff, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">compare</i> &#x2014; material icon named "compare outlined".
-  static const IconData compare_outlined = IconData(0xe100, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">compare</i> &#x2014; material icon named "compare rounded".
-  static const IconData compare_rounded = IconData(0xf12e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">compare</i> &#x2014; material icon named "compare sharp".
-  static const IconData compare_sharp = IconData(0xec00, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">compare_arrows</i> &#x2014; material icon named "compare arrows rounded".
+  static const IconData compare_arrows_rounded = IconData(0xf12d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">compass_calibration</i> &#x2014; material icon named "compass calibration".
   static const IconData compass_calibration = IconData(0xe674, fontFamily: 'MaterialIcons');
@@ -3546,6 +3363,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">confirmation_num</i> &#x2014; material icon named "confirmation num sharp".
   static const IconData confirmation_num_sharp = IconData(0xec03, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">confirmation_number</i> &#x2014; material icon named "confirmation number sharp".
+  static const IconData confirmation_number_sharp = IconData(0xec03, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">confirmation_number</i> &#x2014; material icon named "confirmation number".
   static const IconData confirmation_number = IconData(0xe677, fontFamily: 'MaterialIcons');
 
@@ -3554,9 +3374,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">confirmation_number</i> &#x2014; material icon named "confirmation number rounded".
   static const IconData confirmation_number_rounded = IconData(0xf131, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">confirmation_number</i> &#x2014; material icon named "confirmation number sharp".
-  static const IconData confirmation_number_sharp = IconData(0xec03, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">connect_without_contact</i> &#x2014; material icon named "connect without contact".
   static const IconData connect_without_contact = IconData(0xe678, fontFamily: 'MaterialIcons');
@@ -3600,14 +3417,14 @@ class Icons {
   /// <i class="material-icons md-36">contact_page</i> &#x2014; material icon named "contact page".
   static const IconData contact_page = IconData(0xe67c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">contact_page</i> &#x2014; material icon named "contact page sharp".
+  static const IconData contact_page_sharp = IconData(0xec07, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">contact_page</i> &#x2014; material icon named "contact page outlined".
   static const IconData contact_page_outlined = IconData(0xe107, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">contact_page</i> &#x2014; material icon named "contact page rounded".
   static const IconData contact_page_rounded = IconData(0xf135, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">contact_page</i> &#x2014; material icon named "contact page sharp".
-  static const IconData contact_page_sharp = IconData(0xec07, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">contact_phone</i> &#x2014; material icon named "contact phone".
   static const IconData contact_phone = IconData(0xe67d, fontFamily: 'MaterialIcons');
@@ -3657,29 +3474,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">contacts</i> &#x2014; material icon named "contacts sharp".
   static const IconData contacts_sharp = IconData(0xec0b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">content_copy</i> &#x2014; material icon named "content copy".
-  static const IconData content_copy = IconData(0xe681, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">content_copy</i> &#x2014; material icon named "content copy outlined".
-  static const IconData content_copy_outlined = IconData(0xe10c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">content_copy</i> &#x2014; material icon named "content copy sharp".
+  static const IconData content_copy_sharp = IconData(0xec0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">content_copy</i> &#x2014; material icon named "content copy rounded".
   static const IconData content_copy_rounded = IconData(0xf13a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">content_copy</i> &#x2014; material icon named "content copy sharp".
-  static const IconData content_copy_sharp = IconData(0xec0c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">content_copy</i> &#x2014; material icon named "content copy outlined".
+  static const IconData content_copy_outlined = IconData(0xe10c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">content_cut</i> &#x2014; material icon named "content cut".
-  static const IconData content_cut = IconData(0xe682, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">content_cut</i> &#x2014; material icon named "content cut outlined".
-  static const IconData content_cut_outlined = IconData(0xe10d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">content_copy</i> &#x2014; material icon named "content copy".
+  static const IconData content_copy = IconData(0xe681, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">content_cut</i> &#x2014; material icon named "content cut rounded".
   static const IconData content_cut_rounded = IconData(0xf13b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">content_cut</i> &#x2014; material icon named "content cut".
+  static const IconData content_cut = IconData(0xe682, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">content_cut</i> &#x2014; material icon named "content cut sharp".
   static const IconData content_cut_sharp = IconData(0xec0d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">content_cut</i> &#x2014; material icon named "content cut outlined".
+  static const IconData content_cut_outlined = IconData(0xe10d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">content_paste</i> &#x2014; material icon named "content paste".
   static const IconData content_paste = IconData(0xe683, fontFamily: 'MaterialIcons');
@@ -3708,6 +3525,15 @@ class Icons {
   /// <i class="material-icons md-36">control_point</i> &#x2014; material icon named "control point".
   static const IconData control_point = IconData(0xe685, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">control_point</i> &#x2014; material icon named "control point outlined".
+  static const IconData control_point_outlined = IconData(0xe111, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">control_point</i> &#x2014; material icon named "control point rounded".
+  static const IconData control_point_rounded = IconData(0xf13f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">control_point</i> &#x2014; material icon named "control point sharp".
+  static const IconData control_point_sharp = IconData(0xec11, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">control_point_duplicate</i> &#x2014; material icon named "control point duplicate".
   static const IconData control_point_duplicate = IconData(0xe686, fontFamily: 'MaterialIcons');
 
@@ -3720,14 +3546,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">control_point_duplicate</i> &#x2014; material icon named "control point duplicate sharp".
   static const IconData control_point_duplicate_sharp = IconData(0xec10, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">control_point</i> &#x2014; material icon named "control point outlined".
-  static const IconData control_point_outlined = IconData(0xe111, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">control_point</i> &#x2014; material icon named "control point rounded".
-  static const IconData control_point_rounded = IconData(0xf13f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">control_point</i> &#x2014; material icon named "control point sharp".
-  static const IconData control_point_sharp = IconData(0xec11, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">copy</i> &#x2014; material icon named "copy sharp".
+  static const IconData copy_sharp = IconData(0xec0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">copy</i> &#x2014; material icon named "copy".
   static const IconData copy = IconData(0xe681, fontFamily: 'MaterialIcons');
@@ -3737,9 +3557,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">copy</i> &#x2014; material icon named "copy rounded".
   static const IconData copy_rounded = IconData(0xf13a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">copy</i> &#x2014; material icon named "copy sharp".
-  static const IconData copy_sharp = IconData(0xec0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">copyright</i> &#x2014; material icon named "copyright".
   static const IconData copyright = IconData(0xe687, fontFamily: 'MaterialIcons');
@@ -3753,14 +3570,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">copyright</i> &#x2014; material icon named "copyright sharp".
   static const IconData copyright_sharp = IconData(0xec12, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">coronavirus</i> &#x2014; material icon named "coronavirus rounded".
+  static const IconData coronavirus_rounded = IconData(0xf141, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">coronavirus</i> &#x2014; material icon named "coronavirus".
   static const IconData coronavirus = IconData(0xe688, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">coronavirus</i> &#x2014; material icon named "coronavirus outlined".
   static const IconData coronavirus_outlined = IconData(0xe113, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">coronavirus</i> &#x2014; material icon named "coronavirus rounded".
-  static const IconData coronavirus_rounded = IconData(0xf141, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">coronavirus</i> &#x2014; material icon named "coronavirus sharp".
   static const IconData coronavirus_sharp = IconData(0xec13, fontFamily: 'MaterialIcons');
@@ -3792,6 +3609,15 @@ class Icons {
   /// <i class="material-icons md-36">create</i> &#x2014; material icon named "create".
   static const IconData create = IconData(0xe68b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">create</i> &#x2014; material icon named "create outlined".
+  static const IconData create_outlined = IconData(0xe117, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">create</i> &#x2014; material icon named "create rounded".
+  static const IconData create_rounded = IconData(0xf145, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">create</i> &#x2014; material icon named "create sharp".
+  static const IconData create_sharp = IconData(0xec17, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">create_new_folder</i> &#x2014; material icon named "create new folder".
   static const IconData create_new_folder = IconData(0xe68c, fontFamily: 'MaterialIcons');
 
@@ -3804,26 +3630,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">create_new_folder</i> &#x2014; material icon named "create new folder sharp".
   static const IconData create_new_folder_sharp = IconData(0xec16, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">create</i> &#x2014; material icon named "create outlined".
-  static const IconData create_outlined = IconData(0xe117, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">create</i> &#x2014; material icon named "create rounded".
-  static const IconData create_rounded = IconData(0xf145, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">create</i> &#x2014; material icon named "create sharp".
-  static const IconData create_sharp = IconData(0xec17, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">credit_card</i> &#x2014; material icon named "credit card".
   static const IconData credit_card = IconData(0xe68d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">credit_card</i> &#x2014; material icon named "credit card outlined".
-  static const IconData credit_card_outlined = IconData(0xe118, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">credit_card</i> &#x2014; material icon named "credit card rounded".
   static const IconData credit_card_rounded = IconData(0xf146, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">credit_card</i> &#x2014; material icon named "credit card outlined".
+  static const IconData credit_card_outlined = IconData(0xe118, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">credit_card</i> &#x2014; material icon named "credit card sharp".
   static const IconData credit_card_sharp = IconData(0xec18, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">crop</i> &#x2014; material icon named "crop sharp".
+  static const IconData crop_sharp = IconData(0xec23, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">crop</i> &#x2014; material icon named "crop rounded".
+  static const IconData crop_rounded = IconData(0xf151, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">crop</i> &#x2014; material icon named "crop outlined".
+  static const IconData crop_outlined = IconData(0xe121, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">crop</i> &#x2014; material icon named "crop".
   static const IconData crop = IconData(0xe68e, fontFamily: 'MaterialIcons');
@@ -3876,6 +3702,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">crop_7_5</i> &#x2014; material icon named "crop 7 5 sharp".
   static const IconData crop_7_5_sharp = IconData(0xec1c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">crop_din</i> &#x2014; material icon named "crop din sharp".
+  static const IconData crop_din_sharp = IconData(0xec1d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">crop_din</i> &#x2014; material icon named "crop din".
   static const IconData crop_din = IconData(0xe693, fontFamily: 'MaterialIcons');
 
@@ -3885,20 +3714,17 @@ class Icons {
   /// <i class="material-icons-round md-36">crop_din</i> &#x2014; material icon named "crop din rounded".
   static const IconData crop_din_rounded = IconData(0xf14b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">crop_din</i> &#x2014; material icon named "crop din sharp".
-  static const IconData crop_din_sharp = IconData(0xec1d, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">crop_free</i> &#x2014; material icon named "crop free".
   static const IconData crop_free = IconData(0xe694, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">crop_free</i> &#x2014; material icon named "crop free outlined".
-  static const IconData crop_free_outlined = IconData(0xe11e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">crop_free</i> &#x2014; material icon named "crop free sharp".
+  static const IconData crop_free_sharp = IconData(0xec1e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">crop_free</i> &#x2014; material icon named "crop free rounded".
   static const IconData crop_free_rounded = IconData(0xf14c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">crop_free</i> &#x2014; material icon named "crop free sharp".
-  static const IconData crop_free_sharp = IconData(0xec1e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">crop_free</i> &#x2014; material icon named "crop free outlined".
+  static const IconData crop_free_outlined = IconData(0xe11e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">crop_landscape</i> &#x2014; material icon named "crop landscape".
   static const IconData crop_landscape = IconData(0xe695, fontFamily: 'MaterialIcons');
@@ -3924,9 +3750,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">crop_original</i> &#x2014; material icon named "crop original sharp".
   static const IconData crop_original_sharp = IconData(0xec20, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">crop</i> &#x2014; material icon named "crop outlined".
-  static const IconData crop_outlined = IconData(0xe121, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">crop_portrait</i> &#x2014; material icon named "crop portrait".
   static const IconData crop_portrait = IconData(0xe697, fontFamily: 'MaterialIcons');
 
@@ -3951,12 +3774,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">crop_rotate</i> &#x2014; material icon named "crop rotate sharp".
   static const IconData crop_rotate_sharp = IconData(0xec22, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">crop</i> &#x2014; material icon named "crop rounded".
-  static const IconData crop_rounded = IconData(0xf151, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">crop</i> &#x2014; material icon named "crop sharp".
-  static const IconData crop_sharp = IconData(0xec23, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">crop_square</i> &#x2014; material icon named "crop square".
   static const IconData crop_square = IconData(0xe699, fontFamily: 'MaterialIcons');
 
@@ -3969,11 +3786,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">crop_square</i> &#x2014; material icon named "crop square sharp".
   static const IconData crop_square_sharp = IconData(0xec24, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">cut</i> &#x2014; material icon named "cut".
-  static const IconData cut = IconData(0xe682, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">cut</i> &#x2014; material icon named "cut outlined".
   static const IconData cut_outlined = IconData(0xe10d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">cut</i> &#x2014; material icon named "cut".
+  static const IconData cut = IconData(0xe682, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">cut</i> &#x2014; material icon named "cut rounded".
   static const IconData cut_rounded = IconData(0xf13b, fontFamily: 'MaterialIcons');
@@ -3987,17 +3804,17 @@ class Icons {
   /// <i class="material-icons md-36">dashboard</i> &#x2014; material icon named "dashboard".
   static const IconData dashboard = IconData(0xe69b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">dashboard_customize</i> &#x2014; material icon named "dashboard customize".
-  static const IconData dashboard_customize = IconData(0xe69c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">dashboard</i> &#x2014; material icon named "dashboard outlined".
-  static const IconData dashboard_outlined = IconData(0xe125, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">dashboard</i> &#x2014; material icon named "dashboard rounded".
   static const IconData dashboard_rounded = IconData(0xf153, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">dashboard</i> &#x2014; material icon named "dashboard sharp".
   static const IconData dashboard_sharp = IconData(0xec25, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">dashboard</i> &#x2014; material icon named "dashboard outlined".
+  static const IconData dashboard_outlined = IconData(0xe125, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">dashboard_customize</i> &#x2014; material icon named "dashboard customize".
+  static const IconData dashboard_customize = IconData(0xe69c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">data_usage</i> &#x2014; material icon named "data usage".
   static const IconData data_usage = IconData(0xe69d, fontFamily: 'MaterialIcons');
@@ -4047,17 +3864,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">dehaze</i> &#x2014; material icon named "dehaze sharp".
   static const IconData dehaze_sharp = IconData(0xec29, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">delete</i> &#x2014; material icon named "delete sharp".
+  static const IconData delete_sharp = IconData(0xec2c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">delete</i> &#x2014; material icon named "delete".
   static const IconData delete = IconData(0xe6a1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">delete</i> &#x2014; material icon named "delete outlined".
+  static const IconData delete_outlined = IconData(0xe12c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">delete</i> &#x2014; material icon named "delete rounded".
+  static const IconData delete_rounded = IconData(0xf15a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">delete_forever</i> &#x2014; material icon named "delete forever".
   static const IconData delete_forever = IconData(0xe6a2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">delete_forever</i> &#x2014; material icon named "delete forever outlined".
-  static const IconData delete_forever_outlined = IconData(0xe12a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">delete_forever</i> &#x2014; material icon named "delete forever rounded".
   static const IconData delete_forever_rounded = IconData(0xf158, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">delete_forever</i> &#x2014; material icon named "delete forever outlined".
+  static const IconData delete_forever_outlined = IconData(0xe12a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">delete_forever</i> &#x2014; material icon named "delete forever sharp".
   static const IconData delete_forever_sharp = IconData(0xec2a, fontFamily: 'MaterialIcons');
@@ -4073,15 +3899,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">delete_outline</i> &#x2014; material icon named "delete outline sharp".
   static const IconData delete_outline_sharp = IconData(0xec2b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">delete</i> &#x2014; material icon named "delete outlined".
-  static const IconData delete_outlined = IconData(0xe12c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">delete</i> &#x2014; material icon named "delete rounded".
-  static const IconData delete_rounded = IconData(0xf15a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">delete</i> &#x2014; material icon named "delete sharp".
-  static const IconData delete_sharp = IconData(0xec2c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">delete_sweep</i> &#x2014; material icon named "delete sweep".
   static const IconData delete_sweep = IconData(0xe6a4, fontFamily: 'MaterialIcons');
@@ -4122,17 +3939,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">description</i> &#x2014; material icon named "description sharp".
   static const IconData description_sharp = IconData(0xec2f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">design_services</i> &#x2014; material icon named "design services".
-  static const IconData design_services = IconData(0xe6a8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">design_services</i> &#x2014; material icon named "design services outlined".
-  static const IconData design_services_outlined = IconData(0xe130, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">design_services</i> &#x2014; material icon named "design services sharp".
+  static const IconData design_services_sharp = IconData(0xec30, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">design_services</i> &#x2014; material icon named "design services rounded".
   static const IconData design_services_rounded = IconData(0xf15e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">design_services</i> &#x2014; material icon named "design services sharp".
-  static const IconData design_services_sharp = IconData(0xec30, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">design_services</i> &#x2014; material icon named "design services outlined".
+  static const IconData design_services_outlined = IconData(0xe130, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">design_services</i> &#x2014; material icon named "design services".
+  static const IconData design_services = IconData(0xe6a8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">desktop_access_disabled</i> &#x2014; material icon named "desktop access disabled".
   static const IconData desktop_access_disabled = IconData(0xe6a9, fontFamily: 'MaterialIcons');
@@ -4182,6 +3999,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">details</i> &#x2014; material icon named "details sharp".
   static const IconData details_sharp = IconData(0xec34, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">developer_board</i> &#x2014; material icon named "developer board sharp".
+  static const IconData developer_board_sharp = IconData(0xec35, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">developer_board</i> &#x2014; material icon named "developer board".
   static const IconData developer_board = IconData(0xe6ad, fontFamily: 'MaterialIcons');
 
@@ -4190,9 +4010,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">developer_board</i> &#x2014; material icon named "developer board rounded".
   static const IconData developer_board_rounded = IconData(0xf163, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">developer_board</i> &#x2014; material icon named "developer board sharp".
-  static const IconData developer_board_sharp = IconData(0xec35, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">developer_mode</i> &#x2014; material icon named "developer mode".
   static const IconData developer_mode = IconData(0xe6ae, fontFamily: 'MaterialIcons');
@@ -4236,6 +4053,15 @@ class Icons {
   /// <i class="material-icons md-36">devices</i> &#x2014; material icon named "devices".
   static const IconData devices = IconData(0xe6b2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">devices</i> &#x2014; material icon named "devices outlined".
+  static const IconData devices_outlined = IconData(0xe13a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">devices</i> &#x2014; material icon named "devices rounded".
+  static const IconData devices_rounded = IconData(0xf168, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">devices</i> &#x2014; material icon named "devices sharp".
+  static const IconData devices_sharp = IconData(0xec3a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">devices_other</i> &#x2014; material icon named "devices other".
   static const IconData devices_other = IconData(0xe6b3, fontFamily: 'MaterialIcons');
 
@@ -4247,15 +4073,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">devices_other</i> &#x2014; material icon named "devices other sharp".
   static const IconData devices_other_sharp = IconData(0xec39, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">devices</i> &#x2014; material icon named "devices outlined".
-  static const IconData devices_outlined = IconData(0xe13a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">devices</i> &#x2014; material icon named "devices rounded".
-  static const IconData devices_rounded = IconData(0xf168, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">devices</i> &#x2014; material icon named "devices sharp".
-  static const IconData devices_sharp = IconData(0xec3a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">dialer_sip</i> &#x2014; material icon named "dialer sip".
   static const IconData dialer_sip = IconData(0xe6b4, fontFamily: 'MaterialIcons');
@@ -4284,8 +4101,17 @@ class Icons {
   /// <i class="material-icons md-36">dinner_dining</i> &#x2014; material icon named "dinner dining".
   static const IconData dinner_dining = IconData(0xe6b6, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">directions</i> &#x2014; material icon named "directions sharp".
+  static const IconData directions_sharp = IconData(0xec44, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">directions</i> &#x2014; material icon named "directions".
   static const IconData directions = IconData(0xe6b7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">directions</i> &#x2014; material icon named "directions rounded".
+  static const IconData directions_rounded = IconData(0xf171, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">directions</i> &#x2014; material icon named "directions outlined".
+  static const IconData directions_outlined = IconData(0xe142, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">directions_bike</i> &#x2014; material icon named "directions bike".
   static const IconData directions_bike = IconData(0xe6b8, fontFamily: 'MaterialIcons');
@@ -4326,26 +4152,26 @@ class Icons {
   /// <i class="material-icons md-36">directions_car</i> &#x2014; material icon named "directions car".
   static const IconData directions_car = IconData(0xe6bb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">directions_car</i> &#x2014; material icon named "directions car outlined".
-  static const IconData directions_car_outlined = IconData(0xe140, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">directions_car</i> &#x2014; material icon named "directions car rounded".
   static const IconData directions_car_rounded = IconData(0xf16e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">directions_car</i> &#x2014; material icon named "directions car sharp".
   static const IconData directions_car_sharp = IconData(0xec40, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">directions_ferry</i> &#x2014; material icon named "directions ferry".
-  static const IconData directions_ferry = IconData(0xe6b9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">directions_ferry</i> &#x2014; material icon named "directions ferry outlined".
-  static const IconData directions_ferry_outlined = IconData(0xe13e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">directions_car</i> &#x2014; material icon named "directions car outlined".
+  static const IconData directions_car_outlined = IconData(0xe140, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">directions_ferry</i> &#x2014; material icon named "directions ferry rounded".
   static const IconData directions_ferry_rounded = IconData(0xf16c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">directions_ferry</i> &#x2014; material icon named "directions ferry sharp".
   static const IconData directions_ferry_sharp = IconData(0xec3e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">directions_ferry</i> &#x2014; material icon named "directions ferry".
+  static const IconData directions_ferry = IconData(0xe6b9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">directions_ferry</i> &#x2014; material icon named "directions ferry outlined".
+  static const IconData directions_ferry_outlined = IconData(0xe13e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">directions_off</i> &#x2014; material icon named "directions off".
   static const IconData directions_off = IconData(0xe6bc, fontFamily: 'MaterialIcons');
@@ -4359,9 +4185,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">directions_off</i> &#x2014; material icon named "directions off sharp".
   static const IconData directions_off_sharp = IconData(0xec41, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">directions</i> &#x2014; material icon named "directions outlined".
-  static const IconData directions_outlined = IconData(0xe142, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">directions_railway</i> &#x2014; material icon named "directions railway".
   static const IconData directions_railway = IconData(0xe6bd, fontFamily: 'MaterialIcons');
 
@@ -4373,9 +4196,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">directions_railway</i> &#x2014; material icon named "directions railway sharp".
   static const IconData directions_railway_sharp = IconData(0xec42, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">directions</i> &#x2014; material icon named "directions rounded".
-  static const IconData directions_rounded = IconData(0xf171, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">directions_run</i> &#x2014; material icon named "directions run".
   static const IconData directions_run = IconData(0xe6be, fontFamily: 'MaterialIcons');
@@ -4389,20 +4209,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">directions_run</i> &#x2014; material icon named "directions run sharp".
   static const IconData directions_run_sharp = IconData(0xec43, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">directions</i> &#x2014; material icon named "directions sharp".
-  static const IconData directions_sharp = IconData(0xec44, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">directions_subway</i> &#x2014; material icon named "directions subway".
-  static const IconData directions_subway = IconData(0xe6bf, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">directions_subway</i> &#x2014; material icon named "directions subway outlined".
   static const IconData directions_subway_outlined = IconData(0xe145, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">directions_subway</i> &#x2014; material icon named "directions subway sharp".
+  static const IconData directions_subway_sharp = IconData(0xec45, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">directions_subway</i> &#x2014; material icon named "directions subway rounded".
   static const IconData directions_subway_rounded = IconData(0xf173, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">directions_subway</i> &#x2014; material icon named "directions subway sharp".
-  static const IconData directions_subway_sharp = IconData(0xec45, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">directions_subway</i> &#x2014; material icon named "directions subway".
+  static const IconData directions_subway = IconData(0xe6bf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">directions_train</i> &#x2014; material icon named "directions train".
   static const IconData directions_train = IconData(0xe6bd, fontFamily: 'MaterialIcons');
@@ -4461,14 +4278,23 @@ class Icons {
   /// <i class="material-icons md-36">dns</i> &#x2014; material icon named "dns".
   static const IconData dns = IconData(0xe6c4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">dns</i> &#x2014; material icon named "dns outlined".
-  static const IconData dns_outlined = IconData(0xe149, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">dns</i> &#x2014; material icon named "dns rounded".
   static const IconData dns_rounded = IconData(0xf177, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">dns</i> &#x2014; material icon named "dns outlined".
+  static const IconData dns_outlined = IconData(0xe149, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">dns</i> &#x2014; material icon named "dns sharp".
   static const IconData dns_sharp = IconData(0xec49, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">do_disturb</i> &#x2014; material icon named "do disturb outlined".
+  static const IconData do_disturb_outlined = IconData(0xe14d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">do_disturb</i> &#x2014; material icon named "do disturb rounded".
+  static const IconData do_disturb_rounded = IconData(0xf17b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">do_disturb</i> &#x2014; material icon named "do disturb sharp".
+  static const IconData do_disturb_sharp = IconData(0xec4d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">do_disturb_alt</i> &#x2014; material icon named "do disturb alt outlined".
   static const IconData do_disturb_alt_outlined = IconData(0xe14a, fontFamily: 'MaterialIcons');
@@ -4497,15 +4323,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">do_disturb_on</i> &#x2014; material icon named "do disturb on sharp".
   static const IconData do_disturb_on_sharp = IconData(0xec4c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">do_disturb</i> &#x2014; material icon named "do disturb outlined".
-  static const IconData do_disturb_outlined = IconData(0xe14d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">do_disturb</i> &#x2014; material icon named "do disturb rounded".
-  static const IconData do_disturb_rounded = IconData(0xf17b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">do_disturb</i> &#x2014; material icon named "do disturb sharp".
-  static const IconData do_disturb_sharp = IconData(0xec4d, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">do_not_disturb</i> &#x2014; material icon named "do not disturb".
   static const IconData do_not_disturb = IconData(0xe6c5, fontFamily: 'MaterialIcons');
 
@@ -4530,17 +4347,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">do_not_step</i> &#x2014; material icon named "do not step sharp".
   static const IconData do_not_step_sharp = IconData(0xec4e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">do_not_touch</i> &#x2014; material icon named "do not touch".
-  static const IconData do_not_touch = IconData(0xe6ca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">do_not_touch</i> &#x2014; material icon named "do not touch outlined".
-  static const IconData do_not_touch_outlined = IconData(0xe14f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">do_not_touch</i> &#x2014; material icon named "do not touch sharp".
+  static const IconData do_not_touch_sharp = IconData(0xec4f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">do_not_touch</i> &#x2014; material icon named "do not touch rounded".
   static const IconData do_not_touch_rounded = IconData(0xf17d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">do_not_touch</i> &#x2014; material icon named "do not touch sharp".
-  static const IconData do_not_touch_sharp = IconData(0xec4f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">do_not_touch</i> &#x2014; material icon named "do not touch outlined".
+  static const IconData do_not_touch_outlined = IconData(0xe14f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">do_not_touch</i> &#x2014; material icon named "do not touch".
+  static const IconData do_not_touch = IconData(0xe6ca, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">dock</i> &#x2014; material icon named "dock".
   static const IconData dock = IconData(0xe6cb, fontFamily: 'MaterialIcons');
@@ -4557,6 +4374,15 @@ class Icons {
   /// <i class="material-icons md-36">domain</i> &#x2014; material icon named "domain".
   static const IconData domain = IconData(0xe6cc, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">domain</i> &#x2014; material icon named "domain outlined".
+  static const IconData domain_outlined = IconData(0xe152, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">domain</i> &#x2014; material icon named "domain rounded".
+  static const IconData domain_rounded = IconData(0xf180, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">domain</i> &#x2014; material icon named "domain sharp".
+  static const IconData domain_sharp = IconData(0xec52, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">domain_disabled</i> &#x2014; material icon named "domain disabled".
   static const IconData domain_disabled = IconData(0xe6cd, fontFamily: 'MaterialIcons');
 
@@ -4568,15 +4394,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">domain_disabled</i> &#x2014; material icon named "domain disabled sharp".
   static const IconData domain_disabled_sharp = IconData(0xec51, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">domain</i> &#x2014; material icon named "domain outlined".
-  static const IconData domain_outlined = IconData(0xe152, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">domain</i> &#x2014; material icon named "domain rounded".
-  static const IconData domain_rounded = IconData(0xf180, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">domain</i> &#x2014; material icon named "domain sharp".
-  static const IconData domain_sharp = IconData(0xec52, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">domain_verification</i> &#x2014; material icon named "domain verification".
   static const IconData domain_verification = IconData(0xe6ce, fontFamily: 'MaterialIcons');
@@ -4590,8 +4407,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">domain_verification</i> &#x2014; material icon named "domain verification sharp".
   static const IconData domain_verification_sharp = IconData(0xec53, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">done</i> &#x2014; material icon named "done sharp".
+  static const IconData done_sharp = IconData(0xec56, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">done</i> &#x2014; material icon named "done".
   static const IconData done = IconData(0xe6cf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">done</i> &#x2014; material icon named "done outlined".
+  static const IconData done_outlined = IconData(0xe156, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">done</i> &#x2014; material icon named "done rounded".
+  static const IconData done_rounded = IconData(0xf184, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">done_all</i> &#x2014; material icon named "done all".
   static const IconData done_all = IconData(0xe6d0, fontFamily: 'MaterialIcons');
@@ -4616,15 +4442,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">done_outline</i> &#x2014; material icon named "done outline sharp".
   static const IconData done_outline_sharp = IconData(0xec55, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">done</i> &#x2014; material icon named "done outlined".
-  static const IconData done_outlined = IconData(0xe156, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">done</i> &#x2014; material icon named "done rounded".
-  static const IconData done_rounded = IconData(0xf184, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">done</i> &#x2014; material icon named "done sharp".
-  static const IconData done_sharp = IconData(0xec56, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">donut_large</i> &#x2014; material icon named "donut large".
   static const IconData donut_large = IconData(0xe6d2, fontFamily: 'MaterialIcons');
@@ -4662,6 +4479,15 @@ class Icons {
   /// <i class="material-icons-sharp md-36">double_arrow</i> &#x2014; material icon named "double arrow sharp".
   static const IconData double_arrow_sharp = IconData(0xec59, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">download</i> &#x2014; material icon named "download sharp".
+  static const IconData download_sharp = IconData(0xec5b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">download</i> &#x2014; material icon named "download outlined".
+  static const IconData download_outlined = IconData(0xe15b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">download</i> &#x2014; material icon named "download rounded".
+  static const IconData download_rounded = IconData(0xf189, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">download_done</i> &#x2014; material icon named "download done outlined".
   static const IconData download_done_outlined = IconData(0xe15a, fontFamily: 'MaterialIcons');
 
@@ -4670,15 +4496,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">download_done</i> &#x2014; material icon named "download done sharp".
   static const IconData download_done_sharp = IconData(0xec5a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">download</i> &#x2014; material icon named "download outlined".
-  static const IconData download_outlined = IconData(0xe15b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">download</i> &#x2014; material icon named "download rounded".
-  static const IconData download_rounded = IconData(0xf189, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">download</i> &#x2014; material icon named "download sharp".
-  static const IconData download_sharp = IconData(0xec5b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">drafts</i> &#x2014; material icon named "drafts".
   static const IconData drafts = IconData(0xe6d5, fontFamily: 'MaterialIcons');
@@ -4716,17 +4533,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">drag_indicator</i> &#x2014; material icon named "drag indicator sharp".
   static const IconData drag_indicator_sharp = IconData(0xec5e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">drive_eta</i> &#x2014; material icon named "drive eta".
-  static const IconData drive_eta = IconData(0xe6d8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">drive_eta</i> &#x2014; material icon named "drive eta outlined".
-  static const IconData drive_eta_outlined = IconData(0xe15f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">drive_eta</i> &#x2014; material icon named "drive eta sharp".
+  static const IconData drive_eta_sharp = IconData(0xec5f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">drive_eta</i> &#x2014; material icon named "drive eta rounded".
   static const IconData drive_eta_rounded = IconData(0xf18d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">drive_eta</i> &#x2014; material icon named "drive eta sharp".
-  static const IconData drive_eta_sharp = IconData(0xec5f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">drive_eta</i> &#x2014; material icon named "drive eta outlined".
+  static const IconData drive_eta_outlined = IconData(0xe15f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">drive_eta</i> &#x2014; material icon named "drive eta".
+  static const IconData drive_eta = IconData(0xe6d8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">drive_file_move</i> &#x2014; material icon named "drive file move".
   static const IconData drive_file_move = IconData(0xe6d9, fontFamily: 'MaterialIcons');
@@ -4743,9 +4560,6 @@ class Icons {
   /// <i class="material-icons md-36">dry</i> &#x2014; material icon named "dry".
   static const IconData dry = IconData(0xe6dd, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">dry_cleaning</i> &#x2014; material icon named "dry cleaning".
-  static const IconData dry_cleaning = IconData(0xe6de, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">dry</i> &#x2014; material icon named "dry outlined".
   static const IconData dry_outlined = IconData(0xe160, fontFamily: 'MaterialIcons');
 
@@ -4754,6 +4568,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">dry</i> &#x2014; material icon named "dry sharp".
   static const IconData dry_sharp = IconData(0xec60, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">dry_cleaning</i> &#x2014; material icon named "dry cleaning".
+  static const IconData dry_cleaning = IconData(0xe6de, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">duo</i> &#x2014; material icon named "duo".
   static const IconData duo = IconData(0xe6df, fontFamily: 'MaterialIcons');
@@ -4782,14 +4599,14 @@ class Icons {
   /// <i class="material-icons md-36">dynamic_feed</i> &#x2014; material icon named "dynamic feed".
   static const IconData dynamic_feed = IconData(0xe6e1, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">dynamic_feed</i> &#x2014; material icon named "dynamic feed sharp".
+  static const IconData dynamic_feed_sharp = IconData(0xec63, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">dynamic_feed</i> &#x2014; material icon named "dynamic feed outlined".
   static const IconData dynamic_feed_outlined = IconData(0xe163, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">dynamic_feed</i> &#x2014; material icon named "dynamic feed rounded".
   static const IconData dynamic_feed_rounded = IconData(0xf191, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">dynamic_feed</i> &#x2014; material icon named "dynamic feed sharp".
-  static const IconData dynamic_feed_sharp = IconData(0xec63, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">dynamic_form</i> &#x2014; material icon named "dynamic form".
   static const IconData dynamic_form = IconData(0xe6e2, fontFamily: 'MaterialIcons');
@@ -4830,17 +4647,26 @@ class Icons {
   /// <i class="material-icons md-36">edit</i> &#x2014; material icon named "edit".
   static const IconData edit = IconData(0xe6e5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">edit</i> &#x2014; material icon named "edit rounded".
+  static const IconData edit_rounded = IconData(0xf198, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">edit</i> &#x2014; material icon named "edit outlined".
+  static const IconData edit_outlined = IconData(0xe169, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">edit</i> &#x2014; material icon named "edit sharp".
+  static const IconData edit_sharp = IconData(0xec6a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">edit_attributes</i> &#x2014; material icon named "edit attributes".
   static const IconData edit_attributes = IconData(0xe6e6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">edit_attributes</i> &#x2014; material icon named "edit attributes outlined".
   static const IconData edit_attributes_outlined = IconData(0xe167, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">edit_attributes</i> &#x2014; material icon named "edit attributes rounded".
-  static const IconData edit_attributes_rounded = IconData(0xf195, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">edit_attributes</i> &#x2014; material icon named "edit attributes sharp".
   static const IconData edit_attributes_sharp = IconData(0xec67, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">edit_attributes</i> &#x2014; material icon named "edit attributes rounded".
+  static const IconData edit_attributes_rounded = IconData(0xf195, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">edit_location</i> &#x2014; material icon named "edit location".
   static const IconData edit_location = IconData(0xe6e7, fontFamily: 'MaterialIcons');
@@ -4857,9 +4683,6 @@ class Icons {
   /// <i class="material-icons md-36">edit_off</i> &#x2014; material icon named "edit off".
   static const IconData edit_off = IconData(0xe6e8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">edit</i> &#x2014; material icon named "edit outlined".
-  static const IconData edit_outlined = IconData(0xe169, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">edit_road</i> &#x2014; material icon named "edit road".
   static const IconData edit_road = IconData(0xe6e9, fontFamily: 'MaterialIcons');
 
@@ -4872,11 +4695,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">edit_road</i> &#x2014; material icon named "edit road sharp".
   static const IconData edit_road_sharp = IconData(0xec69, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">edit</i> &#x2014; material icon named "edit rounded".
-  static const IconData edit_rounded = IconData(0xf198, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">8k</i> &#x2014; material icon named "8k".
+  static const IconData eight_k = IconData(0xe552, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">edit</i> &#x2014; material icon named "edit sharp".
-  static const IconData edit_sharp = IconData(0xec6a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">8k_plus</i> &#x2014; material icon named "8k plus".
+  static const IconData eight_k_plus = IconData(0xe553, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">8mp</i> &#x2014; material icon named "8mp".
+  static const IconData eight_mp = IconData(0xe554, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">18mp</i> &#x2014; material icon named "18mp".
+  static const IconData eighteen_mp = IconData(0xe533, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">eject</i> &#x2014; material icon named "eject".
   static const IconData eject = IconData(0xe6ea, fontFamily: 'MaterialIcons');
@@ -4902,17 +4731,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">elderly</i> &#x2014; material icon named "elderly sharp".
   static const IconData elderly_sharp = IconData(0xec6c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">electric_bike</i> &#x2014; material icon named "electric bike".
-  static const IconData electric_bike = IconData(0xe6ec, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">electric_bike</i> &#x2014; material icon named "electric bike outlined".
   static const IconData electric_bike_outlined = IconData(0xe16d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">electric_bike</i> &#x2014; material icon named "electric bike rounded".
-  static const IconData electric_bike_rounded = IconData(0xf19b, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">electric_bike</i> &#x2014; material icon named "electric bike sharp".
   static const IconData electric_bike_sharp = IconData(0xec6d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">electric_bike</i> &#x2014; material icon named "electric bike".
+  static const IconData electric_bike = IconData(0xe6ec, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">electric_bike</i> &#x2014; material icon named "electric bike rounded".
+  static const IconData electric_bike_rounded = IconData(0xf19b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">electric_car</i> &#x2014; material icon named "electric car".
   static const IconData electric_car = IconData(0xe6ed, fontFamily: 'MaterialIcons');
@@ -4983,14 +4812,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">elevator</i> &#x2014; material icon named "elevator sharp".
   static const IconData elevator_sharp = IconData(0xec73, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">11mp</i> &#x2014; material icon named "11mp".
+  static const IconData eleven_mp = IconData(0xe52c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">email</i> &#x2014; material icon named "email rounded".
+  static const IconData email_rounded = IconData(0xf1a2, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">email</i> &#x2014; material icon named "email".
   static const IconData email = IconData(0xe6f3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">email</i> &#x2014; material icon named "email outlined".
   static const IconData email_outlined = IconData(0xe173, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">email</i> &#x2014; material icon named "email rounded".
-  static const IconData email_rounded = IconData(0xf1a2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">email</i> &#x2014; material icon named "email sharp".
   static const IconData email_sharp = IconData(0xec74, fontFamily: 'MaterialIcons');
@@ -5058,11 +4890,11 @@ class Icons {
   /// <i class="material-icons md-36">emoji_objects</i> &#x2014; material icon named "emoji objects".
   static const IconData emoji_objects = IconData(0xe6f9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">emoji_objects</i> &#x2014; material icon named "emoji objects outlined".
-  static const IconData emoji_objects_outlined = IconData(0xe179, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">emoji_objects</i> &#x2014; material icon named "emoji objects rounded".
   static const IconData emoji_objects_rounded = IconData(0xf1a8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">emoji_objects</i> &#x2014; material icon named "emoji objects outlined".
+  static const IconData emoji_objects_outlined = IconData(0xe179, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">emoji_objects</i> &#x2014; material icon named "emoji objects sharp".
   static const IconData emoji_objects_sharp = IconData(0xec7a, fontFamily: 'MaterialIcons');
@@ -5127,17 +4959,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">enhance_photo_translate</i> &#x2014; material icon named "enhance photo translate sharp".
   static const IconData enhance_photo_translate_sharp = IconData(0xebc3, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption".
-  static const IconData enhanced_encryption = IconData(0xe6fe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption outlined".
-  static const IconData enhanced_encryption_outlined = IconData(0xe17e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption sharp".
+  static const IconData enhanced_encryption_sharp = IconData(0xec7f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption rounded".
   static const IconData enhanced_encryption_rounded = IconData(0xf1ad, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption sharp".
-  static const IconData enhanced_encryption_sharp = IconData(0xec7f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption outlined".
+  static const IconData enhanced_encryption_outlined = IconData(0xe17e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">enhanced_encryption</i> &#x2014; material icon named "enhanced encryption".
+  static const IconData enhanced_encryption = IconData(0xe6fe, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">equalizer</i> &#x2014; material icon named "equalizer".
   static const IconData equalizer = IconData(0xe6ff, fontFamily: 'MaterialIcons');
@@ -5154,6 +4986,15 @@ class Icons {
   /// <i class="material-icons md-36">error</i> &#x2014; material icon named "error".
   static const IconData error = IconData(0xe700, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">error</i> &#x2014; material icon named "error outlined".
+  static const IconData error_outlined = IconData(0xe181, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">error</i> &#x2014; material icon named "error rounded".
+  static const IconData error_rounded = IconData(0xf1b0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">error</i> &#x2014; material icon named "error sharp".
+  static const IconData error_sharp = IconData(0xec82, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">error_outline</i> &#x2014; material icon named "error outline".
   static const IconData error_outline = IconData(0xe701, fontFamily: 'MaterialIcons');
 
@@ -5165,15 +5006,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">error_outline</i> &#x2014; material icon named "error outline sharp".
   static const IconData error_outline_sharp = IconData(0xec81, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">error</i> &#x2014; material icon named "error outlined".
-  static const IconData error_outlined = IconData(0xe181, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">error</i> &#x2014; material icon named "error rounded".
-  static const IconData error_rounded = IconData(0xf1b0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">error</i> &#x2014; material icon named "error sharp".
-  static const IconData error_sharp = IconData(0xec82, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">escalator</i> &#x2014; material icon named "escalator".
   static const IconData escalator = IconData(0xe702, fontFamily: 'MaterialIcons');
@@ -5199,17 +5031,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">escalator_warning</i> &#x2014; material icon named "escalator warning sharp".
   static const IconData escalator_warning_sharp = IconData(0xec84, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">euro</i> &#x2014; material icon named "euro".
-  static const IconData euro = IconData(0xe704, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">euro</i> &#x2014; material icon named "euro outlined".
   static const IconData euro_outlined = IconData(0xe184, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">euro</i> &#x2014; material icon named "euro rounded".
-  static const IconData euro_rounded = IconData(0xf1b3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">euro</i> &#x2014; material icon named "euro".
+  static const IconData euro = IconData(0xe704, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">euro</i> &#x2014; material icon named "euro sharp".
   static const IconData euro_sharp = IconData(0xec85, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">euro</i> &#x2014; material icon named "euro rounded".
+  static const IconData euro_rounded = IconData(0xf1b3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">euro_symbol</i> &#x2014; material icon named "euro symbol".
   static const IconData euro_symbol = IconData(0xe705, fontFamily: 'MaterialIcons');
@@ -5235,8 +5067,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">ev_station</i> &#x2014; material icon named "ev station sharp".
   static const IconData ev_station_sharp = IconData(0xec87, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">event</i> &#x2014; material icon named "event sharp".
+  static const IconData event_sharp = IconData(0xec8c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">event</i> &#x2014; material icon named "event".
   static const IconData event = IconData(0xe707, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">event</i> &#x2014; material icon named "event rounded".
+  static const IconData event_rounded = IconData(0xf1b9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">event</i> &#x2014; material icon named "event outlined".
+  static const IconData event_outlined = IconData(0xe18a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">event_available</i> &#x2014; material icon named "event available".
   static const IconData event_available = IconData(0xe708, fontFamily: 'MaterialIcons');
@@ -5274,12 +5115,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">event_note</i> &#x2014; material icon named "event note sharp".
   static const IconData event_note_sharp = IconData(0xec8a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">event</i> &#x2014; material icon named "event outlined".
-  static const IconData event_outlined = IconData(0xe18a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">event</i> &#x2014; material icon named "event rounded".
-  static const IconData event_rounded = IconData(0xf1b9, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">event_seat</i> &#x2014; material icon named "event seat".
   static const IconData event_seat = IconData(0xe70b, fontFamily: 'MaterialIcons');
 
@@ -5291,9 +5126,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">event_seat</i> &#x2014; material icon named "event seat sharp".
   static const IconData event_seat_sharp = IconData(0xec8b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">event</i> &#x2014; material icon named "event sharp".
-  static const IconData event_sharp = IconData(0xec8c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">exit_to_app</i> &#x2014; material icon named "exit to app".
   static const IconData exit_to_app = IconData(0xe70c, fontFamily: 'MaterialIcons');
@@ -5334,20 +5166,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">expand_more</i> &#x2014; material icon named "expand more sharp".
   static const IconData expand_more_sharp = IconData(0xec8f, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">explicit</i> &#x2014; material icon named "explicit rounded".
+  static const IconData explicit_rounded = IconData(0xf1be, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">explicit</i> &#x2014; material icon named "explicit".
   static const IconData explicit = IconData(0xe710, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">explicit</i> &#x2014; material icon named "explicit outlined".
   static const IconData explicit_outlined = IconData(0xe18f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">explicit</i> &#x2014; material icon named "explicit rounded".
-  static const IconData explicit_rounded = IconData(0xf1be, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">explicit</i> &#x2014; material icon named "explicit sharp".
   static const IconData explicit_sharp = IconData(0xec90, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">explore</i> &#x2014; material icon named "explore".
   static const IconData explore = IconData(0xe711, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">explore</i> &#x2014; material icon named "explore outlined".
+  static const IconData explore_outlined = IconData(0xe191, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">explore</i> &#x2014; material icon named "explore rounded".
+  static const IconData explore_rounded = IconData(0xf1c0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">explore</i> &#x2014; material icon named "explore sharp".
+  static const IconData explore_sharp = IconData(0xec92, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">explore_off</i> &#x2014; material icon named "explore off".
   static const IconData explore_off = IconData(0xe712, fontFamily: 'MaterialIcons');
@@ -5361,17 +5202,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">explore_off</i> &#x2014; material icon named "explore off sharp".
   static const IconData explore_off_sharp = IconData(0xec91, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">explore</i> &#x2014; material icon named "explore outlined".
-  static const IconData explore_outlined = IconData(0xe191, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">explore</i> &#x2014; material icon named "explore rounded".
-  static const IconData explore_rounded = IconData(0xf1c0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">explore</i> &#x2014; material icon named "explore sharp".
-  static const IconData explore_sharp = IconData(0xec92, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">exposure</i> &#x2014; material icon named "exposure rounded".
+  static const IconData exposure_rounded = IconData(0xf1c5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">exposure</i> &#x2014; material icon named "exposure".
   static const IconData exposure = IconData(0xe713, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">exposure</i> &#x2014; material icon named "exposure outlined".
+  static const IconData exposure_outlined = IconData(0xe194, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">exposure</i> &#x2014; material icon named "exposure sharp".
+  static const IconData exposure_sharp = IconData(0xec97, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">exposure_minus_1</i> &#x2014; material icon named "exposure minus 1".
   static const IconData exposure_minus_1 = IconData(0xe714, fontFamily: 'MaterialIcons');
@@ -5421,9 +5262,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">exposure_neg_2</i> &#x2014; material icon named "exposure neg 2 sharp".
   static const IconData exposure_neg_2_sharp = IconData(0xec94, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">exposure</i> &#x2014; material icon named "exposure outlined".
-  static const IconData exposure_outlined = IconData(0xe194, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">exposure_plus_1</i> &#x2014; material icon named "exposure plus 1".
   static const IconData exposure_plus_1 = IconData(0xe716, fontFamily: 'MaterialIcons');
 
@@ -5447,12 +5285,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">exposure_plus_2</i> &#x2014; material icon named "exposure plus 2 sharp".
   static const IconData exposure_plus_2_sharp = IconData(0xec96, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">exposure</i> &#x2014; material icon named "exposure rounded".
-  static const IconData exposure_rounded = IconData(0xf1c5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">exposure</i> &#x2014; material icon named "exposure sharp".
-  static const IconData exposure_sharp = IconData(0xec97, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">exposure_zero</i> &#x2014; material icon named "exposure zero".
   static const IconData exposure_zero = IconData(0xe718, fontFamily: 'MaterialIcons');
@@ -5484,14 +5316,14 @@ class Icons {
   /// <i class="material-icons-outlined md-36">face</i> &#x2014; material icon named "face outlined".
   static const IconData face_outlined = IconData(0xe199, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">face_retouching_natural</i> &#x2014; material icon named "face retouching natural".
-  static const IconData face_retouching_natural = IconData(0xe71b, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">face</i> &#x2014; material icon named "face rounded".
   static const IconData face_rounded = IconData(0xf1c8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">face</i> &#x2014; material icon named "face sharp".
   static const IconData face_sharp = IconData(0xec9a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">face_retouching_natural</i> &#x2014; material icon named "face retouching natural".
+  static const IconData face_retouching_natural = IconData(0xe71b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">face_unlock</i> &#x2014; material icon named "face unlock outlined".
   static const IconData face_unlock_outlined = IconData(0xe19a, fontFamily: 'MaterialIcons');
@@ -5502,6 +5334,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">face_unlock</i> &#x2014; material icon named "face unlock sharp".
   static const IconData face_unlock_sharp = IconData(0xec9b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">fact_check</i> &#x2014; material icon named "fact check sharp".
+  static const IconData fact_check_sharp = IconData(0xec9c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">fact_check</i> &#x2014; material icon named "fact check".
   static const IconData fact_check = IconData(0xe71c, fontFamily: 'MaterialIcons');
 
@@ -5510,9 +5345,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">fact_check</i> &#x2014; material icon named "fact check rounded".
   static const IconData fact_check_rounded = IconData(0xf1ca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">fact_check</i> &#x2014; material icon named "fact check sharp".
-  static const IconData fact_check_sharp = IconData(0xec9c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">family_restroom</i> &#x2014; material icon named "family restroom".
   static const IconData family_restroom = IconData(0xe71d, fontFamily: 'MaterialIcons');
@@ -5538,14 +5370,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fast_forward</i> &#x2014; material icon named "fast forward sharp".
   static const IconData fast_forward_sharp = IconData(0xec9e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">fast_rewind</i> &#x2014; material icon named "fast rewind rounded".
+  static const IconData fast_rewind_rounded = IconData(0xf1cd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">fast_rewind</i> &#x2014; material icon named "fast rewind".
   static const IconData fast_rewind = IconData(0xe71f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">fast_rewind</i> &#x2014; material icon named "fast rewind outlined".
   static const IconData fast_rewind_outlined = IconData(0xe19e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">fast_rewind</i> &#x2014; material icon named "fast rewind rounded".
-  static const IconData fast_rewind_rounded = IconData(0xf1cd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">fast_rewind</i> &#x2014; material icon named "fast rewind sharp".
   static const IconData fast_rewind_sharp = IconData(0xec9f, fontFamily: 'MaterialIcons');
@@ -5562,8 +5394,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fastfood</i> &#x2014; material icon named "fastfood sharp".
   static const IconData fastfood_sharp = IconData(0xeca0, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">favorite</i> &#x2014; material icon named "favorite sharp".
+  static const IconData favorite_sharp = IconData(0xeca2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">favorite</i> &#x2014; material icon named "favorite rounded".
+  static const IconData favorite_rounded = IconData(0xf1d0, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">favorite</i> &#x2014; material icon named "favorite".
   static const IconData favorite = IconData(0xe721, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">favorite</i> &#x2014; material icon named "favorite outlined".
+  static const IconData favorite_outlined = IconData(0xe1a1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">favorite_border</i> &#x2014; material icon named "favorite border".
   static const IconData favorite_border = IconData(0xe722, fontFamily: 'MaterialIcons');
@@ -5580,23 +5421,14 @@ class Icons {
   /// <i class="material-icons md-36">favorite_outline</i> &#x2014; material icon named "favorite outline".
   static const IconData favorite_outline = IconData(0xe722, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">favorite_outline</i> &#x2014; material icon named "favorite outline outlined".
-  static const IconData favorite_outline_outlined = IconData(0xe1a0, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">favorite_outline</i> &#x2014; material icon named "favorite outline rounded".
   static const IconData favorite_outline_rounded = IconData(0xf1cf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">favorite_outline</i> &#x2014; material icon named "favorite outline sharp".
   static const IconData favorite_outline_sharp = IconData(0xeca1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">favorite</i> &#x2014; material icon named "favorite outlined".
-  static const IconData favorite_outlined = IconData(0xe1a1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">favorite</i> &#x2014; material icon named "favorite rounded".
-  static const IconData favorite_rounded = IconData(0xf1d0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">favorite</i> &#x2014; material icon named "favorite sharp".
-  static const IconData favorite_sharp = IconData(0xeca2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">favorite_outline</i> &#x2014; material icon named "favorite outline outlined".
+  static const IconData favorite_outline_outlined = IconData(0xe1a0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">featured_play_list</i> &#x2014; material icon named "featured play list".
   static const IconData featured_play_list = IconData(0xe723, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -5613,14 +5445,14 @@ class Icons {
   /// <i class="material-icons md-36">featured_video</i> &#x2014; material icon named "featured video".
   static const IconData featured_video = IconData(0xe724, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-sharp md-36">featured_video</i> &#x2014; material icon named "featured video sharp".
+  static const IconData featured_video_sharp = IconData(0xeca4, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons-outlined md-36">featured_video</i> &#x2014; material icon named "featured video outlined".
   static const IconData featured_video_outlined = IconData(0xe1a3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">featured_video</i> &#x2014; material icon named "featured video rounded".
   static const IconData featured_video_rounded = IconData(0xf1d2, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">featured_video</i> &#x2014; material icon named "featured video sharp".
-  static const IconData featured_video_sharp = IconData(0xeca4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">feedback</i> &#x2014; material icon named "feedback".
   static const IconData feedback = IconData(0xe725, fontFamily: 'MaterialIcons');
@@ -5673,6 +5505,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fiber_manual_record</i> &#x2014; material icon named "fiber manual record sharp".
   static const IconData fiber_manual_record_sharp = IconData(0xeca8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">fiber_new</i> &#x2014; material icon named "fiber new sharp".
+  static const IconData fiber_new_sharp = IconData(0xeca9, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">fiber_new</i> &#x2014; material icon named "fiber new".
   static const IconData fiber_new = IconData(0xe72a, fontFamily: 'MaterialIcons');
 
@@ -5681,9 +5516,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">fiber_new</i> &#x2014; material icon named "fiber new rounded".
   static const IconData fiber_new_rounded = IconData(0xf1d7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">fiber_new</i> &#x2014; material icon named "fiber new sharp".
-  static const IconData fiber_new_sharp = IconData(0xeca9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">fiber_pin</i> &#x2014; material icon named "fiber pin".
   static const IconData fiber_pin = IconData(0xe72b, fontFamily: 'MaterialIcons');
@@ -5709,6 +5541,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fiber_smart_record</i> &#x2014; material icon named "fiber smart record sharp".
   static const IconData fiber_smart_record_sharp = IconData(0xecab, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">15mp</i> &#x2014; material icon named "15mp".
+  static const IconData fifteen_mp = IconData(0xe530, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">file_copy</i> &#x2014; material icon named "file copy".
   static const IconData file_copy = IconData(0xe72d, fontFamily: 'MaterialIcons');
 
@@ -5733,8 +5568,17 @@ class Icons {
   /// <i class="material-icons md-36">file_upload</i> &#x2014; material icon named "file upload".
   static const IconData file_upload = IconData(0xe731, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">filter</i> &#x2014; material icon named "filter rounded".
+  static const IconData filter_rounded = IconData(0xf1ed, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">filter</i> &#x2014; material icon named "filter".
   static const IconData filter = IconData(0xe732, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">filter</i> &#x2014; material icon named "filter sharp".
+  static const IconData filter_sharp = IconData(0xecbf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">filter</i> &#x2014; material icon named "filter outlined".
+  static const IconData filter_outlined = IconData(0xe1be, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">filter_1</i> &#x2014; material icon named "filter 1".
   static const IconData filter_1 = IconData(0xe733, fontFamily: 'MaterialIcons');
@@ -5751,26 +5595,26 @@ class Icons {
   /// <i class="material-icons md-36">filter_2</i> &#x2014; material icon named "filter 2".
   static const IconData filter_2 = IconData(0xe734, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">filter_2</i> &#x2014; material icon named "filter 2 outlined".
-  static const IconData filter_2_outlined = IconData(0xe1ad, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">filter_2</i> &#x2014; material icon named "filter 2 rounded".
   static const IconData filter_2_rounded = IconData(0xf1dc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">filter_2</i> &#x2014; material icon named "filter 2 sharp".
   static const IconData filter_2_sharp = IconData(0xecae, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">filter_3</i> &#x2014; material icon named "filter 3".
-  static const IconData filter_3 = IconData(0xe735, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">filter_3</i> &#x2014; material icon named "filter 3 outlined".
-  static const IconData filter_3_outlined = IconData(0xe1ae, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">filter_2</i> &#x2014; material icon named "filter 2 outlined".
+  static const IconData filter_2_outlined = IconData(0xe1ad, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">filter_3</i> &#x2014; material icon named "filter 3 rounded".
   static const IconData filter_3_rounded = IconData(0xf1dd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">filter_3</i> &#x2014; material icon named "filter 3 sharp".
   static const IconData filter_3_sharp = IconData(0xecaf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">filter_3</i> &#x2014; material icon named "filter 3".
+  static const IconData filter_3 = IconData(0xe735, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">filter_3</i> &#x2014; material icon named "filter 3 outlined".
+  static const IconData filter_3_outlined = IconData(0xe1ae, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">filter_4</i> &#x2014; material icon named "filter 4".
   static const IconData filter_4 = IconData(0xe736, fontFamily: 'MaterialIcons');
@@ -5838,6 +5682,12 @@ class Icons {
   /// <i class="material-icons-outlined md-36">filter_9</i> &#x2014; material icon named "filter 9 outlined".
   static const IconData filter_9_outlined = IconData(0xe1b4, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">filter_9</i> &#x2014; material icon named "filter 9 rounded".
+  static const IconData filter_9_rounded = IconData(0xf1e4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">filter_9</i> &#x2014; material icon named "filter 9 sharp".
+  static const IconData filter_9_sharp = IconData(0xecb6, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">filter_9_plus</i> &#x2014; material icon named "filter 9 plus".
   static const IconData filter_9_plus = IconData(0xe73c, fontFamily: 'MaterialIcons');
 
@@ -5849,12 +5699,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">filter_9_plus</i> &#x2014; material icon named "filter 9 plus sharp".
   static const IconData filter_9_plus_sharp = IconData(0xecb5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">filter_9</i> &#x2014; material icon named "filter 9 rounded".
-  static const IconData filter_9_rounded = IconData(0xf1e4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">filter_9</i> &#x2014; material icon named "filter 9 sharp".
-  static const IconData filter_9_sharp = IconData(0xecb6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">filter_alt</i> &#x2014; material icon named "filter alt".
   static const IconData filter_alt = IconData(0xe73d, fontFamily: 'MaterialIcons');
@@ -5871,11 +5715,11 @@ class Icons {
   /// <i class="material-icons md-36">filter_b_and_w</i> &#x2014; material icon named "filter b and w".
   static const IconData filter_b_and_w = IconData(0xe73e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">filter_b_and_w</i> &#x2014; material icon named "filter b and w outlined".
-  static const IconData filter_b_and_w_outlined = IconData(0xe1b7, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">filter_b_and_w</i> &#x2014; material icon named "filter b and w rounded".
   static const IconData filter_b_and_w_rounded = IconData(0xf1e6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">filter_b_and_w</i> &#x2014; material icon named "filter b and w outlined".
+  static const IconData filter_b_and_w_outlined = IconData(0xe1b7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">filter_b_and_w</i> &#x2014; material icon named "filter b and w sharp".
   static const IconData filter_b_and_w_sharp = IconData(0xecb8, fontFamily: 'MaterialIcons');
@@ -5916,6 +5760,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">filter_frames</i> &#x2014; material icon named "filter frames sharp".
   static const IconData filter_frames_sharp = IconData(0xecbb, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">filter_hdr</i> &#x2014; material icon named "filter hdr sharp".
+  static const IconData filter_hdr_sharp = IconData(0xecbc, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">filter_hdr</i> &#x2014; material icon named "filter hdr".
   static const IconData filter_hdr = IconData(0xe742, fontFamily: 'MaterialIcons');
 
@@ -5925,14 +5772,8 @@ class Icons {
   /// <i class="material-icons-round md-36">filter_hdr</i> &#x2014; material icon named "filter hdr rounded".
   static const IconData filter_hdr_rounded = IconData(0xf1ea, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">filter_hdr</i> &#x2014; material icon named "filter hdr sharp".
-  static const IconData filter_hdr_sharp = IconData(0xecbc, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">filter_list</i> &#x2014; material icon named "filter list".
   static const IconData filter_list = IconData(0xe743, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">filter_list_alt</i> &#x2014; material icon named "filter list alt".
-  static const IconData filter_list_alt = IconData(0xe744, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">filter_list</i> &#x2014; material icon named "filter list outlined".
   static const IconData filter_list_outlined = IconData(0xe1bc, fontFamily: 'MaterialIcons');
@@ -5942,6 +5783,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">filter_list</i> &#x2014; material icon named "filter list sharp".
   static const IconData filter_list_sharp = IconData(0xecbd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">filter_list_alt</i> &#x2014; material icon named "filter list alt".
+  static const IconData filter_list_alt = IconData(0xe744, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">filter_none</i> &#x2014; material icon named "filter none".
   static const IconData filter_none = IconData(0xe745, fontFamily: 'MaterialIcons');
@@ -5954,15 +5798,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">filter_none</i> &#x2014; material icon named "filter none sharp".
   static const IconData filter_none_sharp = IconData(0xecbe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">filter</i> &#x2014; material icon named "filter outlined".
-  static const IconData filter_outlined = IconData(0xe1be, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">filter</i> &#x2014; material icon named "filter rounded".
-  static const IconData filter_rounded = IconData(0xf1ed, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">filter</i> &#x2014; material icon named "filter sharp".
-  static const IconData filter_sharp = IconData(0xecbf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">filter_tilt_shift</i> &#x2014; material icon named "filter tilt shift".
   static const IconData filter_tilt_shift = IconData(0xe746, fontFamily: 'MaterialIcons');
@@ -5991,14 +5826,14 @@ class Icons {
   /// <i class="material-icons md-36">find_in_page</i> &#x2014; material icon named "find in page".
   static const IconData find_in_page = IconData(0xe748, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">find_in_page</i> &#x2014; material icon named "find in page sharp".
+  static const IconData find_in_page_sharp = IconData(0xecc2, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">find_in_page</i> &#x2014; material icon named "find in page outlined".
   static const IconData find_in_page_outlined = IconData(0xe1c1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">find_in_page</i> &#x2014; material icon named "find in page rounded".
   static const IconData find_in_page_rounded = IconData(0xf1f0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">find_in_page</i> &#x2014; material icon named "find in page sharp".
-  static const IconData find_in_page_sharp = IconData(0xecc2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">find_replace</i> &#x2014; material icon named "find replace".
   static const IconData find_replace = IconData(0xe749, fontFamily: 'MaterialIcons');
@@ -6078,6 +5913,27 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fitness_center</i> &#x2014; material icon named "fitness center sharp".
   static const IconData fitness_center_sharp = IconData(0xecc8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">5g</i> &#x2014; material icon named "5g".
+  static const IconData five_g = IconData(0xe547, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">5g</i> &#x2014; material icon named "5g outlined".
+  static const IconData five_g_outlined = IconData(0xe003, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">5g</i> &#x2014; material icon named "5g rounded".
+  static const IconData five_g_rounded = IconData(0xf031, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">5g</i> &#x2014; material icon named "5g sharp".
+  static const IconData five_g_sharp = IconData(0xeb03, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">5k</i> &#x2014; material icon named "5k".
+  static const IconData five_k = IconData(0xe548, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">5k_plus</i> &#x2014; material icon named "5k plus".
+  static const IconData five_k_plus = IconData(0xe549, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">5mp</i> &#x2014; material icon named "5mp".
+  static const IconData five_mp = IconData(0xe54a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">flag</i> &#x2014; material icon named "flag".
   static const IconData flag = IconData(0xe751, fontFamily: 'MaterialIcons');
 
@@ -6102,17 +5958,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">flaky</i> &#x2014; material icon named "flaky sharp".
   static const IconData flaky_sharp = IconData(0xecca, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">flare</i> &#x2014; material icon named "flare sharp".
+  static const IconData flare_sharp = IconData(0xeccb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">flare</i> &#x2014; material icon named "flare".
   static const IconData flare = IconData(0xe753, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">flare</i> &#x2014; material icon named "flare outlined".
-  static const IconData flare_outlined = IconData(0xe1ca, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">flare</i> &#x2014; material icon named "flare rounded".
   static const IconData flare_rounded = IconData(0xf1f9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">flare</i> &#x2014; material icon named "flare sharp".
-  static const IconData flare_sharp = IconData(0xeccb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">flare</i> &#x2014; material icon named "flare outlined".
+  static const IconData flare_outlined = IconData(0xe1ca, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">flash_auto</i> &#x2014; material icon named "flash auto".
   static const IconData flash_auto = IconData(0xe754, fontFamily: 'MaterialIcons');
@@ -6153,6 +6009,15 @@ class Icons {
   /// <i class="material-icons md-36">flight</i> &#x2014; material icon named "flight".
   static const IconData flight = IconData(0xe757, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">flight</i> &#x2014; material icon named "flight outlined".
+  static const IconData flight_outlined = IconData(0xe1cf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">flight</i> &#x2014; material icon named "flight rounded".
+  static const IconData flight_rounded = IconData(0xf1fe, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">flight</i> &#x2014; material icon named "flight sharp".
+  static const IconData flight_sharp = IconData(0xecd0, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">flight_land</i> &#x2014; material icon named "flight land".
   static const IconData flight_land = IconData(0xe758, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
@@ -6165,14 +6030,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">flight_land</i> &#x2014; material icon named "flight land sharp".
   static const IconData flight_land_sharp = IconData(0xeccf, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">flight</i> &#x2014; material icon named "flight outlined".
-  static const IconData flight_outlined = IconData(0xe1cf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">flight</i> &#x2014; material icon named "flight rounded".
-  static const IconData flight_rounded = IconData(0xf1fe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">flight</i> &#x2014; material icon named "flight sharp".
-  static const IconData flight_sharp = IconData(0xecd0, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff rounded".
+  static const IconData flight_takeoff_rounded = IconData(0xf1ff, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff".
   static const IconData flight_takeoff = IconData(0xe759, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -6180,14 +6039,20 @@ class Icons {
   /// <i class="material-icons-outlined md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff outlined".
   static const IconData flight_takeoff_outlined = IconData(0xe1d0, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-round md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff rounded".
-  static const IconData flight_takeoff_rounded = IconData(0xf1ff, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons-sharp md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff sharp".
   static const IconData flight_takeoff_sharp = IconData(0xecd1, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">flip</i> &#x2014; material icon named "flip".
   static const IconData flip = IconData(0xe75a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">flip</i> &#x2014; material icon named "flip outlined".
+  static const IconData flip_outlined = IconData(0xe1d3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">flip</i> &#x2014; material icon named "flip rounded".
+  static const IconData flip_rounded = IconData(0xf202, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">flip</i> &#x2014; material icon named "flip sharp".
+  static const IconData flip_sharp = IconData(0xecd4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">flip_camera_android</i> &#x2014; material icon named "flip camera android".
   static const IconData flip_camera_android = IconData(0xe75b, fontFamily: 'MaterialIcons');
@@ -6213,15 +6078,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">flip_camera_ios</i> &#x2014; material icon named "flip camera ios sharp".
   static const IconData flip_camera_ios_sharp = IconData(0xecd3, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">flip</i> &#x2014; material icon named "flip outlined".
-  static const IconData flip_outlined = IconData(0xe1d3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">flip</i> &#x2014; material icon named "flip rounded".
-  static const IconData flip_rounded = IconData(0xf202, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">flip</i> &#x2014; material icon named "flip sharp".
-  static const IconData flip_sharp = IconData(0xecd4, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">flip_to_back</i> &#x2014; material icon named "flip to back".
   static const IconData flip_to_back = IconData(0xe75d, fontFamily: 'MaterialIcons');
 
@@ -6234,6 +6090,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">flip_to_back</i> &#x2014; material icon named "flip to back sharp".
   static const IconData flip_to_back_sharp = IconData(0xecd5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">flip_to_front</i> &#x2014; material icon named "flip to front sharp".
+  static const IconData flip_to_front_sharp = IconData(0xecd6, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">flip_to_front</i> &#x2014; material icon named "flip to front".
   static const IconData flip_to_front = IconData(0xe75e, fontFamily: 'MaterialIcons');
 
@@ -6243,11 +6102,17 @@ class Icons {
   /// <i class="material-icons-round md-36">flip_to_front</i> &#x2014; material icon named "flip to front rounded".
   static const IconData flip_to_front_rounded = IconData(0xf204, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">flip_to_front</i> &#x2014; material icon named "flip to front sharp".
-  static const IconData flip_to_front_sharp = IconData(0xecd6, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">folder</i> &#x2014; material icon named "folder".
   static const IconData folder = IconData(0xe75f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">folder</i> &#x2014; material icon named "folder outlined".
+  static const IconData folder_outlined = IconData(0xe1d7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">folder</i> &#x2014; material icon named "folder rounded".
+  static const IconData folder_rounded = IconData(0xf206, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">folder</i> &#x2014; material icon named "folder sharp".
+  static const IconData folder_sharp = IconData(0xecd9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">folder_open</i> &#x2014; material icon named "folder open".
   static const IconData folder_open = IconData(0xe760, fontFamily: 'MaterialIcons');
@@ -6261,12 +6126,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">folder_open</i> &#x2014; material icon named "folder open sharp".
   static const IconData folder_open_sharp = IconData(0xecd7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">folder</i> &#x2014; material icon named "folder outlined".
-  static const IconData folder_outlined = IconData(0xe1d7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">folder</i> &#x2014; material icon named "folder rounded".
-  static const IconData folder_rounded = IconData(0xf206, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">folder_shared</i> &#x2014; material icon named "folder shared".
   static const IconData folder_shared = IconData(0xe761, fontFamily: 'MaterialIcons');
 
@@ -6278,9 +6137,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">folder_shared</i> &#x2014; material icon named "folder shared sharp".
   static const IconData folder_shared_sharp = IconData(0xecd8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">folder</i> &#x2014; material icon named "folder sharp".
-  static const IconData folder_sharp = IconData(0xecd9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">folder_special</i> &#x2014; material icon named "folder special".
   static const IconData folder_special = IconData(0xe762, fontFamily: 'MaterialIcons');
@@ -6306,17 +6162,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">follow_the_signs</i> &#x2014; material icon named "follow the signs sharp".
   static const IconData follow_the_signs_sharp = IconData(0xecdb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">font_download</i> &#x2014; material icon named "font download".
-  static const IconData font_download = IconData(0xe764, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">font_download</i> &#x2014; material icon named "font download outlined".
-  static const IconData font_download_outlined = IconData(0xe1db, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">font_download</i> &#x2014; material icon named "font download sharp".
+  static const IconData font_download_sharp = IconData(0xecdc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">font_download</i> &#x2014; material icon named "font download rounded".
   static const IconData font_download_rounded = IconData(0xf20a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">font_download</i> &#x2014; material icon named "font download sharp".
-  static const IconData font_download_sharp = IconData(0xecdc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">font_download</i> &#x2014; material icon named "font download outlined".
+  static const IconData font_download_outlined = IconData(0xe1db, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">font_download</i> &#x2014; material icon named "font download".
+  static const IconData font_download = IconData(0xe764, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">food_bank</i> &#x2014; material icon named "food bank".
   static const IconData food_bank = IconData(0xe765, fontFamily: 'MaterialIcons');
@@ -6366,14 +6222,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">format_align_left</i> &#x2014; material icon named "format align left sharp".
   static const IconData format_align_left_sharp = IconData(0xece0, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">format_align_right</i> &#x2014; material icon named "format align right rounded".
+  static const IconData format_align_right_rounded = IconData(0xf20f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">format_align_right</i> &#x2014; material icon named "format align right".
   static const IconData format_align_right = IconData(0xe769, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">format_align_right</i> &#x2014; material icon named "format align right outlined".
   static const IconData format_align_right_outlined = IconData(0xe1e0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">format_align_right</i> &#x2014; material icon named "format align right rounded".
-  static const IconData format_align_right_rounded = IconData(0xf20f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">format_align_right</i> &#x2014; material icon named "format align right sharp".
   static const IconData format_align_right_sharp = IconData(0xece1, fontFamily: 'MaterialIcons');
@@ -6480,6 +6336,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">format_list_bulleted</i> &#x2014; material icon named "format list bulleted sharp".
   static const IconData format_list_bulleted_sharp = IconData(0xece9, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-sharp md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered sharp".
+  static const IconData format_list_numbered_sharp = IconData(0xeceb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered".
   static const IconData format_list_numbered = IconData(0xe774, fontFamily: 'MaterialIcons');
 
@@ -6489,8 +6348,8 @@ class Icons {
   /// <i class="material-icons-round md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered rounded".
   static const IconData format_list_numbered_rounded = IconData(0xf218, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl".
-  static const IconData format_list_numbered_rtl = IconData(0xe775, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl sharp".
+  static const IconData format_list_numbered_rtl_sharp = IconData(0xecea, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl outlined".
   static const IconData format_list_numbered_rtl_outlined = IconData(0xe1ea, fontFamily: 'MaterialIcons');
@@ -6498,11 +6357,8 @@ class Icons {
   /// <i class="material-icons-round md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl rounded".
   static const IconData format_list_numbered_rtl_rounded = IconData(0xf219, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl sharp".
-  static const IconData format_list_numbered_rtl_sharp = IconData(0xecea, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered sharp".
-  static const IconData format_list_numbered_sharp = IconData(0xeceb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl".
+  static const IconData format_list_numbered_rtl = IconData(0xe775, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">format_paint</i> &#x2014; material icon named "format paint".
   static const IconData format_paint = IconData(0xe776, fontFamily: 'MaterialIcons');
@@ -6555,11 +6411,11 @@ class Icons {
   /// <i class="material-icons md-36">format_strikethrough</i> &#x2014; material icon named "format strikethrough".
   static const IconData format_strikethrough = IconData(0xe77a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">format_strikethrough</i> &#x2014; material icon named "format strikethrough outlined".
-  static const IconData format_strikethrough_outlined = IconData(0xe1ef, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">format_strikethrough</i> &#x2014; material icon named "format strikethrough rounded".
   static const IconData format_strikethrough_rounded = IconData(0xf21e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">format_strikethrough</i> &#x2014; material icon named "format strikethrough outlined".
+  static const IconData format_strikethrough_outlined = IconData(0xe1ef, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">format_strikethrough</i> &#x2014; material icon named "format strikethrough sharp".
   static const IconData format_strikethrough_sharp = IconData(0xecf0, fontFamily: 'MaterialIcons');
@@ -6603,14 +6459,14 @@ class Icons {
   /// <i class="material-icons md-36">format_underlined</i> &#x2014; material icon named "format underlined".
   static const IconData format_underlined = IconData(0xe77d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">format_underlined</i> &#x2014; material icon named "format underlined sharp".
+  static const IconData format_underlined_sharp = IconData(0xecf3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">format_underlined</i> &#x2014; material icon named "format underlined outlined".
   static const IconData format_underlined_outlined = IconData(0xe1f2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">format_underlined</i> &#x2014; material icon named "format underlined rounded".
   static const IconData format_underlined_rounded = IconData(0xf221, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">format_underlined</i> &#x2014; material icon named "format underlined sharp".
-  static const IconData format_underlined_sharp = IconData(0xecf3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">forum</i> &#x2014; material icon named "forum".
   static const IconData forum = IconData(0xe77e, fontFamily: 'MaterialIcons');
@@ -6623,6 +6479,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">forum</i> &#x2014; material icon named "forum sharp".
   static const IconData forum_sharp = IconData(0xecf4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">forward</i> &#x2014; material icon named "forward sharp".
+  static const IconData forward_sharp = IconData(0xecf8, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">forward</i> &#x2014; material icon named "forward rounded".
+  static const IconData forward_rounded = IconData(0xf226, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">forward</i> &#x2014; material icon named "forward outlined".
+  static const IconData forward_outlined = IconData(0xe1f7, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">forward</i> &#x2014; material icon named "forward".
   static const IconData forward = IconData(0xe77f, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -6651,32 +6516,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">forward_30</i> &#x2014; material icon named "forward 30 sharp".
   static const IconData forward_30_sharp = IconData(0xecf6, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">forward_5</i> &#x2014; material icon named "forward 5 sharp".
+  static const IconData forward_5_sharp = IconData(0xecf7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">forward_5</i> &#x2014; material icon named "forward 5 rounded".
+  static const IconData forward_5_rounded = IconData(0xf225, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">forward_5</i> &#x2014; material icon named "forward 5".
   static const IconData forward_5 = IconData(0xe782, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">forward_5</i> &#x2014; material icon named "forward 5 outlined".
   static const IconData forward_5_outlined = IconData(0xe1f6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">forward_5</i> &#x2014; material icon named "forward 5 rounded".
-  static const IconData forward_5_rounded = IconData(0xf225, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">forward_5</i> &#x2014; material icon named "forward 5 sharp".
-  static const IconData forward_5_sharp = IconData(0xecf7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">forward</i> &#x2014; material icon named "forward outlined".
-  static const IconData forward_outlined = IconData(0xe1f7, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">forward</i> &#x2014; material icon named "forward rounded".
-  static const IconData forward_rounded = IconData(0xf226, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">forward</i> &#x2014; material icon named "forward sharp".
-  static const IconData forward_sharp = IconData(0xecf8, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-outlined md-36">forward_to_inbox</i> &#x2014; material icon named "forward to inbox outlined".
+  static const IconData forward_to_inbox_outlined = IconData(0xe1f8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">forward_to_inbox</i> &#x2014; material icon named "forward to inbox".
   static const IconData forward_to_inbox = IconData(0xe783, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">forward_to_inbox</i> &#x2014; material icon named "forward to inbox outlined".
-  static const IconData forward_to_inbox_outlined = IconData(0xe1f8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">forward_to_inbox</i> &#x2014; material icon named "forward to inbox rounded".
   static const IconData forward_to_inbox_rounded = IconData(0xf227, fontFamily: 'MaterialIcons');
@@ -6684,17 +6540,38 @@ class Icons {
   /// <i class="material-icons-sharp md-36">forward_to_inbox</i> &#x2014; material icon named "forward to inbox sharp".
   static const IconData forward_to_inbox_sharp = IconData(0xecf9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">foundation</i> &#x2014; material icon named "foundation rounded".
+  static const IconData foundation_rounded = IconData(0xf228, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">foundation</i> &#x2014; material icon named "foundation sharp".
+  static const IconData foundation_sharp = IconData(0xecfa, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">foundation</i> &#x2014; material icon named "foundation".
   static const IconData foundation = IconData(0xe784, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">foundation</i> &#x2014; material icon named "foundation outlined".
   static const IconData foundation_outlined = IconData(0xe1f9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">foundation</i> &#x2014; material icon named "foundation rounded".
-  static const IconData foundation_rounded = IconData(0xf228, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">4k</i> &#x2014; material icon named "4k".
+  static const IconData four_k = IconData(0xe544, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">foundation</i> &#x2014; material icon named "foundation sharp".
-  static const IconData foundation_sharp = IconData(0xecfa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">4k</i> &#x2014; material icon named "4k sharp".
+  static const IconData four_k_sharp = IconData(0xeb02, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">4k</i> &#x2014; material icon named "4k rounded".
+  static const IconData four_k_rounded = IconData(0xf030, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">4k</i> &#x2014; material icon named "4k outlined".
+  static const IconData four_k_outlined = IconData(0xe002, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">4k_plus</i> &#x2014; material icon named "4k plus".
+  static const IconData four_k_plus = IconData(0xe545, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">4mp</i> &#x2014; material icon named "4mp".
+  static const IconData four_mp = IconData(0xe546, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">14mp</i> &#x2014; material icon named "14mp".
+  static const IconData fourteen_mp = IconData(0xe52f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">free_breakfast</i> &#x2014; material icon named "free breakfast".
   static const IconData free_breakfast = IconData(0xe785, fontFamily: 'MaterialIcons');
@@ -6708,14 +6585,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">free_breakfast</i> &#x2014; material icon named "free breakfast sharp".
   static const IconData free_breakfast_sharp = IconData(0xecfb, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">fullscreen</i> &#x2014; material icon named "fullscreen rounded".
+  static const IconData fullscreen_rounded = IconData(0xf22b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">fullscreen</i> &#x2014; material icon named "fullscreen sharp".
+  static const IconData fullscreen_sharp = IconData(0xecfd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">fullscreen</i> &#x2014; material icon named "fullscreen".
   static const IconData fullscreen = IconData(0xe786, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit".
-  static const IconData fullscreen_exit = IconData(0xe787, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit outlined".
-  static const IconData fullscreen_exit_outlined = IconData(0xe1fb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">fullscreen</i> &#x2014; material icon named "fullscreen outlined".
+  static const IconData fullscreen_outlined = IconData(0xe1fc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit rounded".
   static const IconData fullscreen_exit_rounded = IconData(0xf22a, fontFamily: 'MaterialIcons');
@@ -6723,14 +6603,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit sharp".
   static const IconData fullscreen_exit_sharp = IconData(0xecfc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">fullscreen</i> &#x2014; material icon named "fullscreen outlined".
-  static const IconData fullscreen_outlined = IconData(0xe1fc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit".
+  static const IconData fullscreen_exit = IconData(0xe787, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">fullscreen</i> &#x2014; material icon named "fullscreen rounded".
-  static const IconData fullscreen_rounded = IconData(0xf22b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">fullscreen</i> &#x2014; material icon named "fullscreen sharp".
-  static const IconData fullscreen_sharp = IconData(0xecfd, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">fullscreen_exit</i> &#x2014; material icon named "fullscreen exit outlined".
+  static const IconData fullscreen_exit_outlined = IconData(0xe1fb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">functions</i> &#x2014; material icon named "functions".
   static const IconData functions = IconData(0xe788, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -6756,17 +6633,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">g_translate</i> &#x2014; material icon named "g translate sharp".
   static const IconData g_translate_sharp = IconData(0xecff, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">gamepad</i> &#x2014; material icon named "gamepad".
-  static const IconData gamepad = IconData(0xe78a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">gamepad</i> &#x2014; material icon named "gamepad outlined".
   static const IconData gamepad_outlined = IconData(0xe1ff, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">gamepad</i> &#x2014; material icon named "gamepad rounded".
-  static const IconData gamepad_rounded = IconData(0xf22e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">gamepad</i> &#x2014; material icon named "gamepad sharp".
   static const IconData gamepad_sharp = IconData(0xed00, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">gamepad</i> &#x2014; material icon named "gamepad".
+  static const IconData gamepad = IconData(0xe78a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">gamepad</i> &#x2014; material icon named "gamepad rounded".
+  static const IconData gamepad_rounded = IconData(0xf22e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">games</i> &#x2014; material icon named "games".
   static const IconData games = IconData(0xe78b, fontFamily: 'MaterialIcons');
@@ -6888,14 +6765,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">grade</i> &#x2014; material icon named "grade sharp".
   static const IconData grade_sharp = IconData(0xed0a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">gradient</i> &#x2014; material icon named "gradient rounded".
+  static const IconData gradient_rounded = IconData(0xf239, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">gradient</i> &#x2014; material icon named "gradient".
   static const IconData gradient = IconData(0xe795, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">gradient</i> &#x2014; material icon named "gradient outlined".
   static const IconData gradient_outlined = IconData(0xe20a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">gradient</i> &#x2014; material icon named "gradient rounded".
-  static const IconData gradient_rounded = IconData(0xf239, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">gradient</i> &#x2014; material icon named "gradient sharp".
   static const IconData gradient_sharp = IconData(0xed0b, fontFamily: 'MaterialIcons');
@@ -6960,14 +6837,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">grid_off</i> &#x2014; material icon named "grid off sharp".
   static const IconData grid_off_sharp = IconData(0xed10, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">grid_on</i> &#x2014; material icon named "grid on rounded".
+  static const IconData grid_on_rounded = IconData(0xf23f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">grid_on</i> &#x2014; material icon named "grid on".
   static const IconData grid_on = IconData(0xe79b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">grid_on</i> &#x2014; material icon named "grid on outlined".
   static const IconData grid_on_outlined = IconData(0xe210, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">grid_on</i> &#x2014; material icon named "grid on rounded".
-  static const IconData grid_on_rounded = IconData(0xf23f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">grid_on</i> &#x2014; material icon named "grid on sharp".
   static const IconData grid_on_sharp = IconData(0xed11, fontFamily: 'MaterialIcons');
@@ -6977,6 +6854,15 @@ class Icons {
 
   /// <i class="material-icons md-36">group</i> &#x2014; material icon named "group".
   static const IconData group = IconData(0xe79d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">group</i> &#x2014; material icon named "group outlined".
+  static const IconData group_outlined = IconData(0xe212, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">group</i> &#x2014; material icon named "group rounded".
+  static const IconData group_rounded = IconData(0xf241, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">group</i> &#x2014; material icon named "group sharp".
+  static const IconData group_sharp = IconData(0xed13, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">group_add</i> &#x2014; material icon named "group add".
   static const IconData group_add = IconData(0xe79e, fontFamily: 'MaterialIcons');
@@ -6989,15 +6875,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">group_add</i> &#x2014; material icon named "group add sharp".
   static const IconData group_add_sharp = IconData(0xed12, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">group</i> &#x2014; material icon named "group outlined".
-  static const IconData group_outlined = IconData(0xe212, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">group</i> &#x2014; material icon named "group rounded".
-  static const IconData group_rounded = IconData(0xf241, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">group</i> &#x2014; material icon named "group sharp".
-  static const IconData group_sharp = IconData(0xed13, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">group_work</i> &#x2014; material icon named "group work".
   static const IconData group_work = IconData(0xe79f, fontFamily: 'MaterialIcons');
@@ -7032,14 +6909,14 @@ class Icons {
   /// <i class="material-icons md-36">hd</i> &#x2014; material icon named "hd".
   static const IconData hd = IconData(0xe7a3, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">hd</i> &#x2014; material icon named "hd sharp".
+  static const IconData hd_sharp = IconData(0xed16, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">hd</i> &#x2014; material icon named "hd outlined".
   static const IconData hd_outlined = IconData(0xe215, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">hd</i> &#x2014; material icon named "hd rounded".
   static const IconData hd_rounded = IconData(0xf244, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">hd</i> &#x2014; material icon named "hd sharp".
-  static const IconData hd_sharp = IconData(0xed16, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">hdr_enhanced_select</i> &#x2014; material icon named "hdr enhanced select".
   static const IconData hdr_enhanced_select = IconData(0xe7a4, fontFamily: 'MaterialIcons');
@@ -7092,8 +6969,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">hdr_weak</i> &#x2014; material icon named "hdr weak sharp".
   static const IconData hdr_weak_sharp = IconData(0xed1a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">headset</i> &#x2014; material icon named "headset sharp".
+  static const IconData headset_sharp = IconData(0xed1c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">headset</i> &#x2014; material icon named "headset".
   static const IconData headset = IconData(0xe7a9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">headset</i> &#x2014; material icon named "headset rounded".
+  static const IconData headset_rounded = IconData(0xf24a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">headset</i> &#x2014; material icon named "headset outlined".
+  static const IconData headset_outlined = IconData(0xe21b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">headset_mic</i> &#x2014; material icon named "headset mic".
   static const IconData headset_mic = IconData(0xe7aa, fontFamily: 'MaterialIcons');
@@ -7110,15 +6996,6 @@ class Icons {
   /// <i class="material-icons md-36">headset_off</i> &#x2014; material icon named "headset off".
   static const IconData headset_off = IconData(0xe7ab, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">headset</i> &#x2014; material icon named "headset outlined".
-  static const IconData headset_outlined = IconData(0xe21b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">headset</i> &#x2014; material icon named "headset rounded".
-  static const IconData headset_rounded = IconData(0xf24a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">headset</i> &#x2014; material icon named "headset sharp".
-  static const IconData headset_sharp = IconData(0xed1c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">healing</i> &#x2014; material icon named "healing".
   static const IconData healing = IconData(0xe7ac, fontFamily: 'MaterialIcons');
 
@@ -7134,6 +7011,15 @@ class Icons {
   /// <i class="material-icons md-36">hearing</i> &#x2014; material icon named "hearing".
   static const IconData hearing = IconData(0xe7ad, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">hearing</i> &#x2014; material icon named "hearing outlined".
+  static const IconData hearing_outlined = IconData(0xe21e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">hearing</i> &#x2014; material icon named "hearing rounded".
+  static const IconData hearing_rounded = IconData(0xf24d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">hearing</i> &#x2014; material icon named "hearing sharp".
+  static const IconData hearing_sharp = IconData(0xed1f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">hearing_disabled</i> &#x2014; material icon named "hearing disabled".
   static const IconData hearing_disabled = IconData(0xe7ae, fontFamily: 'MaterialIcons');
 
@@ -7145,15 +7031,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">hearing_disabled</i> &#x2014; material icon named "hearing disabled sharp".
   static const IconData hearing_disabled_sharp = IconData(0xed1e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">hearing</i> &#x2014; material icon named "hearing outlined".
-  static const IconData hearing_outlined = IconData(0xe21e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">hearing</i> &#x2014; material icon named "hearing rounded".
-  static const IconData hearing_rounded = IconData(0xf24d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">hearing</i> &#x2014; material icon named "hearing sharp".
-  static const IconData hearing_sharp = IconData(0xed1f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">height</i> &#x2014; material icon named "height".
   static const IconData height = IconData(0xe7af, fontFamily: 'MaterialIcons');
@@ -7167,20 +7044,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">height</i> &#x2014; material icon named "height sharp".
   static const IconData height_sharp = IconData(0xed20, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">help</i> &#x2014; material icon named "help rounded".
+  static const IconData help_rounded = IconData(0xf251, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">help</i> &#x2014; material icon named "help sharp".
+  static const IconData help_sharp = IconData(0xed23, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">help</i> &#x2014; material icon named "help".
   static const IconData help = IconData(0xe7b0, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-outlined md-36">help</i> &#x2014; material icon named "help outlined".
+  static const IconData help_outlined = IconData(0xe222, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">help_center</i> &#x2014; material icon named "help center".
   static const IconData help_center = IconData(0xe7b1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">help_center</i> &#x2014; material icon named "help center sharp".
+  static const IconData help_center_sharp = IconData(0xed21, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">help_center</i> &#x2014; material icon named "help center outlined".
   static const IconData help_center_outlined = IconData(0xe220, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">help_center</i> &#x2014; material icon named "help center rounded".
   static const IconData help_center_rounded = IconData(0xf24f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">help_center</i> &#x2014; material icon named "help center sharp".
-  static const IconData help_center_sharp = IconData(0xed21, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">help_outline</i> &#x2014; material icon named "help outline".
   static const IconData help_outline = IconData(0xe7b2, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -7193,15 +7079,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">help_outline</i> &#x2014; material icon named "help outline sharp".
   static const IconData help_outline_sharp = IconData(0xed22, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">help</i> &#x2014; material icon named "help outlined".
-  static const IconData help_outlined = IconData(0xe222, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">help</i> &#x2014; material icon named "help rounded".
-  static const IconData help_rounded = IconData(0xf251, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">help</i> &#x2014; material icon named "help sharp".
-  static const IconData help_sharp = IconData(0xed23, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">high_quality</i> &#x2014; material icon named "high quality".
   static const IconData high_quality = IconData(0xe7b3, fontFamily: 'MaterialIcons');
@@ -7217,6 +7094,15 @@ class Icons {
 
   /// <i class="material-icons md-36">highlight</i> &#x2014; material icon named "highlight".
   static const IconData highlight = IconData(0xe7b4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">highlight</i> &#x2014; material icon named "highlight outlined".
+  static const IconData highlight_outlined = IconData(0xe226, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">highlight</i> &#x2014; material icon named "highlight rounded".
+  static const IconData highlight_rounded = IconData(0xf255, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">highlight</i> &#x2014; material icon named "highlight sharp".
+  static const IconData highlight_sharp = IconData(0xed27, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">highlight_alt</i> &#x2014; material icon named "highlight alt".
   static const IconData highlight_alt = IconData(0xe7b5, fontFamily: 'MaterialIcons');
@@ -7242,9 +7128,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">highlight_off</i> &#x2014; material icon named "highlight off sharp".
   static const IconData highlight_off_sharp = IconData(0xed26, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">highlight</i> &#x2014; material icon named "highlight outlined".
-  static const IconData highlight_outlined = IconData(0xe226, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">highlight_remove</i> &#x2014; material icon named "highlight remove".
   static const IconData highlight_remove = IconData(0xe7b6, fontFamily: 'MaterialIcons');
 
@@ -7257,14 +7140,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">highlight_remove</i> &#x2014; material icon named "highlight remove sharp".
   static const IconData highlight_remove_sharp = IconData(0xed26, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">highlight</i> &#x2014; material icon named "highlight rounded".
-  static const IconData highlight_rounded = IconData(0xf255, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">highlight</i> &#x2014; material icon named "highlight sharp".
-  static const IconData highlight_sharp = IconData(0xed27, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">history</i> &#x2014; material icon named "history".
   static const IconData history = IconData(0xe7b7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">history</i> &#x2014; material icon named "history outlined".
+  static const IconData history_outlined = IconData(0xe228, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">history</i> &#x2014; material icon named "history rounded".
+  static const IconData history_rounded = IconData(0xf257, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">history</i> &#x2014; material icon named "history sharp".
+  static const IconData history_sharp = IconData(0xed29, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">history_edu</i> &#x2014; material icon named "history edu".
   static const IconData history_edu = IconData(0xe7b8, fontFamily: 'MaterialIcons');
@@ -7278,15 +7164,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">history_edu</i> &#x2014; material icon named "history edu sharp".
   static const IconData history_edu_sharp = IconData(0xed28, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">history</i> &#x2014; material icon named "history outlined".
-  static const IconData history_outlined = IconData(0xe228, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">history</i> &#x2014; material icon named "history rounded".
-  static const IconData history_rounded = IconData(0xf257, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">history</i> &#x2014; material icon named "history sharp".
-  static const IconData history_sharp = IconData(0xed29, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">history_toggle_off</i> &#x2014; material icon named "history toggle off".
   static const IconData history_toggle_off = IconData(0xe7b9, fontFamily: 'MaterialIcons');
 
@@ -7299,17 +7176,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">history_toggle_off</i> &#x2014; material icon named "history toggle off sharp".
   static const IconData history_toggle_off_sharp = IconData(0xed2a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">home</i> &#x2014; material icon named "home sharp".
+  static const IconData home_sharp = IconData(0xed2c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">home</i> &#x2014; material icon named "home".
   static const IconData home = IconData(0xe7ba, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">home_filled</i> &#x2014; material icon named "home filled".
-  static const IconData home_filled = IconData(0xe7bb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">home</i> &#x2014; material icon named "home rounded".
+  static const IconData home_rounded = IconData(0xf25a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">home</i> &#x2014; material icon named "home outlined".
   static const IconData home_outlined = IconData(0xe22a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">home_repair_service</i> &#x2014; material icon named "home repair service".
-  static const IconData home_repair_service = IconData(0xe7bc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">home_filled</i> &#x2014; material icon named "home filled".
+  static const IconData home_filled = IconData(0xe7bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">home_repair_service</i> &#x2014; material icon named "home repair service outlined".
   static const IconData home_repair_service_outlined = IconData(0xe22b, fontFamily: 'MaterialIcons');
@@ -7320,11 +7200,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">home_repair_service</i> &#x2014; material icon named "home repair service sharp".
   static const IconData home_repair_service_sharp = IconData(0xed2b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">home</i> &#x2014; material icon named "home rounded".
-  static const IconData home_rounded = IconData(0xf25a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">home</i> &#x2014; material icon named "home sharp".
-  static const IconData home_sharp = IconData(0xed2c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">home_repair_service</i> &#x2014; material icon named "home repair service".
+  static const IconData home_repair_service = IconData(0xe7bc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">home_work</i> &#x2014; material icon named "home work".
   static const IconData home_work = IconData(0xe7bd, fontFamily: 'MaterialIcons');
@@ -7362,17 +7239,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">horizontal_split</i> &#x2014; material icon named "horizontal split sharp".
   static const IconData horizontal_split_sharp = IconData(0xed2f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">hot_tub</i> &#x2014; material icon named "hot tub".
-  static const IconData hot_tub = IconData(0xe7c0, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">hot_tub</i> &#x2014; material icon named "hot tub outlined".
   static const IconData hot_tub_outlined = IconData(0xe22f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">hot_tub</i> &#x2014; material icon named "hot tub rounded".
-  static const IconData hot_tub_rounded = IconData(0xf25e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">hot_tub</i> &#x2014; material icon named "hot tub sharp".
   static const IconData hot_tub_sharp = IconData(0xed30, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">hot_tub</i> &#x2014; material icon named "hot tub".
+  static const IconData hot_tub = IconData(0xe7c0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">hot_tub</i> &#x2014; material icon named "hot tub rounded".
+  static const IconData hot_tub_rounded = IconData(0xf25e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">hotel</i> &#x2014; material icon named "hotel".
   static const IconData hotel = IconData(0xe7c1, fontFamily: 'MaterialIcons');
@@ -7422,6 +7299,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">hourglass_empty</i> &#x2014; material icon named "hourglass empty sharp".
   static const IconData hourglass_empty_sharp = IconData(0xed34, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">hourglass_full</i> &#x2014; material icon named "hourglass full sharp".
+  static const IconData hourglass_full_sharp = IconData(0xed35, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">hourglass_full</i> &#x2014; material icon named "hourglass full".
   static const IconData hourglass_full = IconData(0xe7c5, fontFamily: 'MaterialIcons');
 
@@ -7430,9 +7310,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">hourglass_full</i> &#x2014; material icon named "hourglass full rounded".
   static const IconData hourglass_full_rounded = IconData(0xf263, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">hourglass_full</i> &#x2014; material icon named "hourglass full sharp".
-  static const IconData hourglass_full_sharp = IconData(0xed35, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">hourglass_top</i> &#x2014; material icon named "hourglass top".
   static const IconData hourglass_top = IconData(0xe7c6, fontFamily: 'MaterialIcons');
@@ -7494,6 +7371,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">how_to_vote</i> &#x2014; material icon named "how to vote sharp".
   static const IconData how_to_vote_sharp = IconData(0xed3a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">http</i> &#x2014; material icon named "http sharp".
+  static const IconData http_sharp = IconData(0xed3b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">http</i> &#x2014; material icon named "http".
   static const IconData http = IconData(0xe7cb, fontFamily: 'MaterialIcons');
 
@@ -7502,9 +7382,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">http</i> &#x2014; material icon named "http rounded".
   static const IconData http_rounded = IconData(0xf269, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">http</i> &#x2014; material icon named "http sharp".
-  static const IconData http_sharp = IconData(0xed3b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">https</i> &#x2014; material icon named "https".
   static const IconData https = IconData(0xe7cc, fontFamily: 'MaterialIcons');
@@ -7536,6 +7413,15 @@ class Icons {
   /// <i class="material-icons md-36">image</i> &#x2014; material icon named "image".
   static const IconData image = IconData(0xe7cf, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">image</i> &#x2014; material icon named "image outlined".
+  static const IconData image_outlined = IconData(0xe23f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">image</i> &#x2014; material icon named "image rounded".
+  static const IconData image_rounded = IconData(0xf26e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">image</i> &#x2014; material icon named "image sharp".
+  static const IconData image_sharp = IconData(0xed41, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">image_aspect_ratio</i> &#x2014; material icon named "image aspect ratio".
   static const IconData image_aspect_ratio = IconData(0xe7d0, fontFamily: 'MaterialIcons');
 
@@ -7560,12 +7446,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">image_not_supported</i> &#x2014; material icon named "image not supported sharp".
   static const IconData image_not_supported_sharp = IconData(0xed3f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">image</i> &#x2014; material icon named "image outlined".
-  static const IconData image_outlined = IconData(0xe23f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">image</i> &#x2014; material icon named "image rounded".
-  static const IconData image_rounded = IconData(0xf26e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">image_search</i> &#x2014; material icon named "image search".
   static const IconData image_search = IconData(0xe7d2, fontFamily: 'MaterialIcons');
 
@@ -7577,9 +7457,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">image_search</i> &#x2014; material icon named "image search sharp".
   static const IconData image_search_sharp = IconData(0xed40, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">image</i> &#x2014; material icon named "image sharp".
-  static const IconData image_sharp = IconData(0xed41, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">imagesearch_roller</i> &#x2014; material icon named "imagesearch roller".
   static const IconData imagesearch_roller = IconData(0xe7d3, fontFamily: 'MaterialIcons');
@@ -7647,15 +7524,6 @@ class Icons {
   /// <i class="material-icons md-36">info</i> &#x2014; material icon named "info".
   static const IconData info = IconData(0xe7d9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">info_outline</i> &#x2014; material icon named "info outline".
-  static const IconData info_outline = IconData(0xe7da, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">info_outline</i> &#x2014; material icon named "info outline rounded".
-  static const IconData info_outline_rounded = IconData(0xf275, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">info_outline</i> &#x2014; material icon named "info outline sharp".
-  static const IconData info_outline_sharp = IconData(0xed47, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">info</i> &#x2014; material icon named "info outlined".
   static const IconData info_outlined = IconData(0xe246, fontFamily: 'MaterialIcons');
 
@@ -7664,6 +7532,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">info</i> &#x2014; material icon named "info sharp".
   static const IconData info_sharp = IconData(0xed48, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">info_outline</i> &#x2014; material icon named "info outline".
+  static const IconData info_outline = IconData(0xe7da, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">info_outline</i> &#x2014; material icon named "info outline rounded".
+  static const IconData info_outline_rounded = IconData(0xf275, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">info_outline</i> &#x2014; material icon named "info outline sharp".
+  static const IconData info_outline_sharp = IconData(0xed47, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">input</i> &#x2014; material icon named "input".
   static const IconData input = IconData(0xe7db, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -7677,11 +7554,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">input</i> &#x2014; material icon named "input sharp".
   static const IconData input_sharp = IconData(0xed49, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-sharp md-36">insert_chart</i> &#x2014; material icon named "insert chart sharp".
+  static const IconData insert_chart_sharp = IconData(0xed4b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart rounded".
+  static const IconData insert_chart_rounded = IconData(0xf279, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">insert_chart</i> &#x2014; material icon named "insert chart".
   static const IconData insert_chart = IconData(0xe7dc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined".
-  static const IconData insert_chart_outlined = IconData(0xe248, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined outlined".
   static const IconData insert_chart_outlined_outlined = IconData(0xe249, fontFamily: 'MaterialIcons');
@@ -7692,11 +7572,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined sharp".
   static const IconData insert_chart_outlined_sharp = IconData(0xed4a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">insert_chart</i> &#x2014; material icon named "insert chart rounded".
-  static const IconData insert_chart_rounded = IconData(0xf279, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">insert_chart</i> &#x2014; material icon named "insert chart sharp".
-  static const IconData insert_chart_sharp = IconData(0xed4b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">insert_chart_outlined</i> &#x2014; material icon named "insert chart outlined".
+  static const IconData insert_chart_outlined = IconData(0xe248, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">insert_comment</i> &#x2014; material icon named "insert comment".
   static const IconData insert_comment = IconData(0xe7de, fontFamily: 'MaterialIcons');
@@ -7722,6 +7599,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">insert_drive_file</i> &#x2014; material icon named "insert drive file sharp".
   static const IconData insert_drive_file_sharp = IconData(0xed4d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">insert_emoticon</i> &#x2014; material icon named "insert emoticon sharp".
+  static const IconData insert_emoticon_sharp = IconData(0xed4e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">insert_emoticon</i> &#x2014; material icon named "insert emoticon".
   static const IconData insert_emoticon = IconData(0xe7e0, fontFamily: 'MaterialIcons');
 
@@ -7731,17 +7611,14 @@ class Icons {
   /// <i class="material-icons-round md-36">insert_emoticon</i> &#x2014; material icon named "insert emoticon rounded".
   static const IconData insert_emoticon_rounded = IconData(0xf27c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">insert_emoticon</i> &#x2014; material icon named "insert emoticon sharp".
-  static const IconData insert_emoticon_sharp = IconData(0xed4e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">insert_invitation</i> &#x2014; material icon named "insert invitation".
   static const IconData insert_invitation = IconData(0xe7e1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">insert_invitation</i> &#x2014; material icon named "insert invitation outlined".
-  static const IconData insert_invitation_outlined = IconData(0xe24d, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">insert_invitation</i> &#x2014; material icon named "insert invitation rounded".
   static const IconData insert_invitation_rounded = IconData(0xf27d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">insert_invitation</i> &#x2014; material icon named "insert invitation outlined".
+  static const IconData insert_invitation_outlined = IconData(0xe24d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">insert_invitation</i> &#x2014; material icon named "insert invitation sharp".
   static const IconData insert_invitation_sharp = IconData(0xed4f, fontFamily: 'MaterialIcons');
@@ -7800,6 +7677,15 @@ class Icons {
   /// <i class="material-icons md-36">invert_colors</i> &#x2014; material icon named "invert colors".
   static const IconData invert_colors = IconData(0xe7e7, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">invert_colors</i> &#x2014; material icon named "invert colors outlined".
+  static const IconData invert_colors_outlined = IconData(0xe253, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">invert_colors</i> &#x2014; material icon named "invert colors rounded".
+  static const IconData invert_colors_rounded = IconData(0xf283, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">invert_colors</i> &#x2014; material icon named "invert colors sharp".
+  static const IconData invert_colors_sharp = IconData(0xed55, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">invert_colors_off</i> &#x2014; material icon named "invert colors off".
   static const IconData invert_colors_off = IconData(0xe7e8, fontFamily: 'MaterialIcons');
 
@@ -7824,15 +7710,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">invert_colors_on</i> &#x2014; material icon named "invert colors on sharp".
   static const IconData invert_colors_on_sharp = IconData(0xed55, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">invert_colors</i> &#x2014; material icon named "invert colors outlined".
-  static const IconData invert_colors_outlined = IconData(0xe253, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">invert_colors</i> &#x2014; material icon named "invert colors rounded".
-  static const IconData invert_colors_rounded = IconData(0xf283, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">invert_colors</i> &#x2014; material icon named "invert colors sharp".
-  static const IconData invert_colors_sharp = IconData(0xed55, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">ios_share</i> &#x2014; material icon named "ios share".
   static const IconData ios_share = IconData(0xe7e9, fontFamily: 'MaterialIcons');
 
@@ -7848,11 +7725,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">iso</i> &#x2014; material icon named "iso sharp".
   static const IconData iso_sharp = IconData(0xed56, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">keyboard</i> &#x2014; material icon named "keyboard sharp".
+  static const IconData keyboard_sharp = IconData(0xed5f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">keyboard</i> &#x2014; material icon named "keyboard".
   static const IconData keyboard = IconData(0xe7eb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">keyboard_arrow_down</i> &#x2014; material icon named "keyboard arrow down".
-  static const IconData keyboard_arrow_down = IconData(0xe7ec, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">keyboard</i> &#x2014; material icon named "keyboard outlined".
+  static const IconData keyboard_outlined = IconData(0xe25c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">keyboard</i> &#x2014; material icon named "keyboard rounded".
+  static const IconData keyboard_rounded = IconData(0xf28d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">keyboard_arrow_down</i> &#x2014; material icon named "keyboard arrow down outlined".
   static const IconData keyboard_arrow_down_outlined = IconData(0xe255, fontFamily: 'MaterialIcons');
@@ -7863,17 +7746,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">keyboard_arrow_down</i> &#x2014; material icon named "keyboard arrow down sharp".
   static const IconData keyboard_arrow_down_sharp = IconData(0xed57, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left".
-  static const IconData keyboard_arrow_left = IconData(0xe7ed, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left outlined".
-  static const IconData keyboard_arrow_left_outlined = IconData(0xe256, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">keyboard_arrow_down</i> &#x2014; material icon named "keyboard arrow down".
+  static const IconData keyboard_arrow_down = IconData(0xe7ec, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left rounded".
   static const IconData keyboard_arrow_left_rounded = IconData(0xf286, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left sharp".
   static const IconData keyboard_arrow_left_sharp = IconData(0xed58, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left".
+  static const IconData keyboard_arrow_left = IconData(0xe7ed, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">keyboard_arrow_left</i> &#x2014; material icon named "keyboard arrow left outlined".
+  static const IconData keyboard_arrow_left_outlined = IconData(0xe256, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">keyboard_arrow_right</i> &#x2014; material icon named "keyboard arrow right".
   static const IconData keyboard_arrow_right = IconData(0xe7ee, fontFamily: 'MaterialIcons');
@@ -7911,17 +7797,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">keyboard_backspace</i> &#x2014; material icon named "keyboard backspace sharp".
   static const IconData keyboard_backspace_sharp = IconData(0xed5b, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock".
-  static const IconData keyboard_capslock = IconData(0xe7f1, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock outlined".
   static const IconData keyboard_capslock_outlined = IconData(0xe25a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock rounded".
-  static const IconData keyboard_capslock_rounded = IconData(0xf28a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock sharp".
   static const IconData keyboard_capslock_sharp = IconData(0xed5c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock".
+  static const IconData keyboard_capslock = IconData(0xe7f1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock rounded".
+  static const IconData keyboard_capslock_rounded = IconData(0xf28a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">keyboard_control</i> &#x2014; material icon named "keyboard control".
   static const IconData keyboard_control = IconData(0xe886, fontFamily: 'MaterialIcons');
@@ -7947,9 +7833,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">keyboard_hide</i> &#x2014; material icon named "keyboard hide sharp".
   static const IconData keyboard_hide_sharp = IconData(0xed5d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">keyboard</i> &#x2014; material icon named "keyboard outlined".
-  static const IconData keyboard_outlined = IconData(0xe25c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">keyboard_return</i> &#x2014; material icon named "keyboard return".
   static const IconData keyboard_return = IconData(0xe7f3, fontFamily: 'MaterialIcons');
 
@@ -7961,12 +7844,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">keyboard_return</i> &#x2014; material icon named "keyboard return sharp".
   static const IconData keyboard_return_sharp = IconData(0xed5e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">keyboard</i> &#x2014; material icon named "keyboard rounded".
-  static const IconData keyboard_rounded = IconData(0xf28d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">keyboard</i> &#x2014; material icon named "keyboard sharp".
-  static const IconData keyboard_sharp = IconData(0xed5f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">keyboard_tab</i> &#x2014; material icon named "keyboard tab".
   static const IconData keyboard_tab = IconData(0xe7f4, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -8016,20 +7893,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">kitchen</i> &#x2014; material icon named "kitchen sharp".
   static const IconData kitchen_sharp = IconData(0xed63, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">label</i> &#x2014; material icon named "label rounded".
+  static const IconData label_rounded = IconData(0xf296, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">label</i> &#x2014; material icon named "label".
   static const IconData label = IconData(0xe7f8, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-sharp md-36">label</i> &#x2014; material icon named "label sharp".
+  static const IconData label_sharp = IconData(0xed68, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">label</i> &#x2014; material icon named "label outlined".
+  static const IconData label_outlined = IconData(0xe264, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">label_important</i> &#x2014; material icon named "label important".
   static const IconData label_important = IconData(0xe7f9, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons md-36">label_important_outline</i> &#x2014; material icon named "label important outline".
-  static const IconData label_important_outline = IconData(0xe7fa, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">label_important_outline</i> &#x2014; material icon named "label important outline rounded".
-  static const IconData label_important_outline_rounded = IconData(0xf292, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">label_important_outline</i> &#x2014; material icon named "label important outline sharp".
-  static const IconData label_important_outline_sharp = IconData(0xed64, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">label_important</i> &#x2014; material icon named "label important outlined".
   static const IconData label_important_outlined = IconData(0xe262, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -8040,17 +7917,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">label_important</i> &#x2014; material icon named "label important sharp".
   static const IconData label_important_sharp = IconData(0xed65, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">label_off</i> &#x2014; material icon named "label off".
-  static const IconData label_off = IconData(0xe7fb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">label_important_outline</i> &#x2014; material icon named "label important outline".
+  static const IconData label_important_outline = IconData(0xe7fa, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">label_off</i> &#x2014; material icon named "label off outlined".
-  static const IconData label_off_outlined = IconData(0xe263, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">label_important_outline</i> &#x2014; material icon named "label important outline sharp".
+  static const IconData label_important_outline_sharp = IconData(0xed64, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">label_important_outline</i> &#x2014; material icon named "label important outline rounded".
+  static const IconData label_important_outline_rounded = IconData(0xf292, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">label_off</i> &#x2014; material icon named "label off rounded".
   static const IconData label_off_rounded = IconData(0xf294, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">label_off</i> &#x2014; material icon named "label off sharp".
   static const IconData label_off_sharp = IconData(0xed66, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">label_off</i> &#x2014; material icon named "label off".
+  static const IconData label_off = IconData(0xe7fb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">label_off</i> &#x2014; material icon named "label off outlined".
+  static const IconData label_off_outlined = IconData(0xe263, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">label_outline</i> &#x2014; material icon named "label outline".
   static const IconData label_outline = IconData(0xe7fc, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -8061,14 +7947,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">label_outline</i> &#x2014; material icon named "label outline sharp".
   static const IconData label_outline_sharp = IconData(0xed67, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">label</i> &#x2014; material icon named "label outlined".
-  static const IconData label_outlined = IconData(0xe264, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">label</i> &#x2014; material icon named "label rounded".
-  static const IconData label_rounded = IconData(0xf296, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">label</i> &#x2014; material icon named "label sharp".
-  static const IconData label_sharp = IconData(0xed68, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-sharp md-36">landscape</i> &#x2014; material icon named "landscape sharp".
+  static const IconData landscape_sharp = IconData(0xed69, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">landscape</i> &#x2014; material icon named "landscape".
   static const IconData landscape = IconData(0xe7fd, fontFamily: 'MaterialIcons');
@@ -8078,9 +7958,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">landscape</i> &#x2014; material icon named "landscape rounded".
   static const IconData landscape_rounded = IconData(0xf297, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">landscape</i> &#x2014; material icon named "landscape sharp".
-  static const IconData landscape_sharp = IconData(0xed69, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">language</i> &#x2014; material icon named "language".
   static const IconData language = IconData(0xe7fe, fontFamily: 'MaterialIcons');
@@ -8096,6 +7973,15 @@ class Icons {
 
   /// <i class="material-icons md-36">laptop</i> &#x2014; material icon named "laptop".
   static const IconData laptop = IconData(0xe7ff, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">laptop</i> &#x2014; material icon named "laptop outlined".
+  static const IconData laptop_outlined = IconData(0xe269, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">laptop</i> &#x2014; material icon named "laptop rounded".
+  static const IconData laptop_rounded = IconData(0xf29b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">laptop</i> &#x2014; material icon named "laptop sharp".
+  static const IconData laptop_sharp = IconData(0xed6d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">laptop_chromebook</i> &#x2014; material icon named "laptop chromebook".
   static const IconData laptop_chromebook = IconData(0xe800, fontFamily: 'MaterialIcons');
@@ -8121,14 +8007,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">laptop_mac</i> &#x2014; material icon named "laptop mac sharp".
   static const IconData laptop_mac_sharp = IconData(0xed6c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">laptop</i> &#x2014; material icon named "laptop outlined".
-  static const IconData laptop_outlined = IconData(0xe269, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">laptop</i> &#x2014; material icon named "laptop rounded".
-  static const IconData laptop_rounded = IconData(0xf29b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">laptop</i> &#x2014; material icon named "laptop sharp".
-  static const IconData laptop_sharp = IconData(0xed6d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">laptop_windows</i> &#x2014; material icon named "laptop windows sharp".
+  static const IconData laptop_windows_sharp = IconData(0xed6e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">laptop_windows</i> &#x2014; material icon named "laptop windows".
   static const IconData laptop_windows = IconData(0xe802, fontFamily: 'MaterialIcons');
@@ -8138,9 +8018,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">laptop_windows</i> &#x2014; material icon named "laptop windows rounded".
   static const IconData laptop_windows_rounded = IconData(0xf29c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">laptop_windows</i> &#x2014; material icon named "laptop windows sharp".
-  static const IconData laptop_windows_sharp = IconData(0xed6e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">last_page</i> &#x2014; material icon named "last page".
   static const IconData last_page = IconData(0xe803, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -8169,18 +8046,6 @@ class Icons {
   /// <i class="material-icons md-36">layers</i> &#x2014; material icon named "layers".
   static const IconData layers = IconData(0xe805, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">layers_clear</i> &#x2014; material icon named "layers clear".
-  static const IconData layers_clear = IconData(0xe806, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">layers_clear</i> &#x2014; material icon named "layers clear outlined".
-  static const IconData layers_clear_outlined = IconData(0xe26d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">layers_clear</i> &#x2014; material icon named "layers clear rounded".
-  static const IconData layers_clear_rounded = IconData(0xf29f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">layers_clear</i> &#x2014; material icon named "layers clear sharp".
-  static const IconData layers_clear_sharp = IconData(0xed71, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">layers</i> &#x2014; material icon named "layers outlined".
   static const IconData layers_outlined = IconData(0xe26e, fontFamily: 'MaterialIcons');
 
@@ -8190,14 +8055,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">layers</i> &#x2014; material icon named "layers sharp".
   static const IconData layers_sharp = IconData(0xed72, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">layers_clear</i> &#x2014; material icon named "layers clear rounded".
+  static const IconData layers_clear_rounded = IconData(0xf29f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">layers_clear</i> &#x2014; material icon named "layers clear".
+  static const IconData layers_clear = IconData(0xe806, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">layers_clear</i> &#x2014; material icon named "layers clear outlined".
+  static const IconData layers_clear_outlined = IconData(0xe26d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">layers_clear</i> &#x2014; material icon named "layers clear sharp".
+  static const IconData layers_clear_sharp = IconData(0xed71, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">leaderboard</i> &#x2014; material icon named "leaderboard rounded".
+  static const IconData leaderboard_rounded = IconData(0xf2a1, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">leaderboard</i> &#x2014; material icon named "leaderboard".
   static const IconData leaderboard = IconData(0xe807, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">leaderboard</i> &#x2014; material icon named "leaderboard outlined".
   static const IconData leaderboard_outlined = IconData(0xe26f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">leaderboard</i> &#x2014; material icon named "leaderboard rounded".
-  static const IconData leaderboard_rounded = IconData(0xf2a1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">leaderboard</i> &#x2014; material icon named "leaderboard sharp".
   static const IconData leaderboard_sharp = IconData(0xed73, fontFamily: 'MaterialIcons');
@@ -8250,6 +8127,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">legend_toggle</i> &#x2014; material icon named "legend toggle sharp".
   static const IconData legend_toggle_sharp = IconData(0xed77, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">lens</i> &#x2014; material icon named "lens sharp".
+  static const IconData lens_sharp = IconData(0xed78, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">lens</i> &#x2014; material icon named "lens".
   static const IconData lens = IconData(0xe80c, fontFamily: 'MaterialIcons');
 
@@ -8259,11 +8139,17 @@ class Icons {
   /// <i class="material-icons-round md-36">lens</i> &#x2014; material icon named "lens rounded".
   static const IconData lens_rounded = IconData(0xf2a6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">lens</i> &#x2014; material icon named "lens sharp".
-  static const IconData lens_sharp = IconData(0xed78, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">library_add</i> &#x2014; material icon named "library add".
   static const IconData library_add = IconData(0xe80d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">library_add</i> &#x2014; material icon named "library add rounded".
+  static const IconData library_add_rounded = IconData(0xf2a8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">library_add</i> &#x2014; material icon named "library add outlined".
+  static const IconData library_add_outlined = IconData(0xe276, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">library_add</i> &#x2014; material icon named "library add sharp".
+  static const IconData library_add_sharp = IconData(0xed7a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">library_add_check</i> &#x2014; material icon named "library add check".
   static const IconData library_add_check = IconData(0xe80e, fontFamily: 'MaterialIcons');
@@ -8277,23 +8163,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">library_add_check</i> &#x2014; material icon named "library add check sharp".
   static const IconData library_add_check_sharp = IconData(0xed79, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">library_add</i> &#x2014; material icon named "library add outlined".
-  static const IconData library_add_outlined = IconData(0xe276, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">library_add</i> &#x2014; material icon named "library add rounded".
-  static const IconData library_add_rounded = IconData(0xf2a8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">library_add</i> &#x2014; material icon named "library add sharp".
-  static const IconData library_add_sharp = IconData(0xed7a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">library_books</i> &#x2014; material icon named "library books rounded".
+  static const IconData library_books_rounded = IconData(0xf2a9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">library_books</i> &#x2014; material icon named "library books".
   static const IconData library_books = IconData(0xe80f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">library_books</i> &#x2014; material icon named "library books outlined".
   static const IconData library_books_outlined = IconData(0xe277, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">library_books</i> &#x2014; material icon named "library books rounded".
-  static const IconData library_books_rounded = IconData(0xf2a9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">library_books</i> &#x2014; material icon named "library books sharp".
   static const IconData library_books_sharp = IconData(0xed7b, fontFamily: 'MaterialIcons');
@@ -8310,8 +8187,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">library_music</i> &#x2014; material icon named "library music sharp".
   static const IconData library_music_sharp = IconData(0xed7c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">lightbulb</i> &#x2014; material icon named "lightbulb outlined".
+  static const IconData lightbulb_outlined = IconData(0xe279, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">lightbulb</i> &#x2014; material icon named "lightbulb".
   static const IconData lightbulb = IconData(0xe811, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">lightbulb_outline</i> &#x2014; material icon named "lightbulb outline sharp".
+  static const IconData lightbulb_outline_sharp = IconData(0xed7d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">lightbulb_outline</i> &#x2014; material icon named "lightbulb outline".
   static const IconData lightbulb_outline = IconData(0xe812, fontFamily: 'MaterialIcons');
@@ -8319,17 +8202,8 @@ class Icons {
   /// <i class="material-icons-round md-36">lightbulb_outline</i> &#x2014; material icon named "lightbulb outline rounded".
   static const IconData lightbulb_outline_rounded = IconData(0xf2ab, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">lightbulb_outline</i> &#x2014; material icon named "lightbulb outline sharp".
-  static const IconData lightbulb_outline_sharp = IconData(0xed7d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">lightbulb</i> &#x2014; material icon named "lightbulb outlined".
-  static const IconData lightbulb_outlined = IconData(0xe279, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">line_style</i> &#x2014; material icon named "line style".
   static const IconData line_style = IconData(0xe813, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">line_style</i> &#x2014; material icon named "line style outlined".
-  static const IconData line_style_outlined = IconData(0xe27a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">line_style</i> &#x2014; material icon named "line style rounded".
   static const IconData line_style_rounded = IconData(0xf2ac, fontFamily: 'MaterialIcons');
@@ -8337,44 +8211,35 @@ class Icons {
   /// <i class="material-icons-sharp md-36">line_style</i> &#x2014; material icon named "line style sharp".
   static const IconData line_style_sharp = IconData(0xed7e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">line_weight</i> &#x2014; material icon named "line weight".
-  static const IconData line_weight = IconData(0xe814, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">line_weight</i> &#x2014; material icon named "line weight outlined".
-  static const IconData line_weight_outlined = IconData(0xe27b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">line_weight</i> &#x2014; material icon named "line weight rounded".
-  static const IconData line_weight_rounded = IconData(0xf2ad, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">line_style</i> &#x2014; material icon named "line style outlined".
+  static const IconData line_style_outlined = IconData(0xe27a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">line_weight</i> &#x2014; material icon named "line weight sharp".
   static const IconData line_weight_sharp = IconData(0xed7f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">linear_scale</i> &#x2014; material icon named "linear scale".
-  static const IconData linear_scale = IconData(0xe815, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">line_weight</i> &#x2014; material icon named "line weight rounded".
+  static const IconData line_weight_rounded = IconData(0xf2ad, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">linear_scale</i> &#x2014; material icon named "linear scale outlined".
-  static const IconData linear_scale_outlined = IconData(0xe27c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">line_weight</i> &#x2014; material icon named "line weight outlined".
+  static const IconData line_weight_outlined = IconData(0xe27b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">linear_scale</i> &#x2014; material icon named "linear scale rounded".
-  static const IconData linear_scale_rounded = IconData(0xf2ae, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">line_weight</i> &#x2014; material icon named "line weight".
+  static const IconData line_weight = IconData(0xe814, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">linear_scale</i> &#x2014; material icon named "linear scale sharp".
   static const IconData linear_scale_sharp = IconData(0xed80, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">linear_scale</i> &#x2014; material icon named "linear scale rounded".
+  static const IconData linear_scale_rounded = IconData(0xf2ae, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">linear_scale</i> &#x2014; material icon named "linear scale outlined".
+  static const IconData linear_scale_outlined = IconData(0xe27c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">linear_scale</i> &#x2014; material icon named "linear scale".
+  static const IconData linear_scale = IconData(0xe815, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">link</i> &#x2014; material icon named "link".
   static const IconData link = IconData(0xe816, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">link_off</i> &#x2014; material icon named "link off".
-  static const IconData link_off = IconData(0xe817, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">link_off</i> &#x2014; material icon named "link off outlined".
-  static const IconData link_off_outlined = IconData(0xe27d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">link_off</i> &#x2014; material icon named "link off rounded".
-  static const IconData link_off_rounded = IconData(0xf2af, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">link_off</i> &#x2014; material icon named "link off sharp".
-  static const IconData link_off_sharp = IconData(0xed81, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">link</i> &#x2014; material icon named "link outlined".
   static const IconData link_outlined = IconData(0xe27e, fontFamily: 'MaterialIcons');
@@ -8385,11 +8250,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">link</i> &#x2014; material icon named "link sharp".
   static const IconData link_sharp = IconData(0xed82, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">link_off</i> &#x2014; material icon named "link off".
+  static const IconData link_off = IconData(0xe817, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">link_off</i> &#x2014; material icon named "link off sharp".
+  static const IconData link_off_sharp = IconData(0xed81, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">link_off</i> &#x2014; material icon named "link off rounded".
+  static const IconData link_off_rounded = IconData(0xf2af, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">link_off</i> &#x2014; material icon named "link off outlined".
+  static const IconData link_off_outlined = IconData(0xe27d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">linked_camera</i> &#x2014; material icon named "linked camera".
   static const IconData linked_camera = IconData(0xe818, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">linked_camera</i> &#x2014; material icon named "linked camera outlined".
-  static const IconData linked_camera_outlined = IconData(0xe27f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">linked_camera</i> &#x2014; material icon named "linked camera rounded".
   static const IconData linked_camera_rounded = IconData(0xf2b1, fontFamily: 'MaterialIcons');
@@ -8397,50 +8271,47 @@ class Icons {
   /// <i class="material-icons-sharp md-36">linked_camera</i> &#x2014; material icon named "linked camera sharp".
   static const IconData linked_camera_sharp = IconData(0xed83, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">linked_camera</i> &#x2014; material icon named "linked camera outlined".
+  static const IconData linked_camera_outlined = IconData(0xe27f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">liquor</i> &#x2014; material icon named "liquor".
   static const IconData liquor = IconData(0xe819, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">list</i> &#x2014; material icon named "list".
-  static const IconData list = IconData(0xe81a, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons md-36">list_alt</i> &#x2014; material icon named "list alt".
-  static const IconData list_alt = IconData(0xe81b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">list_alt</i> &#x2014; material icon named "list alt outlined".
-  static const IconData list_alt_outlined = IconData(0xe280, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">list_alt</i> &#x2014; material icon named "list alt rounded".
-  static const IconData list_alt_rounded = IconData(0xf2b2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">list_alt</i> &#x2014; material icon named "list alt sharp".
-  static const IconData list_alt_sharp = IconData(0xed84, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">list</i> &#x2014; material icon named "list outlined".
   static const IconData list_outlined = IconData(0xe281, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-round md-36">list</i> &#x2014; material icon named "list rounded".
-  static const IconData list_rounded = IconData(0xf2b3, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons md-36">list</i> &#x2014; material icon named "list".
+  static const IconData list = IconData(0xe81a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-sharp md-36">list</i> &#x2014; material icon named "list sharp".
   static const IconData list_sharp = IconData(0xed85, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">live_help</i> &#x2014; material icon named "live help".
-  static const IconData live_help = IconData(0xe81c, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-round md-36">list</i> &#x2014; material icon named "list rounded".
+  static const IconData list_rounded = IconData(0xf2b3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">live_help</i> &#x2014; material icon named "live help outlined".
-  static const IconData live_help_outlined = IconData(0xe282, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-sharp md-36">list_alt</i> &#x2014; material icon named "list alt sharp".
+  static const IconData list_alt_sharp = IconData(0xed84, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">list_alt</i> &#x2014; material icon named "list alt rounded".
+  static const IconData list_alt_rounded = IconData(0xf2b2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">list_alt</i> &#x2014; material icon named "list alt outlined".
+  static const IconData list_alt_outlined = IconData(0xe280, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">list_alt</i> &#x2014; material icon named "list alt".
+  static const IconData list_alt = IconData(0xe81b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">live_help</i> &#x2014; material icon named "live help rounded".
   static const IconData live_help_rounded = IconData(0xf2b4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-outlined md-36">live_help</i> &#x2014; material icon named "live help outlined".
+  static const IconData live_help_outlined = IconData(0xe282, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons md-36">live_help</i> &#x2014; material icon named "live help".
+  static const IconData live_help = IconData(0xe81c, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons-sharp md-36">live_help</i> &#x2014; material icon named "live help sharp".
   static const IconData live_help_sharp = IconData(0xed86, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons md-36">live_tv</i> &#x2014; material icon named "live tv".
-  static const IconData live_tv = IconData(0xe81d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">live_tv</i> &#x2014; material icon named "live tv outlined".
-  static const IconData live_tv_outlined = IconData(0xe283, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">live_tv</i> &#x2014; material icon named "live tv rounded".
   static const IconData live_tv_rounded = IconData(0xf2b5, fontFamily: 'MaterialIcons');
@@ -8448,8 +8319,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">live_tv</i> &#x2014; material icon named "live tv sharp".
   static const IconData live_tv_sharp = IconData(0xed87, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_activity</i> &#x2014; material icon named "local activity".
-  static const IconData local_activity = IconData(0xe81e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">live_tv</i> &#x2014; material icon named "live tv".
+  static const IconData live_tv = IconData(0xe81d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">live_tv</i> &#x2014; material icon named "live tv outlined".
+  static const IconData live_tv_outlined = IconData(0xe283, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">local_activity</i> &#x2014; material icon named "local activity outlined".
   static const IconData local_activity_outlined = IconData(0xe284, fontFamily: 'MaterialIcons');
@@ -8459,6 +8333,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">local_activity</i> &#x2014; material icon named "local activity sharp".
   static const IconData local_activity_sharp = IconData(0xed88, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_activity</i> &#x2014; material icon named "local activity".
+  static const IconData local_activity = IconData(0xe81e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_airport</i> &#x2014; material icon named "local airport".
   static const IconData local_airport = IconData(0xe81f, fontFamily: 'MaterialIcons');
@@ -8472,11 +8349,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">local_airport</i> &#x2014; material icon named "local airport sharp".
   static const IconData local_airport_sharp = IconData(0xed89, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_atm</i> &#x2014; material icon named "local atm".
-  static const IconData local_atm = IconData(0xe820, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">local_atm</i> &#x2014; material icon named "local atm outlined".
   static const IconData local_atm_outlined = IconData(0xe286, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_atm</i> &#x2014; material icon named "local atm".
+  static const IconData local_atm = IconData(0xe820, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_atm</i> &#x2014; material icon named "local atm rounded".
   static const IconData local_atm_rounded = IconData(0xf2b8, fontFamily: 'MaterialIcons');
@@ -8490,11 +8367,11 @@ class Icons {
   /// <i class="material-icons-outlined md-36">local_attraction</i> &#x2014; material icon named "local attraction outlined".
   static const IconData local_attraction_outlined = IconData(0xe284, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">local_attraction</i> &#x2014; material icon named "local attraction rounded".
-  static const IconData local_attraction_rounded = IconData(0xf2b6, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">local_attraction</i> &#x2014; material icon named "local attraction sharp".
   static const IconData local_attraction_sharp = IconData(0xed88, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">local_attraction</i> &#x2014; material icon named "local attraction rounded".
+  static const IconData local_attraction_rounded = IconData(0xf2b6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_bar</i> &#x2014; material icon named "local bar".
   static const IconData local_bar = IconData(0xe821, fontFamily: 'MaterialIcons');
@@ -8520,41 +8397,41 @@ class Icons {
   /// <i class="material-icons-sharp md-36">local_cafe</i> &#x2014; material icon named "local cafe sharp".
   static const IconData local_cafe_sharp = IconData(0xed8c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_car_wash</i> &#x2014; material icon named "local car wash".
-  static const IconData local_car_wash = IconData(0xe823, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">local_car_wash</i> &#x2014; material icon named "local car wash outlined".
   static const IconData local_car_wash_outlined = IconData(0xe289, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">local_car_wash</i> &#x2014; material icon named "local car wash rounded".
-  static const IconData local_car_wash_rounded = IconData(0xf2bb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">local_car_wash</i> &#x2014; material icon named "local car wash".
+  static const IconData local_car_wash = IconData(0xe823, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_car_wash</i> &#x2014; material icon named "local car wash sharp".
   static const IconData local_car_wash_sharp = IconData(0xed8d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store".
-  static const IconData local_convenience_store = IconData(0xe824, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store outlined".
-  static const IconData local_convenience_store_outlined = IconData(0xe28a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store rounded".
-  static const IconData local_convenience_store_rounded = IconData(0xf2bc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_car_wash</i> &#x2014; material icon named "local car wash rounded".
+  static const IconData local_car_wash_rounded = IconData(0xf2bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store sharp".
   static const IconData local_convenience_store_sharp = IconData(0xed8e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_dining</i> &#x2014; material icon named "local dining".
-  static const IconData local_dining = IconData(0xe825, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store rounded".
+  static const IconData local_convenience_store_rounded = IconData(0xf2bc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">local_dining</i> &#x2014; material icon named "local dining outlined".
-  static const IconData local_dining_outlined = IconData(0xe28b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store outlined".
+  static const IconData local_convenience_store_outlined = IconData(0xe28a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_convenience_store</i> &#x2014; material icon named "local convenience store".
+  static const IconData local_convenience_store = IconData(0xe824, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">local_dining</i> &#x2014; material icon named "local dining sharp".
+  static const IconData local_dining_sharp = IconData(0xed8f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_dining</i> &#x2014; material icon named "local dining rounded".
   static const IconData local_dining_rounded = IconData(0xf2bd, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">local_dining</i> &#x2014; material icon named "local dining sharp".
-  static const IconData local_dining_sharp = IconData(0xed8f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_dining</i> &#x2014; material icon named "local dining outlined".
+  static const IconData local_dining_outlined = IconData(0xe28b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_dining</i> &#x2014; material icon named "local dining".
+  static const IconData local_dining = IconData(0xe825, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_drink</i> &#x2014; material icon named "local drink".
   static const IconData local_drink = IconData(0xe826, fontFamily: 'MaterialIcons');
@@ -8562,47 +8439,47 @@ class Icons {
   /// <i class="material-icons-outlined md-36">local_drink</i> &#x2014; material icon named "local drink outlined".
   static const IconData local_drink_outlined = IconData(0xe28c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">local_drink</i> &#x2014; material icon named "local drink rounded".
-  static const IconData local_drink_rounded = IconData(0xf2be, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">local_drink</i> &#x2014; material icon named "local drink sharp".
   static const IconData local_drink_sharp = IconData(0xed90, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_fire_department</i> &#x2014; material icon named "local fire department".
-  static const IconData local_fire_department = IconData(0xe827, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_fire_department</i> &#x2014; material icon named "local fire department outlined".
-  static const IconData local_fire_department_outlined = IconData(0xe28d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">local_fire_department</i> &#x2014; material icon named "local fire department rounded".
-  static const IconData local_fire_department_rounded = IconData(0xf2bf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_drink</i> &#x2014; material icon named "local drink rounded".
+  static const IconData local_drink_rounded = IconData(0xf2be, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_fire_department</i> &#x2014; material icon named "local fire department sharp".
   static const IconData local_fire_department_sharp = IconData(0xed91, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_florist</i> &#x2014; material icon named "local florist".
-  static const IconData local_florist = IconData(0xe828, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_fire_department</i> &#x2014; material icon named "local fire department rounded".
+  static const IconData local_fire_department_rounded = IconData(0xf2bf, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">local_florist</i> &#x2014; material icon named "local florist outlined".
-  static const IconData local_florist_outlined = IconData(0xe28e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_fire_department</i> &#x2014; material icon named "local fire department outlined".
+  static const IconData local_fire_department_outlined = IconData(0xe28d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">local_florist</i> &#x2014; material icon named "local florist rounded".
-  static const IconData local_florist_rounded = IconData(0xf2c0, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">local_fire_department</i> &#x2014; material icon named "local fire department".
+  static const IconData local_fire_department = IconData(0xe827, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_florist</i> &#x2014; material icon named "local florist sharp".
   static const IconData local_florist_sharp = IconData(0xed92, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_gas_station</i> &#x2014; material icon named "local gas station".
-  static const IconData local_gas_station = IconData(0xe829, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_florist</i> &#x2014; material icon named "local florist rounded".
+  static const IconData local_florist_rounded = IconData(0xf2c0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">local_gas_station</i> &#x2014; material icon named "local gas station outlined".
-  static const IconData local_gas_station_outlined = IconData(0xe28f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_florist</i> &#x2014; material icon named "local florist outlined".
+  static const IconData local_florist_outlined = IconData(0xe28e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_florist</i> &#x2014; material icon named "local florist".
+  static const IconData local_florist = IconData(0xe828, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_gas_station</i> &#x2014; material icon named "local gas station rounded".
   static const IconData local_gas_station_rounded = IconData(0xf2c1, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">local_gas_station</i> &#x2014; material icon named "local gas station outlined".
+  static const IconData local_gas_station_outlined = IconData(0xe28f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">local_gas_station</i> &#x2014; material icon named "local gas station sharp".
   static const IconData local_gas_station_sharp = IconData(0xed93, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_gas_station</i> &#x2014; material icon named "local gas station".
+  static const IconData local_gas_station = IconData(0xe829, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_grocery_store</i> &#x2014; material icon named "local grocery store".
   static const IconData local_grocery_store = IconData(0xe82a, fontFamily: 'MaterialIcons');
@@ -8628,23 +8505,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">local_hospital</i> &#x2014; material icon named "local hospital sharp".
   static const IconData local_hospital_sharp = IconData(0xed95, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_hotel</i> &#x2014; material icon named "local hotel".
-  static const IconData local_hotel = IconData(0xe82c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_hotel</i> &#x2014; material icon named "local hotel outlined".
-  static const IconData local_hotel_outlined = IconData(0xe292, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">local_hotel</i> &#x2014; material icon named "local hotel rounded".
   static const IconData local_hotel_rounded = IconData(0xf2c4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_hotel</i> &#x2014; material icon named "local hotel sharp".
   static const IconData local_hotel_sharp = IconData(0xed96, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">local_hotel</i> &#x2014; material icon named "local hotel".
+  static const IconData local_hotel = IconData(0xe82c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">local_hotel</i> &#x2014; material icon named "local hotel outlined".
+  static const IconData local_hotel_outlined = IconData(0xe292, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">local_laundry_service</i> &#x2014; material icon named "local laundry service".
   static const IconData local_laundry_service = IconData(0xe82d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_laundry_service</i> &#x2014; material icon named "local laundry service outlined".
-  static const IconData local_laundry_service_outlined = IconData(0xe293, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_laundry_service</i> &#x2014; material icon named "local laundry service rounded".
   static const IconData local_laundry_service_rounded = IconData(0xf2c5, fontFamily: 'MaterialIcons');
@@ -8652,29 +8526,38 @@ class Icons {
   /// <i class="material-icons-sharp md-36">local_laundry_service</i> &#x2014; material icon named "local laundry service sharp".
   static const IconData local_laundry_service_sharp = IconData(0xed97, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_library</i> &#x2014; material icon named "local library".
-  static const IconData local_library = IconData(0xe82e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_library</i> &#x2014; material icon named "local library outlined".
-  static const IconData local_library_outlined = IconData(0xe294, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">local_library</i> &#x2014; material icon named "local library rounded".
-  static const IconData local_library_rounded = IconData(0xf2c6, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_laundry_service</i> &#x2014; material icon named "local laundry service outlined".
+  static const IconData local_laundry_service_outlined = IconData(0xe293, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_library</i> &#x2014; material icon named "local library sharp".
   static const IconData local_library_sharp = IconData(0xed98, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_mall</i> &#x2014; material icon named "local mall".
-  static const IconData local_mall = IconData(0xe82f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">local_library</i> &#x2014; material icon named "local library rounded".
+  static const IconData local_library_rounded = IconData(0xf2c6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">local_mall</i> &#x2014; material icon named "local mall outlined".
-  static const IconData local_mall_outlined = IconData(0xe295, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_library</i> &#x2014; material icon named "local library outlined".
+  static const IconData local_library_outlined = IconData(0xe294, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_library</i> &#x2014; material icon named "local library".
+  static const IconData local_library = IconData(0xe82e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">local_mall</i> &#x2014; material icon named "local mall sharp".
+  static const IconData local_mall_sharp = IconData(0xed99, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_mall</i> &#x2014; material icon named "local mall rounded".
   static const IconData local_mall_rounded = IconData(0xf2c7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">local_mall</i> &#x2014; material icon named "local mall sharp".
-  static const IconData local_mall_sharp = IconData(0xed99, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_mall</i> &#x2014; material icon named "local mall outlined".
+  static const IconData local_mall_outlined = IconData(0xe295, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">local_mall</i> &#x2014; material icon named "local mall".
+  static const IconData local_mall = IconData(0xe82f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">local_movies</i> &#x2014; material icon named "local movies sharp".
+  static const IconData local_movies_sharp = IconData(0xed9a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">local_movies</i> &#x2014; material icon named "local movies rounded".
+  static const IconData local_movies_rounded = IconData(0xf2c8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_movies</i> &#x2014; material icon named "local movies".
   static const IconData local_movies = IconData(0xe830, fontFamily: 'MaterialIcons');
@@ -8682,47 +8565,41 @@ class Icons {
   /// <i class="material-icons-outlined md-36">local_movies</i> &#x2014; material icon named "local movies outlined".
   static const IconData local_movies_outlined = IconData(0xe296, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">local_movies</i> &#x2014; material icon named "local movies rounded".
-  static const IconData local_movies_rounded = IconData(0xf2c8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">local_movies</i> &#x2014; material icon named "local movies sharp".
-  static const IconData local_movies_sharp = IconData(0xed9a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">local_offer</i> &#x2014; material icon named "local offer".
-  static const IconData local_offer = IconData(0xe831, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_offer</i> &#x2014; material icon named "local offer outlined".
-  static const IconData local_offer_outlined = IconData(0xe297, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">local_offer</i> &#x2014; material icon named "local offer sharp".
+  static const IconData local_offer_sharp = IconData(0xed9b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_offer</i> &#x2014; material icon named "local offer rounded".
   static const IconData local_offer_rounded = IconData(0xf2c9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">local_offer</i> &#x2014; material icon named "local offer sharp".
-  static const IconData local_offer_sharp = IconData(0xed9b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_offer</i> &#x2014; material icon named "local offer outlined".
+  static const IconData local_offer_outlined = IconData(0xe297, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">local_parking</i> &#x2014; material icon named "local parking".
-  static const IconData local_parking = IconData(0xe832, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">local_offer</i> &#x2014; material icon named "local offer".
+  static const IconData local_offer = IconData(0xe831, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">local_parking</i> &#x2014; material icon named "local parking outlined".
   static const IconData local_parking_outlined = IconData(0xe298, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">local_parking</i> &#x2014; material icon named "local parking sharp".
+  static const IconData local_parking_sharp = IconData(0xed9c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">local_parking</i> &#x2014; material icon named "local parking rounded".
   static const IconData local_parking_rounded = IconData(0xf2ca, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">local_parking</i> &#x2014; material icon named "local parking sharp".
-  static const IconData local_parking_sharp = IconData(0xed9c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">local_parking</i> &#x2014; material icon named "local parking".
+  static const IconData local_parking = IconData(0xe832, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy sharp".
+  static const IconData local_pharmacy_sharp = IconData(0xed9d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy rounded".
+  static const IconData local_pharmacy_rounded = IconData(0xf2cb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy".
   static const IconData local_pharmacy = IconData(0xe833, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy outlined".
   static const IconData local_pharmacy_outlined = IconData(0xe299, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy rounded".
-  static const IconData local_pharmacy_rounded = IconData(0xf2cb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">local_pharmacy</i> &#x2014; material icon named "local pharmacy sharp".
-  static const IconData local_pharmacy_sharp = IconData(0xed9d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_phone</i> &#x2014; material icon named "local phone".
   static const IconData local_phone = IconData(0xe834, fontFamily: 'MaterialIcons');
@@ -8796,17 +8673,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">local_print_shop</i> &#x2014; material icon named "local print shop sharp".
   static const IconData local_print_shop_sharp = IconData(0xeda3, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">local_printshop</i> &#x2014; material icon named "local printshop sharp".
+  static const IconData local_printshop_sharp = IconData(0xeda3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">local_printshop</i> &#x2014; material icon named "local printshop".
   static const IconData local_printshop = IconData(0xe839, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">local_printshop</i> &#x2014; material icon named "local printshop outlined".
-  static const IconData local_printshop_outlined = IconData(0xe29f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">local_printshop</i> &#x2014; material icon named "local printshop rounded".
   static const IconData local_printshop_rounded = IconData(0xf2d1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">local_printshop</i> &#x2014; material icon named "local printshop sharp".
-  static const IconData local_printshop_sharp = IconData(0xeda3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">local_printshop</i> &#x2014; material icon named "local printshop outlined".
+  static const IconData local_printshop_outlined = IconData(0xe29f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">local_restaurant</i> &#x2014; material icon named "local restaurant".
   static const IconData local_restaurant = IconData(0xe825, fontFamily: 'MaterialIcons');
@@ -8847,11 +8724,11 @@ class Icons {
   /// <i class="material-icons md-36">local_taxi</i> &#x2014; material icon named "local taxi".
   static const IconData local_taxi = IconData(0xe83c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">local_taxi</i> &#x2014; material icon named "local taxi outlined".
-  static const IconData local_taxi_outlined = IconData(0xe2a2, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">local_taxi</i> &#x2014; material icon named "local taxi rounded".
   static const IconData local_taxi_rounded = IconData(0xf2d4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">local_taxi</i> &#x2014; material icon named "local taxi outlined".
+  static const IconData local_taxi_outlined = IconData(0xe2a2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">local_taxi</i> &#x2014; material icon named "local taxi sharp".
   static const IconData local_taxi_sharp = IconData(0xeda6, fontFamily: 'MaterialIcons');
@@ -8880,6 +8757,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">location_disabled</i> &#x2014; material icon named "location disabled sharp".
   static const IconData location_disabled_sharp = IconData(0xeda8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">location_history</i> &#x2014; material icon named "location history sharp".
+  static const IconData location_history_sharp = IconData(0xee57, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">location_history</i> &#x2014; material icon named "location history".
   static const IconData location_history = IconData(0xe906, fontFamily: 'MaterialIcons');
 
@@ -8889,8 +8769,8 @@ class Icons {
   /// <i class="material-icons-round md-36">location_history</i> &#x2014; material icon named "location history rounded".
   static const IconData location_history_rounded = IconData(0xf385, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">location_history</i> &#x2014; material icon named "location history sharp".
-  static const IconData location_history_sharp = IconData(0xee57, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">location_off</i> &#x2014; material icon named "location off sharp".
+  static const IconData location_off_sharp = IconData(0xeda9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">location_off</i> &#x2014; material icon named "location off".
   static const IconData location_off = IconData(0xe83f, fontFamily: 'MaterialIcons');
@@ -8901,35 +8781,41 @@ class Icons {
   /// <i class="material-icons-round md-36">location_off</i> &#x2014; material icon named "location off rounded".
   static const IconData location_off_rounded = IconData(0xf2d7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">location_off</i> &#x2014; material icon named "location off sharp".
-  static const IconData location_off_sharp = IconData(0xeda9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">location_on</i> &#x2014; material icon named "location on".
-  static const IconData location_on = IconData(0xe840, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">location_on</i> &#x2014; material icon named "location on outlined".
-  static const IconData location_on_outlined = IconData(0xe2a6, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">location_on</i> &#x2014; material icon named "location on sharp".
+  static const IconData location_on_sharp = IconData(0xedaa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">location_on</i> &#x2014; material icon named "location on rounded".
   static const IconData location_on_rounded = IconData(0xf2d8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">location_on</i> &#x2014; material icon named "location on sharp".
-  static const IconData location_on_sharp = IconData(0xedaa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">location_on</i> &#x2014; material icon named "location on outlined".
+  static const IconData location_on_outlined = IconData(0xe2a6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">location_on</i> &#x2014; material icon named "location on".
+  static const IconData location_on = IconData(0xe840, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">location_pin</i> &#x2014; material icon named "location pin".
   static const IconData location_pin = IconData(0xe841, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">location_searching</i> &#x2014; material icon named "location searching".
-  static const IconData location_searching = IconData(0xe842, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">location_searching</i> &#x2014; material icon named "location searching outlined".
-  static const IconData location_searching_outlined = IconData(0xe2a7, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">location_searching</i> &#x2014; material icon named "location searching sharp".
+  static const IconData location_searching_sharp = IconData(0xedab, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">location_searching</i> &#x2014; material icon named "location searching rounded".
   static const IconData location_searching_rounded = IconData(0xf2d9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">location_searching</i> &#x2014; material icon named "location searching sharp".
-  static const IconData location_searching_sharp = IconData(0xedab, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">location_searching</i> &#x2014; material icon named "location searching outlined".
+  static const IconData location_searching_outlined = IconData(0xe2a7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">location_searching</i> &#x2014; material icon named "location searching".
+  static const IconData location_searching = IconData(0xe842, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">lock</i> &#x2014; material icon named "lock sharp".
+  static const IconData lock_sharp = IconData(0xedae, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">lock</i> &#x2014; material icon named "lock rounded".
+  static const IconData lock_rounded = IconData(0xf2dc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">lock</i> &#x2014; material icon named "lock outlined".
+  static const IconData lock_outlined = IconData(0xe2a9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">lock</i> &#x2014; material icon named "lock".
   static const IconData lock = IconData(0xe843, fontFamily: 'MaterialIcons');
@@ -8937,38 +8823,29 @@ class Icons {
   /// <i class="material-icons md-36">lock_clock</i> &#x2014; material icon named "lock clock".
   static const IconData lock_clock = IconData(0xe844, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">lock_open</i> &#x2014; material icon named "lock open".
-  static const IconData lock_open = IconData(0xe845, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">lock_open</i> &#x2014; material icon named "lock open outlined".
-  static const IconData lock_open_outlined = IconData(0xe2a8, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">lock_open</i> &#x2014; material icon named "lock open sharp".
+  static const IconData lock_open_sharp = IconData(0xedac, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">lock_open</i> &#x2014; material icon named "lock open rounded".
   static const IconData lock_open_rounded = IconData(0xf2da, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">lock_open</i> &#x2014; material icon named "lock open sharp".
-  static const IconData lock_open_sharp = IconData(0xedac, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">lock_open</i> &#x2014; material icon named "lock open outlined".
+  static const IconData lock_open_outlined = IconData(0xe2a8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">lock_outline</i> &#x2014; material icon named "lock outline".
-  static const IconData lock_outline = IconData(0xe846, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">lock_outline</i> &#x2014; material icon named "lock outline rounded".
-  static const IconData lock_outline_rounded = IconData(0xf2db, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">lock_open</i> &#x2014; material icon named "lock open".
+  static const IconData lock_open = IconData(0xe845, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">lock_outline</i> &#x2014; material icon named "lock outline sharp".
   static const IconData lock_outline_sharp = IconData(0xedad, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">lock</i> &#x2014; material icon named "lock outlined".
-  static const IconData lock_outlined = IconData(0xe2a9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">lock_outline</i> &#x2014; material icon named "lock outline rounded".
+  static const IconData lock_outline_rounded = IconData(0xf2db, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">lock</i> &#x2014; material icon named "lock rounded".
-  static const IconData lock_rounded = IconData(0xf2dc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">lock_outline</i> &#x2014; material icon named "lock outline".
+  static const IconData lock_outline = IconData(0xe846, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">lock</i> &#x2014; material icon named "lock sharp".
-  static const IconData lock_sharp = IconData(0xedae, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">login</i> &#x2014; material icon named "login".
-  static const IconData login = IconData(0xe847, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">login</i> &#x2014; material icon named "login sharp".
+  static const IconData login_sharp = IconData(0xedaf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">login</i> &#x2014; material icon named "login outlined".
   static const IconData login_outlined = IconData(0xe2aa, fontFamily: 'MaterialIcons');
@@ -8976,8 +8853,8 @@ class Icons {
   /// <i class="material-icons-round md-36">login</i> &#x2014; material icon named "login rounded".
   static const IconData login_rounded = IconData(0xf2dd, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">login</i> &#x2014; material icon named "login sharp".
-  static const IconData login_sharp = IconData(0xedaf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">login</i> &#x2014; material icon named "login".
+  static const IconData login = IconData(0xe847, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">logout</i> &#x2014; material icon named "logout".
   static const IconData logout = IconData(0xe848, fontFamily: 'MaterialIcons');
@@ -8985,41 +8862,50 @@ class Icons {
   /// <i class="material-icons md-36">looks</i> &#x2014; material icon named "looks".
   static const IconData looks = IconData(0xe849, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">looks_3</i> &#x2014; material icon named "looks 3".
-  static const IconData looks_3 = IconData(0xe84a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">looks</i> &#x2014; material icon named "looks sharp".
+  static const IconData looks_sharp = IconData(0xedb5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">looks_3</i> &#x2014; material icon named "looks 3 outlined".
-  static const IconData looks_3_outlined = IconData(0xe2ab, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">looks</i> &#x2014; material icon named "looks rounded".
+  static const IconData looks_rounded = IconData(0xf2e3, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">looks_3</i> &#x2014; material icon named "looks 3 rounded".
-  static const IconData looks_3_rounded = IconData(0xf2de, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">looks</i> &#x2014; material icon named "looks outlined".
+  static const IconData looks_outlined = IconData(0xe2b0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">looks_3</i> &#x2014; material icon named "looks 3 sharp".
   static const IconData looks_3_sharp = IconData(0xedb0, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">looks_3</i> &#x2014; material icon named "looks 3 rounded".
+  static const IconData looks_3_rounded = IconData(0xf2de, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">looks_3</i> &#x2014; material icon named "looks 3 outlined".
+  static const IconData looks_3_outlined = IconData(0xe2ab, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">looks_3</i> &#x2014; material icon named "looks 3".
+  static const IconData looks_3 = IconData(0xe84a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">looks_4</i> &#x2014; material icon named "looks 4".
   static const IconData looks_4 = IconData(0xe84b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">looks_4</i> &#x2014; material icon named "looks 4 outlined".
-  static const IconData looks_4_outlined = IconData(0xe2ac, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">looks_4</i> &#x2014; material icon named "looks 4 rounded".
-  static const IconData looks_4_rounded = IconData(0xf2df, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">looks_4</i> &#x2014; material icon named "looks 4 sharp".
   static const IconData looks_4_sharp = IconData(0xedb1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">looks_5</i> &#x2014; material icon named "looks 5".
-  static const IconData looks_5 = IconData(0xe84c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">looks_4</i> &#x2014; material icon named "looks 4 rounded".
+  static const IconData looks_4_rounded = IconData(0xf2df, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">looks_5</i> &#x2014; material icon named "looks 5 outlined".
-  static const IconData looks_5_outlined = IconData(0xe2ad, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">looks_4</i> &#x2014; material icon named "looks 4 outlined".
+  static const IconData looks_4_outlined = IconData(0xe2ac, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">looks_5</i> &#x2014; material icon named "looks 5 sharp".
+  static const IconData looks_5_sharp = IconData(0xedb2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">looks_5</i> &#x2014; material icon named "looks 5 rounded".
   static const IconData looks_5_rounded = IconData(0xf2e0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">looks_5</i> &#x2014; material icon named "looks 5 sharp".
-  static const IconData looks_5_sharp = IconData(0xedb2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">looks_5</i> &#x2014; material icon named "looks 5 outlined".
+  static const IconData looks_5_outlined = IconData(0xe2ad, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">looks_5</i> &#x2014; material icon named "looks 5".
+  static const IconData looks_5 = IconData(0xe84c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">looks_6</i> &#x2014; material icon named "looks 6".
   static const IconData looks_6 = IconData(0xe84d, fontFamily: 'MaterialIcons');
@@ -9044,15 +8930,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">looks_one</i> &#x2014; material icon named "looks one sharp".
   static const IconData looks_one_sharp = IconData(0xedb4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">looks</i> &#x2014; material icon named "looks outlined".
-  static const IconData looks_outlined = IconData(0xe2b0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">looks</i> &#x2014; material icon named "looks rounded".
-  static const IconData looks_rounded = IconData(0xf2e3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">looks</i> &#x2014; material icon named "looks sharp".
-  static const IconData looks_sharp = IconData(0xedb5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">looks_two</i> &#x2014; material icon named "looks two".
   static const IconData looks_two = IconData(0xe84f, fontFamily: 'MaterialIcons');
@@ -9090,17 +8967,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">loupe</i> &#x2014; material icon named "loupe sharp".
   static const IconData loupe_sharp = IconData(0xedb8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">low_priority</i> &#x2014; material icon named "low priority".
-  static const IconData low_priority = IconData(0xe852, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">low_priority</i> &#x2014; material icon named "low priority outlined".
   static const IconData low_priority_outlined = IconData(0xe2b4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">low_priority</i> &#x2014; material icon named "low priority rounded".
-  static const IconData low_priority_rounded = IconData(0xf2e7, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">low_priority</i> &#x2014; material icon named "low priority".
+  static const IconData low_priority = IconData(0xe852, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">low_priority</i> &#x2014; material icon named "low priority sharp".
   static const IconData low_priority_sharp = IconData(0xedb9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">low_priority</i> &#x2014; material icon named "low priority rounded".
+  static const IconData low_priority_rounded = IconData(0xf2e7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">loyalty</i> &#x2014; material icon named "loyalty".
   static const IconData loyalty = IconData(0xe853, fontFamily: 'MaterialIcons');
@@ -9120,6 +8997,15 @@ class Icons {
   /// <i class="material-icons md-36">mail</i> &#x2014; material icon named "mail".
   static const IconData mail = IconData(0xe855, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">mail</i> &#x2014; material icon named "mail outlined".
+  static const IconData mail_outlined = IconData(0xe2b7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">mail</i> &#x2014; material icon named "mail rounded".
+  static const IconData mail_rounded = IconData(0xf2ea, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">mail</i> &#x2014; material icon named "mail sharp".
+  static const IconData mail_sharp = IconData(0xedbc, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">mail_outline</i> &#x2014; material icon named "mail outline".
   static const IconData mail_outline = IconData(0xe856, fontFamily: 'MaterialIcons');
 
@@ -9131,15 +9017,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">mail_outline</i> &#x2014; material icon named "mail outline sharp".
   static const IconData mail_outline_sharp = IconData(0xedbb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mail</i> &#x2014; material icon named "mail outlined".
-  static const IconData mail_outlined = IconData(0xe2b7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">mail</i> &#x2014; material icon named "mail rounded".
-  static const IconData mail_rounded = IconData(0xf2ea, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mail</i> &#x2014; material icon named "mail sharp".
-  static const IconData mail_sharp = IconData(0xedbc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">map</i> &#x2014; material icon named "map".
   static const IconData map = IconData(0xe857, fontFamily: 'MaterialIcons');
@@ -9156,14 +9033,14 @@ class Icons {
   /// <i class="material-icons md-36">maps_ugc</i> &#x2014; material icon named "maps ugc".
   static const IconData maps_ugc = IconData(0xe858, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">maps_ugc</i> &#x2014; material icon named "maps ugc sharp".
+  static const IconData maps_ugc_sharp = IconData(0xedbe, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">maps_ugc</i> &#x2014; material icon named "maps ugc outlined".
   static const IconData maps_ugc_outlined = IconData(0xe2b9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">maps_ugc</i> &#x2014; material icon named "maps ugc rounded".
   static const IconData maps_ugc_rounded = IconData(0xf2ec, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">maps_ugc</i> &#x2014; material icon named "maps ugc sharp".
-  static const IconData maps_ugc_sharp = IconData(0xedbe, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">margin</i> &#x2014; material icon named "margin".
   static const IconData margin = IconData(0xe859, fontFamily: 'MaterialIcons');
@@ -9171,23 +9048,20 @@ class Icons {
   /// <i class="material-icons md-36">mark_as_unread</i> &#x2014; material icon named "mark as unread".
   static const IconData mark_as_unread = IconData(0xe85a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read".
-  static const IconData mark_chat_read = IconData(0xe85b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read outlined".
-  static const IconData mark_chat_read_outlined = IconData(0xe2ba, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read sharp".
+  static const IconData mark_chat_read_sharp = IconData(0xedbf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read rounded".
   static const IconData mark_chat_read_rounded = IconData(0xf2ed, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read sharp".
-  static const IconData mark_chat_read_sharp = IconData(0xedbf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read outlined".
+  static const IconData mark_chat_read_outlined = IconData(0xe2ba, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">mark_chat_read</i> &#x2014; material icon named "mark chat read".
+  static const IconData mark_chat_read = IconData(0xe85b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mark_chat_unread</i> &#x2014; material icon named "mark chat unread".
   static const IconData mark_chat_unread = IconData(0xe85c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mark_chat_unread</i> &#x2014; material icon named "mark chat unread outlined".
-  static const IconData mark_chat_unread_outlined = IconData(0xe2bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">mark_chat_unread</i> &#x2014; material icon named "mark chat unread rounded".
   static const IconData mark_chat_unread_rounded = IconData(0xf2ee, fontFamily: 'MaterialIcons');
@@ -9195,44 +9069,35 @@ class Icons {
   /// <i class="material-icons-sharp md-36">mark_chat_unread</i> &#x2014; material icon named "mark chat unread sharp".
   static const IconData mark_chat_unread_sharp = IconData(0xedc0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">mark_email_read</i> &#x2014; material icon named "mark email read".
-  static const IconData mark_email_read = IconData(0xe85d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mark_email_read</i> &#x2014; material icon named "mark email read outlined".
-  static const IconData mark_email_read_outlined = IconData(0xe2bc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">mark_chat_unread</i> &#x2014; material icon named "mark chat unread outlined".
+  static const IconData mark_chat_unread_outlined = IconData(0xe2bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">mark_email_read</i> &#x2014; material icon named "mark email read rounded".
   static const IconData mark_email_read_rounded = IconData(0xf2ef, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">mark_email_read</i> &#x2014; material icon named "mark email read outlined".
+  static const IconData mark_email_read_outlined = IconData(0xe2bc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">mark_email_read</i> &#x2014; material icon named "mark email read".
+  static const IconData mark_email_read = IconData(0xe85d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">mark_email_read</i> &#x2014; material icon named "mark email read sharp".
   static const IconData mark_email_read_sharp = IconData(0xedc1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread".
-  static const IconData mark_email_unread = IconData(0xe85e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread outlined".
-  static const IconData mark_email_unread_outlined = IconData(0xe2bd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread rounded".
-  static const IconData mark_email_unread_rounded = IconData(0xf2f0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread sharp".
   static const IconData mark_email_unread_sharp = IconData(0xedc2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread rounded".
+  static const IconData mark_email_unread_rounded = IconData(0xf2f0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread outlined".
+  static const IconData mark_email_unread_outlined = IconData(0xe2bd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">mark_email_unread</i> &#x2014; material icon named "mark email unread".
+  static const IconData mark_email_unread = IconData(0xe85e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">markunread</i> &#x2014; material icon named "markunread".
   static const IconData markunread = IconData(0xe85f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox".
-  static const IconData markunread_mailbox = IconData(0xe860, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox outlined".
-  static const IconData markunread_mailbox_outlined = IconData(0xe2be, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox rounded".
-  static const IconData markunread_mailbox_rounded = IconData(0xf2f1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox sharp".
-  static const IconData markunread_mailbox_sharp = IconData(0xedc3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">markunread</i> &#x2014; material icon named "markunread outlined".
   static const IconData markunread_outlined = IconData(0xe2bf, fontFamily: 'MaterialIcons');
@@ -9243,11 +9108,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">markunread</i> &#x2014; material icon named "markunread sharp".
   static const IconData markunread_sharp = IconData(0xedc4, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox sharp".
+  static const IconData markunread_mailbox_sharp = IconData(0xedc3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox outlined".
+  static const IconData markunread_mailbox_outlined = IconData(0xe2be, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox rounded".
+  static const IconData markunread_mailbox_rounded = IconData(0xf2f1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox".
+  static const IconData markunread_mailbox = IconData(0xe860, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">masks</i> &#x2014; material icon named "masks".
   static const IconData masks = IconData(0xe861, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">masks</i> &#x2014; material icon named "masks outlined".
-  static const IconData masks_outlined = IconData(0xe2c0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">masks</i> &#x2014; material icon named "masks rounded".
   static const IconData masks_rounded = IconData(0xf2f3, fontFamily: 'MaterialIcons');
@@ -9255,17 +9129,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">masks</i> &#x2014; material icon named "masks sharp".
   static const IconData masks_sharp = IconData(0xedc5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">masks</i> &#x2014; material icon named "masks outlined".
+  static const IconData masks_outlined = IconData(0xe2c0, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">maximize</i> &#x2014; material icon named "maximize".
   static const IconData maximize = IconData(0xe862, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">maximize</i> &#x2014; material icon named "maximize outlined".
-  static const IconData maximize_outlined = IconData(0xe2c1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">maximize</i> &#x2014; material icon named "maximize rounded".
   static const IconData maximize_rounded = IconData(0xf2f4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">maximize</i> &#x2014; material icon named "maximize sharp".
   static const IconData maximize_sharp = IconData(0xedc6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">maximize</i> &#x2014; material icon named "maximize outlined".
+  static const IconData maximize_outlined = IconData(0xe2c1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mediation</i> &#x2014; material icon named "mediation".
   static const IconData mediation = IconData(0xe863, fontFamily: 'MaterialIcons');
@@ -9291,77 +9168,77 @@ class Icons {
   /// <i class="material-icons-sharp md-36">medical_services</i> &#x2014; material icon named "medical services sharp".
   static const IconData medical_services_sharp = IconData(0xedc8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">meeting_room</i> &#x2014; material icon named "meeting room".
-  static const IconData meeting_room = IconData(0xe865, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">meeting_room</i> &#x2014; material icon named "meeting room outlined".
-  static const IconData meeting_room_outlined = IconData(0xe2c4, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">meeting_room</i> &#x2014; material icon named "meeting room sharp".
+  static const IconData meeting_room_sharp = IconData(0xedc9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">meeting_room</i> &#x2014; material icon named "meeting room rounded".
   static const IconData meeting_room_rounded = IconData(0xf2f7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">meeting_room</i> &#x2014; material icon named "meeting room sharp".
-  static const IconData meeting_room_sharp = IconData(0xedc9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">meeting_room</i> &#x2014; material icon named "meeting room outlined".
+  static const IconData meeting_room_outlined = IconData(0xe2c4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">memory</i> &#x2014; material icon named "memory".
-  static const IconData memory = IconData(0xe866, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">memory</i> &#x2014; material icon named "memory outlined".
-  static const IconData memory_outlined = IconData(0xe2c5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">memory</i> &#x2014; material icon named "memory rounded".
-  static const IconData memory_rounded = IconData(0xf2f8, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">meeting_room</i> &#x2014; material icon named "meeting room".
+  static const IconData meeting_room = IconData(0xe865, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">memory</i> &#x2014; material icon named "memory sharp".
   static const IconData memory_sharp = IconData(0xedca, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">menu</i> &#x2014; material icon named "menu".
-  static const IconData menu = IconData(0xe867, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">memory</i> &#x2014; material icon named "memory rounded".
+  static const IconData memory_rounded = IconData(0xf2f8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">menu_book</i> &#x2014; material icon named "menu book".
-  static const IconData menu_book = IconData(0xe868, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">memory</i> &#x2014; material icon named "memory outlined".
+  static const IconData memory_outlined = IconData(0xe2c5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">menu_book</i> &#x2014; material icon named "menu book outlined".
-  static const IconData menu_book_outlined = IconData(0xe2c6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">menu_book</i> &#x2014; material icon named "menu book rounded".
-  static const IconData menu_book_rounded = IconData(0xf2f9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">menu_book</i> &#x2014; material icon named "menu book sharp".
-  static const IconData menu_book_sharp = IconData(0xedcb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">menu_open</i> &#x2014; material icon named "menu open".
-  static const IconData menu_open = IconData(0xe869, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">menu_open</i> &#x2014; material icon named "menu open outlined".
-  static const IconData menu_open_outlined = IconData(0xe2c7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">menu_open</i> &#x2014; material icon named "menu open rounded".
-  static const IconData menu_open_rounded = IconData(0xf2fa, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">menu_open</i> &#x2014; material icon named "menu open sharp".
-  static const IconData menu_open_sharp = IconData(0xedcc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">menu</i> &#x2014; material icon named "menu outlined".
-  static const IconData menu_outlined = IconData(0xe2c8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">menu</i> &#x2014; material icon named "menu rounded".
-  static const IconData menu_rounded = IconData(0xf2fb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">memory</i> &#x2014; material icon named "memory".
+  static const IconData memory = IconData(0xe866, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">menu</i> &#x2014; material icon named "menu sharp".
   static const IconData menu_sharp = IconData(0xedcd, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">menu</i> &#x2014; material icon named "menu rounded".
+  static const IconData menu_rounded = IconData(0xf2fb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">menu</i> &#x2014; material icon named "menu outlined".
+  static const IconData menu_outlined = IconData(0xe2c8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">menu</i> &#x2014; material icon named "menu".
+  static const IconData menu = IconData(0xe867, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">menu_book</i> &#x2014; material icon named "menu book sharp".
+  static const IconData menu_book_sharp = IconData(0xedcb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">menu_book</i> &#x2014; material icon named "menu book".
+  static const IconData menu_book = IconData(0xe868, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">menu_book</i> &#x2014; material icon named "menu book rounded".
+  static const IconData menu_book_rounded = IconData(0xf2f9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">menu_book</i> &#x2014; material icon named "menu book outlined".
+  static const IconData menu_book_outlined = IconData(0xe2c6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">menu_open</i> &#x2014; material icon named "menu open sharp".
+  static const IconData menu_open_sharp = IconData(0xedcc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">menu_open</i> &#x2014; material icon named "menu open rounded".
+  static const IconData menu_open_rounded = IconData(0xf2fa, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">menu_open</i> &#x2014; material icon named "menu open outlined".
+  static const IconData menu_open_outlined = IconData(0xe2c7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">menu_open</i> &#x2014; material icon named "menu open".
+  static const IconData menu_open = IconData(0xe869, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">merge_type</i> &#x2014; material icon named "merge type".
   static const IconData merge_type = IconData(0xe86a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">merge_type</i> &#x2014; material icon named "merge type sharp".
+  static const IconData merge_type_sharp = IconData(0xedce, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">merge_type</i> &#x2014; material icon named "merge type outlined".
   static const IconData merge_type_outlined = IconData(0xe2c9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">merge_type</i> &#x2014; material icon named "merge type rounded".
   static const IconData merge_type_rounded = IconData(0xf2fc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">merge_type</i> &#x2014; material icon named "merge type sharp".
-  static const IconData merge_type_sharp = IconData(0xedce, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">message</i> &#x2014; material icon named "message".
   static const IconData message = IconData(0xe86b, fontFamily: 'MaterialIcons');
@@ -9375,32 +9252,41 @@ class Icons {
   /// <i class="material-icons-sharp md-36">message</i> &#x2014; material icon named "message sharp".
   static const IconData message_sharp = IconData(0xedcf, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">messenger</i> &#x2014; material icon named "messenger".
-  static const IconData messenger = IconData(0xe64a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">messenger_outline</i> &#x2014; material icon named "messenger outline".
-  static const IconData messenger_outline = IconData(0xe64b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">messenger_outline</i> &#x2014; material icon named "messenger outline outlined".
-  static const IconData messenger_outline_outlined = IconData(0xe0d9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">messenger_outline</i> &#x2014; material icon named "messenger outline rounded".
-  static const IconData messenger_outline_rounded = IconData(0xf107, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">messenger_outline</i> &#x2014; material icon named "messenger outline sharp".
-  static const IconData messenger_outline_sharp = IconData(0xebd9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">messenger</i> &#x2014; material icon named "messenger sharp".
+  static const IconData messenger_sharp = IconData(0xebda, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">messenger</i> &#x2014; material icon named "messenger outlined".
   static const IconData messenger_outlined = IconData(0xe0da, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">messenger</i> &#x2014; material icon named "messenger".
+  static const IconData messenger = IconData(0xe64a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">messenger</i> &#x2014; material icon named "messenger rounded".
   static const IconData messenger_rounded = IconData(0xf108, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">messenger</i> &#x2014; material icon named "messenger sharp".
-  static const IconData messenger_sharp = IconData(0xebda, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">messenger_outline</i> &#x2014; material icon named "messenger outline sharp".
+  static const IconData messenger_outline_sharp = IconData(0xebd9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">messenger_outline</i> &#x2014; material icon named "messenger outline rounded".
+  static const IconData messenger_outline_rounded = IconData(0xf107, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">messenger_outline</i> &#x2014; material icon named "messenger outline outlined".
+  static const IconData messenger_outline_outlined = IconData(0xe0d9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">messenger_outline</i> &#x2014; material icon named "messenger outline".
+  static const IconData messenger_outline = IconData(0xe64b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">mic</i> &#x2014; material icon named "mic sharp".
+  static const IconData mic_sharp = IconData(0xedd2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">mic</i> &#x2014; material icon named "mic outlined".
+  static const IconData mic_outlined = IconData(0xe2cd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mic</i> &#x2014; material icon named "mic".
   static const IconData mic = IconData(0xe86c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">mic</i> &#x2014; material icon named "mic rounded".
+  static const IconData mic_rounded = IconData(0xf300, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mic_external_off</i> &#x2014; material icon named "mic external off".
   static const IconData mic_external_off = IconData(0xe86d, fontFamily: 'MaterialIcons');
@@ -9408,38 +9294,29 @@ class Icons {
   /// <i class="material-icons md-36">mic_external_on</i> &#x2014; material icon named "mic external on".
   static const IconData mic_external_on = IconData(0xe86e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">mic_none</i> &#x2014; material icon named "mic none".
-  static const IconData mic_none = IconData(0xe86f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">mic_none</i> &#x2014; material icon named "mic none sharp".
+  static const IconData mic_none_sharp = IconData(0xedd0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">mic_none</i> &#x2014; material icon named "mic none outlined".
   static const IconData mic_none_outlined = IconData(0xe2cb, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">mic_none</i> &#x2014; material icon named "mic none".
+  static const IconData mic_none = IconData(0xe86f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">mic_none</i> &#x2014; material icon named "mic none rounded".
   static const IconData mic_none_rounded = IconData(0xf2fe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mic_none</i> &#x2014; material icon named "mic none sharp".
-  static const IconData mic_none_sharp = IconData(0xedd0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">mic_off</i> &#x2014; material icon named "mic off".
-  static const IconData mic_off = IconData(0xe870, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mic_off</i> &#x2014; material icon named "mic off outlined".
-  static const IconData mic_off_outlined = IconData(0xe2cc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">mic_off</i> &#x2014; material icon named "mic off rounded".
-  static const IconData mic_off_rounded = IconData(0xf2ff, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">mic_off</i> &#x2014; material icon named "mic off sharp".
   static const IconData mic_off_sharp = IconData(0xedd1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">mic</i> &#x2014; material icon named "mic outlined".
-  static const IconData mic_outlined = IconData(0xe2cd, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">mic_off</i> &#x2014; material icon named "mic off rounded".
+  static const IconData mic_off_rounded = IconData(0xf2ff, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">mic</i> &#x2014; material icon named "mic rounded".
-  static const IconData mic_rounded = IconData(0xf300, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">mic_off</i> &#x2014; material icon named "mic off outlined".
+  static const IconData mic_off_outlined = IconData(0xe2cc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">mic</i> &#x2014; material icon named "mic sharp".
-  static const IconData mic_sharp = IconData(0xedd2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">mic_off</i> &#x2014; material icon named "mic off".
+  static const IconData mic_off = IconData(0xe870, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">microwave</i> &#x2014; material icon named "microwave".
   static const IconData microwave = IconData(0xe871, fontFamily: 'MaterialIcons');
@@ -9465,17 +9342,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">military_tech</i> &#x2014; material icon named "military tech sharp".
   static const IconData military_tech_sharp = IconData(0xedd4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">minimize</i> &#x2014; material icon named "minimize".
-  static const IconData minimize = IconData(0xe873, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">minimize</i> &#x2014; material icon named "minimize outlined".
   static const IconData minimize_outlined = IconData(0xe2d0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">minimize</i> &#x2014; material icon named "minimize rounded".
-  static const IconData minimize_rounded = IconData(0xf303, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">minimize</i> &#x2014; material icon named "minimize".
+  static const IconData minimize = IconData(0xe873, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">minimize</i> &#x2014; material icon named "minimize sharp".
   static const IconData minimize_sharp = IconData(0xedd5, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">minimize</i> &#x2014; material icon named "minimize rounded".
+  static const IconData minimize_rounded = IconData(0xf303, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">miscellaneous_services</i> &#x2014; material icon named "miscellaneous services".
   static const IconData miscellaneous_services = IconData(0xe874, fontFamily: 'MaterialIcons');
@@ -9528,14 +9405,14 @@ class Icons {
   /// <i class="material-icons md-36">mobile_off</i> &#x2014; material icon named "mobile off".
   static const IconData mobile_off = IconData(0xe878, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">mobile_off</i> &#x2014; material icon named "mobile off sharp".
+  static const IconData mobile_off_sharp = IconData(0xedda, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">mobile_off</i> &#x2014; material icon named "mobile off outlined".
   static const IconData mobile_off_outlined = IconData(0xe2d5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">mobile_off</i> &#x2014; material icon named "mobile off rounded".
   static const IconData mobile_off_rounded = IconData(0xf308, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mobile_off</i> &#x2014; material icon named "mobile off sharp".
-  static const IconData mobile_off_sharp = IconData(0xedda, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mobile_screen_share</i> &#x2014; material icon named "mobile screen share".
   static const IconData mobile_screen_share = IconData(0xe879, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -9548,6 +9425,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">mobile_screen_share</i> &#x2014; material icon named "mobile screen share sharp".
   static const IconData mobile_screen_share_sharp = IconData(0xeddb, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">mode</i> &#x2014; material icon named "mode outlined".
+  static const IconData mode_outlined = IconData(0xe2d8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">mode</i> &#x2014; material icon named "mode rounded".
+  static const IconData mode_rounded = IconData(0xf30b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">mode</i> &#x2014; material icon named "mode sharp".
+  static const IconData mode_sharp = IconData(0xeddd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mode_comment</i> &#x2014; material icon named "mode comment".
   static const IconData mode_comment = IconData(0xe87a, fontFamily: 'MaterialIcons');
@@ -9564,15 +9450,6 @@ class Icons {
   /// <i class="material-icons md-36">mode_edit</i> &#x2014; material icon named "mode edit".
   static const IconData mode_edit = IconData(0xe87b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">mode</i> &#x2014; material icon named "mode outlined".
-  static const IconData mode_outlined = IconData(0xe2d8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">mode</i> &#x2014; material icon named "mode rounded".
-  static const IconData mode_rounded = IconData(0xf30b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mode</i> &#x2014; material icon named "mode sharp".
-  static const IconData mode_sharp = IconData(0xeddd, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">model_training</i> &#x2014; material icon named "model training".
   static const IconData model_training = IconData(0xe87c, fontFamily: 'MaterialIcons');
 
@@ -9585,14 +9462,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">model_training</i> &#x2014; material icon named "model training sharp".
   static const IconData model_training_sharp = IconData(0xedde, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">monetization_on</i> &#x2014; material icon named "monetization on rounded".
+  static const IconData monetization_on_rounded = IconData(0xf30d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">monetization_on</i> &#x2014; material icon named "monetization on".
   static const IconData monetization_on = IconData(0xe87d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">monetization_on</i> &#x2014; material icon named "monetization on outlined".
   static const IconData monetization_on_outlined = IconData(0xe2da, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">monetization_on</i> &#x2014; material icon named "monetization on rounded".
-  static const IconData monetization_on_rounded = IconData(0xf30d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">monetization_on</i> &#x2014; material icon named "monetization on sharp".
   static const IconData monetization_on_sharp = IconData(0xeddf, fontFamily: 'MaterialIcons');
@@ -9600,17 +9477,17 @@ class Icons {
   /// <i class="material-icons md-36">money</i> &#x2014; material icon named "money".
   static const IconData money = IconData(0xe87e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">money</i> &#x2014; material icon named "money outlined".
+  static const IconData money_outlined = IconData(0xe2dd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">money</i> &#x2014; material icon named "money rounded".
+  static const IconData money_rounded = IconData(0xf310, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">money</i> &#x2014; material icon named "money sharp".
+  static const IconData money_sharp = IconData(0xede2, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">money_off</i> &#x2014; material icon named "money off".
   static const IconData money_off = IconData(0xe87f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">money_off_csred</i> &#x2014; material icon named "money off csred outlined".
-  static const IconData money_off_csred_outlined = IconData(0xe2db, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">money_off_csred</i> &#x2014; material icon named "money off csred rounded".
-  static const IconData money_off_csred_rounded = IconData(0xf30e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">money_off_csred</i> &#x2014; material icon named "money off csred sharp".
-  static const IconData money_off_csred_sharp = IconData(0xede0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">money_off</i> &#x2014; material icon named "money off outlined".
   static const IconData money_off_outlined = IconData(0xe2dc, fontFamily: 'MaterialIcons');
@@ -9621,14 +9498,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">money_off</i> &#x2014; material icon named "money off sharp".
   static const IconData money_off_sharp = IconData(0xede1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">money</i> &#x2014; material icon named "money outlined".
-  static const IconData money_outlined = IconData(0xe2dd, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">money_off_csred</i> &#x2014; material icon named "money off csred outlined".
+  static const IconData money_off_csred_outlined = IconData(0xe2db, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">money</i> &#x2014; material icon named "money rounded".
-  static const IconData money_rounded = IconData(0xf310, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">money_off_csred</i> &#x2014; material icon named "money off csred rounded".
+  static const IconData money_off_csred_rounded = IconData(0xf30e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">money</i> &#x2014; material icon named "money sharp".
-  static const IconData money_sharp = IconData(0xede2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">money_off_csred</i> &#x2014; material icon named "money off csred sharp".
+  static const IconData money_off_csred_sharp = IconData(0xede0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">monitor</i> &#x2014; material icon named "monitor".
   static const IconData monitor = IconData(0xe880, fontFamily: 'MaterialIcons');
@@ -9645,29 +9522,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">monochrome_photos</i> &#x2014; material icon named "monochrome photos sharp".
   static const IconData monochrome_photos_sharp = IconData(0xede3, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">mood</i> &#x2014; material icon named "mood rounded".
+  static const IconData mood_rounded = IconData(0xf313, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">mood</i> &#x2014; material icon named "mood".
   static const IconData mood = IconData(0xe882, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">mood</i> &#x2014; material icon named "mood outlined".
+  static const IconData mood_outlined = IconData(0xe2e0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">mood</i> &#x2014; material icon named "mood sharp".
+  static const IconData mood_sharp = IconData(0xede5, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">mood_bad</i> &#x2014; material icon named "mood bad".
   static const IconData mood_bad = IconData(0xe883, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">mood_bad</i> &#x2014; material icon named "mood bad sharp".
+  static const IconData mood_bad_sharp = IconData(0xede4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">mood_bad</i> &#x2014; material icon named "mood bad outlined".
   static const IconData mood_bad_outlined = IconData(0xe2df, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">mood_bad</i> &#x2014; material icon named "mood bad rounded".
   static const IconData mood_bad_rounded = IconData(0xf312, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mood_bad</i> &#x2014; material icon named "mood bad sharp".
-  static const IconData mood_bad_sharp = IconData(0xede4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">mood</i> &#x2014; material icon named "mood outlined".
-  static const IconData mood_outlined = IconData(0xe2e0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">mood</i> &#x2014; material icon named "mood rounded".
-  static const IconData mood_rounded = IconData(0xf313, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">mood</i> &#x2014; material icon named "mood sharp".
-  static const IconData mood_sharp = IconData(0xede5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">moped</i> &#x2014; material icon named "moped".
   static const IconData moped = IconData(0xe884, fontFamily: 'MaterialIcons');
@@ -9684,6 +9561,15 @@ class Icons {
   /// <i class="material-icons md-36">more</i> &#x2014; material icon named "more".
   static const IconData more = IconData(0xe885, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">more</i> &#x2014; material icon named "more outlined".
+  static const IconData more_outlined = IconData(0xe2e3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">more</i> &#x2014; material icon named "more rounded".
+  static const IconData more_rounded = IconData(0xf316, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">more</i> &#x2014; material icon named "more sharp".
+  static const IconData more_sharp = IconData(0xede8, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">more_horiz</i> &#x2014; material icon named "more horiz".
   static const IconData more_horiz = IconData(0xe886, fontFamily: 'MaterialIcons');
 
@@ -9695,15 +9581,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">more_horiz</i> &#x2014; material icon named "more horiz sharp".
   static const IconData more_horiz_sharp = IconData(0xede7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">more</i> &#x2014; material icon named "more outlined".
-  static const IconData more_outlined = IconData(0xe2e3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">more</i> &#x2014; material icon named "more rounded".
-  static const IconData more_rounded = IconData(0xf316, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">more</i> &#x2014; material icon named "more sharp".
-  static const IconData more_sharp = IconData(0xede8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">more_time</i> &#x2014; material icon named "more time".
   static const IconData more_time = IconData(0xe887, fontFamily: 'MaterialIcons');
@@ -9756,17 +9633,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">motion_photos_pause</i> &#x2014; material icon named "motion photos pause sharp".
   static const IconData motion_photos_pause_sharp = IconData(0xedec, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused".
-  static const IconData motion_photos_paused = IconData(0xe88c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused outlined".
-  static const IconData motion_photos_paused_outlined = IconData(0xe2e8, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused sharp".
+  static const IconData motion_photos_paused_sharp = IconData(0xeded, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused rounded".
   static const IconData motion_photos_paused_rounded = IconData(0xf31b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused sharp".
-  static const IconData motion_photos_paused_sharp = IconData(0xeded, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused outlined".
+  static const IconData motion_photos_paused_outlined = IconData(0xe2e8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">motion_photos_paused</i> &#x2014; material icon named "motion photos paused".
+  static const IconData motion_photos_paused = IconData(0xe88c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">motorcycle</i> &#x2014; material icon named "motorcycle".
   static const IconData motorcycle = IconData(0xe88d, fontFamily: 'MaterialIcons');
@@ -9804,20 +9681,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">move_to_inbox</i> &#x2014; material icon named "move to inbox sharp".
   static const IconData move_to_inbox_sharp = IconData(0xedf0, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">movie</i> &#x2014; material icon named "movie rounded".
+  static const IconData movie_rounded = IconData(0xf321, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">movie</i> &#x2014; material icon named "movie".
   static const IconData movie = IconData(0xe890, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">movie_creation</i> &#x2014; material icon named "movie creation".
-  static const IconData movie_creation = IconData(0xe891, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">movie</i> &#x2014; material icon named "movie outlined".
+  static const IconData movie_outlined = IconData(0xe2ee, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">movie_creation</i> &#x2014; material icon named "movie creation outlined".
-  static const IconData movie_creation_outlined = IconData(0xe2ec, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">movie</i> &#x2014; material icon named "movie sharp".
+  static const IconData movie_sharp = IconData(0xedf3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">movie_creation</i> &#x2014; material icon named "movie creation rounded".
   static const IconData movie_creation_rounded = IconData(0xf31f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">movie_creation</i> &#x2014; material icon named "movie creation sharp".
   static const IconData movie_creation_sharp = IconData(0xedf1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">movie_creation</i> &#x2014; material icon named "movie creation".
+  static const IconData movie_creation = IconData(0xe891, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">movie_creation</i> &#x2014; material icon named "movie creation outlined".
+  static const IconData movie_creation_outlined = IconData(0xe2ec, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">movie_filter</i> &#x2014; material icon named "movie filter".
   static const IconData movie_filter = IconData(0xe892, fontFamily: 'MaterialIcons');
@@ -9830,15 +9716,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">movie_filter</i> &#x2014; material icon named "movie filter sharp".
   static const IconData movie_filter_sharp = IconData(0xedf2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">movie</i> &#x2014; material icon named "movie outlined".
-  static const IconData movie_outlined = IconData(0xe2ee, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">movie</i> &#x2014; material icon named "movie rounded".
-  static const IconData movie_rounded = IconData(0xf321, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">movie</i> &#x2014; material icon named "movie sharp".
-  static const IconData movie_sharp = IconData(0xedf3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">mp</i> &#x2014; material icon named "mp".
   static const IconData mp = IconData(0xe893, fontFamily: 'MaterialIcons');
@@ -9939,14 +9816,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">my_library_add</i> &#x2014; material icon named "my library add sharp".
   static const IconData my_library_add_sharp = IconData(0xed7a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">my_library_books</i> &#x2014; material icon named "my library books rounded".
+  static const IconData my_library_books_rounded = IconData(0xf2a9, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">my_library_books</i> &#x2014; material icon named "my library books".
   static const IconData my_library_books = IconData(0xe80f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">my_library_books</i> &#x2014; material icon named "my library books outlined".
   static const IconData my_library_books_outlined = IconData(0xe277, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">my_library_books</i> &#x2014; material icon named "my library books rounded".
-  static const IconData my_library_books_rounded = IconData(0xf2a9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">my_library_books</i> &#x2014; material icon named "my library books sharp".
   static const IconData my_library_books_sharp = IconData(0xed7b, fontFamily: 'MaterialIcons');
@@ -9993,6 +9870,12 @@ class Icons {
   /// <i class="material-icons-outlined md-36">nature</i> &#x2014; material icon named "nature outlined".
   static const IconData nature_outlined = IconData(0xe2f7, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">nature</i> &#x2014; material icon named "nature rounded".
+  static const IconData nature_rounded = IconData(0xf32b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">nature</i> &#x2014; material icon named "nature sharp".
+  static const IconData nature_sharp = IconData(0xedfd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">nature_people</i> &#x2014; material icon named "nature people".
   static const IconData nature_people = IconData(0xe89d, fontFamily: 'MaterialIcons');
 
@@ -10004,12 +9887,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">nature_people</i> &#x2014; material icon named "nature people sharp".
   static const IconData nature_people_sharp = IconData(0xedfc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">nature</i> &#x2014; material icon named "nature rounded".
-  static const IconData nature_rounded = IconData(0xf32b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">nature</i> &#x2014; material icon named "nature sharp".
-  static const IconData nature_sharp = IconData(0xedfd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">navigate_before</i> &#x2014; material icon named "navigate before".
   static const IconData navigate_before = IconData(0xe89e, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -10050,6 +9927,15 @@ class Icons {
   /// <i class="material-icons md-36">near_me</i> &#x2014; material icon named "near me".
   static const IconData near_me = IconData(0xe8a1, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">near_me</i> &#x2014; material icon named "near me outlined".
+  static const IconData near_me_outlined = IconData(0xe2fd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">near_me</i> &#x2014; material icon named "near me rounded".
+  static const IconData near_me_rounded = IconData(0xf330, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">near_me</i> &#x2014; material icon named "near me sharp".
+  static const IconData near_me_sharp = IconData(0xee02, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">near_me_disabled</i> &#x2014; material icon named "near me disabled".
   static const IconData near_me_disabled = IconData(0xe8a2, fontFamily: 'MaterialIcons');
 
@@ -10061,15 +9947,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">near_me_disabled</i> &#x2014; material icon named "near me disabled sharp".
   static const IconData near_me_disabled_sharp = IconData(0xee01, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">near_me</i> &#x2014; material icon named "near me outlined".
-  static const IconData near_me_outlined = IconData(0xe2fd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">near_me</i> &#x2014; material icon named "near me rounded".
-  static const IconData near_me_rounded = IconData(0xf330, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">near_me</i> &#x2014; material icon named "near me sharp".
-  static const IconData near_me_sharp = IconData(0xee02, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">network_cell</i> &#x2014; material icon named "network cell".
   static const IconData network_cell = IconData(0xe8a3, fontFamily: 'MaterialIcons');
@@ -10125,6 +10002,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">next_plan</i> &#x2014; material icon named "next plan sharp".
   static const IconData next_plan_sharp = IconData(0xee06, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">next_week</i> &#x2014; material icon named "next week sharp".
+  static const IconData next_week_sharp = IconData(0xee07, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">next_week</i> &#x2014; material icon named "next week".
   static const IconData next_week = IconData(0xe8a9, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
@@ -10133,9 +10013,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">next_week</i> &#x2014; material icon named "next week rounded".
   static const IconData next_week_rounded = IconData(0xf335, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">next_week</i> &#x2014; material icon named "next week sharp".
-  static const IconData next_week_sharp = IconData(0xee07, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">nfc</i> &#x2014; material icon named "nfc".
   static const IconData nfc = IconData(0xe8aa, fontFamily: 'MaterialIcons');
@@ -10149,17 +10026,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">nfc</i> &#x2014; material icon named "nfc sharp".
   static const IconData nfc_sharp = IconData(0xee08, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">night_shelter</i> &#x2014; material icon named "night shelter".
-  static const IconData night_shelter = IconData(0xe8ab, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">night_shelter</i> &#x2014; material icon named "night shelter outlined".
-  static const IconData night_shelter_outlined = IconData(0xe304, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">night_shelter</i> &#x2014; material icon named "night shelter sharp".
+  static const IconData night_shelter_sharp = IconData(0xee09, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">night_shelter</i> &#x2014; material icon named "night shelter rounded".
   static const IconData night_shelter_rounded = IconData(0xf337, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">night_shelter</i> &#x2014; material icon named "night shelter sharp".
-  static const IconData night_shelter_sharp = IconData(0xee09, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">night_shelter</i> &#x2014; material icon named "night shelter outlined".
+  static const IconData night_shelter_outlined = IconData(0xe304, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">night_shelter</i> &#x2014; material icon named "night shelter".
+  static const IconData night_shelter = IconData(0xe8ab, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">nightlife</i> &#x2014; material icon named "nightlife".
   static const IconData nightlife = IconData(0xe8ac, fontFamily: 'MaterialIcons');
@@ -10178,6 +10055,18 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">nights_stay</i> &#x2014; material icon named "nights stay sharp".
   static const IconData nights_stay_sharp = IconData(0xee0a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">9k</i> &#x2014; material icon named "9k".
+  static const IconData nine_k = IconData(0xe555, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">9k_plus</i> &#x2014; material icon named "9k plus".
+  static const IconData nine_k_plus = IconData(0xe556, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">9mp</i> &#x2014; material icon named "9mp".
+  static const IconData nine_mp = IconData(0xe557, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">19mp</i> &#x2014; material icon named "19mp".
+  static const IconData nineteen_mp = IconData(0xe534, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">no_cell</i> &#x2014; material icon named "no cell".
   static const IconData no_cell = IconData(0xe8af, fontFamily: 'MaterialIcons');
@@ -10206,15 +10095,6 @@ class Icons {
   /// <i class="material-icons md-36">no_encryption</i> &#x2014; material icon named "no encryption".
   static const IconData no_encryption = IconData(0xe8b1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred outlined".
-  static const IconData no_encryption_gmailerrorred_outlined = IconData(0xe308, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred rounded".
-  static const IconData no_encryption_gmailerrorred_rounded = IconData(0xf33b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred sharp".
-  static const IconData no_encryption_gmailerrorred_sharp = IconData(0xee0d, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">no_encryption</i> &#x2014; material icon named "no encryption outlined".
   static const IconData no_encryption_outlined = IconData(0xe309, fontFamily: 'MaterialIcons');
 
@@ -10223,6 +10103,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">no_encryption</i> &#x2014; material icon named "no encryption sharp".
   static const IconData no_encryption_sharp = IconData(0xee0e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred outlined".
+  static const IconData no_encryption_gmailerrorred_outlined = IconData(0xe308, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred rounded".
+  static const IconData no_encryption_gmailerrorred_rounded = IconData(0xf33b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">no_encryption_gmailerrorred</i> &#x2014; material icon named "no encryption gmailerrorred sharp".
+  static const IconData no_encryption_gmailerrorred_sharp = IconData(0xee0d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">no_flash</i> &#x2014; material icon named "no flash".
   static const IconData no_flash = IconData(0xe8b2, fontFamily: 'MaterialIcons');
@@ -10236,14 +10125,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">no_flash</i> &#x2014; material icon named "no flash sharp".
   static const IconData no_flash_sharp = IconData(0xee0f, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">no_food</i> &#x2014; material icon named "no food rounded".
+  static const IconData no_food_rounded = IconData(0xf33e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">no_food</i> &#x2014; material icon named "no food".
   static const IconData no_food = IconData(0xe8b3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">no_food</i> &#x2014; material icon named "no food outlined".
   static const IconData no_food_outlined = IconData(0xe30b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">no_food</i> &#x2014; material icon named "no food rounded".
-  static const IconData no_food_rounded = IconData(0xf33e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">no_food</i> &#x2014; material icon named "no food sharp".
   static const IconData no_food_sharp = IconData(0xee10, fontFamily: 'MaterialIcons');
@@ -10251,17 +10140,17 @@ class Icons {
   /// <i class="material-icons md-36">no_meals</i> &#x2014; material icon named "no meals".
   static const IconData no_meals = IconData(0xe8b4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">no_meals_ouline</i> &#x2014; material icon named "no meals ouline".
-  static const IconData no_meals_ouline = IconData(0xe8b5, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">no_meals</i> &#x2014; material icon named "no meals rounded".
+  static const IconData no_meals_rounded = IconData(0xf33f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">no_meals</i> &#x2014; material icon named "no meals outlined".
   static const IconData no_meals_outlined = IconData(0xe30c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">no_meals</i> &#x2014; material icon named "no meals rounded".
-  static const IconData no_meals_rounded = IconData(0xf33f, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">no_meals</i> &#x2014; material icon named "no meals sharp".
   static const IconData no_meals_sharp = IconData(0xee11, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">no_meals_ouline</i> &#x2014; material icon named "no meals ouline".
+  static const IconData no_meals_ouline = IconData(0xe8b5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">no_meeting_room</i> &#x2014; material icon named "no meeting room".
   static const IconData no_meeting_room = IconData(0xe8b6, fontFamily: 'MaterialIcons');
@@ -10290,26 +10179,26 @@ class Icons {
   /// <i class="material-icons md-36">no_sim</i> &#x2014; material icon named "no sim".
   static const IconData no_sim = IconData(0xe8b8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">no_sim</i> &#x2014; material icon named "no sim sharp".
+  static const IconData no_sim_sharp = IconData(0xee14, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">no_sim</i> &#x2014; material icon named "no sim outlined".
   static const IconData no_sim_outlined = IconData(0xe30f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">no_sim</i> &#x2014; material icon named "no sim rounded".
   static const IconData no_sim_rounded = IconData(0xf342, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">no_sim</i> &#x2014; material icon named "no sim sharp".
-  static const IconData no_sim_sharp = IconData(0xee14, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">no_stroller</i> &#x2014; material icon named "no stroller".
   static const IconData no_stroller = IconData(0xe8b9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">no_stroller</i> &#x2014; material icon named "no stroller outlined".
-  static const IconData no_stroller_outlined = IconData(0xe310, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">no_stroller</i> &#x2014; material icon named "no stroller sharp".
+  static const IconData no_stroller_sharp = IconData(0xee15, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">no_stroller</i> &#x2014; material icon named "no stroller rounded".
   static const IconData no_stroller_rounded = IconData(0xf343, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">no_stroller</i> &#x2014; material icon named "no stroller sharp".
-  static const IconData no_stroller_sharp = IconData(0xee15, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">no_stroller</i> &#x2014; material icon named "no stroller outlined".
+  static const IconData no_stroller_outlined = IconData(0xe310, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">no_transfer</i> &#x2014; material icon named "no transfer".
   static const IconData no_transfer = IconData(0xe8ba, fontFamily: 'MaterialIcons');
@@ -10317,26 +10206,14 @@ class Icons {
   /// <i class="material-icons-outlined md-36">no_transfer</i> &#x2014; material icon named "no transfer outlined".
   static const IconData no_transfer_outlined = IconData(0xe311, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">no_transfer</i> &#x2014; material icon named "no transfer rounded".
-  static const IconData no_transfer_rounded = IconData(0xf344, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">no_transfer</i> &#x2014; material icon named "no transfer sharp".
   static const IconData no_transfer_sharp = IconData(0xee16, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">no_transfer</i> &#x2014; material icon named "no transfer rounded".
+  static const IconData no_transfer_rounded = IconData(0xf344, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">north</i> &#x2014; material icon named "north".
   static const IconData north = IconData(0xe8bb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">north_east</i> &#x2014; material icon named "north east".
-  static const IconData north_east = IconData(0xe8bc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">north_east</i> &#x2014; material icon named "north east outlined".
-  static const IconData north_east_outlined = IconData(0xe312, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">north_east</i> &#x2014; material icon named "north east rounded".
-  static const IconData north_east_rounded = IconData(0xf345, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">north_east</i> &#x2014; material icon named "north east sharp".
-  static const IconData north_east_sharp = IconData(0xee17, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">north</i> &#x2014; material icon named "north outlined".
   static const IconData north_outlined = IconData(0xe313, fontFamily: 'MaterialIcons');
@@ -10347,11 +10224,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">north</i> &#x2014; material icon named "north sharp".
   static const IconData north_sharp = IconData(0xee18, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">north_east</i> &#x2014; material icon named "north east rounded".
+  static const IconData north_east_rounded = IconData(0xf345, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">north_east</i> &#x2014; material icon named "north east sharp".
+  static const IconData north_east_sharp = IconData(0xee17, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">north_east</i> &#x2014; material icon named "north east outlined".
+  static const IconData north_east_outlined = IconData(0xe312, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">north_east</i> &#x2014; material icon named "north east".
+  static const IconData north_east = IconData(0xe8bc, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">north_west</i> &#x2014; material icon named "north west".
   static const IconData north_west = IconData(0xe8bd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">north_west</i> &#x2014; material icon named "north west outlined".
-  static const IconData north_west_outlined = IconData(0xe314, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">north_west</i> &#x2014; material icon named "north west rounded".
   static const IconData north_west_rounded = IconData(0xf347, fontFamily: 'MaterialIcons');
@@ -10359,26 +10245,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">north_west</i> &#x2014; material icon named "north west sharp".
   static const IconData north_west_sharp = IconData(0xee19, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">north_west</i> &#x2014; material icon named "north west outlined".
+  static const IconData north_west_outlined = IconData(0xe314, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">not_accessible</i> &#x2014; material icon named "not accessible".
   static const IconData not_accessible = IconData(0xe8be, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">not_accessible</i> &#x2014; material icon named "not accessible outlined".
   static const IconData not_accessible_outlined = IconData(0xe315, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">not_accessible</i> &#x2014; material icon named "not accessible rounded".
-  static const IconData not_accessible_rounded = IconData(0xf348, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">not_accessible</i> &#x2014; material icon named "not accessible sharp".
   static const IconData not_accessible_sharp = IconData(0xee1a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">not_interested</i> &#x2014; material icon named "not interested".
-  static const IconData not_interested = IconData(0xe8bf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">not_accessible</i> &#x2014; material icon named "not accessible rounded".
+  static const IconData not_accessible_rounded = IconData(0xf348, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">not_interested</i> &#x2014; material icon named "not interested rounded".
+  static const IconData not_interested_rounded = IconData(0xf349, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">not_interested</i> &#x2014; material icon named "not interested outlined".
   static const IconData not_interested_outlined = IconData(0xe316, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">not_interested</i> &#x2014; material icon named "not interested rounded".
-  static const IconData not_interested_rounded = IconData(0xf349, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">not_interested</i> &#x2014; material icon named "not interested".
+  static const IconData not_interested = IconData(0xe8bf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">not_interested</i> &#x2014; material icon named "not interested sharp".
   static const IconData not_interested_sharp = IconData(0xee1b, fontFamily: 'MaterialIcons');
@@ -10386,11 +10275,11 @@ class Icons {
   /// <i class="material-icons md-36">not_listed_location</i> &#x2014; material icon named "not listed location".
   static const IconData not_listed_location = IconData(0xe8c0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">not_listed_location</i> &#x2014; material icon named "not listed location outlined".
-  static const IconData not_listed_location_outlined = IconData(0xe317, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">not_listed_location</i> &#x2014; material icon named "not listed location rounded".
   static const IconData not_listed_location_rounded = IconData(0xf34a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">not_listed_location</i> &#x2014; material icon named "not listed location outlined".
+  static const IconData not_listed_location_outlined = IconData(0xe317, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">not_listed_location</i> &#x2014; material icon named "not listed location sharp".
   static const IconData not_listed_location_sharp = IconData(0xee1c, fontFamily: 'MaterialIcons');
@@ -10401,14 +10290,23 @@ class Icons {
   /// <i class="material-icons-outlined md-36">not_started</i> &#x2014; material icon named "not started outlined".
   static const IconData not_started_outlined = IconData(0xe318, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">not_started</i> &#x2014; material icon named "not started rounded".
-  static const IconData not_started_rounded = IconData(0xf34b, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">not_started</i> &#x2014; material icon named "not started sharp".
   static const IconData not_started_sharp = IconData(0xee1d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">not_started</i> &#x2014; material icon named "not started rounded".
+  static const IconData not_started_rounded = IconData(0xf34b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">note</i> &#x2014; material icon named "note".
   static const IconData note = IconData(0xe8c2, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">note</i> &#x2014; material icon named "note outlined".
+  static const IconData note_outlined = IconData(0xe31a, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">note</i> &#x2014; material icon named "note rounded".
+  static const IconData note_rounded = IconData(0xf34d, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">note</i> &#x2014; material icon named "note sharp".
+  static const IconData note_sharp = IconData(0xee1f, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">note_add</i> &#x2014; material icon named "note add".
   static const IconData note_add = IconData(0xe8c3, fontFamily: 'MaterialIcons');
@@ -10421,15 +10319,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">note_add</i> &#x2014; material icon named "note add sharp".
   static const IconData note_add_sharp = IconData(0xee1e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">note</i> &#x2014; material icon named "note outlined".
-  static const IconData note_outlined = IconData(0xe31a, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">note</i> &#x2014; material icon named "note rounded".
-  static const IconData note_rounded = IconData(0xf34d, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">note</i> &#x2014; material icon named "note sharp".
-  static const IconData note_sharp = IconData(0xee1f, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">notes</i> &#x2014; material icon named "notes".
   static const IconData notes = IconData(0xe8c4, fontFamily: 'MaterialIcons');
@@ -10458,6 +10347,15 @@ class Icons {
   /// <i class="material-icons md-36">notifications</i> &#x2014; material icon named "notifications".
   static const IconData notifications = IconData(0xe8c6, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">notifications</i> &#x2014; material icon named "notifications sharp".
+  static const IconData notifications_sharp = IconData(0xee26, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">notifications</i> &#x2014; material icon named "notifications outlined".
+  static const IconData notifications_outlined = IconData(0xe320, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">notifications</i> &#x2014; material icon named "notifications rounded".
+  static const IconData notifications_rounded = IconData(0xf354, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">notifications_active</i> &#x2014; material icon named "notifications active".
   static const IconData notifications_active = IconData(0xe8c7, fontFamily: 'MaterialIcons');
 
@@ -10470,23 +10368,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">notifications_active</i> &#x2014; material icon named "notifications active sharp".
   static const IconData notifications_active_sharp = IconData(0xee22, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">notifications_none</i> &#x2014; material icon named "notifications none rounded".
+  static const IconData notifications_none_rounded = IconData(0xf351, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">notifications_none</i> &#x2014; material icon named "notifications none".
   static const IconData notifications_none = IconData(0xe8c8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">notifications_none</i> &#x2014; material icon named "notifications none outlined".
   static const IconData notifications_none_outlined = IconData(0xe31e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">notifications_none</i> &#x2014; material icon named "notifications none rounded".
-  static const IconData notifications_none_rounded = IconData(0xf351, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">notifications_none</i> &#x2014; material icon named "notifications none sharp".
   static const IconData notifications_none_sharp = IconData(0xee23, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">notifications_off</i> &#x2014; material icon named "notifications off".
-  static const IconData notifications_off = IconData(0xe8c9, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">notifications_off</i> &#x2014; material icon named "notifications off outlined".
   static const IconData notifications_off_outlined = IconData(0xe31f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">notifications_off</i> &#x2014; material icon named "notifications off".
+  static const IconData notifications_off = IconData(0xe8c9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">notifications_off</i> &#x2014; material icon named "notifications off rounded".
   static const IconData notifications_off_rounded = IconData(0xf352, fontFamily: 'MaterialIcons');
@@ -10506,9 +10404,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">notifications_on</i> &#x2014; material icon named "notifications on sharp".
   static const IconData notifications_on_sharp = IconData(0xee22, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">notifications</i> &#x2014; material icon named "notifications outlined".
-  static const IconData notifications_outlined = IconData(0xe320, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">notifications_paused</i> &#x2014; material icon named "notifications paused".
   static const IconData notifications_paused = IconData(0xe8ca, fontFamily: 'MaterialIcons');
 
@@ -10520,12 +10415,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">notifications_paused</i> &#x2014; material icon named "notifications paused sharp".
   static const IconData notifications_paused_sharp = IconData(0xee25, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">notifications</i> &#x2014; material icon named "notifications rounded".
-  static const IconData notifications_rounded = IconData(0xf354, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">notifications</i> &#x2014; material icon named "notifications sharp".
-  static const IconData notifications_sharp = IconData(0xee26, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">now_wallpaper</i> &#x2014; material icon named "now wallpaper".
   static const IconData now_wallpaper = IconData(0xead5, fontFamily: 'MaterialIcons');
@@ -10554,26 +10443,26 @@ class Icons {
   /// <i class="material-icons md-36">offline_bolt</i> &#x2014; material icon named "offline bolt".
   static const IconData offline_bolt = IconData(0xe8cb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">offline_bolt</i> &#x2014; material icon named "offline bolt outlined".
-  static const IconData offline_bolt_outlined = IconData(0xe322, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">offline_bolt</i> &#x2014; material icon named "offline bolt rounded".
   static const IconData offline_bolt_rounded = IconData(0xf355, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">offline_bolt</i> &#x2014; material icon named "offline bolt sharp".
   static const IconData offline_bolt_sharp = IconData(0xee27, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">offline_pin</i> &#x2014; material icon named "offline pin".
-  static const IconData offline_pin = IconData(0xe8cc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">offline_bolt</i> &#x2014; material icon named "offline bolt outlined".
+  static const IconData offline_bolt_outlined = IconData(0xe322, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">offline_pin</i> &#x2014; material icon named "offline pin outlined".
   static const IconData offline_pin_outlined = IconData(0xe323, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">offline_pin</i> &#x2014; material icon named "offline pin sharp".
+  static const IconData offline_pin_sharp = IconData(0xee28, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">offline_pin</i> &#x2014; material icon named "offline pin rounded".
   static const IconData offline_pin_rounded = IconData(0xf356, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">offline_pin</i> &#x2014; material icon named "offline pin sharp".
-  static const IconData offline_pin_sharp = IconData(0xee28, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">offline_pin</i> &#x2014; material icon named "offline pin".
+  static const IconData offline_pin = IconData(0xe8cc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">offline_share</i> &#x2014; material icon named "offline share".
   static const IconData offline_share = IconData(0xe8cd, fontFamily: 'MaterialIcons');
@@ -10590,17 +10479,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">ondemand_video</i> &#x2014; material icon named "ondemand video sharp".
   static const IconData ondemand_video_sharp = IconData(0xee29, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">1k</i> &#x2014; material icon named "1k".
+  static const IconData one_k = IconData(0xe535, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">1k_plus</i> &#x2014; material icon named "1k plus".
+  static const IconData one_k_plus = IconData(0xe536, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">online_prediction</i> &#x2014; material icon named "online prediction sharp".
+  static const IconData online_prediction_sharp = IconData(0xee2a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">online_prediction</i> &#x2014; material icon named "online prediction".
   static const IconData online_prediction = IconData(0xe8cf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">online_prediction</i> &#x2014; material icon named "online prediction outlined".
-  static const IconData online_prediction_outlined = IconData(0xe325, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">online_prediction</i> &#x2014; material icon named "online prediction rounded".
   static const IconData online_prediction_rounded = IconData(0xf358, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">online_prediction</i> &#x2014; material icon named "online prediction sharp".
-  static const IconData online_prediction_sharp = IconData(0xee2a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">online_prediction</i> &#x2014; material icon named "online prediction outlined".
+  static const IconData online_prediction_outlined = IconData(0xe325, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">opacity</i> &#x2014; material icon named "opacity rounded".
+  static const IconData opacity_rounded = IconData(0xf359, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">opacity</i> &#x2014; material icon named "opacity".
   static const IconData opacity = IconData(0xe8d0, fontFamily: 'MaterialIcons');
@@ -10608,29 +10506,23 @@ class Icons {
   /// <i class="material-icons-outlined md-36">opacity</i> &#x2014; material icon named "opacity outlined".
   static const IconData opacity_outlined = IconData(0xe326, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">opacity</i> &#x2014; material icon named "opacity rounded".
-  static const IconData opacity_rounded = IconData(0xf359, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">opacity</i> &#x2014; material icon named "opacity sharp".
   static const IconData opacity_sharp = IconData(0xee2b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">open_in_browser</i> &#x2014; material icon named "open in browser".
-  static const IconData open_in_browser = IconData(0xe8d1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">open_in_browser</i> &#x2014; material icon named "open in browser outlined".
-  static const IconData open_in_browser_outlined = IconData(0xe327, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">open_in_browser</i> &#x2014; material icon named "open in browser rounded".
-  static const IconData open_in_browser_rounded = IconData(0xf35a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">open_in_browser</i> &#x2014; material icon named "open in browser sharp".
   static const IconData open_in_browser_sharp = IconData(0xee2c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">open_in_browser</i> &#x2014; material icon named "open in browser rounded".
+  static const IconData open_in_browser_rounded = IconData(0xf35a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">open_in_browser</i> &#x2014; material icon named "open in browser outlined".
+  static const IconData open_in_browser_outlined = IconData(0xe327, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">open_in_browser</i> &#x2014; material icon named "open in browser".
+  static const IconData open_in_browser = IconData(0xe8d1, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">open_in_full</i> &#x2014; material icon named "open in full".
   static const IconData open_in_full = IconData(0xe8d2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">open_in_full</i> &#x2014; material icon named "open in full outlined".
-  static const IconData open_in_full_outlined = IconData(0xe328, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">open_in_full</i> &#x2014; material icon named "open in full rounded".
   static const IconData open_in_full_rounded = IconData(0xf35b, fontFamily: 'MaterialIcons');
@@ -10638,23 +10530,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">open_in_full</i> &#x2014; material icon named "open in full sharp".
   static const IconData open_in_full_sharp = IconData(0xee2d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">open_in_new</i> &#x2014; material icon named "open in new".
-  static const IconData open_in_new = IconData(0xe8d3, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">open_in_new</i> &#x2014; material icon named "open in new outlined".
-  static const IconData open_in_new_outlined = IconData(0xe329, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">open_in_new</i> &#x2014; material icon named "open in new rounded".
-  static const IconData open_in_new_rounded = IconData(0xf35c, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-outlined md-36">open_in_full</i> &#x2014; material icon named "open in full outlined".
+  static const IconData open_in_full_outlined = IconData(0xe328, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">open_in_new</i> &#x2014; material icon named "open in new sharp".
   static const IconData open_in_new_sharp = IconData(0xee2e, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">open_with</i> &#x2014; material icon named "open with".
-  static const IconData open_with = IconData(0xe8d4, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">open_in_new</i> &#x2014; material icon named "open in new rounded".
+  static const IconData open_in_new_rounded = IconData(0xf35c, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">open_with</i> &#x2014; material icon named "open with outlined".
-  static const IconData open_with_outlined = IconData(0xe32a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">open_in_new</i> &#x2014; material icon named "open in new outlined".
+  static const IconData open_in_new_outlined = IconData(0xe329, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons md-36">open_in_new</i> &#x2014; material icon named "open in new".
+  static const IconData open_in_new = IconData(0xe8d3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">open_with</i> &#x2014; material icon named "open with rounded".
   static const IconData open_with_rounded = IconData(0xf35d, fontFamily: 'MaterialIcons');
@@ -10662,11 +10551,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">open_with</i> &#x2014; material icon named "open with sharp".
   static const IconData open_with_sharp = IconData(0xee2f, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">open_with</i> &#x2014; material icon named "open with outlined".
+  static const IconData open_with_outlined = IconData(0xe32a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">open_with</i> &#x2014; material icon named "open with".
+  static const IconData open_with = IconData(0xe8d4, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">outbond</i> &#x2014; material icon named "outbond".
   static const IconData outbond = IconData(0xe8d5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">outbond</i> &#x2014; material icon named "outbond outlined".
-  static const IconData outbond_outlined = IconData(0xe32b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">outbond</i> &#x2014; material icon named "outbond rounded".
   static const IconData outbond_rounded = IconData(0xf35e, fontFamily: 'MaterialIcons');
@@ -10674,35 +10566,38 @@ class Icons {
   /// <i class="material-icons-sharp md-36">outbond</i> &#x2014; material icon named "outbond sharp".
   static const IconData outbond_sharp = IconData(0xee30, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">outbond</i> &#x2014; material icon named "outbond outlined".
+  static const IconData outbond_outlined = IconData(0xe32b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">outbox</i> &#x2014; material icon named "outbox".
   static const IconData outbox = IconData(0xe8d6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill".
-  static const IconData outdoor_grill = IconData(0xe8d7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill outlined".
-  static const IconData outdoor_grill_outlined = IconData(0xe32c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill rounded".
-  static const IconData outdoor_grill_rounded = IconData(0xf35f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill sharp".
   static const IconData outdoor_grill_sharp = IconData(0xee31, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill rounded".
+  static const IconData outdoor_grill_rounded = IconData(0xf35f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill outlined".
+  static const IconData outdoor_grill_outlined = IconData(0xe32c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">outdoor_grill</i> &#x2014; material icon named "outdoor grill".
+  static const IconData outdoor_grill = IconData(0xe8d7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">outgoing_mail</i> &#x2014; material icon named "outgoing mail".
   static const IconData outgoing_mail = IconData(0xe8d8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">outlet</i> &#x2014; material icon named "outlet".
-  static const IconData outlet = IconData(0xe8d9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">outlet</i> &#x2014; material icon named "outlet outlined".
   static const IconData outlet_outlined = IconData(0xe32d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">outlet</i> &#x2014; material icon named "outlet rounded".
-  static const IconData outlet_rounded = IconData(0xf360, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">outlet</i> &#x2014; material icon named "outlet".
+  static const IconData outlet = IconData(0xe8d9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">outlet</i> &#x2014; material icon named "outlet sharp".
   static const IconData outlet_sharp = IconData(0xee32, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">outlet</i> &#x2014; material icon named "outlet rounded".
+  static const IconData outlet_rounded = IconData(0xf360, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">outlined_flag</i> &#x2014; material icon named "outlined flag".
   static const IconData outlined_flag = IconData(0xe8da, fontFamily: 'MaterialIcons');
@@ -10746,14 +10641,14 @@ class Icons {
   /// <i class="material-icons md-36">palette</i> &#x2014; material icon named "palette".
   static const IconData palette = IconData(0xe8de, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">palette</i> &#x2014; material icon named "palette sharp".
+  static const IconData palette_sharp = IconData(0xee36, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">palette</i> &#x2014; material icon named "palette outlined".
   static const IconData palette_outlined = IconData(0xe331, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">palette</i> &#x2014; material icon named "palette rounded".
   static const IconData palette_rounded = IconData(0xf364, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">palette</i> &#x2014; material icon named "palette sharp".
-  static const IconData palette_sharp = IconData(0xee36, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pan_tool</i> &#x2014; material icon named "pan tool".
   static const IconData pan_tool = IconData(0xe8df, fontFamily: 'MaterialIcons');
@@ -10767,8 +10662,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">pan_tool</i> &#x2014; material icon named "pan tool sharp".
   static const IconData pan_tool_sharp = IconData(0xee37, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">panorama</i> &#x2014; material icon named "panorama sharp".
+  static const IconData panorama_sharp = IconData(0xee3a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">panorama</i> &#x2014; material icon named "panorama".
   static const IconData panorama = IconData(0xe8e0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">panorama</i> &#x2014; material icon named "panorama rounded".
+  static const IconData panorama_rounded = IconData(0xf368, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">panorama</i> &#x2014; material icon named "panorama outlined".
+  static const IconData panorama_outlined = IconData(0xe335, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">panorama_fish_eye</i> &#x2014; material icon named "panorama fish eye".
   static const IconData panorama_fish_eye = IconData(0xe8e1, fontFamily: 'MaterialIcons');
@@ -10800,29 +10704,20 @@ class Icons {
   /// <i class="material-icons-outlined md-36">panorama_horizontal</i> &#x2014; material icon named "panorama horizontal outlined".
   static const IconData panorama_horizontal_outlined = IconData(0xe334, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">panorama_horizontal</i> &#x2014; material icon named "panorama horizontal sharp".
+  static const IconData panorama_horizontal_sharp = IconData(0xee39, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">panorama_horizontal</i> &#x2014; material icon named "panorama horizontal rounded".
   static const IconData panorama_horizontal_rounded = IconData(0xf367, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">panorama_horizontal_select</i> &#x2014; material icon named "panorama horizontal select".
   static const IconData panorama_horizontal_select = IconData(0xe8e3, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">panorama_horizontal</i> &#x2014; material icon named "panorama horizontal sharp".
-  static const IconData panorama_horizontal_sharp = IconData(0xee39, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">panorama</i> &#x2014; material icon named "panorama outlined".
-  static const IconData panorama_outlined = IconData(0xe335, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">panorama_photosphere</i> &#x2014; material icon named "panorama photosphere".
   static const IconData panorama_photosphere = IconData(0xe8e4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">panorama_photosphere_select</i> &#x2014; material icon named "panorama photosphere select".
   static const IconData panorama_photosphere_select = IconData(0xe8e5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">panorama</i> &#x2014; material icon named "panorama rounded".
-  static const IconData panorama_rounded = IconData(0xf368, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">panorama</i> &#x2014; material icon named "panorama sharp".
-  static const IconData panorama_sharp = IconData(0xee3a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">panorama_vertical</i> &#x2014; material icon named "panorama vertical".
   static const IconData panorama_vertical = IconData(0xe8e6, fontFamily: 'MaterialIcons');
@@ -10833,11 +10728,14 @@ class Icons {
   /// <i class="material-icons-round md-36">panorama_vertical</i> &#x2014; material icon named "panorama vertical rounded".
   static const IconData panorama_vertical_rounded = IconData(0xf369, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">panorama_vertical</i> &#x2014; material icon named "panorama vertical sharp".
+  static const IconData panorama_vertical_sharp = IconData(0xee3b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">panorama_vertical_select</i> &#x2014; material icon named "panorama vertical select".
   static const IconData panorama_vertical_select = IconData(0xe8e7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">panorama_vertical</i> &#x2014; material icon named "panorama vertical sharp".
-  static const IconData panorama_vertical_sharp = IconData(0xee3b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">panorama_wide_angle</i> &#x2014; material icon named "panorama wide angle sharp".
+  static const IconData panorama_wide_angle_sharp = IconData(0xee3c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">panorama_wide_angle</i> &#x2014; material icon named "panorama wide angle".
   static const IconData panorama_wide_angle = IconData(0xe8e8, fontFamily: 'MaterialIcons');
@@ -10850,9 +10748,6 @@ class Icons {
 
   /// <i class="material-icons md-36">panorama_wide_angle_select</i> &#x2014; material icon named "panorama wide angle select".
   static const IconData panorama_wide_angle_select = IconData(0xe8e9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">panorama_wide_angle</i> &#x2014; material icon named "panorama wide angle sharp".
-  static const IconData panorama_wide_angle_sharp = IconData(0xee3c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">park</i> &#x2014; material icon named "park".
   static const IconData park = IconData(0xe8ea, fontFamily: 'MaterialIcons');
@@ -10869,6 +10764,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">party_mode</i> &#x2014; material icon named "party mode sharp".
   static const IconData party_mode_sharp = IconData(0xee3d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">paste</i> &#x2014; material icon named "paste sharp".
+  static const IconData paste_sharp = IconData(0xec0e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">paste</i> &#x2014; material icon named "paste".
   static const IconData paste = IconData(0xe683, fontFamily: 'MaterialIcons');
 
@@ -10878,50 +10776,8 @@ class Icons {
   /// <i class="material-icons-round md-36">paste</i> &#x2014; material icon named "paste rounded".
   static const IconData paste_rounded = IconData(0xf13c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">paste</i> &#x2014; material icon named "paste sharp".
-  static const IconData paste_sharp = IconData(0xec0e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">pause</i> &#x2014; material icon named "pause".
   static const IconData pause = IconData(0xe8ec, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled".
-  static const IconData pause_circle_filled = IconData(0xe8ed, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled outlined".
-  static const IconData pause_circle_filled_outlined = IconData(0xe339, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled rounded".
-  static const IconData pause_circle_filled_rounded = IconData(0xf36c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled sharp".
-  static const IconData pause_circle_filled_sharp = IconData(0xee3e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline".
-  static const IconData pause_circle_outline = IconData(0xe8ee, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline outlined".
-  static const IconData pause_circle_outline_outlined = IconData(0xe33a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline rounded".
-  static const IconData pause_circle_outline_rounded = IconData(0xf36d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline sharp".
-  static const IconData pause_circle_outline_sharp = IconData(0xee3f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pause</i> &#x2014; material icon named "pause outlined".
-  static const IconData pause_outlined = IconData(0xe33b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">pause_presentation</i> &#x2014; material icon named "pause presentation".
-  static const IconData pause_presentation = IconData(0xe8ef, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pause_presentation</i> &#x2014; material icon named "pause presentation outlined".
-  static const IconData pause_presentation_outlined = IconData(0xe33c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pause_presentation</i> &#x2014; material icon named "pause presentation rounded".
-  static const IconData pause_presentation_rounded = IconData(0xf36e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pause_presentation</i> &#x2014; material icon named "pause presentation sharp".
-  static const IconData pause_presentation_sharp = IconData(0xee40, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">pause</i> &#x2014; material icon named "pause rounded".
   static const IconData pause_rounded = IconData(0xf36f, fontFamily: 'MaterialIcons');
@@ -10929,11 +10785,50 @@ class Icons {
   /// <i class="material-icons-sharp md-36">pause</i> &#x2014; material icon named "pause sharp".
   static const IconData pause_sharp = IconData(0xee41, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">payment</i> &#x2014; material icon named "payment".
-  static const IconData payment = IconData(0xe8f0, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">pause</i> &#x2014; material icon named "pause outlined".
+  static const IconData pause_outlined = IconData(0xe33b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled sharp".
+  static const IconData pause_circle_filled_sharp = IconData(0xee3e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled outlined".
+  static const IconData pause_circle_filled_outlined = IconData(0xe339, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled".
+  static const IconData pause_circle_filled = IconData(0xe8ed, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pause_circle_filled</i> &#x2014; material icon named "pause circle filled rounded".
+  static const IconData pause_circle_filled_rounded = IconData(0xf36c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline".
+  static const IconData pause_circle_outline = IconData(0xe8ee, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline sharp".
+  static const IconData pause_circle_outline_sharp = IconData(0xee3f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline rounded".
+  static const IconData pause_circle_outline_rounded = IconData(0xf36d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pause_circle_outline</i> &#x2014; material icon named "pause circle outline outlined".
+  static const IconData pause_circle_outline_outlined = IconData(0xe33a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">pause_presentation</i> &#x2014; material icon named "pause presentation".
+  static const IconData pause_presentation = IconData(0xe8ef, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pause_presentation</i> &#x2014; material icon named "pause presentation outlined".
+  static const IconData pause_presentation_outlined = IconData(0xe33c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pause_presentation</i> &#x2014; material icon named "pause presentation sharp".
+  static const IconData pause_presentation_sharp = IconData(0xee40, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pause_presentation</i> &#x2014; material icon named "pause presentation rounded".
+  static const IconData pause_presentation_rounded = IconData(0xf36e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">payment</i> &#x2014; material icon named "payment outlined".
   static const IconData payment_outlined = IconData(0xe33d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">payment</i> &#x2014; material icon named "payment".
+  static const IconData payment = IconData(0xe8f0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">payment</i> &#x2014; material icon named "payment rounded".
   static const IconData payment_rounded = IconData(0xf370, fontFamily: 'MaterialIcons');
@@ -10941,32 +10836,44 @@ class Icons {
   /// <i class="material-icons-sharp md-36">payment</i> &#x2014; material icon named "payment sharp".
   static const IconData payment_sharp = IconData(0xee42, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">payments</i> &#x2014; material icon named "payments".
-  static const IconData payments = IconData(0xe8f1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">payments</i> &#x2014; material icon named "payments outlined".
-  static const IconData payments_outlined = IconData(0xe33e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">payments</i> &#x2014; material icon named "payments sharp".
+  static const IconData payments_sharp = IconData(0xee43, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">payments</i> &#x2014; material icon named "payments rounded".
   static const IconData payments_rounded = IconData(0xf371, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">payments</i> &#x2014; material icon named "payments sharp".
-  static const IconData payments_sharp = IconData(0xee43, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">payments</i> &#x2014; material icon named "payments outlined".
+  static const IconData payments_outlined = IconData(0xe33e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">pedal_bike</i> &#x2014; material icon named "pedal bike".
-  static const IconData pedal_bike = IconData(0xe8f2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pedal_bike</i> &#x2014; material icon named "pedal bike outlined".
-  static const IconData pedal_bike_outlined = IconData(0xe33f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pedal_bike</i> &#x2014; material icon named "pedal bike rounded".
-  static const IconData pedal_bike_rounded = IconData(0xf372, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">payments</i> &#x2014; material icon named "payments".
+  static const IconData payments = IconData(0xe8f1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">pedal_bike</i> &#x2014; material icon named "pedal bike sharp".
   static const IconData pedal_bike_sharp = IconData(0xee44, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">pedal_bike</i> &#x2014; material icon named "pedal bike rounded".
+  static const IconData pedal_bike_rounded = IconData(0xf372, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pedal_bike</i> &#x2014; material icon named "pedal bike outlined".
+  static const IconData pedal_bike_outlined = IconData(0xe33f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">pedal_bike</i> &#x2014; material icon named "pedal bike".
+  static const IconData pedal_bike = IconData(0xe8f2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pending</i> &#x2014; material icon named "pending sharp".
+  static const IconData pending_sharp = IconData(0xee46, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pending</i> &#x2014; material icon named "pending rounded".
+  static const IconData pending_rounded = IconData(0xf374, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pending</i> &#x2014; material icon named "pending outlined".
+  static const IconData pending_outlined = IconData(0xe341, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">pending</i> &#x2014; material icon named "pending".
   static const IconData pending = IconData(0xe8f3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pending_actions</i> &#x2014; material icon named "pending actions sharp".
+  static const IconData pending_actions_sharp = IconData(0xee45, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pending_actions</i> &#x2014; material icon named "pending actions".
   static const IconData pending_actions = IconData(0xe8f4, fontFamily: 'MaterialIcons');
@@ -10977,53 +10884,41 @@ class Icons {
   /// <i class="material-icons-round md-36">pending_actions</i> &#x2014; material icon named "pending actions rounded".
   static const IconData pending_actions_rounded = IconData(0xf373, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">pending_actions</i> &#x2014; material icon named "pending actions sharp".
-  static const IconData pending_actions_sharp = IconData(0xee45, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pending</i> &#x2014; material icon named "pending outlined".
-  static const IconData pending_outlined = IconData(0xe341, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pending</i> &#x2014; material icon named "pending rounded".
-  static const IconData pending_rounded = IconData(0xf374, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pending</i> &#x2014; material icon named "pending sharp".
-  static const IconData pending_sharp = IconData(0xee46, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">people</i> &#x2014; material icon named "people outlined".
+  static const IconData people_outlined = IconData(0xe344, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">people</i> &#x2014; material icon named "people".
   static const IconData people = IconData(0xe8f5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">people_alt</i> &#x2014; material icon named "people alt".
-  static const IconData people_alt = IconData(0xe8f6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">people_alt</i> &#x2014; material icon named "people alt outlined".
-  static const IconData people_alt_outlined = IconData(0xe342, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">people_alt</i> &#x2014; material icon named "people alt rounded".
-  static const IconData people_alt_rounded = IconData(0xf375, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">people_alt</i> &#x2014; material icon named "people alt sharp".
-  static const IconData people_alt_sharp = IconData(0xee47, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">people_outline</i> &#x2014; material icon named "people outline".
-  static const IconData people_outline = IconData(0xe8f7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">people_outline</i> &#x2014; material icon named "people outline outlined".
-  static const IconData people_outline_outlined = IconData(0xe343, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">people_outline</i> &#x2014; material icon named "people outline rounded".
-  static const IconData people_outline_rounded = IconData(0xf376, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">people_outline</i> &#x2014; material icon named "people outline sharp".
-  static const IconData people_outline_sharp = IconData(0xee48, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">people</i> &#x2014; material icon named "people outlined".
-  static const IconData people_outlined = IconData(0xe344, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">people</i> &#x2014; material icon named "people rounded".
   static const IconData people_rounded = IconData(0xf377, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">people</i> &#x2014; material icon named "people sharp".
   static const IconData people_sharp = IconData(0xee49, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">people_alt</i> &#x2014; material icon named "people alt".
+  static const IconData people_alt = IconData(0xe8f6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">people_alt</i> &#x2014; material icon named "people alt sharp".
+  static const IconData people_alt_sharp = IconData(0xee47, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">people_alt</i> &#x2014; material icon named "people alt rounded".
+  static const IconData people_alt_rounded = IconData(0xf375, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">people_alt</i> &#x2014; material icon named "people alt outlined".
+  static const IconData people_alt_outlined = IconData(0xe342, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">people_outline</i> &#x2014; material icon named "people outline sharp".
+  static const IconData people_outline_sharp = IconData(0xee48, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">people_outline</i> &#x2014; material icon named "people outline rounded".
+  static const IconData people_outline_rounded = IconData(0xf376, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">people_outline</i> &#x2014; material icon named "people outline outlined".
+  static const IconData people_outline_outlined = IconData(0xe343, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">people_outline</i> &#x2014; material icon named "people outline".
+  static const IconData people_outline = IconData(0xe8f7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">perm_camera_mic</i> &#x2014; material icon named "perm camera mic".
   static const IconData perm_camera_mic = IconData(0xe8f8, fontFamily: 'MaterialIcons');
@@ -11037,14 +10932,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">perm_camera_mic</i> &#x2014; material icon named "perm camera mic sharp".
   static const IconData perm_camera_mic_sharp = IconData(0xee4a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">perm_contact_cal</i> &#x2014; material icon named "perm contact cal rounded".
+  static const IconData perm_contact_cal_rounded = IconData(0xf379, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">perm_contact_cal</i> &#x2014; material icon named "perm contact cal".
   static const IconData perm_contact_cal = IconData(0xe8f9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">perm_contact_cal</i> &#x2014; material icon named "perm contact cal outlined".
   static const IconData perm_contact_cal_outlined = IconData(0xe346, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">perm_contact_cal</i> &#x2014; material icon named "perm contact cal rounded".
-  static const IconData perm_contact_cal_rounded = IconData(0xf379, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">perm_contact_cal</i> &#x2014; material icon named "perm contact cal sharp".
   static const IconData perm_contact_cal_sharp = IconData(0xee4b, fontFamily: 'MaterialIcons');
@@ -11061,20 +10956,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">perm_contact_calendar</i> &#x2014; material icon named "perm contact calendar sharp".
   static const IconData perm_contact_calendar_sharp = IconData(0xee4b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting".
-  static const IconData perm_data_setting = IconData(0xe8fa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting rounded".
+  static const IconData perm_data_setting_rounded = IconData(0xf37a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting outlined".
   static const IconData perm_data_setting_outlined = IconData(0xe347, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting rounded".
-  static const IconData perm_data_setting_rounded = IconData(0xf37a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting sharp".
   static const IconData perm_data_setting_sharp = IconData(0xee4c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">perm_device_info</i> &#x2014; material icon named "perm device info".
-  static const IconData perm_device_info = IconData(0xe8fb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">perm_data_setting</i> &#x2014; material icon named "perm data setting".
+  static const IconData perm_data_setting = IconData(0xe8fa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">perm_device_info</i> &#x2014; material icon named "perm device info outlined".
   static const IconData perm_device_info_outlined = IconData(0xe348, fontFamily: 'MaterialIcons');
@@ -11085,8 +10977,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">perm_device_info</i> &#x2014; material icon named "perm device info sharp".
   static const IconData perm_device_info_sharp = IconData(0xee4d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">perm_device_information</i> &#x2014; material icon named "perm device information".
-  static const IconData perm_device_information = IconData(0xe8fb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">perm_device_info</i> &#x2014; material icon named "perm device info".
+  static const IconData perm_device_info = IconData(0xe8fb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">perm_device_information</i> &#x2014; material icon named "perm device information sharp".
+  static const IconData perm_device_information_sharp = IconData(0xee4d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">perm_device_information</i> &#x2014; material icon named "perm device information outlined".
   static const IconData perm_device_information_outlined = IconData(0xe348, fontFamily: 'MaterialIcons');
@@ -11094,14 +10989,8 @@ class Icons {
   /// <i class="material-icons-round md-36">perm_device_information</i> &#x2014; material icon named "perm device information rounded".
   static const IconData perm_device_information_rounded = IconData(0xf37b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">perm_device_information</i> &#x2014; material icon named "perm device information sharp".
-  static const IconData perm_device_information_sharp = IconData(0xee4d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">perm_identity</i> &#x2014; material icon named "perm identity".
-  static const IconData perm_identity = IconData(0xe8fc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">perm_identity</i> &#x2014; material icon named "perm identity outlined".
-  static const IconData perm_identity_outlined = IconData(0xe349, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">perm_device_information</i> &#x2014; material icon named "perm device information".
+  static const IconData perm_device_information = IconData(0xe8fb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">perm_identity</i> &#x2014; material icon named "perm identity rounded".
   static const IconData perm_identity_rounded = IconData(0xf37c, fontFamily: 'MaterialIcons');
@@ -11109,17 +10998,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">perm_identity</i> &#x2014; material icon named "perm identity sharp".
   static const IconData perm_identity_sharp = IconData(0xee4e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">perm_media</i> &#x2014; material icon named "perm media".
-  static const IconData perm_media = IconData(0xe8fd, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">perm_identity</i> &#x2014; material icon named "perm identity outlined".
+  static const IconData perm_identity_outlined = IconData(0xe349, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">perm_identity</i> &#x2014; material icon named "perm identity".
+  static const IconData perm_identity = IconData(0xe8fc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">perm_media</i> &#x2014; material icon named "perm media outlined".
   static const IconData perm_media_outlined = IconData(0xe34a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">perm_media</i> &#x2014; material icon named "perm media rounded".
-  static const IconData perm_media_rounded = IconData(0xf37d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">perm_media</i> &#x2014; material icon named "perm media".
+  static const IconData perm_media = IconData(0xe8fd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">perm_media</i> &#x2014; material icon named "perm media sharp".
   static const IconData perm_media_sharp = IconData(0xee4f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">perm_media</i> &#x2014; material icon named "perm media rounded".
+  static const IconData perm_media_rounded = IconData(0xf37d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">perm_phone_msg</i> &#x2014; material icon named "perm phone msg".
   static const IconData perm_phone_msg = IconData(0xe8fe, fontFamily: 'MaterialIcons');
@@ -11145,11 +11040,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">perm_scan_wifi</i> &#x2014; material icon named "perm scan wifi sharp".
   static const IconData perm_scan_wifi_sharp = IconData(0xee51, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">person</i> &#x2014; material icon named "person outlined".
+  static const IconData person_outlined = IconData(0xe351, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">person</i> &#x2014; material icon named "person sharp".
+  static const IconData person_sharp = IconData(0xee5b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">person</i> &#x2014; material icon named "person rounded".
+  static const IconData person_rounded = IconData(0xf388, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">person</i> &#x2014; material icon named "person".
   static const IconData person = IconData(0xe900, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">person_add</i> &#x2014; material icon named "person add".
   static const IconData person_add = IconData(0xe901, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">person_add</i> &#x2014; material icon named "person add outlined".
+  static const IconData person_add_outlined = IconData(0xe34f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">person_add</i> &#x2014; material icon named "person add rounded".
+  static const IconData person_add_rounded = IconData(0xf382, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">person_add</i> &#x2014; material icon named "person add sharp".
+  static const IconData person_add_sharp = IconData(0xee54, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">person_add_alt</i> &#x2014; material icon named "person add alt".
   static const IconData person_add_alt = IconData(0xe902, fontFamily: 'MaterialIcons');
@@ -11178,20 +11091,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">person_add_disabled</i> &#x2014; material icon named "person add disabled sharp".
   static const IconData person_add_disabled_sharp = IconData(0xee53, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">person_add</i> &#x2014; material icon named "person add outlined".
-  static const IconData person_add_outlined = IconData(0xe34f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">person_add</i> &#x2014; material icon named "person add rounded".
-  static const IconData person_add_rounded = IconData(0xf382, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">person_add</i> &#x2014; material icon named "person add sharp".
-  static const IconData person_add_sharp = IconData(0xee54, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">person_outline</i> &#x2014; material icon named "person outline".
   static const IconData person_outline = IconData(0xe905, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">person_outline</i> &#x2014; material icon named "person outline outlined".
-  static const IconData person_outline_outlined = IconData(0xe350, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">person_outline</i> &#x2014; material icon named "person outline rounded".
   static const IconData person_outline_rounded = IconData(0xf383, fontFamily: 'MaterialIcons');
@@ -11199,8 +11100,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">person_outline</i> &#x2014; material icon named "person outline sharp".
   static const IconData person_outline_sharp = IconData(0xee55, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">person</i> &#x2014; material icon named "person outlined".
-  static const IconData person_outlined = IconData(0xe351, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">person_outline</i> &#x2014; material icon named "person outline outlined".
+  static const IconData person_outline_outlined = IconData(0xe350, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">person_pin</i> &#x2014; material icon named "person pin sharp".
+  static const IconData person_pin_sharp = IconData(0xee57, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">person_pin</i> &#x2014; material icon named "person pin rounded".
+  static const IconData person_pin_rounded = IconData(0xf385, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">person_pin</i> &#x2014; material icon named "person pin outlined".
+  static const IconData person_pin_outlined = IconData(0xe353, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">person_pin</i> &#x2014; material icon named "person pin".
   static const IconData person_pin = IconData(0xe906, fontFamily: 'MaterialIcons');
@@ -11211,35 +11121,14 @@ class Icons {
   /// <i class="material-icons-outlined md-36">person_pin_circle</i> &#x2014; material icon named "person pin circle outlined".
   static const IconData person_pin_circle_outlined = IconData(0xe352, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">person_pin_circle</i> &#x2014; material icon named "person pin circle rounded".
-  static const IconData person_pin_circle_rounded = IconData(0xf384, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">person_pin_circle</i> &#x2014; material icon named "person pin circle sharp".
   static const IconData person_pin_circle_sharp = IconData(0xee56, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">person_pin</i> &#x2014; material icon named "person pin outlined".
-  static const IconData person_pin_outlined = IconData(0xe353, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">person_pin</i> &#x2014; material icon named "person pin rounded".
-  static const IconData person_pin_rounded = IconData(0xf385, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">person_pin</i> &#x2014; material icon named "person pin sharp".
-  static const IconData person_pin_sharp = IconData(0xee57, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">person_pin_circle</i> &#x2014; material icon named "person pin circle rounded".
+  static const IconData person_pin_circle_rounded = IconData(0xf384, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">person_remove</i> &#x2014; material icon named "person remove".
   static const IconData person_remove = IconData(0xe908, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1".
-  static const IconData person_remove_alt_1 = IconData(0xe909, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 outlined".
-  static const IconData person_remove_alt_1_outlined = IconData(0xe354, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 rounded".
-  static const IconData person_remove_alt_1_rounded = IconData(0xf386, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 sharp".
-  static const IconData person_remove_alt_1_sharp = IconData(0xee58, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">person_remove</i> &#x2014; material icon named "person remove outlined".
   static const IconData person_remove_outlined = IconData(0xe355, fontFamily: 'MaterialIcons');
@@ -11250,14 +11139,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">person_remove</i> &#x2014; material icon named "person remove sharp".
   static const IconData person_remove_sharp = IconData(0xee59, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">person</i> &#x2014; material icon named "person rounded".
-  static const IconData person_rounded = IconData(0xf388, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 rounded".
+  static const IconData person_remove_alt_1_rounded = IconData(0xf386, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1".
+  static const IconData person_remove_alt_1 = IconData(0xe909, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 outlined".
+  static const IconData person_remove_alt_1_outlined = IconData(0xe354, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">person_remove_alt_1</i> &#x2014; material icon named "person remove alt 1 sharp".
+  static const IconData person_remove_alt_1_sharp = IconData(0xee58, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">person_search</i> &#x2014; material icon named "person search".
   static const IconData person_search = IconData(0xe90a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">person_search</i> &#x2014; material icon named "person search outlined".
-  static const IconData person_search_outlined = IconData(0xe356, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">person_search</i> &#x2014; material icon named "person search rounded".
   static const IconData person_search_rounded = IconData(0xf389, fontFamily: 'MaterialIcons');
@@ -11265,8 +11160,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">person_search</i> &#x2014; material icon named "person search sharp".
   static const IconData person_search_sharp = IconData(0xee5a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">person</i> &#x2014; material icon named "person sharp".
-  static const IconData person_sharp = IconData(0xee5b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">person_search</i> &#x2014; material icon named "person search outlined".
+  static const IconData person_search_outlined = IconData(0xe356, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">personal_video</i> &#x2014; material icon named "personal video".
   static const IconData personal_video = IconData(0xe90b, fontFamily: 'MaterialIcons');
@@ -11274,17 +11169,23 @@ class Icons {
   /// <i class="material-icons-outlined md-36">personal_video</i> &#x2014; material icon named "personal video outlined".
   static const IconData personal_video_outlined = IconData(0xe357, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">personal_video</i> &#x2014; material icon named "personal video rounded".
-  static const IconData personal_video_rounded = IconData(0xf38a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">personal_video</i> &#x2014; material icon named "personal video sharp".
   static const IconData personal_video_sharp = IconData(0xee5c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">personal_video</i> &#x2014; material icon named "personal video rounded".
+  static const IconData personal_video_rounded = IconData(0xf38a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pest_control</i> &#x2014; material icon named "pest control".
   static const IconData pest_control = IconData(0xe90c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">pest_control</i> &#x2014; material icon named "pest control outlined".
   static const IconData pest_control_outlined = IconData(0xe358, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pest_control</i> &#x2014; material icon named "pest control rounded".
+  static const IconData pest_control_rounded = IconData(0xf38c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">pest_control</i> &#x2014; material icon named "pest control sharp".
+  static const IconData pest_control_sharp = IconData(0xee5e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pest_control_rodent</i> &#x2014; material icon named "pest control rodent".
   static const IconData pest_control_rodent = IconData(0xe90d, fontFamily: 'MaterialIcons');
@@ -11298,23 +11199,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">pest_control_rodent</i> &#x2014; material icon named "pest control rodent sharp".
   static const IconData pest_control_rodent_sharp = IconData(0xee5d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">pest_control</i> &#x2014; material icon named "pest control rounded".
-  static const IconData pest_control_rounded = IconData(0xf38c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pest_control</i> &#x2014; material icon named "pest control sharp".
-  static const IconData pest_control_sharp = IconData(0xee5e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">pets</i> &#x2014; material icon named "pets outlined".
+  static const IconData pets_outlined = IconData(0xe35a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pets</i> &#x2014; material icon named "pets".
   static const IconData pets = IconData(0xe90e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pets</i> &#x2014; material icon named "pets outlined".
-  static const IconData pets_outlined = IconData(0xe35a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">pets</i> &#x2014; material icon named "pets rounded".
   static const IconData pets_rounded = IconData(0xf38d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">pets</i> &#x2014; material icon named "pets sharp".
   static const IconData pets_sharp = IconData(0xee5f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">phone</i> &#x2014; material icon named "phone sharp".
+  static const IconData phone_sharp = IconData(0xee6b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">phone</i> &#x2014; material icon named "phone rounded".
+  static const IconData phone_rounded = IconData(0xf399, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">phone</i> &#x2014; material icon named "phone outlined".
+  static const IconData phone_outlined = IconData(0xe365, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phone</i> &#x2014; material icon named "phone".
   static const IconData phone = IconData(0xe90f, fontFamily: 'MaterialIcons');
@@ -11331,17 +11235,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">phone_android</i> &#x2014; material icon named "phone android sharp".
   static const IconData phone_android_sharp = IconData(0xee60, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker".
-  static const IconData phone_bluetooth_speaker = IconData(0xe911, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker outlined".
-  static const IconData phone_bluetooth_speaker_outlined = IconData(0xe35c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker rounded".
   static const IconData phone_bluetooth_speaker_rounded = IconData(0xf38f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker sharp".
   static const IconData phone_bluetooth_speaker_sharp = IconData(0xee61, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker".
+  static const IconData phone_bluetooth_speaker = IconData(0xe911, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">phone_bluetooth_speaker</i> &#x2014; material icon named "phone bluetooth speaker outlined".
+  static const IconData phone_bluetooth_speaker_outlined = IconData(0xe35c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phone_callback</i> &#x2014; material icon named "phone callback".
   static const IconData phone_callback = IconData(0xe912, fontFamily: 'MaterialIcons');
@@ -11355,23 +11259,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">phone_callback</i> &#x2014; material icon named "phone callback sharp".
   static const IconData phone_callback_sharp = IconData(0xee62, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_disabled</i> &#x2014; material icon named "phone disabled".
-  static const IconData phone_disabled = IconData(0xe913, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">phone_disabled</i> &#x2014; material icon named "phone disabled outlined".
-  static const IconData phone_disabled_outlined = IconData(0xe35e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">phone_disabled</i> &#x2014; material icon named "phone disabled sharp".
+  static const IconData phone_disabled_sharp = IconData(0xee63, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">phone_disabled</i> &#x2014; material icon named "phone disabled rounded".
   static const IconData phone_disabled_rounded = IconData(0xf391, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">phone_disabled</i> &#x2014; material icon named "phone disabled sharp".
-  static const IconData phone_disabled_sharp = IconData(0xee63, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">phone_disabled</i> &#x2014; material icon named "phone disabled outlined".
+  static const IconData phone_disabled_outlined = IconData(0xe35e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_enabled</i> &#x2014; material icon named "phone enabled".
-  static const IconData phone_enabled = IconData(0xe914, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">phone_disabled</i> &#x2014; material icon named "phone disabled".
+  static const IconData phone_disabled = IconData(0xe913, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">phone_enabled</i> &#x2014; material icon named "phone enabled outlined".
   static const IconData phone_enabled_outlined = IconData(0xe35f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">phone_enabled</i> &#x2014; material icon named "phone enabled".
+  static const IconData phone_enabled = IconData(0xe914, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">phone_enabled</i> &#x2014; material icon named "phone enabled rounded".
   static const IconData phone_enabled_rounded = IconData(0xf392, fontFamily: 'MaterialIcons');
@@ -11379,68 +11283,65 @@ class Icons {
   /// <i class="material-icons-sharp md-36">phone_enabled</i> &#x2014; material icon named "phone enabled sharp".
   static const IconData phone_enabled_sharp = IconData(0xee64, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded".
-  static const IconData phone_forwarded = IconData(0xe915, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded outlined".
-  static const IconData phone_forwarded_outlined = IconData(0xe360, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded rounded".
   static const IconData phone_forwarded_rounded = IconData(0xf393, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded sharp".
   static const IconData phone_forwarded_sharp = IconData(0xee65, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk".
-  static const IconData phone_in_talk = IconData(0xe916, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded outlined".
+  static const IconData phone_forwarded_outlined = IconData(0xe360, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk outlined".
-  static const IconData phone_in_talk_outlined = IconData(0xe361, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk rounded".
-  static const IconData phone_in_talk_rounded = IconData(0xf394, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">phone_forwarded</i> &#x2014; material icon named "phone forwarded".
+  static const IconData phone_forwarded = IconData(0xe915, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk sharp".
   static const IconData phone_in_talk_sharp = IconData(0xee66, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_iphone</i> &#x2014; material icon named "phone iphone".
-  static const IconData phone_iphone = IconData(0xe917, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk rounded".
+  static const IconData phone_in_talk_rounded = IconData(0xf394, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">phone_iphone</i> &#x2014; material icon named "phone iphone outlined".
-  static const IconData phone_iphone_outlined = IconData(0xe362, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk outlined".
+  static const IconData phone_in_talk_outlined = IconData(0xe361, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">phone_iphone</i> &#x2014; material icon named "phone iphone rounded".
-  static const IconData phone_iphone_rounded = IconData(0xf395, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">phone_in_talk</i> &#x2014; material icon named "phone in talk".
+  static const IconData phone_in_talk = IconData(0xe916, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">phone_iphone</i> &#x2014; material icon named "phone iphone sharp".
   static const IconData phone_iphone_sharp = IconData(0xee67, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_locked</i> &#x2014; material icon named "phone locked".
-  static const IconData phone_locked = IconData(0xe918, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">phone_iphone</i> &#x2014; material icon named "phone iphone rounded".
+  static const IconData phone_iphone_rounded = IconData(0xf395, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">phone_locked</i> &#x2014; material icon named "phone locked outlined".
-  static const IconData phone_locked_outlined = IconData(0xe363, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">phone_iphone</i> &#x2014; material icon named "phone iphone outlined".
+  static const IconData phone_iphone_outlined = IconData(0xe362, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">phone_locked</i> &#x2014; material icon named "phone locked rounded".
-  static const IconData phone_locked_rounded = IconData(0xf396, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">phone_iphone</i> &#x2014; material icon named "phone iphone".
+  static const IconData phone_iphone = IconData(0xe917, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">phone_locked</i> &#x2014; material icon named "phone locked sharp".
   static const IconData phone_locked_sharp = IconData(0xee68, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">phone_missed</i> &#x2014; material icon named "phone missed".
-  static const IconData phone_missed = IconData(0xe919, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">phone_locked</i> &#x2014; material icon named "phone locked rounded".
+  static const IconData phone_locked_rounded = IconData(0xf396, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">phone_missed</i> &#x2014; material icon named "phone missed outlined".
-  static const IconData phone_missed_outlined = IconData(0xe364, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">phone_locked</i> &#x2014; material icon named "phone locked outlined".
+  static const IconData phone_locked_outlined = IconData(0xe363, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">phone_locked</i> &#x2014; material icon named "phone locked".
+  static const IconData phone_locked = IconData(0xe918, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">phone_missed</i> &#x2014; material icon named "phone missed rounded".
   static const IconData phone_missed_rounded = IconData(0xf397, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">phone_missed</i> &#x2014; material icon named "phone missed outlined".
+  static const IconData phone_missed_outlined = IconData(0xe364, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">phone_missed</i> &#x2014; material icon named "phone missed".
+  static const IconData phone_missed = IconData(0xe919, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">phone_missed</i> &#x2014; material icon named "phone missed sharp".
   static const IconData phone_missed_sharp = IconData(0xee69, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">phone</i> &#x2014; material icon named "phone outlined".
-  static const IconData phone_outlined = IconData(0xe365, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phone_paused</i> &#x2014; material icon named "phone paused".
   static const IconData phone_paused = IconData(0xe91a, fontFamily: 'MaterialIcons');
@@ -11448,20 +11349,23 @@ class Icons {
   /// <i class="material-icons-outlined md-36">phone_paused</i> &#x2014; material icon named "phone paused outlined".
   static const IconData phone_paused_outlined = IconData(0xe366, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">phone_paused</i> &#x2014; material icon named "phone paused rounded".
-  static const IconData phone_paused_rounded = IconData(0xf398, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">phone_paused</i> &#x2014; material icon named "phone paused sharp".
   static const IconData phone_paused_sharp = IconData(0xee6a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">phone</i> &#x2014; material icon named "phone rounded".
-  static const IconData phone_rounded = IconData(0xf399, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">phone</i> &#x2014; material icon named "phone sharp".
-  static const IconData phone_sharp = IconData(0xee6b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">phone_paused</i> &#x2014; material icon named "phone paused rounded".
+  static const IconData phone_paused_rounded = IconData(0xf398, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phonelink</i> &#x2014; material icon named "phonelink".
   static const IconData phonelink = IconData(0xe91b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">phonelink</i> &#x2014; material icon named "phonelink rounded".
+  static const IconData phonelink_rounded = IconData(0xf39e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">phonelink</i> &#x2014; material icon named "phonelink sharp".
+  static const IconData phonelink_sharp = IconData(0xee71, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">phonelink</i> &#x2014; material icon named "phonelink outlined".
+  static const IconData phonelink_outlined = IconData(0xe36a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phonelink_erase</i> &#x2014; material icon named "phonelink erase".
   static const IconData phonelink_erase = IconData(0xe91c, fontFamily: 'MaterialIcons');
@@ -11499,9 +11403,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">phonelink_off</i> &#x2014; material icon named "phonelink off sharp".
   static const IconData phonelink_off_sharp = IconData(0xee6e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">phonelink</i> &#x2014; material icon named "phonelink outlined".
-  static const IconData phonelink_outlined = IconData(0xe36a, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">phonelink_ring</i> &#x2014; material icon named "phonelink ring".
   static const IconData phonelink_ring = IconData(0xe91f, fontFamily: 'MaterialIcons');
 
@@ -11513,9 +11414,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">phonelink_ring</i> &#x2014; material icon named "phonelink ring sharp".
   static const IconData phonelink_ring_sharp = IconData(0xee6f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">phonelink</i> &#x2014; material icon named "phonelink rounded".
-  static const IconData phonelink_rounded = IconData(0xf39e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">phonelink_setup</i> &#x2014; material icon named "phonelink setup".
   static const IconData phonelink_setup = IconData(0xe920, fontFamily: 'MaterialIcons');
@@ -11529,14 +11427,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">phonelink_setup</i> &#x2014; material icon named "phonelink setup sharp".
   static const IconData phonelink_setup_sharp = IconData(0xee70, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">phonelink</i> &#x2014; material icon named "phonelink sharp".
-  static const IconData phonelink_sharp = IconData(0xee71, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">photo</i> &#x2014; material icon named "photo sharp".
+  static const IconData photo_sharp = IconData(0xee76, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">photo</i> &#x2014; material icon named "photo".
   static const IconData photo = IconData(0xe921, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">photo</i> &#x2014; material icon named "photo outlined".
+  static const IconData photo_outlined = IconData(0xe371, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">photo</i> &#x2014; material icon named "photo rounded".
+  static const IconData photo_rounded = IconData(0xf3a4, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">photo_album</i> &#x2014; material icon named "photo album".
   static const IconData photo_album = IconData(0xe922, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">photo_album</i> &#x2014; material icon named "photo album sharp".
+  static const IconData photo_album_sharp = IconData(0xee72, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">photo_album</i> &#x2014; material icon named "photo album outlined".
   static const IconData photo_album_outlined = IconData(0xe36d, fontFamily: 'MaterialIcons');
@@ -11544,17 +11451,8 @@ class Icons {
   /// <i class="material-icons-round md-36">photo_album</i> &#x2014; material icon named "photo album rounded".
   static const IconData photo_album_rounded = IconData(0xf3a0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">photo_album</i> &#x2014; material icon named "photo album sharp".
-  static const IconData photo_album_sharp = IconData(0xee72, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">photo_camera</i> &#x2014; material icon named "photo camera".
   static const IconData photo_camera = IconData(0xe923, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">photo_camera_back</i> &#x2014; material icon named "photo camera back".
-  static const IconData photo_camera_back = IconData(0xe924, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">photo_camera_front</i> &#x2014; material icon named "photo camera front".
-  static const IconData photo_camera_front = IconData(0xe925, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">photo_camera</i> &#x2014; material icon named "photo camera outlined".
   static const IconData photo_camera_outlined = IconData(0xe36e, fontFamily: 'MaterialIcons');
@@ -11564,6 +11462,12 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">photo_camera</i> &#x2014; material icon named "photo camera sharp".
   static const IconData photo_camera_sharp = IconData(0xee73, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">photo_camera_back</i> &#x2014; material icon named "photo camera back".
+  static const IconData photo_camera_back = IconData(0xe924, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">photo_camera_front</i> &#x2014; material icon named "photo camera front".
+  static const IconData photo_camera_front = IconData(0xe925, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">photo_filter</i> &#x2014; material icon named "photo filter".
   static const IconData photo_filter = IconData(0xe926, fontFamily: 'MaterialIcons');
@@ -11589,15 +11493,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">photo_library</i> &#x2014; material icon named "photo library sharp".
   static const IconData photo_library_sharp = IconData(0xee75, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">photo</i> &#x2014; material icon named "photo outlined".
-  static const IconData photo_outlined = IconData(0xe371, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">photo</i> &#x2014; material icon named "photo rounded".
-  static const IconData photo_rounded = IconData(0xf3a4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">photo</i> &#x2014; material icon named "photo sharp".
-  static const IconData photo_sharp = IconData(0xee76, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">photo_size_select_actual</i> &#x2014; material icon named "photo size select actual".
   static const IconData photo_size_select_actual = IconData(0xe928, fontFamily: 'MaterialIcons');
 
@@ -11610,17 +11505,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">photo_size_select_actual</i> &#x2014; material icon named "photo size select actual sharp".
   static const IconData photo_size_select_actual_sharp = IconData(0xee77, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large".
-  static const IconData photo_size_select_large = IconData(0xe929, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large outlined".
-  static const IconData photo_size_select_large_outlined = IconData(0xe373, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large sharp".
+  static const IconData photo_size_select_large_sharp = IconData(0xee78, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large rounded".
   static const IconData photo_size_select_large_rounded = IconData(0xf3a6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large sharp".
-  static const IconData photo_size_select_large_sharp = IconData(0xee78, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large outlined".
+  static const IconData photo_size_select_large_outlined = IconData(0xe373, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">photo_size_select_large</i> &#x2014; material icon named "photo size select large".
+  static const IconData photo_size_select_large = IconData(0xe929, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">photo_size_select_small</i> &#x2014; material icon named "photo size select small".
   static const IconData photo_size_select_small = IconData(0xe92a, fontFamily: 'MaterialIcons');
@@ -11649,6 +11544,15 @@ class Icons {
   /// <i class="material-icons md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture".
   static const IconData picture_in_picture = IconData(0xe92c, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture outlined".
+  static const IconData picture_in_picture_outlined = IconData(0xe377, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture rounded".
+  static const IconData picture_in_picture_rounded = IconData(0xf3aa, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture sharp".
+  static const IconData picture_in_picture_sharp = IconData(0xee7c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">picture_in_picture_alt</i> &#x2014; material icon named "picture in picture alt".
   static const IconData picture_in_picture_alt = IconData(0xe92d, fontFamily: 'MaterialIcons');
 
@@ -11661,26 +11565,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">picture_in_picture_alt</i> &#x2014; material icon named "picture in picture alt sharp".
   static const IconData picture_in_picture_alt_sharp = IconData(0xee7b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture outlined".
-  static const IconData picture_in_picture_outlined = IconData(0xe377, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture rounded".
-  static const IconData picture_in_picture_rounded = IconData(0xf3aa, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">picture_in_picture</i> &#x2014; material icon named "picture in picture sharp".
-  static const IconData picture_in_picture_sharp = IconData(0xee7c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">pie_chart</i> &#x2014; material icon named "pie chart sharp".
+  static const IconData pie_chart_sharp = IconData(0xee7e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pie_chart</i> &#x2014; material icon named "pie chart".
   static const IconData pie_chart = IconData(0xe92e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline outlined".
-  static const IconData pie_chart_outline_outlined = IconData(0xe378, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline rounded".
-  static const IconData pie_chart_outline_rounded = IconData(0xf3ab, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline sharp".
-  static const IconData pie_chart_outline_sharp = IconData(0xee7d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">pie_chart</i> &#x2014; material icon named "pie chart outlined".
   static const IconData pie_chart_outlined = IconData(0xe379, fontFamily: 'MaterialIcons');
@@ -11688,8 +11577,14 @@ class Icons {
   /// <i class="material-icons-round md-36">pie_chart</i> &#x2014; material icon named "pie chart rounded".
   static const IconData pie_chart_rounded = IconData(0xf3ac, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">pie_chart</i> &#x2014; material icon named "pie chart sharp".
-  static const IconData pie_chart_sharp = IconData(0xee7e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline sharp".
+  static const IconData pie_chart_outline_sharp = IconData(0xee7d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline outlined".
+  static const IconData pie_chart_outline_outlined = IconData(0xe378, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">pie_chart_outline</i> &#x2014; material icon named "pie chart outline rounded".
+  static const IconData pie_chart_outline_rounded = IconData(0xf3ab, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">pin_drop</i> &#x2014; material icon named "pin drop".
   static const IconData pin_drop = IconData(0xe930, fontFamily: 'MaterialIcons');
@@ -11745,11 +11640,11 @@ class Icons {
   /// <i class="material-icons md-36">play_circle_fill</i> &#x2014; material icon named "play circle fill".
   static const IconData play_circle_fill = IconData(0xe935, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">play_circle_fill</i> &#x2014; material icon named "play circle fill outlined".
-  static const IconData play_circle_fill_outlined = IconData(0xe37e, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">play_circle_fill</i> &#x2014; material icon named "play circle fill rounded".
   static const IconData play_circle_fill_rounded = IconData(0xf3b1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">play_circle_fill</i> &#x2014; material icon named "play circle fill outlined".
+  static const IconData play_circle_fill_outlined = IconData(0xe37e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">play_circle_fill</i> &#x2014; material icon named "play circle fill sharp".
   static const IconData play_circle_fill_sharp = IconData(0xee83, fontFamily: 'MaterialIcons');
@@ -11793,14 +11688,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">play_for_work</i> &#x2014; material icon named "play for work sharp".
   static const IconData play_for_work_sharp = IconData(0xee85, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">playlist_add</i> &#x2014; material icon named "playlist add rounded".
+  static const IconData playlist_add_rounded = IconData(0xf3b5, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">playlist_add</i> &#x2014; material icon named "playlist add".
   static const IconData playlist_add = IconData(0xe939, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check".
-  static const IconData playlist_add_check = IconData(0xe93a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">playlist_add</i> &#x2014; material icon named "playlist add outlined".
+  static const IconData playlist_add_outlined = IconData(0xe382, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check outlined".
-  static const IconData playlist_add_check_outlined = IconData(0xe381, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">playlist_add</i> &#x2014; material icon named "playlist add sharp".
+  static const IconData playlist_add_sharp = IconData(0xee87, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check rounded".
   static const IconData playlist_add_check_rounded = IconData(0xf3b4, fontFamily: 'MaterialIcons');
@@ -11808,14 +11706,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check sharp".
   static const IconData playlist_add_check_sharp = IconData(0xee86, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">playlist_add</i> &#x2014; material icon named "playlist add outlined".
-  static const IconData playlist_add_outlined = IconData(0xe382, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check".
+  static const IconData playlist_add_check = IconData(0xe93a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">playlist_add</i> &#x2014; material icon named "playlist add rounded".
-  static const IconData playlist_add_rounded = IconData(0xf3b5, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">playlist_add</i> &#x2014; material icon named "playlist add sharp".
-  static const IconData playlist_add_sharp = IconData(0xee87, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-outlined md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check outlined".
+  static const IconData playlist_add_check_outlined = IconData(0xe381, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">playlist_play</i> &#x2014; material icon named "playlist play".
   static const IconData playlist_play = IconData(0xe93b, fontFamily: 'MaterialIcons');
@@ -11877,8 +11772,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">policy</i> &#x2014; material icon named "policy sharp".
   static const IconData policy_sharp = IconData(0xee8c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">poll</i> &#x2014; material icon named "poll".
-  static const IconData poll = IconData(0xe940, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">poll</i> &#x2014; material icon named "poll sharp".
+  static const IconData poll_sharp = IconData(0xee8d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">poll</i> &#x2014; material icon named "poll outlined".
   static const IconData poll_outlined = IconData(0xe388, fontFamily: 'MaterialIcons');
@@ -11886,8 +11781,8 @@ class Icons {
   /// <i class="material-icons-round md-36">poll</i> &#x2014; material icon named "poll rounded".
   static const IconData poll_rounded = IconData(0xf3bb, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">poll</i> &#x2014; material icon named "poll sharp".
-  static const IconData poll_sharp = IconData(0xee8d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">poll</i> &#x2014; material icon named "poll".
+  static const IconData poll = IconData(0xe940, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">polymer</i> &#x2014; material icon named "polymer".
   static const IconData polymer = IconData(0xe941, fontFamily: 'MaterialIcons');
@@ -11937,6 +11832,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">portrait</i> &#x2014; material icon named "portrait sharp".
   static const IconData portrait_sharp = IconData(0xee91, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">post_add</i> &#x2014; material icon named "post add sharp".
+  static const IconData post_add_sharp = IconData(0xee92, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">post_add</i> &#x2014; material icon named "post add".
   static const IconData post_add = IconData(0xe945, fontFamily: 'MaterialIcons');
 
@@ -11946,11 +11844,17 @@ class Icons {
   /// <i class="material-icons-round md-36">post_add</i> &#x2014; material icon named "post add rounded".
   static const IconData post_add_rounded = IconData(0xf3c0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">post_add</i> &#x2014; material icon named "post add sharp".
-  static const IconData post_add_sharp = IconData(0xee92, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">power</i> &#x2014; material icon named "power".
   static const IconData power = IconData(0xe946, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">power</i> &#x2014; material icon named "power outlined".
+  static const IconData power_outlined = IconData(0xe390, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">power</i> &#x2014; material icon named "power rounded".
+  static const IconData power_rounded = IconData(0xf3c3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">power</i> &#x2014; material icon named "power sharp".
+  static const IconData power_sharp = IconData(0xee96, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">power_input</i> &#x2014; material icon named "power input".
   static const IconData power_input = IconData(0xe947, fontFamily: 'MaterialIcons');
@@ -11976,12 +11880,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">power_off</i> &#x2014; material icon named "power off sharp".
   static const IconData power_off_sharp = IconData(0xee94, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">power</i> &#x2014; material icon named "power outlined".
-  static const IconData power_outlined = IconData(0xe390, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">power</i> &#x2014; material icon named "power rounded".
-  static const IconData power_rounded = IconData(0xf3c3, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">power_settings_new</i> &#x2014; material icon named "power settings new".
   static const IconData power_settings_new = IconData(0xe949, fontFamily: 'MaterialIcons');
 
@@ -11994,9 +11892,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">power_settings_new</i> &#x2014; material icon named "power settings new sharp".
   static const IconData power_settings_new_sharp = IconData(0xee95, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">power</i> &#x2014; material icon named "power sharp".
-  static const IconData power_sharp = IconData(0xee96, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">precision_manufacturing</i> &#x2014; material icon named "precision manufacturing outlined".
   static const IconData precision_manufacturing_outlined = IconData(0xe392, fontFamily: 'MaterialIcons');
 
@@ -12006,17 +11901,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">precision_manufacturing</i> &#x2014; material icon named "precision manufacturing sharp".
   static const IconData precision_manufacturing_sharp = IconData(0xee97, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman sharp".
+  static const IconData pregnant_woman_sharp = IconData(0xee98, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman".
   static const IconData pregnant_woman = IconData(0xe94a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman outlined".
-  static const IconData pregnant_woman_outlined = IconData(0xe393, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman rounded".
   static const IconData pregnant_woman_rounded = IconData(0xf3c6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman sharp".
-  static const IconData pregnant_woman_sharp = IconData(0xee98, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">pregnant_woman</i> &#x2014; material icon named "pregnant woman outlined".
+  static const IconData pregnant_woman_outlined = IconData(0xe393, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">present_to_all</i> &#x2014; material icon named "present to all".
   static const IconData present_to_all = IconData(0xe94b, fontFamily: 'MaterialIcons');
@@ -12045,6 +11940,15 @@ class Icons {
   /// <i class="material-icons md-36">print</i> &#x2014; material icon named "print".
   static const IconData print = IconData(0xe94d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">print</i> &#x2014; material icon named "print outlined".
+  static const IconData print_outlined = IconData(0xe397, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">print</i> &#x2014; material icon named "print rounded".
+  static const IconData print_rounded = IconData(0xf3ca, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">print</i> &#x2014; material icon named "print sharp".
+  static const IconData print_sharp = IconData(0xee9c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">print_disabled</i> &#x2014; material icon named "print disabled".
   static const IconData print_disabled = IconData(0xe94e, fontFamily: 'MaterialIcons');
 
@@ -12056,15 +11960,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">print_disabled</i> &#x2014; material icon named "print disabled sharp".
   static const IconData print_disabled_sharp = IconData(0xee9b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">print</i> &#x2014; material icon named "print outlined".
-  static const IconData print_outlined = IconData(0xe397, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">print</i> &#x2014; material icon named "print rounded".
-  static const IconData print_rounded = IconData(0xf3ca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">print</i> &#x2014; material icon named "print sharp".
-  static const IconData print_sharp = IconData(0xee9c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">priority_high</i> &#x2014; material icon named "priority high".
   static const IconData priority_high = IconData(0xe94f, fontFamily: 'MaterialIcons');
@@ -12081,11 +11976,11 @@ class Icons {
   /// <i class="material-icons md-36">privacy_tip</i> &#x2014; material icon named "privacy tip".
   static const IconData privacy_tip = IconData(0xe950, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">privacy_tip</i> &#x2014; material icon named "privacy tip outlined".
-  static const IconData privacy_tip_outlined = IconData(0xe399, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">privacy_tip</i> &#x2014; material icon named "privacy tip rounded".
   static const IconData privacy_tip_rounded = IconData(0xf3cc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">privacy_tip</i> &#x2014; material icon named "privacy tip outlined".
+  static const IconData privacy_tip_outlined = IconData(0xe399, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">privacy_tip</i> &#x2014; material icon named "privacy tip sharp".
   static const IconData privacy_tip_sharp = IconData(0xee9e, fontFamily: 'MaterialIcons');
@@ -12105,6 +12000,15 @@ class Icons {
   /// <i class="material-icons md-36">public</i> &#x2014; material icon named "public".
   static const IconData public = IconData(0xe952, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">public</i> &#x2014; material icon named "public outlined".
+  static const IconData public_outlined = IconData(0xe39c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">public</i> &#x2014; material icon named "public rounded".
+  static const IconData public_rounded = IconData(0xf3cf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">public</i> &#x2014; material icon named "public sharp".
+  static const IconData public_sharp = IconData(0xeea1, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">public_off</i> &#x2014; material icon named "public off".
   static const IconData public_off = IconData(0xe953, fontFamily: 'MaterialIcons');
 
@@ -12116,15 +12020,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">public_off</i> &#x2014; material icon named "public off sharp".
   static const IconData public_off_sharp = IconData(0xeea0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">public</i> &#x2014; material icon named "public outlined".
-  static const IconData public_outlined = IconData(0xe39c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">public</i> &#x2014; material icon named "public rounded".
-  static const IconData public_rounded = IconData(0xf3cf, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">public</i> &#x2014; material icon named "public sharp".
-  static const IconData public_sharp = IconData(0xeea1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">publish</i> &#x2014; material icon named "publish".
   static const IconData publish = IconData(0xe954, fontFamily: 'MaterialIcons');
@@ -12159,6 +12054,9 @@ class Icons {
   /// <i class="material-icons-round md-36">qr_code</i> &#x2014; material icon named "qr code rounded".
   static const IconData qr_code_rounded = IconData(0xf3d2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">qr_code</i> &#x2014; material icon named "qr code sharp".
+  static const IconData qr_code_sharp = IconData(0xeea5, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">qr_code_scanner</i> &#x2014; material icon named "qr code scanner".
   static const IconData qr_code_scanner = IconData(0xe957, fontFamily: 'MaterialIcons');
 
@@ -12170,9 +12068,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">qr_code_scanner</i> &#x2014; material icon named "qr code scanner sharp".
   static const IconData qr_code_scanner_sharp = IconData(0xeea4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">qr_code</i> &#x2014; material icon named "qr code sharp".
-  static const IconData qr_code_sharp = IconData(0xeea5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">query_builder</i> &#x2014; material icon named "query builder".
   static const IconData query_builder = IconData(0xe958, fontFamily: 'MaterialIcons');
@@ -12201,6 +12096,15 @@ class Icons {
   /// <i class="material-icons md-36">queue</i> &#x2014; material icon named "queue".
   static const IconData queue = IconData(0xe95a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">queue</i> &#x2014; material icon named "queue outlined".
+  static const IconData queue_outlined = IconData(0xe3a4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">queue</i> &#x2014; material icon named "queue sharp".
+  static const IconData queue_sharp = IconData(0xeeaa, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">queue</i> &#x2014; material icon named "queue rounded".
+  static const IconData queue_rounded = IconData(0xf3d8, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">queue_music</i> &#x2014; material icon named "queue music".
   static const IconData queue_music = IconData(0xe95b, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
@@ -12213,12 +12117,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">queue_music</i> &#x2014; material icon named "queue music sharp".
   static const IconData queue_music_sharp = IconData(0xeea8, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">queue</i> &#x2014; material icon named "queue outlined".
-  static const IconData queue_outlined = IconData(0xe3a4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">queue_play_next</i> &#x2014; material icon named "queue play next".
-  static const IconData queue_play_next = IconData(0xe95c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">queue_play_next</i> &#x2014; material icon named "queue play next outlined".
   static const IconData queue_play_next_outlined = IconData(0xe3a5, fontFamily: 'MaterialIcons');
 
@@ -12228,11 +12126,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">queue_play_next</i> &#x2014; material icon named "queue play next sharp".
   static const IconData queue_play_next_sharp = IconData(0xeea9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">queue</i> &#x2014; material icon named "queue rounded".
-  static const IconData queue_rounded = IconData(0xf3d8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">queue</i> &#x2014; material icon named "queue sharp".
-  static const IconData queue_sharp = IconData(0xeeaa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">queue_play_next</i> &#x2014; material icon named "queue play next".
+  static const IconData queue_play_next = IconData(0xe95c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">quick_contacts_dialer</i> &#x2014; material icon named "quick contacts dialer".
   static const IconData quick_contacts_dialer = IconData(0xe67d, fontFamily: 'MaterialIcons');
@@ -12273,17 +12168,26 @@ class Icons {
   /// <i class="material-icons md-36">radio</i> &#x2014; material icon named "radio".
   static const IconData radio = IconData(0xe95e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">radio</i> &#x2014; material icon named "radio sharp".
+  static const IconData radio_sharp = IconData(0xeeae, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">radio</i> &#x2014; material icon named "radio outlined".
+  static const IconData radio_outlined = IconData(0xe3a9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">radio</i> &#x2014; material icon named "radio rounded".
+  static const IconData radio_rounded = IconData(0xf3dc, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">radio_button_checked</i> &#x2014; material icon named "radio button checked".
   static const IconData radio_button_checked = IconData(0xe95f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">radio_button_checked</i> &#x2014; material icon named "radio button checked sharp".
+  static const IconData radio_button_checked_sharp = IconData(0xeeac, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">radio_button_checked</i> &#x2014; material icon named "radio button checked outlined".
   static const IconData radio_button_checked_outlined = IconData(0xe3a7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">radio_button_checked</i> &#x2014; material icon named "radio button checked rounded".
   static const IconData radio_button_checked_rounded = IconData(0xf3da, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">radio_button_checked</i> &#x2014; material icon named "radio button checked sharp".
-  static const IconData radio_button_checked_sharp = IconData(0xeeac, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">radio_button_off</i> &#x2014; material icon named "radio button off".
   static const IconData radio_button_off = IconData(0xe960, fontFamily: 'MaterialIcons');
@@ -12321,15 +12225,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">radio_button_unchecked</i> &#x2014; material icon named "radio button unchecked sharp".
   static const IconData radio_button_unchecked_sharp = IconData(0xeead, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">radio</i> &#x2014; material icon named "radio outlined".
-  static const IconData radio_outlined = IconData(0xe3a9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">radio</i> &#x2014; material icon named "radio rounded".
-  static const IconData radio_rounded = IconData(0xf3dc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">radio</i> &#x2014; material icon named "radio sharp".
-  static const IconData radio_sharp = IconData(0xeeae, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">railway_alert</i> &#x2014; material icon named "railway alert".
   static const IconData railway_alert = IconData(0xe961, fontFamily: 'MaterialIcons');
 
@@ -12351,17 +12246,26 @@ class Icons {
   /// <i class="material-icons md-36">read_more</i> &#x2014; material icon named "read more".
   static const IconData read_more = IconData(0xe964, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">read_more</i> &#x2014; material icon named "read more outlined".
-  static const IconData read_more_outlined = IconData(0xe3ab, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">read_more</i> &#x2014; material icon named "read more rounded".
   static const IconData read_more_rounded = IconData(0xf3de, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">read_more</i> &#x2014; material icon named "read more outlined".
+  static const IconData read_more_outlined = IconData(0xe3ab, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">read_more</i> &#x2014; material icon named "read more sharp".
   static const IconData read_more_sharp = IconData(0xeeb0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">receipt</i> &#x2014; material icon named "receipt".
   static const IconData receipt = IconData(0xe965, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">receipt</i> &#x2014; material icon named "receipt outlined".
+  static const IconData receipt_outlined = IconData(0xe3ad, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">receipt</i> &#x2014; material icon named "receipt rounded".
+  static const IconData receipt_rounded = IconData(0xf3e0, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">receipt</i> &#x2014; material icon named "receipt sharp".
+  static const IconData receipt_sharp = IconData(0xeeb2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">receipt_long</i> &#x2014; material icon named "receipt long".
   static const IconData receipt_long = IconData(0xe966, fontFamily: 'MaterialIcons');
@@ -12374,15 +12278,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">receipt_long</i> &#x2014; material icon named "receipt long sharp".
   static const IconData receipt_long_sharp = IconData(0xeeb1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">receipt</i> &#x2014; material icon named "receipt outlined".
-  static const IconData receipt_outlined = IconData(0xe3ad, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">receipt</i> &#x2014; material icon named "receipt rounded".
-  static const IconData receipt_rounded = IconData(0xf3e0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">receipt</i> &#x2014; material icon named "receipt sharp".
-  static const IconData receipt_sharp = IconData(0xeeb2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">recent_actors</i> &#x2014; material icon named "recent actors".
   static const IconData recent_actors = IconData(0xe967, fontFamily: 'MaterialIcons');
@@ -12411,14 +12306,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">record_voice_over</i> &#x2014; material icon named "record voice over sharp".
   static const IconData record_voice_over_sharp = IconData(0xeeb4, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">redeem</i> &#x2014; material icon named "redeem rounded".
+  static const IconData redeem_rounded = IconData(0xf3e3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">redeem</i> &#x2014; material icon named "redeem".
   static const IconData redeem = IconData(0xe96a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">redeem</i> &#x2014; material icon named "redeem outlined".
   static const IconData redeem_outlined = IconData(0xe3b0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">redeem</i> &#x2014; material icon named "redeem rounded".
-  static const IconData redeem_rounded = IconData(0xf3e3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">redeem</i> &#x2014; material icon named "redeem sharp".
   static const IconData redeem_sharp = IconData(0xeeb5, fontFamily: 'MaterialIcons');
@@ -12459,11 +12354,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">refresh</i> &#x2014; material icon named "refresh sharp".
   static const IconData refresh_sharp = IconData(0xeeb8, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">remove</i> &#x2014; material icon named "remove outlined".
+  static const IconData remove_outlined = IconData(0xe3b7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">remove</i> &#x2014; material icon named "remove".
   static const IconData remove = IconData(0xe96e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">remove</i> &#x2014; material icon named "remove rounded".
+  static const IconData remove_rounded = IconData(0xf3eb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">remove</i> &#x2014; material icon named "remove sharp".
+  static const IconData remove_sharp = IconData(0xeebd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">remove_circle</i> &#x2014; material icon named "remove circle".
   static const IconData remove_circle = IconData(0xe96f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">remove_circle</i> &#x2014; material icon named "remove circle outlined".
+  static const IconData remove_circle_outlined = IconData(0xe3b5, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">remove_circle</i> &#x2014; material icon named "remove circle rounded".
+  static const IconData remove_circle_rounded = IconData(0xf3e8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">remove_circle</i> &#x2014; material icon named "remove circle sharp".
+  static const IconData remove_circle_sharp = IconData(0xeeba, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">remove_circle_outline</i> &#x2014; material icon named "remove circle outline".
   static const IconData remove_circle_outline = IconData(0xe970, fontFamily: 'MaterialIcons');
@@ -12477,17 +12390,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">remove_circle_outline</i> &#x2014; material icon named "remove circle outline sharp".
   static const IconData remove_circle_outline_sharp = IconData(0xeeb9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">remove_circle</i> &#x2014; material icon named "remove circle outlined".
-  static const IconData remove_circle_outlined = IconData(0xe3b5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">remove_circle</i> &#x2014; material icon named "remove circle rounded".
-  static const IconData remove_circle_rounded = IconData(0xf3e8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">remove_circle</i> &#x2014; material icon named "remove circle sharp".
-  static const IconData remove_circle_sharp = IconData(0xeeba, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">remove_done</i> &#x2014; material icon named "remove done".
   static const IconData remove_done = IconData(0xe971, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">remove_from_queue</i> &#x2014; material icon named "remove from queue sharp".
+  static const IconData remove_from_queue_sharp = IconData(0xeebb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">remove_from_queue</i> &#x2014; material icon named "remove from queue".
   static const IconData remove_from_queue = IconData(0xe972, fontFamily: 'MaterialIcons');
@@ -12498,14 +12405,8 @@ class Icons {
   /// <i class="material-icons-round md-36">remove_from_queue</i> &#x2014; material icon named "remove from queue rounded".
   static const IconData remove_from_queue_rounded = IconData(0xf3e9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">remove_from_queue</i> &#x2014; material icon named "remove from queue sharp".
-  static const IconData remove_from_queue_sharp = IconData(0xeebb, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">remove_moderator</i> &#x2014; material icon named "remove moderator".
   static const IconData remove_moderator = IconData(0xe973, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">remove</i> &#x2014; material icon named "remove outlined".
-  static const IconData remove_outlined = IconData(0xe3b7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">remove_red_eye</i> &#x2014; material icon named "remove red eye".
   static const IconData remove_red_eye = IconData(0xe974, fontFamily: 'MaterialIcons');
@@ -12518,12 +12419,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">remove_red_eye</i> &#x2014; material icon named "remove red eye sharp".
   static const IconData remove_red_eye_sharp = IconData(0xeebc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">remove</i> &#x2014; material icon named "remove rounded".
-  static const IconData remove_rounded = IconData(0xf3eb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">remove</i> &#x2014; material icon named "remove sharp".
-  static const IconData remove_sharp = IconData(0xeebd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">remove_shopping_cart</i> &#x2014; material icon named "remove shopping cart".
   static const IconData remove_shopping_cart = IconData(0xe975, fontFamily: 'MaterialIcons');
@@ -12549,17 +12444,23 @@ class Icons {
   /// <i class="material-icons-sharp md-36">reorder</i> &#x2014; material icon named "reorder sharp".
   static const IconData reorder_sharp = IconData(0xeebf, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">repeat</i> &#x2014; material icon named "repeat sharp".
+  static const IconData repeat_sharp = IconData(0xeec1, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">repeat</i> &#x2014; material icon named "repeat".
   static const IconData repeat = IconData(0xe977, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">repeat</i> &#x2014; material icon named "repeat outlined".
+  static const IconData repeat_outlined = IconData(0xe3bc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">repeat</i> &#x2014; material icon named "repeat rounded".
+  static const IconData repeat_rounded = IconData(0xf3ef, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">repeat_on</i> &#x2014; material icon named "repeat on".
   static const IconData repeat_on = IconData(0xe978, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">repeat_one</i> &#x2014; material icon named "repeat one".
   static const IconData repeat_one = IconData(0xe979, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">repeat_one_on</i> &#x2014; material icon named "repeat one on".
-  static const IconData repeat_one_on = IconData(0xe97a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">repeat_one</i> &#x2014; material icon named "repeat one outlined".
   static const IconData repeat_one_outlined = IconData(0xe3bb, fontFamily: 'MaterialIcons');
@@ -12570,17 +12471,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">repeat_one</i> &#x2014; material icon named "repeat one sharp".
   static const IconData repeat_one_sharp = IconData(0xeec0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">repeat</i> &#x2014; material icon named "repeat outlined".
-  static const IconData repeat_outlined = IconData(0xe3bc, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">repeat_one_on</i> &#x2014; material icon named "repeat one on".
+  static const IconData repeat_one_on = IconData(0xe97a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">repeat</i> &#x2014; material icon named "repeat rounded".
-  static const IconData repeat_rounded = IconData(0xf3ef, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">repeat</i> &#x2014; material icon named "repeat sharp".
-  static const IconData repeat_sharp = IconData(0xeec1, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">replay</i> &#x2014; material icon named "replay sharp".
+  static const IconData replay_sharp = IconData(0xeec5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">replay</i> &#x2014; material icon named "replay".
   static const IconData replay = IconData(0xe97b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">replay</i> &#x2014; material icon named "replay rounded".
+  static const IconData replay_rounded = IconData(0xf3f3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">replay</i> &#x2014; material icon named "replay outlined".
+  static const IconData replay_outlined = IconData(0xe3c0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">replay_10</i> &#x2014; material icon named "replay 10".
   static const IconData replay_10 = IconData(0xe97c, fontFamily: 'MaterialIcons');
@@ -12594,17 +12498,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">replay_10</i> &#x2014; material icon named "replay 10 sharp".
   static const IconData replay_10_sharp = IconData(0xeec2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">replay_30</i> &#x2014; material icon named "replay 30".
-  static const IconData replay_30 = IconData(0xe97d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">replay_30</i> &#x2014; material icon named "replay 30 outlined".
-  static const IconData replay_30_outlined = IconData(0xe3be, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">replay_30</i> &#x2014; material icon named "replay 30 rounded".
   static const IconData replay_30_rounded = IconData(0xf3f1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">replay_30</i> &#x2014; material icon named "replay 30 sharp".
   static const IconData replay_30_sharp = IconData(0xeec3, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">replay_30</i> &#x2014; material icon named "replay 30".
+  static const IconData replay_30 = IconData(0xe97d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">replay_30</i> &#x2014; material icon named "replay 30 outlined".
+  static const IconData replay_30_outlined = IconData(0xe3be, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">replay_5</i> &#x2014; material icon named "replay 5".
   static const IconData replay_5 = IconData(0xe97e, fontFamily: 'MaterialIcons');
@@ -12621,17 +12525,17 @@ class Icons {
   /// <i class="material-icons md-36">replay_circle_filled</i> &#x2014; material icon named "replay circle filled".
   static const IconData replay_circle_filled = IconData(0xe97f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">replay</i> &#x2014; material icon named "replay outlined".
-  static const IconData replay_outlined = IconData(0xe3c0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">replay</i> &#x2014; material icon named "replay rounded".
-  static const IconData replay_rounded = IconData(0xf3f3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">replay</i> &#x2014; material icon named "replay sharp".
-  static const IconData replay_sharp = IconData(0xeec5, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">reply</i> &#x2014; material icon named "reply".
   static const IconData reply = IconData(0xe980, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-outlined md-36">reply</i> &#x2014; material icon named "reply outlined".
+  static const IconData reply_outlined = IconData(0xe3c2, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">reply</i> &#x2014; material icon named "reply rounded".
+  static const IconData reply_rounded = IconData(0xf3f5, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-sharp md-36">reply</i> &#x2014; material icon named "reply sharp".
+  static const IconData reply_sharp = IconData(0xeec7, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">reply_all</i> &#x2014; material icon named "reply all".
   static const IconData reply_all = IconData(0xe981, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -12645,17 +12549,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">reply_all</i> &#x2014; material icon named "reply all sharp".
   static const IconData reply_all_sharp = IconData(0xeec6, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">reply</i> &#x2014; material icon named "reply outlined".
-  static const IconData reply_outlined = IconData(0xe3c2, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">reply</i> &#x2014; material icon named "reply rounded".
-  static const IconData reply_rounded = IconData(0xf3f5, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">reply</i> &#x2014; material icon named "reply sharp".
-  static const IconData reply_sharp = IconData(0xeec7, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-sharp md-36">report</i> &#x2014; material icon named "report sharp".
+  static const IconData report_sharp = IconData(0xeecb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">report</i> &#x2014; material icon named "report".
   static const IconData report = IconData(0xe982, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">report</i> &#x2014; material icon named "report outlined".
+  static const IconData report_outlined = IconData(0xe3c5, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">report</i> &#x2014; material icon named "report rounded".
+  static const IconData report_rounded = IconData(0xf3f9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">report_gmailerrorred</i> &#x2014; material icon named "report gmailerrorred outlined".
   static const IconData report_gmailerrorred_outlined = IconData(0xe3c3, fontFamily: 'MaterialIcons');
@@ -12678,26 +12582,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">report_off</i> &#x2014; material icon named "report off sharp".
   static const IconData report_off_sharp = IconData(0xeec9, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">report</i> &#x2014; material icon named "report outlined".
-  static const IconData report_outlined = IconData(0xe3c5, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">report_problem</i> &#x2014; material icon named "report problem sharp".
+  static const IconData report_problem_sharp = IconData(0xeeca, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">report_problem</i> &#x2014; material icon named "report problem".
   static const IconData report_problem = IconData(0xe984, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">report_problem</i> &#x2014; material icon named "report problem outlined".
-  static const IconData report_problem_outlined = IconData(0xe3c6, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">report_problem</i> &#x2014; material icon named "report problem rounded".
   static const IconData report_problem_rounded = IconData(0xf3f8, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">report_problem</i> &#x2014; material icon named "report problem sharp".
-  static const IconData report_problem_sharp = IconData(0xeeca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">report</i> &#x2014; material icon named "report rounded".
-  static const IconData report_rounded = IconData(0xf3f9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">report</i> &#x2014; material icon named "report sharp".
-  static const IconData report_sharp = IconData(0xeecb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">report_problem</i> &#x2014; material icon named "report problem outlined".
+  static const IconData report_problem_outlined = IconData(0xe3c6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">request_page</i> &#x2014; material icon named "request page".
   static const IconData request_page = IconData(0xe985, fontFamily: 'MaterialIcons');
@@ -12729,6 +12624,15 @@ class Icons {
   /// <i class="material-icons md-36">restaurant</i> &#x2014; material icon named "restaurant".
   static const IconData restaurant = IconData(0xe988, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">restaurant</i> &#x2014; material icon named "restaurant outlined".
+  static const IconData restaurant_outlined = IconData(0xe3ca, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">restaurant</i> &#x2014; material icon named "restaurant rounded".
+  static const IconData restaurant_rounded = IconData(0xf3fd, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">restaurant</i> &#x2014; material icon named "restaurant sharp".
+  static const IconData restaurant_sharp = IconData(0xeecf, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">restaurant_menu</i> &#x2014; material icon named "restaurant menu".
   static const IconData restaurant_menu = IconData(0xe989, fontFamily: 'MaterialIcons');
 
@@ -12741,32 +12645,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">restaurant_menu</i> &#x2014; material icon named "restaurant menu sharp".
   static const IconData restaurant_menu_sharp = IconData(0xeece, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">restaurant</i> &#x2014; material icon named "restaurant outlined".
-  static const IconData restaurant_outlined = IconData(0xe3ca, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">restaurant</i> &#x2014; material icon named "restaurant rounded".
-  static const IconData restaurant_rounded = IconData(0xf3fd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">restaurant</i> &#x2014; material icon named "restaurant sharp".
-  static const IconData restaurant_sharp = IconData(0xeecf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">restore</i> &#x2014; material icon named "restore sharp".
+  static const IconData restore_sharp = IconData(0xeed2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">restore</i> &#x2014; material icon named "restore".
   static const IconData restore = IconData(0xe98a, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">restore</i> &#x2014; material icon named "restore outlined".
+  static const IconData restore_outlined = IconData(0xe3cc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">restore</i> &#x2014; material icon named "restore rounded".
+  static const IconData restore_rounded = IconData(0xf400, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash".
   static const IconData restore_from_trash = IconData(0xe98b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash sharp".
+  static const IconData restore_from_trash_sharp = IconData(0xeed0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash outlined".
   static const IconData restore_from_trash_outlined = IconData(0xe3cb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash rounded".
   static const IconData restore_from_trash_rounded = IconData(0xf3fe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash sharp".
-  static const IconData restore_from_trash_sharp = IconData(0xeed0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">restore</i> &#x2014; material icon named "restore outlined".
-  static const IconData restore_outlined = IconData(0xe3cc, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">restore_page</i> &#x2014; material icon named "restore page".
   static const IconData restore_page = IconData(0xe98c, fontFamily: 'MaterialIcons');
@@ -12779,12 +12680,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">restore_page</i> &#x2014; material icon named "restore page sharp".
   static const IconData restore_page_sharp = IconData(0xeed1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">restore</i> &#x2014; material icon named "restore rounded".
-  static const IconData restore_rounded = IconData(0xf400, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">restore</i> &#x2014; material icon named "restore sharp".
-  static const IconData restore_sharp = IconData(0xeed2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">rice_bowl</i> &#x2014; material icon named "rice bowl".
   static const IconData rice_bowl = IconData(0xe98d, fontFamily: 'MaterialIcons');
@@ -12822,14 +12717,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">roofing</i> &#x2014; material icon named "roofing sharp".
   static const IconData roofing_sharp = IconData(0xeed5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">room</i> &#x2014; material icon named "room".
-  static const IconData room = IconData(0xe990, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">room</i> &#x2014; material icon named "room sharp".
+  static const IconData room_sharp = IconData(0xeed8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">room</i> &#x2014; material icon named "room rounded".
+  static const IconData room_rounded = IconData(0xf405, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">room</i> &#x2014; material icon named "room outlined".
   static const IconData room_outlined = IconData(0xe3d1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">room_preferences</i> &#x2014; material icon named "room preferences".
-  static const IconData room_preferences = IconData(0xe991, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">room</i> &#x2014; material icon named "room".
+  static const IconData room = IconData(0xe990, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">room_preferences</i> &#x2014; material icon named "room preferences outlined".
   static const IconData room_preferences_outlined = IconData(0xe3d2, fontFamily: 'MaterialIcons');
@@ -12840,8 +12738,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">room_preferences</i> &#x2014; material icon named "room preferences sharp".
   static const IconData room_preferences_sharp = IconData(0xeed6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">room</i> &#x2014; material icon named "room rounded".
-  static const IconData room_rounded = IconData(0xf405, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">room_preferences</i> &#x2014; material icon named "room preferences".
+  static const IconData room_preferences = IconData(0xe991, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">room_service</i> &#x2014; material icon named "room service".
   static const IconData room_service = IconData(0xe992, fontFamily: 'MaterialIcons');
@@ -12854,9 +12752,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">room_service</i> &#x2014; material icon named "room service sharp".
   static const IconData room_service_sharp = IconData(0xeed7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">room</i> &#x2014; material icon named "room sharp".
-  static const IconData room_sharp = IconData(0xeed8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">rotate_90_degrees_ccw</i> &#x2014; material icon named "rotate 90 degrees ccw".
   static const IconData rotate_90_degrees_ccw = IconData(0xe993, fontFamily: 'MaterialIcons');
@@ -12882,17 +12777,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">rotate_left</i> &#x2014; material icon named "rotate left sharp".
   static const IconData rotate_left_sharp = IconData(0xeeda, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">rotate_right</i> &#x2014; material icon named "rotate right".
-  static const IconData rotate_right = IconData(0xe995, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">rotate_right</i> &#x2014; material icon named "rotate right outlined".
-  static const IconData rotate_right_outlined = IconData(0xe3d6, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">rotate_right</i> &#x2014; material icon named "rotate right rounded".
   static const IconData rotate_right_rounded = IconData(0xf409, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">rotate_right</i> &#x2014; material icon named "rotate right sharp".
   static const IconData rotate_right_sharp = IconData(0xeedb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">rotate_right</i> &#x2014; material icon named "rotate right".
+  static const IconData rotate_right = IconData(0xe995, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">rotate_right</i> &#x2014; material icon named "rotate right outlined".
+  static const IconData rotate_right_outlined = IconData(0xe3d6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">rounded_corner</i> &#x2014; material icon named "rounded corner".
   static const IconData rounded_corner = IconData(0xe996, fontFamily: 'MaterialIcons');
@@ -12948,6 +12843,15 @@ class Icons {
   /// <i class="material-icons md-36">rule</i> &#x2014; material icon named "rule".
   static const IconData rule = IconData(0xe99b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">rule</i> &#x2014; material icon named "rule outlined".
+  static const IconData rule_outlined = IconData(0xe3dc, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">rule</i> &#x2014; material icon named "rule rounded".
+  static const IconData rule_rounded = IconData(0xf40f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">rule</i> &#x2014; material icon named "rule sharp".
+  static const IconData rule_sharp = IconData(0xeee1, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">rule_folder</i> &#x2014; material icon named "rule folder".
   static const IconData rule_folder = IconData(0xe99c, fontFamily: 'MaterialIcons');
 
@@ -12959,15 +12863,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">rule_folder</i> &#x2014; material icon named "rule folder sharp".
   static const IconData rule_folder_sharp = IconData(0xeee0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">rule</i> &#x2014; material icon named "rule outlined".
-  static const IconData rule_outlined = IconData(0xe3dc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">rule</i> &#x2014; material icon named "rule rounded".
-  static const IconData rule_rounded = IconData(0xf40f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">rule</i> &#x2014; material icon named "rule sharp".
-  static const IconData rule_sharp = IconData(0xeee1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">run_circle</i> &#x2014; material icon named "run circle".
   static const IconData run_circle = IconData(0xe99d, fontFamily: 'MaterialIcons');
@@ -13017,11 +12912,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">satellite</i> &#x2014; material icon named "satellite sharp".
   static const IconData satellite_sharp = IconData(0xeee5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">save</i> &#x2014; material icon named "save sharp".
+  static const IconData save_sharp = IconData(0xeee7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">save</i> &#x2014; material icon named "save".
   static const IconData save = IconData(0xe9a1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">save_alt</i> &#x2014; material icon named "save alt".
-  static const IconData save_alt = IconData(0xe9a2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">save</i> &#x2014; material icon named "save rounded".
+  static const IconData save_rounded = IconData(0xf415, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">save</i> &#x2014; material icon named "save outlined".
+  static const IconData save_outlined = IconData(0xe3e2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">save_alt</i> &#x2014; material icon named "save alt outlined".
   static const IconData save_alt_outlined = IconData(0xe3e1, fontFamily: 'MaterialIcons');
@@ -13032,14 +12933,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">save_alt</i> &#x2014; material icon named "save alt sharp".
   static const IconData save_alt_sharp = IconData(0xeee6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">save</i> &#x2014; material icon named "save outlined".
-  static const IconData save_outlined = IconData(0xe3e2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">save</i> &#x2014; material icon named "save rounded".
-  static const IconData save_rounded = IconData(0xf415, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">save</i> &#x2014; material icon named "save sharp".
-  static const IconData save_sharp = IconData(0xeee7, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">save_alt</i> &#x2014; material icon named "save alt".
+  static const IconData save_alt = IconData(0xe9a2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">saved_search</i> &#x2014; material icon named "saved search".
   static const IconData saved_search = IconData(0xe9a3, fontFamily: 'MaterialIcons');
@@ -13077,20 +12972,20 @@ class Icons {
   /// <i class="material-icons-round md-36">schedule</i> &#x2014; material icon named "schedule rounded".
   static const IconData schedule_rounded = IconData(0xf418, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">schedule</i> &#x2014; material icon named "schedule sharp".
+  static const IconData schedule_sharp = IconData(0xeeea, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">schedule_send</i> &#x2014; material icon named "schedule send".
   static const IconData schedule_send = IconData(0xe9a7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">schedule</i> &#x2014; material icon named "schedule sharp".
-  static const IconData schedule_sharp = IconData(0xeeea, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">school</i> &#x2014; material icon named "school rounded".
+  static const IconData school_rounded = IconData(0xf419, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">school</i> &#x2014; material icon named "school".
   static const IconData school = IconData(0xe9a8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">school</i> &#x2014; material icon named "school outlined".
   static const IconData school_outlined = IconData(0xe3e6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">school</i> &#x2014; material icon named "school rounded".
-  static const IconData school_rounded = IconData(0xf419, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">school</i> &#x2014; material icon named "school sharp".
   static const IconData school_sharp = IconData(0xeeeb, fontFamily: 'MaterialIcons');
@@ -13188,15 +13083,6 @@ class Icons {
   /// <i class="material-icons md-36">sd_card</i> &#x2014; material icon named "sd card".
   static const IconData sd_card = IconData(0xe9b2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert outlined".
-  static const IconData sd_card_alert_outlined = IconData(0xe3ee, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert rounded".
-  static const IconData sd_card_alert_rounded = IconData(0xf421, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert sharp".
-  static const IconData sd_card_alert_sharp = IconData(0xeef3, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">sd_card</i> &#x2014; material icon named "sd card outlined".
   static const IconData sd_card_outlined = IconData(0xe3ef, fontFamily: 'MaterialIcons');
 
@@ -13205,6 +13091,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">sd_card</i> &#x2014; material icon named "sd card sharp".
   static const IconData sd_card_sharp = IconData(0xeef4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert outlined".
+  static const IconData sd_card_alert_outlined = IconData(0xe3ee, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert rounded".
+  static const IconData sd_card_alert_rounded = IconData(0xf421, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">sd_card_alert</i> &#x2014; material icon named "sd card alert sharp".
+  static const IconData sd_card_alert_sharp = IconData(0xeef3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sd_storage</i> &#x2014; material icon named "sd storage".
   static const IconData sd_storage = IconData(0xe9b3, fontFamily: 'MaterialIcons');
@@ -13218,14 +13113,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">sd_storage</i> &#x2014; material icon named "sd storage sharp".
   static const IconData sd_storage_sharp = IconData(0xeef5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">search</i> &#x2014; material icon named "search sharp".
+  static const IconData search_sharp = IconData(0xeef7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">search</i> &#x2014; material icon named "search".
   static const IconData search = IconData(0xe9b4, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">search</i> &#x2014; material icon named "search rounded".
+  static const IconData search_rounded = IconData(0xf425, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">search</i> &#x2014; material icon named "search outlined".
+  static const IconData search_outlined = IconData(0xe3f2, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">search_off</i> &#x2014; material icon named "search off".
   static const IconData search_off = IconData(0xe9b5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">search_off</i> &#x2014; material icon named "search off outlined".
-  static const IconData search_off_outlined = IconData(0xe3f1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">search_off</i> &#x2014; material icon named "search off rounded".
   static const IconData search_off_rounded = IconData(0xf424, fontFamily: 'MaterialIcons');
@@ -13233,14 +13134,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">search_off</i> &#x2014; material icon named "search off sharp".
   static const IconData search_off_sharp = IconData(0xeef6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">search</i> &#x2014; material icon named "search outlined".
-  static const IconData search_outlined = IconData(0xe3f2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">search</i> &#x2014; material icon named "search rounded".
-  static const IconData search_rounded = IconData(0xf425, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">search</i> &#x2014; material icon named "search sharp".
-  static const IconData search_sharp = IconData(0xeef7, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">search_off</i> &#x2014; material icon named "search off outlined".
+  static const IconData search_off_outlined = IconData(0xe3f1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">security</i> &#x2014; material icon named "security".
   static const IconData security = IconData(0xe9b6, fontFamily: 'MaterialIcons');
@@ -13281,20 +13176,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">self_improvement</i> &#x2014; material icon named "self improvement sharp".
   static const IconData self_improvement_sharp = IconData(0xeefa, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">send</i> &#x2014; material icon named "send rounded".
+  static const IconData send_rounded = IconData(0xf429, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">send</i> &#x2014; material icon named "send".
   static const IconData send = IconData(0xe9ba, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons md-36">send_and_archive</i> &#x2014; material icon named "send and archive".
-  static const IconData send_and_archive = IconData(0xe9bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">send</i> &#x2014; material icon named "send outlined".
   static const IconData send_outlined = IconData(0xe3f6, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-round md-36">send</i> &#x2014; material icon named "send rounded".
-  static const IconData send_rounded = IconData(0xf429, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons-sharp md-36">send</i> &#x2014; material icon named "send sharp".
   static const IconData send_sharp = IconData(0xeefb, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons md-36">send_and_archive</i> &#x2014; material icon named "send and archive".
+  static const IconData send_and_archive = IconData(0xe9bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">send_to_mobile</i> &#x2014; material icon named "send to mobile".
   static const IconData send_to_mobile = IconData(0xe9bc, fontFamily: 'MaterialIcons');
@@ -13344,20 +13239,11 @@ class Icons {
   /// <i class="material-icons-round md-36">sentiment_neutral</i> &#x2014; material icon named "sentiment neutral rounded".
   static const IconData sentiment_neutral_rounded = IconData(0xf42d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">sentiment_satisfied</i> &#x2014; material icon named "sentiment satisfied sharp".
+  static const IconData sentiment_satisfied_sharp = IconData(0xef00, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">sentiment_satisfied</i> &#x2014; material icon named "sentiment satisfied".
   static const IconData sentiment_satisfied = IconData(0xe9c1, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt".
-  static const IconData sentiment_satisfied_alt = IconData(0xe9c2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt outlined".
-  static const IconData sentiment_satisfied_alt_outlined = IconData(0xe3fb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt rounded".
-  static const IconData sentiment_satisfied_alt_rounded = IconData(0xf42e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt sharp".
-  static const IconData sentiment_satisfied_alt_sharp = IconData(0xeeff, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">sentiment_satisfied</i> &#x2014; material icon named "sentiment satisfied outlined".
   static const IconData sentiment_satisfied_outlined = IconData(0xe3fc, fontFamily: 'MaterialIcons');
@@ -13365,8 +13251,17 @@ class Icons {
   /// <i class="material-icons-round md-36">sentiment_satisfied</i> &#x2014; material icon named "sentiment satisfied rounded".
   static const IconData sentiment_satisfied_rounded = IconData(0xf42f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">sentiment_satisfied</i> &#x2014; material icon named "sentiment satisfied sharp".
-  static const IconData sentiment_satisfied_sharp = IconData(0xef00, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt".
+  static const IconData sentiment_satisfied_alt = IconData(0xe9c2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt rounded".
+  static const IconData sentiment_satisfied_alt_rounded = IconData(0xf42e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt outlined".
+  static const IconData sentiment_satisfied_alt_outlined = IconData(0xe3fb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">sentiment_satisfied_alt</i> &#x2014; material icon named "sentiment satisfied alt sharp".
+  static const IconData sentiment_satisfied_alt_sharp = IconData(0xeeff, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sentiment_very_dissatisfied</i> &#x2014; material icon named "sentiment very dissatisfied".
   static const IconData sentiment_very_dissatisfied = IconData(0xe9c3, fontFamily: 'MaterialIcons');
@@ -13404,8 +13299,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">set_meal</i> &#x2014; material icon named "set meal sharp".
   static const IconData set_meal_sharp = IconData(0xef03, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">settings</i> &#x2014; material icon named "settings sharp".
+  static const IconData settings_sharp = IconData(0xef13, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">settings</i> &#x2014; material icon named "settings".
   static const IconData settings = IconData(0xe9c6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">settings</i> &#x2014; material icon named "settings rounded".
+  static const IconData settings_rounded = IconData(0xf442, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">settings</i> &#x2014; material icon named "settings outlined".
+  static const IconData settings_outlined = IconData(0xe40b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">settings_applications</i> &#x2014; material icon named "settings applications".
   static const IconData settings_applications = IconData(0xe9c7, fontFamily: 'MaterialIcons');
@@ -13413,23 +13317,23 @@ class Icons {
   /// <i class="material-icons-outlined md-36">settings_applications</i> &#x2014; material icon named "settings applications outlined".
   static const IconData settings_applications_outlined = IconData(0xe400, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">settings_applications</i> &#x2014; material icon named "settings applications rounded".
-  static const IconData settings_applications_rounded = IconData(0xf433, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">settings_applications</i> &#x2014; material icon named "settings applications sharp".
   static const IconData settings_applications_sharp = IconData(0xef04, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore".
-  static const IconData settings_backup_restore = IconData(0xe9c8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore outlined".
-  static const IconData settings_backup_restore_outlined = IconData(0xe401, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">settings_applications</i> &#x2014; material icon named "settings applications rounded".
+  static const IconData settings_applications_rounded = IconData(0xf433, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore rounded".
   static const IconData settings_backup_restore_rounded = IconData(0xf434, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore sharp".
   static const IconData settings_backup_restore_sharp = IconData(0xef05, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore".
+  static const IconData settings_backup_restore = IconData(0xe9c8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">settings_backup_restore</i> &#x2014; material icon named "settings backup restore outlined".
+  static const IconData settings_backup_restore_outlined = IconData(0xe401, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">settings_bluetooth</i> &#x2014; material icon named "settings bluetooth".
   static const IconData settings_bluetooth = IconData(0xe9c9, fontFamily: 'MaterialIcons');
@@ -13515,6 +13419,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">settings_input_component</i> &#x2014; material icon named "settings input component sharp".
   static const IconData settings_input_component_sharp = IconData(0xef0b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">settings_input_composite</i> &#x2014; material icon named "settings input composite sharp".
+  static const IconData settings_input_composite_sharp = IconData(0xef0c, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">settings_input_composite</i> &#x2014; material icon named "settings input composite".
   static const IconData settings_input_composite = IconData(0xe9cf, fontFamily: 'MaterialIcons');
 
@@ -13523,9 +13430,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">settings_input_composite</i> &#x2014; material icon named "settings input composite rounded".
   static const IconData settings_input_composite_rounded = IconData(0xf43b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">settings_input_composite</i> &#x2014; material icon named "settings input composite sharp".
-  static const IconData settings_input_composite_sharp = IconData(0xef0c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">settings_input_hdmi</i> &#x2014; material icon named "settings input hdmi".
   static const IconData settings_input_hdmi = IconData(0xe9d0, fontFamily: 'MaterialIcons');
@@ -13551,9 +13455,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">settings_input_svideo</i> &#x2014; material icon named "settings input svideo sharp".
   static const IconData settings_input_svideo_sharp = IconData(0xef0e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">settings</i> &#x2014; material icon named "settings outlined".
-  static const IconData settings_outlined = IconData(0xe40b, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">settings_overscan</i> &#x2014; material icon named "settings overscan".
   static const IconData settings_overscan = IconData(0xe9d2, fontFamily: 'MaterialIcons');
 
@@ -13578,14 +13479,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">settings_phone</i> &#x2014; material icon named "settings phone sharp".
   static const IconData settings_phone_sharp = IconData(0xef10, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">settings_power</i> &#x2014; material icon named "settings power".
-  static const IconData settings_power = IconData(0xe9d4, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">settings_power</i> &#x2014; material icon named "settings power rounded".
+  static const IconData settings_power_rounded = IconData(0xf440, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">settings_power</i> &#x2014; material icon named "settings power outlined".
   static const IconData settings_power_outlined = IconData(0xe40e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">settings_power</i> &#x2014; material icon named "settings power rounded".
-  static const IconData settings_power_rounded = IconData(0xf440, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">settings_power</i> &#x2014; material icon named "settings power".
+  static const IconData settings_power = IconData(0xe9d4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">settings_power</i> &#x2014; material icon named "settings power sharp".
   static const IconData settings_power_sharp = IconData(0xef11, fontFamily: 'MaterialIcons');
@@ -13601,12 +13502,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">settings_remote</i> &#x2014; material icon named "settings remote sharp".
   static const IconData settings_remote_sharp = IconData(0xef12, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">settings</i> &#x2014; material icon named "settings rounded".
-  static const IconData settings_rounded = IconData(0xf442, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">settings</i> &#x2014; material icon named "settings sharp".
-  static const IconData settings_sharp = IconData(0xef13, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">settings_system_daydream</i> &#x2014; material icon named "settings system daydream".
   static const IconData settings_system_daydream = IconData(0xe9d6, fontFamily: 'MaterialIcons');
@@ -13632,6 +13527,18 @@ class Icons {
   /// <i class="material-icons-sharp md-36">settings_voice</i> &#x2014; material icon named "settings voice sharp".
   static const IconData settings_voice_sharp = IconData(0xef15, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">7k</i> &#x2014; material icon named "7k".
+  static const IconData seven_k = IconData(0xe54f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">7k_plus</i> &#x2014; material icon named "7k plus".
+  static const IconData seven_k_plus = IconData(0xe550, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">7mp</i> &#x2014; material icon named "7mp".
+  static const IconData seven_mp = IconData(0xe551, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">17mp</i> &#x2014; material icon named "17mp".
+  static const IconData seventeen_mp = IconData(0xe532, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">share</i> &#x2014; material icon named "share".
   static const IconData share = IconData(0xe9d8, fontFamily: 'MaterialIcons');
 
@@ -13647,17 +13554,17 @@ class Icons {
   /// <i class="material-icons md-36">shield</i> &#x2014; material icon named "shield".
   static const IconData shield = IconData(0xe9d9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">shop</i> &#x2014; material icon named "shop sharp".
+  static const IconData shop_sharp = IconData(0xef17, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">shop</i> &#x2014; material icon named "shop rounded".
+  static const IconData shop_rounded = IconData(0xf446, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">shop</i> &#x2014; material icon named "shop".
   static const IconData shop = IconData(0xe9da, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">shop</i> &#x2014; material icon named "shop outlined".
   static const IconData shop_outlined = IconData(0xe413, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">shop</i> &#x2014; material icon named "shop rounded".
-  static const IconData shop_rounded = IconData(0xf446, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">shop</i> &#x2014; material icon named "shop sharp".
-  static const IconData shop_sharp = IconData(0xef17, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">shop_two</i> &#x2014; material icon named "shop two".
   static const IconData shop_two = IconData(0xe9db, fontFamily: 'MaterialIcons');
@@ -13710,14 +13617,14 @@ class Icons {
   /// <i class="material-icons md-36">short_text</i> &#x2014; material icon named "short text".
   static const IconData short_text = IconData(0xe9df, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
+  /// <i class="material-icons-sharp md-36">short_text</i> &#x2014; material icon named "short text sharp".
+  static const IconData short_text_sharp = IconData(0xef1c, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons-outlined md-36">short_text</i> &#x2014; material icon named "short text outlined".
   static const IconData short_text_outlined = IconData(0xe418, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">short_text</i> &#x2014; material icon named "short text rounded".
   static const IconData short_text_rounded = IconData(0xf44b, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">short_text</i> &#x2014; material icon named "short text sharp".
-  static const IconData short_text_sharp = IconData(0xef1c, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">show_chart</i> &#x2014; material icon named "show chart".
   static const IconData show_chart = IconData(0xe9e0, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -13734,9 +13641,6 @@ class Icons {
   /// <i class="material-icons md-36">shuffle</i> &#x2014; material icon named "shuffle".
   static const IconData shuffle = IconData(0xe9e1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">shuffle_on</i> &#x2014; material icon named "shuffle on".
-  static const IconData shuffle_on = IconData(0xe9e2, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">shuffle</i> &#x2014; material icon named "shuffle outlined".
   static const IconData shuffle_outlined = IconData(0xe41a, fontFamily: 'MaterialIcons');
 
@@ -13745,6 +13649,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">shuffle</i> &#x2014; material icon named "shuffle sharp".
   static const IconData shuffle_sharp = IconData(0xef1e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">shuffle_on</i> &#x2014; material icon named "shuffle on".
+  static const IconData shuffle_on = IconData(0xe9e2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">shutter_speed</i> &#x2014; material icon named "shutter speed".
   static const IconData shutter_speed = IconData(0xe9e3, fontFamily: 'MaterialIcons');
@@ -13770,6 +13677,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">sick</i> &#x2014; material icon named "sick sharp".
   static const IconData sick_sharp = IconData(0xef20, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">signal_cellular_4_bar</i> &#x2014; material icon named "signal cellular 4 bar sharp".
+  static const IconData signal_cellular_4_bar_sharp = IconData(0xef21, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">signal_cellular_4_bar</i> &#x2014; material icon named "signal cellular 4 bar".
   static const IconData signal_cellular_4_bar = IconData(0xe9e5, fontFamily: 'MaterialIcons');
 
@@ -13778,9 +13688,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">signal_cellular_4_bar</i> &#x2014; material icon named "signal cellular 4 bar rounded".
   static const IconData signal_cellular_4_bar_rounded = IconData(0xf450, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">signal_cellular_4_bar</i> &#x2014; material icon named "signal cellular 4 bar sharp".
-  static const IconData signal_cellular_4_bar_sharp = IconData(0xef21, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">signal_cellular_alt</i> &#x2014; material icon named "signal cellular alt".
   static const IconData signal_cellular_alt = IconData(0xe9e6, fontFamily: 'MaterialIcons');
@@ -13830,6 +13737,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">signal_cellular_null</i> &#x2014; material icon named "signal cellular null sharp".
   static const IconData signal_cellular_null_sharp = IconData(0xef25, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">signal_cellular_off</i> &#x2014; material icon named "signal cellular off sharp".
+  static const IconData signal_cellular_off_sharp = IconData(0xef26, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">signal_cellular_off</i> &#x2014; material icon named "signal cellular off".
   static const IconData signal_cellular_off = IconData(0xe9ea, fontFamily: 'MaterialIcons');
 
@@ -13839,11 +13749,17 @@ class Icons {
   /// <i class="material-icons-round md-36">signal_cellular_off</i> &#x2014; material icon named "signal cellular off rounded".
   static const IconData signal_cellular_off_rounded = IconData(0xf455, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">signal_cellular_off</i> &#x2014; material icon named "signal cellular off sharp".
-  static const IconData signal_cellular_off_sharp = IconData(0xef26, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar".
   static const IconData signal_wifi_4_bar = IconData(0xe9eb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar outlined".
+  static const IconData signal_wifi_4_bar_outlined = IconData(0xe424, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar rounded".
+  static const IconData signal_wifi_4_bar_rounded = IconData(0xf457, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar sharp".
+  static const IconData signal_wifi_4_bar_sharp = IconData(0xef28, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">signal_wifi_4_bar_lock</i> &#x2014; material icon named "signal wifi 4 bar lock".
   static const IconData signal_wifi_4_bar_lock = IconData(0xe9ec, fontFamily: 'MaterialIcons');
@@ -13857,32 +13773,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">signal_wifi_4_bar_lock</i> &#x2014; material icon named "signal wifi 4 bar lock sharp".
   static const IconData signal_wifi_4_bar_lock_sharp = IconData(0xef27, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar outlined".
-  static const IconData signal_wifi_4_bar_outlined = IconData(0xe424, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar rounded".
-  static const IconData signal_wifi_4_bar_rounded = IconData(0xf457, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">signal_wifi_4_bar</i> &#x2014; material icon named "signal wifi 4 bar sharp".
-  static const IconData signal_wifi_4_bar_sharp = IconData(0xef28, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">signal_wifi_off</i> &#x2014; material icon named "signal wifi off".
   static const IconData signal_wifi_off = IconData(0xe9ed, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">signal_wifi_off</i> &#x2014; material icon named "signal wifi off outlined".
-  static const IconData signal_wifi_off_outlined = IconData(0xe425, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">signal_wifi_off</i> &#x2014; material icon named "signal wifi off rounded".
   static const IconData signal_wifi_off_rounded = IconData(0xf458, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">signal_wifi_off</i> &#x2014; material icon named "signal wifi off outlined".
+  static const IconData signal_wifi_off_outlined = IconData(0xe425, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">signal_wifi_off</i> &#x2014; material icon named "signal wifi off sharp".
   static const IconData signal_wifi_off_sharp = IconData(0xef29, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sim_card</i> &#x2014; material icon named "sim card".
   static const IconData sim_card = IconData(0xe9ee, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">sim_card_alert</i> &#x2014; material icon named "sim card alert".
-  static const IconData sim_card_alert = IconData(0xe9ef, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">sim_card</i> &#x2014; material icon named "sim card outlined".
   static const IconData sim_card_outlined = IconData(0xe426, fontFamily: 'MaterialIcons');
@@ -13892,6 +13796,9 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">sim_card</i> &#x2014; material icon named "sim card sharp".
   static const IconData sim_card_sharp = IconData(0xef2a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sim_card_alert</i> &#x2014; material icon named "sim card alert".
+  static const IconData sim_card_alert = IconData(0xe9ef, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">single_bed</i> &#x2014; material icon named "single bed".
   static const IconData single_bed = IconData(0xe9f0, fontFamily: 'MaterialIcons');
@@ -13904,6 +13811,30 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">single_bed</i> &#x2014; material icon named "single bed sharp".
   static const IconData single_bed_sharp = IconData(0xef2b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart sharp".
+  static const IconData six_ft_apart_sharp = IconData(0xeb04, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart rounded".
+  static const IconData six_ft_apart_rounded = IconData(0xf032, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart outlined".
+  static const IconData six_ft_apart_outlined = IconData(0xe004, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">6_ft_apart</i> &#x2014; material icon named "6 ft apart".
+  static const IconData six_ft_apart = IconData(0xe54b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">6k</i> &#x2014; material icon named "6k".
+  static const IconData six_k = IconData(0xe54c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">6k_plus</i> &#x2014; material icon named "6k plus".
+  static const IconData six_k_plus = IconData(0xe54d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">6mp</i> &#x2014; material icon named "6mp".
+  static const IconData six_mp = IconData(0xe54e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">16mp</i> &#x2014; material icon named "16mp".
+  static const IconData sixteen_mp = IconData(0xe531, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">skip_next</i> &#x2014; material icon named "skip next".
   static const IconData skip_next = IconData(0xe9f1, fontFamily: 'MaterialIcons');
@@ -13920,14 +13851,14 @@ class Icons {
   /// <i class="material-icons md-36">skip_previous</i> &#x2014; material icon named "skip previous".
   static const IconData skip_previous = IconData(0xe9f2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">skip_previous</i> &#x2014; material icon named "skip previous outlined".
-  static const IconData skip_previous_outlined = IconData(0xe429, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">skip_previous</i> &#x2014; material icon named "skip previous sharp".
+  static const IconData skip_previous_sharp = IconData(0xef2d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">skip_previous</i> &#x2014; material icon named "skip previous rounded".
   static const IconData skip_previous_rounded = IconData(0xf45c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">skip_previous</i> &#x2014; material icon named "skip previous sharp".
-  static const IconData skip_previous_sharp = IconData(0xef2d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">skip_previous</i> &#x2014; material icon named "skip previous outlined".
+  static const IconData skip_previous_outlined = IconData(0xe429, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">slideshow</i> &#x2014; material icon named "slideshow".
   static const IconData slideshow = IconData(0xe9f3, fontFamily: 'MaterialIcons');
@@ -13980,14 +13911,14 @@ class Icons {
   /// <i class="material-icons md-36">smoke_free</i> &#x2014; material icon named "smoke free".
   static const IconData smoke_free = IconData(0xe9f7, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">smoke_free</i> &#x2014; material icon named "smoke free sharp".
+  static const IconData smoke_free_sharp = IconData(0xef32, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">smoke_free</i> &#x2014; material icon named "smoke free outlined".
   static const IconData smoke_free_outlined = IconData(0xe42e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">smoke_free</i> &#x2014; material icon named "smoke free rounded".
   static const IconData smoke_free_rounded = IconData(0xf461, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">smoke_free</i> &#x2014; material icon named "smoke free sharp".
-  static const IconData smoke_free_sharp = IconData(0xef32, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">smoking_rooms</i> &#x2014; material icon named "smoking rooms".
   static const IconData smoking_rooms = IconData(0xe9f8, fontFamily: 'MaterialIcons');
@@ -14001,8 +13932,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">smoking_rooms</i> &#x2014; material icon named "smoking rooms sharp".
   static const IconData smoking_rooms_sharp = IconData(0xef33, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">sms</i> &#x2014; material icon named "sms sharp".
+  static const IconData sms_sharp = IconData(0xef35, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">sms</i> &#x2014; material icon named "sms".
   static const IconData sms = IconData(0xe9f9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sms</i> &#x2014; material icon named "sms outlined".
+  static const IconData sms_outlined = IconData(0xe431, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">sms</i> &#x2014; material icon named "sms rounded".
+  static const IconData sms_rounded = IconData(0xf464, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sms_failed</i> &#x2014; material icon named "sms failed".
   static const IconData sms_failed = IconData(0xe9fa, fontFamily: 'MaterialIcons');
@@ -14015,15 +13955,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">sms_failed</i> &#x2014; material icon named "sms failed sharp".
   static const IconData sms_failed_sharp = IconData(0xef34, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sms</i> &#x2014; material icon named "sms outlined".
-  static const IconData sms_outlined = IconData(0xe431, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sms</i> &#x2014; material icon named "sms rounded".
-  static const IconData sms_rounded = IconData(0xf464, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sms</i> &#x2014; material icon named "sms sharp".
-  static const IconData sms_sharp = IconData(0xef35, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">snippet_folder</i> &#x2014; material icon named "snippet folder".
   static const IconData snippet_folder = IconData(0xe9fb, fontFamily: 'MaterialIcons');
@@ -14049,77 +13980,77 @@ class Icons {
   /// <i class="material-icons-sharp md-36">snooze</i> &#x2014; material icon named "snooze sharp".
   static const IconData snooze_sharp = IconData(0xef37, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">soap</i> &#x2014; material icon named "soap".
-  static const IconData soap = IconData(0xe9fd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">soap</i> &#x2014; material icon named "soap outlined".
-  static const IconData soap_outlined = IconData(0xe434, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">soap</i> &#x2014; material icon named "soap sharp".
+  static const IconData soap_sharp = IconData(0xef38, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">soap</i> &#x2014; material icon named "soap rounded".
   static const IconData soap_rounded = IconData(0xf467, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">soap</i> &#x2014; material icon named "soap sharp".
-  static const IconData soap_sharp = IconData(0xef38, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">soap</i> &#x2014; material icon named "soap outlined".
+  static const IconData soap_outlined = IconData(0xe434, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">soap</i> &#x2014; material icon named "soap".
+  static const IconData soap = IconData(0xe9fd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sort</i> &#x2014; material icon named "sort".
   static const IconData sort = IconData(0xe9fe, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha".
-  static const IconData sort_by_alpha = IconData(0xe9ff, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha outlined".
-  static const IconData sort_by_alpha_outlined = IconData(0xe435, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha rounded".
-  static const IconData sort_by_alpha_rounded = IconData(0xf468, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha sharp".
-  static const IconData sort_by_alpha_sharp = IconData(0xef39, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sort</i> &#x2014; material icon named "sort outlined".
-  static const IconData sort_outlined = IconData(0xe436, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-sharp md-36">sort</i> &#x2014; material icon named "sort sharp".
+  static const IconData sort_sharp = IconData(0xef3a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">sort</i> &#x2014; material icon named "sort rounded".
   static const IconData sort_rounded = IconData(0xf469, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-sharp md-36">sort</i> &#x2014; material icon named "sort sharp".
-  static const IconData sort_sharp = IconData(0xef3a, fontFamily: 'MaterialIcons', matchTextDirection: true);
+  /// <i class="material-icons-outlined md-36">sort</i> &#x2014; material icon named "sort outlined".
+  static const IconData sort_outlined = IconData(0xe436, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">source</i> &#x2014; material icon named "source".
-  static const IconData source = IconData(0xea00, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha sharp".
+  static const IconData sort_by_alpha_sharp = IconData(0xef39, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">source</i> &#x2014; material icon named "source outlined".
-  static const IconData source_outlined = IconData(0xe437, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha rounded".
+  static const IconData sort_by_alpha_rounded = IconData(0xf468, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">source</i> &#x2014; material icon named "source rounded".
-  static const IconData source_rounded = IconData(0xf46a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha outlined".
+  static const IconData sort_by_alpha_outlined = IconData(0xe435, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha".
+  static const IconData sort_by_alpha = IconData(0xe9ff, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">source</i> &#x2014; material icon named "source sharp".
   static const IconData source_sharp = IconData(0xef3b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">source</i> &#x2014; material icon named "source rounded".
+  static const IconData source_rounded = IconData(0xf46a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">source</i> &#x2014; material icon named "source outlined".
+  static const IconData source_outlined = IconData(0xe437, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">source</i> &#x2014; material icon named "source".
+  static const IconData source = IconData(0xea00, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">south</i> &#x2014; material icon named "south rounded".
+  static const IconData south_rounded = IconData(0xf46c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">south</i> &#x2014; material icon named "south outlined".
+  static const IconData south_outlined = IconData(0xe439, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">south</i> &#x2014; material icon named "south".
   static const IconData south = IconData(0xea01, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">south</i> &#x2014; material icon named "south sharp".
+  static const IconData south_sharp = IconData(0xef3d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">south_east</i> &#x2014; material icon named "south east sharp".
+  static const IconData south_east_sharp = IconData(0xef3c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">south_east</i> &#x2014; material icon named "south east rounded".
+  static const IconData south_east_rounded = IconData(0xf46b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">south_east</i> &#x2014; material icon named "south east".
   static const IconData south_east = IconData(0xea02, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">south_east</i> &#x2014; material icon named "south east outlined".
   static const IconData south_east_outlined = IconData(0xe438, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">south_east</i> &#x2014; material icon named "south east rounded".
-  static const IconData south_east_rounded = IconData(0xf46b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">south_east</i> &#x2014; material icon named "south east sharp".
-  static const IconData south_east_sharp = IconData(0xef3c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">south</i> &#x2014; material icon named "south outlined".
-  static const IconData south_outlined = IconData(0xe439, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">south</i> &#x2014; material icon named "south rounded".
-  static const IconData south_rounded = IconData(0xf46c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">south</i> &#x2014; material icon named "south sharp".
-  static const IconData south_sharp = IconData(0xef3d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">south_west</i> &#x2014; material icon named "south west".
   static const IconData south_west = IconData(0xea03, fontFamily: 'MaterialIcons');
@@ -14133,6 +14064,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">south_west</i> &#x2014; material icon named "south west sharp".
   static const IconData south_west_sharp = IconData(0xef3e, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">spa</i> &#x2014; material icon named "spa sharp".
+  static const IconData spa_sharp = IconData(0xef3f, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">spa</i> &#x2014; material icon named "spa".
   static const IconData spa = IconData(0xea04, fontFamily: 'MaterialIcons');
 
@@ -14141,12 +14075,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">spa</i> &#x2014; material icon named "spa rounded".
   static const IconData spa_rounded = IconData(0xf46e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">spa</i> &#x2014; material icon named "spa sharp".
-  static const IconData spa_sharp = IconData(0xef3f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">space_bar</i> &#x2014; material icon named "space bar".
-  static const IconData space_bar = IconData(0xea05, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">space_bar</i> &#x2014; material icon named "space bar outlined".
   static const IconData space_bar_outlined = IconData(0xe43c, fontFamily: 'MaterialIcons');
@@ -14157,8 +14085,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">space_bar</i> &#x2014; material icon named "space bar sharp".
   static const IconData space_bar_sharp = IconData(0xef40, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">space_bar</i> &#x2014; material icon named "space bar".
+  static const IconData space_bar = IconData(0xea05, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">speaker</i> &#x2014; material icon named "speaker".
   static const IconData speaker = IconData(0xea06, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">speaker</i> &#x2014; material icon named "speaker outlined".
+  static const IconData speaker_outlined = IconData(0xe440, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">speaker</i> &#x2014; material icon named "speaker rounded".
+  static const IconData speaker_rounded = IconData(0xf474, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">speaker</i> &#x2014; material icon named "speaker sharp".
+  static const IconData speaker_sharp = IconData(0xef45, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">speaker_group</i> &#x2014; material icon named "speaker group".
   static const IconData speaker_group = IconData(0xea07, fontFamily: 'MaterialIcons');
@@ -14175,8 +14115,14 @@ class Icons {
   /// <i class="material-icons md-36">speaker_notes</i> &#x2014; material icon named "speaker notes".
   static const IconData speaker_notes = IconData(0xea08, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">speaker_notes_off</i> &#x2014; material icon named "speaker notes off".
-  static const IconData speaker_notes_off = IconData(0xea09, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">speaker_notes</i> &#x2014; material icon named "speaker notes outlined".
+  static const IconData speaker_notes_outlined = IconData(0xe43f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">speaker_notes</i> &#x2014; material icon named "speaker notes rounded".
+  static const IconData speaker_notes_rounded = IconData(0xf472, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">speaker_notes</i> &#x2014; material icon named "speaker notes sharp".
+  static const IconData speaker_notes_sharp = IconData(0xef43, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">speaker_notes_off</i> &#x2014; material icon named "speaker notes off outlined".
   static const IconData speaker_notes_off_outlined = IconData(0xe43e, fontFamily: 'MaterialIcons');
@@ -14187,17 +14133,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">speaker_notes_off</i> &#x2014; material icon named "speaker notes off sharp".
   static const IconData speaker_notes_off_sharp = IconData(0xef42, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">speaker_notes</i> &#x2014; material icon named "speaker notes outlined".
-  static const IconData speaker_notes_outlined = IconData(0xe43f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">speaker_notes</i> &#x2014; material icon named "speaker notes rounded".
-  static const IconData speaker_notes_rounded = IconData(0xf472, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">speaker_notes</i> &#x2014; material icon named "speaker notes sharp".
-  static const IconData speaker_notes_sharp = IconData(0xef43, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">speaker</i> &#x2014; material icon named "speaker outlined".
-  static const IconData speaker_outlined = IconData(0xe440, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">speaker_notes_off</i> &#x2014; material icon named "speaker notes off".
+  static const IconData speaker_notes_off = IconData(0xea09, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">speaker_phone</i> &#x2014; material icon named "speaker phone".
   static const IconData speaker_phone = IconData(0xea0a, fontFamily: 'MaterialIcons');
@@ -14205,17 +14142,11 @@ class Icons {
   /// <i class="material-icons-outlined md-36">speaker_phone</i> &#x2014; material icon named "speaker phone outlined".
   static const IconData speaker_phone_outlined = IconData(0xe441, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">speaker_phone</i> &#x2014; material icon named "speaker phone rounded".
-  static const IconData speaker_phone_rounded = IconData(0xf473, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">speaker_phone</i> &#x2014; material icon named "speaker phone sharp".
   static const IconData speaker_phone_sharp = IconData(0xef44, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">speaker</i> &#x2014; material icon named "speaker rounded".
-  static const IconData speaker_rounded = IconData(0xf474, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">speaker</i> &#x2014; material icon named "speaker sharp".
-  static const IconData speaker_sharp = IconData(0xef45, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">speaker_phone</i> &#x2014; material icon named "speaker phone rounded".
+  static const IconData speaker_phone_rounded = IconData(0xf473, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">speed</i> &#x2014; material icon named "speed".
   static const IconData speed = IconData(0xea0b, fontFamily: 'MaterialIcons');
@@ -14240,6 +14171,15 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">spellcheck</i> &#x2014; material icon named "spellcheck sharp".
   static const IconData spellcheck_sharp = IconData(0xef47, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">sports</i> &#x2014; material icon named "sports sharp".
+  static const IconData sports_sharp = IconData(0xef55, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">sports</i> &#x2014; material icon named "sports rounded".
+  static const IconData sports_rounded = IconData(0xf483, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sports</i> &#x2014; material icon named "sports outlined".
+  static const IconData sports_outlined = IconData(0xe450, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sports</i> &#x2014; material icon named "sports".
   static const IconData sports = IconData(0xea0d, fontFamily: 'MaterialIcons');
@@ -14283,14 +14223,14 @@ class Icons {
   /// <i class="material-icons md-36">sports_cricket</i> &#x2014; material icon named "sports cricket".
   static const IconData sports_cricket = IconData(0xea11, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">sports_cricket</i> &#x2014; material icon named "sports cricket sharp".
+  static const IconData sports_cricket_sharp = IconData(0xef4b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">sports_cricket</i> &#x2014; material icon named "sports cricket outlined".
   static const IconData sports_cricket_outlined = IconData(0xe447, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_cricket</i> &#x2014; material icon named "sports cricket rounded".
   static const IconData sports_cricket_rounded = IconData(0xf47a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sports_cricket</i> &#x2014; material icon named "sports cricket sharp".
-  static const IconData sports_cricket_sharp = IconData(0xef4b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sports_esports</i> &#x2014; material icon named "sports esports".
   static const IconData sports_esports = IconData(0xea12, fontFamily: 'MaterialIcons');
@@ -14316,6 +14256,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">sports_football</i> &#x2014; material icon named "sports football sharp".
   static const IconData sports_football_sharp = IconData(0xef4d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">sports_golf</i> &#x2014; material icon named "sports golf sharp".
+  static const IconData sports_golf_sharp = IconData(0xef4e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">sports_golf</i> &#x2014; material icon named "sports golf".
   static const IconData sports_golf = IconData(0xea14, fontFamily: 'MaterialIcons');
 
@@ -14325,95 +14268,80 @@ class Icons {
   /// <i class="material-icons-round md-36">sports_golf</i> &#x2014; material icon named "sports golf rounded".
   static const IconData sports_golf_rounded = IconData(0xf47d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">sports_golf</i> &#x2014; material icon named "sports golf sharp".
-  static const IconData sports_golf_sharp = IconData(0xef4e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">sports_handball</i> &#x2014; material icon named "sports handball".
-  static const IconData sports_handball = IconData(0xea15, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sports_handball</i> &#x2014; material icon named "sports handball rounded".
+  static const IconData sports_handball_rounded = IconData(0xf47e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">sports_handball</i> &#x2014; material icon named "sports handball outlined".
   static const IconData sports_handball_outlined = IconData(0xe44b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sports_handball</i> &#x2014; material icon named "sports handball rounded".
-  static const IconData sports_handball_rounded = IconData(0xf47e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sports_handball</i> &#x2014; material icon named "sports handball".
+  static const IconData sports_handball = IconData(0xea15, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">sports_handball</i> &#x2014; material icon named "sports handball sharp".
   static const IconData sports_handball_sharp = IconData(0xef4f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sports_hockey</i> &#x2014; material icon named "sports hockey".
-  static const IconData sports_hockey = IconData(0xea16, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_hockey</i> &#x2014; material icon named "sports hockey outlined".
-  static const IconData sports_hockey_outlined = IconData(0xe44c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">sports_hockey</i> &#x2014; material icon named "sports hockey sharp".
+  static const IconData sports_hockey_sharp = IconData(0xef50, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_hockey</i> &#x2014; material icon named "sports hockey rounded".
   static const IconData sports_hockey_rounded = IconData(0xf47f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">sports_hockey</i> &#x2014; material icon named "sports hockey sharp".
-  static const IconData sports_hockey_sharp = IconData(0xef50, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">sports_hockey</i> &#x2014; material icon named "sports hockey outlined".
+  static const IconData sports_hockey_outlined = IconData(0xe44c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi".
-  static const IconData sports_kabaddi = IconData(0xea17, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi outlined".
-  static const IconData sports_kabaddi_outlined = IconData(0xe44d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi rounded".
-  static const IconData sports_kabaddi_rounded = IconData(0xf480, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sports_hockey</i> &#x2014; material icon named "sports hockey".
+  static const IconData sports_hockey = IconData(0xea16, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi sharp".
   static const IconData sports_kabaddi_sharp = IconData(0xef51, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sports_mma</i> &#x2014; material icon named "sports mma".
-  static const IconData sports_mma = IconData(0xea18, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi rounded".
+  static const IconData sports_kabaddi_rounded = IconData(0xf480, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">sports_mma</i> &#x2014; material icon named "sports mma outlined".
-  static const IconData sports_mma_outlined = IconData(0xe44e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi outlined".
+  static const IconData sports_kabaddi_outlined = IconData(0xe44d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sports_kabaddi</i> &#x2014; material icon named "sports kabaddi".
+  static const IconData sports_kabaddi = IconData(0xea17, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_mma</i> &#x2014; material icon named "sports mma rounded".
   static const IconData sports_mma_rounded = IconData(0xf481, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">sports_mma</i> &#x2014; material icon named "sports mma outlined".
+  static const IconData sports_mma_outlined = IconData(0xe44e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sports_mma</i> &#x2014; material icon named "sports mma".
+  static const IconData sports_mma = IconData(0xea18, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">sports_mma</i> &#x2014; material icon named "sports mma sharp".
   static const IconData sports_mma_sharp = IconData(0xef52, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports".
-  static const IconData sports_motorsports = IconData(0xea19, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports outlined".
-  static const IconData sports_motorsports_outlined = IconData(0xe44f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports rounded".
   static const IconData sports_motorsports_rounded = IconData(0xf482, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports outlined".
+  static const IconData sports_motorsports_outlined = IconData(0xe44f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports".
+  static const IconData sports_motorsports = IconData(0xea19, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">sports_motorsports</i> &#x2014; material icon named "sports motorsports sharp".
   static const IconData sports_motorsports_sharp = IconData(0xef53, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports</i> &#x2014; material icon named "sports outlined".
-  static const IconData sports_outlined = IconData(0xe450, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sports</i> &#x2014; material icon named "sports rounded".
-  static const IconData sports_rounded = IconData(0xf483, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">sports_rugby</i> &#x2014; material icon named "sports rugby".
-  static const IconData sports_rugby = IconData(0xea1a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_rugby</i> &#x2014; material icon named "sports rugby outlined".
-  static const IconData sports_rugby_outlined = IconData(0xe451, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_rugby</i> &#x2014; material icon named "sports rugby rounded".
   static const IconData sports_rugby_rounded = IconData(0xf484, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">sports_rugby</i> &#x2014; material icon named "sports rugby outlined".
+  static const IconData sports_rugby_outlined = IconData(0xe451, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">sports_rugby</i> &#x2014; material icon named "sports rugby sharp".
   static const IconData sports_rugby_sharp = IconData(0xef54, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">sports</i> &#x2014; material icon named "sports sharp".
-  static const IconData sports_sharp = IconData(0xef55, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sports_rugby</i> &#x2014; material icon named "sports rugby".
+  static const IconData sports_rugby = IconData(0xea1a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sports_soccer</i> &#x2014; material icon named "sports soccer".
   static const IconData sports_soccer = IconData(0xea1b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_soccer</i> &#x2014; material icon named "sports soccer outlined".
-  static const IconData sports_soccer_outlined = IconData(0xe452, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">sports_soccer</i> &#x2014; material icon named "sports soccer rounded".
   static const IconData sports_soccer_rounded = IconData(0xf485, fontFamily: 'MaterialIcons');
@@ -14421,56 +14349,62 @@ class Icons {
   /// <i class="material-icons-sharp md-36">sports_soccer</i> &#x2014; material icon named "sports soccer sharp".
   static const IconData sports_soccer_sharp = IconData(0xef56, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sports_tennis</i> &#x2014; material icon named "sports tennis".
-  static const IconData sports_tennis = IconData(0xea1c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">sports_tennis</i> &#x2014; material icon named "sports tennis outlined".
-  static const IconData sports_tennis_outlined = IconData(0xe453, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">sports_tennis</i> &#x2014; material icon named "sports tennis rounded".
-  static const IconData sports_tennis_rounded = IconData(0xf486, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">sports_soccer</i> &#x2014; material icon named "sports soccer outlined".
+  static const IconData sports_soccer_outlined = IconData(0xe452, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">sports_tennis</i> &#x2014; material icon named "sports tennis sharp".
   static const IconData sports_tennis_sharp = IconData(0xef57, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball".
-  static const IconData sports_volleyball = IconData(0xea1d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sports_tennis</i> &#x2014; material icon named "sports tennis".
+  static const IconData sports_tennis = IconData(0xea1c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">sports_tennis</i> &#x2014; material icon named "sports tennis rounded".
+  static const IconData sports_tennis_rounded = IconData(0xf486, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sports_tennis</i> &#x2014; material icon named "sports tennis outlined".
+  static const IconData sports_tennis_outlined = IconData(0xe453, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball outlined".
   static const IconData sports_volleyball_outlined = IconData(0xe454, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball rounded".
-  static const IconData sports_volleyball_rounded = IconData(0xf487, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball sharp".
   static const IconData sports_volleyball_sharp = IconData(0xef58, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">square_foot</i> &#x2014; material icon named "square foot".
-  static const IconData square_foot = IconData(0xea1e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball rounded".
+  static const IconData sports_volleyball_rounded = IconData(0xf487, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">square_foot</i> &#x2014; material icon named "square foot outlined".
-  static const IconData square_foot_outlined = IconData(0xe455, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">square_foot</i> &#x2014; material icon named "square foot rounded".
-  static const IconData square_foot_rounded = IconData(0xf488, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sports_volleyball</i> &#x2014; material icon named "sports volleyball".
+  static const IconData sports_volleyball = IconData(0xea1d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">square_foot</i> &#x2014; material icon named "square foot sharp".
   static const IconData square_foot_sharp = IconData(0xef59, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">square_foot</i> &#x2014; material icon named "square foot rounded".
+  static const IconData square_foot_rounded = IconData(0xf488, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">square_foot</i> &#x2014; material icon named "square foot outlined".
+  static const IconData square_foot_outlined = IconData(0xe455, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">square_foot</i> &#x2014; material icon named "square foot".
+  static const IconData square_foot = IconData(0xea1e, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">stacked_bar_chart</i> &#x2014; material icon named "stacked bar chart".
   static const IconData stacked_bar_chart = IconData(0xea1f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart".
-  static const IconData stacked_line_chart = IconData(0xea20, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart sharp".
+  static const IconData stacked_line_chart_sharp = IconData(0xef5a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart outlined".
   static const IconData stacked_line_chart_outlined = IconData(0xe456, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart".
+  static const IconData stacked_line_chart = IconData(0xea20, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-round md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart rounded".
   static const IconData stacked_line_chart_rounded = IconData(0xf489, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">stacked_line_chart</i> &#x2014; material icon named "stacked line chart sharp".
-  static const IconData stacked_line_chart_sharp = IconData(0xef5a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">stairs</i> &#x2014; material icon named "stairs sharp".
+  static const IconData stairs_sharp = IconData(0xef5b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">stairs</i> &#x2014; material icon named "stairs".
   static const IconData stairs = IconData(0xea21, fontFamily: 'MaterialIcons');
@@ -14481,14 +14415,26 @@ class Icons {
   /// <i class="material-icons-round md-36">stairs</i> &#x2014; material icon named "stairs rounded".
   static const IconData stairs_rounded = IconData(0xf48a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">stairs</i> &#x2014; material icon named "stairs sharp".
-  static const IconData stairs_sharp = IconData(0xef5b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">star</i> &#x2014; material icon named "star rounded".
+  static const IconData star_rounded = IconData(0xf48f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">star</i> &#x2014; material icon named "star outlined".
+  static const IconData star_outlined = IconData(0xe45c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">star</i> &#x2014; material icon named "star".
   static const IconData star = IconData(0xea22, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">star</i> &#x2014; material icon named "star sharp".
+  static const IconData star_sharp = IconData(0xef62, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">star_border</i> &#x2014; material icon named "star border".
   static const IconData star_border = IconData(0xea23, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">star_border</i> &#x2014; material icon named "star border rounded".
+  static const IconData star_border_rounded = IconData(0xf48b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">star_border</i> &#x2014; material icon named "star border sharp".
+  static const IconData star_border_sharp = IconData(0xef5d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">star_border</i> &#x2014; material icon named "star border outlined".
   static const IconData star_border_outlined = IconData(0xe458, fontFamily: 'MaterialIcons');
@@ -14498,12 +14444,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">star_border_purple500</i> &#x2014; material icon named "star border purple500 sharp".
   static const IconData star_border_purple500_sharp = IconData(0xef5c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">star_border</i> &#x2014; material icon named "star border rounded".
-  static const IconData star_border_rounded = IconData(0xf48b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">star_border</i> &#x2014; material icon named "star border sharp".
-  static const IconData star_border_sharp = IconData(0xef5d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">star_half</i> &#x2014; material icon named "star half".
   static const IconData star_half = IconData(0xea24, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -14529,9 +14469,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">star_outline</i> &#x2014; material icon named "star outline sharp".
   static const IconData star_outline_sharp = IconData(0xef5f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">star</i> &#x2014; material icon named "star outlined".
-  static const IconData star_outlined = IconData(0xe45c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">star_purple500</i> &#x2014; material icon named "star purple500 outlined".
   static const IconData star_purple500_outlined = IconData(0xe45d, fontFamily: 'MaterialIcons');
 
@@ -14549,12 +14486,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">star_rate</i> &#x2014; material icon named "star rate sharp".
   static const IconData star_rate_sharp = IconData(0xef61, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">star</i> &#x2014; material icon named "star rounded".
-  static const IconData star_rounded = IconData(0xf48f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">star</i> &#x2014; material icon named "star sharp".
-  static const IconData star_sharp = IconData(0xef62, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">stars</i> &#x2014; material icon named "stars".
   static const IconData stars = IconData(0xea27, fontFamily: 'MaterialIcons');
@@ -14604,17 +14535,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">stay_primary_landscape</i> &#x2014; material icon named "stay primary landscape sharp".
   static const IconData stay_primary_landscape_sharp = IconData(0xef66, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait sharp".
+  static const IconData stay_primary_portrait_sharp = IconData(0xef67, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait".
   static const IconData stay_primary_portrait = IconData(0xea2b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait outlined".
-  static const IconData stay_primary_portrait_outlined = IconData(0xe463, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait rounded".
   static const IconData stay_primary_portrait_rounded = IconData(0xf494, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait sharp".
-  static const IconData stay_primary_portrait_sharp = IconData(0xef67, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">stay_primary_portrait</i> &#x2014; material icon named "stay primary portrait outlined".
+  static const IconData stay_primary_portrait_outlined = IconData(0xe463, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sticky_note_2</i> &#x2014; material icon named "sticky note 2".
   static const IconData sticky_note_2 = IconData(0xea2c, fontFamily: 'MaterialIcons');
@@ -14631,6 +14562,15 @@ class Icons {
   /// <i class="material-icons md-36">stop</i> &#x2014; material icon named "stop".
   static const IconData stop = IconData(0xea2d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">stop</i> &#x2014; material icon named "stop outlined".
+  static const IconData stop_outlined = IconData(0xe466, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">stop</i> &#x2014; material icon named "stop rounded".
+  static const IconData stop_rounded = IconData(0xf497, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">stop</i> &#x2014; material icon named "stop sharp".
+  static const IconData stop_sharp = IconData(0xef6b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">stop_circle</i> &#x2014; material icon named "stop circle".
   static const IconData stop_circle = IconData(0xea2e, fontFamily: 'MaterialIcons');
 
@@ -14642,12 +14582,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">stop_circle</i> &#x2014; material icon named "stop circle sharp".
   static const IconData stop_circle_sharp = IconData(0xef69, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">stop</i> &#x2014; material icon named "stop outlined".
-  static const IconData stop_outlined = IconData(0xe466, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">stop</i> &#x2014; material icon named "stop rounded".
-  static const IconData stop_rounded = IconData(0xf497, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">stop_screen_share</i> &#x2014; material icon named "stop screen share".
   static const IconData stop_screen_share = IconData(0xea2f, fontFamily: 'MaterialIcons');
@@ -14661,23 +14595,29 @@ class Icons {
   /// <i class="material-icons-sharp md-36">stop_screen_share</i> &#x2014; material icon named "stop screen share sharp".
   static const IconData stop_screen_share_sharp = IconData(0xef6a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">stop</i> &#x2014; material icon named "stop sharp".
-  static const IconData stop_sharp = IconData(0xef6b, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">storage</i> &#x2014; material icon named "storage".
   static const IconData storage = IconData(0xea30, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">storage</i> &#x2014; material icon named "storage outlined".
-  static const IconData storage_outlined = IconData(0xe468, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">storage</i> &#x2014; material icon named "storage rounded".
   static const IconData storage_rounded = IconData(0xf499, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">storage</i> &#x2014; material icon named "storage outlined".
+  static const IconData storage_outlined = IconData(0xe468, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">storage</i> &#x2014; material icon named "storage sharp".
   static const IconData storage_sharp = IconData(0xef6c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">store</i> &#x2014; material icon named "store".
   static const IconData store = IconData(0xea31, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">store</i> &#x2014; material icon named "store outlined".
+  static const IconData store_outlined = IconData(0xe46a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">store</i> &#x2014; material icon named "store rounded".
+  static const IconData store_rounded = IconData(0xf49b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">store</i> &#x2014; material icon named "store sharp".
+  static const IconData store_sharp = IconData(0xef6e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">store_mall_directory</i> &#x2014; material icon named "store mall directory".
   static const IconData store_mall_directory = IconData(0xea32, fontFamily: 'MaterialIcons');
@@ -14690,15 +14630,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">store_mall_directory</i> &#x2014; material icon named "store mall directory sharp".
   static const IconData store_mall_directory_sharp = IconData(0xef6d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">store</i> &#x2014; material icon named "store outlined".
-  static const IconData store_outlined = IconData(0xe46a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">store</i> &#x2014; material icon named "store rounded".
-  static const IconData store_rounded = IconData(0xf49b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">store</i> &#x2014; material icon named "store sharp".
-  static const IconData store_sharp = IconData(0xef6e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">storefront</i> &#x2014; material icon named "storefront".
   static const IconData storefront = IconData(0xea33, fontFamily: 'MaterialIcons');
@@ -14727,29 +14658,35 @@ class Icons {
   /// <i class="material-icons md-36">stream</i> &#x2014; material icon named "stream".
   static const IconData stream = IconData(0xea35, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">streetview</i> &#x2014; material icon named "streetview".
-  static const IconData streetview = IconData(0xea36, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">streetview</i> &#x2014; material icon named "streetview outlined".
-  static const IconData streetview_outlined = IconData(0xe46d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">streetview</i> &#x2014; material icon named "streetview sharp".
+  static const IconData streetview_sharp = IconData(0xef71, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">streetview</i> &#x2014; material icon named "streetview rounded".
   static const IconData streetview_rounded = IconData(0xf49e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">streetview</i> &#x2014; material icon named "streetview sharp".
-  static const IconData streetview_sharp = IconData(0xef71, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">streetview</i> &#x2014; material icon named "streetview outlined".
+  static const IconData streetview_outlined = IconData(0xe46d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s".
-  static const IconData strikethrough_s = IconData(0xea37, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">streetview</i> &#x2014; material icon named "streetview".
+  static const IconData streetview = IconData(0xea36, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s outlined".
-  static const IconData strikethrough_s_outlined = IconData(0xe46e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s sharp".
+  static const IconData strikethrough_s_sharp = IconData(0xef72, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s rounded".
   static const IconData strikethrough_s_rounded = IconData(0xf49f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s sharp".
-  static const IconData strikethrough_s_sharp = IconData(0xef72, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s outlined".
+  static const IconData strikethrough_s_outlined = IconData(0xe46e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">strikethrough_s</i> &#x2014; material icon named "strikethrough s".
+  static const IconData strikethrough_s = IconData(0xea37, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">stroller</i> &#x2014; material icon named "stroller sharp".
+  static const IconData stroller_sharp = IconData(0xef73, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">stroller</i> &#x2014; material icon named "stroller rounded".
+  static const IconData stroller_rounded = IconData(0xf4a0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">stroller</i> &#x2014; material icon named "stroller".
   static const IconData stroller = IconData(0xea38, fontFamily: 'MaterialIcons');
@@ -14757,65 +14694,53 @@ class Icons {
   /// <i class="material-icons-outlined md-36">stroller</i> &#x2014; material icon named "stroller outlined".
   static const IconData stroller_outlined = IconData(0xe46f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">stroller</i> &#x2014; material icon named "stroller rounded".
-  static const IconData stroller_rounded = IconData(0xf4a0, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">stroller</i> &#x2014; material icon named "stroller sharp".
-  static const IconData stroller_sharp = IconData(0xef73, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">style</i> &#x2014; material icon named "style".
-  static const IconData style = IconData(0xea39, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">style</i> &#x2014; material icon named "style outlined".
-  static const IconData style_outlined = IconData(0xe470, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">style</i> &#x2014; material icon named "style sharp".
+  static const IconData style_sharp = IconData(0xef74, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">style</i> &#x2014; material icon named "style rounded".
   static const IconData style_rounded = IconData(0xf4a1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">style</i> &#x2014; material icon named "style sharp".
-  static const IconData style_sharp = IconData(0xef74, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">style</i> &#x2014; material icon named "style outlined".
+  static const IconData style_outlined = IconData(0xe470, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left".
-  static const IconData subdirectory_arrow_left = IconData(0xea3a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left outlined".
-  static const IconData subdirectory_arrow_left_outlined = IconData(0xe471, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left rounded".
-  static const IconData subdirectory_arrow_left_rounded = IconData(0xf4a2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">style</i> &#x2014; material icon named "style".
+  static const IconData style = IconData(0xea39, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left sharp".
   static const IconData subdirectory_arrow_left_sharp = IconData(0xef75, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right".
-  static const IconData subdirectory_arrow_right = IconData(0xea3b, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left rounded".
+  static const IconData subdirectory_arrow_left_rounded = IconData(0xf4a2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left outlined".
+  static const IconData subdirectory_arrow_left_outlined = IconData(0xe471, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">subdirectory_arrow_left</i> &#x2014; material icon named "subdirectory arrow left".
+  static const IconData subdirectory_arrow_left = IconData(0xea3a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right outlined".
   static const IconData subdirectory_arrow_right_outlined = IconData(0xe472, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right rounded".
-  static const IconData subdirectory_arrow_right_rounded = IconData(0xf4a3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right".
+  static const IconData subdirectory_arrow_right = IconData(0xea3b, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right sharp".
   static const IconData subdirectory_arrow_right_sharp = IconData(0xef76, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">subdirectory_arrow_right</i> &#x2014; material icon named "subdirectory arrow right rounded".
+  static const IconData subdirectory_arrow_right_rounded = IconData(0xf4a3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">subject</i> &#x2014; material icon named "subject".
   static const IconData subject = IconData(0xea3c, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-outlined md-36">subject</i> &#x2014; material icon named "subject outlined".
-  static const IconData subject_outlined = IconData(0xe473, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-round md-36">subject</i> &#x2014; material icon named "subject rounded".
-  static const IconData subject_rounded = IconData(0xf4a4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-sharp md-36">subject</i> &#x2014; material icon named "subject sharp".
   static const IconData subject_sharp = IconData(0xef77, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons md-36">subscript</i> &#x2014; material icon named "subscript".
-  static const IconData subscript = IconData(0xea3d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">subject</i> &#x2014; material icon named "subject rounded".
+  static const IconData subject_rounded = IconData(0xf4a4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-outlined md-36">subscript</i> &#x2014; material icon named "subscript outlined".
-  static const IconData subscript_outlined = IconData(0xe474, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">subject</i> &#x2014; material icon named "subject outlined".
+  static const IconData subject_outlined = IconData(0xe473, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons-round md-36">subscript</i> &#x2014; material icon named "subscript rounded".
   static const IconData subscript_rounded = IconData(0xf4a5, fontFamily: 'MaterialIcons');
@@ -14823,32 +14748,26 @@ class Icons {
   /// <i class="material-icons-sharp md-36">subscript</i> &#x2014; material icon named "subscript sharp".
   static const IconData subscript_sharp = IconData(0xef78, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">subscriptions</i> &#x2014; material icon named "subscriptions".
-  static const IconData subscriptions = IconData(0xea3e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">subscript</i> &#x2014; material icon named "subscript outlined".
+  static const IconData subscript_outlined = IconData(0xe474, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">subscript</i> &#x2014; material icon named "subscript".
+  static const IconData subscript = IconData(0xea3d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">subscriptions</i> &#x2014; material icon named "subscriptions rounded".
+  static const IconData subscriptions_rounded = IconData(0xf4a6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">subscriptions</i> &#x2014; material icon named "subscriptions outlined".
   static const IconData subscriptions_outlined = IconData(0xe475, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">subscriptions</i> &#x2014; material icon named "subscriptions rounded".
-  static const IconData subscriptions_rounded = IconData(0xf4a6, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">subscriptions</i> &#x2014; material icon named "subscriptions".
+  static const IconData subscriptions = IconData(0xea3e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">subscriptions</i> &#x2014; material icon named "subscriptions sharp".
   static const IconData subscriptions_sharp = IconData(0xef79, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">subtitles</i> &#x2014; material icon named "subtitles".
   static const IconData subtitles = IconData(0xea3f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">subtitles_off</i> &#x2014; material icon named "subtitles off".
-  static const IconData subtitles_off = IconData(0xea40, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">subtitles_off</i> &#x2014; material icon named "subtitles off outlined".
-  static const IconData subtitles_off_outlined = IconData(0xe476, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">subtitles_off</i> &#x2014; material icon named "subtitles off rounded".
-  static const IconData subtitles_off_rounded = IconData(0xf4a7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">subtitles_off</i> &#x2014; material icon named "subtitles off sharp".
-  static const IconData subtitles_off_sharp = IconData(0xef7a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">subtitles</i> &#x2014; material icon named "subtitles outlined".
   static const IconData subtitles_outlined = IconData(0xe477, fontFamily: 'MaterialIcons');
@@ -14859,56 +14778,77 @@ class Icons {
   /// <i class="material-icons-sharp md-36">subtitles</i> &#x2014; material icon named "subtitles sharp".
   static const IconData subtitles_sharp = IconData(0xef7b, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">subtitles_off</i> &#x2014; material icon named "subtitles off rounded".
+  static const IconData subtitles_off_rounded = IconData(0xf4a7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">subtitles_off</i> &#x2014; material icon named "subtitles off".
+  static const IconData subtitles_off = IconData(0xea40, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">subtitles_off</i> &#x2014; material icon named "subtitles off outlined".
+  static const IconData subtitles_off_outlined = IconData(0xe476, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">subtitles_off</i> &#x2014; material icon named "subtitles off sharp".
+  static const IconData subtitles_off_sharp = IconData(0xef7a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">subway</i> &#x2014; material icon named "subway".
   static const IconData subway = IconData(0xea41, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">subway</i> &#x2014; material icon named "subway outlined".
   static const IconData subway_outlined = IconData(0xe478, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">subway</i> &#x2014; material icon named "subway rounded".
-  static const IconData subway_rounded = IconData(0xf4a9, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">subway</i> &#x2014; material icon named "subway sharp".
   static const IconData subway_sharp = IconData(0xef7c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">superscript</i> &#x2014; material icon named "superscript".
-  static const IconData superscript = IconData(0xea42, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">superscript</i> &#x2014; material icon named "superscript outlined".
-  static const IconData superscript_outlined = IconData(0xe479, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">superscript</i> &#x2014; material icon named "superscript rounded".
-  static const IconData superscript_rounded = IconData(0xf4aa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">subway</i> &#x2014; material icon named "subway rounded".
+  static const IconData subway_rounded = IconData(0xf4a9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">superscript</i> &#x2014; material icon named "superscript sharp".
   static const IconData superscript_sharp = IconData(0xef7d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle".
-  static const IconData supervised_user_circle = IconData(0xea43, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">superscript</i> &#x2014; material icon named "superscript rounded".
+  static const IconData superscript_rounded = IconData(0xf4aa, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle outlined".
-  static const IconData supervised_user_circle_outlined = IconData(0xe47a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">superscript</i> &#x2014; material icon named "superscript outlined".
+  static const IconData superscript_outlined = IconData(0xe479, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">superscript</i> &#x2014; material icon named "superscript".
+  static const IconData superscript = IconData(0xea42, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle rounded".
   static const IconData supervised_user_circle_rounded = IconData(0xf4ab, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle outlined".
+  static const IconData supervised_user_circle_outlined = IconData(0xe47a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle".
+  static const IconData supervised_user_circle = IconData(0xea43, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-sharp md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle sharp".
   static const IconData supervised_user_circle_sharp = IconData(0xef7e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">supervisor_account</i> &#x2014; material icon named "supervisor account".
-  static const IconData supervisor_account = IconData(0xea44, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">supervisor_account</i> &#x2014; material icon named "supervisor account rounded".
+  static const IconData supervisor_account_rounded = IconData(0xf4ac, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">supervisor_account</i> &#x2014; material icon named "supervisor account outlined".
   static const IconData supervisor_account_outlined = IconData(0xe47b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">supervisor_account</i> &#x2014; material icon named "supervisor account rounded".
-  static const IconData supervisor_account_rounded = IconData(0xf4ac, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">supervisor_account</i> &#x2014; material icon named "supervisor account".
+  static const IconData supervisor_account = IconData(0xea44, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">supervisor_account</i> &#x2014; material icon named "supervisor account sharp".
   static const IconData supervisor_account_sharp = IconData(0xef7f, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">support</i> &#x2014; material icon named "support".
   static const IconData support = IconData(0xea45, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">support</i> &#x2014; material icon named "support outlined".
+  static const IconData support_outlined = IconData(0xe47d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">support</i> &#x2014; material icon named "support rounded".
+  static const IconData support_rounded = IconData(0xf4ae, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">support</i> &#x2014; material icon named "support sharp".
+  static const IconData support_sharp = IconData(0xef81, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">support_agent</i> &#x2014; material icon named "support agent".
   static const IconData support_agent = IconData(0xea46, fontFamily: 'MaterialIcons');
@@ -14922,14 +14862,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">support_agent</i> &#x2014; material icon named "support agent sharp".
   static const IconData support_agent_sharp = IconData(0xef80, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">support</i> &#x2014; material icon named "support outlined".
-  static const IconData support_outlined = IconData(0xe47d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">support</i> &#x2014; material icon named "support rounded".
-  static const IconData support_rounded = IconData(0xf4ae, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">support</i> &#x2014; material icon named "support sharp".
-  static const IconData support_sharp = IconData(0xef81, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">surround_sound</i> &#x2014; material icon named "surround sound sharp".
+  static const IconData surround_sound_sharp = IconData(0xef82, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">surround_sound</i> &#x2014; material icon named "surround sound".
   static const IconData surround_sound = IconData(0xea47, fontFamily: 'MaterialIcons');
@@ -14939,9 +14873,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">surround_sound</i> &#x2014; material icon named "surround sound rounded".
   static const IconData surround_sound_rounded = IconData(0xf4af, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">surround_sound</i> &#x2014; material icon named "surround sound sharp".
-  static const IconData surround_sound_sharp = IconData(0xef82, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">swap_calls</i> &#x2014; material icon named "swap calls".
   static const IconData swap_calls = IconData(0xea48, fontFamily: 'MaterialIcons');
@@ -14979,20 +14910,11 @@ class Icons {
   /// <i class="material-icons-sharp md-36">swap_horizontal_circle</i> &#x2014; material icon named "swap horizontal circle sharp".
   static const IconData swap_horizontal_circle_sharp = IconData(0xef85, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">swap_vert</i> &#x2014; material icon named "swap vert sharp".
+  static const IconData swap_vert_sharp = IconData(0xef86, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">swap_vert</i> &#x2014; material icon named "swap vert".
   static const IconData swap_vert = IconData(0xea4b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle".
-  static const IconData swap_vert_circle = IconData(0xea4c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle outlined".
-  static const IconData swap_vert_circle_outlined = IconData(0xe483, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle rounded".
-  static const IconData swap_vert_circle_rounded = IconData(0xf4b4, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle sharp".
-  static const IconData swap_vert_circle_sharp = IconData(0xef87, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">swap_vert</i> &#x2014; material icon named "swap vert outlined".
   static const IconData swap_vert_outlined = IconData(0xe482, fontFamily: 'MaterialIcons');
@@ -15000,8 +14922,17 @@ class Icons {
   /// <i class="material-icons-round md-36">swap_vert</i> &#x2014; material icon named "swap vert rounded".
   static const IconData swap_vert_rounded = IconData(0xf4b3, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">swap_vert</i> &#x2014; material icon named "swap vert sharp".
-  static const IconData swap_vert_sharp = IconData(0xef86, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle".
+  static const IconData swap_vert_circle = IconData(0xea4c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle rounded".
+  static const IconData swap_vert_circle_rounded = IconData(0xf4b4, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle outlined".
+  static const IconData swap_vert_circle_outlined = IconData(0xe483, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">swap_vert_circle</i> &#x2014; material icon named "swap vert circle sharp".
+  static const IconData swap_vert_circle_sharp = IconData(0xef87, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">swap_vertical_circle</i> &#x2014; material icon named "swap vertical circle".
   static const IconData swap_vertical_circle = IconData(0xea4c, fontFamily: 'MaterialIcons');
@@ -15021,50 +14952,50 @@ class Icons {
   /// <i class="material-icons md-36">switch_account</i> &#x2014; material icon named "switch account".
   static const IconData switch_account = IconData(0xea4e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">switch_camera</i> &#x2014; material icon named "switch camera".
-  static const IconData switch_camera = IconData(0xea4f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">switch_camera</i> &#x2014; material icon named "switch camera outlined".
-  static const IconData switch_camera_outlined = IconData(0xe484, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">switch_camera</i> &#x2014; material icon named "switch camera rounded".
   static const IconData switch_camera_rounded = IconData(0xf4b5, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_camera</i> &#x2014; material icon named "switch camera sharp".
   static const IconData switch_camera_sharp = IconData(0xef88, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">switch_camera</i> &#x2014; material icon named "switch camera".
+  static const IconData switch_camera = IconData(0xea4f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">switch_camera</i> &#x2014; material icon named "switch camera outlined".
+  static const IconData switch_camera_outlined = IconData(0xe484, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">switch_left</i> &#x2014; material icon named "switch left".
   static const IconData switch_left = IconData(0xea50, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">switch_left</i> &#x2014; material icon named "switch left outlined".
-  static const IconData switch_left_outlined = IconData(0xe485, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">switch_left</i> &#x2014; material icon named "switch left rounded".
-  static const IconData switch_left_rounded = IconData(0xf4b6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_left</i> &#x2014; material icon named "switch left sharp".
   static const IconData switch_left_sharp = IconData(0xef89, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">switch_left</i> &#x2014; material icon named "switch left rounded".
+  static const IconData switch_left_rounded = IconData(0xf4b6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">switch_left</i> &#x2014; material icon named "switch left outlined".
+  static const IconData switch_left_outlined = IconData(0xe485, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">switch_right</i> &#x2014; material icon named "switch right".
   static const IconData switch_right = IconData(0xea51, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">switch_right</i> &#x2014; material icon named "switch right outlined".
-  static const IconData switch_right_outlined = IconData(0xe486, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">switch_right</i> &#x2014; material icon named "switch right rounded".
-  static const IconData switch_right_rounded = IconData(0xf4b7, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_right</i> &#x2014; material icon named "switch right sharp".
   static const IconData switch_right_sharp = IconData(0xef8a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">switch_video</i> &#x2014; material icon named "switch video".
-  static const IconData switch_video = IconData(0xea52, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">switch_right</i> &#x2014; material icon named "switch right rounded".
+  static const IconData switch_right_rounded = IconData(0xf4b7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">switch_right</i> &#x2014; material icon named "switch right outlined".
+  static const IconData switch_right_outlined = IconData(0xe486, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">switch_video</i> &#x2014; material icon named "switch video rounded".
+  static const IconData switch_video_rounded = IconData(0xf4b8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">switch_video</i> &#x2014; material icon named "switch video outlined".
   static const IconData switch_video_outlined = IconData(0xe487, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">switch_video</i> &#x2014; material icon named "switch video rounded".
-  static const IconData switch_video_rounded = IconData(0xf4b8, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">switch_video</i> &#x2014; material icon named "switch video".
+  static const IconData switch_video = IconData(0xea52, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">switch_video</i> &#x2014; material icon named "switch video sharp".
   static const IconData switch_video_sharp = IconData(0xef8b, fontFamily: 'MaterialIcons');
@@ -15072,32 +15003,38 @@ class Icons {
   /// <i class="material-icons md-36">sync</i> &#x2014; material icon named "sync".
   static const IconData sync = IconData(0xea53, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sync_alt</i> &#x2014; material icon named "sync alt".
-  static const IconData sync_alt = IconData(0xea54, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">sync</i> &#x2014; material icon named "sync sharp".
+  static const IconData sync_sharp = IconData(0xef8f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">sync_alt</i> &#x2014; material icon named "sync alt outlined".
-  static const IconData sync_alt_outlined = IconData(0xe488, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sync</i> &#x2014; material icon named "sync rounded".
+  static const IconData sync_rounded = IconData(0xf4bc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sync_alt</i> &#x2014; material icon named "sync alt rounded".
-  static const IconData sync_alt_rounded = IconData(0xf4b9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">sync</i> &#x2014; material icon named "sync outlined".
+  static const IconData sync_outlined = IconData(0xe48a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">sync_alt</i> &#x2014; material icon named "sync alt sharp".
   static const IconData sync_alt_sharp = IconData(0xef8c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">sync_disabled</i> &#x2014; material icon named "sync disabled".
-  static const IconData sync_disabled = IconData(0xea55, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sync_alt</i> &#x2014; material icon named "sync alt rounded".
+  static const IconData sync_alt_rounded = IconData(0xf4b9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">sync_alt</i> &#x2014; material icon named "sync alt outlined".
+  static const IconData sync_alt_outlined = IconData(0xe488, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">sync_alt</i> &#x2014; material icon named "sync alt".
+  static const IconData sync_alt = IconData(0xea54, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">sync_disabled</i> &#x2014; material icon named "sync disabled outlined".
   static const IconData sync_disabled_outlined = IconData(0xe489, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sync_disabled</i> &#x2014; material icon named "sync disabled rounded".
-  static const IconData sync_disabled_rounded = IconData(0xf4ba, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">sync_disabled</i> &#x2014; material icon named "sync disabled".
+  static const IconData sync_disabled = IconData(0xea55, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">sync_disabled</i> &#x2014; material icon named "sync disabled sharp".
   static const IconData sync_disabled_sharp = IconData(0xef8d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">sync</i> &#x2014; material icon named "sync outlined".
-  static const IconData sync_outlined = IconData(0xe48a, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sync_disabled</i> &#x2014; material icon named "sync disabled rounded".
+  static const IconData sync_disabled_rounded = IconData(0xf4ba, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">sync_problem</i> &#x2014; material icon named "sync problem".
   static const IconData sync_problem = IconData(0xea56, fontFamily: 'MaterialIcons');
@@ -15105,20 +15042,29 @@ class Icons {
   /// <i class="material-icons-outlined md-36">sync_problem</i> &#x2014; material icon named "sync problem outlined".
   static const IconData sync_problem_outlined = IconData(0xe48b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sync_problem</i> &#x2014; material icon named "sync problem rounded".
-  static const IconData sync_problem_rounded = IconData(0xf4bb, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">sync_problem</i> &#x2014; material icon named "sync problem sharp".
   static const IconData sync_problem_sharp = IconData(0xef8e, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">sync</i> &#x2014; material icon named "sync rounded".
-  static const IconData sync_rounded = IconData(0xf4bc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">sync</i> &#x2014; material icon named "sync sharp".
-  static const IconData sync_sharp = IconData(0xef8f, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">sync_problem</i> &#x2014; material icon named "sync problem rounded".
+  static const IconData sync_problem_rounded = IconData(0xf4bb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">system_update</i> &#x2014; material icon named "system update".
   static const IconData system_update = IconData(0xea57, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">system_update</i> &#x2014; material icon named "system update sharp".
+  static const IconData system_update_sharp = IconData(0xef91, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">system_update</i> &#x2014; material icon named "system update rounded".
+  static const IconData system_update_rounded = IconData(0xf4be, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">system_update</i> &#x2014; material icon named "system update outlined".
+  static const IconData system_update_outlined = IconData(0xe48d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">system_update_alt</i> &#x2014; material icon named "system update alt sharp".
+  static const IconData system_update_alt_sharp = IconData(0xef90, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">system_update_alt</i> &#x2014; material icon named "system update alt rounded".
+  static const IconData system_update_alt_rounded = IconData(0xf4bd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">system_update_alt</i> &#x2014; material icon named "system update alt".
   static const IconData system_update_alt = IconData(0xea58, fontFamily: 'MaterialIcons');
@@ -15126,44 +15072,32 @@ class Icons {
   /// <i class="material-icons-outlined md-36">system_update_alt</i> &#x2014; material icon named "system update alt outlined".
   static const IconData system_update_alt_outlined = IconData(0xe48c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">system_update_alt</i> &#x2014; material icon named "system update alt rounded".
-  static const IconData system_update_alt_rounded = IconData(0xf4bd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">system_update_alt</i> &#x2014; material icon named "system update alt sharp".
-  static const IconData system_update_alt_sharp = IconData(0xef90, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">system_update</i> &#x2014; material icon named "system update outlined".
-  static const IconData system_update_outlined = IconData(0xe48d, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">system_update</i> &#x2014; material icon named "system update rounded".
-  static const IconData system_update_rounded = IconData(0xf4be, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">system_update</i> &#x2014; material icon named "system update sharp".
-  static const IconData system_update_sharp = IconData(0xef91, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">system_update_tv</i> &#x2014; material icon named "system update tv".
   static const IconData system_update_tv = IconData(0xea58, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">system_update_tv</i> &#x2014; material icon named "system update tv outlined".
   static const IconData system_update_tv_outlined = IconData(0xe48c, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">system_update_tv</i> &#x2014; material icon named "system update tv rounded".
-  static const IconData system_update_tv_rounded = IconData(0xf4bd, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-sharp md-36">system_update_tv</i> &#x2014; material icon named "system update tv sharp".
   static const IconData system_update_tv_sharp = IconData(0xef90, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">tab</i> &#x2014; material icon named "tab".
-  static const IconData tab = IconData(0xea59, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">tab</i> &#x2014; material icon named "tab outlined".
-  static const IconData tab_outlined = IconData(0xe48e, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">system_update_tv</i> &#x2014; material icon named "system update tv rounded".
+  static const IconData system_update_tv_rounded = IconData(0xf4bd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">tab</i> &#x2014; material icon named "tab rounded".
   static const IconData tab_rounded = IconData(0xf4bf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">tab</i> &#x2014; material icon named "tab sharp".
   static const IconData tab_sharp = IconData(0xef92, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">tab</i> &#x2014; material icon named "tab outlined".
+  static const IconData tab_outlined = IconData(0xe48e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">tab</i> &#x2014; material icon named "tab".
+  static const IconData tab = IconData(0xea59, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">tab_unselected</i> &#x2014; material icon named "tab unselected sharp".
+  static const IconData tab_unselected_sharp = IconData(0xef93, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">tab_unselected</i> &#x2014; material icon named "tab unselected".
   static const IconData tab_unselected = IconData(0xea5a, fontFamily: 'MaterialIcons');
@@ -15174,38 +15108,35 @@ class Icons {
   /// <i class="material-icons-round md-36">tab_unselected</i> &#x2014; material icon named "tab unselected rounded".
   static const IconData tab_unselected_rounded = IconData(0xf4c0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">tab_unselected</i> &#x2014; material icon named "tab unselected sharp".
-  static const IconData tab_unselected_sharp = IconData(0xef93, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">table_chart</i> &#x2014; material icon named "table chart".
   static const IconData table_chart = IconData(0xea5b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">table_chart</i> &#x2014; material icon named "table chart outlined".
-  static const IconData table_chart_outlined = IconData(0xe490, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">table_chart</i> &#x2014; material icon named "table chart rounded".
-  static const IconData table_chart_rounded = IconData(0xf4c1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">table_chart</i> &#x2014; material icon named "table chart sharp".
   static const IconData table_chart_sharp = IconData(0xef94, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">table_rows</i> &#x2014; material icon named "table rows".
-  static const IconData table_rows = IconData(0xea5c, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">table_chart</i> &#x2014; material icon named "table chart rounded".
+  static const IconData table_chart_rounded = IconData(0xf4c1, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">table_rows</i> &#x2014; material icon named "table rows outlined".
-  static const IconData table_rows_outlined = IconData(0xe491, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">table_rows</i> &#x2014; material icon named "table rows rounded".
-  static const IconData table_rows_rounded = IconData(0xf4c2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">table_chart</i> &#x2014; material icon named "table chart outlined".
+  static const IconData table_chart_outlined = IconData(0xe490, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">table_rows</i> &#x2014; material icon named "table rows sharp".
   static const IconData table_rows_sharp = IconData(0xef95, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">table_view</i> &#x2014; material icon named "table view".
-  static const IconData table_view = IconData(0xea5d, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">table_rows</i> &#x2014; material icon named "table rows rounded".
+  static const IconData table_rows_rounded = IconData(0xf4c2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">table_rows</i> &#x2014; material icon named "table rows outlined".
+  static const IconData table_rows_outlined = IconData(0xe491, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">table_rows</i> &#x2014; material icon named "table rows".
+  static const IconData table_rows = IconData(0xea5c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">table_view</i> &#x2014; material icon named "table view outlined".
   static const IconData table_view_outlined = IconData(0xe492, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">table_view</i> &#x2014; material icon named "table view".
+  static const IconData table_view = IconData(0xea5d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">table_view</i> &#x2014; material icon named "table view rounded".
   static const IconData table_view_rounded = IconData(0xf4c3, fontFamily: 'MaterialIcons');
@@ -15215,6 +15146,15 @@ class Icons {
 
   /// <i class="material-icons md-36">tablet</i> &#x2014; material icon named "tablet".
   static const IconData tablet = IconData(0xea5e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">tablet</i> &#x2014; material icon named "tablet outlined".
+  static const IconData tablet_outlined = IconData(0xe495, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">tablet</i> &#x2014; material icon named "tablet rounded".
+  static const IconData tablet_rounded = IconData(0xf4c6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">tablet</i> &#x2014; material icon named "tablet sharp".
+  static const IconData tablet_sharp = IconData(0xef99, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">tablet_android</i> &#x2014; material icon named "tablet android".
   static const IconData tablet_android = IconData(0xea5f, fontFamily: 'MaterialIcons');
@@ -15240,29 +15180,20 @@ class Icons {
   /// <i class="material-icons-sharp md-36">tablet_mac</i> &#x2014; material icon named "tablet mac sharp".
   static const IconData tablet_mac_sharp = IconData(0xef98, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">tablet</i> &#x2014; material icon named "tablet outlined".
-  static const IconData tablet_outlined = IconData(0xe495, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">tablet</i> &#x2014; material icon named "tablet rounded".
-  static const IconData tablet_rounded = IconData(0xf4c6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">tablet</i> &#x2014; material icon named "tablet sharp".
-  static const IconData tablet_sharp = IconData(0xef99, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">tag</i> &#x2014; material icon named "tag".
   static const IconData tag = IconData(0xea61, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">tag_faces</i> &#x2014; material icon named "tag faces".
   static const IconData tag_faces = IconData(0xea62, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">tag_faces</i> &#x2014; material icon named "tag faces sharp".
+  static const IconData tag_faces_sharp = IconData(0xef9a, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">tag_faces</i> &#x2014; material icon named "tag faces outlined".
   static const IconData tag_faces_outlined = IconData(0xe496, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">tag_faces</i> &#x2014; material icon named "tag faces rounded".
   static const IconData tag_faces_rounded = IconData(0xf4c7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">tag_faces</i> &#x2014; material icon named "tag faces sharp".
-  static const IconData tag_faces_sharp = IconData(0xef9a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">takeout_dining</i> &#x2014; material icon named "takeout dining".
   static const IconData takeout_dining = IconData(0xea63, fontFamily: 'MaterialIcons');
@@ -15294,6 +15225,12 @@ class Icons {
   /// <i class="material-icons md-36">taxi_alert</i> &#x2014; material icon named "taxi alert".
   static const IconData taxi_alert = IconData(0xea66, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">10k</i> &#x2014; material icon named "10k".
+  static const IconData ten_k = IconData(0xe52a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">10mp</i> &#x2014; material icon named "10mp".
+  static const IconData ten_mp = IconData(0xe52b, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">terrain</i> &#x2014; material icon named "terrain".
   static const IconData terrain = IconData(0xea67, fontFamily: 'MaterialIcons');
 
@@ -15306,14 +15243,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">terrain</i> &#x2014; material icon named "terrain sharp".
   static const IconData terrain_sharp = IconData(0xef9d, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">text_fields</i> &#x2014; material icon named "text fields rounded".
+  static const IconData text_fields_rounded = IconData(0xf4cb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">text_fields</i> &#x2014; material icon named "text fields".
   static const IconData text_fields = IconData(0xea68, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">text_fields</i> &#x2014; material icon named "text fields outlined".
   static const IconData text_fields_outlined = IconData(0xe49a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">text_fields</i> &#x2014; material icon named "text fields rounded".
-  static const IconData text_fields_rounded = IconData(0xf4cb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">text_fields</i> &#x2014; material icon named "text fields sharp".
   static const IconData text_fields_sharp = IconData(0xef9e, fontFamily: 'MaterialIcons');
@@ -15366,14 +15303,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">text_rotation_angledown</i> &#x2014; material icon named "text rotation angledown sharp".
   static const IconData text_rotation_angledown_sharp = IconData(0xefa2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup rounded".
+  static const IconData text_rotation_angleup_rounded = IconData(0xf4d0, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup".
   static const IconData text_rotation_angleup = IconData(0xea6d, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup outlined".
   static const IconData text_rotation_angleup_outlined = IconData(0xe49f, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup rounded".
-  static const IconData text_rotation_angleup_rounded = IconData(0xf4d0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup sharp".
   static const IconData text_rotation_angleup_sharp = IconData(0xefa3, fontFamily: 'MaterialIcons');
@@ -15417,26 +15354,26 @@ class Icons {
   /// <i class="material-icons md-36">textsms</i> &#x2014; material icon named "textsms".
   static const IconData textsms = IconData(0xea71, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">textsms</i> &#x2014; material icon named "textsms sharp".
+  static const IconData textsms_sharp = IconData(0xefa7, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">textsms</i> &#x2014; material icon named "textsms outlined".
   static const IconData textsms_outlined = IconData(0xe4a3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">textsms</i> &#x2014; material icon named "textsms rounded".
   static const IconData textsms_rounded = IconData(0xf4d4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">textsms</i> &#x2014; material icon named "textsms sharp".
-  static const IconData textsms_sharp = IconData(0xefa7, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">texture</i> &#x2014; material icon named "texture".
   static const IconData texture = IconData(0xea72, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">texture</i> &#x2014; material icon named "texture sharp".
+  static const IconData texture_sharp = IconData(0xefa8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">texture</i> &#x2014; material icon named "texture outlined".
   static const IconData texture_outlined = IconData(0xe4a4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">texture</i> &#x2014; material icon named "texture rounded".
   static const IconData texture_rounded = IconData(0xf4d5, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">texture</i> &#x2014; material icon named "texture sharp".
-  static const IconData texture_sharp = IconData(0xefa8, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">theater_comedy</i> &#x2014; material icon named "theater comedy".
   static const IconData theater_comedy = IconData(0xea73, fontFamily: 'MaterialIcons');
@@ -15453,17 +15390,62 @@ class Icons {
   /// <i class="material-icons-sharp md-36">theaters</i> &#x2014; material icon named "theaters sharp".
   static const IconData theaters_sharp = IconData(0xefa9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">thermostat</i> &#x2014; material icon named "thermostat sharp".
+  static const IconData thermostat_sharp = IconData(0xefaa, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">thermostat</i> &#x2014; material icon named "thermostat outlined".
   static const IconData thermostat_outlined = IconData(0xe4a6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">thermostat</i> &#x2014; material icon named "thermostat rounded".
   static const IconData thermostat_rounded = IconData(0xf4d7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">thermostat</i> &#x2014; material icon named "thermostat sharp".
-  static const IconData thermostat_sharp = IconData(0xefaa, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">13mp</i> &#x2014; material icon named "13mp".
+  static const IconData thirteen_mp = IconData(0xe52e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">3k</i> &#x2014; material icon named "3k".
+  static const IconData three_k = IconData(0xe541, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">3k_plus</i> &#x2014; material icon named "3k plus".
+  static const IconData three_k_plus = IconData(0xe542, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">3mp</i> &#x2014; material icon named "3mp".
+  static const IconData three_mp = IconData(0xe543, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">3d_rotation</i> &#x2014; material icon named "3d rotation".
+  static const IconData threed_rotation = IconData(0xe540, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">3d_rotation</i> &#x2014; material icon named "3d rotation outlined".
+  static const IconData threed_rotation_outlined = IconData(0xe001, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">3d_rotation</i> &#x2014; material icon named "3d rotation rounded".
+  static const IconData threed_rotation_rounded = IconData(0xf02f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">3d_rotation</i> &#x2014; material icon named "3d rotation sharp".
+  static const IconData threed_rotation_sharp = IconData(0xeb01, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">360</i> &#x2014; material icon named "360".
+  static const IconData threesixty = IconData(0xe53f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">360</i> &#x2014; material icon named "360 outlined".
+  static const IconData threesixty_outlined = IconData(0xe000, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">360</i> &#x2014; material icon named "360 sharp".
+  static const IconData threesixty_sharp = IconData(0xeb00, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">360</i> &#x2014; material icon named "360 rounded".
+  static const IconData threesixty_rounded = IconData(0xf02e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">thumb_down</i> &#x2014; material icon named "thumb down".
   static const IconData thumb_down = IconData(0xea75, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">thumb_down</i> &#x2014; material icon named "thumb down outlined".
+  static const IconData thumb_down_outlined = IconData(0xe4a8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">thumb_down</i> &#x2014; material icon named "thumb down rounded".
+  static const IconData thumb_down_rounded = IconData(0xf4d9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">thumb_down</i> &#x2014; material icon named "thumb down sharp".
+  static const IconData thumb_down_sharp = IconData(0xefac, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">thumb_down_alt</i> &#x2014; material icon named "thumb down alt".
   static const IconData thumb_down_alt = IconData(0xea76, fontFamily: 'MaterialIcons');
@@ -15480,23 +15462,17 @@ class Icons {
   /// <i class="material-icons md-36">thumb_down_off_alt</i> &#x2014; material icon named "thumb down off alt".
   static const IconData thumb_down_off_alt = IconData(0xea77, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">thumb_down</i> &#x2014; material icon named "thumb down outlined".
-  static const IconData thumb_down_outlined = IconData(0xe4a8, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">thumb_down</i> &#x2014; material icon named "thumb down rounded".
-  static const IconData thumb_down_rounded = IconData(0xf4d9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">thumb_down</i> &#x2014; material icon named "thumb down sharp".
-  static const IconData thumb_down_sharp = IconData(0xefac, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">thumb_up</i> &#x2014; material icon named "thumb up sharp".
+  static const IconData thumb_up_sharp = IconData(0xefae, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">thumb_up</i> &#x2014; material icon named "thumb up".
   static const IconData thumb_up = IconData(0xea78, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt".
-  static const IconData thumb_up_alt = IconData(0xea79, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-round md-36">thumb_up</i> &#x2014; material icon named "thumb up rounded".
+  static const IconData thumb_up_rounded = IconData(0xf4db, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt outlined".
-  static const IconData thumb_up_alt_outlined = IconData(0xe4a9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">thumb_up</i> &#x2014; material icon named "thumb up outlined".
+  static const IconData thumb_up_outlined = IconData(0xe4aa, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt rounded".
   static const IconData thumb_up_alt_rounded = IconData(0xf4da, fontFamily: 'MaterialIcons');
@@ -15504,17 +15480,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt sharp".
   static const IconData thumb_up_alt_sharp = IconData(0xefad, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt".
+  static const IconData thumb_up_alt = IconData(0xea79, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">thumb_up_alt</i> &#x2014; material icon named "thumb up alt outlined".
+  static const IconData thumb_up_alt_outlined = IconData(0xe4a9, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">thumb_up_off_alt</i> &#x2014; material icon named "thumb up off alt".
   static const IconData thumb_up_off_alt = IconData(0xea7a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">thumb_up</i> &#x2014; material icon named "thumb up outlined".
-  static const IconData thumb_up_outlined = IconData(0xe4aa, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">thumb_up</i> &#x2014; material icon named "thumb up rounded".
-  static const IconData thumb_up_rounded = IconData(0xf4db, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">thumb_up</i> &#x2014; material icon named "thumb up sharp".
-  static const IconData thumb_up_sharp = IconData(0xefae, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">thumbs_up_down</i> &#x2014; material icon named "thumbs up down".
   static const IconData thumbs_up_down = IconData(0xea7b, fontFamily: 'MaterialIcons');
@@ -15564,8 +15537,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">timeline</i> &#x2014; material icon named "timeline sharp".
   static const IconData timeline_sharp = IconData(0xefb2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">timer</i> &#x2014; material icon named "timer outlined".
+  static const IconData timer_outlined = IconData(0xe4b2, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">timer</i> &#x2014; material icon named "timer sharp".
+  static const IconData timer_sharp = IconData(0xefb6, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">timer</i> &#x2014; material icon named "timer".
   static const IconData timer = IconData(0xea7f, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">timer</i> &#x2014; material icon named "timer rounded".
+  static const IconData timer_rounded = IconData(0xf4e3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">timer_10</i> &#x2014; material icon named "timer 10".
   static const IconData timer_10 = IconData(0xea80, fontFamily: 'MaterialIcons');
@@ -15591,26 +15573,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">timer_3</i> &#x2014; material icon named "timer 3 sharp".
   static const IconData timer_3_sharp = IconData(0xefb4, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">timer_off</i> &#x2014; material icon named "timer off".
-  static const IconData timer_off = IconData(0xea82, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">timer_off</i> &#x2014; material icon named "timer off outlined".
-  static const IconData timer_off_outlined = IconData(0xe4b1, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">timer_off</i> &#x2014; material icon named "timer off rounded".
   static const IconData timer_off_rounded = IconData(0xf4e2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">timer_off</i> &#x2014; material icon named "timer off sharp".
   static const IconData timer_off_sharp = IconData(0xefb5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">timer</i> &#x2014; material icon named "timer outlined".
-  static const IconData timer_outlined = IconData(0xe4b2, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">timer_off</i> &#x2014; material icon named "timer off".
+  static const IconData timer_off = IconData(0xea82, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">timer</i> &#x2014; material icon named "timer rounded".
-  static const IconData timer_rounded = IconData(0xf4e3, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">timer</i> &#x2014; material icon named "timer sharp".
-  static const IconData timer_sharp = IconData(0xefb6, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">timer_off</i> &#x2014; material icon named "timer off outlined".
+  static const IconData timer_off_outlined = IconData(0xe4b1, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">title</i> &#x2014; material icon named "title".
   static const IconData title = IconData(0xea83, fontFamily: 'MaterialIcons');
@@ -15720,14 +15693,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">touch_app</i> &#x2014; material icon named "touch app sharp".
   static const IconData touch_app_sharp = IconData(0xefbf, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">tour</i> &#x2014; material icon named "tour rounded".
+  static const IconData tour_rounded = IconData(0xf4ed, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">tour</i> &#x2014; material icon named "tour".
   static const IconData tour = IconData(0xea8c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">tour</i> &#x2014; material icon named "tour outlined".
   static const IconData tour_outlined = IconData(0xe4bc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">tour</i> &#x2014; material icon named "tour rounded".
-  static const IconData tour_rounded = IconData(0xf4ed, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">tour</i> &#x2014; material icon named "tour sharp".
   static const IconData tour_sharp = IconData(0xefc0, fontFamily: 'MaterialIcons');
@@ -15792,14 +15765,14 @@ class Icons {
   /// <i class="material-icons-sharp md-36">tram</i> &#x2014; material icon named "tram sharp".
   static const IconData tram_sharp = IconData(0xefc5, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-round md-36">transfer_within_a_station</i> &#x2014; material icon named "transfer within a station rounded".
+  static const IconData transfer_within_a_station_rounded = IconData(0xf4f3, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">transfer_within_a_station</i> &#x2014; material icon named "transfer within a station".
   static const IconData transfer_within_a_station = IconData(0xea92, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">transfer_within_a_station</i> &#x2014; material icon named "transfer within a station outlined".
   static const IconData transfer_within_a_station_outlined = IconData(0xe4c2, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">transfer_within_a_station</i> &#x2014; material icon named "transfer within a station rounded".
-  static const IconData transfer_within_a_station_rounded = IconData(0xf4f3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">transfer_within_a_station</i> &#x2014; material icon named "transfer within a station sharp".
   static const IconData transfer_within_a_station_sharp = IconData(0xefc6, fontFamily: 'MaterialIcons');
@@ -15840,6 +15813,9 @@ class Icons {
   /// <i class="material-icons-sharp md-36">translate</i> &#x2014; material icon named "translate sharp".
   static const IconData translate_sharp = IconData(0xefc9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">trending_down</i> &#x2014; material icon named "trending down sharp".
+  static const IconData trending_down_sharp = IconData(0xefca, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
   /// <i class="material-icons md-36">trending_down</i> &#x2014; material icon named "trending down".
   static const IconData trending_down = IconData(0xea96, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
@@ -15848,9 +15824,6 @@ class Icons {
 
   /// <i class="material-icons-round md-36">trending_down</i> &#x2014; material icon named "trending down rounded".
   static const IconData trending_down_rounded = IconData(0xf4f7, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
-  /// <i class="material-icons-sharp md-36">trending_down</i> &#x2014; material icon named "trending down sharp".
-  static const IconData trending_down_sharp = IconData(0xefca, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">trending_flat</i> &#x2014; material icon named "trending flat".
   static const IconData trending_flat = IconData(0xea97, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -15900,29 +15873,38 @@ class Icons {
   /// <i class="material-icons-sharp md-36">trip_origin</i> &#x2014; material icon named "trip origin sharp".
   static const IconData trip_origin_sharp = IconData(0xefcd, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">tty</i> &#x2014; material icon named "tty sharp".
+  static const IconData tty_sharp = IconData(0xefce, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">tty</i> &#x2014; material icon named "tty rounded".
+  static const IconData tty_rounded = IconData(0xf4fb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">tty</i> &#x2014; material icon named "tty".
   static const IconData tty = IconData(0xea9a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">tty</i> &#x2014; material icon named "tty outlined".
   static const IconData tty_outlined = IconData(0xe4ca, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">tty</i> &#x2014; material icon named "tty rounded".
-  static const IconData tty_rounded = IconData(0xf4fb, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">tty</i> &#x2014; material icon named "tty sharp".
-  static const IconData tty_sharp = IconData(0xefce, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons md-36">tune</i> &#x2014; material icon named "tune".
-  static const IconData tune = IconData(0xea9b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">tune</i> &#x2014; material icon named "tune outlined".
-  static const IconData tune_outlined = IconData(0xe4cb, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">tune</i> &#x2014; material icon named "tune sharp".
+  static const IconData tune_sharp = IconData(0xefcf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">tune</i> &#x2014; material icon named "tune rounded".
   static const IconData tune_rounded = IconData(0xf4fc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">tune</i> &#x2014; material icon named "tune sharp".
-  static const IconData tune_sharp = IconData(0xefcf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">tune</i> &#x2014; material icon named "tune outlined".
+  static const IconData tune_outlined = IconData(0xe4cb, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">tune</i> &#x2014; material icon named "tune".
+  static const IconData tune = IconData(0xea9b, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">turned_in</i> &#x2014; material icon named "turned in sharp".
+  static const IconData turned_in_sharp = IconData(0xefd1, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">turned_in</i> &#x2014; material icon named "turned in rounded".
+  static const IconData turned_in_rounded = IconData(0xf4fe, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">turned_in</i> &#x2014; material icon named "turned in outlined".
+  static const IconData turned_in_outlined = IconData(0xe4cd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">turned_in</i> &#x2014; material icon named "turned in".
   static const IconData turned_in = IconData(0xea9c, fontFamily: 'MaterialIcons');
@@ -15939,17 +15921,17 @@ class Icons {
   /// <i class="material-icons-sharp md-36">turned_in_not</i> &#x2014; material icon named "turned in not sharp".
   static const IconData turned_in_not_sharp = IconData(0xefd0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">turned_in</i> &#x2014; material icon named "turned in outlined".
-  static const IconData turned_in_outlined = IconData(0xe4cd, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">turned_in</i> &#x2014; material icon named "turned in rounded".
-  static const IconData turned_in_rounded = IconData(0xf4fe, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">turned_in</i> &#x2014; material icon named "turned in sharp".
-  static const IconData turned_in_sharp = IconData(0xefd1, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">tv</i> &#x2014; material icon named "tv".
   static const IconData tv = IconData(0xea9e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">tv</i> &#x2014; material icon named "tv outlined".
+  static const IconData tv_outlined = IconData(0xe4cf, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">tv</i> &#x2014; material icon named "tv rounded".
+  static const IconData tv_rounded = IconData(0xf500, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">tv</i> &#x2014; material icon named "tv sharp".
+  static const IconData tv_sharp = IconData(0xefd3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">tv_off</i> &#x2014; material icon named "tv off".
   static const IconData tv_off = IconData(0xea9f, fontFamily: 'MaterialIcons');
@@ -15963,14 +15945,32 @@ class Icons {
   /// <i class="material-icons-sharp md-36">tv_off</i> &#x2014; material icon named "tv off sharp".
   static const IconData tv_off_sharp = IconData(0xefd2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">tv</i> &#x2014; material icon named "tv outlined".
-  static const IconData tv_outlined = IconData(0xe4cf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">12mp</i> &#x2014; material icon named "12mp".
+  static const IconData twelve_mp = IconData(0xe52d, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-round md-36">tv</i> &#x2014; material icon named "tv rounded".
-  static const IconData tv_rounded = IconData(0xf500, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">24mp</i> &#x2014; material icon named "24mp".
+  static const IconData twenty_four_mp = IconData(0xe53b, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">tv</i> &#x2014; material icon named "tv sharp".
-  static const IconData tv_sharp = IconData(0xefd3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">20mp</i> &#x2014; material icon named "20mp".
+  static const IconData twenty_mp = IconData(0xe537, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">21mp</i> &#x2014; material icon named "21mp".
+  static const IconData twenty_one_mp = IconData(0xe538, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">23mp</i> &#x2014; material icon named "23mp".
+  static const IconData twenty_three_mp = IconData(0xe53a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">22mp</i> &#x2014; material icon named "22mp".
+  static const IconData twenty_two_mp = IconData(0xe539, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">2k</i> &#x2014; material icon named "2k".
+  static const IconData two_k = IconData(0xe53c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">2k_plus</i> &#x2014; material icon named "2k plus".
+  static const IconData two_k_plus = IconData(0xe53d, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons md-36">2mp</i> &#x2014; material icon named "2mp".
+  static const IconData two_mp = IconData(0xe53e, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">two_wheeler</i> &#x2014; material icon named "two wheeler".
   static const IconData two_wheeler = IconData(0xeaa0, fontFamily: 'MaterialIcons');
@@ -15999,14 +15999,14 @@ class Icons {
   /// <i class="material-icons md-36">unarchive</i> &#x2014; material icon named "unarchive".
   static const IconData unarchive = IconData(0xeaa2, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-sharp md-36">unarchive</i> &#x2014; material icon named "unarchive sharp".
+  static const IconData unarchive_sharp = IconData(0xefd6, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons-outlined md-36">unarchive</i> &#x2014; material icon named "unarchive outlined".
   static const IconData unarchive_outlined = IconData(0xe4d2, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">unarchive</i> &#x2014; material icon named "unarchive rounded".
   static const IconData unarchive_rounded = IconData(0xf503, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">unarchive</i> &#x2014; material icon named "unarchive sharp".
-  static const IconData unarchive_sharp = IconData(0xefd6, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">undo</i> &#x2014; material icon named "undo".
   static const IconData undo = IconData(0xeaa3, fontFamily: 'MaterialIcons', matchTextDirection: true);
@@ -16080,8 +16080,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">upgrade</i> &#x2014; material icon named "upgrade sharp".
   static const IconData upgrade_sharp = IconData(0xefdc, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">upload_file</i> &#x2014; material icon named "upload file".
-  static const IconData upload_file = IconData(0xeaa9, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">upload</i> &#x2014; material icon named "upload sharp".
+  static const IconData upload_sharp = IconData(0xefdd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">upload</i> &#x2014; material icon named "upload outlined".
   static const IconData upload_outlined = IconData(0xe4d9, fontFamily: 'MaterialIcons');
@@ -16089,8 +16089,8 @@ class Icons {
   /// <i class="material-icons-round md-36">upload</i> &#x2014; material icon named "upload rounded".
   static const IconData upload_rounded = IconData(0xf50a, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">upload</i> &#x2014; material icon named "upload sharp".
-  static const IconData upload_sharp = IconData(0xefdd, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">upload_file</i> &#x2014; material icon named "upload file".
+  static const IconData upload_file = IconData(0xeaa9, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">usb</i> &#x2014; material icon named "usb".
   static const IconData usb = IconData(0xeaaa, fontFamily: 'MaterialIcons');
@@ -16152,8 +16152,8 @@ class Icons {
   /// <i class="material-icons-sharp md-36">vertical_align_center</i> &#x2014; material icon named "vertical align center sharp".
   static const IconData vertical_align_center_sharp = IconData(0xefe2, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top".
-  static const IconData vertical_align_top = IconData(0xeaaf, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top sharp".
+  static const IconData vertical_align_top_sharp = IconData(0xefe3, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top outlined".
   static const IconData vertical_align_top_outlined = IconData(0xe4df, fontFamily: 'MaterialIcons');
@@ -16161,8 +16161,8 @@ class Icons {
   /// <i class="material-icons-round md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top rounded".
   static const IconData vertical_align_top_rounded = IconData(0xf510, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top sharp".
-  static const IconData vertical_align_top_sharp = IconData(0xefe3, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">vertical_align_top</i> &#x2014; material icon named "vertical align top".
+  static const IconData vertical_align_top = IconData(0xeaaf, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">vertical_split</i> &#x2014; material icon named "vertical split".
   static const IconData vertical_split = IconData(0xeab0, fontFamily: 'MaterialIcons');
@@ -16251,6 +16251,15 @@ class Icons {
   /// <i class="material-icons md-36">videocam</i> &#x2014; material icon named "videocam".
   static const IconData videocam = IconData(0xeab6, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">videocam</i> &#x2014; material icon named "videocam outlined".
+  static const IconData videocam_outlined = IconData(0xe4e7, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">videocam</i> &#x2014; material icon named "videocam rounded".
+  static const IconData videocam_rounded = IconData(0xf518, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">videocam</i> &#x2014; material icon named "videocam sharp".
+  static const IconData videocam_sharp = IconData(0xefeb, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">videocam_off</i> &#x2014; material icon named "videocam off".
   static const IconData videocam_off = IconData(0xeab7, fontFamily: 'MaterialIcons');
 
@@ -16262,15 +16271,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">videocam_off</i> &#x2014; material icon named "videocam off sharp".
   static const IconData videocam_off_sharp = IconData(0xefea, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">videocam</i> &#x2014; material icon named "videocam outlined".
-  static const IconData videocam_outlined = IconData(0xe4e7, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">videocam</i> &#x2014; material icon named "videocam rounded".
-  static const IconData videocam_rounded = IconData(0xf518, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">videocam</i> &#x2014; material icon named "videocam sharp".
-  static const IconData videocam_sharp = IconData(0xefeb, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">videogame_asset</i> &#x2014; material icon named "videogame asset".
   static const IconData videogame_asset = IconData(0xeab8, fontFamily: 'MaterialIcons');
@@ -16383,14 +16383,14 @@ class Icons {
   /// <i class="material-icons md-36">view_headline</i> &#x2014; material icon named "view headline".
   static const IconData view_headline = IconData(0xeac0, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">view_headline</i> &#x2014; material icon named "view headline outlined".
-  static const IconData view_headline_outlined = IconData(0xe4f0, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">view_headline</i> &#x2014; material icon named "view headline sharp".
+  static const IconData view_headline_sharp = IconData(0xeff4, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-round md-36">view_headline</i> &#x2014; material icon named "view headline rounded".
   static const IconData view_headline_rounded = IconData(0xf521, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">view_headline</i> &#x2014; material icon named "view headline sharp".
-  static const IconData view_headline_sharp = IconData(0xeff4, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-outlined md-36">view_headline</i> &#x2014; material icon named "view headline outlined".
+  static const IconData view_headline_outlined = IconData(0xe4f0, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">view_in_ar</i> &#x2014; material icon named "view in ar".
   static const IconData view_in_ar = IconData(0xeac1, fontFamily: 'MaterialIcons');
@@ -16482,6 +16482,15 @@ class Icons {
   /// <i class="material-icons md-36">visibility</i> &#x2014; material icon named "visibility".
   static const IconData visibility = IconData(0xeac9, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">visibility</i> &#x2014; material icon named "visibility outlined".
+  static const IconData visibility_outlined = IconData(0xe4f9, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">visibility</i> &#x2014; material icon named "visibility rounded".
+  static const IconData visibility_rounded = IconData(0xf52a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">visibility</i> &#x2014; material icon named "visibility sharp".
+  static const IconData visibility_sharp = IconData(0xeffd, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">visibility_off</i> &#x2014; material icon named "visibility off".
   static const IconData visibility_off = IconData(0xeaca, fontFamily: 'MaterialIcons');
 
@@ -16493,15 +16502,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">visibility_off</i> &#x2014; material icon named "visibility off sharp".
   static const IconData visibility_off_sharp = IconData(0xeffc, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">visibility</i> &#x2014; material icon named "visibility outlined".
-  static const IconData visibility_outlined = IconData(0xe4f9, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">visibility</i> &#x2014; material icon named "visibility rounded".
-  static const IconData visibility_rounded = IconData(0xf52a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">visibility</i> &#x2014; material icon named "visibility sharp".
-  static const IconData visibility_sharp = IconData(0xeffd, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">voice_chat</i> &#x2014; material icon named "voice chat".
   static const IconData voice_chat = IconData(0xeacb, fontFamily: 'MaterialIcons');
@@ -16665,15 +16665,6 @@ class Icons {
   /// <i class="material-icons md-36">warning</i> &#x2014; material icon named "warning".
   static const IconData warning = IconData(0xead6, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">warning_amber</i> &#x2014; material icon named "warning amber outlined".
-  static const IconData warning_amber_outlined = IconData(0xe504, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">warning_amber</i> &#x2014; material icon named "warning amber rounded".
-  static const IconData warning_amber_rounded = IconData(0xf535, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">warning_amber</i> &#x2014; material icon named "warning amber sharp".
-  static const IconData warning_amber_sharp = IconData(0xf008, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-outlined md-36">warning</i> &#x2014; material icon named "warning outlined".
   static const IconData warning_outlined = IconData(0xe505, fontFamily: 'MaterialIcons');
 
@@ -16683,20 +16674,38 @@ class Icons {
   /// <i class="material-icons-sharp md-36">warning</i> &#x2014; material icon named "warning sharp".
   static const IconData warning_sharp = IconData(0xf009, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">warning_amber</i> &#x2014; material icon named "warning amber outlined".
+  static const IconData warning_amber_outlined = IconData(0xe504, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">warning_amber</i> &#x2014; material icon named "warning amber rounded".
+  static const IconData warning_amber_rounded = IconData(0xf535, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">warning_amber</i> &#x2014; material icon named "warning amber sharp".
+  static const IconData warning_amber_sharp = IconData(0xf008, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">wash</i> &#x2014; material icon named "wash".
   static const IconData wash = IconData(0xead7, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">wash</i> &#x2014; material icon named "wash outlined".
-  static const IconData wash_outlined = IconData(0xe506, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons-round md-36">wash</i> &#x2014; material icon named "wash rounded".
   static const IconData wash_rounded = IconData(0xf537, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">wash</i> &#x2014; material icon named "wash outlined".
+  static const IconData wash_outlined = IconData(0xe506, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-sharp md-36">wash</i> &#x2014; material icon named "wash sharp".
   static const IconData wash_sharp = IconData(0xf00a, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">watch</i> &#x2014; material icon named "watch".
   static const IconData watch = IconData(0xead8, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">watch</i> &#x2014; material icon named "watch outlined".
+  static const IconData watch_outlined = IconData(0xe508, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">watch</i> &#x2014; material icon named "watch rounded".
+  static const IconData watch_rounded = IconData(0xf539, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">watch</i> &#x2014; material icon named "watch sharp".
+  static const IconData watch_sharp = IconData(0xf00c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">watch_later</i> &#x2014; material icon named "watch later".
   static const IconData watch_later = IconData(0xead9, fontFamily: 'MaterialIcons');
@@ -16709,15 +16718,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">watch_later</i> &#x2014; material icon named "watch later sharp".
   static const IconData watch_later_sharp = IconData(0xf00b, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">watch</i> &#x2014; material icon named "watch outlined".
-  static const IconData watch_outlined = IconData(0xe508, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">watch</i> &#x2014; material icon named "watch rounded".
-  static const IconData watch_rounded = IconData(0xf539, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">watch</i> &#x2014; material icon named "watch sharp".
-  static const IconData watch_sharp = IconData(0xf00c, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">water_damage</i> &#x2014; material icon named "water damage".
   static const IconData water_damage = IconData(0xeada, fontFamily: 'MaterialIcons');
@@ -16827,17 +16827,8 @@ class Icons {
   /// <i class="material-icons md-36">web</i> &#x2014; material icon named "web".
   static const IconData web = IconData(0xeae5, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons md-36">web_asset</i> &#x2014; material icon named "web asset".
-  static const IconData web_asset = IconData(0xeae6, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">web_asset</i> &#x2014; material icon named "web asset outlined".
-  static const IconData web_asset_outlined = IconData(0xe511, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">web_asset</i> &#x2014; material icon named "web asset rounded".
-  static const IconData web_asset_rounded = IconData(0xf542, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">web_asset</i> &#x2014; material icon named "web asset sharp".
-  static const IconData web_asset_sharp = IconData(0xf015, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons-sharp md-36">web</i> &#x2014; material icon named "web sharp".
+  static const IconData web_sharp = IconData(0xf016, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons-outlined md-36">web</i> &#x2014; material icon named "web outlined".
   static const IconData web_outlined = IconData(0xe512, fontFamily: 'MaterialIcons');
@@ -16845,8 +16836,17 @@ class Icons {
   /// <i class="material-icons-round md-36">web</i> &#x2014; material icon named "web rounded".
   static const IconData web_rounded = IconData(0xf543, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-sharp md-36">web</i> &#x2014; material icon named "web sharp".
-  static const IconData web_sharp = IconData(0xf016, fontFamily: 'MaterialIcons');
+  /// <i class="material-icons md-36">web_asset</i> &#x2014; material icon named "web asset".
+  static const IconData web_asset = IconData(0xeae6, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">web_asset</i> &#x2014; material icon named "web asset rounded".
+  static const IconData web_asset_rounded = IconData(0xf542, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">web_asset</i> &#x2014; material icon named "web asset sharp".
+  static const IconData web_asset_sharp = IconData(0xf015, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-outlined md-36">web_asset</i> &#x2014; material icon named "web asset outlined".
+  static const IconData web_asset_outlined = IconData(0xe511, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">weekend</i> &#x2014; material icon named "weekend".
   static const IconData weekend = IconData(0xeae7, fontFamily: 'MaterialIcons');
@@ -16923,6 +16923,15 @@ class Icons {
   /// <i class="material-icons md-36">wifi</i> &#x2014; material icon named "wifi".
   static const IconData wifi = IconData(0xeaed, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">wifi</i> &#x2014; material icon named "wifi outlined".
+  static const IconData wifi_outlined = IconData(0xe51c, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">wifi</i> &#x2014; material icon named "wifi rounded".
+  static const IconData wifi_rounded = IconData(0xf54e, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">wifi</i> &#x2014; material icon named "wifi sharp".
+  static const IconData wifi_sharp = IconData(0xf021, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">wifi_calling</i> &#x2014; material icon named "wifi calling".
   static const IconData wifi_calling = IconData(0xeaee, fontFamily: 'MaterialIcons');
 
@@ -16959,9 +16968,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">wifi_off</i> &#x2014; material icon named "wifi off sharp".
   static const IconData wifi_off_sharp = IconData(0xf01f, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">wifi</i> &#x2014; material icon named "wifi outlined".
-  static const IconData wifi_outlined = IconData(0xe51c, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">wifi_protected_setup</i> &#x2014; material icon named "wifi protected setup".
   static const IconData wifi_protected_setup = IconData(0xeaf1, fontFamily: 'MaterialIcons');
 
@@ -16973,12 +16979,6 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">wifi_protected_setup</i> &#x2014; material icon named "wifi protected setup sharp".
   static const IconData wifi_protected_setup_sharp = IconData(0xf020, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">wifi</i> &#x2014; material icon named "wifi rounded".
-  static const IconData wifi_rounded = IconData(0xf54e, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">wifi</i> &#x2014; material icon named "wifi sharp".
-  static const IconData wifi_sharp = IconData(0xf021, fontFamily: 'MaterialIcons');
 
   /// <i class="material-icons md-36">wifi_tethering</i> &#x2014; material icon named "wifi tethering".
   static const IconData wifi_tethering = IconData(0xeaf2, fontFamily: 'MaterialIcons');
@@ -17007,6 +17007,15 @@ class Icons {
   /// <i class="material-icons md-36">work</i> &#x2014; material icon named "work".
   static const IconData work = IconData(0xeaf4, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">work</i> &#x2014; material icon named "work outlined".
+  static const IconData work_outlined = IconData(0xe522, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">work</i> &#x2014; material icon named "work rounded".
+  static const IconData work_rounded = IconData(0xf553, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">work</i> &#x2014; material icon named "work sharp".
+  static const IconData work_sharp = IconData(0xf026, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">work_off</i> &#x2014; material icon named "work off".
   static const IconData work_off = IconData(0xeaf5, fontFamily: 'MaterialIcons');
 
@@ -17031,15 +17040,6 @@ class Icons {
   /// <i class="material-icons-sharp md-36">work_outline</i> &#x2014; material icon named "work outline sharp".
   static const IconData work_outline_sharp = IconData(0xf025, fontFamily: 'MaterialIcons');
 
-  /// <i class="material-icons-outlined md-36">work</i> &#x2014; material icon named "work outlined".
-  static const IconData work_outlined = IconData(0xe522, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">work</i> &#x2014; material icon named "work rounded".
-  static const IconData work_rounded = IconData(0xf553, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">work</i> &#x2014; material icon named "work sharp".
-  static const IconData work_sharp = IconData(0xf026, fontFamily: 'MaterialIcons');
-
   /// <i class="material-icons md-36">workspaces_filled</i> &#x2014; material icon named "workspaces filled".
   static const IconData workspaces_filled = IconData(0xeaf7, fontFamily: 'MaterialIcons');
 
@@ -17052,11 +17052,11 @@ class Icons {
   /// <i class="material-icons-outlined md-36">wrap_text</i> &#x2014; material icon named "wrap text outlined".
   static const IconData wrap_text_outlined = IconData(0xe523, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
-  /// <i class="material-icons-round md-36">wrap_text</i> &#x2014; material icon named "wrap text rounded".
-  static const IconData wrap_text_rounded = IconData(0xf554, fontFamily: 'MaterialIcons', matchTextDirection: true);
-
   /// <i class="material-icons-sharp md-36">wrap_text</i> &#x2014; material icon named "wrap text sharp".
   static const IconData wrap_text_sharp = IconData(0xf027, fontFamily: 'MaterialIcons', matchTextDirection: true);
+
+  /// <i class="material-icons-round md-36">wrap_text</i> &#x2014; material icon named "wrap text rounded".
+  static const IconData wrap_text_rounded = IconData(0xf554, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <i class="material-icons md-36">wrong_location</i> &#x2014; material icon named "wrong location".
   static const IconData wrong_location = IconData(0xeafa, fontFamily: 'MaterialIcons');
@@ -17109,6 +17109,15 @@ class Icons {
   /// <i class="material-icons md-36">zoom_out</i> &#x2014; material icon named "zoom out".
   static const IconData zoom_out = IconData(0xeafe, fontFamily: 'MaterialIcons');
 
+  /// <i class="material-icons-outlined md-36">zoom_out</i> &#x2014; material icon named "zoom out outlined".
+  static const IconData zoom_out_outlined = IconData(0xe529, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-round md-36">zoom_out</i> &#x2014; material icon named "zoom out rounded".
+  static const IconData zoom_out_rounded = IconData(0xf55a, fontFamily: 'MaterialIcons');
+
+  /// <i class="material-icons-sharp md-36">zoom_out</i> &#x2014; material icon named "zoom out sharp".
+  static const IconData zoom_out_sharp = IconData(0xf02d, fontFamily: 'MaterialIcons');
+
   /// <i class="material-icons md-36">zoom_out_map</i> &#x2014; material icon named "zoom out map".
   static const IconData zoom_out_map = IconData(0xeaff, fontFamily: 'MaterialIcons');
 
@@ -17120,14 +17129,5 @@ class Icons {
 
   /// <i class="material-icons-sharp md-36">zoom_out_map</i> &#x2014; material icon named "zoom out map sharp".
   static const IconData zoom_out_map_sharp = IconData(0xf02c, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-outlined md-36">zoom_out</i> &#x2014; material icon named "zoom out outlined".
-  static const IconData zoom_out_outlined = IconData(0xe529, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-round md-36">zoom_out</i> &#x2014; material icon named "zoom out rounded".
-  static const IconData zoom_out_rounded = IconData(0xf55a, fontFamily: 'MaterialIcons');
-
-  /// <i class="material-icons-sharp md-36">zoom_out</i> &#x2014; material icon named "zoom out sharp".
-  static const IconData zoom_out_sharp = IconData(0xf02d, fontFamily: 'MaterialIcons');
   // END GENERATED ICONS
 }
