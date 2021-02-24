@@ -91,6 +91,13 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
+  native_ui_tests_ios32:
+    description: >
+      Run native XCUITests on 32-bit iOS (iPhone 4S).
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
+
   platform_interaction_test_ios:
     description: >
       Checks platform interaction on iPhone 6.
