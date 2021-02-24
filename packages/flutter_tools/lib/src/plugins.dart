@@ -1231,8 +1231,6 @@ const String _pluginCmakefileTemplate = r'''
 # Generated file, do not edit.
 #
 
-# clang-format off
-
 list(APPEND FLUTTER_PLUGIN_LIST
 {{#plugins}}
   {{name}}
