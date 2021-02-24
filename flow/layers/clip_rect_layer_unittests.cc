@@ -63,7 +63,7 @@ TEST_F(ClipRectLayerTest, PaintingCulledLayerDies) {
   EXPECT_EQ(layer->paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer->parent_cull_rect(), distant_bounds);
+  EXPECT_EQ(mock_layer->parent_cull_rect(), kEmptyRect);
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_bounds)}));
