@@ -706,6 +706,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     return Semantics(
       toggled: widget.value,
       child: GestureDetector(
+        excludeFromSemantics: true,
         onHorizontalDragStart: _handleDragStart,
         onHorizontalDragUpdate: _handleDragUpdate,
         onHorizontalDragEnd: _handleDragEnd,
