@@ -444,8 +444,7 @@ class SurfaceCanvas implements ui.Canvas {
   void drawPicture(ui.Picture picture) {
     // ignore: unnecessary_null_comparison
     assert(picture != null); // picture is checked on the engine side
-    // TODO(het): Support this
-    throw UnimplementedError();
+    _canvas.drawPicture(picture);
   }
 
   @override
