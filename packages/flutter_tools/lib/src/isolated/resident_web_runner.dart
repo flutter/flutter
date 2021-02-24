@@ -812,7 +812,9 @@ class _ResidentWebRunner extends ResidentWebRunner {
       setHttpAddress(_httpUriFromWebsocketUri(websocketUri), device.vmService);
       setWsAddress(websocketUri, device.vmService);
 
-      // Always run main after connecting because start paused doesn't work yet.
+      // Run main immediately if the app is not started paused or if there
+      // is no debugger attached. Otherwise, runMain when a resume event
+      // is received.
       if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
         _connectionResult.appConnection.runMain();
       } else {
