@@ -677,17 +677,23 @@ void main() {
       // Regression text for https://github.com/flutter/flutter/pull/74722.
       testWidgets('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
         textEditingController.text = 'a' * 100;
-        textEditingController.selection = const TextSelection.collapsed(offset: 1);
-        final ScrollController scrollController = ScrollController(initialScrollOffset: 100);
+        textEditingController.selection = const TextSelection.collapsed(offset: 0);
         final ScrollController editableScrollController = ScrollController();
         final bool deterministicCursor = EditableText.debugDeterministicCursor;
         EditableText.debugDeterministicCursor = false;
 
         await tester.pumpWidget(
-          buildEditableText(
-            rejectUserInputs: false,
-            scrollController: scrollController,
-            editableScrollController: editableScrollController,
+          MaterialApp(
+            home: Scaffold(
+              body: EditableText(
+                backgroundCursorColor: Colors.grey,
+                controller: textEditingController,
+                scrollController: editableScrollController,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
           ),
         );
 
@@ -706,19 +712,18 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // The caret should be stay where it was, since the selection didn't
-        // change.
+        // The caret should stay where it was, since the selection didn't change.
         expect(isCaretOnScreen(tester), true);
         expect(editableScrollController.offset, 0.0);
 
-        // Now move the hide the cursor.
+        // Now move to hide the cursor.
         editableScrollController.jumpTo(100.0);
 
         // Does not trigger showCaretOnScreen.
         await tester.pump();
         await tester.pumpAndSettle();
-        expect(isCaretOnScreen(tester), isFalse);
         expect(editableScrollController.offset, 100.0);
+        expect(isCaretOnScreen(tester), isFalse);
 
         EditableText.debugDeterministicCursor = deterministicCursor;
       });
