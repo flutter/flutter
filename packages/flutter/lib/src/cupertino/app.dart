@@ -168,6 +168,7 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -207,6 +208,7 @@ class CupertinoApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(title != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -393,6 +395,11 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
+  /// {@macro flutter.widgets.widgetsApp.scrollBehavior}
+  ///
+  /// When null, defaults to [CupertinoScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
+
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
 
@@ -403,7 +410,11 @@ class CupertinoApp extends StatefulWidget {
       HeroController(); // Linear tweening.
 }
 
-class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets should behave for [CupertinoApp]s.
+///
+/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
+/// subtree.
+class CupertinoScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // Never build any overscroll glow indicators.
@@ -521,7 +532,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: _AlwaysCupertinoScrollBehavior(),
+      behavior: widget.scrollBehavior ?? CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(

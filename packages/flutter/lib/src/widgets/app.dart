@@ -21,6 +21,7 @@ import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
+import 'scroll_configuration.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
@@ -197,6 +198,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -293,6 +295,7 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(
          routeInformationParser != null &&
          routerDelegate != null,
@@ -972,6 +975,18 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationScopeId;
 
+  /// {@template flutter.widgets.widgetsApp.scrollBehavior}
+  /// The default [ScrollBehavior] for the application.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollConfiguration], which controls how [Scrollable] widgets behave
+  ///    in a subtree.
+  /// {@endtemplate}
+  ///
+  /// When null, defaults to [ScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1621,20 +1636,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    return RootRestorationScope(
-      restorationId: widget.restorationScopeId,
-      child: Shortcuts(
-        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        child: Actions(
-          actions: widget.actions ?? WidgetsApp.defaultActions,
-          child: FocusTraversalGroup(
-            policy: ReadingOrderTraversalPolicy(),
-            child: _MediaQueryFromWindow(
-              child: Localizations(
-                locale: appLocale,
-                delegates: _localizationsDelegates.toList(),
-                child: title,
+    return ScrollConfiguration(
+      behavior: widget.scrollBehavior ?? const ScrollBehavior(),
+      child: RootRestorationScope(
+        restorationId: widget.restorationScopeId,
+        child: Shortcuts(
+          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+          debugLabel: '<Default WidgetsApp Shortcuts>',
+          child: Actions(
+            actions: widget.actions ?? WidgetsApp.defaultActions,
+            child: FocusTraversalGroup(
+              policy: ReadingOrderTraversalPolicy(),
+              child: _MediaQueryFromWindow(
+                child: Localizations(
+                  locale: appLocale,
+                  delegates: _localizationsDelegates.toList(),
+                  child: title,
+                ),
               ),
             ),
           ),

@@ -196,6 +196,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -242,6 +243,7 @@ class MaterialApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.scrollBehavior,
   }) : assert(routeInformationParser != null),
        assert(routerDelegate != null),
        assert(title != null),
@@ -632,6 +634,11 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
+  /// {@macro flutter.widgets.widgetsApp.scrollBehavior}
+  ///
+  /// When null, defaults to [MaterialScrollBehavior].
+  final ScrollBehavior? scrollBehavior;
+
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -657,7 +664,11 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
-class _MaterialScrollBehavior extends ScrollBehavior {
+/// Describes how [Scrollable] widgets should behave in [MaterialApp]s.
+///
+/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
+/// subtree.
+class MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
@@ -850,7 +861,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: _MaterialScrollBehavior(),
+      behavior: widget.scrollBehavior ?? MaterialScrollBehavior(),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,
