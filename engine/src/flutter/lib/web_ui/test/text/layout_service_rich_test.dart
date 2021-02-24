@@ -149,4 +149,22 @@ void testMain() async {
       l('ipsum', 6, 11, hardBreak: true, width: 50.0, left: 0.0),
     ]);
   });
+
+  test('should handle placeholder-only paragraphs', () {
+    final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
+      fontFamily: 'ahem',
+      fontSize: 10,
+      textAlign: ui.TextAlign.center,
+    );
+    final CanvasParagraph paragraph = rich(paragraphStyle, (builder) {
+      builder.addPlaceholder(300.0, 50.0, ui.PlaceholderAlignment.baseline, baseline: ui.TextBaseline.alphabetic);
+    })..layout(constrain(500.0));
+
+    expect(paragraph.maxIntrinsicWidth, 300.0);
+    expect(paragraph.minIntrinsicWidth, 300.0);
+    expect(paragraph.height, 50.0);
+    expectLines(paragraph, [
+      l('', 0, 0, hardBreak: false, width: 300.0, left: 100.0),
+    ]);
+  });
 }
