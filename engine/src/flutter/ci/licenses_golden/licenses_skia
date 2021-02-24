@@ -1,4 +1,4 @@
-Signature: 66d72e85dbac0f2624fe53ee1c83a79f
+Signature: 9e866feebdd0b00cb387fbd05607a273
 
 UNUSED LICENSES:
 
@@ -4028,7 +4028,6 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImag
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2012 The Android Open Source Project
