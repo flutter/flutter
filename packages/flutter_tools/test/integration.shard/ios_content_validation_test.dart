@@ -195,6 +195,8 @@ void main() {
             'VERBOSE_SCRIPT_LOGGING': '1',
             'FLUTTER_BUILD_MODE': 'release',
             'ACTION': 'install',
+            'ARCHS': 'arm64 armv7',
+            'FLUTTER_ROOT': flutterRoot,
             // Skip bitcode stripping since we just checked that above.
           },
         );
