@@ -82,7 +82,7 @@ const Map<String, String> _identifierRewrites = <String, String>{
   '23mp': 'twenty_three_mp',
   '24mp': 'twenty_four_mp',
   'class': 'class_',
-  // TODO(guidezpl): will clean these up in g3
+  // TODO(guidezpl): will clean these up in g3 b/153556862
   'door_back': 'door_back_door',
   'door_front': 'door_front_door',
   'try': 'try_sms_star',
