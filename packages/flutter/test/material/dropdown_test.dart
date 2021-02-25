@@ -2949,4 +2949,57 @@ void main() {
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/76614
+  testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 48.0 * 3 - 1.0, // The height of menu is 47.0.
+          width: double.infinity,
+          child: MaterialApp(
+            home: Scaffold(
+              body: DropdownButton<String>(
+                value: value,
+                items: <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(
+                    key: itemKey,
+                    value: value,
+                    child: const Text(value),
+                  ),
+                ],
+                onChanged: (_) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(value));
+    await tester.pumpAndSettle();
+
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dx, 0.0);
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dy, 228.5);
+
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dx, 16.0);
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dy, 228.5);
+
+    expect(
+      find.ancestor(
+        of: find.text(value).last,
+        matching: find.byType(CustomPaint),
+      ).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        // The height of menu is 47.0.
+        ..rrect(rrect: const RRect.fromLTRBXY(0.0, 0.0, 112.0, 47.0, 2.0, 2.0), color: Colors.grey[50], hasMaskFilter: false)
+    );
+  });
 }
