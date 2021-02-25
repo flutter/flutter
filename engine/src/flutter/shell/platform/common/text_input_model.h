@@ -162,6 +162,9 @@ class TextInputModel {
   // GetText().
   int GetCursorOffset() const;
 
+  // Returns a range covering the entire text.
+  TextRange text_range() const { return TextRange(0, text_.length()); }
+
   // The current selection.
   TextRange selection() const { return selection_; }
 
@@ -187,9 +190,6 @@ class TextInputModel {
   TextRange editable_range() const {
     return composing_ ? composing_range_ : text_range();
   }
-
-  // Returns a range covering the entire text.
-  TextRange text_range() const { return TextRange(0, text_.length()); }
 
   std::u16string text_;
   TextRange selection_ = TextRange(0);
