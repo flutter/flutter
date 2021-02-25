@@ -361,8 +361,8 @@ class Switch extends StatelessWidget {
 
   Size _getSwitchSize(ThemeData theme) {
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = materialTapTargetSize
-        ?? theme.switchTheme.materialTapTargetSize
-        ?? theme.materialTapTargetSize;
+      ?? theme.switchTheme.materialTapTargetSize
+      ?? theme.materialTapTargetSize;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         return const Size(_kSwitchWidth, _kSwitchHeight);
@@ -665,43 +665,43 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color effectiveActiveThumbColor = widget.thumbColor?.resolve(activeStates)
-        ?? _widgetThumbColor.resolve(activeStates)
-        ?? theme.switchTheme.thumbColor?.resolve(activeStates)
-        ?? _defaultThumbColor.resolve(activeStates);
+      ?? _widgetThumbColor.resolve(activeStates)
+      ?? theme.switchTheme.thumbColor?.resolve(activeStates)
+      ?? _defaultThumbColor.resolve(activeStates);
     final Color effectiveInactiveThumbColor = widget.thumbColor?.resolve(inactiveStates)
-        ?? _widgetThumbColor.resolve(inactiveStates)
-        ?? theme.switchTheme.thumbColor?.resolve(inactiveStates)
-        ?? _defaultThumbColor.resolve(inactiveStates);
+      ?? _widgetThumbColor.resolve(inactiveStates)
+      ?? theme.switchTheme.thumbColor?.resolve(inactiveStates)
+      ?? _defaultThumbColor.resolve(inactiveStates);
     final Color effectiveActiveTrackColor = widget.trackColor?.resolve(activeStates)
-        ?? _widgetTrackColor.resolve(activeStates)
-        ?? theme.switchTheme.trackColor?.resolve(activeStates)
-        ?? _defaultTrackColor.resolve(activeStates);
+      ?? _widgetTrackColor.resolve(activeStates)
+      ?? theme.switchTheme.trackColor?.resolve(activeStates)
+      ?? _defaultTrackColor.resolve(activeStates);
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
-        ?? _widgetTrackColor.resolve(inactiveStates)
-        ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
-        ?? _defaultTrackColor.resolve(inactiveStates);
+      ?? _widgetTrackColor.resolve(inactiveStates)
+      ?? theme.switchTheme.trackColor?.resolve(inactiveStates)
+      ?? _defaultTrackColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
-        ?? widget.focusColor
-        ?? theme.switchTheme.overlayColor?.resolve(focusedStates)
-        ?? theme.focusColor;
+      ?? widget.focusColor
+      ?? theme.switchTheme.overlayColor?.resolve(focusedStates)
+      ?? theme.focusColor;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
-        ?? theme.hoverColor;
+      ?? widget.hoverColor
+      ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
+      ?? theme.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+      ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
+      ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+      ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     return Semantics(
       toggled: widget.value,
@@ -930,7 +930,7 @@ class _SwitchPainter extends ToggleablePainter {
       size.height / 2.0,
     );
 
-    paintRadialReaction(canvas: canvas, origin: thumbPosition,);
+    paintRadialReaction(canvas: canvas, origin: thumbPosition);
 
     try {
       _isPainting = true;

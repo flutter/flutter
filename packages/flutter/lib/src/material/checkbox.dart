@@ -373,8 +373,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-          ?? themeData.checkboxTheme.mouseCursor?.resolve(states)
-          ?? MaterialStateMouseCursor.clickable.resolve(states);
+        ?? themeData.checkboxTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateMouseCursor.clickable.resolve(states);
     });
 
     // Colors need to be resolved in selected and non selected states separately
@@ -382,39 +382,39 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
     final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
-        ?? _widgetFillColor.resolve(activeStates)
-        ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
-        ?? _defaultFillColor.resolve(activeStates);
+      ?? _widgetFillColor.resolve(activeStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(activeStates)
+      ?? _defaultFillColor.resolve(activeStates);
     final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
-        ?? _widgetFillColor.resolve(inactiveStates)
-        ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
-        ?? _defaultFillColor.resolve(inactiveStates);
+      ?? _widgetFillColor.resolve(inactiveStates)
+      ?? themeData.checkboxTheme.fillColor?.resolve(inactiveStates)
+      ?? _defaultFillColor.resolve(inactiveStates);
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
     final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
-        ?? widget.focusColor
-        ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
-        ?? themeData.focusColor;
+      ?? widget.focusColor
+      ?? themeData.checkboxTheme.overlayColor?.resolve(focusedStates)
+      ?? themeData.focusColor;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
-        ?? themeData.hoverColor;
+      ?? widget.hoverColor
+      ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
+      ?? themeData.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
+      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Color effectiveCheckColor = widget.checkColor
-        ?? themeData.checkboxTheme.checkColor?.resolve(states)
-        ?? const Color(0xFFFFFFFF);
+      ?? themeData.checkboxTheme.checkColor?.resolve(states)
+      ?? const Color(0xFFFFFFFF);
 
     return Semantics(
       checked: widget.value == true,
