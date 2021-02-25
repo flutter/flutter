@@ -1502,6 +1502,51 @@ void main() {
     }
   });
 
+  testWidgets('Selection changes during Scribble interaction should have the scribble cause', (WidgetTester tester) async {
+    late SelectionChangedCause selectionCause;
+
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            if (cause != null)
+              selectionCause = cause;
+          },
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    
+    // A normal selection update from the framework has 'keyboard' as the cause
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 2, extentOffset: 3),
+    ));
+    await tester.pumpAndSettle();
+    
+    expect(selectionCause, SelectionChangedCause.keyboard);
+    
+    // A selection update during a scribble interaction has 'scribble' as the cause
+    await tester.testTextInput.startScribbleInteraction();
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(selectionCause, SelectionChangedCause.scribble);
+  });
+
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;

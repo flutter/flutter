@@ -224,4 +224,23 @@ class TestTextInput {
     assert(isRegistered);
     _isVisible = false;
   }
+
+  /// Simulates a scribble interaction starting
+  Future<void> startScribbleInteraction() async {
+    assert(isRegistered);
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0)
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    await _binaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionBegan',
+           <dynamic>[_client,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
 }
