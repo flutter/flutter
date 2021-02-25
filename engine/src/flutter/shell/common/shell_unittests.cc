@@ -321,6 +321,29 @@ TEST_F(ShellTest,
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, InitializeWithDisabledGpu) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  auto shell = CreateShell(
+      std::move(settings), std::move(task_runners), /*simulate_vsync=*/false,
+      /*shell_test_external_view_embedder=*/nullptr, /*is_gpu_disabled=*/true);
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  bool is_disabled = false;
+  shell->GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { is_disabled = true; }));
+  ASSERT_TRUE(is_disabled);
+
+  DestroyShell(std::move(shell), std::move(task_runners));
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
 TEST_F(ShellTest, InitializeWithGPUAndPlatformThreadsTheSame) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();

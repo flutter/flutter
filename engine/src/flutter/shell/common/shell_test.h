@@ -39,7 +39,8 @@ class ShellTest : public FixtureTest {
       TaskRunners task_runners,
       bool simulate_vsync = false,
       std::shared_ptr<ShellTestExternalViewEmbedder>
-          shell_test_external_view_embedder = nullptr);
+          shell_test_external_view_embedder = nullptr,
+      bool is_gpu_disabled = false);
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell, TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();
