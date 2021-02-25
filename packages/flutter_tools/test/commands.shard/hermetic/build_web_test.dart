@@ -112,7 +112,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
@@ -149,7 +149,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     Pub: () => FakePub(),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => MockBuildSystem(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 }
 
@@ -208,8 +208,6 @@ class UrlLauncherPlugin {}
     return BuildResult(success: true);
   });
 }
-
-class MockBuildSystem extends Mock implements BuildSystem {}
 
 class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({ bool verboseHelp = false }) :
