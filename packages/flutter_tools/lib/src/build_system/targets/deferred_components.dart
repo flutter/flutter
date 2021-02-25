@@ -8,48 +8,36 @@ import 'package:meta/meta.dart';
 
 import '../../android/deferred_components_gen_snapshot_validator.dart';
 import '../../base/deferred_component.dart';
-import '../../build_info.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import 'android.dart';
 
-/// Creates a [DeferredComponentsSetupValidator and displays the validator
+/// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and displays the validator
 /// output to the developer if changes are recommended.
 class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   DeferredComponentsGenSnapshotValidatorTarget({
-    this.dependency,
+    @required this.dependency,
+    @required this.abis,
     this.title,
     this.exitOnFail = true,
     String name = 'deferred_components_setup_validator',
   }) : _name = name;
 
-  /// The [AndroidAotDeferredComponentsBundle] derived target instances this rule depends on.
+  /// The [AndroidAotDeferredComponentsBundle] derived target instances this rule depends on packed
+  /// as a [CompositeTarget].
   final CompositeTarget dependency;
 
-  /// The title of the [DeferredComponentsSetupValidator] that is
+  /// The title of the [DeferredComponentsGenSnapshotValidator] that is
   /// displayed to the developer when logging results.
   final String title;
 
   /// Whether to exit the tool if a recommended change is found by the
-  /// [DeferredComponentsSetupValidator].
+  /// [DeferredComponentsGenSnapshotValidator].
   final bool exitOnFail;
 
-  /// The name of the produced Android ABI.
-  List<String> get _androidAbiNames {
-    final List<String> abis = <String>[];
-    if (dependency == null) {
-      return abis;
-    }
-    for (final Target target in dependency.dependencies) {
-      if (target.dependencies.isNotEmpty) {
-        abis.add(getNameForAndroidArch(
-          getAndroidArchForName(getNameForTargetPlatform((target.dependencies.first as AndroidAotBundle).dependency.targetPlatform))));
-      }
-    }
-    return abis;
-  }
+  /// The abis to validate.
+  final List<String> abis;
 
   @override
   String get name => _name;
@@ -87,15 +75,16 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
         environment.outputDir,
         environment.logger,
-        abis: _androidAbiNames
+        abis: abis
     );
 
-    validator.checkAppAndroidManifestComponentLoadingUnitMapping(
-        FlutterProject.current().manifest.deferredComponents,
-        generatedLoadingUnits,
-    );
-    validator.checkAgainstLoadingUnitsCache(generatedLoadingUnits);
-    validator.writeLoadingUnitsCache(generatedLoadingUnits);
+    validator
+      ..checkAppAndroidManifestComponentLoadingUnitMapping(
+          FlutterProject.current().manifest.deferredComponents,
+          generatedLoadingUnits,
+      )
+      ..checkAgainstLoadingUnitsCache(generatedLoadingUnits)
+      ..writeLoadingUnitsCache(generatedLoadingUnits);
 
     validator.handleResults();
 

@@ -48,6 +48,7 @@ void main() {
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
+      abis: <String>['arm64-v8a'],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -60,7 +61,7 @@ void main() {
     expect(validatorTarget.validator.inputs[1].path, 'project/android/app/src/main/AndroidManifest.xml');
   });
 
-  testUsingContext('checkAgainstLoadingUnitGolden checks runs', () async {
+  testUsingContext('checkAgainstLoadingUnitsCache checks runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -81,6 +82,7 @@ void main() {
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
+      abis: <String>['arm64-v8a'],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -89,10 +91,10 @@ void main() {
 
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.inputs.length, 3);
-    expect(validatorTarget.validator.inputs[2].path, 'project/deferred_components_golden.yaml');
+    expect(validatorTarget.validator.inputs[2].path, 'project/deferred_components_loading_units.yaml');
   });
 
-  testUsingContext('writeGolden task runs', () async {
+  testUsingContext('writeLoadingUnitsCache task runs', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
@@ -113,6 +115,7 @@ void main() {
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
       dependency: compositeTarget,
+      abis: <String>['arm64-v8a'],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -121,6 +124,6 @@ void main() {
 
     // We check the inputs to determine if the task was executed.
     expect(validatorTarget.validator.outputs.length, 1);
-    expect(validatorTarget.validator.outputs[0].path, 'project/deferred_components_golden.yaml');
+    expect(validatorTarget.validator.outputs[0].path, 'project/deferred_components_loading_units.yaml');
   });
 }
