@@ -26,7 +26,7 @@ void main() {
 
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     BuildSystem: ()  => MockBuildSystem(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(),
   });
 
   testbed.test('flutter assemble can run a build', () async {
