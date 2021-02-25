@@ -126,7 +126,7 @@ class AssembleCommand extends FlutterCommand {
     );
     usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
     usesDartDefineOption(useLegacyNames: useLegacyNames);
-    argParser.addOption(kSplitAot);
+    argParser.addOption(kDeferredComponents);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -257,9 +257,9 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption)) {
       results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
-    results[kSplitAot] = 'false';
+    results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets()) {
-      results[kSplitAot] = 'true';
+      results[kDeferredComponents] = 'true';
     }
     if (argResults.wasParsed(kDartDefines)) {
       results[kDartDefines] = argResults[kDartDefines] as String;

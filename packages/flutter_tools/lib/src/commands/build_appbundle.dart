@@ -105,9 +105,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
-    final Map<String, String> defines = <String, String>{ kSplitAot: 'false' };
+    final Map<String, String> defines = <String, String>{ kDeferredComponents: 'false' };
     if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components')) {
-      defines[kSplitAot] = 'true';
+      defines[kDeferredComponents] = 'true';
     }
     final String output = flutterProject.directory
         .childDirectory('build')
@@ -148,7 +148,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
     );
-    if (env.defines[kSplitAot] == 'true' && boolArg('verify-deferred-components') && !boolArg('debug')) {
+    if (env.defines[kDeferredComponents] == 'true' && boolArg('verify-deferred-components') && !boolArg('debug')) {
 
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
         env,
