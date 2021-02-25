@@ -654,12 +654,6 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
     final ThemeData theme = Theme.of(context);
 
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-      return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? theme.switchTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
-    });
-
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
@@ -689,19 +683,25 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-      ?? widget.hoverColor
-      ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
-      ?? theme.hoverColor;
+        ?? widget.hoverColor
+        ?? theme.switchTheme.overlayColor?.resolve(hoveredStates)
+        ?? theme.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-      ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
-      ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+        ?? theme.switchTheme.overlayColor?.resolve(activePressedStates)
+        ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
       ?? theme.switchTheme.overlayColor?.resolve(inactivePressedStates)
       ?? effectiveActiveThumbColor.withAlpha(kRadialReactionAlpha);
+
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+      return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+        ?? theme.switchTheme.mouseCursor?.resolve(states)
+        ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
+    });
 
     return Semantics(
       toggled: widget.value,

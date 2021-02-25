@@ -353,7 +353,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
-
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? themeData.checkboxTheme.materialTapTargetSize
       ?? themeData.materialTapTargetSize;
@@ -398,19 +397,19 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-      ?? widget.hoverColor
-      ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
-      ?? themeData.hoverColor;
+        ?? widget.hoverColor
+        ?? themeData.checkboxTheme.overlayColor?.resolve(hoveredStates)
+        ?? themeData.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-      ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
-      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+        ?? themeData.checkboxTheme.overlayColor?.resolve(activePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-      ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
-      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+        ?? themeData.checkboxTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Color effectiveCheckColor = widget.checkColor
       ?? themeData.checkboxTheme.checkColor?.resolve(states)

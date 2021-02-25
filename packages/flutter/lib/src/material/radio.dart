@@ -424,7 +424,6 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
-
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? themeData.radioTheme.materialTapTargetSize
       ?? themeData.materialTapTargetSize;
@@ -469,19 +468,19 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
     final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-      ?? widget.hoverColor
-      ?? themeData.radioTheme.overlayColor?.resolve(hoveredStates)
-      ?? themeData.hoverColor;
+        ?? widget.hoverColor
+        ?? themeData.radioTheme.overlayColor?.resolve(hoveredStates)
+        ?? themeData.hoverColor;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-      ?? themeData.radioTheme.overlayColor?.resolve(activePressedStates)
-      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+        ?? themeData.radioTheme.overlayColor?.resolve(activePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-      ?? themeData.radioTheme.overlayColor?.resolve(inactivePressedStates)
-      ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+        ?? themeData.radioTheme.overlayColor?.resolve(inactivePressedStates)
+        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
 
     return Semantics(
       inMutuallyExclusiveGroup: true,

@@ -26,6 +26,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// dragged. These controls manipulate this animation controller to update
   /// their [position] and eventually trigger an [onChanged] callback when the
   /// animation reaches either 0.0 or 1.0.
+  @protected
   AnimationController get positionController => _positionController;
   late AnimationController _positionController;
 
@@ -37,6 +38,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// animation has a value of 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).
+  @protected
   CurvedAnimation get position => _position;
   late CurvedAnimation _position;
 
@@ -47,6 +49,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
+  @protected
   AnimationController get reactionController => _reactionController;
   late AnimationController _reactionController;
 
@@ -57,9 +60,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
+  @protected
   Animation<double> get reaction => _reaction;
   late Animation<double> _reaction;
-
 
   /// Controls the radial reaction's opacity animation for hover changes.
   ///
@@ -69,6 +72,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
+  @protected
   Animation<double> get reactionHoverFade => _reactionHoverFade;
   late Animation<double> _reactionHoverFade;
   late AnimationController _reactionHoverFadeController;
@@ -80,6 +84,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
+  @protected
   Animation<double> get reactionFocusFade => _reactionFocusFade;
   late Animation<double> _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
@@ -135,6 +140,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     );
   }
 
+  @protected
   void animateToValue() {
     if (tristate) {
       if (value == null)
@@ -160,6 +166,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     super.dispose();
   }
 
+  @protected
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
 
@@ -220,6 +227,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
+  @protected
   Set<MaterialState> get states => <MaterialState>{
     if (!isInteractive) MaterialState.disabled,
     if (_hovering) MaterialState.hovered,
@@ -227,6 +235,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (value != false) MaterialState.selected,
   };
 
+  @protected
   Widget buildToggleable({
     FocusNode? focusNode,
     bool autofocus = false,
