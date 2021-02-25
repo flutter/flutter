@@ -13,13 +13,6 @@ import 'package:vm_service/vm_service.dart' as vms;
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../../flutter_driver.dart';
-import '../common/error.dart';
-import '../common/frame_sync.dart';
-import '../common/health.dart';
-import '../common/message.dart';
-import 'common.dart';
-import 'driver.dart';
-import 'timeline.dart';
 
 /// An implementation of the Flutter Driver over the vmservice protocol.
 class VMServiceFlutterDriver extends FlutterDriver {

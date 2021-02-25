@@ -189,7 +189,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages);
     }
 
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(_androidSdk.directory)));
+    messages.add(ValidationMessage(_userMessages.androidSdkLocation(_androidSdk.directory?.path)));
 
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {

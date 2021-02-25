@@ -19,8 +19,8 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -115,7 +115,9 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: 'No Linux desktop project configured'));
+    ), throwsToolExit(message: 'No Linux desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Linux support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => fileSystem,
@@ -463,7 +465,7 @@ set(BINARY_NAME "fizz_bar")
 ''');
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     expect(getCmakeExecutableName(flutterProject.linux), 'fizz_bar');
   }, overrides: <Type, Generator>{

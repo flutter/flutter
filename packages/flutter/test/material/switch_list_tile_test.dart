@@ -359,34 +359,35 @@ void main() {
   });
 
   testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
-    final Color tileColor = Colors.red.shade500;
+    const Color tileColor = Colors.red;
 
     await tester.pumpWidget(
       wrap(
-        child: Center(
+        child: const Center(
           child: SwitchListTile(
             value: false,
             onChanged: null,
-            title: const Text('Title'),
+            title: Text('Title'),
             tileColor: tileColor,
           ),
         ),
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, tileColor);
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
-    final Color selectedTileColor = Colors.green.shade500;
+    const Color selectedTileColor = Colors.black;
 
     await tester.pumpWidget(
       wrap(
-        child: Center(
+        child: const Center(
           child: SwitchListTile(
             value: false,
             onChanged: null,
-            title: const Text('Title'),
+            title: Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
           ),
@@ -394,7 +395,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 
 }

@@ -469,6 +469,7 @@ class DataTable extends StatelessWidget {
     this.showBottomBorder = false,
     this.dividerThickness,
     required this.rows,
+    this.checkboxHorizontalMargin,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -636,6 +637,10 @@ class DataTable extends StatelessWidget {
   ///
   /// If null, [DataTableThemeData.horizontalMargin] is used. This value
   /// defaults to 24.0 to adhere to the Material Design specifications.
+  ///
+  /// If [checkboxHorizontalMargin] is null, then [horizontalMargin] is also the
+  /// margin between the edge of the table and the checkbox, as well as the
+  /// margin between the checkbox and the content in the first data column.
   final double? horizontalMargin;
 
   /// {@template flutter.material.dataTable.columnSpacing}
@@ -678,6 +683,16 @@ class DataTable extends StatelessWidget {
   /// By default, a border is not shown at the bottom to allow for a border
   /// around the table defined by [decoration].
   final bool showBottomBorder;
+
+  /// {@template flutter.material.dataTable.checkboxHorizontalMargin}
+  /// Horizontal margin around the checkbox, if it is displayed.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.checkboxHorizontalMargin] is used. If that is
+  /// also null, then [horizontalMargin] is used as the margin between the edge
+  /// of the table and the checkbox, as well as the margin between the checkbox
+  /// and the content in the first data column. This value defaults to 24.0.
+  final double? checkboxHorizontalMargin;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -746,12 +761,18 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? themeData.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxHorizontalMarginStart = checkboxHorizontalMargin
+      ?? themeData.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin;
+    final double effectiveCheckboxHorizontalMarginEnd = checkboxHorizontalMargin
+      ?? themeData.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin / 2.0;
     Widget contents = Semantics(
       container: true,
       child: Padding(
         padding: EdgeInsetsDirectional.only(
-          start: effectiveHorizontalMargin,
-          end: effectiveHorizontalMargin / 2.0,
+          start: effectiveCheckboxHorizontalMarginStart,
+          end: effectiveCheckboxHorizontalMarginEnd,
         ),
         child: Center(
           child: Checkbox(
@@ -933,6 +954,12 @@ class DataTable extends StatelessWidget {
     final double effectiveHorizontalMargin = horizontalMargin
       ?? theme.dataTableTheme.horizontalMargin
       ?? _horizontalMargin;
+    final double effectiveCheckboxHorizontalMarginStart = checkboxHorizontalMargin
+      ?? theme.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin;
+    final double effectiveCheckboxHorizontalMarginEnd = checkboxHorizontalMargin
+      ?? theme.dataTableTheme.checkboxHorizontalMargin
+      ?? effectiveHorizontalMargin / 2.0;
     final double effectiveColumnSpacing = columnSpacing
       ?? theme.dataTableTheme.columnSpacing
       ?? _columnSpacing;
@@ -976,7 +1003,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (displayCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(effectiveHorizontalMargin + Checkbox.width + effectiveHorizontalMargin / 2.0);
+      tableColumns[0] = FixedColumnWidth(effectiveCheckboxHorizontalMarginStart + Checkbox.width + effectiveCheckboxHorizontalMarginEnd);
       tableRows[0].children![0] = _buildCheckbox(
         context: context,
         checked: someChecked ? null : allChecked,
@@ -1004,7 +1031,9 @@ class DataTable extends StatelessWidget {
       final DataColumn column = columns[dataColumnIndex];
 
       final double paddingStart;
-      if (dataColumnIndex == 0 && displayCheckboxColumn) {
+      if (dataColumnIndex == 0 && displayCheckboxColumn && checkboxHorizontalMargin != null) {
+        paddingStart = effectiveHorizontalMargin;
+      } else if (dataColumnIndex == 0 && displayCheckboxColumn) {
         paddingStart = effectiveHorizontalMargin / 2.0;
       } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
         paddingStart = effectiveHorizontalMargin;

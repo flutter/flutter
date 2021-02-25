@@ -134,7 +134,7 @@ void main() {
       )
     );
 
-    final Rect paddingRect = tester.getRect(find.byType(SafeArea));
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
     final Rect checkboxRect = tester.getRect(find.byType(Checkbox));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
@@ -246,34 +246,35 @@ void main() {
   });
 
   testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
-    final Color tileColor = Colors.red.shade500;
+    const Color tileColor = Colors.black;
 
     await tester.pumpWidget(
       wrap(
-        child: Center(
+        child: const Center(
           child: CheckboxListTile(
             value: false,
             onChanged: null,
-            title: const Text('Title'),
+            title: Text('Title'),
             tileColor: tileColor,
           ),
         ),
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(tileColor));
   });
 
   testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
-    final Color selectedTileColor = Colors.green.shade500;
+    const Color selectedTileColor = Colors.black;
 
     await tester.pumpWidget(
       wrap(
-        child: Center(
+        child: const Center(
           child: CheckboxListTile(
             value: false,
             onChanged: null,
-            title: const Text('Title'),
+            title: Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
           ),
@@ -281,6 +282,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
+    expect(coloredBox.color, equals(selectedTileColor));
   });
 }

@@ -36,13 +36,6 @@
 tasks:
   # Tests of compiling in a variety of modes
 
-  complex_layout_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the Complex
-      Layout sample app for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   complex_layout_win__compile:
     description: >
       Collects various performance metrics of compiling the Complex
@@ -50,26 +43,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  basic_material_app_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the default
-      app for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   basic_material_app_win__compile:
     description: >
       Collects various performance metrics of compiling the default
       app for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-
-  flutter_gallery_ios__compile:
-    description: >
-      Collects various performance metrics of compiling the Flutter
-      Gallery for iOS from Mac.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_win__compile:
     description: >
@@ -94,97 +73,18 @@ tasks:
     required_agent_capabilities: ["mac/ios32"]
     flaky: true
 
-  ios_defines_test:
-    description: >
-      Builds a Framework with a --dart-define and verifies it can be used as a constant
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  ios_content_validation_test:
-    description: >
-      Builds an obfuscated app and verifies contents and structure
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    on_luci: true
-
-  tiles_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_views_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   flutter_gallery_ios32__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
-  flavors_test_ios:
+  native_ui_tests_ios32:
     description: >
-      Checks that flavored builds work on iPhone 6.
+      Run native XCUITests on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  external_ui_integration_test_ios:
-    description: >
-      Checks that external UIs work on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  channels_integration_test_ios:
-    description: >
-      Checks that platform channels work on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_interaction_test_ios:
-    description: >
-      Checks platform interaction on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_channel_sample_test_ios:
-    description: >
-      Runs a driver test on the Platform Channel sample app on iPhone 6 Objective-C project.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_channel_sample_test_swift:
-    description: >
-      Runs a driver test on the Platform Channel sample app on iPhone 6 Swift project.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  platform_view_ios__start_up:
-    description: >
-      Verifies that Platform View can be used from an iOS project.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  backdrop_filter_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of backdrop filter blurs on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  post_backdrop_filter_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of animations after a backdrop filter is removed on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  complex_layout_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of the Complex Layout sample app on
-      iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac/ios32"]
+    flaky: true
 
   flutter_gallery_ios__start_up:
     description: >
@@ -192,97 +92,10 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  complex_layout_ios__start_up:
-    description: >
-      Measures the startup time of the Complex Layout sample app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   flutter_gallery_ios__transition_perf:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  hello_world_ios__compile:
-    description: >
-      Measures the IPA size of Hello World.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  microbenchmarks_ios:
-    description: >
-      Runs benchmarks from dev/benchmarks/microbenchmarks on iPhone 6.
-    stage: devicelab_ios
-    #TODO(godofredoc): Remove ios/12 capability once
-    # https://github.com/flutter/flutter/issues/49635 is fixed.
-    required_agent_capabilities: ["mac/ios", "ios/12"]
-
-  flutter_view_ios__start_up:
-    description: >
-      Verifies that Flutter View can be used from an iOS project.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  integration_ui_ios_driver:
-    description: >
-      Runs end-to-end Flutter tests on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  integration_ui_ios_keyboard_resize:
-    description: >
-      Runs end-to-end Flutter tests on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  integration_ui_ios_screenshot:
-    description: >
-      Runs end-to-end Flutter tests on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  integration_ui_ios_textfield:
-    description: >
-      Runs end-to-end Flutter tests on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  ios_platform_view_tests:
-    description: >
-      Runs end-to-end tests with platform views in the scene.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  macos_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  simple_animation_perf_ios:
-    description: >
-      Measure CPU/GPU usage percentages of a simple animation.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
-    description: >
-      A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac-catalina/ios"]
-
-  # macOS target platform tests
-  hot_mode_dev_cycle_macos_target__benchmark:
-    description: >
-      Checks the functionality and performance of hot reload on a macOS target platform
-    stage: devicelab
-    required_agent_capabilities: ["mac/ios"]
-
-  ios_app_with_extensions_test:
-    description: >
-      Checks that an iOS app with extensions can be built for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -328,16 +141,3 @@ tasks:
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-
-  large_image_changer_perf_ios:
-    description: >
-      Measures memory, cpu, and gpu usage when rotating through a series of large images.
-    stage: devicelab
-    required_agent_capabilities: ["mac/ios"]
-
-  # android_splash_screen_integration_test:
-  #   description: >
-  #     Runs end-to-end test of Flutter's Android splash behavior.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-  #   flaky: true

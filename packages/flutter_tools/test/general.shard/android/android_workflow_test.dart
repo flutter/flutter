@@ -20,7 +20,7 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager;
+import '../../src/mocks.dart' show MockAndroidSdk, MockProcessManager;
 import '../../src/testbed.dart';
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
@@ -41,10 +41,10 @@ void main() {
     stdio = FakeStdio();
   });
 
-  MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
+  FakeProcess Function(List<String>) processMetaFactory(List<String> stdout) {
     final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
         stdout.map<List<int>>((String s) => s.codeUnits));
-    return (List<String> command) => MockProcess(stdout: stdoutStream);
+    return (List<String> command) => FakeProcess(stdout: stdoutStream);
   }
 
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {

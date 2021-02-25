@@ -209,8 +209,15 @@ class EngineBuildPaths {
 abstract class Artifacts {
   /// A test-specific implementation of artifacts that returns stable paths for
   /// all artifacts.
+  ///
+  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
-  factory Artifacts.test() = _TestArtifacts;
+  factory Artifacts.test({String localEngine}) {
+    if (localEngine != null) {
+      return _TestLocalEngine(localEngine);
+    }
+    return _TestArtifacts();
+  }
 
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
@@ -569,9 +576,21 @@ String _getIosEngineArtifactPath(String engineDirectory,
       .path;
 }
 
+abstract class LocalEngineArtifacts implements Artifacts {
+  factory LocalEngineArtifacts(String engineOutPath, String hostEngineOutPath, {
+    @required FileSystem fileSystem,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Platform platform,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) = CachedLocalEngineArtifacts;
+
+  String get engineOutPath;
+}
+
 /// Manages the artifacts of a locally built engine.
-class LocalEngineArtifacts implements Artifacts {
-  LocalEngineArtifacts(
+class CachedLocalEngineArtifacts implements LocalEngineArtifacts {
+  CachedLocalEngineArtifacts(
     this.engineOutPath,
     this._hostEngineOutPath, {
     @required FileSystem fileSystem,
@@ -585,7 +604,9 @@ class LocalEngineArtifacts implements Artifacts {
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils;
 
-  final String engineOutPath; // TODO(goderbauer): This should be private.
+  @override
+  final String engineOutPath;
+
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
   final Cache _cache;
@@ -846,4 +867,14 @@ class _TestArtifacts implements Artifacts {
 
   @override
   bool get isLocalEngine => false;
+}
+
+class _TestLocalEngine extends _TestArtifacts implements LocalEngineArtifacts {
+  _TestLocalEngine(this.engineOutPath);
+
+  @override
+  bool get isLocalEngine => true;
+
+  @override
+  final String engineOutPath;
 }

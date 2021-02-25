@@ -7,14 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/common/diagnostics_tree.dart';
-import 'package:flutter_driver/src/common/find.dart';
-import 'package:flutter_driver/src/common/geometry.dart';
-import 'package:flutter_driver/src/common/request_data.dart';
-import 'package:flutter_driver/src/common/text.dart';
-import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -215,13 +215,13 @@ class Ink extends StatefulWidget {
   /// any [padding].
   final double? height;
 
-  EdgeInsetsGeometry get _paddingIncludingDecoration {
+  EdgeInsetsGeometry? get _paddingIncludingDecoration {
     if (decoration == null || decoration!.padding == null)
-      return padding ?? EdgeInsets.zero;
-    final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
+      return padding;
+    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
     if (padding == null)
       return decorationPadding;
-    return padding!.add(decorationPadding);
+    return padding!.add(decorationPadding!);
   }
 
   @override
@@ -236,7 +236,6 @@ class Ink extends StatefulWidget {
 }
 
 class _InkState extends State<Ink> {
-  final GlobalKey _boxKey = GlobalKey();
   InkDecoration? _ink;
 
   void _handleRemoved() {
@@ -250,31 +249,31 @@ class _InkState extends State<Ink> {
     super.deactivate();
   }
 
-  Widget _build(BuildContext context) {
-    // By creating the InkDecoration from within a Builder widget, we can
-    // use the RenderBox of the Padding widget.
+  Widget _build(BuildContext context, BoxConstraints constraints) {
     if (_ink == null) {
       _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context)!,
-        referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
+        referenceBox: context.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
     } else {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? Container();
+    Widget? current = widget.child;
+    final EdgeInsetsGeometry? effectivePadding = widget._paddingIncludingDecoration;
+    if (effectivePadding != null)
+      current = Padding(padding: effectivePadding, child: current);
+    return current ?? Container();
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget result = Padding(
-      key: _boxKey,
-      padding: widget._paddingIncludingDecoration,
-      child: Builder(builder: _build),
+    Widget result = LayoutBuilder(
+      builder: _build,
     );
     if (widget.width != null || widget.height != null) {
       result = SizedBox(

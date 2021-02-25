@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -149,18 +150,18 @@ void main() {
     testUsingContext('performs a build and starts in debug mode', () async {
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-      final String assetsPath = fileSystem.path.join('build', 'flutter_assets');
-      final String dillPath = fileSystem.path.join('build', 'flutter-tester-app.dill');
+      final Completer<void> completer = Completer<void>();
       fakeProcessManager.addCommand(FakeCommand(
-        command: <String>[
+        command: const <String>[
           'Artifact.flutterTester',
           '--run-forever',
           '--non-interactive',
           '--enable-dart-profiling',
           '--packages=.packages',
-          '--flutter-assets-dir=$assetsPath',
-          dillPath,
+          '--flutter-assets-dir=/.tmp_rand0/flutter-testerrand0',
+          '/.tmp_rand0/flutter-testerrand0/flutter-tester-app.dill',
         ],
+        completer: completer,
         stdout:
         '''
 Observatory listening on $observatoryUri

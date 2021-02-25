@@ -9,7 +9,6 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 // ignore: deprecated_member_use
@@ -109,7 +108,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 void testWidgets(
   String description,
   WidgetTesterCallback callback, {
-  bool skip = false,
+  bool? skip,
   test_package.Timeout? timeout,
   Duration? initialTimeout,
   bool semanticsEnabled = true,

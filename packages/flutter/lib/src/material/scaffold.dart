@@ -13,7 +13,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'button_bar.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -1555,7 +1554,7 @@ class Scaffold extends StatefulWidget {
   /// Typically this is a list of [TextButton] widgets. These buttons are
   /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
-  /// These widgets will be wrapped in a [ButtonBar].
+  /// These widgets will be wrapped in an [OverflowBar].
   ///
   /// The [persistentFooterButtons] are rendered above the
   /// [bottomNavigationBar] but below the [body].
@@ -3114,8 +3113,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           ),
           child: SafeArea(
             top: false,
-            child: ButtonBar(
-              children: widget.persistentFooterButtons!,
+            child: IntrinsicHeight(
+              child: Container(
+                alignment: AlignmentDirectional.centerEnd,
+                padding: const EdgeInsets.all(8),
+                child: OverflowBar(
+                  spacing: 8,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  children: widget.persistentFooterButtons!,
+                ),
+              ),
             ),
           ),
         ),

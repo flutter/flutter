@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_process_manager.dart';
 
 const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
 const String kElfAot = '--snapshot_kind=app-aot-elf';

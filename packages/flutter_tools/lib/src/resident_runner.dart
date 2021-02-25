@@ -195,7 +195,7 @@ class FlutterDevice {
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
-  vm_service.VmService vmService;
+  FlutterVmService vmService;
   DevFS devFS;
   ApplicationPackage package;
   List<String> fileSystemRoots;
@@ -237,7 +237,7 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       bool existingDds = false;
-      vm_service.VmService service;
+      FlutterVmService service;
       if (!disableDds) {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
@@ -250,9 +250,6 @@ class FlutterDevice {
         // from an old application instance, we shouldn't try and start DDS.
         try {
           service = await connectToVmService(observatoryUri);
-          // TODO(dnfield): Remove ignore once internal repo is up to date
-          // https://github.com/flutter/flutter/issues/74518
-          // ignore: await_only_futures
           await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
@@ -306,7 +303,7 @@ class FlutterDevice {
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
           ]
-        ) as vm_service.VmService;
+        ) as FlutterVmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
@@ -365,7 +362,7 @@ class FlutterDevice {
         ));
       }
     }
-    return vmService.onDone
+    return vmService.service.onDone
       .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
           'unhandled error waiting for vm service exit:\n $error',
@@ -400,45 +397,50 @@ class FlutterDevice {
   Future<void> debugDumpApp() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpApp(
+      final String data = await vmService.flutterDebugDumpApp(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpRenderTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpRenderTree(
+      final String data = await vmService.flutterDebugDumpRenderTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpLayerTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpLayerTree(
+      final String data = await vmService.flutterDebugDumpLayerTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
@@ -551,7 +553,7 @@ class FlutterDevice {
   }
 
   Future<void> initLogReader() async {
-    final vm_service.VM vm = await vmService.getVM();
+    final vm_service.VM vm = await vmService.service.getVM();
     final DeviceLogReader logReader = await device.getLogReader(app: package);
     logReader.appPid = vm.pid;
   }
@@ -915,6 +917,7 @@ abstract class ResidentRunner {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
@@ -1269,7 +1272,7 @@ abstract class ResidentRunner {
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
-      unawaited(device.vmService.onDone.then<void>(
+      unawaited(device.vmService.service.onDone.then<void>(
         _serviceProtocolDone,
         onError: _serviceProtocolError,
       ).whenComplete(_serviceDisconnected));
@@ -1676,8 +1679,6 @@ class TerminalHandler {
 class DebugConnectionInfo {
   DebugConnectionInfo({ this.httpUri, this.wsUri, this.baseUri });
 
-  // TODO(danrubel): the httpUri field should be removed as part of
-  // https://github.com/flutter/flutter/issues/7050
   final Uri httpUri;
   final Uri wsUri;
   final String baseUri;

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -149,7 +150,29 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('VM service', () {
     testWithoutContext('IOSDeviceLogReader can listen to VM Service logs', () async {
-      final MockVmService vmService = MockVmService();
+      final Event stdoutEvent = Event(
+        kind: 'Stdout',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  This is a message ')),
+      );
+      final Event stderrEvent = Event(
+        kind: 'Stderr',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  And this is an error ')),
+      );
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+        FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+        FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+      ]).vmService;
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -159,47 +182,39 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      final StreamController<Event> stdoutController = StreamController<Event>();
-      final StreamController<Event> stderController = StreamController<Event>();
-      final Completer<Success> stdoutCompleter = Completer<Success>();
-      final Completer<Success> stderrCompleter = Completer<Success>();
-      when(vmService.streamListen('Stdout')).thenAnswer((Invocation invocation) {
-        return stdoutCompleter.future;
-      });
-      when(vmService.streamListen('Stderr')).thenAnswer((Invocation invocation) {
-        return stderrCompleter.future;
-      });
-      when(vmService.onStdoutEvent).thenAnswer((Invocation invocation) {
-        return stdoutController.stream;
-      });
-      when(vmService.onStderrEvent).thenAnswer((Invocation invocation) {
-        return stderController.stream;
-      });
       logReader.connectedVMService = vmService;
-
-      stdoutCompleter.complete(Success());
-      stderrCompleter.complete(Success());
-      stdoutController.add(Event(
-        kind: 'Stdout',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  This is a message ')),
-      ));
-      stderController.add(Event(
-        kind: 'Stderr',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  And this is an error ')),
-      ));
 
       // Wait for stream listeners to fire.
       await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
         equals('  This is a message '),
         equals('  And this is an error '),
       ]));
-      verify(vmService.streamListen('Debug'));
     });
 
     testWithoutContext('IOSDeviceLogReader ignores VM Service logs when attached to debugger', () async {
-      final MockVmService vmService = MockVmService();
+      final Event stdoutEvent = Event(
+        kind: 'Stdout',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  This is a message ')),
+      );
+      final Event stderrEvent = Event(
+        kind: 'Stderr',
+        timestamp: 0,
+        bytes: base64.encode(utf8.encode('  And this is an error ')),
+      );
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+        FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+        FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+      ]).vmService;
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -209,36 +224,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
       );
-      final StreamController<Event> stdoutController = StreamController<Event>();
-      final StreamController<Event> stderController = StreamController<Event>();
-      final Completer<Success> stdoutCompleter = Completer<Success>();
-      final Completer<Success> stderrCompleter = Completer<Success>();
-      when(vmService.streamListen('Stdout')).thenAnswer((Invocation invocation) {
-        return stdoutCompleter.future;
-      });
-      when(vmService.streamListen('Stderr')).thenAnswer((Invocation invocation) {
-        return stderrCompleter.future;
-      });
-      when(vmService.onStdoutEvent).thenAnswer((Invocation invocation) {
-        return stdoutController.stream;
-      });
-      when(vmService.onStderrEvent).thenAnswer((Invocation invocation) {
-        return stderController.stream;
-      });
       logReader.connectedVMService = vmService;
-
-      stdoutCompleter.complete(Success());
-      stderrCompleter.complete(Success());
-      stdoutController.add(Event(
-        kind: 'Stdout',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  This is a message ')),
-      ));
-      stderController.add(Event(
-        kind: 'Stderr',
-        timestamp: 0,
-        bytes: base64.encode(utf8.encode('  And this is an error ')),
-      ));
 
       final MockIOSDeployDebugger iosDeployDebugger = MockIOSDeployDebugger();
       when(iosDeployDebugger.debuggerAttached).thenReturn(true);
@@ -327,5 +313,4 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   });
 }
 
-class MockVmService extends Mock implements VmService {}
 class MockIOSDeployDebugger extends Mock implements IOSDeployDebugger {}
