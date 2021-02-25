@@ -14,7 +14,7 @@ import '../framework/utils.dart';
 ///
 /// Using this [Task] allows DeviceLab capacity to only be spent on the [test].
 abstract class BuildTestTask {
-  BuildTestTask(this.args, {this.workingDirectory}) {
+  BuildTestTask(this.args, {this.workingDirectory, this.runFlutterClean = true,}) {
     final ArgResults argResults = argParser.parse(args);
     applicationBinaryPath = argResults[kApplicationBinaryPathOption] as String;
     buildOnly = argResults[kBuildOnlyFlag] as bool;
@@ -40,6 +40,9 @@ abstract class BuildTestTask {
   /// If true, skip [build].
   bool testOnly = false;
 
+  /// Whether to run `flutter clean` before building the application under test.
+  final bool runFlutterClean;
+
   /// Path to a built application to use in [test].
   /// 
   /// If not given, will default to child's expected location.
@@ -51,8 +54,11 @@ abstract class BuildTestTask {
   /// Run Flutter build to create [applicationBinaryPath].
   Future<void> build() async {
     await inDirectory<void>(workingDirectory, () async {
+      if (runFlutterClean) {
+        section('FLUTTER CLEAN');
+        await flutter('clean');
+      }
       section('BUILDING APPLICATION');
-      await flutter('clean');
       await flutter('build', options: getBuildArgs(deviceOperatingSystem));
     });
 
@@ -60,7 +66,7 @@ abstract class BuildTestTask {
 
   /// Run Flutter drive test from [getTestArgs] against the application under test on the device.
   ///
-  /// This assumes that [build()] was called or [applicationBinaryPath] exists.
+  /// This assumes that [applicationBinaryPath] exists.
   Future<TaskResult> test() async {
     final Device device = await devices.workingDevice;
     await device.unlock();
