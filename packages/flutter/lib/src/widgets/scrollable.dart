@@ -732,12 +732,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    return _configuration.buildViewportChrome(
-      context,
-      result,
-      widget.axisDirection,
-      controller: widget.autoScrollbar ? widget.controller : null,
-    );
+    return _configuration.useDecoration
+      ? _configuration.buildViewportDecoration(
+          context,
+          result,
+          widget.axisDirection,
+          widget.autoScrollbar ? widget.controller : null,
+        )
+      : _configuration.buildViewportChrome(context, result, widget.axisDirection);
   }
 
   @override

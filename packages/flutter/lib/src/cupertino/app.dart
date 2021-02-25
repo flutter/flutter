@@ -406,13 +406,25 @@ class CupertinoApp extends StatefulWidget {
 }
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
+  const _AlwaysCupertinoScrollBehavior({ bool useDecoration = false }) : super(useDecoration: useDecoration);
+
+  @Deprecated(
+    'Migrate to buildViewportDecoration.'
+    'This feature was deprecated after v1.27.0-9.0.pre.'
+  )
   @override
-  Widget buildViewportChrome(
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // Never build any overscroll glow indicators.
+    return child;
+  }
+
+  @override
+  Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection, {
+    AxisDirection axisDirection,
     ScrollController? controller,
-  }) {
+  ) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
     // GlowingOverscrollIndicator is not applicable.
     // On Web and Desktop, when a controller is provided and the theme specifies,
@@ -549,7 +561,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
 
     return ScrollConfiguration(
-      behavior: _AlwaysCupertinoScrollBehavior(),
+      behavior: const _AlwaysCupertinoScrollBehavior(useDecoration: true),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(

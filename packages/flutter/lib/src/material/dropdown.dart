@@ -91,18 +91,18 @@ class _DropdownMenuPainter extends CustomPainter {
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
 class _DropdownScrollBehavior extends ScrollBehavior {
-  const _DropdownScrollBehavior();
+  const _DropdownScrollBehavior() : super(useDecoration: true);
 
   @override
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildViewportChrome(
+  Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection, {
+    AxisDirection axisDirection,
     ScrollController? controller,
-  }) {
+  ) {
     // No GlowingOverscrollIndicator or Scrollbar applied.
     return child;
   }

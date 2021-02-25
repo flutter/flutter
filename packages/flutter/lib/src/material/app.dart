@@ -659,18 +659,44 @@ class MaterialApp extends StatefulWidget {
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
+  const _MaterialScrollBehavior({ bool useDecoration = false }) : super(useDecoration: useDecoration);
+
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
   }
 
+  @Deprecated(
+    'Migrate to buildViewportDecoration.'
+    'This feature was deprecated after v1.27.0-9.0.pre.'
+  )
   @override
-  Widget buildViewportChrome(
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: axisDirection,
+          color: Theme.of(context).accentColor,
+        );
+    }
+  }
+
+  @override
+  Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection, {
+    AxisDirection axisDirection,
     ScrollController? controller,
-  }) {
+  ) {
     final ThemeData theme = Theme.of(context);
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
@@ -873,7 +899,7 @@ class _MaterialAppState extends State<MaterialApp> {
     }());
 
     return ScrollConfiguration(
-      behavior: _MaterialScrollBehavior(),
+      behavior: const _MaterialScrollBehavior(useDecoration: true),
       child: HeroControllerScope(
         controller: _heroController,
         child: result,

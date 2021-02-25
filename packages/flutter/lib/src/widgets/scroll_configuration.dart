@@ -21,24 +21,63 @@ const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior();
+  const ScrollBehavior({ this.useDecoration = false });
 
   /// The platform whose scroll physics should be implemented.
   ///
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
+  /// Whether [buildViewportChrome] or [buildViewportDecoration] should be used
+  /// in wrapping the Scrollable widget.
+  ///
+  /// This is used as an opt-in during the deprecation period.
+  @Deprecated(
+    'Set to true after migrating to buildViewportDecoration.'
+    'This feature was deprecated after v1.27.0-9.0.pre.'
+  )
+  final bool useDecoration;
+
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
   /// For example, on Android, this method wraps the given widget with a
   /// [GlowingOverscrollIndicator] to provide visual feedback when the user
   /// overscrolls.
-  Widget buildViewportChrome(
+  @Deprecated(
+    'Migrate to buildViewportDecoration.'
+    'This feature was deprecated after v1.27.0-9.0.pre.'
+  )
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // _MaterialScrollBehavior as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: axisDirection,
+          color: _kDefaultGlowColor,
+        );
+    }
+  }
+
+  /// Wraps the given widget, which scrolls in the given [AxisDirection], and is
+  /// controlled by the given [ScrollController].
+  ///
+  /// For example, on Android, this method wraps the given widget with a
+  /// [GlowingOverscrollIndicator] to provide visual feedback when the user
+  /// overscrolls.
+  Widget buildViewportDecoration(
     BuildContext context,
     Widget child,
-    AxisDirection axisDirection, {
+    AxisDirection axisDirection,
     ScrollController? controller,
-  }) {
+  ) {
     // When modifying this function, consider modifying the implementation in
     // _MaterialScrollBehavior and _AlwaysCupertinoScrollBehavior as well.
     // On Android and Fuchsia, we add a GlowingOverscrollIndicator.
@@ -162,7 +201,7 @@ class ScrollConfiguration extends InheritedWidget {
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
-    return configuration?.behavior ?? const ScrollBehavior();
+    return configuration?.behavior ?? const ScrollBehavior(useDecoration: true);
   }
 
   @override
