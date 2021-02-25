@@ -985,6 +985,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (selection.isCollapsed) {
       if (!forward && textBefore.isNotEmpty) {
         final int characterBoundary = previousCharacter(textBefore.length, textBefore);
+        // If the last character is a "Right-To-Left Mark"(8207) or 
+        // "Left-To-Right Mark"(8206), delete this mark also.
+        // See https://github.com/flutter/flutter/issues/57732 
+        final int lastCharCode = textBefore.characters.last.codeUnitAt(0);
+        if (characterBoundary > 0 && (lastCharCode == 8207 || lastCharCode == 8206)){
+          characterBoundary--;
+        }
         textBefore = textBefore.substring(0, characterBoundary);
         cursorPosition = characterBoundary;
       }
