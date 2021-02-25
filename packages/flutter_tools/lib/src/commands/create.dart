@@ -326,7 +326,7 @@ In order to run your $application, type:
 To enable null safety, type:
 
   \$ cd $relativeAppPath
-  \$ dart migrate --apply-changes
+  \$ dart migrate --apply-changes --no-web-preview
 
 Your $application code is in $relativeAppMain.
 ''');
