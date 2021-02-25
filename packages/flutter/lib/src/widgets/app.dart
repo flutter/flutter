@@ -1636,29 +1636,33 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    return ScrollConfiguration(
-      behavior: widget.scrollBehavior ?? const ScrollBehavior(),
-      child: RootRestorationScope(
-        restorationId: widget.restorationScopeId,
-        child: Shortcuts(
-          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-          debugLabel: '<Default WidgetsApp Shortcuts>',
-          child: Actions(
-            actions: widget.actions ?? WidgetsApp.defaultActions,
-            child: FocusTraversalGroup(
-              policy: ReadingOrderTraversalPolicy(),
-              child: _MediaQueryFromWindow(
-                child: Localizations(
-                  locale: appLocale,
-                  delegates: _localizationsDelegates.toList(),
-                  child: title,
-                ),
+    final Widget app =  RootRestorationScope(
+      restorationId: widget.restorationScopeId,
+      child: Shortcuts(
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        debugLabel: '<Default WidgetsApp Shortcuts>',
+        child: Actions(
+          actions: widget.actions ?? WidgetsApp.defaultActions,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: _MediaQueryFromWindow(
+              child: Localizations(
+                locale: appLocale,
+                delegates: _localizationsDelegates.toList(),
+                child: title,
               ),
             ),
           ),
         ),
       ),
     );
+    if (widget.scrollBehavior != null) {
+      return ScrollConfiguration(
+        behavior: widget.scrollBehavior!,
+        child: app,
+      );
+    }
+    return app;
   }
 }
 
