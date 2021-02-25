@@ -198,6 +198,13 @@ class KeyEventSimulator {
       'keymap': platform,
     };
 
+    if (kIsWeb) {
+      result['code'] = _getWebKeyCode(key);
+      result['key'] = key.keyLabel;
+      result['metaState'] = _getWebModifierFlags(key, isDown);
+      return result;
+    }
+
     switch (platform) {
       case 'android':
         result['keyCode'] = keyCode;

@@ -270,12 +270,15 @@ abstract class RawKeyEvent with Diagnosticable {
 
     final String keymap = message['keymap'] as String;
     if (kIsWeb) {
+      final String? key = message['key'] as String?;
       data = RawKeyEventDataWeb(
         code: message['code'] as String? ?? '',
-        key: message['key'] as String? ?? '',
+        key: key ?? '',
         metaState: message['metaState'] as int? ?? 0,
       );
-      character = message['key'] as String?;
+      if (key != null && key.isNotEmpty) {
+        character = key;
+      }
     } else {
       switch (keymap) {
         case 'android':
@@ -348,12 +351,15 @@ abstract class RawKeyEvent with Diagnosticable {
           }
           break;
         case 'web':
+          final String? key = message['key'] as String?;
           data = RawKeyEventDataWeb(
             code: message['code'] as String? ?? '',
-            key: message['key'] as String? ?? '',
+            key: key ?? '',
             metaState: message['metaState'] as int? ?? 0,
           );
-          character = message['key'] as String?;
+          if (key != null && key.isNotEmpty) {
+            character = key;
+          }
           break;
         default:
           /// This exception would only be hit on platforms that haven't yet
