@@ -272,7 +272,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// The returned set will include:
   ///
-  ///  * [MaterialState.disabled], if [interactive] is false
+  ///  * [MaterialState.disabled], if [isInteractive] is false
   ///  * [MaterialState.hovered], if a pointer is hovering over the Toggleable
   ///  * [MaterialState.focused], if the Toggleable has input focus
   ///  * [MaterialState.selected], if [value] is true or null
