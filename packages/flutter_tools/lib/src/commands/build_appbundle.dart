@@ -6,13 +6,13 @@
 
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
+import '../android/deferred_components_prebuild_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart';
-import '../build_system/targets/deferred_components.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -149,19 +149,17 @@ class BuildAppBundleCommand extends BuildSubCommand {
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
     );
     if (env.defines[kSplitAot] == 'true' && boolArg('verify-deferred-components') && !boolArg('debug')) {
-      final Target target = DeferredComponentsSetupValidatorTarget(
-        tasks: <DeferredComponentsSetupValidatorTask>[
-          DeferredComponentsSetupValidatorTask.clearOutputDir,
-          DeferredComponentsSetupValidatorTask.checkAndroidDynamicFeature,
-          DeferredComponentsSetupValidatorTask.checkAndroidResourcesStrings,
-        ],
-        title: 'Deferred components setup verification part 1 of 2',
-        name: 'deferred_components_setup_validator_1',
+
+      final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+        env,
+        title: 'Deferred components prebuild verification',
+        exitOnFail: true,
       );
-      final BuildResult result = await globals.buildSystem.build(
-        target,
-        createEnvironment(),
-      );
+      validator.clearOutputDir();
+      await validator.checkAndroidDynamicFeature(FlutterProject.current().manifest.deferredComponents);
+      validator.checkAndroidResourcesStrings(FlutterProject.current().manifest.deferredComponents);
+
+      validator.handleResults();
 
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.

@@ -6,7 +6,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../android/deferred_components_setup_validator.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
@@ -285,15 +284,17 @@ class AssembleCommand extends FlutterCommand {
         && boolArg('verify-deferred-components')
         && isDeferredComponentsTargets()
         && !isDebug()) {
-      target = DeferredComponentsSetupValidatorTarget(
-        tasks: <DeferredComponentsSetupValidatorTask>[
-          DeferredComponentsSetupValidatorTask.checkAppAndroidManifestComponentLoadingUnitMapping,
-          DeferredComponentsSetupValidatorTask.checkAgainstLoadingUnitGolden,
-          DeferredComponentsSetupValidatorTask.writeGolden,
-        ],
+      final List<String> abis = <String>[];
+      for (final AndroidAotDeferredComponentsBundle target in targets) {
+        abis.add(
+          getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)))
+        );
+      }
+      target = DeferredComponentsGenSnapshotValidatorTarget(
         dependency: target as CompositeTarget,
-        title: 'Deferred components setup verification part 2 of 2',
-        name: 'deferred_components_setup_validator_2',
+        abis: abis,
+        title: 'Deferred components gen_snapshot verification',
+        name: 'deferred_components_gen_snapshot_validator',
       );
     }
     final BuildResult result = await globals.buildSystem.build(
