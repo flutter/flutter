@@ -33,6 +33,8 @@ void main() {
   }, overrides: <Type, Generator>{
     BuildSystem: ()  => TestBuildSystem.all(BuildResult(success: true)),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble can parse defines whose values contain =', () async {
@@ -45,6 +47,8 @@ void main() {
       expect(environment.defines, containsPair('FooBar', 'fizz=2'));
     }),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble can parse inputs', () async {
@@ -57,6 +61,8 @@ void main() {
       expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
     }),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble throws ToolExit if not provided with output', () async {
@@ -66,6 +72,8 @@ void main() {
   }, overrides: <Type, Generator>{
     BuildSystem: ()  => TestBuildSystem.all(BuildResult(success: true)),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
@@ -76,6 +84,8 @@ void main() {
   }, overrides: <Type, Generator>{
     BuildSystem: ()  => TestBuildSystem.all(BuildResult(success: true)),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
@@ -90,6 +100,8 @@ void main() {
       'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
     })),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble outputs JSON performance data to provided file', () async {
@@ -121,6 +133,8 @@ void main() {
         ),
       })),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble does not inject engine revision with local-engine', () async {
@@ -132,6 +146,8 @@ void main() {
       expect(environment.engineVersion, isNull);
     }),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('flutter assemble only writes input and output files when the values change', () async {
@@ -183,11 +199,18 @@ void main() {
       ),
       BuildResult(
         success: true,
+        inputFiles: <File>[globals.fs.file('foo')..createSync()],
+        outputFiles: <File>[globals.fs.file('bar')..createSync()],
+      ),
+      BuildResult(
+        success: true,
         inputFiles: <File>[globals.fs.file('foo'), globals.fs.file('fizz')..createSync()],
         outputFiles: <File>[globals.fs.file('bar'), globals.fs.file(globals.fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)],
       ),
     ]),
     Cache: () => FakeCache(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
