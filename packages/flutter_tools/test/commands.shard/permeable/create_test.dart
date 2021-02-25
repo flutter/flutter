@@ -1055,6 +1055,7 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
@@ -1064,6 +1065,7 @@ void main() {
     expect(buildPhaseScript, contains('FLUTTER_ROOT='));
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
+    expect(buildPhaseScript, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
 
     // Generated podspec
     final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
@@ -1156,6 +1158,7 @@ void main() {
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
+    expect(xcodeConfig, contains('COCOAPODS_PARALLEL_CODE_SIGN=true'));
     // App identification
     final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
