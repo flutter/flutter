@@ -449,6 +449,7 @@ void main() {
     });
 
     testUsingContext('test without bot', () async {
+      globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         FakeCommand(command: <String>['${getFlutterRoot()}/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
       );
@@ -472,6 +473,7 @@ void main() {
     });
 
     testUsingContext('test with bot', () async {
+      globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
         FakeCommand(command: <String>['${getFlutterRoot()}/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
       );
@@ -495,6 +497,7 @@ void main() {
     });
 
     testUsingContext('run pass arguments through to pub', () async {
+      globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
         FakeCommand(command: <String>[
