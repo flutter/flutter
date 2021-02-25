@@ -250,6 +250,29 @@ abstract class Target {
   }
 }
 
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
+class CompositeTarget extends Target {
+  CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
+}
+
 /// The [Environment] defines several constants for use during the build.
 ///
 /// The environment contains configuration and file paths that are safe to

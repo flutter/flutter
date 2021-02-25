@@ -417,7 +417,6 @@ abstract class IosAssetBundle extends Target {
       environment.buildDir.childFile('flutter_assets.d'),
     );
 
-
     // Copy the plist from either the project or module.
     // TODO(jonahwilliams): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
@@ -532,6 +531,87 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
       // Best effort. Sometimes we can't delete things from system temp.
     } on Exception catch (e) {
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+    }
+  }
+}
+
+/// Destructively thins the specified executable file to include only the specified architectures.
+///
+/// This target is not fingerprinted and will always run.
+class ThinIosApplicationFrameworks extends Target {
+  const ThinIosApplicationFrameworks();
+
+  @override
+  String get name => 'thin_ios_application_frameworks';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kIosArchs] == null) {
+      throw MissingDefineException(kIosArchs, 'thin_ios_application_frameworks');
+    }
+    final Directory frameworkDirectory = environment.outputDir;
+
+    final File appFramework = frameworkDirectory.childDirectory('App.framework').childFile('App');
+    final File flutterFramework = frameworkDirectory.childDirectory('Flutter.framework').childFile('Flutter');
+    await _thinBinary(appFramework, environment);
+    await _thinBinary(flutterFramework, environment);
+  }
+
+  Future<void> _thinBinary(File binary, Environment environment) async {
+    final String binaryPath = binary.path;
+    if (!binary.existsSync()) {
+      throw Exception('Binary $binaryPath does not exist, cannot thin');
+    }
+    final String archs = environment.defines[kIosArchs];
+    final List<String> archList = archs.split(' ').toList();
+    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-info',
+      binaryPath,
+    ]);
+    final String lipoInfo = infoResult.stdout as String;
+
+    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+      'lipo',
+      binaryPath,
+      '-verify_arch',
+      ...archList
+    ]);
+
+    if (verifyResult.exitCode != 0) {
+      throw Exception('Binary $binaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+    }
+
+    // Skip this step for non-fat executables.
+    if (lipoInfo.startsWith('Non-fat file:')) {
+      environment.logger.printTrace('Skipping lipo for non-fat file $binaryPath');
+      return;
+    }
+
+    // Thin in-place.
+    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+      'lipo',
+      '-output',
+      binaryPath,
+      for (final String arch in archList)
+        ...<String>[
+          '-extract',
+          arch,
+        ],
+      ...<String>[binaryPath],
+    ]);
+
+    if (extractResult.exitCode != 0) {
+      throw Exception('Failed to extract $archs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
     }
   }
 }

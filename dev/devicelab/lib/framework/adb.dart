@@ -581,7 +581,9 @@ class AndroidDevice extends Device {
           .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat: $line');
-            stream.sink.add(line);
+            if (!stream.isClosed) {
+              stream.sink.add(line);
+            }
           }, onDone: () { stdoutDone.complete(); });
         process.stderr
           .transform<String>(utf8.decoder)

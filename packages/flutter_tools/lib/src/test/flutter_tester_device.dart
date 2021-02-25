@@ -11,7 +11,6 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -165,11 +164,11 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final Future<vm_service.VmService> localVmService = connectToVmService(
+        final Future<FlutterVmService> localVmService = connectToVmService(
           forwardingUri,
           compileExpression: compileExpression,
         );
-        unawaited(localVmService.then((vm_service.VmService vmservice) {
+        unawaited(localVmService.then((FlutterVmService vmservice) {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         }));
 
