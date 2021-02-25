@@ -455,6 +455,7 @@ void main() {
 
       expect(processManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
@@ -477,6 +478,7 @@ void main() {
 
       expect(processManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
@@ -503,6 +505,7 @@ void main() {
 
       expect(processManager.hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
