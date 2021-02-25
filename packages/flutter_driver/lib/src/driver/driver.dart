@@ -311,7 +311,7 @@ abstract class FlutterDriver {
   /// See also:
   ///
   ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
-  Future<Map<String, Object>> getRenderObjectDiagnostics(
+  Future<Map<String, Object?>> getRenderObjectDiagnostics(
       SerializableFinder finder, {
       int subtreeDepth = 0,
       bool includeProperties = true,
@@ -323,7 +323,7 @@ abstract class FlutterDriver {
       subtreeDepth: subtreeDepth,
       includeProperties: includeProperties,
       timeout: timeout,
-    )) as Map<String, Object>;
+    ));
   }
 
   /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
@@ -344,7 +344,7 @@ abstract class FlutterDriver {
   ///
   ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
   ///    [RenderObject].
-  Future<Map<String, Object>> getWidgetDiagnostics(
+  Future<Map<String, Object?>> getWidgetDiagnostics(
     SerializableFinder finder, {
     int subtreeDepth = 0,
     bool includeProperties = true,
@@ -356,7 +356,7 @@ abstract class FlutterDriver {
       subtreeDepth: subtreeDepth,
       includeProperties: includeProperties,
       timeout: timeout,
-    )) as Map<String, Object>;
+    ));
   }
 
   /// Tell the driver to perform a scrolling action.

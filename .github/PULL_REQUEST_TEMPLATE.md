@@ -9,10 +9,10 @@
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
-- [ ] I listed at least one issue that this PR fixes in the description above.
-- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test exempt.
-- [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I signed the [CLA].
+- [ ] I listed at least one issue that this PR fixes in the description above.
+- [ ] I updated/added relevant documentation (doc comments with `///`).
+- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test-exempt.
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].

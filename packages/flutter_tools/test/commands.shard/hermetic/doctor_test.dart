@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -1045,7 +1044,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
   MockDevice() {

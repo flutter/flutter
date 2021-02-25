@@ -427,6 +427,8 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
+  // TODO(jonahwilliams): update after google3 uuid is updated.
+  // ignore: prefer_const_constructors
   static final Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.v4();

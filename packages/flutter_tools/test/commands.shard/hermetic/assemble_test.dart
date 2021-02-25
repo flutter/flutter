@@ -135,7 +135,6 @@ void main() {
 
   testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
     Environment environment;
-    when(globals.artifacts.isLocalEngine).thenReturn(true);
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         environment = invocation.positionalArguments[1] as Environment;
@@ -146,7 +145,7 @@ void main() {
 
     expect(environment.engineVersion, isNull);
   }, overrides: <Type, Generator>{
-    Artifacts: () => MockLocalEngineArtifacts()
+    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
   });
 
   testbed.test('flutter assemble only writes input and output files when the values change', () async {
@@ -239,4 +238,3 @@ void main() {
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

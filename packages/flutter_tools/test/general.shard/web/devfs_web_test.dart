@@ -4,12 +4,11 @@
 
 // @dart = 2.8
 
-import 'dart:io';
+import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';

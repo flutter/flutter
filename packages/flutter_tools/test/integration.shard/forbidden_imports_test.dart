@@ -86,6 +86,31 @@ void main() {
     }
   });
 
+  test('no unauthorized imports of package:http', () {
+    final List<String> allowedPaths = <String>[
+      // Used only for multi-part file uploads, which are non-trivial to reimplement.
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'reporting.dart'),
+    ];
+    bool _isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+
+    for (final String dirName in <String>['lib', 'bin']) {
+      final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotAllowed)
+        .map(_asFile);
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:http/')) &&
+              !line.contains('ignore: package_http_import')) {
+            final String relativePath = fileSystem.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:http'; import 'lib/src/base/io.dart' instead");
+          }
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of test_api', () {
     final List<String> allowedPaths = <String>[
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),

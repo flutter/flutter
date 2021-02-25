@@ -8,12 +8,14 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -286,11 +288,13 @@ class NoContext implements AppContext {
 class FakeVmServiceHost {
   FakeVmServiceHost({
     @required List<VmServiceExpectation> requests,
+    Uri httpAddress,
+    Uri wsAddress,
   }) : _requests = requests {
-    _vmService = vm_service.VmService(
+    _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
-    );
+    ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object> request = json.decode(data) as Map<String, Object>;
@@ -330,8 +334,9 @@ class FakeVmServiceHost {
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
-  vm_service.VmService get vmService => _vmService;
-  vm_service.VmService _vmService;
+  FlutterVmService get vmService => _vmService;
+  FlutterVmService _vmService;
+
 
   bool get hasRemainingExpectations => _requests.isNotEmpty;
 
@@ -419,27 +424,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
   }
 }
 
-/// A file system that allows preconfiguring certain entities.
-///
-/// This is useful for inserting mocks/entities which throw errors or
-/// have other behavior that is not easily configured through the
-/// filesystem interface.
-class ConfiguredFileSystem extends ForwardingFileSystem {
-  ConfiguredFileSystem(FileSystem delegate, {@required this.entities}) : super(delegate);
-
-  final Map<String, FileSystemEntity> entities;
-
-  @override
-  File file(dynamic path) {
-    return (entities[path] as File) ?? super.file(path);
-  }
-
-  @override
-  Directory directory(dynamic path) {
-    return (entities[path] as Directory) ?? super.directory(path);
-  }
-}
-
 /// Matches a doctor validation result.
 Matcher matchDoctorValidation({
   ValidationType validationType,
@@ -450,4 +434,45 @@ Matcher matchDoctorValidation({
     .having((ValidationResult result) => result.type, 'type', validationType)
     .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
     .having((ValidationResult result) => result.messages, 'messages', messages);
+}
+
+/// Allows inserting file system exceptions into certain
+/// [MemoryFileSystem] operations by tagging path/op combinations.
+///
+/// Example use:
+///
+/// ```
+/// void main() {
+///   var handler = FileExceptionHandler();
+///   var fs = MemoryFileSystem(opHandle: handler.opHandle);
+///
+///   var file = fs.file('foo')..createSync();
+///   handler.addError(file, FileSystemOp.read, FileSystemException('Error Reading foo'));
+///
+///   expect(() => file.writeAsStringSync('A'), throwsA(isA<FileSystemException>()));
+/// }
+/// ```
+class FileExceptionHandler {
+  final Map<String, Map<FileSystemOp, FileSystemException>> _contextErrors = <String, Map<FileSystemOp, FileSystemException>>{};
+
+  /// Add an exception that will be thrown whenever the file system attached to this
+  /// handler performs the [operation] on the [entity].
+  void addError(FileSystemEntity entity, FileSystemOp operation, FileSystemException exception) {
+    final String path = entity.path;
+    _contextErrors[path] ??= <FileSystemOp, FileSystemException>{};
+    _contextErrors[path][operation] = exception;
+  }
+
+  // Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
+  void opHandle(String path, FileSystemOp operation) {
+    final Map<FileSystemOp, FileSystemException> exceptions = _contextErrors[path];
+    if (exceptions == null) {
+      return;
+    }
+    final FileSystemException exception = exceptions[operation];
+    if (exception == null) {
+      return;
+    }
+    throw exception;
+  }
 }

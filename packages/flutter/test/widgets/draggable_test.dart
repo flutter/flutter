@@ -293,7 +293,7 @@ void main() {
     events.clear();
 
     expect(events, isEmpty);
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     expect(events, equals(<String>['tap']));
     events.clear();
 
@@ -325,7 +325,7 @@ void main() {
 
     expect(events, isEmpty);
     await tester.tap(find.text('Button'));
-    await tester.tap(find.text('Target'));
+    await tester.tap(find.text('Target'), warnIfMissed: false); // (inside IgnorePointer)
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['tap', 'tap', 'drop', 'details']));
@@ -2873,6 +2873,48 @@ void main() {
         ],
     ), ignoreTransform: true, ignoreRect: true));
     semantics.dispose();
+  });
+
+  testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              hitTestBehavior: hitTestBehavior,
+              feedback: Container(height: 50.0, child: const Text('Draggable')),
+              child: Container(height: 50.0, child: const Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.widget<Listener>(find.byType(Listener).first).behavior, hitTestBehavior);
+  });
+
+  testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
+    const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            DragTarget<int>(
+              hitTestBehavior: hitTestBehavior,
+              builder: (BuildContext context, List<int?> data,
+                  List<dynamic> rejects) {
+                return Container(height: 100.0, child: const Text('Target'));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.widget<MetaData>(find.byType(MetaData)).behavior, hitTestBehavior);
   });
 }
 

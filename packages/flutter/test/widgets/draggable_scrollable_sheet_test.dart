@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -154,7 +153,7 @@ void main() {
         await tester.drag(find.text('Item 1'), const Offset(0, -325));
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
@@ -206,7 +205,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -240,7 +239,7 @@ void main() {
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
@@ -249,7 +248,7 @@ void main() {
         await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
+        await tester.tap(find.text('TapHere'), warnIfMissed: false);
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);

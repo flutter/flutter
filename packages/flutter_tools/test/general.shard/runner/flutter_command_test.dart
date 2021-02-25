@@ -25,19 +25,20 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    MockitoCache cache;
-    MockitoUsage usage;
+    MockCache cache;
+    TestUsage usage;
     FakeClock clock;
     MockProcessInfo mockProcessInfo;
 
     setUp(() {
       Cache.disableLocking();
-      cache = MockitoCache();
-      usage = MockitoUsage();
+      cache = MockCache();
+      usage = TestUsage();
       clock = FakeClock();
       mockProcessInfo = MockProcessInfo();
 
@@ -159,24 +160,19 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'success',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'success',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'success',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -190,24 +186,19 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(
-        'dummy',
-        parameters: anyNamed('parameters'),
-      ));
-      verify(usage.sendEvent(
-        'tool-command-result',
-        'dummy',
-        label: 'warning',
-        parameters: anyNamed('parameters'),
-      ));
-      expect(verify(usage.sendEvent(
+      expect(usage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'warning',
+        ),
+        const TestUsageEvent(
           'tool-command-max-rss',
           'dummy',
           label: 'warning',
-          value: captureAnyNamed('value'),
-        )).captured[0],
-        10,
-      );
+          value: 10,
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in failure', () async {
@@ -254,29 +245,23 @@ void main() {
           return null; // unreachable
         }
       );
-
       try {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'fail',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'fail',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'fail',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }
     });
 
@@ -365,24 +350,19 @@ void main() {
         signalController.add(mockSignal);
         await completer.future;
 
-        verify(usage.sendCommand(
-          'dummy',
-          parameters: anyNamed('parameters'),
-        ));
-        verify(usage.sendEvent(
-          'tool-command-result',
-          'dummy',
-          label: 'killed',
-          parameters: anyNamed('parameters'),
-        ));
-        expect(verify(usage.sendEvent(
+        expect(usage.events, <TestUsageEvent>[
+          const TestUsageEvent(
+            'tool-command-result',
+            'dummy',
+            label: 'killed',
+          ),
+          const TestUsageEvent(
             'tool-command-max-rss',
             'dummy',
             label: 'killed',
-            value: captureAnyNamed('value'),
-          )).captured[0],
-          10,
-        );
+            value: 10,
+          ),
+        ]);
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -438,17 +418,13 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 1000),
-          'fail',
-        ],
-      );
+          Duration(milliseconds: 1000),
+          label: 'fail',
+        )));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
@@ -458,9 +434,8 @@ void main() {
       final DummyFlutterCommand flutterCommand =
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
-      verifyNever(usage.sendTiming(
-                   any, any, any,
-                   label: anyNamed('label')));
+
+      expect(usage.timings, isEmpty);
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
@@ -478,17 +453,14 @@ void main() {
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
-      expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
-        <dynamic>[
+
+      expect(usage.timings, contains(
+        const TestTimingEvent(
           'flutter',
           'dummy',
-          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
-          'success-blah1-blah2-blah3',
-        ],
-      );
+          Duration(milliseconds: 500),
+          label: 'success-blah1-blah2-blah3',
+        )));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
@@ -506,18 +478,13 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-
-        expect(
-          verify(usage.sendTiming(
-                  captureAny, captureAny, captureAny,
-                  label: captureAnyNamed('label'))).captured,
-          <dynamic>[
+        expect(usage.timings, contains(
+          const TestTimingEvent(
             'flutter',
             'dummy',
-            const Duration(milliseconds: 1000),
-            'fail',
-          ],
-        );
+            Duration(milliseconds: 1000),
+            label: 'fail',
+          )));
       }
     });
 
@@ -550,14 +517,28 @@ void main() {
 
       await runner.run(<String>['test']);
 
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'runtime-mode', label: 'NullSafetyMode.sound')).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'stats', parameters: <String, String>{
-        'cd49': '1', 'cd50': '1',
-      })).called(1);
-      verify(globals.flutterUsage.sendEvent(NullSafetyAnalysisEvent.kNullSafetyCategory, 'language-version', label: '2.12')).called(1);
+      expect(usage.events, containsAll(<TestUsageEvent>[
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'runtime-mode',
+          label: 'NullSafetyMode.sound',
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'stats',
+          parameters: <String, String>{
+            'cd49': '1', 'cd50': '1',
+          },
+        ),
+        const TestUsageEvent(
+          NullSafetyAnalysisEvent.kNullSafetyCategory,
+          'language-version',
+          label: '2.12',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
-      Usage: () => MockitoUsage(),
+      Usage: () => usage,
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -672,20 +653,6 @@ class FakeSignals implements Signals {
   Stream<Object> get errors => delegate.errors;
 }
 
-class FakePub extends Fake implements Pub {
-  @override
-  Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
-    bool checkUpToDate = false,
-  }) async { }
-}
-
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];
 
@@ -694,3 +661,5 @@ class FakeClock extends Fake implements SystemClock {
     return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
   }
 }
+
+class MockCache extends Mock implements Cache {}

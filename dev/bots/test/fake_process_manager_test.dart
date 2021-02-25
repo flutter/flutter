@@ -26,10 +26,10 @@ void main() {
 
     test('start works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-        'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil acl get gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output1', ''),
         ],
-        'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil cat gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output2', ''),
         ],
       };
@@ -48,10 +48,10 @@ void main() {
 
     test('run works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-        'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil acl get gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output1', ''),
         ],
-        'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil cat gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output2', ''),
         ],
       };
@@ -65,10 +65,10 @@ void main() {
 
     test('runSync works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-        'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil acl get gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output1', ''),
         ],
-        'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil cat gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output2', ''),
         ],
       };
@@ -82,10 +82,10 @@ void main() {
 
     test('captures stdin', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-        'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil acl get gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output1', ''),
         ],
-        'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
+        'gsutil cat gs://flutter_infra_release/releases/releases.json': <ProcessResult>[
           ProcessResult(0, 0, 'output2', ''),
         ],
       };

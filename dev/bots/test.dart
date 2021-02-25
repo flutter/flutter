@@ -15,6 +15,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'service_worker_test.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -104,7 +105,6 @@ Future<void> main(List<String> args) async {
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'web_tool_tests': _runWebToolTests,
@@ -118,27 +118,6 @@ Future<void> main(List<String> args) async {
     error.apply();
   }
   print('$clock ${bold}Test successful.$reset');
-}
-
-/// Returns whether or not Linux desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunLinux() {
-  return Platform.isLinux && (branchName != 'beta' && branchName != 'stable');
-}
-
-/// Returns whether or not macOS desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunMacOS() {
-  return Platform.isMacOS && (branchName != 'beta' && branchName != 'stable');
-}
-
-/// Returns whether or not Windows desktop tests should be run.
-///
-/// The branch restrictions here should stay in sync with features.dart.
-bool _shouldRunWindows() {
-  return Platform.isWindows && (branchName != 'beta' && branchName != 'stable');
 }
 
 /// Verify the Flutter Engine is the revision in
@@ -274,30 +253,6 @@ Future<void> _runSmokeTests() async {
     exitWithError(<String>[versionError]);
 }
 
-Future<void> _runToolCoverage() async {
-  await _pubRunTest(
-    toolRoot,
-    testPaths: <String>[
-      path.join('test', 'general.shard'),
-      path.join('test', 'commands.shard', 'hermetic'),
-    ],
-    coverage: 'coverage',
-  );
-  await runCommand(pub,
-    <String>[
-      'run',
-      'coverage:format_coverage',
-      '--lcov',
-      '--in=coverage',
-      '--out=coverage/lcov.info',
-      '--packages=.packages',
-      '--report-on=lib/'
-    ],
-    workingDirectory: toolRoot,
-    outputMode: OutputMode.capture,
-  );
-}
-
 Future<void> _runGeneralToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
@@ -369,27 +324,32 @@ Future<void> _runWebToolTests() async {
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
   // distribution of costs, but the seed is fixed so that issues are reproducible.
   final List<ShardRunner> tests = <ShardRunner>[
     for (final FileSystemEntity exampleDirectory in exampleDirectories)
-        () => _runExampleProjectBuildTests(exampleDirectory),
-    if (branchName != 'beta' && branchName != 'stable')
-      ...<ShardRunner>[
-        // Web compilation tests.
-          () =>  _flutterBuildDart2js(
-          path.join('dev', 'integration_tests', 'web'),
-          path.join('lib', 'main.dart'),
-        ),
-        // Should not fail to compile with dart:io.
-          () =>  _flutterBuildDart2js(
-          path.join('dev', 'integration_tests', 'web_compile_tests'),
-          path.join('lib', 'dart_io_import.dart'),
-        ),
-      ],
+      () => _runExampleProjectBuildTests(exampleDirectory),
+    ...<ShardRunner>[
+      // Web compilation tests.
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web'),
+            path.join('lib', 'main.dart'),
+          ),
+      // Should not fail to compile with dart:io.
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web_compile_tests'),
+            path.join('lib', 'dart_io_import.dart'),
+          ),
+    ],
   ]..shuffle(math.Random(0));
 
   await _runShardRunnerIndexOfTotalSubshard(tests);
@@ -420,7 +380,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
-  if (_shouldRunLinux()) {
+  if (Platform.isLinux) {
     if (Directory(path.join(examplePath, 'linux')).existsSync()) {
       await _flutterBuildLinux(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildLinux(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -428,7 +388,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no linux directory, skipping Linux');
     }
   }
-  if (_shouldRunMacOS()) {
+  if (Platform.isMacOS) {
     if (Directory(path.join(examplePath, 'macos')).existsSync()) {
       await _flutterBuildMacOS(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildMacOS(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -436,7 +396,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
       print('Example project ${path.basename(examplePath)} has no macos directory, skipping macOS');
     }
   }
-  if (_shouldRunWindows()) {
+  if (Platform.isWindows) {
     if (Directory(path.join(examplePath, 'windows')).existsSync()) {
       await _flutterBuildWin32(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       await _flutterBuildWin32(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -836,6 +796,7 @@ Future<void> _runWebLongRunningTests() async {
     () => _runGalleryE2eWebTest('profile', canvasKit: true),
     () => _runGalleryE2eWebTest('release'),
     () => _runGalleryE2eWebTest('release', canvasKit: true),
+    () => runWebServiceWorkerTest(headless: true),
   ];
   await _ensureChromeDriverIsRunning();
   await _runShardRunnerIndexOfTotalSubshard(tests);

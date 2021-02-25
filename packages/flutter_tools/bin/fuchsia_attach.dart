@@ -113,6 +113,7 @@ Future<void> main(List<String> args) async {
           fileSystem: globals.fs,
           cache: globals.cache,
           platform: globals.platform,
+          operatingSystemUtils: globals.os,
         ),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,

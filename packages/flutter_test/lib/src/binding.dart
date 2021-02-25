@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:clock/clock.dart';
@@ -212,7 +211,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// change the behavior of [debugPrint]. For example,
   /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
   /// synchronous, disabling its normal throttling behavior.
-  @protected
+  ///
+  /// It is also used by some other parts of the test framework (e.g.
+  /// [WidgetTester.printToConsole]) to ensure that messages from the
+  /// test framework are displayed to the developer rather than logged
+  /// by whatever code is overriding [debugPrint].
   DebugPrintCallback get debugPrintOverride => debugPrint;
 
   /// The value to set [debugDisableShadows] to while tests are running.
@@ -893,7 +896,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
-    buildOwner!.focusManager = FocusManager();
+    buildOwner!.focusManager.dispose();
+    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.

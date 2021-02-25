@@ -413,7 +413,6 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
-    // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
     final String windowsMessage = _terminal.supportsEmoji
       ? message
       : message.replaceAll('🔥', '')
@@ -421,7 +420,8 @@ class WindowsStdoutLogger extends StdoutLogger {
                .replaceAll('✗', 'X')
                .replaceAll('✓', '√')
                .replaceAll('🔨', '')
-               .replaceAll('💪', '');
+               .replaceAll('💪', '')
+               .replaceAll('✏️', '');
     _stdio.stdoutWrite(windowsMessage);
   }
 }

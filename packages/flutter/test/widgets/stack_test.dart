@@ -409,7 +409,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(IndexedStack));
+    await tester.tap(find.byType(IndexedStack), warnIfMissed: false);
     final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);

@@ -855,4 +855,72 @@ void main() {
     // Reset the surface size.
     await binding.setSurfaceSize(originalSize);
   });
+
+  testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+    const double _customCheckboxHorizontalMargin = 15.0;
+    const double _customHorizontalMargin = 10.0;
+
+    const double _width = 400;
+    const double _height = 400;
+
+    final Size originalSize = binding.renderView.size;
+
+    // Ensure the containing Card is small enough that we don't expand too
+    // much, resulting in our custom margin being ignored.
+    await binding.setSurfaceSize(const Size(_width, _height));
+
+    final TestDataSource source = TestDataSource(
+      onSelectChanged: (bool? value) {},
+    );
+    Finder cellContent;
+    Finder checkbox;
+    Finder padding;
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          availableRowsPerPage: const <int>[
+            2, 4,
+          ],
+          onRowsPerPageChanged: (int? rowsPerPage) {},
+          onPageChanged: (int rowIndex) {},
+          onSelectAll: (bool? value) {},
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+          horizontalMargin: _customHorizontalMargin,
+          checkboxHorizontalMargin: _customCheckboxHorizontalMargin,
+        ),
+      ),
+    ));
+
+    // Custom checkbox padding.
+    checkbox = find.byType(Checkbox).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    expect(
+      tester.getRect(checkbox).left - tester.getRect(padding).left,
+      _customCheckboxHorizontalMargin,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(checkbox).right,
+      _customCheckboxHorizontalMargin,
+    );
+
+    // Custom first column padding.
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget.
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customHorizontalMargin,
+    );
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
+  });
 }

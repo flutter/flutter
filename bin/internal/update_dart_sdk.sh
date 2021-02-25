@@ -58,13 +58,24 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   }
   >&2 echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
+  # On x64 stdout is "uname -m: x86_64"
+  # On arm64 stdout is "uname -m: aarch64, arm64_v8a"
+  case "$(uname -m)" in
+    x86_64)
+      ARCH="x64"
+      ;;
+    *)
+      ARCH="arm64"
+      ;;
+  esac
+
   case "$(uname -s)" in
     Darwin)
       DART_ZIP_NAME="dart-sdk-darwin-x64.zip"
       IS_USER_EXECUTABLE="-perm +100"
       ;;
     Linux)
-      DART_ZIP_NAME="dart-sdk-linux-x64.zip"
+      DART_ZIP_NAME="dart-sdk-linux-${ARCH}.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;
     MINGW*)
@@ -85,7 +96,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   fi
 
   DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}"
-  DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
+  DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra_release/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
 
   # if the sdk path exists, copy it to a temporary location
   if [ -d "$DART_SDK_PATH" ]; then

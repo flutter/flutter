@@ -86,9 +86,25 @@ class FlutterProject {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static FlutterProject current() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
 
-  /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
-  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => globals.projectFactory.fromDirectory(globals.fs.directory(path));
+  /// Create a [FlutterProject] and bypass the project caching.
+  @visibleForTesting
+  static FlutterProject fromDirectoryTest(Directory directory, [Logger logger]) {
+    final FileSystem fileSystem = directory.fileSystem;
+    logger ??= BufferLogger.test();
+    final FlutterManifest manifest = FlutterProject._readManifest(
+      directory.childFile(bundle.defaultManifestPath).path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    final FlutterManifest exampleManifest = FlutterProject._readManifest(
+      FlutterProject._exampleDirectory(directory)
+        .childFile(bundle.defaultManifestPath)
+        .path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    return FlutterProject(directory, manifest, exampleManifest);
+  }
 
   /// The location of this project.
   final Directory directory;
@@ -201,6 +217,9 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
+  /// True if this project is a Flutter plugin project.
+  bool get isPlugin => manifest.isPlugin;
+
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
@@ -269,7 +288,7 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
   }) async {
-    if (!directory.existsSync() || hasExampleApp) {
+    if (!directory.existsSync() || hasExampleApp || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
@@ -689,7 +708,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         framework,
         engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );
@@ -806,6 +825,31 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
+  /// Returns true if the current version of the Gradle plugin is supported.
+  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
+  bool _isSupportedVersion;
+
+  bool _computeSupportedVersion() {
+    final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
+    final File plugin = hostAppGradleRoot.childFile(
+        fileSystem.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
+    if (plugin.existsSync()) {
+      return false;
+    }
+    final File appGradle = hostAppGradleRoot.childFile(
+        fileSystem.path.join('app', 'build.gradle'));
+    if (!appGradle.existsSync()) {
+      return false;
+    }
+    for (final String line in appGradle.readAsLinesSync()) {
+      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
+          line.contains("def flutterPluginVersion = 'managed'")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
@@ -900,7 +944,7 @@ to migrate your project.
       'library_new_embedding',
     ), ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    globals.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {

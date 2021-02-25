@@ -146,13 +146,24 @@ String generateNumberFormattingLogic(Message message) {
       }
       final Iterable<String> parameters =
         placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
-          return '${parameter.name}: ${parameter.value}';
+          if (parameter.value is num) {
+            return '${parameter.name}: ${parameter.value}';
+          } else {
+            return '${parameter.name}: ${generateString(parameter.value.toString())}';
+          }
         },
       );
-      return numberFormatTemplate
-        .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', placeholder.format)
-        .replaceAll('@(parameters)', parameters.join(',    \n'));
+
+      if (placeholder.hasNumberFormatWithParameters) {
+        return numberFormatNamedTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format)
+            .replaceAll('@(parameters)', parameters.join(',\n      '));
+      } else {
+        return numberFormatPositionalTemplate
+            .replaceAll('@(placeholder)', placeholder.name)
+            .replaceAll('@(format)', placeholder.format);
+      }
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');

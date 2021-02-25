@@ -4,7 +4,6 @@
 
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_driver/flutter_driver.dart'; // ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter_driver/src/common/message.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'stub_command.dart';

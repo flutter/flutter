@@ -7,14 +7,17 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
-
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:test/fake.dart';
 
 /// A fake implementation of the [DeviceLogReader].
 class FakeDeviceLogReader extends DeviceLogReader {
@@ -397,4 +400,46 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+}
+
+class FakePlistParser implements PlistParser {
+  final Map<String, dynamic> _underlyingValues = <String, String>{};
+
+  void setProperty(String key, dynamic value) {
+    _underlyingValues[key] = value;
+  }
+
+  @override
+  Map<String, dynamic> parseFile(String plistFilePath) {
+    return _underlyingValues;
+  }
+
+  @override
+  String getValueFromFile(String plistFilePath, String key) {
+    return _underlyingValues[key] as String;
+  }
+}
+
+class FakeBotDetector implements BotDetector {
+  const FakeBotDetector(bool isRunningOnBot)
+      : _isRunningOnBot = isRunningOnBot;
+
+  @override
+  Future<bool> get isRunningOnBot async => _isRunningOnBot;
+
+  final bool _isRunningOnBot;
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String flutterRootOverride,
+    bool checkUpToDate = false,
+  }) async { }
 }
