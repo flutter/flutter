@@ -226,7 +226,7 @@ class AndroidAot extends AotElfBase {
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
     final String manifestPath = '${output.path}${io.Platform.pathSeparator}manifest.json';
-    if (environment.defines[kSplitAot] == 'true') {
+    if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
@@ -258,7 +258,7 @@ class AndroidAot extends AotElfBase {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
     }
     final List<File> outputs = <File>[];
-    if (environment.defines[kSplitAot] == 'true') {
+    if (environment.defines[kDeferredComponents] == 'true') {
       // Parse the manifest for .so paths
       final List<LoadingUnit> loadingUnits = LoadingUnit.parseLoadingUnitManifest(environment.fileSystem.file(manifestPath), environment.logger);
       for (final LoadingUnit unit in loadingUnits) {

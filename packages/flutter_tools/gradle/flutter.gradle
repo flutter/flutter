@@ -727,9 +727,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('code-size-directory')) {
             codeSizeDirectoryValue = project.property('code-size-directory')
         }
-        Boolean splitAotValue = false
-        if (project.hasProperty('split-aot')) {
-            splitAotValue = project.property('split-aot').toBoolean()
+        Boolean deferredComponentsValue = false
+        if (project.hasProperty('deferred-components')) {
+            deferredComponentsValue = project.property('deferred-components').toBoolean()
         }
         Boolean verifyDeferredComponentsValue = true
         if (project.hasProperty('verify-deferred-components')) {
@@ -776,7 +776,7 @@ class FlutterPlugin implements Plugin<Project> {
                 bundleSkSLPath bundleSkSLPathValue
                 performanceMeasurementFile performanceMeasurementFileValue
                 codeSizeDirectory codeSizeDirectoryValue
-                splitAot splitAotValue
+                deferredComponents deferredComponentsValue
                 verifyDeferredComponents verifyDeferredComponentsValue
                 doLast {
                     project.exec {
@@ -994,7 +994,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String codeSizeDirectory;
     String performanceMeasurementFile;
     @Optional @Input
-    Boolean splitAot
+    Boolean deferredComponents
     @Optional @Input
     Boolean verifyDeferredComponents
 
@@ -1021,7 +1021,7 @@ abstract class BaseFlutterTask extends DefaultTask {
         String[] ruleNames;
         if (buildMode == "debug") {
             ruleNames = ["debug_android_application"]
-        } else if (splitAot) {
+        } else if (deferredComponents) {
             ruleNames = targetPlatformValues.collect { "android_aot_deferred_components_bundle_${buildMode}_$it" }
         } else {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }

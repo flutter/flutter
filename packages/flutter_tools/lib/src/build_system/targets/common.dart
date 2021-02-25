@@ -47,7 +47,7 @@ const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Whether the app should run gen_snapshot as a split aot build for deferred
 /// components.
-const String kSplitAot = 'SplitAot';
+const String kDeferredComponents = 'DeferredComponents';
 
 /// Whether to strip source code information out of release builds and where to save it.
 const String kSplitDebugInfo = 'SplitDebugInfo';

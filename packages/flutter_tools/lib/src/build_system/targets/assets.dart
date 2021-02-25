@@ -58,7 +58,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     assetDirPath: null,
-    deferredComponentsEnabled: environment.defines[kSplitAot] == 'true',
+    deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
@@ -141,7 +141,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
               // and the native APIs will look for files this way.
 
               // If deferred components are disabled, then copy assets to regular location.
-              final File file = environment.defines[kSplitAot] == 'true'
+              final File file = environment.defines[kDeferredComponents] == 'true'
                 ? environment.fileSystem.file(
                     environment.fileSystem.path.join(componentOutputDir.path, buildMode.name, 'deferred_assets', 'flutter_assets', entry.key))
                 : environment.fileSystem.file(

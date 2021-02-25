@@ -34,7 +34,7 @@ void main() {
       buildDir: fileSystem.directory('build')..createSync(),
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{
-        kSplitAot: 'true',
+        kDeferredComponents: 'true',
       },
       artifacts: null,
       processManager: null,
@@ -68,7 +68,7 @@ void main() {
       buildDir: fileSystem.directory('build')..createSync(),
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{
-        kSplitAot: 'true',
+        kDeferredComponents: 'true',
       },
       artifacts: null,
       processManager: null,
@@ -101,7 +101,7 @@ void main() {
       buildDir: fileSystem.directory('build')..createSync(),
       projectDir: fileSystem.directory('project')..createSync(),
       defines: <String, String>{
-        kSplitAot: 'true',
+        kDeferredComponents: 'true',
       },
       artifacts: null,
       processManager: null,
