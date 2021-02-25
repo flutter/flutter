@@ -139,7 +139,8 @@ std::unique_ptr<Shell> Shell::Create(
     TaskRunners task_runners,
     Settings settings,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    bool is_gpu_disabled) {
   // This must come first as it initializes tracing.
   PerformInitializationTasks(settings);
 
@@ -165,7 +166,7 @@ std::unique_ptr<Shell> Shell::Create(
                             std::move(isolate_snapshot),         //
                             std::move(on_create_platform_view),  //
                             std::move(on_create_rasterizer),     //
-                            CreateEngine);
+                            CreateEngine, is_gpu_disabled);
 }
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
@@ -176,7 +177,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    const Shell::EngineCreateCallback& on_create_engine) {
+    const Shell::EngineCreateCallback& on_create_engine,
+    bool is_gpu_disabled) {
   if (!task_runners.IsValid()) {
     FML_LOG(ERROR) << "Task runners to run the shell were invalid.";
     return nullptr;
@@ -186,7 +188,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       new Shell(std::move(vm), task_runners, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
-                    !settings.skia_deterministic_rendering_on_cpu)));
+                    !settings.skia_deterministic_rendering_on_cpu),
+                is_gpu_disabled));
 
   // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
@@ -315,7 +318,8 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    const Shell::EngineCreateCallback& on_create_engine) {
+    const Shell::EngineCreateCallback& on_create_engine,
+    bool is_gpu_disabled) {
   // This must come first as it initializes tracing.
   PerformInitializationTasks(settings);
 
@@ -341,7 +345,8 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
            isolate_snapshot = std::move(isolate_snapshot),                //
            on_create_platform_view = std::move(on_create_platform_view),  //
            on_create_rasterizer = std::move(on_create_rasterizer),        //
-           on_create_engine = std::move(on_create_engine)]() mutable {
+           on_create_engine = std::move(on_create_engine),
+           is_gpu_disabled]() mutable {
             shell = CreateShellOnPlatformThread(
                 std::move(vm),                       //
                 std::move(task_runners),             //
@@ -350,7 +355,7 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
                 std::move(isolate_snapshot),         //
                 std::move(on_create_platform_view),  //
                 std::move(on_create_rasterizer),     //
-                std::move(on_create_engine));
+                std::move(on_create_engine), is_gpu_disabled);
             latch.Signal();
           }));
   latch.Wait();
@@ -360,11 +365,12 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
 Shell::Shell(DartVMRef vm,
              TaskRunners task_runners,
              Settings settings,
-             std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
+             std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+             bool is_gpu_disabled)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
-      is_gpu_disabled_sync_switch_(new fml::SyncSwitch()),
+      is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
       volatile_path_tracker_(std::move(volatile_path_tracker)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
@@ -481,25 +487,34 @@ std::unique_ptr<Shell> Shell::Spawn(
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
-  std::unique_ptr<Shell> result(CreateWithSnapshot(
-      PlatformData{}, task_runners_, GetSettings(), vm_,
-      vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
-      on_create_rasterizer,
-      [engine = this->engine_.get()](
-          Engine::Delegate& delegate,
-          const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
-          fml::RefPtr<const DartSnapshot> isolate_snapshot,
-          TaskRunners task_runners, const PlatformData& platform_data,
-          Settings settings, std::unique_ptr<Animator> animator,
-          fml::WeakPtr<IOManager> io_manager,
-          fml::RefPtr<SkiaUnrefQueue> unref_queue,
-          fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-          std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
-        return engine->Spawn(/*delegate=*/delegate,
-                             /*dispatcher_maker=*/dispatcher_maker,
-                             /*settings=*/settings,
-                             /*animator=*/std::move(animator));
-      }));
+  auto shell_maker = [&](bool is_gpu_disabled) {
+    std::unique_ptr<Shell> result(CreateWithSnapshot(
+        PlatformData{}, task_runners_, GetSettings(), vm_,
+        vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
+        on_create_rasterizer,
+        [engine = this->engine_.get()](
+            Engine::Delegate& delegate,
+            const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
+            fml::RefPtr<const DartSnapshot> isolate_snapshot,
+            TaskRunners task_runners, const PlatformData& platform_data,
+            Settings settings, std::unique_ptr<Animator> animator,
+            fml::WeakPtr<IOManager> io_manager,
+            fml::RefPtr<SkiaUnrefQueue> unref_queue,
+            fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+            std::shared_ptr<VolatilePathTracker> volatile_path_tracker) {
+          return engine->Spawn(/*delegate=*/delegate,
+                               /*dispatcher_maker=*/dispatcher_maker,
+                               /*settings=*/settings,
+                               /*animator=*/std::move(animator));
+        },
+        is_gpu_disabled));
+    return result;
+  };
+  std::unique_ptr<Shell> result;
+  GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfFalse([&] { result = shell_maker(false); })
+          .SetIfTrue([&] { result = shell_maker(true); }));
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
 
