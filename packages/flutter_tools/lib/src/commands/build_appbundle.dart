@@ -131,7 +131,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
       processManager: globals.processManager,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision
+        : globals.flutterVersion.engineRevision,
+      generateDartPluginRegistry: true,
     );
     return result;
   }

@@ -366,7 +366,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (project.manifest.deferredComponents != null) {
       if (deferredComponentsEnabled) {
         command.add('-Pdeferred-components=true');
-
         command.add('-Pverify-deferred-components=$verifyDeferredComponents');
       }
       // Pass in deferred components regardless of building split aot to satisfy

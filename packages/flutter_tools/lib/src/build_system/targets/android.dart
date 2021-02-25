@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io' as io;
-
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/deferred_component.dart';
@@ -225,7 +223,7 @@ class AndroidAot extends AotElfBase {
       output.createSync(recursive: true);
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final String manifestPath = '${output.path}${io.Platform.pathSeparator}manifest.json';
+    final String manifestPath = '${output.path}${globals.platform.pathSeparator}manifest.json';
     if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
     }

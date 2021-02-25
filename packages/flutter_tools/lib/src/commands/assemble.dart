@@ -285,7 +285,7 @@ class AssembleCommand extends FlutterCommand {
         && isDeferredComponentsTargets()
         && !isDebug()) {
       final List<String> abis = <String>[];
-      for (final AndroidAotDeferredComponentsBundle target in targets) {
+      for (final AndroidAotDeferredComponentsBundle target in targets as List<AndroidAotDeferredComponentsBundle>) {
         abis.add(
           getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)))
         );
