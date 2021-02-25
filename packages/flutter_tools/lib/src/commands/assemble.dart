@@ -139,8 +139,9 @@ class AssembleCommand extends FlutterCommand {
             'tooling also provides guidance on how to set up the project files to pass this '
             'verification. Disabling setup verification will always attempt to fully build '
             'the app regardless of any problems detected. Builds that are part of CI testing '
-            'and advanced users custom deferred components implementations should disable'
-            'setup verification.',
+            'and advanced users with custom deferred components implementations should disable'
+            'setup verification. This flag has no effect on non-deferred components apps. '
+            'Defaults to true.',
     );
   }
 
@@ -260,7 +261,7 @@ class AssembleCommand extends FlutterCommand {
       results[kDartDefines] = (argResults[useLegacyNames ? kDartDefines : FlutterOptions.kDartDefinesOption] as List<String>).join(',');
     }
     results[kDeferredComponents] = 'false';
-    if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets()) {
+    if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
     if (argResults.wasParsed(kDartDefines)) {
@@ -285,10 +286,12 @@ class AssembleCommand extends FlutterCommand {
         && isDeferredComponentsTargets()
         && !isDebug()) {
       final List<String> abis = <String>[];
-      for (final AndroidAotDeferredComponentsBundle target in targets as List<AndroidAotDeferredComponentsBundle>) {
-        abis.add(
-          getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)))
-        );
+      for (final Target target in targets) {
+        if (deferredComponentsTargets.contains(target.name)) {
+          abis.add(
+            getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform((target as AndroidAotDeferredComponentsBundle).dependency.targetPlatform)))
+          );
+        }
       }
       target = DeferredComponentsGenSnapshotValidatorTarget(
         dependency: target as CompositeTarget,

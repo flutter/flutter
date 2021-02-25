@@ -14,7 +14,6 @@ import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
-import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -121,7 +120,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   // Copy deferred components assets only for release or profile builds.
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
-  if (FlutterProject.current().manifest.deferredComponents != null && (buildMode == BuildMode.profile || buildMode == BuildMode.release)) {
+  if (environment.defines[kDeferredComponents] == 'true') {
     await Future.wait<void>(
       assetBundle.splitEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =

@@ -52,7 +52,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
       defaultsTo: true,
       help: 'Setting to false disables building with deferred components. All deferred code '
             'will be compiled into the base app, and assets act as if they were defined under'
-            ' the regular assets section in pubspec.yaml. Defaults to true.',
+            ' the regular assets section in pubspec.yaml. This flag has no effect on '
+            'non-deferred components apps. Defaults to true.',
     );
     argParser.addFlag('verify-deferred-components',
       negatable: true,
@@ -62,7 +63,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
             'tooling also provides guidance on how to set up the project files to pass this '
             'verification. Disabling setup verification will always attempt to fully build '
             'the app regardless of any problems detected. Builds that are part of CI testing '
-            'and advanced users custom deferred components implementations should disable'
+            'and advanced users with custom deferred components implementations should disable'
             'setup verification. This flag has no effect on non-deferred components apps. '
             'Defaults to true.',
     );
@@ -106,7 +107,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
     final Map<String, String> defines = <String, String>{ kDeferredComponents: 'false' };
-    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components')) {
+    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components') && !boolArg('debug')) {
       defines[kDeferredComponents] = 'true';
     }
     final String output = flutterProject.directory
@@ -143,12 +144,12 @@ class BuildAppBundleCommand extends BuildSubCommand {
       exitWithNoSdkMessage();
     }
 
-    // Do all setup verification that doesn't involve loading units. Checks that
-    // require generated loading units are done after the compilation in assemble.
-    final Environment env = createEnvironment();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
     );
+    // Do all setup verification that doesn't involve loading units. Checks that
+    // require generated loading units are done after gen_snapshot in assemble.
+    final Environment env = createEnvironment();
     if (env.defines[kDeferredComponents] == 'true' && boolArg('verify-deferred-components') && !boolArg('debug')) {
 
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
@@ -185,7 +186,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       verifyDeferredComponents: boolArg('verify-deferred-components'),
-      deferredComponentsEnabled: boolArg('deferred-components'),
+      deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );
     return FlutterCommandResult.success();
   }
