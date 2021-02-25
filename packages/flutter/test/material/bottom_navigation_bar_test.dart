@@ -76,8 +76,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          primaryColor: primaryColor,
+        theme: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light().copyWith(primary: primaryColor),
           unselectedWidgetColor: unselectedWidgetColor,
         ),
         home: Scaffold(
