@@ -1006,7 +1006,7 @@
       "name": "Mac_ios smoke_catalina_hot_mode_dev_cycle_ios__benchmark",
       "repo": "flutter",
       "task_name": "mac_ios_smoke_catalina_hot_mode_dev_cycle_ios__benchmark",
-      "flaky": false
+      "flaky": true
     },
     {
       "name": "Mac_ios tiles_scroll_perf_ios__timeline_summary",
