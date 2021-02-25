@@ -80,6 +80,7 @@ void Animator::EnqueueTraceFlowId(uint64_t trace_flow_id) {
           return;
         }
         self->trace_flow_ids_.push_back(trace_flow_id);
+        self->ScheduleMaybeClearTraceFlowIds();
       });
 }
 
@@ -249,8 +250,27 @@ void Animator::AwaitVSync() {
   delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
 }
 
-void Animator::ScheduleSecondaryVsyncCallback(const fml::closure& callback) {
-  waiter_->ScheduleSecondaryCallback(callback);
+void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
+                                              const fml::closure& callback) {
+  waiter_->ScheduleSecondaryCallback(id, callback);
+}
+
+void Animator::ScheduleMaybeClearTraceFlowIds() {
+  waiter_->ScheduleSecondaryCallback(
+      reinterpret_cast<uintptr_t>(this), [self = weak_factory_.GetWeakPtr()] {
+        if (!self) {
+          return;
+        }
+        if (!self->frame_scheduled_ && !self->trace_flow_ids_.empty()) {
+          TRACE_EVENT0("flutter",
+                       "Animator::ScheduleMaybeClearTraceFlowIds - callback");
+          while (!self->trace_flow_ids_.empty()) {
+            auto flow_id = self->trace_flow_ids_.front();
+            TRACE_FLOW_END("flutter", "PointerEvent", flow_id);
+            self->trace_flow_ids_.pop_front();
+          }
+        }
+      });
 }
 
 }  // namespace flutter

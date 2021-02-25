@@ -4,6 +4,8 @@
 
 #include "flutter/shell/common/pointer_data_dispatcher.h"
 
+#include "flutter/fml/trace_event.h"
+
 namespace flutter {
 
 PointerDataDispatcher::~PointerDataDispatcher() = default;
@@ -16,12 +18,17 @@ SmoothPointerDataDispatcher::~SmoothPointerDataDispatcher() = default;
 void DefaultPointerDataDispatcher::DispatchPacket(
     std::unique_ptr<PointerDataPacket> packet,
     uint64_t trace_flow_id) {
+  TRACE_EVENT0("flutter", "DefaultPointerDataDispatcher::DispatchPacket");
+  TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
   delegate_.DoDispatchPacket(std::move(packet), trace_flow_id);
 }
 
 void SmoothPointerDataDispatcher::DispatchPacket(
     std::unique_ptr<PointerDataPacket> packet,
     uint64_t trace_flow_id) {
+  TRACE_EVENT0("flutter", "SmoothPointerDataDispatcher::DispatchPacket");
+  TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
+
   if (is_pointer_data_in_progress_) {
     if (pending_packet_ != nullptr) {
       DispatchPendingPacket();
@@ -39,6 +46,7 @@ void SmoothPointerDataDispatcher::DispatchPacket(
 
 void SmoothPointerDataDispatcher::ScheduleSecondaryVsyncCallback() {
   delegate_.ScheduleSecondaryVsyncCallback(
+      reinterpret_cast<uintptr_t>(this),
       [dispatcher = weak_factory_.GetWeakPtr()]() {
         if (dispatcher && dispatcher->is_pointer_data_in_progress_) {
           if (dispatcher->pending_packet_ != nullptr) {

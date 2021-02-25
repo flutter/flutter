@@ -515,8 +515,9 @@ void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
   }
 }
 
-void Engine::ScheduleSecondaryVsyncCallback(const fml::closure& callback) {
-  animator_->ScheduleSecondaryVsyncCallback(callback);
+void Engine::ScheduleSecondaryVsyncCallback(uintptr_t id,
+                                            const fml::closure& callback) {
+  animator_->ScheduleSecondaryVsyncCallback(id, callback);
 }
 
 void Engine::HandleAssetPlatformMessage(fml::RefPtr<PlatformMessage> message) {

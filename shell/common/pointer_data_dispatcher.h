@@ -53,14 +53,16 @@ class PointerDataDispatcher {
     ///           by `Animator::RequestFrame`).
     ///
     ///           Like the callback in `AsyncWaitForVsync`, this callback is
-    ///           only scheduled to be called once, and it will be called in the
-    ///           UI thread. If there is no AsyncWaitForVsync callback
-    ///           (`Animator::RequestFrame` is not called), this secondary
-    ///           callback will still be executed at vsync.
+    ///           only scheduled to be called once per |id|, and it will be
+    ///           called in the UI thread. If there is no AsyncWaitForVsync
+    ///           callback (`Animator::RequestFrame` is not called), this
+    ///           secondary callback will still be executed at vsync.
     ///
     ///           This callback is used to provide the vsync signal needed by
-    ///           `SmoothPointerDataDispatcher`.
+    ///           `SmoothPointerDataDispatcher`, and for `Animator` input flow
+    ///           events.
     virtual void ScheduleSecondaryVsyncCallback(
+        uintptr_t id,
         const fml::closure& callback) = 0;
   };
 

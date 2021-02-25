@@ -804,7 +804,8 @@ class Engine final : public RuntimeDelegate,
                         uint64_t trace_flow_id) override;
 
   // |PointerDataDispatcher::Delegate|
-  void ScheduleSecondaryVsyncCallback(const fml::closure& callback) override;
+  void ScheduleSecondaryVsyncCallback(uintptr_t id,
+                                      const fml::closure& callback) override;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint that was used in the RunConfiguration
