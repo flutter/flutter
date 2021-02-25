@@ -140,6 +140,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

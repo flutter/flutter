@@ -406,6 +406,11 @@ class FakeTextInputClient implements TextInputClient {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
+
   TextInputConfiguration get configuration => const TextInputConfiguration();
 }
 
