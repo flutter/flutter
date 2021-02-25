@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'dart:io' show Platform;
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -63,6 +64,7 @@ Future<void> gn() {
     path.join(environment.flutterDirectory.path, 'tools', 'gn'),
     <String>[
       '--unopt',
+      if (Platform.isMacOS) '--xcode-symlinks',
       '--full-dart-sdk',
     ],
   );
