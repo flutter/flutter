@@ -347,9 +347,9 @@ class SingleChildScrollView extends StatelessWidget {
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       scrollable = NotificationListener<ScrollUpdateNotification>(
         child: scrollable,
-        onNotification: (ScrollUpdateNotification details) {
+        onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusNode = FocusScope.of(context);
-          if (details.dragDetails != null && focusNode.hasFocus) {
+          if (notification.dragDetails != null && focusNode.hasFocus) {
             focusNode.unfocus();
           }
           return false;
