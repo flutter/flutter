@@ -105,6 +105,9 @@ class KeyEventSimulator {
         case 'ios':
         // iOS doesn't do key codes, just scan codes.
           return -1;
+        case 'web':
+          // web doesn't have int type code.
+          return -1;
         case 'linux':
           map = kGlfwToLogicalKey;
           break;
@@ -158,6 +161,9 @@ class KeyEventSimulator {
           break;
         case 'linux':
           map = kLinuxToPhysicalKey;
+          break;
+        case 'web':
+          map = kWebToPhysicalKey;
           break;
         case 'windows':
           map = kWindowsToPhysicalKey;
