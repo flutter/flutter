@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/MacOSGLContextSwitch.h"
@@ -39,22 +40,13 @@
   return self;
 }
 
-#ifdef SHELL_ENABLE_METAL
 + (Class)layerClass {
-  return [CAMetalLayer class];
+  return [FlutterRenderingBackend layerClass];
 }
 
 - (CALayer*)makeBackingLayer {
-  CAMetalLayer* metalLayer = [CAMetalLayer layer];
-  // This is set to true to synchronize the presentation of the layer and its contents with Core
-  // Animation. When presenting the texture see `[FlutterMetalResizableBackingStoreProvider
-  // resizeSynchronizerCommit:]` we start a CATransaction and wait for the command buffer to be
-  // scheduled. This ensures that the resizing process is smooth.
-  metalLayer.presentsWithTransaction = YES;
-  metalLayer.autoresizingMask = kCALayerHeightSizable | kCALayerWidthSizable;
-  return metalLayer;
+  return [FlutterRenderingBackend createBackingLayer];
 }
-#endif
 
 - (instancetype)initWithMainContext:(NSOpenGLContext*)mainContext
                     reshapeListener:(id<FlutterViewReshapeListener>)reshapeListener {

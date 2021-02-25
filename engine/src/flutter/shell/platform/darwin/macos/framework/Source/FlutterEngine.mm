@@ -13,6 +13,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterGLCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMetalRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterOpenGLRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderingBackend.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
@@ -131,10 +132,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // Pointer to the Dart AOT snapshot and instruction data.
   _FlutterEngineAOTData* _aotData;
 
-  // If set to true, engine will render using metal. This is controlled by SHELL_ENABLE_METAL
-  // for now, intent is to be made default in the future.
-  BOOL _enableMetalRendering;
-
   // _macOSGLCompositor is created when the engine is created and
   // it's destruction is handled by ARC when the engine is destroyed.
   std::unique_ptr<flutter::FlutterGLCompositor> _macOSGLCompositor;
@@ -157,14 +154,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _messageHandlers = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
 
-#ifdef SHELL_ENABLE_METAL
-  _enableMetalRendering = YES;
-#endif
-
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
 
-  if (_enableMetalRendering) {
+  if ([FlutterRenderingBackend renderUsingMetal]) {
     _renderer = [[FlutterMetalRenderer alloc] initWithFlutterEngine:self];
   } else {
     _renderer = [[FlutterOpenGLRenderer alloc] initWithFlutterEngine:self];
@@ -307,7 +300,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (FlutterCompositor*)createFlutterCompositor {
   // When rendering with metal do not support platform views.
-  if (_enableMetalRendering) {
+  if ([FlutterRenderingBackend renderUsingMetal]) {
     return nil;
   }
 
