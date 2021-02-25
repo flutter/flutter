@@ -58,7 +58,7 @@ enum BottomNavigationBarType {
 ///    four [items]. The selected item is rendered with the
 ///    [selectedItemColor] if it's non-null, otherwise the theme's
 ///    [ColorScheme.primary] color is used for [Brightness.light] themes
-///    and [Color.secondary] for [Brightness.dark] themes.
+///    and [ColorScheme.secondary] for [Brightness.dark] themes.
 ///    If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
