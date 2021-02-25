@@ -315,8 +315,8 @@ class ParagraphTxt : public Paragraph {
   double longest_line_ = -1.0f;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
-  double alphabetic_baseline_ = FLT_MAX;
-  double ideographic_baseline_ = FLT_MAX;
+  double alphabetic_baseline_ = std::numeric_limits<double>::max();
+  double ideographic_baseline_ = std::numeric_limits<double>::max();
 
   bool needs_layout_ = true;
 
