@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, LeadingDistribution;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -558,11 +558,25 @@ class TextStyle with Diagnosticable {
   ///
   /// ![Since the explicit line height is applied as a scale factor on the font-metrics-defined line height, the gap above the text grows faster, as the height grows, than the gap below the text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
-  /// See [StrutStyle] for further control of line height at the paragraph level.
+  /// See [StrutStyle] and [TextHeightBehavior] for further control of line
+  /// height at the paragraph level.
   final double? height;
 
-
-  final ui.LeadingDistribution? leadingDistribution;
+  /// How the vertical space added by the [height] multiplier should be
+  /// distributed over and under the text.
+  ///
+  /// When a non-null [height] is specified, after accommodating the glyphs of
+  /// the text (whose height is determined by the font metrics and does not
+  /// scale with [height]), the remaining vertical space from the allotted line
+  /// height will be distributed over and under the text, according to the
+  /// [leadingDistribution] property.
+  ///
+  /// When [height] is null, [leadingDistribution] does not affect the text
+  /// layout.
+  ///
+  /// Defaults to null, which defers to the paragraph's
+  /// [ParagraphStyle.textHeightBehavior]'s `leadingDistribution`.
+  final ui.TextLeadingDistribution? leadingDistribution;
 
   /// The locale used to select region-specific glyphs.
   ///
@@ -715,7 +729,7 @@ class TextStyle with Diagnosticable {
     double? wordSpacing,
     TextBaseline? textBaseline,
     double? height,
-    ui.LeadingDistribution? leadingDistribution,
+    ui.TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     Paint? foreground,
     Paint? background,
@@ -812,7 +826,7 @@ class TextStyle with Diagnosticable {
     double heightFactor = 1.0,
     double heightDelta = 0.0,
     TextBaseline? textBaseline,
-    ui.LeadingDistribution? leadingDistribution,
+    ui.TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
@@ -1110,7 +1124,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
-      textHeightBehavior: textHeightBehavior ?? ui.TextHeightBehavior(leadingDistribution: leadingDistribution ?? ui.LeadingDistribution.proportional),
+      textHeightBehavior: textHeightBehavior ?? ui.TextHeightBehavior(leadingDistribution: leadingDistribution ?? ui.TextLeadingDistribution.proportional),
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
