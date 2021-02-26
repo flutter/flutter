@@ -274,12 +274,9 @@ void SceneBuilder::addPicture(double dx,
                               double dy,
                               Picture* picture,
                               int hints) {
-  SkPoint offset = SkPoint::Make(dx, dy);
-  SkRect pictureRect = picture->picture()->cullRect();
-  pictureRect.offset(offset.x(), offset.y());
   auto layer = std::make_unique<flutter::PictureLayer>(
-      offset, UIDartState::CreateGPUObject(picture->picture()), !!(hints & 1),
-      !!(hints & 2));
+      SkPoint::Make(dx, dy), UIDartState::CreateGPUObject(picture->picture()),
+      !!(hints & 1), !!(hints & 2));
   AddLayer(std::move(layer));
 }
 
