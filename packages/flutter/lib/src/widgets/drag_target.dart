@@ -64,7 +64,7 @@ typedef DragTargetLeave = void Function(Object? data);
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
 /// Used by [DragTarget.onMove].
-typedef DragTargetMove = void Function(DragTargetDetails<dynamic> details);
+typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -732,7 +732,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted)
       return;
     if (widget.onMove != null)
-      widget.onMove!(DragTargetDetails<dynamic>(data: avatar.data, offset: avatar._lastOffset!));
+      widget.onMove!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
   }
 
   @override
