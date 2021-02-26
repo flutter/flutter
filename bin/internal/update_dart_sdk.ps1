@@ -54,7 +54,7 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
-
+[Net.ServicePointManager]::SecurityProtocol +='tls12'
 Try {
     Import-Module BitsTransfer
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
