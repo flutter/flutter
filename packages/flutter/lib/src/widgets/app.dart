@@ -863,6 +863,9 @@ class WidgetsApp extends StatefulWidget {
   /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  ///
+  /// Passing this will not replace [DefaultTextEditingShortcuts]. These can be
+  /// overridden by using a [Shortcuts] widget lower in the widget tree.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -912,6 +915,8 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
+  ///
+  /// Passing this will not replace [DefaultTextEditingActions].
   /// {@endtemplate}
   ///
   /// {@tool snippet}
@@ -1623,52 +1628,32 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
-    Widget child = FocusTraversalGroup(
-      policy: ReadingOrderTraversalPolicy(),
-      child: _MediaQueryFromWindow(
-        child: Localizations(
-          locale: appLocale,
-          delegates: _localizationsDelegates.toList(),
-          child: title,
-        ),
-      ),
-    );
-
-    // Passing actions or shortcuts gets rid of all default actions or shortcuts
-    // respectively, including text editing actions/shortcuts.
-    if (widget.actions == null) {
-      child = DefaultTextEditingActions(
-        child: Actions(
-          actions: WidgetsApp.defaultActions,
-          child: child,
-        ),
-      );
-    } else {
-      child = Actions(
-        actions: widget.actions!,
-        child: child,
-      );
-    }
-    if (widget.shortcuts == null) {
-      // The DefaultTextEditingShortcuts may fall through to the defaultShortcuts.
-      child = Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: WidgetsApp.defaultShortcuts,
-        child: DefaultTextEditingShortcuts(
-          child: child,
-        ),
-      );
-    } else {
-      child = Shortcuts(
-        debugLabel: '<Default WidgetsApp Shortcuts>',
-        shortcuts: widget.shortcuts!,
-        child: child,
-      );
-    }
 
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
-      child: child,
+      child: Shortcuts(
+        debugLabel: '<Default WidgetsApp Shortcuts>',
+        shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+        // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+        // fall through to the defaultShortcuts.
+        child: DefaultTextEditingShortcuts(
+          child: DefaultTextEditingActions(
+            child: Actions(
+              actions: widget.actions ?? WidgetsApp.defaultActions,
+              child: FocusTraversalGroup(
+                policy: ReadingOrderTraversalPolicy(),
+                child: _MediaQueryFromWindow(
+                  child: Localizations(
+                    locale: appLocale,
+                    delegates: _localizationsDelegates.toList(),
+                    child: title,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
