@@ -17,12 +17,15 @@ import 'package:process/process.dart';
 
 const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
-const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra/mingit/'
+const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
-const String gsBase = 'gs://flutter_infra';
+const String oldGsBase = 'gs://flutter_infra';
 const String releaseFolder = '/releases';
-const String gsReleaseFolder = '$gsBase$releaseFolder';
-const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
+const String oldGsReleaseFolder = '$oldGsBase$releaseFolder';
+const String oldBaseUrl = 'https://storage.googleapis.com/flutter_infra';
+const String newGsBase = 'gs://flutter_infra_release';
+const String newGsReleaseFolder = '$newGsBase$releaseFolder';
+const String newBaseUrl = 'https://storage.googleapis.com/flutter_infra_release';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -470,13 +473,14 @@ class ArchivePublisher {
     this.revision,
     this.branch,
     this.version,
-    this.outputFile, {
+    this.outputFile,
+    this.dryRun, {
     ProcessManager processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
-        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
+        metadataGsPath = '$newGsReleaseFolder/${getMetadataFilename(platform)}',
         _processRunner = ProcessRunner(
           processManager: processManager,
           subprocessOutput: subprocessOutput,
@@ -491,6 +495,7 @@ class ArchivePublisher {
   final Directory tempDir;
   final File outputFile;
   final ProcessRunner _processRunner;
+  final bool dryRun;
   String get branchName => getBranchName(branch);
   String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
@@ -508,15 +513,28 @@ class ArchivePublisher {
   }
 
   /// Publish the archive to Google Storage.
-  Future<void> publishArchive() async {
-    final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
-    await _cloudCopy(outputFile.absolute.path, destGsPath);
-    assert(tempDir.existsSync());
-    await _updateMetadata();
+  ///
+  /// This method will throw if the target archive already exists on cloud
+  /// storage.
+  Future<void> publishArchive([bool forceUpload = false]) async {
+    for (final String releaseFolder in <String>[oldGsReleaseFolder, newGsReleaseFolder]) {
+      final String destGsPath = '$releaseFolder/$destinationArchivePath';
+      if (!forceUpload) {
+        if (await _cloudPathExists(destGsPath) && !dryRun) {
+          throw PreparePackageException(
+            'File $destGsPath already exists on cloud storage!',
+          );
+        }
+      }
+      await _cloudCopy(outputFile.absolute.path, destGsPath);
+      assert(tempDir.existsSync());
+      await _updateMetadata('$releaseFolder/${getMetadataFilename(platform)}', newBucket: false);
+    }
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
-    jsonData['base_url'] = '$baseUrl$releaseFolder';
+  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData, {bool newBucket=true}) async {
+    final String tmpBaseUrl = newBucket ? newBaseUrl : oldBaseUrl;
+    jsonData['base_url'] = '$tmpBaseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
@@ -548,7 +566,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata() async {
+  Future<void> _updateMetadata(String gsPath, {bool newBucket=true}) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -556,24 +574,26 @@ class ArchivePublisher {
     final File metadataFile = File(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
-    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
-    final String currentMetadata = metadataFile.readAsStringSync();
-    if (currentMetadata.isEmpty) {
-      throw PreparePackageException('Empty metadata received from server');
+    await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
+    if (!dryRun) {
+      final String currentMetadata = metadataFile.readAsStringSync();
+      if (currentMetadata.isEmpty) {
+        throw PreparePackageException('Empty metadata received from server');
+      }
+
+      Map<String, dynamic> jsonData;
+      try {
+        jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
+      } on FormatException catch (e) {
+        throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
+      }
+
+      jsonData = await _addRelease(jsonData, newBucket: newBucket);
+
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      metadataFile.writeAsStringSync(encoder.convert(jsonData));
     }
-
-    Map<String, dynamic> jsonData;
-    try {
-      jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
-    } on FormatException catch (e) {
-      throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
-    }
-
-    jsonData = await _addRelease(jsonData);
-
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    metadataFile.writeAsStringSync(encoder.convert(jsonData));
-    await _cloudCopy(metadataFile.absolute.path, metadataGsPath);
+    await _cloudCopy(metadataFile.absolute.path, gsPath);
   }
 
   Future<String> _runGsUtil(
@@ -581,6 +601,10 @@ class ArchivePublisher {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
+    if (dryRun) {
+      print('gsutil.py -- $args');
+      return '';
+    }
     if (platform.isWindows) {
       return _processRunner.runProcess(
         <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--', ...args],
@@ -594,6 +618,20 @@ class ArchivePublisher {
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
+  }
+
+  /// Determine if a file exists at a given [cloudPath].
+  Future<bool> _cloudPathExists(String cloudPath) async {
+    try {
+      await _runGsUtil(
+        <String>['stat', cloudPath],
+        failOk: false,
+      );
+    } on PreparePackageException {
+      // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
+      return false;
+    }
+    return true;
   }
 
   Future<String> _cloudCopy(String src, String dest) async {
@@ -662,7 +700,19 @@ Future<void> main(List<String> rawArguments) async {
     defaultsTo: false,
     help: 'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
-        'directory: $baseUrl$releaseFolder',
+        'directory: $newBaseUrl$releaseFolder',
+  );
+  argParser.addFlag(
+    'force',
+    abbr: 'f',
+    defaultsTo: false,
+    help: 'Overwrite a previously uploaded package.',
+  );
+  argParser.addFlag(
+    'dry_run',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Prints gsutil commands instead of executing them.',
   );
   argParser.addFlag(
     'help',
@@ -685,14 +735,14 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final String revision = parsedArguments['revision'] as String;
-  if (revision.isEmpty) {
+  if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if ((parsedArguments['branch'] as String).isEmpty) {
+  if (!parsedArguments.wasParsed('branch')) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
@@ -733,8 +783,9 @@ Future<void> main(List<String> rawArguments) async {
         branch,
         version,
         outputFile,
+	parsedArguments['dry_run'] as bool,
       );
-      await publisher.publishArchive();
+      await publisher.publishArchive(parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;

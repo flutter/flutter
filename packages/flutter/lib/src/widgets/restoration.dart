@@ -14,7 +14,7 @@ export 'package:flutter/services.dart' show RestorationBucket;
 /// Creates a new scope for restoration IDs used by descendant widgets to claim
 /// [RestorationBucket]s.
 ///
-/// {@template flutter.widgets.restoration.scope}
+/// {@template flutter.widgets.RestorationScope}
 /// A restoration scope inserts a [RestorationBucket] into the widget tree,
 /// which descendant widgets can access via [RestorationScope.of]. It is
 /// uncommon for descendants to directly store data in this bucket. Instead,
@@ -80,7 +80,7 @@ class RestorationScope extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The restoration ID used by this widget to obtain a child bucket from the
@@ -119,7 +119,7 @@ class _RestorationScopeState extends State<RestorationScope> with RestorationMix
 /// Inserts a provided [RestorationBucket] into the widget tree and makes it
 /// available to descendants via [RestorationScope.of].
 ///
-/// {@macro flutter.widgets.restoration.scope}
+/// {@macro flutter.widgets.RestorationScope}
 ///
 /// If [bucket] is null, no restoration bucket is made available to descendant
 /// widgets ([RestorationScope.of] invoked from a descendant will return null).
@@ -230,7 +230,7 @@ class RootRestorationScope extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   /// The restoration ID used to identify the child bucket that this widget
@@ -301,7 +301,9 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 
   @override
   void dispose() {
-    ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    if (_rootBucketValid) {
+      ServicesBinding.instance!.restorationManager.removeListener(_replaceRootBucket);
+    }
     super.dispose();
   }
 
@@ -425,7 +427,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// [RestorableProperty]. Whenever new restoration data has been provided to
   /// the [RestorationMixin] the property is registered to, either this method
   /// or [createDefaultValue] is called before [initWithValue] is invoked.
-  T fromPrimitives(Object data);
+  T fromPrimitives(Object? data);
 
   /// Called by the [RestorationMixin] with the `value` returned by either
   /// [createDefaultValue] or [fromPrimitives] to set the value that this
@@ -623,9 +625,9 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///
 /// ```dart
 /// class RestorableCounter extends StatefulWidget {
-///   RestorableCounter({Key key, this.restorationId}) : super(key: key);
+///   RestorableCounter({Key? key, this.restorationId}) : super(key: key);
 ///
-///   final String restorationId;
+///   final String? restorationId;
 ///
 ///   @override
 ///   _RestorableCounterState createState() => _RestorableCounterState();
@@ -643,10 +645,10 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 ///   // In this example, the restoration ID for the mixin is passed in through
 ///   // the [StatefulWidget]'s constructor.
 ///   @override
-///   String get restorationId => widget.restorationId;
+///   String? get restorationId => widget.restorationId;
 ///
 ///   @override
-///   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+///   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
 ///     // All restorable properties must be registered with the mixin. After
 ///     // registration, the counter either has its old value restored or is
 ///     // initialized to its default value.
@@ -884,7 +886,7 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// restore the internal state of a [State] object, it may be removed from the
   /// restoration data by calling this method.
   @protected
-  void unregisterFromRestoration(RestorableProperty<Object> property) {
+  void unregisterFromRestoration(RestorableProperty<Object?> property) {
     assert(property != null);
     assert(property._owner == this);
     _bucket?.remove<Object?>(property._restorationId!);

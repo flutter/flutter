@@ -36,7 +36,7 @@ void main() {
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         // --fast-start does not support routes.
-        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '--no-publish-port', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
         .transform<String>(utf8.decoder)
@@ -82,6 +82,9 @@ void main() {
         });
       int result;
       result = await drive.exitCode;
+      await flutter('install', options: <String>[
+        '--uninstall-only',
+      ]);
       if (result != 0)
         throw 'Failed to drive test app (exit code $result).';
       result = await run.exitCode;

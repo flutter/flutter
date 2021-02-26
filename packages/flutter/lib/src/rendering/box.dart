@@ -715,7 +715,7 @@ class BoxHitTestResult extends HitTestResult {
   ///   }
   ///
   ///   @override
-  ///   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  ///   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
   ///     return result.addWithPaintTransform(
   ///       transform: _effectiveTransform,
   ///       position: position,
@@ -1183,16 +1183,16 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// Sizing purely based on the constraints allows the system to make some
 /// significant optimizations. Classes that use this approach should override
-/// [sizedByParent] to return true, and then override [performResize] to set the
-/// [size] using nothing but the constraints, e.g.:
+/// [sizedByParent] to return true, and then override [computeDryLayout] to
+/// compute the [Size] using nothing but the constraints, e.g.:
 ///
 /// ```dart
 /// @override
 /// bool get sizedByParent => true;
 ///
 /// @override
-/// void performResize() {
-///   size = constraints.smallest;
+/// Size computeDryLayout(BoxConstraints constraints) {
+///   return constraints.smallest;
 /// }
 /// ```
 ///
@@ -1341,6 +1341,10 @@ class _IntrinsicDimensionsCacheEntry {
 /// [computeMinIntrinsicWidth], [computeMaxIntrinsicWidth],
 /// [computeMinIntrinsicHeight], [computeMaxIntrinsicHeight].
 ///
+/// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if you
+/// do override any of these methods, which will add additional checks to
+/// help validate your implementation.
+///
 /// In addition, if the box has any children, it must implement
 /// [computeDistanceToActualBaseline]. [RenderProxyBox] provides a simple
 /// implementation that forwards to the child; [RenderShiftedBox] provides an
@@ -1444,6 +1448,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// ## Examples
   ///
@@ -1597,6 +1605,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
@@ -1674,6 +1686,10 @@ abstract class RenderBox extends RenderObject {
   /// whose names start with `get`, not `compute`.
   ///
   /// This function should never return a negative or infinite value.
+  ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
   ///
   /// See also:
   ///
@@ -1760,12 +1776,151 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
+  /// Be sure to set [debugCheckIntrinsicSizes] to true in your unit tests if
+  /// you do override this method, which will add additional checks to help
+  /// validate your implementation.
+  ///
   /// See also:
   ///
   ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;
+  }
+
+  Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
+  bool _computingThisDryLayout = false;
+
+  /// Returns the [Size] that this [RenderBox] would like to be given the
+  /// provided [BoxConstraints].
+  ///
+  /// The size returned by this method is guaranteed to be the same size that
+  /// this [RenderBox] computes for itself during layout given the same
+  /// constraints.
+  ///
+  /// This function should only be called on one's children. Calling this
+  /// function couples the child with the parent so that when the child's layout
+  /// changes, the parent is notified (via [markNeedsLayout]).
+  ///
+  /// This layout is called "dry" layout as opposed to the regular "wet" layout
+  /// run performed by [performLayout] because it computes the desired size for
+  /// the given constraints without changing any internal state.
+  ///
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
+  ///
+  /// Do not override this method. Instead, implement [computeDryLayout].
+  @mustCallSuper
+  Size getDryLayout(BoxConstraints constraints) {
+    bool shouldCache = true;
+    assert(() {
+      // we don't want the checked-mode intrinsic tests to affect
+      // who gets marked dirty, etc.
+      if (RenderObject.debugCheckingIntrinsics)
+        shouldCache = false;
+      return true;
+    }());
+    if (shouldCache) {
+      _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
+      return _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
+    }
+    return _computeDryLayout(constraints);
+  }
+
+  Size _computeDryLayout(BoxConstraints constraints) {
+    assert(() {
+      assert(!_computingThisDryLayout);
+      _computingThisDryLayout = true;
+      return true;
+    }());
+    final Size result = computeDryLayout(constraints);
+    assert(() {
+      assert(_computingThisDryLayout);
+      _computingThisDryLayout = false;
+      return true;
+    }());
+    return result;
+  }
+
+  /// Computes the value returned by [getDryLayout]. Do not call this
+  /// function directly, instead, call [getDryLayout].
+  ///
+  /// Override in subclasses that implement [performLayout] or [performResize]
+  /// or when setting [sizedByParent] to true without overriding
+  /// [performResize]. This method should return the [Size] that this
+  /// [RenderBox] would like to be given the provided [BoxConstraints].
+  ///
+  /// The size returned by this method must match the [size] that the
+  /// [RenderBox] will compute for itself in [performLayout] (or
+  /// [performResize], if [sizedByParent] is true).
+  ///
+  /// If this algorithm depends on the size of a child, the size of that child
+  /// should be obtained using its [getDryLayout] method.
+  ///
+  /// This layout is called "dry" layout as opposed to the regular "wet" layout
+  /// run performed by [performLayout] because it computes the desired size for
+  /// the given constraints without changing any internal state.
+  ///
+  /// ### When the size cannot be known
+  ///
+  /// There are cases where render objects do not have an efficient way to
+  /// compute their size without doing a full layout. For example, the size
+  /// may depend on the baseline of a child (which is not available without
+  /// doing a full layout), it may be computed by a callback about which the
+  /// render object cannot reason, or the layout is so complex that it
+  /// is simply impractical to calculate the size in an efficient way.
+  ///
+  /// In such cases, it may be impossible (or at least impractical) to actually
+  /// return a valid answer. In such cases, the function should call
+  /// [debugCannotComputeDryLayout] from within an assert and and return a dummy
+  /// value of `const Size(0, 0)`.
+  @protected
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(debugCannotComputeDryLayout(
+      error: FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
+        ErrorHint(
+          'If you are not writing your own RenderBox subclass, then this is not\n'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+        ),
+      ]),
+    ));
+    return Size.zero;
+  }
+
+  static bool _dryLayoutCalculationValid = true;
+
+  /// Called from [computeDryLayout] within an assert if the given [RenderBox]
+  /// subclass does not support calculating a dry layout.
+  ///
+  /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
+  /// method will either throw the provided [FlutterError] or it will create and
+  /// throw a [FlutterError] with the provided `reason`. Otherwise, it will
+  /// simply return true.
+  ///
+  /// One of the arguments has to be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [computeDryLayout], which lists some reasons why it may not be feasible
+  ///    to compute the dry layout.
+  bool debugCannotComputeDryLayout({String? reason, FlutterError? error}) {
+    assert((reason == null) != (error == null));
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        if (reason != null) {
+          assert(error ==null);
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not support dry layout.'),
+            if (reason.isNotEmpty) ErrorDescription(reason),
+          ]);
+        }
+        assert(error != null);
+        throw error!;
+      }
+      _dryLayoutCalculationValid = false;
+      return true;
+    }());
+    return true;
   }
 
   /// Whether this render object has undergone layout and has a [size].
@@ -1787,9 +1942,10 @@ abstract class RenderBox extends RenderObject {
       final Size? _size = this._size;
       if (_size is _DebugSize) {
         assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
+        if (RenderObject.debugActiveLayout != null &&
+            !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
-            debugDoingThisResize || debugDoingThisLayout ||
+            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
             'RenderBox.size accessed beyond the scope of resize, layout, or '
             'permitted parent access. RenderBox can always access its own size, '
@@ -2072,7 +2228,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
           ),
         ]);
       }
@@ -2119,7 +2275,33 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
+            ),
+          ]);
+        }
+
+        // Checking that getDryLayout computes the same size.
+        _dryLayoutCalculationValid = true;
+        RenderObject.debugCheckingIntrinsics = true;
+        late Size dryLayoutSize;
+        try {
+          dryLayoutSize = getDryLayout(constraints);
+        } finally {
+          RenderObject.debugCheckingIntrinsics = false;
+        }
+        if (_dryLayoutCalculationValid && dryLayoutSize != size) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.'),
+            ErrorDescription(
+              'The size computed in ${sizedByParent ? 'performResize' : 'performLayout'} '
+              'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.'
+            ),
+            ErrorDescription(
+              'The constraints used were $constraints.',
+            ),
+            ErrorHint(
+              'If you are not writing your own RenderBox subclass, then this is not\n'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md'
             ),
           ]);
         }
@@ -2131,7 +2313,8 @@ abstract class RenderBox extends RenderObject {
   @override
   void markNeedsLayout() {
     if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
-        (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty)) {
+        (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
+        (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
       // If we have cached data, then someone must have used our data.
       // Since the parent will shortly be marked dirty, we can forget that they
       // used the baseline and/or intrinsic dimensions. If they use them again,
@@ -2139,6 +2322,7 @@ abstract class RenderBox extends RenderObject {
       // notify them again.
       _cachedBaselines?.clear();
       _cachedIntrinsicDimensions?.clear();
+      _cachedDryLayoutSizes?.clear();
       if (parent is RenderObject) {
         markParentNeedsLayout();
         return;
@@ -2147,10 +2331,15 @@ abstract class RenderBox extends RenderObject {
     super.markNeedsLayout();
   }
 
+  /// {@macro flutter.rendering.RenderObject.performResize}
+  ///
+  /// By default this method calls [getDryLayout] with the current
+  /// [constraints]. Instead of overriding this method, consider overriding
+  /// [computeDryLayout] (the backend implementation of [getDryLayout]).
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
-    size = constraints.smallest;
+    size = computeDryLayout(constraints);
     assert(size.isFinite);
   }
 
@@ -2394,8 +2583,8 @@ abstract class RenderBox extends RenderObject {
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.
   /// (This is useful because [PointerEvent.position] is in global coordinates.)
   ///
-  /// If you override this, consider calling [debugHandleEvent] as follows, so
-  /// that you can support [debugPaintPointersEnabled]:
+  /// Implementations of this method should call [debugHandleEvent] as follows,
+  /// so that they support [debugPaintPointersEnabled]:
   ///
   /// ```dart
   /// @override

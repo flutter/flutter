@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 @JS()
 library js_location_strategy;
 
@@ -16,7 +14,7 @@ import 'package:meta/meta.dart';
 
 import 'url_strategy.dart';
 
-typedef _JsSetUrlStrategy = void Function(JsUrlStrategy);
+typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
 
 /// A JavaScript hook to customize the URL strategy of a Flutter app.
 //
@@ -29,7 +27,7 @@ external _JsSetUrlStrategy get jsSetUrlStrategy;
 
 typedef _PathGetter = String Function();
 
-typedef _StateGetter = Object Function();
+typedef _StateGetter = Object? Function();
 
 typedef _AddPopStateListener = ui.VoidCallback Function(html.EventListener);
 
@@ -43,10 +41,6 @@ typedef _HistoryMove = Future<void> Function(int count);
 /// Given a Dart implementation of URL strategy, converts it to a JavaScript
 /// URL strategy to be passed through JS interop.
 JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
-  if (strategy == null) {
-    return null;
-  }
-
   return JsUrlStrategy(
     getPath: allowInterop(strategy.getPath),
     getState: allowInterop(strategy.getState),

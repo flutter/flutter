@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -19,7 +18,7 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 /// The [SliverLayoutBuilder]'s final [SliverGeometry] will match the [SliverGeometry]
 /// of its child.
 ///
-/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// {@macro flutter.widgets.ConstrainedLayoutBuilder}
 ///
 /// See also:
 ///

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -544,7 +545,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
 
     // Exit animation
-    await tester.tap(find.text('Button'));
+    await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
@@ -633,7 +634,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
 
     // Exit animation
-    await tester.tap(find.text('Button'));
+    await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
@@ -1067,7 +1068,7 @@ void main() {
 
     // Tapping on the "page" route doesn't trigger the GestureDetector because
     // it's being dragged.
-    await tester.tap(find.byKey(pageScaffoldKey));
+    await tester.tap(find.byKey(pageScaffoldKey), warnIfMissed: false);
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
   });
@@ -1632,6 +1633,87 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
+
+  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
+
+    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+      return const Scaffold(
+        body: Center(
+          child: Text('child'),
+        ),
+      );
+    });
+
+    late NavigatorState navigator;
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: Builder(builder: (BuildContext context) {
+          return ElevatedButton(
+            child: const Text('Home'),
+            onPressed: () {
+              navigator = Navigator.of(context);
+              assert(navigator != null);
+              navigator.push<void>(r);
+            },
+          );
+        }),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byType(ElevatedButton)));
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+
+    await gesture.down(const Offset(3, 300), timeStamp: Duration.zero);
+
+    // Need 2 events to form a valid drag
+    await tester.pump(const Duration(milliseconds: 100));
+    await gesture.moveTo(const Offset(30, 300), timeStamp: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveTo(const Offset(50, 300), timeStamp: const Duration(milliseconds: 200));
+
+    // Pause a while so that the route is popped when the drag is canceled
+    await tester.pump(const Duration(milliseconds: 1000));
+    await gesture.moveTo(const Offset(51, 300), timeStamp: const Duration(milliseconds: 1200));
+
+    // Remove the drag
+    navigator.removeRoute(r);
+    await tester.pump();
+  });
+
+  testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        restorationScopeId: 'app',
+        home: _RestorableModalTestWidget(),
+      ),
+    );
+
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+    final TestRestorationData restorationData = await tester.getRestorationData();
+
+    await tester.restartAndRestore();
+
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoActionSheet), findsNothing);
+
+    await tester.restoreFrom(restorationData);
+    expect(find.byType(CupertinoActionSheet), findsOneWidget);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -1670,7 +1752,7 @@ class PopupObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       popupCount++;
     }
     super.didPush(route, previousRoute);
@@ -1682,7 +1764,7 @@ class DialogObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_DialogRoute')) {
+    if (route is CupertinoDialogRoute) {
       dialogCount++;
     }
     super.didPush(route, previousRoute);
@@ -1694,7 +1776,7 @@ class RouteSettingsObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+    if (route is CupertinoModalPopupRoute) {
       routeName = route.settings.name;
     }
     super.didPush(route, previousRoute);
@@ -1813,6 +1895,48 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
           },
         );
       },
+    );
+  }
+}
+
+class _RestorableModalTestWidget extends StatelessWidget{
+  static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
+    return CupertinoModalPopupRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              child: const Text('Action One'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: const Text('Action Two'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Home'),
+      ),
+      child: Center(child: CupertinoButton(
+        onPressed: () {
+          Navigator.of(context).restorablePush(_modalBuilder);
+        },
+        child: const Text('X'),
+      )),
     );
   }
 }

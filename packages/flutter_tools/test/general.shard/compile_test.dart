@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../src/common.dart';
@@ -42,5 +45,12 @@ void main() {
     expect(toMultiRootPath(Uri.parse('file:///a/b/c'), null, <String>[], false), 'file:///a/b/c');
     expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), null, <String>[], false), 'org-dartlang-app:///a/b/c');
     expect(toMultiRootPath(Uri.parse('org-dartlang-app:///a/b/c'), 'scheme', <String>['/d/b'], false), 'org-dartlang-app:///a/b/c');
+  });
+
+  testWithoutContext('buildModeOptions removes matching product define', () {
+    expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.product=true']), <String>[
+      '-Ddart.vm.profile=false',
+      '--enable-asserts',
+    ]);
   });
 }

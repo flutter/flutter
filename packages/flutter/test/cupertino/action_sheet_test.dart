@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,6 +39,7 @@ void main() {
 
     await tester.tap(find.text('Go'));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
 
     expect(find.text('Action Sheet'), findsOneWidget);
 
@@ -283,7 +283,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
@@ -348,9 +348,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          screenHeight = MediaQuery.of(context)!.size.height;
+          screenHeight = MediaQuery.of(context).size.height;
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: Text('Very long content' * 200),

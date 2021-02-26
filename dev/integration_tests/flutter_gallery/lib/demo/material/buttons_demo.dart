@@ -53,7 +53,7 @@ class ButtonsDemo extends StatefulWidget {
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
-  OutlinedBorder _buttonShape;
+  OutlinedBorder? _buttonShape;
 
   @override
   Widget build(BuildContext context) {
@@ -63,42 +63,42 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         description: _elevatedText,
         demoWidget: buildElevatedButton(_buttonShape),
         exampleCodeTag: _elevatedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/ElevatedButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/ElevatedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'TEXT',
         description: _textText,
         demoWidget: buildTextButton(_buttonShape),
         exampleCodeTag: _textCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/TextButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/TextButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'OUTLINED',
         description: _outlinedText,
         demoWidget: buildOutlinedButton(_buttonShape),
         exampleCodeTag: _outlinedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlinedButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/OutlinedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         demoWidget: buildDropdownButton(),
         exampleCodeTag: _dropdownCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/DropdownButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/DropdownButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         demoWidget: buildIconButton(),
         exampleCodeTag: _iconCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/IconButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/IconButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         demoWidget: buildActionButton(),
         exampleCodeTag: _actionCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/FloatingActionButton-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/FloatingActionButton-class.html',
       ),
     ];
 
@@ -118,7 +118,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildElevatedButton(OutlinedBorder shape) {
+  Widget buildElevatedButton(OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -156,7 +156,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 style: style,
                 icon: const Icon(Icons.add, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 2'),
-                onPressed: null,
+                onPressed: () {},
               ),
             ],
           ),
@@ -165,7 +165,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildTextButton(OutlinedBorder shape) {
+  Widget buildTextButton(OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -203,7 +203,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 style: style,
                 icon: const Icon(Icons.add_circle_outline, size: 18.0),
                 label: const Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 4'),
-                onPressed: null,
+                onPressed: () {},
               ),
             ],
           ),
@@ -212,7 +212,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildOutlinedButton(OutlinedBorder shape) {
+  Widget buildOutlinedButton(OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -260,9 +260,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   }
 
   // https://en.wikipedia.org/wiki/Free_Four
-  String dropdown1Value = 'Free';
-  String dropdown2Value;
-  String dropdown3Value = 'Four';
+  String? dropdown1Value = 'Free';
+  String? dropdown2Value;
+  String? dropdown3Value = 'Four';
 
   Widget buildDropdownButton() {
     return Padding(
@@ -274,7 +274,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             title: const Text('Simple dropdown:'),
             trailing: DropdownButton<String>(
               value: dropdown1Value,
-              onChanged: (String newValue) {
+              onChanged: (String? newValue) {
                 setState(() {
                   dropdown1Value = newValue;
                 });
@@ -295,7 +295,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             trailing: DropdownButton<String>(
               value: dropdown2Value,
               hint: const Text('Choose'),
-              onChanged: (String newValue) {
+              onChanged: (String? newValue) {
                 setState(() {
                   dropdown2Value = newValue;
                 });
@@ -315,7 +315,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             title: const Text('Scrollable dropdown:'),
             trailing: DropdownButton<String>(
               value: dropdown3Value,
-              onChanged: (String newValue) {
+              onChanged: (String? newValue) {
                 setState(() {
                   dropdown3Value = newValue;
                 });

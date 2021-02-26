@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -17,6 +19,8 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'plugins.dart';
+import 'project.dart';
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -146,12 +150,15 @@ class StdoutHandler {
 }
 
 /// List the preconfigured build options for a given build mode.
-List<String> buildModeOptions(BuildMode mode) {
+List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
         '-Ddart.vm.profile=false',
-        '-Ddart.vm.product=false',
+        // This allows the CLI to override the value of this define for unit
+        // testing the framework.
+        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+          '-Ddart.vm.product=false',
         '--enable-asserts',
       ];
     case BuildMode.profile:
@@ -204,6 +211,8 @@ class KernelCompiler {
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    Directory buildDir,
+    bool generateDartPluginRegistry = false,
     @required String packagesPath,
     @required BuildMode buildMode,
     @required bool trackWidgetCreation,
@@ -222,7 +231,8 @@ class KernelCompiler {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    final File mainFile = _fileSystem.file(mainPath);
+    final Uri mainFileUri = mainFile.uri;
     if (packagesPath != null) {
       mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
     }
@@ -230,6 +240,23 @@ class KernelCompiler {
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
+    if (buildDir != null && generateDartPluginRegistry) {
+      // `generated_main.dart` is under `.dart_tools/flutter_build/`,
+      // so the resident compiler can find it.
+      final File newMainDart = buildDir.parent.childFile('generated_main.dart');
+      if (await generateMainDartWithPluginRegistrant(
+        FlutterProject.current(),
+        packageConfig,
+        mainUri,
+        newMainDart,
+        mainFile,
+        // TODO(egarciad): Turn this on when the plugins are fixed.
+        throwOnPluginPubspecError: false,
+      )) {
+        mainUri = newMainDart.path;
+      }
+    }
+
     final List<String> command = <String>[
       engineDartPath,
       '--disable-dart-dev',
@@ -237,10 +264,10 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
+      '--no-print-incremental-dependencies',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
-      ...buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -397,9 +424,11 @@ class _RejectRequest extends _CompilationRequest {
 abstract class ResidentCompiler {
   factory ResidentCompiler(String sdkRoot, {
     @required BuildMode buildMode,
-    Logger logger, // TODO(jonahwilliams): migrate to @required after google3
-    ProcessManager processManager, // TODO(jonahwilliams): migrate to @required after google3
-    Artifacts artifacts, // TODO(jonahwilliams): migrate to @required after google3
+    @required Logger logger,
+    @required ProcessManager processManager,
+    @required Artifacts artifacts,
+    @required Platform platform,
+    bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -411,7 +440,6 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
-    @required Platform platform,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -496,10 +524,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
+    @required Logger logger,
+    @required ProcessManager processManager,
+    @required Artifacts artifacts,
     @required Platform platform,
-    Logger logger, // TODO(jonahwilliams): migrate to @required after google3
-    ProcessManager processManager, // TODO(jonahwilliams): migrate to @required after google3
-    Artifacts artifacts, // TODO(jonahwilliams): migrate to @required after google3
+    this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
@@ -526,6 +555,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final Artifacts _artifacts;
   final Platform _platform;
 
+  final bool testCompilation;
   final BuildMode buildMode;
   final bool trackWidgetCreation;
   final String packagesPath;
@@ -571,7 +601,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
-
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
       _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
@@ -642,6 +671,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--sdk-root',
       sdkRoot,
       '--incremental',
+      if (testCompilation)
+        '--no-print-incremental-dependencies',
       '--target=$targetModel',
       // TODO(jonahwilliams): remove once this becomes the default behavior
       // in the frontend_server.
@@ -651,7 +682,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
       // in the frontend_server.
       // https://github.com/flutter/flutter/issues/59902
       '--experimental-emit-debug-metadata',
-      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[
@@ -666,7 +696,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--packages',
         packagesPath,
       ],
-      ...buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[

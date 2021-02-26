@@ -991,8 +991,8 @@ void main() {
                 data: MediaQueryData(textScaleFactor: textScaleFactor),
                 child: Material(
                   child: Theme(
-                    data: Theme.of(context)!.copyWith(
-                      sliderTheme: Theme.of(context)!.sliderTheme.copyWith(showValueIndicator: show),
+                    data: Theme.of(context).copyWith(
+                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
                     ),
                     child: Center(
                       child: OverflowBox(
@@ -1032,7 +1032,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1055,7 +1055,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-304.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1082,7 +1082,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),
@@ -1109,7 +1109,7 @@ void main() {
       paints
         ..path(
           includes: const <Offset>[
-            Offset(0.0, 0.0),
+            Offset.zero,
             Offset(0.0, -8.0),
             Offset(-276.0, -16.0),
             Offset(-216.0, -16.0),
@@ -2086,12 +2086,12 @@ void main() {
                   ElevatedButton(
                     child: const Text('Next'),
                     onPressed: () {
-                      Navigator.of(context)!.pushReplacement(
+                      Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
-                              onPressed: () { Navigator.of(context)!.pop(); },
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),

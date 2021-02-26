@@ -11,7 +11,7 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// bool _first;
+// bool _first = false;
 
 /// Specifies which of two children to show. See [AnimatedCrossFade].
 ///

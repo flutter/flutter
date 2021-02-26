@@ -143,7 +143,7 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context!, nullOk: true, scopeOk: true);
+      parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
       parent ??= _node.context!.owner!.focusManager.rootScope;
       assert(parent != null);
       parent._reparent(_node);
@@ -222,7 +222,7 @@ enum UnfocusDisposition {
 /// To see the focus tree in the debug console, call [debugDumpFocusTree]. To
 /// get the focus tree as a string, call [debugDescribeFocusTree].
 ///
-/// {@template flutter.widgets.focus_manager.focus.lifecycle}
+/// {@template flutter.widgets.FocusNode.lifecycle}
 /// ## Lifecycle
 ///
 /// There are several actors involved in the lifecycle of a
@@ -265,7 +265,7 @@ enum UnfocusDisposition {
 /// call [dispose] when the node is done being used.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.focus_manager.focus.keyEvents}
+/// {@template flutter.widgets.FocusNode.keyEvents}
 /// ## Key Event Propagation
 ///
 /// The [FocusManager] receives key events from [RawKeyboard] and will pass them
@@ -303,10 +303,10 @@ enum UnfocusDisposition {
 /// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
 /// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold} This example shows how
-/// a FocusNode should be managed if not using the [Focus] or [FocusScope]
-/// widgets. See the [Focus] widget for a similar example using [Focus] and
-/// [FocusScope] widgets.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows how a FocusNode should be managed if not using the
+/// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
+/// example using [Focus] and [FocusScope] widgets.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';
@@ -314,16 +314,16 @@ enum UnfocusDisposition {
 ///
 /// ```dart preamble
 /// class ColorfulButton extends StatefulWidget {
-///   ColorfulButton({Key key}) : super(key: key);
+///   ColorfulButton({Key? key}) : super(key: key);
 ///
 ///   @override
 ///   _ColorfulButtonState createState() => _ColorfulButtonState();
 /// }
 ///
 /// class _ColorfulButtonState extends State<ColorfulButton> {
-///   FocusNode _node;
+///   late FocusNode _node;
 ///   bool _focused = false;
-///   FocusAttachment _nodeAttachment;
+///   late FocusAttachment _nodeAttachment;
 ///   Color _color = Colors.white;
 ///
 ///   @override
@@ -406,7 +406,7 @@ enum UnfocusDisposition {
 /// Widget build(BuildContext context) {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
-///     style: textTheme.headline4,
+///     style: textTheme.headline4!,
 ///     child: ColorfulButton(),
 ///   );
 /// }
@@ -432,7 +432,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// arguments must not be null.
   FocusNode({
     String? debugLabel,
-    FocusOnKeyCallback? onKey,
+    this.onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
     bool descendantsAreFocusable = true,
@@ -441,8 +441,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
-        _descendantsAreFocusable = descendantsAreFocusable,
-        _onKey = onKey {
+        _descendantsAreFocusable = descendantsAreFocusable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
@@ -572,9 +571,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
-  /// {@macro flutter.widgets.focus_manager.focus.keyEvents}
-  FocusOnKeyCallback? get onKey => _onKey;
-  FocusOnKeyCallback? _onKey;
+  /// {@macro flutter.widgets.FocusNode.keyEvents}
+  FocusOnKeyCallback? onKey;
 
   FocusManager? _manager;
   List<FocusNode>? _ancestors;
@@ -835,9 +833,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                   children: <Widget>[
   ///                     Radio<UnfocusDisposition>(
   ///                       groupValue: disposition,
-  ///                       onChanged: (UnfocusDisposition value) {
+  ///                       onChanged: (UnfocusDisposition? value) {
   ///                         setState(() {
-  ///                           disposition = value;
+  ///                           if (value != null) {
+  ///                             disposition = value;
+  ///                           }
   ///                         });
   ///                       },
   ///                       value: UnfocusDisposition.values[index],
@@ -850,7 +850,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///                 child: const Text('UNFOCUS'),
   ///                 onPressed: () {
   ///                   setState(() {
-  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                     primaryFocus!.unfocus(disposition: disposition);
   ///                   });
   ///                 },
   ///               ),
@@ -1005,7 +1005,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?._setAsFocusedChildForScope();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
-      FocusTraversalGroup.of(child.context!, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
+      FocusTraversalGroup.maybeOf(child.context!)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
       child._doRequestFocus(findFirstFocus: true);
@@ -1026,7 +1026,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext? context, {FocusOnKeyCallback? onKey}) {
     _context = context;
-    _onKey = onKey ?? _onKey;
+    this.onKey = onKey ?? this.onKey;
     _attachment = FocusAttachment._(this);
     return _attachment!;
   }
@@ -1145,19 +1145,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool nextFocus() => FocusTraversalGroup.of(context!)!.next(this);
+  bool nextFocus() => FocusTraversalGroup.of(context!).next(this);
 
   /// Request to move the focus to the previous focus node, by calling the
   /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool previousFocus() => FocusTraversalGroup.of(context!)!.previous(this);
+  bool previousFocus() => FocusTraversalGroup.of(context!).previous(this);
 
   /// Request to move the focus to the nearest focus node in the given
   /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!)!.inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context!).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1205,8 +1205,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// as the [focusedChild] of this node, adopting if it isn't already part of the
 /// focus tree.
 ///
-/// {@macro flutter.widgets.focus_manager.focus.lifecycle}
-/// {@macro flutter.widgets.focus_manager.focus.keyEvents}
+/// {@macro flutter.widgets.FocusNode.lifecycle}
+/// {@macro flutter.widgets.FocusNode.keyEvents}
 ///
 /// See also:
 ///
@@ -1439,10 +1439,37 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// This constructor is rarely called directly. To access the [FocusManager],
   /// consider using the [FocusManager.instance] accessor instead (which gets it
   /// from the [WidgetsBinding] singleton).
+  ///
+  /// This newly constructed focus manager does not have the necessary event
+  /// handlers registered to allow it to manage focus. To register those event
+  /// handlers, callers must call [registerGlobalHandlers]. See the
+  /// documentation in that method for caveats to watch out for.
   FocusManager() {
     rootScope._manager = this;
+  }
+
+  /// Registers global input event handlers that are needed to manage focus.
+  ///
+  /// This sets the [RawKeyboard.keyEventHandler] for the shared instance of
+  /// [RawKeyboard] and adds a route to the global entry in the gesture routing
+  /// table. As such, only one [FocusManager] instance should register its
+  /// global handlers.
+  ///
+  /// When this focus manager is no longer needed, calling [dispose] on it will
+  /// unregister these handlers.
+  void registerGlobalHandlers() {
+    assert(RawKeyboard.instance.keyEventHandler == null);
     RawKeyboard.instance.keyEventHandler = _handleRawKeyEvent;
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  @override
+  void dispose() {
+    if (RawKeyboard.instance.keyEventHandler == _handleRawKeyEvent) {
+      RawKeyboard.instance.keyEventHandler = null;
+      GestureBinding.instance!.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    }
+    super.dispose();
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from

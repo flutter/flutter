@@ -10,7 +10,7 @@ class SpinningSquare extends StatefulWidget {
 }
 
 class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProviderStateMixin {
-  AnimationController _animation;
+  late AnimationController _animation;
 
   @override
   void initState() {

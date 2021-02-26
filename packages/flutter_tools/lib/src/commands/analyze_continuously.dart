@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -26,7 +28,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required List<String> experiments,
     @required Artifacts artifacts,
   }) : super(
         argResults,
@@ -37,7 +38,6 @@ class AnalyzeContinuously extends AnalyzeBase {
         platform: platform,
         terminal: terminal,
         processManager: processManager,
-        experiments: experiments,
         artifacts: artifacts,
       );
 
@@ -77,7 +77,6 @@ class AnalyzeContinuously extends AnalyzeBase {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
-      experiments: experiments,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

@@ -479,6 +479,7 @@ class AutofillHints {
   /// This hint will be translated to the below values on different platforms:
   ///
   /// * iOS: [streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  ///   As of iOS 14.2 this hint does not trigger autofill.
   /// * web: ["address-line2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine2 = 'streetAddressLine2';
@@ -647,7 +648,7 @@ class AutofillConfiguration {
   ///
   /// Must not be null or empty.
   ///
-  /// {@template flutter.services.autofill.autofillHints}
+  /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
   /// [AutofillHints], as well as their availability on different platforms.
@@ -728,7 +729,7 @@ abstract class AutofillClient {
 
 /// An ordered group within which [AutofillClient]s are logically connected.
 ///
-/// {@template flutter.services.autofill.AutofillScope}
+/// {@template flutter.services.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will

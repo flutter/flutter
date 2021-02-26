@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-
-import '../flutter_test_alternative.dart' show Fake;
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -980,6 +976,44 @@ void main() {
     tester.state<PagedTestNavigatorState>(find.byType(PagedTestNavigator)).addPage('p1');
     await tester.pumpAndSettle();
     expect(findRoute('p1', count: 0), findsOneWidget);
+  });
+
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'material_app',
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(),
+        },
+        onGenerateInitialRoutes: (String initialRoute) {
+          return <MaterialPageRoute<void>>[
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => Container(),
+            ),
+          ];
+        },
+      ),
+    );
+    await tester.restartAndRestore();
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      (exception as AssertionError).message,
+      contains('All routes returned by onGenerateInitialRoutes are not restorable.'),
+    );
+
+    // The previous assert leaves the widget tree in a broken state, so the
+    // following code catches any remaining exceptions from attempting to build
+    // new widget tree.
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    dynamic remainingException;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      remainingException ??= details.exception;
+    };
+    await tester.pumpWidget(Container(key: UniqueKey()));
+    FlutterError.onError = oldHandler;
+    expect(remainingException, isAssertionError);
   });
 }
 

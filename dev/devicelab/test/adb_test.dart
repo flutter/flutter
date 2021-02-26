@@ -22,6 +22,18 @@ void main() {
     tearDown(() {
     });
 
+    group('cpu check', () {
+      test('arm64', () async {
+        FakeDevice.pretendArm64();
+        final AndroidDevice androidDevice = device as AndroidDevice;
+        expect(await androidDevice.isArm64(), isTrue);
+        expectLog(<CommandArgs>[
+          cmd(command: 'getprop', arguments: <String>['ro.bootimage.build.fingerprint', ';', 'getprop', 'ro.build.version.release', ';', 'getprop', 'ro.build.version.sdk'], environment: null),
+          cmd(command: 'getprop', arguments: <String>['ro.product.cpu.abi'], environment: null),
+        ]);
+      });
+    });
+
     group('isAwake/isAsleep', () {
       test('reads Awake', () async {
         FakeDevice.pretendAwake();
@@ -184,6 +196,12 @@ class FakeDevice extends AndroidDevice {
   static void pretendAsleep() {
     output = '''
       mWakefulness=Asleep
+    ''';
+  }
+
+  static void pretendArm64() {
+    output = '''
+      arm64
     ''';
   }
 

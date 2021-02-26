@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -18,7 +20,6 @@ void main() {
       cocoaPods = MockCocoaPods();
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.recommended);
-      when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => true);
       when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
 
@@ -39,13 +40,6 @@ void main() {
     testWithoutContext('Emits partial status when CocoaPods is installed with unknown version', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
-      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
-      final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.partial);
-    });
-
-    testWithoutContext('Emits partial status when CocoaPods is not initialized', () async {
-      when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);

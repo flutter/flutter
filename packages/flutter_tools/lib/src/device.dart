@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
@@ -43,6 +44,7 @@ import 'macos/xcode.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
+import 'vmservice.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
@@ -305,11 +307,11 @@ abstract class DeviceManager {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput)];
+    return devices[int.parse(userInput) - 1];
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    int count = 0;
+    int count = 1;
     for (final Device device in devices) {
       _logger.printStatus(_userMessages.flutterChooseDevice(count, device.name, device.id));
       count++;
@@ -319,7 +321,7 @@ abstract class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     _terminal.usesTerminalUi = true;
     final String result = await _terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '$i', 'q', 'Q'],
+      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
       displayAcceptedCharacters: false,
       logger: _logger,
       prompt: _userMessages.flutterChooseOne,
@@ -392,6 +394,7 @@ class FlutterDeviceManager extends DeviceManager {
       config: config,
       logger: logger,
       artifacts: artifacts,
+      operatingSystemUtils: operatingSystemUtils,
     ),
     MacOSDevices(
       processManager: processManager,
@@ -621,6 +624,10 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// Platform name for display only.
+  Future<String> get targetPlatformDisplayName async =>
+      getNameForTargetPlatform(await targetPlatform);
+
   Future<String> get sdkNameAndVersion;
 
   /// Create a platform-specific [DevFSWriter] for the given [app], or
@@ -749,7 +756,7 @@ abstract class Device {
       table.add(<String>[
         '${device.name} (${device.category})',
         device.id,
-        getNameForTargetPlatform(targetPlatform),
+        await device.targetPlatformDisplayName,
         '${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
@@ -831,6 +838,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.disableDds = false,
+    this.dartEntrypointArgs = const <String>[],
     this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
@@ -847,7 +855,7 @@ class DebuggingOptions {
     this.disablePortPublication = false,
     this.deviceVmServicePort,
     this.ddsPort,
-    this.initializePlatform = true,
+    this.devToolsServerAddress,
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
@@ -859,10 +867,11 @@ class DebuggingOptions {
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
+    this.nativeNullAssertions = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
-      this.initializePlatform = true,
+      this.dartEntrypointArgs = const <String>[],
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
@@ -890,16 +899,19 @@ class DebuggingOptions {
       disablePortPublication = false,
       deviceVmServicePort = null,
       ddsPort = null,
+      devToolsServerAddress = null,
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
-      nullAssertions = false;
+      nullAssertions = false,
+      nativeNullAssertions = false;
 
   final bool debuggingEnabled;
 
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final List<String> dartEntrypointArgs;
   final bool disableServiceAuthCodes;
   final bool disableDds;
   final bool enableSoftwareRendering;
@@ -913,12 +925,11 @@ class DebuggingOptions {
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
-  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
-  final bool initializePlatform;
   final int hostVmServicePort;
   final int deviceVmServicePort;
   final bool disablePortPublication;
   final int ddsPort;
+  final Uri devToolsServerAddress;
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
@@ -943,6 +954,12 @@ class DebuggingOptions {
   final bool fastStart;
 
   final bool nullAssertions;
+
+  /// Additional null runtime checks inserted for web applications.
+  ///
+  /// See also:
+  ///   * https://github.com/dart-lang/sdk/blob/master/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
+  final bool nativeNullAssertions;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
@@ -1014,7 +1031,7 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   String toString() => name;
@@ -1044,7 +1061,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
-  vm_service.VmService connectedVMService;
+  FlutterVmService connectedVMService;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

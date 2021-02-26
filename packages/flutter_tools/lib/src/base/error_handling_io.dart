@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:process/process.dart';
 
+import '../reporting/reporting.dart';
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
 
@@ -100,7 +104,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   static bool _noExitOnFailure = false;
 
   @override
-  Directory get currentDirectory => directory(delegate.currentDirectory);
+  Directory get currentDirectory {
+    return _runSync(() =>  directory(delegate.currentDirectory), platform: _platform);
+  }
 
   @override
   File file(dynamic path) => ErrorHandlingFile(
@@ -262,6 +268,17 @@ class ErrorHandlingFile
   }
 
   @override
+  void createSync({bool recursive = false}) {
+    _runSync<void>(
+      () => delegate.createSync(
+        recursive: recursive,
+      ),
+      platform: _platform,
+      failureMessage: 'Flutter failed to create file at "${delegate.path}"',
+    );
+  }
+
+  @override
   RandomAccessFile openSync({FileMode mode = FileMode.read}) {
     return _runSync<RandomAccessFile>(
       () => delegate.openSync(
@@ -270,6 +287,63 @@ class ErrorHandlingFile
       platform: _platform,
       failureMessage: 'Flutter failed to open a file at "${delegate.path}"',
     );
+  }
+
+  /// This copy method attempts to handle file system errors from both reading
+  /// and writing the copied file.
+  @override
+  File copySync(String newPath) {
+    final File resultFile = fileSystem.file(newPath);
+    // First check if the source file can be read. If not, bail through error
+    // handling.
+    _runSync<void>(
+      () => delegate.openSync(mode: FileMode.read).closeSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to source location error'
+    );
+    // Next check if the destination file can be written. If not, bail through
+    // error handling.
+    _runSync<void>(
+      () => resultFile.createSync(recursive: true),
+      platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to destination location error'
+    );
+    // If both of the above checks passed, attempt to copy the file and catch
+    // any thrown errors.
+    try {
+      return wrapFile(delegate.copySync(newPath));
+    } on FileSystemException {
+      // Proceed below
+    }
+    // If the copy failed but both of the above checks passed, copy the bytes
+    // directly.
+    _runSync(() {
+      RandomAccessFile source;
+      RandomAccessFile sink;
+      try {
+        source = delegate.openSync(mode: FileMode.read);
+        sink = resultFile.openSync(mode: FileMode.writeOnly);
+        // 64k is the same sized buffer used by dart:io for `File.openRead`.
+        final Uint8List buffer = Uint8List(64 * 1024);
+        final int totalBytes = source.lengthSync();
+        int bytes = 0;
+        while (bytes < totalBytes) {
+          final int chunkLength = source.readIntoSync(buffer);
+          sink.writeFromSync(buffer, 0, chunkLength);
+          bytes += chunkLength;
+        }
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
+        ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
+        rethrow;
+      } finally {
+        source?.closeSync();
+        sink?.closeSync();
+      }
+    }, platform: _platform, failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error');
+    // The original copy failed, but the manual copy worked. Report an analytics event to
+    // track this to determine if this code path is actually hit.
+    ErrorHandlingEvent('copy-fallback').send();
+    return wrapFile(resultFile);
   }
 
   @override
@@ -501,6 +575,70 @@ T _runSync<T>(T Function() op, {
   }
 }
 
+class _ProcessDelegate {
+  const _ProcessDelegate();
+
+  Future<io.Process> start(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    io.ProcessStartMode mode = io.ProcessStartMode.normal,
+  }) {
+    return io.Process.start(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    );
+  }
+
+  Future<io.ProcessResult> run(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return io.Process.run(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
+  io.ProcessResult runSync(
+    List<String> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = io.systemEncoding,
+    Encoding stderrEncoding = io.systemEncoding,
+  }) {
+    return io.Process.runSync(
+      command[0],
+      command.skip(1).toList(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+}
+
 /// A [ProcessManager] that throws a [ToolExit] on certain errors.
 ///
 /// If a [ProcessException] is not caused by the Flutter tool, and can only be
@@ -518,6 +656,21 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   final ProcessManager _delegate;
   final Platform _platform;
+  static const _ProcessDelegate _processDelegate = _ProcessDelegate();
+  static bool _skipCommandLookup = false;
+
+  /// Bypass package:process command lookup for all functions in this block.
+  ///
+  /// This required that the fully resolved executable path is provided.
+  static Future<T> skipCommandLookup<T>(Future<T> Function() operation) async {
+    final bool previousValue = ErrorHandlingProcessManager._skipCommandLookup;
+    try {
+      ErrorHandlingProcessManager._skipCommandLookup = true;
+      return await operation();
+    } finally {
+      ErrorHandlingProcessManager._skipCommandLookup = previousValue;
+    }
+  }
 
   @override
   bool canRun(dynamic executable, {String workingDirectory}) {
@@ -545,15 +698,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _run(() => _delegate.run(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _run(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+       return _processDelegate.run(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+          stdoutEncoding: stdoutEncoding,
+          stderrEncoding: stderrEncoding,
+        );
+      }
+      return _delegate.run(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -565,13 +731,24 @@ class ErrorHandlingProcessManager extends ProcessManager {
     bool runInShell = false,
     io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
-    return _run(() => _delegate.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-    ), platform: _platform);
+    return _run(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+        return _processDelegate.start(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+        );
+      }
+      return _delegate.start(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+      );
+    }, platform: _platform);
   }
 
   @override
@@ -584,15 +761,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     Encoding stdoutEncoding = io.systemEncoding,
     Encoding stderrEncoding = io.systemEncoding,
   }) {
-    return _runSync(() => _delegate.runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
-    ), platform: _platform);
+    return _runSync(() {
+      if (_skipCommandLookup && _delegate is LocalProcessManager) {
+        return _processDelegate.runSync(
+          command.cast<String>(),
+          workingDirectory: workingDirectory,
+          environment: environment,
+          includeParentEnvironment: includeParentEnvironment,
+          runInShell: runInShell,
+          stdoutEncoding: stdoutEncoding,
+          stderrEncoding: stderrEncoding,
+        );
+      }
+      return _delegate.runSync(
+        command,
+        workingDirectory: workingDirectory,
+        environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
+        runInShell: runInShell,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding,
+      );
+    }, platform: _platform);
   }
 }
 
@@ -633,12 +823,14 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
   const int kDeviceFull = 112;
   const int kUserMappedSectionOpened = 1224;
   const int kAccessDenied = 5;
+  const int kFatalDeviceHardwareError = 483;
+
   // Catch errors and bail when:
   String errorMessage;
   switch (errorCode) {
     case kAccessDenied:
       errorMessage =
-        '$message. The flutter tool cannot access the file.\n'
+        '$message. The flutter tool cannot access the file or directory.\n'
         'Please ensure that the SDK and/or project is installed in a location '
         'that has read/write permissions for the current user.';
       break;
@@ -654,6 +846,11 @@ void _handleWindowsException(Exception e, String message, int errorCode) {
         '\n$e\n'
         'Do you have an antivirus program running? '
         'Try disabling your antivirus program and try again.';
+      break;
+    case kFatalDeviceHardwareError:
+      errorMessage =
+        '$message. There is a problem with the device driver '
+        'that this file or directory is stored on.';
       break;
     default:
       // Caller must rethrow the exception.

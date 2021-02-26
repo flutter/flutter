@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -152,6 +154,10 @@ class LinuxDoctorValidator extends DoctorValidator {
     if (!await _libraryIsPresent('blkid')) {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error(_userMessages.blkidLibraryMissing));
+    }
+    if (!await _libraryIsPresent('liblzma')) {
+      validationType = ValidationType.missing;
+      messages.add(ValidationMessage.error(_userMessages.lzmaLibraryMissing));
     }
 
     return ValidationResult(validationType, messages);

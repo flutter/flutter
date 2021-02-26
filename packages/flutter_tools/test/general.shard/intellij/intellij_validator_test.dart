@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:archive/archive.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -29,9 +30,9 @@ final Platform linuxPlatform = FakePlatform(
 final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
-    'USERPROFILE': 'C:\\Users\\foo',
-    'APPDATA': 'C:\\Users\\foo\\AppData\\Roaming',
-    'LOCALAPPDATA': 'C:\\Users\\foo\\AppData\\Local'
+    'USERPROFILE': r'C:\Users\foo',
+    'APPDATA': r'C:\Users\foo\AppData\Roaming',
+    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local'
   },
 );
 
@@ -163,9 +164,9 @@ void main() {
   });
 
   testWithoutContext('legacy intellij(<2020) plugins check on windows', () async {
-    const String cachePath   = 'C:\\Users\\foo\\.IntelliJIdea2019.10\\system';
-    const String installPath = 'C:\\Program Files\\JetBrains\\IntelliJ IDEA Ultimate Edition 2019.10.1';
-    const String pluginPath  = 'C:\\Users\\foo\\.IntelliJIdea2019.10\\config\\plugins';
+    const String cachePath   = r'C:\Users\foo\.IntelliJIdea2019.10\system';
+    const String installPath = r'C:\Program Files\JetBrains\IntelliJ IDEA Ultimate Edition 2019.10.1';
+    const String pluginPath  = r'C:\Users\foo\.IntelliJIdea2019.10\config\plugins';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -190,9 +191,9 @@ void main() {
   });
 
   testWithoutContext('intellij(2020.1 ~ 2020.2) plugins check on windows (installed via JetBrains ToolBox app)', () async {
-    const String cachePath   = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\IntelliJIdea2020.10';
-    const String installPath = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-U\\ch-0\\201.0000.00';
-    const String pluginPath  = 'C:\\Users\\foo\\AppData\\Roaming\\JetBrains\\IntelliJIdea2020.10\\plugins';
+    const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IntelliJIdea2020.10';
+    const String installPath = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00';
+    const String pluginPath  = r'C:\Users\foo\AppData\Roaming\JetBrains\IntelliJIdea2020.10\plugins';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -202,8 +203,8 @@ void main() {
         .writeAsStringSync(installPath, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
-    createIntellijFlutterPluginJar(pluginPath + '\\flutter-intellij\\lib\\flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '\\Dart\\lib\\Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + r'\Dart\lib\Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnWindows.installed(
       fileSystem: fileSystem,
@@ -217,9 +218,9 @@ void main() {
   });
 
   testWithoutContext('intellij(>=2020.3) plugins check on windows (installed via JetBrains ToolBox app and plugins)', () async {
-    const String cachePath   = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\IntelliJIdea2020.10';
-    const String installPath = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-U\\ch-0\\201.0000.00';
-    const String pluginPath  = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-U\\ch-0\\201.0000.00.plugins';
+    const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IntelliJIdea2020.10';
+    const String installPath = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00';
+    const String pluginPath  = r'C:\Users\foo\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\201.0000.00.plugins';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -229,8 +230,8 @@ void main() {
         .writeAsStringSync(installPath, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
-    createIntellijFlutterPluginJar(pluginPath + '\\flutter-intellij\\lib\\flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '\\Dart\\lib\\Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + r'\Dart\lib\Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnWindows.installed(
       fileSystem: fileSystem,
@@ -244,9 +245,9 @@ void main() {
   });
 
   testWithoutContext('intellij(2020.1~) plugins check on windows (installed via installer)', () async {
-    const String cachePath   = 'C:\\Users\\foo\\AppData\\Local\\JetBrains\\IdeaIC2020.10';
-    const String installPath = 'C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2020.10.1';
-    const String pluginPath  = 'C:\\Users\\foo\\AppData\\Roaming\\JetBrains\\IdeaIC2020.10\\plugins';
+    const String cachePath   = r'C:\Users\foo\AppData\Local\JetBrains\IdeaIC2020.10';
+    const String installPath = r'C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2020.10.1';
+    const String pluginPath  = r'C:\Users\foo\AppData\Roaming\JetBrains\IdeaIC2020.10\plugins';
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
     final Directory cacheDirectory = fileSystem.directory(cachePath)
@@ -256,8 +257,8 @@ void main() {
         .writeAsStringSync(installPath, flush: true);
     final Directory installedDirectory = fileSystem.directory(installPath);
     installedDirectory.createSync(recursive: true);
-    createIntellijFlutterPluginJar(pluginPath + '\\flutter-intellij\\lib\\flutter-intellij.jar', fileSystem, version: '50.0');
-    createIntellijDartPluginJar(pluginPath + '\\Dart\\lib\\Dart.jar', fileSystem);
+    createIntellijFlutterPluginJar(pluginPath + r'\flutter-intellij\lib\flutter-intellij.jar', fileSystem, version: '50.0');
+    createIntellijDartPluginJar(pluginPath + r'\Dart\lib\Dart.jar', fileSystem);
 
     final Iterable<DoctorValidator> installed = IntelliJValidatorOnWindows.installed(
       fileSystem: fileSystem,

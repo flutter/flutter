@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -66,14 +68,28 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
-    final String presetPluginsPath = pathsSelectorValue == null
-      ? null
-      : globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        pathsSelectorValue,
-      );
+
+    final int major = version?.major;
+    final int minor = version?.minor;
+    String presetPluginsPath;
+    if (pathsSelectorValue != null) {
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
+        presetPluginsPath = globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          pathsSelectorValue,
+        );
+      } else {
+        presetPluginsPath = globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          pathsSelectorValue,
+        );
+      }
+    }
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
@@ -127,12 +143,23 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (globals.platform.isMacOS) {
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        'AndroidStudio$major.$minor',
-      );
+      /// plugin path of Android Studio has been changed after version 4.1.
+      if (major != null && major >= 4 && minor != null && minor >= 1) {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'Google',
+          'AndroidStudio$major.$minor',
+        );
+      } else {
+        return globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Application Support',
+          'AndroidStudio$major.$minor',
+        );
+      }
     } else {
       return globals.fs.path.join(
         globals.fsUtils.homeDirPath,

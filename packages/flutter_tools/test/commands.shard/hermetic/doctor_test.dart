@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio_validator.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -19,7 +23,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -51,10 +54,12 @@ final Platform macPlatform = FakePlatform(
 void main() {
   MockFlutterVersion mockFlutterVersion;
   BufferLogger logger;
+  FakeProcessManager fakeProcessManager;
 
   setUp(() {
     mockFlutterVersion = MockFlutterVersion();
     logger = BufferLogger.test();
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
@@ -82,6 +87,16 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('No IDE Validator includes expected installation messages', () async {
+      final ValidationResult result = await NoIdeValidator().validate();
+      expect(result.type, ValidationType.missing);
+
+      expect(
+        result.messages.map((ValidationMessage vm) => vm.message),
+        UserMessages().noIdeInstallationInfo,
+      );
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
@@ -207,133 +222,123 @@ void main() {
   });
 
   group('doctor usage params', () {
-    Usage mockUsage;
+    TestUsage testUsage;
 
     setUp(() {
-      mockUsage = MockUsage();
-      when(mockUsage.isFirstRun).thenReturn(true);
+      testUsage = TestUsage();
     });
 
     testUsingContext('contains installed', () async {
       final Doctor doctor = Doctor(logger: logger);
       await doctor.diagnose(verbose: false);
 
-      expect(
-        verify(mockUsage.sendEvent(
+      expect(testUsage.events.length, 3);
+      expect(testUsage.events, contains(
+        const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['installed', 'installed', 'installed'],
-      );
+          label: 'installed',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Platform: _kNoColorOutputPlatform,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('contains installed and partial', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false);
 
-      expect(
-        verify(mockUsage.sendEvent(
+      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+        const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['installed', 'installed'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'installed',
+        ),
+        const TestUsageEvent(
+          'doctor-result',
+          'PassingValidator',
+          label: 'installed',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'PartialValidatorWithHintsOnly',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['partial'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'partial',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'PartialValidatorWithErrors',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['partial'],
-      );
+          label: 'partial',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Platform: _kNoColorOutputPlatform,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('contains installed, missing and partial', () async {
       await FakeDoctor(logger).diagnose(verbose: false);
 
-      expect(
-        verify(mockUsage.sendEvent(
+      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+        const TestUsageEvent(
           'doctor-result',
           'PassingValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['installed'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'installed',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'MissingValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['missing'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'missing',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'NotAvailableValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['notAvailable'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'notAvailable',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'PartialValidatorWithHintsOnly',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['partial'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'partial',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'PartialValidatorWithErrors',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['partial'],
-      );
+          label: 'partial',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Platform: _kNoColorOutputPlatform,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
 
     testUsingContext('events for grouped validators are properly decomposed', () async {
       await FakeGroupedDoctor(logger).diagnose(verbose: false);
 
-      expect(
-        verify(mockUsage.sendEvent(
+      expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+        const TestUsageEvent(
           'doctor-result',
           'PassingGroupedValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['installed', 'installed', 'installed'],
-      );
-      expect(
-        verify(mockUsage.sendEvent(
+          label: 'installed',
+        ),
+        const TestUsageEvent(
+          'doctor-result',
+          'PassingGroupedValidator',
+          label: 'installed',
+        ),
+        const TestUsageEvent(
+          'doctor-result',
+          'PassingGroupedValidator',
+          label: 'installed',
+        ),
+        const TestUsageEvent(
           'doctor-result',
           'MissingGroupedValidator',
-          label: captureAnyNamed('label'),
-        )).captured,
-        <dynamic>['missing'],
-      );
+          label: 'missing',
+        ),
+      ]));
     }, overrides: <Type, Generator>{
       Platform: _kNoColorOutputPlatform,
-      Usage: () => mockUsage,
+      Usage: () => testUsage,
     });
   });
 
@@ -593,7 +598,6 @@ void main() {
     }, overrides: noColorTerminalOverride);
   });
 
-
   group('grouped validator merging results', () {
     final PassingGroupedValidator installed = PassingGroupedValidator('Category');
     final PartialGroupedValidator partial = PartialGroupedValidator('Category');
@@ -646,14 +650,12 @@ void main() {
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    when(globals.processManager.canRun(any)).thenReturn(true);
-
     expect(DoctorValidatorsProvider.defaultInstance.workflows,
       contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => fakeProcessManager,
   });
 
   testUsingContext('Fetches tags to get the right version', () async {
@@ -673,6 +675,13 @@ void main() {
     FlutterVersion: () => mockFlutterVersion,
     Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
+
+  testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+  });
 }
 
 class NoOpDoctor implements Doctor {
@@ -686,7 +695,12 @@ class NoOpDoctor implements Doctor {
   Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
 
   @override
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    bool showColor = true,
+    AndroidLicenseValidator androidLicenseValidator,
+  }) async => true;
 
   @override
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
@@ -700,8 +714,6 @@ class NoOpDoctor implements Doctor {
   @override
   List<Workflow> get workflows => <Workflow>[];
 }
-
-class MockUsage extends Mock implements Usage {}
 
 class PassingValidator extends DoctorValidator {
   PassingValidator(String name) : super(name);
@@ -1032,8 +1044,6 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockPlistParser extends Mock implements PlistParser {}
 class MockDeviceManager extends Mock implements DeviceManager {}
 class MockDevice extends Mock implements Device {
   MockDevice() {
@@ -1041,5 +1051,6 @@ class MockDevice extends Mock implements Device {
     when(id).thenReturn('device-id');
     when(isLocalEmulator).thenAnswer((_) => Future<bool>.value(false));
     when(targetPlatform).thenAnswer((_) => Future<TargetPlatform>.value(TargetPlatform.android));
+    when(targetPlatformDisplayName).thenAnswer((_) async => 'android');
   }
 }

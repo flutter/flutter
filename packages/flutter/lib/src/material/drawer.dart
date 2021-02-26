@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
@@ -158,7 +157,7 @@ class Drawer extends StatelessWidget {
   ///
   /// Typically a [SliverList].
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The semantic label of the dialog used by accessibility frameworks to
@@ -177,16 +176,15 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     String? label = semanticLabel;
-    switch (Theme.of(context)!.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        label = semanticLabel;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
+        label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     return Semantics(
       scopesRoute: true,
@@ -232,6 +230,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey? key,
     required this.child,
     required this.alignment,
+    this.isDrawerOpen = false,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
@@ -256,7 +255,7 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
 
-  /// {@template flutter.material.drawer.dragStartBehavior}
+  /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag behavior used for opening
@@ -299,6 +298,14 @@ class DrawerController extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double? edgeDragWidth;
 
+  /// Whether or not the drawer is opened or closed.
+  ///
+  /// This parameter is primarily used by the state restoration framework
+  /// to restore the drawer's animation controller to the open or closed state
+  /// depending on what was last saved to the target platform before the
+  /// application was killed.
+  final bool isDrawerOpen;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -311,7 +318,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void initState() {
     super.initState();
     _scrimColorTween = _buildScrimColorTween();
-    _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
+    _controller = AnimationController(
+      value: widget.isDrawerOpen ? 1.0 : 0.0,
+      duration: _kBaseSettleDuration,
+      vsync: this,
+    );
+    _controller
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
   }
@@ -328,6 +340,16 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
       _scrimColorTween = _buildScrimColorTween();
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
+      switch(_controller.status) {
+        case AnimationStatus.completed:
+        case AnimationStatus.dismissed:
+          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   void _animationChanged() {
@@ -408,7 +430,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         delta = -delta;
         break;
     }
-    switch (Directionality.of(context)!) {
+    switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
         break;
@@ -435,7 +457,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           visualVelocity = -visualVelocity;
           break;
       }
-      switch (Directionality.of(context)!) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           if (widget.drawerCallback != null)
@@ -499,12 +521,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context)!.padding;
-    final TextDirection? textDirection = Directionality.of(context);
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final TextDirection textDirection = Directionality.of(context);
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
-      switch (textDirection!) {
+      switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
@@ -535,7 +557,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
     } else {
       final bool platformHasBackButton;
-      switch (Theme.of(context)!.platform) {
+      switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
           break;
@@ -566,7 +588,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: GestureDetector(
                     onTap: close,
                     child: Semantics(
-                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: MouseRegion(
                         opaque: true,
                         child: Container( // The drawer's "scrim"

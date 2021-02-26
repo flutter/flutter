@@ -797,9 +797,9 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   Description describe(Description description) {
     if (_predicates.isEmpty)
       return description.add('An object or closure and a paint pattern.');
-    description.add('Object or closure painting: ');
+    description.add('Object or closure painting:\n');
     return description.addAll(
-      '', ', ', '',
+      '', '\n', '',
       _predicates.map<String>((_PaintPredicate predicate) => predicate.toString()),
     );
   }
@@ -823,7 +823,6 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
       while (predicate.moveNext()) {
         predicate.current.match(call);
       }
-      assert(predicate.current == null);
       // We allow painting more than expected.
     } on _MismatchedCall catch (data) {
       description.writeln(data.message);

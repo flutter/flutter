@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -11,7 +9,52 @@ import 'framework.dart';
 
 /// Applies a [ColorFilter] to its child.
 ///
+/// This widget applies a function independently to each pixel of [child]'s
+/// content, according to the [ColorFilter] specified.
+/// Use the [ColorFilter.mode] constructor to apply a [Color] using a [BlendMode].
+/// Use the [BackdropFilter] widget instead, if the [ColorFilter]
+/// needs to be applied onto the content beneath [child].
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=F7Cll22Dno8}
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// These two images have two [ColorFilter]s applied with different [BlendMode]s,
+/// one with red color and [BlendMode.modulate] another with a grey color and [BlendMode.saturation].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return SingleChildScrollView(
+///     child: Column(
+///       children: [
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.red,
+///             BlendMode.modulate,
+///           ),
+///           child: Image.network(
+///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+///         ),
+///         ColorFiltered(
+///           colorFilter: ColorFilter.mode(
+///             Colors.grey,
+///             BlendMode.saturation,
+///           ),
+///           child: Image.network(
+///               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+///{@end-tool}
+///
+/// See Also:
+///
+///  * [BlendMode], describes how to blend a source image with the destination image.
+///  * [ColorFilter], which describes a function that modify a color to a different color.
+
 @immutable
 class ColorFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a [ColorFilter] to its child.

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,7 +17,7 @@ const double crossAxisEndOffset = 0.5;
 Widget buildTest({
   double? startToEndThreshold,
   TextDirection textDirection = TextDirection.ltr,
-  Future<bool> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
+  Future<bool?> Function(BuildContext context, DismissDirection direction)? confirmDismiss,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -679,7 +678,7 @@ void main() {
       return buildTest(
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
           confirmDismissDirection = dismissDirection;
-          return Future<bool>.value(confirmDismissValue);
+          return Future<bool?>.value(confirmDismissValue);
         }
       );
     }
@@ -860,5 +859,18 @@ void main() {
     await pumpWidgetTree(HitTestBehavior.translucent);
     await tester.tapAt(const Offset(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
+  });
+
+  testWidgets('DismissDirection.none does not trigger dismiss', (WidgetTester tester) async {
+    dismissDirection = DismissDirection.none;
+
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.left);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.up);
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.down);
+    expect(find.text('0'), findsOneWidget);
   });
 }

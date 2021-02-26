@@ -130,6 +130,31 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
+  testWidgets('Decoding does not crash when disposed', (WidgetTester tester) async {
+    final Completer<Codec> completer = Completer<Codec>();
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 1;
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      scale: 1.0,
+    );
+
+    completer.complete(mockCodec);
+    await tester.idle();
+    expect(mockCodec.numFramesAsked, 0);
+
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    final ImageStreamListener streamListener = ImageStreamListener(listener);
+    imageStream.addListener(streamListener);
+    await tester.idle();
+    expect(mockCodec.numFramesAsked, 1);
+
+    final FrameInfo frame = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    mockCodec.completeNextFrame(frame);
+    imageStream.removeListener(streamListener);
+    await tester.idle();
+  });
+
   testWidgets('Chunk events of base ImageStreamCompleter are delivered', (WidgetTester tester) async {
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
     final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
@@ -776,7 +801,7 @@ void main() {
   //
   //   final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
   //   final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
-  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, const Duration(milliseconds: 0));
+  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, Duration.zero);
   //
   //   mockCodec.completeNextFrame(frame1);
   //   await tester.idle(); // let nextFrameFuture complete

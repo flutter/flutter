@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,7 +18,6 @@ import 'package:flutter_tools/src/compile.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_process_manager.dart';
 
 const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
 const String kElfAot = '--snapshot_kind=app-aot-elf';
@@ -88,8 +89,8 @@ void main() {
           mode: BuildMode.profile,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -124,8 +125,8 @@ void main() {
           mode: BuildMode.profile,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -160,8 +161,8 @@ void main() {
           mode: BuildMode.profile,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -197,8 +198,8 @@ void main() {
           mode: BuildMode.profile,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=false',
-        ...buildModeOptions(BuildMode.profile),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.profile, <String>[]),
         '--aot',
         '--tfa',
         '--packages',
@@ -236,8 +237,8 @@ void main() {
           mode: BuildMode.debug,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--no-link-platform',
         '--packages',
         '/.dart_tool/package_config.json',
@@ -273,8 +274,8 @@ void main() {
           mode: BuildMode.debug,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -322,8 +323,8 @@ void main() {
           mode: BuildMode.debug,
         ) + '/',
         '--target=flutter',
-        '-Ddart.developer.causal_async_stacks=true',
-        ...buildModeOptions(BuildMode.debug),
+        '--no-print-incremental-dependencies',
+        ...buildModeOptions(BuildMode.debug, <String>[]),
         '--track-widget-creation',
         '--no-link-platform',
         '--packages',
@@ -356,8 +357,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -386,8 +385,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ])
     ]);
@@ -456,8 +453,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -467,28 +462,7 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
-      ]),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
@@ -496,7 +470,7 @@ void main() {
         '-arch',
         'armv7',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-c',
         '$build/armv7/snapshot_assembly.S',
         '-o',
@@ -508,7 +482,7 @@ void main() {
         '-arch',
         'arm64',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-c',
         '$build/arm64/snapshot_assembly.S',
         '-o',
@@ -519,7 +493,7 @@ void main() {
         'clang',
         '-arch',
         'armv7',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -532,7 +506,7 @@ void main() {
         '-install_name',
         '@rpath/App.framework/App',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/armv7/App.framework/App',
         '$build/armv7/snapshot_assembly.o',
@@ -542,7 +516,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -555,7 +529,7 @@ void main() {
         '-install_name',
         '@rpath/App.framework/App',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -570,6 +544,7 @@ void main() {
       ]),
     ]);
     iosEnvironment.defines[kIosArchs] ='armv7 arm64';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
 
     await const AotAssemblyProfile().build(iosEnvironment);
 
@@ -583,6 +558,7 @@ void main() {
   testUsingContext('AotAssemblyProfile with bitcode sends correct argument to snapshotter (one arch)', () async {
     iosEnvironment.defines[kIosArchs] = 'arm64';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     final String build = iosEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -592,22 +568,7 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
@@ -615,7 +576,7 @@ void main() {
         '-arch',
         'arm64',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-c',
@@ -628,7 +589,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -643,7 +604,7 @@ void main() {
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -669,6 +630,7 @@ void main() {
   testUsingContext('AotAssemblyRelease configures gen_snapshot with code size directory', () async {
     iosEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     iosEnvironment.defines[kIosArchs] = 'arm64';
+    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
     final String build = iosEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
@@ -681,22 +643,7 @@ void main() {
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
         '--strip',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
-      ]),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        exitCode: 1,
-      ),
-      const FakeCommand(command: <String>[
-        'xcrun',
-        '--sdk',
-        'iphoneos',
-        '--show-sdk-path',
       ]),
       FakeCommand(command: <String>[
         'xcrun',
@@ -704,7 +651,7 @@ void main() {
         '-arch',
         'arm64',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-c',
@@ -717,7 +664,7 @@ void main() {
         'clang',
         '-arch',
         'arm64',
-        '-miphoneos-version-min=9.0',
+        '-miphoneos-version-min=8.0',
         '-dynamiclib',
         '-Xlinker',
         '-rpath',
@@ -732,7 +679,7 @@ void main() {
         // Contains bitcode flag.
         '-fembed-bitcode',
         '-isysroot',
-        '',
+        'path/to/iPhoneOS.sdk',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
@@ -776,8 +723,6 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
-        '--no-causal-async-stacks',
-        '--lazy-async-stacks',
         '$build/app.dill',
       ]),
     ]);

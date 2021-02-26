@@ -5,14 +5,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'ink_ripple.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -28,7 +26,8 @@ import 'theme_data.dart';
 ///  * [ElevatedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
-  /// Create a [ButtonStyleButton].
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ButtonStyleButton({
     Key? key,
     required this.onPressed,
@@ -70,7 +69,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Null by default.
   final ButtonStyle? style;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -87,9 +86,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
   ///
-  /// The returned style can be overriden by the [style] parameter and
+  /// The returned style can be overridden by the [style] parameter and
   /// by the style returned by [themeStyleOf]. For example the default
-  /// style of the [TextButton] subclass can be overidden with its
+  /// style of the [TextButton] subclass can be overridden with its
   /// [TextButton.style] constructor parameter, or with a
   /// [TextButtonTheme].
   ///
@@ -105,7 +104,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Returns the ButtonStyle that belongs to the button's component theme.
   ///
-  /// The returned style can be overriden by the [style] parameter.
+  /// The returned style can be overridden by the [style] parameter.
   ///
   /// Concrete button subclasses should return the ButtonStyle for the
   /// nearest subclass-specific inherited theme, and if no such theme
@@ -268,6 +267,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Color? resolvedShadowColor = resolve<Color?>((ButtonStyle? style) => style?.shadowColor);
     final EdgeInsetsGeometry? resolvedPadding = resolve<EdgeInsetsGeometry?>((ButtonStyle? style) => style?.padding);
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
+    final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
 
@@ -283,13 +283,32 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
     final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
+    final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+
+    BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
         minWidth: resolvedMinimumSize!.width,
         minHeight: resolvedMinimumSize.height,
       ),
     );
+    if (resolvedFixedSize != null) {
+      final Size size = effectiveConstraints.constrain(resolvedFixedSize);
+      if (size.width.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minWidth: size.width,
+          maxWidth: size.width,
+        );
+      }
+      if (size.height.isFinite) {
+        effectiveConstraints = effectiveConstraints.copyWith(
+          minHeight: size.height,
+          maxHeight: size.height
+        );
+      }
+    }
+
     final EdgeInsetsGeometry padding = resolvedPadding!.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
@@ -352,7 +371,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           canRequestFocus: widget.enabled,
           onFocusChange: _handleFocusedChanged,
           autofocus: widget.autofocus,
-          splashFactory: InkRipple.splashFactory,
+          splashFactory: resolvedSplashFactory,
           overlayColor: overlayColor,
           highlightColor: Colors.transparent,
           customBorder: resolvedShape,
@@ -360,7 +379,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
             data: IconThemeData(color: resolvedForegroundColor),
             child: Padding(
               padding: padding,
-              child: Center(
+              child: Align(
+                alignment: resolvedAlignment!,
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: widget.child,
@@ -475,18 +495,33 @@ class _RenderInputPadding extends RenderShiftedBox {
     return 0.0;
   }
 
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
+  }
+
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
-      final double height = math.max(child!.size.width, minSize.width);
-      final double width = math.max(child!.size.height, minSize.height);
-      size = constraints.constrain(Size(height, width));
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
-    } else {
-      size = Size.zero;
     }
   }
 

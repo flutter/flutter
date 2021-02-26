@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestPage extends StatelessWidget {
@@ -26,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   void _presentModalPage() {
-    Navigator.of(context)!.push(PageRouteBuilder<void>(
+    Navigator.of(context).push(PageRouteBuilder<void>(
       transitionDuration: const Duration(milliseconds: 300),
       barrierColor: Colors.black54,
       opaque: false,
@@ -62,7 +61,7 @@ class ModalPage extends StatelessWidget {
               highlightColor: Colors.transparent,
               splashColor: Colors.transparent,
               onTap: () {
-                Navigator.of(context)!.pop();
+                Navigator.of(context).pop();
               },
               child: const SizedBox.expand(),
             ),

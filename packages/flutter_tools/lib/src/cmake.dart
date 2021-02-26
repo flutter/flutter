@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'project.dart';
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
@@ -40,12 +42,12 @@ file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
-  "FLUTTER_ROOT=\\"$escapedFlutterRoot\\""
-  "PROJECT_DIR=\\"$escapedProjectDir\\""
+  "FLUTTER_ROOT=$escapedFlutterRoot"
+  "PROJECT_DIR=$escapedProjectDir"
 ''');
   for (final String key in environment.keys) {
     final String value = _escapeBackslashes(environment[key]);
-    buffer.writeln('  "$key=\\"$value\\""');
+    buffer.writeln('  "$key=$value"');
   }
   buffer.writeln(')');
 

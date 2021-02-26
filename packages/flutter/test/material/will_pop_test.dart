@@ -139,7 +139,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -178,7 +178,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
@@ -222,24 +222,24 @@ void main() {
   });
 
   testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
-    Future<bool> showYesNoAlert(BuildContext context) {
-      return showDialog<bool>(
+    Future<bool> showYesNoAlert(BuildContext context) async {
+      return (await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             actions: <Widget> [
               TextButton(
                 child: const Text('YES'),
-                onPressed: () { Navigator.of(context)!.pop(true); },
+                onPressed: () { Navigator.of(context).pop(true); },
               ),
               TextButton(
                 child: const Text('NO'),
-                onPressed: () { Navigator.of(context)!.pop(false); },
+                onPressed: () { Navigator.of(context).pop(false); },
               ),
             ],
           );
         },
-      );
+      ))!;
     }
 
     Widget buildFrame() {
@@ -252,7 +252,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(MaterialPageRoute<void>(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
@@ -338,7 +338,7 @@ void main() {
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context)!.push(route);
+                    Navigator.of(context).push(route);
                   },
                 ),
               );

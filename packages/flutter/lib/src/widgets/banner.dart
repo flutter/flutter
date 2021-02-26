@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -256,7 +255,7 @@ class Banner extends StatelessWidget {
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The message to show in the banner.
@@ -304,9 +303,9 @@ class Banner extends StatelessWidget {
     return CustomPaint(
       foregroundPainter: BannerPainter(
         message: message,
-        textDirection: textDirection ?? Directionality.of(context)!,
+        textDirection: textDirection ?? Directionality.of(context),
         location: location,
-        layoutDirection: layoutDirection ?? Directionality.of(context)!,
+        layoutDirection: layoutDirection ?? Directionality.of(context),
         color: color,
         textStyle: textStyle,
       ),
@@ -338,7 +337,7 @@ class CheckedModeBanner extends StatelessWidget {
 
   /// The widget to show behind the banner.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

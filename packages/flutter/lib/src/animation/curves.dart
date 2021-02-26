@@ -346,16 +346,12 @@ class Cubic extends Curve {
 ///
 /// class FollowCurve2D extends StatefulWidget {
 ///   const FollowCurve2D({
-///     Key key,
-///     @required this.path,
+///     Key? key,
+///     required this.path,
 ///     this.curve = Curves.easeInOut,
-///     @required this.child,
+///     required this.child,
 ///     this.duration = const Duration(seconds: 1),
-///   })  : assert(path != null),
-///         assert(curve != null),
-///         assert(child != null),
-///         assert(duration != null),
-///         super(key: key);
+///   }) : super(key: key);
 ///
 ///   final Curve2D path;
 ///   final Curve curve;
@@ -368,9 +364,9 @@ class Cubic extends Curve {
 ///
 /// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
 ///   // The animation controller for this animation.
-///   AnimationController controller;
+///   late AnimationController controller;
 ///   // The animation that will be used to apply the widget's animation curve.
-///   Animation<double> animation;
+///   late Animation<double> animation;
 ///
 ///   @override
 ///   void initState() {
@@ -414,7 +410,7 @@ class Cubic extends Curve {
 ///         child: CircleAvatar(
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.headline6,
+///             style: Theme.of(context).textTheme.headline6!,
 ///             child: Text("B"), // Buzz, buzz!
 ///           ),
 ///         ),
@@ -554,7 +550,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
 ///  * [Curve2D.generateSamples], which generates samples of this type.
 ///  * [Curve2D], a parametric curve that maps a double parameter to a 2D location.
 class Curve2DSample {
-  /// A const constructor for the sample so that subclasses can be const.
+  /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
   const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);
@@ -578,7 +574,7 @@ class Curve2DSample {
 /// smoothly from one control point to the next, passing through the control
 /// points.
 ///
-/// {@template flutter.animation.curves.catmull_rom_description}
+/// {@template flutter.animation.CatmullRomSpline}
 /// Unlike most cubic splines, Catmull-Rom splines have the advantage that their
 /// curves pass through the control points given to them. They are cubic
 /// polynomial representations, and, in fact, Catmull-Rom splines can be
@@ -766,7 +762,7 @@ class CatmullRomSpline extends Curve2D {
 /// smoothly from one control point to the next, passing through (0.0, 0.0), the
 /// given points, and then (1.0, 1.0).
 ///
-/// {@macro flutter.animation.curves.catmull_rom_description}
+/// {@macro flutter.animation.CatmullRomSpline}
 ///
 /// This class uses a centripetal Catmull-Rom curve (a [CatmullRomSpline]) as
 /// its internal representation. The term centripetal implies that it won't form

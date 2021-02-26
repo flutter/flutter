@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -12,7 +14,6 @@ import 'common.dart';
 import 'context.dart';
 import 'io.dart';
 import 'logger.dart';
-import 'utils.dart';
 
 typedef StringConverter = String Function(String string);
 
@@ -529,7 +530,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 
     // Wait for stdout to be fully processed
     // because process.exitCode may complete first causing flaky tests.
-    await waitGroup<void>(<Future<void>>[
+    await Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
     ]);

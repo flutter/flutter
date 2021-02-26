@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -164,6 +166,34 @@ void main() {
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), true);
+  });
+
+  testWithoutContext('target platform display name on x86_64', () async {
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
+        FakeOperatingSystemUtils();
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
+    );
+
+    expect(await device.targetPlatformDisplayName, 'darwin-x64');
+  });
+
+  testWithoutContext('target platform display name on ARM', () async {
+    final FakeOperatingSystemUtils fakeOperatingSystemUtils =
+        FakeOperatingSystemUtils();
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm;
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
+    );
+
+    expect(await device.targetPlatformDisplayName, 'darwin-arm64');
   });
 
   testUsingContext('isSupportedForProject is false with no host app', () async {

@@ -20,10 +20,9 @@ class CupertinoPickerDemo extends StatefulWidget {
 
 class _BottomPicker extends StatelessWidget {
   const _BottomPicker({
-    Key key,
-    @required this.child,
-  }) : assert(child != null),
-       super(key: key);
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   final Widget child;
 
@@ -53,10 +52,9 @@ class _BottomPicker extends StatelessWidget {
 
 class _Menu extends StatelessWidget {
   const _Menu({
-    Key key,
-    @required this.children,
-  }) : assert(children != null),
-       super(key: key);
+    Key? key,
+    required this.children,
+  }) : super(key: key);
 
   final List<Widget> children;
 
@@ -89,7 +87,7 @@ class _Menu extends StatelessWidget {
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
-  Duration timer = const Duration();
+  Duration timer = Duration.zero;
 
   // Value that is shown in the date picker in date mode.
   DateTime date = DateTime.now();

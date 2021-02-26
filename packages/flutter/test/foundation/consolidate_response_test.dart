@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -111,7 +110,7 @@ void main() {
 
       test('Notifies onBytesReceived with gzipped numbers', () async {
         response.contentLength = gzipped.length;
-        final List<int?> records = <int>[];
+        final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int? total) {
@@ -147,7 +146,7 @@ void main() {
         ]);
       });
     });
-  });
+  }, skip: kIsWeb);
 }
 
 class MockHttpClientResponse extends Fake implements HttpClientResponse {

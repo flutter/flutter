@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -302,7 +301,7 @@ void main() {
   });
 
   testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
-    final Completer<RestorationBucket> completer = Completer<RestorationBucket>();
+    final Completer<RestorationBucket?> completer = Completer<RestorationBucket?>();
     binding.restorationManager.rootBucket = completer.future;
 
     await tester.pumpWidget(

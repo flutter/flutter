@@ -20,5 +20,6 @@
   "pasteButtonLabel": "అతికించు",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
   "tabSemanticsLabel": "$tabCountలో $tabIndexవ ట్యాబ్",
-  "modalBarrierDismissLabel": "విస్మరించు"
+  "modalBarrierDismissLabel": "విస్మరించు",
+  "searchTextFieldPlaceholderLabel": "సెర్చ్ చేయి"
 }

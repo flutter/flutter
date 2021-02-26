@@ -225,7 +225,7 @@ class RenderFlow extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
@@ -293,6 +293,11 @@ class RenderFlow extends RenderBox
     if (height.isFinite)
       return height;
     return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
   }
 
   @override

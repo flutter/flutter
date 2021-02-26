@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -20,7 +22,7 @@ void main() {
   setUp(() {
     cache = MockCache();
     // Release lock between test cases.
-    Cache.releaseLock();
+    cache.releaseLock();
 
     when(cache.isUpToDate()).thenAnswer((Invocation _) => Future<bool>.value(false));
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
@@ -39,9 +41,8 @@ void main() {
     );
     await createTestCommandRunner(command).run(const <String>['precache']);
 
-    expect(Cache.isLocked(), isTrue);
     // Do not throw StateError, lock is acquired.
-    expect(() => Cache.checkLockAcquired(platform), returnsNormally);
+    expect(() => cache.checkLockAcquired(), returnsNormally);
   });
 
   testUsingContext('precache should not re-entrantly acquire lock', () async {
@@ -62,7 +63,7 @@ void main() {
 
     expect(Cache.isLocked(), isFalse);
     // Do not throw StateError, acquired reentrantly with FLUTTER_ALREADY_LOCKED.
-    expect(() => Cache.checkLockAcquired(platform), returnsNormally);
+    expect(() => cache.checkLockAcquired(), returnsNormally);
   });
 
   testUsingContext('precache downloads web artifacts on dev branch when feature is enabled.', () async {
@@ -269,6 +270,7 @@ void main() {
       const <String>[
         'precache',
         '--no-ios',
+        '--android',
         '--android_gen_snapshot',
         '--android_maven',
         '--android_internal_build',
@@ -403,6 +405,34 @@ void main() {
     await createTestCommandRunner(command).run(const <String>['precache', '--force']);
 
     verify(cache.clearStampFiles()).called(1);
+  });
+
+  testUsingContext('precache downloads all enabled platforms if no flags are provided.', () async {
+    final PrecacheCommand command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(
+        isWebEnabled: true,
+        isLinuxEnabled: true,
+        isWindowsEnabled: true,
+        isMacOSEnabled: true,
+        isIOSEnabled: false,
+        isAndroidEnabled: false,
+      ),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+    await createTestCommandRunner(command).run(const <String>['precache']);
+
+    expect(
+      artifacts,
+      unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.web,
+        DevelopmentArtifact.macOS,
+        DevelopmentArtifact.windows,
+        DevelopmentArtifact.linux,
+        DevelopmentArtifact.universal,
+        // iOS and android specifically excluded
+      }));
   });
 }
 

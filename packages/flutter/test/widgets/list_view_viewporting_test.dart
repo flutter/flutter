@@ -238,7 +238,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: Theme.of(context)!.primaryColor,
+        color: Theme.of(context).primaryColor,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
@@ -501,8 +501,7 @@ void main() {
           child: Container(
             height: 200.0,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 0.0, vertical: 0.0),
+              padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
               itemExtent: 200.0,
               itemCount: 10,

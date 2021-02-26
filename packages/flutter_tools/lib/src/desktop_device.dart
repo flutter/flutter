@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -139,6 +141,7 @@ abstract class DesktopDevice extends Device {
     final Process process = await _processManager.start(
       <String>[
         executable,
+        ...?debuggingOptions?.dartEntrypointArgs,
       ],
       environment: _computeEnvironment(debuggingOptions, traceStartup, route),
     );

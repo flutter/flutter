@@ -4,10 +4,9 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, Window;
+import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -57,7 +56,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox? child,
     required ViewConfiguration configuration,
-    required ui.Window window,
+    required ui.FlutterView window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -85,7 +84,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.Window _window;
+  final ui.FlutterView _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -107,19 +106,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///  * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
   ///  * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
   bool automaticSystemUiAdjustment = true;
-
-  /// Bootstrap the rendering pipeline by scheduling the first frame.
-  ///
-  /// Deprecated. Call [prepareInitialFrame] followed by a call to
-  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated(
-    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
-    'This feature was deprecated after v1.10.0.'
-  )
-  void scheduleInitialFrame() {
-    prepareInitialFrame();
-    owner!.requestVisualUpdate();
-  }
 
   /// Bootstrap the rendering pipeline by preparing the first frame.
   ///
@@ -244,9 +230,47 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void _updateSystemChrome() {
+    // Take overlay style from the place where a system status bar and system
+    // navigation bar are placed to update system style overlay.
+    // The center of the system navigation bar and the center of the status bar
+    // are used to get SystemUiOverlayStyle's to update system overlay appearance.
+    //
+    //         Horizontal center of the screen
+    //                 V
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |    System status bar   |  <- Vertical center of the status bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |        Content         |
+    //    ~                        ~
+    //    |                        |
+    //    ++++++++++++++++++++++++++
+    //    |                        |
+    //    |  System navigation bar | <- Vertical center of the navigation bar
+    //    |                        |
+    //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
+    // Center of the status bar
+    final Offset top = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // The vertical center of the system status bar. The system status bar
+      // height is kept as top window padding.
+      _window.padding.top / 2.0,
+    );
+    // Center of the navigation bar
+    final Offset bottom = Offset(
+      // Horizontal center of the screen
+      bounds.center.dx,
+      // Vertical center of the system navigation bar. The system navigation bar
+      // height is kept as bottom window padding. The "1" needs to be subtracted
+      // from the bottom because available pixels are in (0..bottom) range.
+      // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
+      // bottom drawn pixel is at 1919 position.
+      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+    );
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
@@ -296,7 +320,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

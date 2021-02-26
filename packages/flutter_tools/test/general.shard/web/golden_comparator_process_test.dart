@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -20,14 +22,14 @@ void main() {
     Uri goldenKey;
     File imageFile2;
     Uri goldenKey2;
-    MockProcess Function(String) createMockProcess;
+    FakeProcess Function(String) createFakeProcess;
 
     setUpAll(() {
       imageFile = globals.fs.file('test_image_file');
       goldenKey = Uri.parse('file://golden_key');
       imageFile2 = globals.fs.file('second_test_image_file');
       goldenKey2 = Uri.parse('file://second_golden_key');
-      createMockProcess = (String stdout) => MockProcess(
+      createFakeProcess = (String stdout) => FakeProcess(
         exitCode: Future<int>.value(0),
         stdout: stdoutFromString(stdout),
       );
@@ -39,7 +41,7 @@ void main() {
         'message': 'some message',
       };
 
-      final MockProcess mockProcess = createMockProcess(jsonEncode(expectedResponse) + '\n');
+      final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse) + '\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess);
@@ -62,7 +64,7 @@ void main() {
         'message': 'some other message',
       };
 
-      final MockProcess mockProcess = createMockProcess(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n');
+      final FakeProcess mockProcess = createFakeProcess(jsonEncode(expectedResponse1) + '\n' + jsonEncode(expectedResponse2) + '\n');
       final MemoryIOSink ioSink = mockProcess.stdin as MemoryIOSink;
 
       final TestGoldenComparatorProcess process = TestGoldenComparatorProcess(mockProcess);
@@ -86,7 +88,7 @@ void main() {
         'message': 'some message',
       };
 
-      final MockProcess mockProcess = createMockProcess('''
+      final FakeProcess mockProcess = createFakeProcess('''
 Some random data including {} curly bracket
   {} curly bracket that is not on the beginning of the line
 ${jsonEncode(expectedResponse)}

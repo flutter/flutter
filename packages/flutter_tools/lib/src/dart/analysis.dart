@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -27,13 +29,11 @@ class AnalysisServer {
     @required Logger logger,
     @required Platform platform,
     @required Terminal terminal,
-    @required List<String> experiments,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal,
-       _experiments = experiments;
+       _terminal = terminal;
 
   final String sdkPath;
   final List<String> directories;
@@ -42,7 +42,6 @@ class AnalysisServer {
   final Logger _logger;
   final Platform _platform;
   final Terminal _terminal;
-  final List<String> _experiments;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -64,11 +63,6 @@ class AnalysisServer {
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       '--disable-dart-dev',
       snapshot,
-      for (String experiment in _experiments)
-        ...<String>[
-          '--enable-experiment',
-          experiment,
-        ],
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
       '--sdk',

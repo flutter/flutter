@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import 'base/config.dart';
 import 'base/context.dart';
@@ -10,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
+import 'convert.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
@@ -31,10 +35,11 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.packagesPath = '.packages',
-    this.nullSafetyMode = NullSafetyMode.autodetect,
+    this.packagesPath = '.packages', // TODO(jonahwilliams): make this required and remove the default.
+    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
+    this.packageConfig = PackageConfig.empty,
   });
 
   final BuildMode mode;
@@ -133,6 +138,12 @@ class BuildInfo {
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
 
+  /// The package configuration for the loaded application.
+  ///
+  /// This is captured once during startup, but the actual package configuration
+  /// may change during a 'flutter run` workflow.
+  final PackageConfig packageConfig;
+
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
   static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -182,9 +193,9 @@ class BuildInfo {
       if (dartObfuscation != null)
         'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions?.isNotEmpty ?? false)
-        'EXTRA_FRONT_END_OPTIONS': encodeDartDefines(extraFrontEndOptions),
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions?.join(','),
       if (extraGenSnapshotOptions?.isNotEmpty ?? false)
-        'EXTRA_GEN_SNAPSHOT_OPTIONS': encodeDartDefines(extraGenSnapshotOptions),
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions?.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath,
       if (trackWidgetCreation != null)
@@ -201,6 +212,34 @@ class BuildInfo {
         'CODE_SIZE_DIRECTORY': codeSizeDirectory,
     };
   }
+
+  /// Convert this config to a series of project level arguments to be passed
+  /// on the command line to gradle.
+  List<String> toGradleConfig() {
+    // PACKAGE_CONFIG not currently supported.
+    return <String>[
+      if (dartDefines?.isNotEmpty ?? false)
+        '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartObfuscation != null)
+        '-Pdart-obfuscation=$dartObfuscation',
+      if (extraFrontEndOptions?.isNotEmpty ?? false)
+        '-Pextra-front-end-options=${extraFrontEndOptions?.join(',')}',
+      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions?.join(',')}',
+      if (splitDebugInfoPath != null)
+        '-Psplit-debug-info=$splitDebugInfoPath',
+      if (trackWidgetCreation != null)
+        '-Ptrack-widget-creation=$trackWidgetCreation',
+      if (treeShakeIcons != null)
+        '-Ptree-shake-icons=$treeShakeIcons',
+      if (performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=$performanceMeasurementFile',
+      if (bundleSkSLPath != null)
+        '-Pbundle-sksl-path=$bundleSkSLPath',
+      if (codeSizeDirectory != null)
+        '-Pcode-size-directory=$codeSizeDirectory',
+    ];
+  }
 }
 
 /// Information about an Android build to be performed or used.
@@ -213,7 +252,6 @@ class AndroidBuildInfo {
       AndroidArch.x86_64,
     ],
     this.splitPerAbi = false,
-    this.shrink = false,
     this.fastStart = false,
   });
 
@@ -226,9 +264,6 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
-
-  /// Whether to enable code shrinking on release mode.
-  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -309,6 +344,12 @@ String getNameForBuildMode(BuildMode buildMode) {
 /// Returns the [BuildMode] for a particular `name`.
 BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
+}
+
+/// Environment type of the target device.
+enum EnvironmentType {
+  physical,
+  simulator,
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
@@ -415,6 +456,7 @@ enum HostPlatform {
   darwin_x64,
   darwin_arm,
   linux_x64,
+  linux_arm64,
   windows_x64,
 }
 
@@ -426,6 +468,8 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'darwin-arm';
     case HostPlatform.linux_x64:
       return 'linux-x64';
+    case HostPlatform.linux_arm64:
+      return 'linux-arm64';
     case HostPlatform.windows_x64:
       return 'windows-x64';
   }
@@ -439,6 +483,7 @@ enum TargetPlatform {
   // darwin_arm64 not yet supported, macOS desktop targets run in Rosetta as x86.
   darwin_x64,
   linux_x64,
+  linux_arm64,
   windows_x64,
   fuchsia_arm64,
   fuchsia_x64,
@@ -472,9 +517,19 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
-  DarwinArch.arm64,
-];
+List<DarwinArch> defaultIOSArchsForEnvironment(
+    EnvironmentType environmentType) {
+  if (environmentType == EnvironmentType.simulator) {
+    return <DarwinArch>[
+      // Apple Silicon ARM simulators not yet supported.
+      DarwinArch.x86_64,
+    ];
+  }
+  return <DarwinArch>[
+    DarwinArch.armv7,
+    DarwinArch.arm64,
+  ];
+}
 
 String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
@@ -523,6 +578,8 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
+   case TargetPlatform.linux_arm64:
+      return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
     case TargetPlatform.fuchsia_arm64:
@@ -562,6 +619,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+   case 'linux-arm64':
+      return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
     case 'web-javascript':
@@ -632,7 +691,8 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.darwin_x64;
   }
   if (globals.platform.isLinux) {
-    return HostPlatform.linux_x64;
+    // support x64 and arm64 architecture.
+    return globals.os.hostPlatform;
   }
   if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
@@ -696,8 +756,12 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'linux');
+String getLinuxBuildDirectory([TargetPlatform targetPlatform]) {
+  final String arch = (targetPlatform == null) ?
+      _getCurrentHostPlatformArchName() :
+      getNameForTargetPlatformArch(targetPlatform);
+  final String subDirs = 'linux/' + arch;
+  return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
 /// Returns the Windows build output directory.
@@ -715,9 +779,32 @@ String getFuchsiaBuildDirectory() {
 /// These values are URI-encoded and then combined into a comma-separated string.
 const String kDartDefines = 'DartDefines';
 
-/// Encode a List of dart defines in a URI string.
+final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
+final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
+
+/// Encode a List of dart defines in a base64 string.
+///
+/// This encoding does not include `,`, which is used to distinguish
+/// the individual entries, nor does it include `%` which is often a
+/// control character on windows command lines.
+///
+/// When decoding this string, it can be safely split on commas, since any
+/// user provided commans will still be encoded.
+///
+/// If the presence of the `/` character ends up being an issue, this can
+/// be changed to use base32 instead.
 String encodeDartDefines(List<String> defines) {
-  return defines.map(Uri.encodeComponent).join(',');
+  return defines.map(_defineEncoder.convert).join(',');
+}
+
+List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String key) {
+  if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
+    return <String>[];
+  }
+  return environmentDefines[key]
+    .split(',')
+    .cast<String>()
+    .toList();
 }
 
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
@@ -727,7 +814,7 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
   }
   return environmentDefines[key]
     .split(',')
-    .map<Object>(Uri.decodeComponent)
+    .map<Object>(_defineDecoder.convert)
     .cast<String>()
     .toList();
 }
@@ -736,5 +823,43 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
 enum NullSafetyMode {
   sound,
   unsound,
+  /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
+}
+
+String _getCurrentHostPlatformArchName() {
+  final HostPlatform hostPlatform = getCurrentHostPlatform();
+  return getNameForHostPlatformArch(hostPlatform);
+}
+
+String getNameForTargetPlatformArch(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.darwin_x64:
+    case TargetPlatform.windows_x64:
+      return 'x64';
+    case TargetPlatform.linux_arm64:
+      return 'arm64';
+    default:
+      break;
+  }
+  assert(false);
+  return null;
+}
+
+String getNameForHostPlatformArch(HostPlatform platform) {
+  switch (platform) {
+    case HostPlatform.darwin_x64:
+      return 'x64';
+    case HostPlatform.darwin_arm:
+      return 'arm';
+    case HostPlatform.linux_x64:
+      return 'x64';
+    case HostPlatform.linux_arm64:
+      return 'arm64';
+    case HostPlatform.windows_x64:
+      return 'x64';
+  }
+  assert(false);
+  return null;
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -248,6 +250,29 @@ abstract class Target {
   }
 }
 
+/// Target that contains multiple other targets.
+///
+/// This target does not do anything in its own [build]
+/// and acts as a wrapper around multiple other targets.
+class CompositeTarget extends Target {
+  CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
+}
+
 /// The [Environment] defines several constants for use during the build.
 ///
 /// The environment contains configuration and file paths that are safe to
@@ -306,6 +331,7 @@ class Environment {
     @required Artifacts artifacts,
     @required ProcessManager processManager,
     @required String engineVersion,
+    @required bool generateDartPluginRegistry,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -345,6 +371,7 @@ class Environment {
       processManager: processManager,
       engineVersion: engineVersion,
       inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -361,6 +388,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String engineVersion,
+    bool generateDartPluginRegistry = false,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -379,6 +407,7 @@ class Environment {
       artifacts: artifacts,
       processManager: processManager,
       engineVersion: engineVersion,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
@@ -396,6 +425,7 @@ class Environment {
     @required this.artifacts,
     @required this.engineVersion,
     @required this.inputs,
+    @required this.generateDartPluginRegistry,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -473,6 +503,11 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String engineVersion;
+
+  /// Whether to generate the Dart plugin registry.
+  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// the new entrypoint.
+  final bool generateDartPluginRegistry;
 }
 
 /// The result information from the build system.
@@ -772,7 +807,7 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache, fileSystem, logger);
+        node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
@@ -802,11 +837,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.diffFileList(node.inputs);
+        fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.diffFileList(node.outputs);
+      fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -1001,12 +1036,12 @@ class Node {
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<bool> computeChanges(
+  bool computeChanges(
     Environment environment,
     FileStore fileStore,
     FileSystem fileSystem,
     Logger logger,
-  ) async {
+  ) {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
     };
@@ -1075,7 +1110,7 @@ class Node {
     // If we have files to diff, compute them asynchronously and then
     // update the result.
     if (sourcesToDiff.isNotEmpty) {
-      final List<File> dirty = await fileStore.diffFileList(sourcesToDiff);
+      final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;

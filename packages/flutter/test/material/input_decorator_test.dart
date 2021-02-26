@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,7 +33,7 @@ Widget buildInputDecorator({
       child: Builder(
         builder: (BuildContext context) {
           return Theme(
-            data: Theme.of(context)!.copyWith(
+            data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
@@ -1519,7 +1520,7 @@ void main() {
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1542,7 +1543,7 @@ void main() {
       buildInputDecorator(
         isEmpty: true,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -1577,7 +1578,7 @@ void main() {
       buildInputDecorator(
         isEmpty: false,
         isFocused: true,
-        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        visualDensity: VisualDensity.compact,
         decoration: const InputDecoration(
           labelText: 'label',
           hintText: 'hint',
@@ -3052,7 +3053,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
@@ -3811,7 +3812,7 @@ void main() {
           // is rounded.
 
           // Top-left
-          Offset(0.0, 0.0),
+          Offset.zero,
           // Top-right
           Offset(inputDecoratorWidth, 0.0),
           // Bottom-left
@@ -4204,7 +4205,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!,
+                data: Theme.of(context),
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: TextField(
@@ -4253,21 +4254,21 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
-  testWidgets('OutlineInputBorder with InputDecorator long label, width should ignore icon width', (WidgetTester tester) async {
-    // Related issue: https://github.com/flutter/flutter/issues/64427
+  // Related issue: https://github.com/flutter/flutter/issues/64427
+  testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
     const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
-    Widget getLabeledInputDecorator(bool useOutlineBorder) => MaterialApp(
+    Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
         home: Material(
           child: Container(
             width: 300,
             child: TextField(
               decoration: InputDecoration(
-                border: useOutlineBorder ? const OutlineInputBorder(
+                border: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
-                ) : null,
+                ),
                 suffixIcon: const Icon(Icons.arrow_drop_down),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+                floatingLabelBehavior: floatingLabelBehavior,
                 labelText: labelText,
               ),
             ),
@@ -4275,16 +4276,34 @@ void main() {
         ),
       );
 
-    // Build with no OutlineInputBorder.
-    await tester.pumpWidget(getLabeledInputDecorator(false));
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
 
-    // Get the width of the label when there is no OutlineInputBorder.
-    final double labelWidth = tester.getSize(find.text(labelText)).width;
+    final double labelWidth = getLabelRect(tester).width;
 
-    // Build with a OutlineInputBorder.
-    await tester.pumpWidget(getLabeledInputDecorator(true));
+    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
+    await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.text(labelText)).width > labelWidth, isTrue);
+    final double floatedLabelWidth = getLabelRect(tester).width;
+
+    expect(floatedLabelWidth > labelWidth, isTrue);
+
+    final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
+    await tester.pumpWidget(target);
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, labelWidth);
+
+    // Click for Focus.
+    await tester.tap(find.byType(TextField));
+    // Default animation duration is 200 millisecond.
+    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+
+    expect(getLabelRect(tester).width > labelWidth, isTrue);
+    expect(getLabelRect(tester).width < floatedLabelWidth, isTrue);
+
+    await tester.pumpAndSettle();
+
+    expect(getLabelRect(tester).width, floatedLabelWidth);
   });
 
   testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
@@ -4298,7 +4317,7 @@ void main() {
           child: Builder(
             builder: (BuildContext context) {
               return Theme(
-                data: Theme.of(context)!.copyWith(visualDensity: visualDensity),
+                data: Theme.of(context).copyWith(visualDensity: visualDensity),
                 child: Center(
                   child: Row(
                     children: <Widget>[
@@ -4371,7 +4390,7 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(visualDensity: VisualDensity.compact),
+              data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
               child: Center(
                 child: Row(
                   children: <Widget>[
@@ -4401,5 +4420,43 @@ void main() {
     final double height = tester.getSize(find.byKey(key)).height;
     final double intrinsicHeight = tester.getSize(find.byKey(intrinsicHeightKey)).height;
     expect(intrinsicHeight, equals(height));
+  });
+
+  testWidgets('error message for negative baseline', (WidgetTester tester) async {
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails ??= details;
+    };
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: InputDecorator(
+                decoration: const InputDecoration(),
+                child: Stack(
+                  children: const <Widget>[
+                    SizedBox(height: 0),
+                    Positioned(
+                      bottom: 5,
+                      child: Text('ok'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        null,
+        EnginePhase.layout,
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
+    expect(errorDetails?.toString(), contains('RenderStack'));
   });
 }

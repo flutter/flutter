@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -259,8 +261,30 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   String get pathVarSeparator => ':';
 
+  HostPlatform _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      final RunResult hostPlatformCheck =
+          _processUtils.runSync(<String>['uname', '-m']);
+      // On x64 stdout is "uname -m: x86_64"
+      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
+      if (hostPlatformCheck.exitCode != 0) {
+        _logger.printError(
+          'Error trying to run uname -m'
+          '\nstdout: ${hostPlatformCheck.stdout}'
+          '\nstderr: ${hostPlatformCheck.stderr}',
+        );
+        _hostPlatform = HostPlatform.linux_x64;
+      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
+        _hostPlatform = HostPlatform.linux_x64;
+      } else {
+        _hostPlatform = HostPlatform.linux_arm64;
+      }
+    }
+    return _hostPlatform;
+  }
 }
 
 class _MacOSUtils extends _PosixUtils {
@@ -295,14 +319,30 @@ class _MacOSUtils extends _PosixUtils {
     return _name;
   }
 
-  HostPlatform _hostPlatform;
-
   // On ARM returns arm64, even when this process is running in Rosetta.
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
+      String sysctlPath;
+      if (which('sysctl') == null) {
+        // Fallback to known install locations.
+        for (final String path in <String>[
+          '/usr/sbin/sysctl',
+          '/sbin/sysctl',
+        ]) {
+          if (_fileSystem.isFileSync(path)) {
+            sysctlPath = path;
+          }
+        }
+      } else {
+        sysctlPath = 'sysctl';
+      }
+
+      if (sysctlPath == null) {
+        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
+      }
       final RunResult arm64Check =
-          _processUtils.runSync(<String>['sysctl', 'hw.optional.arm64']);
+          _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
@@ -347,7 +387,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       // `where` could be missing if system32 is not on the PATH.
       throwToolExit(
         'Cannot find the executable for `where`. This can happen if the System32 '
-        'folder (e.g. C:\\Windows\\System32 ) is removed from the PATH environment '
+        r'folder (e.g. C:\Windows\System32 ) is removed from the PATH environment '
         'variable. Ensure that this is present and then try again after restarting '
         'the terminal and/or IDE.'
       );

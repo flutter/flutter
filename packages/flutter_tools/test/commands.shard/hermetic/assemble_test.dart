@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -11,7 +13,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -20,8 +21,9 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  FlutterCommandRunner.initFlutterRoot();
   Cache.disableLocking();
+  Cache.flutterRoot = '';
+
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     BuildSystem: ()  => MockBuildSystem(),
     Cache: () => FakeCache(),
@@ -133,7 +135,6 @@ void main() {
 
   testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
     Environment environment;
-    when(globals.artifacts.isLocalEngine).thenReturn(true);
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         environment = invocation.positionalArguments[1] as Environment;
@@ -144,7 +145,7 @@ void main() {
 
     expect(environment.engineVersion, isNull);
   }, overrides: <Type, Generator>{
-    Artifacts: () => MockLocalEngineArtifacts()
+    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
   });
 
   testbed.test('flutter assemble only writes input and output files when the values change', () async {
@@ -237,4 +238,3 @@ void main() {
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

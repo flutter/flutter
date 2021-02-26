@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
-
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
@@ -61,7 +59,7 @@ class NavigationToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     return CustomMultiChildLayout(
       delegate: _ToolbarLayout(
         centerMiddle: centerMiddle,

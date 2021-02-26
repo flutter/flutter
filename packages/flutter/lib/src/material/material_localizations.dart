@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'reorderable_list.dart';
-import 'text_theme.dart';
+import 'debug.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -102,6 +101,12 @@ abstract class MaterialLocalizations {
 
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "first page" button.
+  String get firstPageTooltip;
+
+  /// The tooltip for the [PaginatedDataTable]'s "last page" button.
+  String get lastPageTooltip;
 
   /// The tooltip for the [PaginatedDataTable]'s "next page" button.
   String get nextPageTooltip;
@@ -494,8 +499,11 @@ abstract class MaterialLocalizations {
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
+  /// If no [MaterialLocalizations] are available in the given `context`, this
+  /// method throws an exception.
+  ///
   /// This method is just a convenient shorthand for:
-  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)`.
+  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!`.
   ///
   /// References to the localized resources defined by this class are typically
   /// written in terms of this method. For example:
@@ -503,8 +511,9 @@ abstract class MaterialLocalizations {
   /// ```dart
   /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
   /// ```
-  static MaterialLocalizations? of(BuildContext context) {
-    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+  static MaterialLocalizations of(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   }
 }
 
@@ -884,6 +893,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get previousPageTooltip => 'Previous page';
+
+  @override
+  String get firstPageTooltip => 'First page';
+
+  @override
+  String get lastPageTooltip => 'Last page';
 
   @override
   String get showMenuTooltip => 'Show menu';

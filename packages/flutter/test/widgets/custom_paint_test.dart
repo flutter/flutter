@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart' show Fake;
-
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ required this.log, this.name });
 
@@ -29,7 +27,7 @@ class TestCustomPainterWithCustomSemanticsBuilder extends TestCustomPainter {
   @override
   SemanticsBuilderCallback get semanticsBuilder => (Size size) {
     const Key key = Key('0');
-    const Rect rect = Rect.fromLTRB(0, 0, 0, 0);
+    const Rect rect = Rect.zero;
     const SemanticsProperties semanticsProperties = SemanticsProperties();
     return <CustomPainterSemantics>[
       const CustomPainterSemantics(key: key, rect: rect, properties: semanticsProperties),
@@ -58,7 +56,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
         log: log,
@@ -82,7 +80,7 @@ void main() {
   testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (
       WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
@@ -95,7 +93,7 @@ void main() {
     FlutterError getError() {
       late FlutterError error;
       try {
-        renderCustom.paint(paintingContext, const Offset(0, 0));
+        renderCustom.paint(paintingContext, Offset.zero);
       } on FlutterError catch (e) {
         error = e;
       }
@@ -174,7 +172,7 @@ void main() {
   testWidgets('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
-    final List<String> log = <String>[];
+    final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
@@ -197,5 +195,21 @@ void main() {
   test('Raster cache hints cannot be set with null painters', () {
     expect(() => CustomPaint(isComplex: true), throwsAssertionError);
     expect(() => CustomPaint(willChange: true), throwsAssertionError);
+  });
+
+  test('RenderCustomPaint consults preferred size for intrinsics when it has no child', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: const Size(20, 30));
+    expect(inner.getMinIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 20);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 30);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 30);
+  });
+
+  test('RenderCustomPaint does not return infinity for its intrinsics', () {
+    final RenderCustomPaint inner = RenderCustomPaint(preferredSize: Size.infinite);
+    expect(inner.getMinIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMaxIntrinsicWidth(double.infinity), 0);
+    expect(inner.getMinIntrinsicHeight(double.infinity), 0);
+    expect(inner.getMaxIntrinsicHeight(double.infinity), 0);
   });
 }

@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:mockito/mockito.dart';
+import 'package:meta/meta.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
+import '../../src/fakes.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
-  MockStdio stdio;
+  FakeStdio stdio;
   SymbolizeCommand command;
-  MockDwarfSymbolizationService mockDwarfSymbolizationService;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -30,12 +32,11 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    stdio = MockStdio();
-    mockDwarfSymbolizationService = MockDwarfSymbolizationService();
+    stdio = FakeStdio();
     command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
-      dwarfSymbolizationService: mockDwarfSymbolizationService,
+      dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
   });
 
@@ -84,31 +85,22 @@ void main() {
     fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
     fileSystem.file('foo.stack').writeAsStringSync('hello');
 
-    when(mockDwarfSymbolizationService.decode(
-      input: anyNamed('input'),
-      output: anyNamed('output'),
-      symbols: anyNamed('symbols'))
-    ).thenAnswer((Invocation invocation) async {
-      // Data is passed correctly to service
-      expect((await (invocation.namedArguments[#input] as Stream<List<int>>).toList()).first,
-        utf8.encode('hello'));
-      expect(invocation.namedArguments[#symbols] as Uint8List, <int>[1, 2, 3,]);
-      return;
-    });
-
     await createTestCommandRunner(command)
       .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
+
+    expect(fileSystem.file('results/foo.result'), exists);
+    expect(fileSystem.file('results/foo.result').readAsBytesSync(), <int>[104, 101, 108, 108, 111, 10]); // hello
   });
 
   testUsingContext('symbolize throws when DwarfSymbolizationService throws', () async {
+    command = SymbolizeCommand(
+      stdio: stdio,
+      fileSystem: fileSystem,
+      dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
+    );
+
     fileSystem.file('app.debug').writeAsBytesSync(<int>[1, 2, 3]);
     fileSystem.file('foo.stack').writeAsStringSync('hello');
-
-    when(mockDwarfSymbolizationService.decode(
-      input: anyNamed('input'),
-      output: anyNamed('output'),
-      symbols: anyNamed('symbols'))
-    ).thenThrow(ToolExit('test'));
 
     expect(
       createTestCommandRunner(command).run(const <String>[
@@ -118,4 +110,13 @@ void main() {
   });
 }
 
-class MockDwarfSymbolizationService extends Mock implements DwarfSymbolizationService {}
+class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
+  @override
+  Future<void> decode({
+    @required Stream<List<int>> input,
+    @required IOSink output,
+    @required Uint8List symbols,
+  }) async {
+    throwToolExit('test');
+  }
+}

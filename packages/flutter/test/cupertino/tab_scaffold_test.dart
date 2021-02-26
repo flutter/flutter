@@ -45,7 +45,7 @@ void main() {
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-      title: Text('Tab ${index + 1}'),
+      label: 'Tab ${index + 1}',
     );
   }
 
@@ -406,7 +406,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 0);
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
   testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -433,7 +433,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 50);
+    expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
   testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -502,7 +502,7 @@ void main() {
                   items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) {
-                  contentPadding = MediaQuery.of(context)!.padding;
+                  contentPadding = MediaQuery.of(context).padding;
                   return const Placeholder();
                 }
               ),
@@ -543,7 +543,7 @@ void main() {
     );
 
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
-    expect(MediaQuery.of(innerContext)!.padding.bottom, 0);
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
@@ -1031,7 +1031,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 0),
+          viewInsets: EdgeInsets.zero,
         ),
         child: CupertinoApp(
           home: CupertinoTabScaffold(
@@ -1074,12 +1074,12 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), title: Text('$i')),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -1221,11 +1221,11 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 1'),
+        label: 'Tab 1',
       ),
       BottomNavigationBarItem(
         icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        title: const Text('Tab 2'),
+        label: 'Tab 2',
       ),
     ],
     currentIndex: selectedTab,

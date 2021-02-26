@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -10,7 +12,6 @@ import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -30,11 +31,11 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
@@ -142,7 +143,7 @@ void main() {
       return UpdateFSReport(success: true,  syncedBytes: 0);
     });
     when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
-      return fakeVmServiceHost.vmService;
+      return fakeVmServiceHost.vmService.service;
     });
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;
@@ -170,7 +171,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -186,7 +187,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -201,7 +202,7 @@ void main() {
     ));
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
@@ -213,7 +214,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
   testUsingContext('profile does not supportsServiceProtocol', () {
@@ -222,7 +223,7 @@ void main() {
       ..writeAsStringSync('\n');
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -232,7 +233,7 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
@@ -244,34 +245,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
-    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
-  });
-
-  testUsingContext('Exits on run if target file does not exist', () async {
-    fileSystem.file('.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
-    final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-      mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
-    ) as ResidentWebRunner;
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file(fileSystem.path.join('web', 'index.html'))
-      .createSync(recursive: true);
-
-    expect(await residentWebRunner.run(), 1);
-    final String absoluteMain = fileSystem.path.absolute(fileSystem.path.join('lib', 'main.dart'));
-    expect(testLogger.errorText, contains('Tried to run $absoluteMain, but that file does not exist.'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -300,7 +274,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -320,7 +294,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -355,7 +329,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -366,7 +340,7 @@ void main() {
       .deleteSync();
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
@@ -379,7 +353,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -388,7 +362,7 @@ void main() {
     _setupMocks();
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
@@ -399,7 +373,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -437,7 +411,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -505,14 +479,14 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
   testUsingContext('Does not run main with --start-paused', () async {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
@@ -531,7 +505,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -611,7 +585,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -695,7 +669,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -737,7 +711,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -749,26 +723,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
-    Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
-  });
-
-  testUsingContext('web resident runner can toggle CanvasKit', () async {
-    final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null, null);
-    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
-
-    expect(webAssetServer.canvasKitRendering, false);
-
-    final bool toggleResult = await residentWebRunner.toggleCanvaskit();
-
-    expect(webAssetServer.canvasKitRendering, true);
-    expect(toggleResult, true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -804,7 +759,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -837,7 +792,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -877,7 +832,7 @@ void main() {
     Usage: () => MockFlutterUsage(),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -905,7 +860,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -933,22 +888,20 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
-  testUsingContext('printHelp without details has web warning', () async {
+  testUsingContext('printHelp without details shows hot restart help message', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(mockFlutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentWebRunner.printHelp(details: false);
 
-    expect(testLogger.statusText, contains('Warning'));
-    expect(testLogger.statusText, contains('https://flutter.dev/web'));
-    expect(testLogger.statusText, isNot(contains('https://flutter.dev/web.')));
+    expect(testLogger.statusText, contains('To hot restart changes'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -975,7 +928,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1002,7 +955,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1029,7 +982,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1056,7 +1009,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1084,7 +1037,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1125,7 +1078,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1166,7 +1119,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1207,7 +1160,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1248,7 +1201,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1289,7 +1242,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1332,7 +1285,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1375,7 +1328,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1407,7 +1360,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1433,7 +1386,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1458,7 +1411,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1505,7 +1458,7 @@ void main() {
     fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -1533,7 +1486,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1552,7 +1505,7 @@ void main() {
     fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -1580,7 +1533,7 @@ void main() {
     Logger: () => FakeStatusLogger(BufferLogger.test()),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1597,7 +1550,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1614,7 +1567,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1631,7 +1584,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1646,7 +1599,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 
@@ -1673,7 +1626,7 @@ void main() {
     )),
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
-    Pub: () => MockPub(),
+    Pub: () => FakePub(),
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
   });
 }
@@ -1681,7 +1634,7 @@ void main() {
 ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   return DwdsWebRunnerFactory().createWebRunner(
     flutterDevice,
-    flutterProject: FlutterProject.current(),
+    flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     stayResident: true,
@@ -1694,7 +1647,6 @@ class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
-class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}
@@ -1706,4 +1658,3 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
-class MockPub extends Mock implements Pub {}

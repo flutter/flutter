@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // diagnostics use Platform.operatingSystem.
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -258,6 +258,7 @@ void main() {
       '             │ parentData: <none> (can use size)\n'
       '             │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '             │ size: Size(800.0, 600.0)\n'
+      '             │ behavior: opaque\n'
       '             │ gestures: vertical scroll\n'
       '             │\n'
       '             └─child: RenderPointerListener#00000\n'
@@ -406,6 +407,7 @@ void main() {
       '             │ parentData: <none> (can use size)\n'
       '             │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '             │ size: Size(800.0, 600.0)\n'
+      '             │ behavior: opaque\n'
       '             │ gestures: vertical scroll\n'
       '             │\n'
       '             └─child: RenderPointerListener#00000\n'
@@ -530,6 +532,6 @@ void main() {
       '                             constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                             size: Size(800.0, 400.0)\n'
     ));
-  });
+  }, skip: kIsWeb);
 
 }

@@ -101,6 +101,33 @@ void main() {
   });
   */
 
+  testWidgets('Button child alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.center); // default
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton(
+          alignment: Alignment.centerLeft,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    expect(align.alignment, Alignment.centerLeft);
+  });
+
   testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: Text('X', style: testStyle),

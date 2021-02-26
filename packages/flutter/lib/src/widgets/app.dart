@@ -49,7 +49,7 @@ export 'dart:ui' show Locale;
 ///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
 
-/// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
+/// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
@@ -433,8 +433,8 @@ class WidgetsApp extends StatefulWidget {
   /// This object will be used by the underlying [Router].
   ///
   /// If this is not provided, the widgets app will create a
-  /// [PlatformRouteInformationProvider] with initial route name equals to
-  /// the [Window.defaultRouteName] by default.
+  /// [PlatformRouteInformationProvider] with initial route name equal to the
+  /// [dart:ui.PlatformDispatcher.defaultRouteName] by default.
   ///
   /// See also:
   ///
@@ -525,8 +525,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
+  /// Defaults to [dart:ui.PlatformDispatcher.defaultRouteName], which may be
+  /// overridden by the code that launched the application.
   ///
   /// If the route name starts with a slash, then it is treated as a "deep link",
   /// and before this route is pushed, the routes leading to this one are pushed
@@ -880,7 +880,7 @@ class WidgetsApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -934,7 +934,7 @@ class WidgetsApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -1024,7 +1024,14 @@ class WidgetsApp extends StatefulWidget {
   // Default shortcuts for the web platform.
   static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
+      orderedIntents: <Intent>[
+        ActivateIntent(),
+        ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+      ]
+    ),
+    // On the web, enter activates buttons, but not other controls.
+    LogicalKeySet(LogicalKeyboardKey.enter): const ButtonActivateIntent(),
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
@@ -1043,7 +1050,7 @@ class WidgetsApp extends StatefulWidget {
   };
 
   // Default shortcuts for the macOS platform.
-  static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+  static final Map<LogicalKeySet, Intent> _defaultAppleOsShortcuts = <LogicalKeySet, Intent>{
     // Activation
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
@@ -1083,13 +1090,10 @@ class WidgetsApp extends StatefulWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return _defaultShortcuts;
-      case TargetPlatform.macOS:
-        return _defaultMacOsShortcuts;
       case TargetPlatform.iOS:
-        // No keyboard support on iOS yet.
-        break;
+      case TargetPlatform.macOS:
+        return _defaultAppleOsShortcuts;
     }
-    return <LogicalKeySet, Intent>{};
   }
 
   /// The default value of [WidgetsApp.actions].
@@ -1101,6 +1105,7 @@ class WidgetsApp extends StatefulWidget {
     PreviousFocusIntent: PreviousFocusAction(),
     DirectionalFocusIntent: DirectionalFocusAction(),
     ScrollIntent: ScrollAction(),
+    PrioritizedIntents: PrioritizedAction(),
   };
 
   @override

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
@@ -382,7 +381,7 @@ void main() {
             children: <Widget>[
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
-                innerMediaQueryPadding = MediaQuery.of(context)!.padding;
+                innerMediaQueryPadding = MediaQuery.of(context).padding;
                 return Container();
               }),
             ],

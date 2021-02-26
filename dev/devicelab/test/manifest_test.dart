@@ -14,10 +14,10 @@ void main() {
       final Manifest manifest = loadTaskManifest();
       expect(manifest.tasks, isNotEmpty);
 
-      final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'flutter_gallery__start_up');
-      expect(task.description, 'Measures the startup time of the Flutter Gallery app on Android.\n');
-      expect(task.stage, 'devicelab');
-      expect(task.requiredAgentCapabilities, <String>['linux/android']);
+      final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'complex_layout_win__compile');
+      expect(task.description, 'Collects various performance metrics of compiling the Complex Layout for Android from Windows.\n');
+      expect(task.stage, 'devicelab_win');
+      expect(task.requiredAgentCapabilities, <String>['windows/android']);
 
       for (final ManifestTask task in manifest.tasks) {
         final File taskFile = File('bin/tasks/${task.name}.dart');

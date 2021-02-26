@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -28,6 +30,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{
     'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
     'FLUTTER_ROOT': flutterRoot,
+    'USERPROFILE': '/',
   }
 );
 final Platform notWindowsPlatform = FakePlatform(
@@ -42,7 +45,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  Usage usage;
+  TestUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -52,7 +55,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = Usage.test();
+    usage = TestUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -135,7 +138,9 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['windows', '--no-pub']
-    ), throwsToolExit(message: 'No Windows desktop project configured'));
+    ), throwsToolExit(message: 'No Windows desktop project configured. See '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
+      'to learn about adding Windows support to a project.'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => fileSystem,
@@ -314,17 +319,17 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     expect(configLines, containsAll(<String>[
       r'file(TO_CMAKE_PATH "C:\\flutter" FLUTTER_ROOT)',
       r'file(TO_CMAKE_PATH "C:\\" PROJECT_DIR)',
-      r'  "DART_DEFINES=\"foo%3Da,bar%3Db\""',
-      r'  "DART_OBFUSCATION=\"true\""',
-      r'  "EXTRA_FRONT_END_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=\"--enable-experiment%3Dnon-nullable\""',
-      r'  "SPLIT_DEBUG_INFO=\"C:\\foo\\\""',
-      r'  "TRACK_WIDGET_CREATION=\"true\""',
-      r'  "TREE_SHAKE_ICONS=\"true\""',
-      r'  "FLUTTER_ROOT=\"C:\\flutter\""',
-      r'  "PROJECT_DIR=\"C:\\\""',
-      r'  "FLUTTER_TARGET=\"lib\\other.dart\""',
-      r'  "BUNDLE_SKSL_PATH=\"foo\\bar.sksl.json\""',
+      r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
+      r'  "DART_OBFUSCATION=true"',
+      r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
+      r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
+      r'  "SPLIT_DEBUG_INFO=C:\\foo\\"',
+      r'  "TRACK_WIDGET_CREATION=true"',
+      r'  "TREE_SHAKE_ICONS=true"',
+      r'  "FLUTTER_ROOT=C:\\flutter"',
+      r'  "PROJECT_DIR=C:\\"',
+      r'  "FLUTTER_TARGET=lib\\other.dart"',
+      r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -398,15 +403,15 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['windows', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
+    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(usage.events, contains(
+       const TestUsageEvent('code-size-analysis', 'windows'),
+    ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,7 +18,7 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () {
+  testWithoutContext('calls buildSystem.build with blank l10n.yaml file', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -31,7 +33,6 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').createSync();
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -39,11 +40,11 @@ void main() {
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: artifacts,
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -57,7 +58,7 @@ void main() {
     )).called(1);
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -72,7 +73,7 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: true');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Artifacts artifacts = Artifacts.test();
     final Environment environment = Environment.test(
@@ -80,11 +81,11 @@ void main() {
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: artifacts,
-      processManager: mockProcessManager,
+      processManager: fakeProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -98,7 +99,7 @@ void main() {
     )).called(1);
   });
 
-  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () {
+  testWithoutContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -113,18 +114,17 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: null');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -150,14 +150,13 @@ void main() {
     );
     pubspecFile.writeAsStringSync(content);
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
@@ -172,7 +171,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () {
+  testWithoutContext('does not call buildSystem.build with incorrect l10n.yaml format', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -187,18 +186,17 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('helloWorld');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,
@@ -212,7 +210,7 @@ void main() {
     ));
   });
 
-  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () {
+  testWithoutContext('does not call buildSystem.build with non-bool "synthetic-package" value', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -227,18 +225,17 @@ void main() {
     // Create an l10n.yaml file
     fileSystem.file('l10n.yaml').writeAsStringSync('synthetic-package: nonBoolValue');
 
-    final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
       artifacts: Artifacts.test(),
-      processManager: mockProcessManager,
+      processManager: FakeProcessManager.any(),
     );
     final BuildSystem buildSystem = MockBuildSystem();
 
-    expect(
+    await expectLater(
       () => generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: buildSystem,

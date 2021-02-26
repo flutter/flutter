@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -12,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -23,8 +26,8 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'devices.dart';
-import 'migrations/ios_migrator.dart';
 import 'migrations/project_base_configuration_migration.dart';
+import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
@@ -102,13 +105,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  final List<IOSMigrator> migrators = <IOSMigrator>[
+  final List<ProjectMigrator> migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
+    ProjectBuildLocationMigration(app.project, globals.logger),
   ];
 
-  final IOSMigration migration = IOSMigration(migrators);
+  final ProjectMigration migration = ProjectMigration(migrators);
   if (!migration.run()) {
     return XcodeBuildResult(success: false);
   }
@@ -221,7 +225,8 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands.addAll(<String>[
         '-workspace', globals.fs.path.basename(entity.path),
         '-scheme', scheme,
-        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
       ]);
       break;
     }
@@ -341,10 +346,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
   globals.printStatus(
-    'Xcode ${buildAction.name} done.'.padRight(kDefaultStatusPadding + 1)
+    'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  globals.flutterUsage.sendTiming(buildAction.name, 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to occasionally timeout. Here, we give
@@ -430,7 +435,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           // (for example, kernel binary files produced from previous run).
           globals.fs.directory(outputDir).deleteSync(recursive: true);
         }
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           globals.fs.directory(expectedOutputDirectory),
           globals.fs.directory(outputDir),
         );
@@ -438,7 +443,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = '${globals.fs.path.absolute(app.archiveBundlePath)}.xcarchive';
+      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
       if (!globals.fs.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }
@@ -539,7 +544,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
     logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     logger.printError('');
     logger.printError('You can temporarily work around this issue by running:');
-    logger.printError('  rm -rf ios/Flutter/App.framework');
+    logger.printError('  flutter clean');
     return;
   }
 
@@ -587,9 +592,8 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
 
-extension XcodeBuildActionExtension on XcodeBuildAction {
-  String get name {
-    switch (this) {
+String xcodeBuildActionToString(XcodeBuildAction action) {
+    switch (action) {
       case XcodeBuildAction.build:
         return 'build';
       case XcodeBuildAction.archive:
@@ -597,7 +601,6 @@ extension XcodeBuildActionExtension on XcodeBuildAction {
       default:
         throw UnsupportedError('Unknown Xcode build action');
     }
-  }
 }
 
 class XcodeBuildResult {
@@ -634,7 +637,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.$kXcodeRequiredVersionPatch or greater is required to develop for iOS.';
+final String _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {
@@ -644,7 +647,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!globals.xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isRequiredVersionSatisfactory) {
     globals.printError('Found "${globals.xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

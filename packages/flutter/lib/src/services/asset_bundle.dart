@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'binary_messenger.dart';
+import 'binding.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -71,11 +71,13 @@ abstract class AssetBundle {
     // that the null-handling logic is dead code).
     if (data == null)
       throw FlutterError('Unable to load asset: $key'); // ignore: dead_code
-    if (data.lengthInBytes < 10 * 1024) {
-      // 10KB takes about 3ms to parse on a Pixel 2 XL.
-      // See: https://github.com/dart-lang/sdk/issues/31954
+    // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
+    // on a Pixel 4.
+    if (data.lengthInBytes < 50 * 1024) {
       return utf8.decode(data.buffer.asUint8List());
     }
+    // For strings larger than 50 KB, run the computation in an isolate to
+    // avoid causing main thread jank.
     return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
@@ -220,7 +222,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance!.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

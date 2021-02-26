@@ -86,7 +86,7 @@ class AnnotationResult<T> {
 /// To composite the tree, create a [SceneBuilder] object, pass it to the
 /// root [Layer] object's [addToScene] method, and then call
 /// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [Window.render].
+/// using [dart:ui.FlutterView.render].
 ///
 /// See also:
 ///
@@ -286,7 +286,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// ## About layer annotations
   ///
-  /// {@template flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  /// {@template flutter.rendering.Layer.findAnnotations.aboutAnnotations}
   /// An annotation is an optional object of any type that can be carried with a
   /// layer. An annotation can be found at a location as long as the owner layer
   /// contains the location and is walked to.
@@ -344,7 +344,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// ## About layer annotations
   ///
-  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  /// {@macro flutter.rendering.Layer.findAnnotations.aboutAnnotations}
   ///
   /// See also:
   ///
@@ -370,40 +370,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// ## About layer annotations
   ///
-  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
-  ///
-  /// See also:
-  ///
-  ///  * [find], which is similar but returns the first annotation found at the
-  ///    given position.
-  ///  * [findAllAnnotations], which is similar but returns an
-  ///    [AnnotationResult], which contains more information, such as the local
-  ///    position of the event related to each annotation, and is equally fast,
-  ///    hence is preferred over [findAll].
-  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  @Deprecated(
-    'Use findAllAnnotations(...).annotations instead. '
-    'This feature was deprecated after v1.10.14.'
-  )
-  Iterable<S> findAll<S extends Object>(Offset localPosition) {
-    final AnnotationResult<S> result = findAllAnnotations(localPosition);
-    return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
-  }
-
-  /// Search this layer and its subtree for all annotations of type `S` under
-  /// the point described by `localPosition`.
-  ///
-  /// Returns a result with empty entries if no matching annotations are found.
-  ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
-  /// false` and returns the annotations of its result. Prefer overriding
-  /// [findAnnotations] instead of this method, because during an annotation
-  /// search, only [findAnnotations] is recursively called, while custom
-  /// behavior in this method is ignored.
-  ///
-  /// ## About layer annotations
-  ///
-  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  /// {@macro flutter.rendering.Layer.findAnnotations.aboutAnnotations}
   ///
   /// See also:
   ///
@@ -592,16 +559,16 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
-  /// When true the texture that will not be updated with new frames.
+  /// When true the texture will not be updated with new frames.
   ///
-  /// This is used when resizing an embedded  Android views: When resizing there
+  /// This is used for resizing embedded Android views: when resizing there
   /// is a short period during which the framework cannot tell if the newest
   /// texture frame has the previous or new size, to workaround this the
   /// framework "freezes" the texture just before resizing the Android view and
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
-  /// {@macro FilterQuality}
+  /// {@macro flutter.widgets.Texture.filterQuality}
   final ui.FilterQuality filterQuality;
 
   @override
@@ -1179,9 +1146,9 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// The [pixelRatio] describes the scale between the logical pixels and the
   /// size of the output image. It is independent of the
-  /// [Window.devicePixelRatio] for the device, so specifying 1.0 (the default)
-  /// will give you a 1:1 mapping between logical pixels and the output pixels
-  /// in the image.
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
   ///
   /// See also:
   ///
@@ -1246,7 +1213,7 @@ class ClipRectLayer extends ContainerLayer {
     }
   }
 
-  /// {@template flutter.clipper.clipBehavior}
+  /// {@template flutter.rendering.ClipRectLayer.clipBehavior}
   /// Controls how to clip.
   ///
   /// Must not be set to null or [Clip.none].
@@ -1334,7 +1301,7 @@ class ClipRRectLayer extends ContainerLayer {
     }
   }
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
@@ -1418,7 +1385,7 @@ class ClipPathLayer extends ContainerLayer {
     }
   }
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   ///
   /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
@@ -1911,7 +1878,7 @@ class PhysicalModelLayer extends ContainerLayer {
     return clipPath!.transform(matrix.storage);
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -2074,7 +2041,7 @@ class LeaderLayer extends ContainerLayer {
   /// pipeline.
   Offset offset;
 
-  /// {@macro flutter.leaderFollower.alwaysNeedsAddToScene}
+  /// {@macro flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
   @override
   bool get alwaysNeedsAddToScene => true;
 
@@ -2361,7 +2328,7 @@ class FollowerLayer extends ContainerLayer {
     _inverseDirty = true;
   }
 
-  /// {@template flutter.leaderFollower.alwaysNeedsAddToScene}
+  /// {@template flutter.rendering.FollowerLayer.alwaysNeedsAddToScene}
   /// This disables retained rendering.
   ///
   /// A [FollowerLayer] copies changes from a [LeaderLayer] that could be anywhere
@@ -2439,7 +2406,7 @@ class FollowerLayer extends ContainerLayer {
 /// of this layer's children, respecting their opacity. Then it adds this
 /// layer's annotation if all of the following restrictions are met:
 ///
-/// {@template flutter.rendering.annotatedRegionLayer.restrictions}
+/// {@template flutter.rendering.AnnotatedRegionLayer.restrictions}
 /// * The target type must be identical to the annotated type `T`.
 /// * If [size] is provided, the target position must be contained within the
 ///   rectangle formed by [size] and [offset].
@@ -2515,7 +2482,7 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// return, this method then adds this layer's annotation if all of the
   /// following restrictions are met:
   ///
-  /// {@macro flutter.rendering.annotatedRegionLayer.restrictions}
+  /// {@macro flutter.rendering.AnnotatedRegionLayer.restrictions}
   ///
   /// This search process respects `onlyFirst`, meaning that when `onlyFirst` is
   /// true, the search will stop when it finds the first annotation from the

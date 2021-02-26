@@ -52,7 +52,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia, fake }
+enum DeviceOperatingSystem { android, androidArm, androidArm64 ,ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -63,6 +63,10 @@ abstract class DeviceDiscovery {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return AndroidDeviceDiscovery();
+      case DeviceOperatingSystem.androidArm:
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm);
+      case DeviceOperatingSystem.androidArm64:
+        return AndroidDeviceDiscovery(cpu: _AndroidCPU.arm64);
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
@@ -83,7 +87,7 @@ abstract class DeviceDiscovery {
   /// returned. For such behavior see [workingDevice].
   Future<void> chooseWorkingDevice();
 
-  /// Select the device with ID strati with deviceId, return the device.
+  /// Selects a device to work with by device ID.
   Future<void> chooseWorkingDeviceById(String deviceId);
 
   /// A device to work with.
@@ -131,6 +135,9 @@ abstract class Device {
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<void> unlock();
 
+  /// Attempt to reboot the phone, if possible.
+  Future<void> reboot();
+
   /// Emulate a tap on the touch screen.
   Future<void> tap(int x, int y);
 
@@ -152,12 +159,19 @@ abstract class Device {
   }
 }
 
+enum _AndroidCPU {
+  arm,
+  arm64,
+}
+
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery() {
-    return _instance ??= AndroidDeviceDiscovery._();
+  factory AndroidDeviceDiscovery({_AndroidCPU cpu}) {
+    return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
-  AndroidDeviceDiscovery._();
+  AndroidDeviceDiscovery._(this.cpu);
+
+  final _AndroidCPU cpu;
 
   // Parses information about a device. Example:
   //
@@ -182,6 +196,18 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return _workingDevice;
   }
 
+  Future<bool> _matchesCPURequirement(AndroidDevice device) async {
+    if (cpu == null)
+      return true;
+    switch (cpu) {
+      case _AndroidCPU.arm64:
+        return device.isArm64();
+      case _AndroidCPU.arm:
+        return device.isArm();
+    }
+    return true;
+  }
+
   /// Picks a random Android device out of connected devices and sets it as
   /// [workingDevice].
   @override
@@ -193,8 +219,22 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     if (allDevices.isEmpty)
       throw const DeviceException('No Android devices detected');
 
-    // TODO(yjbanov): filter out and warn about those with low battery level
-    _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    if (cpu != null) {
+      for (final AndroidDevice device in allDevices) {
+        if (await _matchesCPURequirement(device)) {
+          _workingDevice = device;
+          break;
+        }
+      }
+
+    } else {
+      // TODO(yjbanov): filter out and warn about those with low battery level
+      _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
+    }
+
+    if (_workingDevice == null)
+      throw const DeviceException('Cannot find a suitable Android device');
+
     print('Device chosen: $_workingDevice');
   }
 
@@ -203,6 +243,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final String matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = AndroidDevice(deviceId: matchedId);
+      if (cpu != null) {
+        if (!await _matchesCPURequirement(_workingDevice)) {
+          throw DeviceException('The selected device $matchedId does not match the cpu requirement');
+        }
+      }
       print('Choose device by ID: $matchedId');
       return;
     }
@@ -441,6 +486,16 @@ class AndroidDevice extends Device {
     return wakefulness;
   }
 
+  Future<bool> isArm64() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('arm64');
+  }
+
+  Future<bool> isArm() async {
+    final String cpuInfo = await shellEval('getprop', const <String>['ro.product.cpu.abi']);
+    return cpuInfo.contains('armeabi');
+  }
+
   Future<void> _updateDeviceInfo() async {
     String info;
     try {
@@ -526,7 +581,9 @@ class AndroidDevice extends Device {
           .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat: $line');
-            stream.sink.add(line);
+            if (!stream.isClosed) {
+              stream.sink.add(line);
+            }
           }, onDone: () { stdoutDone.complete(); });
         process.stderr
           .transform<String>(utf8.decoder)
@@ -574,6 +631,11 @@ class AndroidDevice extends Device {
   @override
   String toString() {
     return '$deviceId $deviceInfo';
+  }
+
+  @override
+  Future<void> reboot() {
+    return adb(<String>['reboot']);
   }
 }
 
@@ -636,7 +698,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<List<String>> discoverDevices() async {
     final List<dynamic> results = json.decode(await eval(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '10'],
+      <String>['devices', '--machine', '--suppress-analytics', '--device-timeout', '5'],
     )) as List<dynamic>;
 
     // [
@@ -740,6 +802,11 @@ class IosDevice extends Device {
 
   @override
   Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> reboot() {
+    return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
+  }
 }
 
 /// Fuchsia device.
@@ -782,6 +849,11 @@ class FuchsiaDevice extends Device {
   @override
   Stream<String> get logcat {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> reboot() async {
+    // Unsupported.
   }
 }
 
@@ -846,6 +918,11 @@ class FakeDevice extends Device {
 
   @override
   Future<void> stop(String packageName) async {}
+
+  @override
+  Future<void> reboot() async {
+    // Unsupported.
+  }
 }
 
 class FakeDeviceDiscovery implements DeviceDiscovery {

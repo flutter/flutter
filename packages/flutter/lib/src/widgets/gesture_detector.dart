@@ -48,10 +48,10 @@ export 'package:flutter/gestures.dart' show
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
-// bool _lights;
+// late bool _lights;
 // void setState(VoidCallback fn) { }
-// String _last;
-// Color _color;
+// late String _last;
+// late Color _color;
 
 /// Factory for creating gesture recognizers.
 ///
@@ -297,7 +297,7 @@ class GestureDetector extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// A pointer that might cause a tap with a primary button has contacted the
@@ -896,7 +896,8 @@ class GestureDetector extends StatelessWidget {
           instance
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
-            ..onEnd = onScaleEnd;
+            ..onEnd = onScaleEnd
+            ..dragStartBehavior = dragStartBehavior;
         },
       );
     }
@@ -991,7 +992,7 @@ class RawGestureDetector extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
   /// The gestures that this widget will attempt to recognize.
@@ -1043,8 +1044,8 @@ class RawGestureDetector extends StatefulWidget {
   /// ```dart
   /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
   ///   const ForcePressGestureDetectorWithSemantics({
-  ///     this.child,
-  ///     this.onForcePress,
+  ///     required this.child,
+  ///     required this.onForcePress,
   ///   });
   ///
   ///   final Widget child;
@@ -1220,11 +1221,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
-    if (!widget.excludeFromSemantics)
+    if (!widget.excludeFromSemantics) {
       result = _GestureSemantics(
-        child: result,
+        behavior: widget.behavior ?? _defaultBehavior,
         assignSemantics: _updateSemanticsForRenderObject,
+        child: result,
       );
+    }
     return result;
   }
 
@@ -1252,21 +1255,25 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key? key,
     Widget? child,
+    required this.behavior,
     required this.assignSemantics,
   }) : assert(assignSemantics != null),
        super(key: key, child: child);
 
+  final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler();
+    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler()
+      ..behavior = behavior;
     assignSemantics(renderObject);
     return renderObject;
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
+    renderObject.behavior = behavior;
     assignSemantics(renderObject);
   }
 }

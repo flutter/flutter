@@ -2,18 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
+import '../../base/project_migrator.dart';
+import '../../base/version.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
-import 'ios_migrator.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
 // This caused issues switching between a real device and simulator due to architecture mismatch.
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
-class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
+class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
     Logger logger,
@@ -91,15 +94,15 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
     }
 
     // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
-    const String thinBinaryScript = 'xcode_backend.sh\\" thin';
+    const String thinBinaryScript = r'xcode_backend.sh\" thin';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
-      return line.replaceFirst(thinBinaryScript, 'xcode_backend.sh\\" embed_and_thin');
+      return line.replaceFirst(thinBinaryScript, r'xcode_backend.sh\" embed_and_thin');
     }
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
       // Print scary message if the user is on Xcode 11.4 or greater, or if Xcode isn't installed.
       final bool xcodeIsInstalled = _xcode.isInstalled;
-      if(!xcodeIsInstalled || (_xcode.majorVersion > 11 || (_xcode.majorVersion == 11 && _xcode.minorVersion >= 4))) {
+      if(!xcodeIsInstalled || _xcode.currentVersion >= Version(11, 4, 0)) {
         UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
         throwToolExit('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
       }

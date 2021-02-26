@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Whether the tool started from the daemon, as opposed to the command line.
-// TODO(jonahwilliams): remove once IDE updates have rolled.
-bool isRunningFromDaemon = false;
+// @dart = 2.8
 
 /// Throw a specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
@@ -28,7 +26,7 @@ class ToolExit implements Exception {
   String toString() => 'Exception: $message';
 }
 
-/// Indicates to the linter that the given future is intentionally not `await`-ed.
+/// Indicates to the linter that the given future is intentionally not awaited.
 ///
 /// Has the same functionality as `unawaited` from `package:pedantic`.
 ///

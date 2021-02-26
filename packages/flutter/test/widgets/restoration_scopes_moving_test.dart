@@ -209,7 +209,7 @@ class TestWidget extends StatefulWidget {
 }
 
 class TestWidgetState extends State<TestWidget> with RestorationMixin {
-  List<RestorationBucket?> buckets = <RestorationBucket>[];
+  List<RestorationBucket?> buckets = <RestorationBucket?>[];
   List<bool> flags = <bool>[];
 
   @override

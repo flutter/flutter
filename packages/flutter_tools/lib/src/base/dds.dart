@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
@@ -11,6 +13,14 @@ import 'common.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
+@visibleForTesting
+Future<dds.DartDevelopmentService> Function(
+  Uri,
+  {bool enableAuthCodes,
+  bool ipv6,
+  Uri serviceUri,
+}) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
+
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService {
@@ -19,7 +29,8 @@ class DartDevelopmentService {
   final Logger logger;
   dds.DartDevelopmentService _ddsInstance;
 
-  Uri get uri => _ddsInstance.uri;
+  Uri get uri => _ddsInstance?.uri ?? _existingDdsUri;
+  Uri _existingDdsUri;
 
   Future<void> get done => _completer.future;
   final Completer<void> _completer = Completer<void>();
@@ -43,17 +54,43 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.',
     );
     try {
-      _ddsInstance = await dds.DartDevelopmentService.startDartDevelopmentService(
+      _ddsInstance = await ddsLauncherCallback(
           observatoryUri,
           serviceUri: ddsUri,
           enableAuthCodes: !disableServiceAuthCodes,
           ipv6: ipv6,
         );
-      unawaited(_ddsInstance.done.whenComplete(_completer.complete));
+      unawaited(_ddsInstance.done.whenComplete(() {
+        if (!_completer.isCompleted) {
+          _completer.complete();
+        }
+      }));
       logger.printTrace('DDS is listening at ${_ddsInstance.uri}.');
     } on dds.DartDevelopmentServiceException catch (e) {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
-      _completer.complete();
+      if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
+        try {
+          _existingDdsUri = Uri.parse(
+            e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
+          );
+        } on StateError {
+          if (e.message.contains('Existing VM service clients prevent DDS from taking control.')) {
+            throwToolExit('${e.message}. Please rebuild your application with a newer version of Flutter.');
+            return;
+          }
+          logger.printError(
+            'DDS has failed to start and there is not an existing DDS instance '
+            'available to connect to. Please file an issue at https://github.com/flutter/flutter/issues '
+            'with the following error message:\n\n ${e.message}.'
+          );
+          // DDS was unable to start for an unknown reason. Raise a StateError
+          // so it can be reported by the crash reporter.
+          throw StateError(e.message);
+        }
+      }
+      if (!_completer.isCompleted) {
+        _completer.complete();
+      }
       rethrow;
     }
   }

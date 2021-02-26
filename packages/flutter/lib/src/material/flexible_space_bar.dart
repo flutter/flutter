@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -38,6 +37,8 @@ enum StretchMode {
 
 /// The part of a material design [AppBar] that expands, collapses, and
 /// stretches.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=mSc7qFzxHDw}
 ///
 /// Most commonly used in the [SliverAppBar.flexibleSpace] field, a flexible
 /// space bar expands and contracts as the app scrolls so that the [AppBar]
@@ -72,13 +73,13 @@ enum StretchMode {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       body: CustomScrollView(
-///         physics: const BouncingScrollPhysics(),
+///         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
 ///         slivers: <Widget>[
 ///           SliverAppBar(
 ///             stretch: true,
 ///             onStretchTrigger: () {
 ///               // Function callback for stretch
-///               return;
+///               return Future.value();
 ///             },
 ///             expandedHeight: 300.0,
 ///             flexibleSpace: FlexibleSpaceBar(
@@ -252,7 +253,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
     if (effectiveCenterTitle)
       return Alignment.bottomCenter;
-    final TextDirection textDirection = Directionality.of(context)!;
+    final TextDirection textDirection = Directionality.of(context);
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
@@ -339,7 +340,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // title
         if (widget.title != null) {
-          final ThemeData theme = Theme.of(context)!;
+          final ThemeData theme = Theme.of(context);
 
           Widget? title;
           switch (theme.platform) {

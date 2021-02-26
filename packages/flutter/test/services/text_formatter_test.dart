@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,8 +11,8 @@ void main() {
   TextEditingValue testNewValue = TextEditingValue.empty;
 
   test('withFunction wraps formatting function', () {
-    testOldValue = const TextEditingValue();
-    testNewValue = const TextEditingValue();
+    testOldValue = TextEditingValue.empty;
+    testNewValue = TextEditingValue.empty;
 
     late TextEditingValue calledOldValue;
     late TextEditingValue calledNewValue;
@@ -458,6 +459,28 @@ void main() {
           newValue
         );
         expect(formatted.text, 'bbbbbbbbbb');
+      });
+    });
+
+    group('get enforcement from target platform', () {
+      // The enforcement on Web will be always `MaxLengthEnforcement.truncateAfterCompositionEnds`
+
+      test('with TargetPlatform.windows', () async {
+        final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
+          TargetPlatform.windows,
+        );
+        if (kIsWeb) {
+          expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
+        } else {
+          expect(enforcement, MaxLengthEnforcement.enforced);
+        }
+      });
+
+      test('with TargetPlatform.macOS', () async {
+        final MaxLengthEnforcement enforcement = LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
+          TargetPlatform.macOS,
+        );
+        expect(enforcement, MaxLengthEnforcement.truncateAfterCompositionEnds);
       });
     });
   });

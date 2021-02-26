@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -19,7 +21,6 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.throttleDuration,
-    this.throttleTimeout,
     this.hostPort,
     this.devicePort,
     this.ipv6,
@@ -37,7 +38,6 @@ class ProtocolDiscovery {
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
     Duration throttleDuration,
-    Duration throttleTimeout,
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
@@ -49,7 +49,6 @@ class ProtocolDiscovery {
       kObservatoryService,
       portForwarder: portForwarder,
       throttleDuration: throttleDuration ?? const Duration(milliseconds: 200),
-      throttleTimeout: throttleTimeout,
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
@@ -67,11 +66,6 @@ class ProtocolDiscovery {
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
-
-  /// The time between URIs are discovered before timing out when scraping the [logReader].
-  ///
-  /// If null, log scanning will continue indefinitely.
-  final Duration throttleTimeout;
 
   StreamSubscription<String> _deviceLogSubscription;
   _BufferedStreamController<Uri> _uriStreamController;
@@ -99,15 +93,10 @@ class ProtocolDiscovery {
   /// Port forwarding is only attempted when this is invoked,
   /// for each observatory URL in the stream.
   Stream<Uri> get uris {
-    Stream<Uri> uriStream = _uriStreamController.stream
+    final Stream<Uri> uriStream = _uriStreamController.stream
       .transform(_throttle<Uri>(
         waitDuration: throttleDuration,
       ));
-    if (throttleTimeout != null) {
-      // Don't throw a TimeoutException. The URL wasn't found in time, just close the stream.
-      uriStream = uriStream.timeout(throttleTimeout,
-          onTimeout: (EventSink<Uri> sink) => sink.close());
-    }
     return uriStream.asyncMap<Uri>(_forwardPort);
   }
 

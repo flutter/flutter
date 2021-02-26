@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'tabs.dart';
@@ -81,7 +80,7 @@ class TabBarTheme with Diagnosticable {
 
   /// The data from the closest [TabBarTheme] instance given the build context.
   static TabBarTheme of(BuildContext context) {
-    return Theme.of(context)!.tabBarTheme;
+    return Theme.of(context).tabBarTheme;
   }
 
   /// Linearly interpolate between two tab bar themes.

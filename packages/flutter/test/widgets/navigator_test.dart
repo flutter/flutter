@@ -86,7 +86,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context)!.textTheme.headline3),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),
@@ -204,13 +204,13 @@ void main() {
                         return ElevatedButton(
                           child: const Text('Next'),
                           onPressed: () {
-                            Navigator.of(context)!.push(
+                            Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
                                   return ElevatedButton(
                                     child: const Text('Inner page'),
                                     onPressed: () {
-                                      Navigator.of(context, rootNavigator: true)!.push(
+                                      Navigator.of(context, rootNavigator: true).push(
                                         MaterialPageRoute<void>(
                                           builder: (BuildContext context) {
                                             return const Text('Dialog');
@@ -279,7 +279,7 @@ void main() {
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
-    await tester.tap(find.text('right'));
+    await tester.tap(find.text('right'), warnIfMissed: false);
     expect(log, equals(<String>['left']));
   });
 
@@ -783,8 +783,8 @@ void main() {
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: (){
-          Navigator.of(context)!.popUntil((Route<dynamic> route) => route.isFirst);
-          Navigator.of(context)!.pushReplacementNamed('/C');
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
         },
       ),
       '/C': (BuildContext context) => const OnTapPage(id: 'C',
@@ -851,7 +851,7 @@ void main() {
         id: 'B',
         onTap: (){
           // Pops all routes with bad predicate.
-          Navigator.of(context)!.popUntil((Route<dynamic> route) => false);
+          Navigator.of(context).popUntil((Route<dynamic> route) => false);
         },
       ),
     };
@@ -929,7 +929,7 @@ void main() {
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: () {
-          Navigator.of(context)!.pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
+          Navigator.of(context).pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
         },
       ),
       '/D': (BuildContext context) => const Text('page D'),
@@ -957,7 +957,7 @@ void main() {
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
-    late Future<String> value;
+    late Future<String?> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
@@ -1001,7 +1001,7 @@ void main() {
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
-    final String replaceNamedValue = await value; // replaceNamed result was 'B'
+    final String? replaceNamedValue = await value; // replaceNamed result was 'B'
     expect(replaceNamedValue, 'B');
   });
 
@@ -1092,7 +1092,7 @@ void main() {
   });
 
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
-    late Future<String> pageValue;
+    late Future<String?> pageValue;
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
       '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context, 'A'); }),
@@ -1113,7 +1113,7 @@ void main() {
 
     await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
     await tester.pumpAndSettle();
-    pageValue.then((String value) { assert(false); });
+    pageValue.then((String? value) { assert(false); });
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.removeRoute(routes['/A']!); // stack becomes /, pageValue will not complete
@@ -1597,7 +1597,7 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
         Navigator.pushNamed(context, '/A');
-        Navigator.of(context)!.pop();
+        Navigator.of(context).pop();
       }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
@@ -1825,12 +1825,12 @@ void main() {
   });
 
   testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: '/a/b',
           onGenerateRoute: (RouteSettings s) {
             return MaterialPageRoute<void>(
@@ -1850,7 +1850,7 @@ void main() {
     expect(find.text('+/a+', skipOffstage: false), findsOneWidget);
     expect(find.text('+/a/b+'), findsOneWidget);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsNothing);
@@ -1858,7 +1858,7 @@ void main() {
     expect(find.text('+/a+'), findsOneWidget);
     expect(find.text('+/a/b+'), findsNothing);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('+/+'), findsOneWidget);
@@ -1868,12 +1868,12 @@ void main() {
 
   testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
     bool onGenerateInitialRoutesCalled = false;
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          key: g,
+          key: testKey,
           initialRoute: 'Hello World',
           onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
             onGenerateInitialRoutesCalled = true;
@@ -1893,7 +1893,7 @@ void main() {
     expect(find.text('Hello'), findsNothing);
     expect(find.text('World'), findsOneWidget);
 
-    g.currentState!.pop();
+    testKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     expect(find.text('Hello'), findsOneWidget);
@@ -1901,16 +1901,16 @@ void main() {
   });
 
   testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
-        navigatorKey: g,
+        navigatorKey: testKey,
         home: const Text('home'),
       )
     );
 
-    final NavigatorState state = Navigator.of(g.currentContext!)!;
-    expect(state, g.currentState);
+    final NavigatorState state = Navigator.of(testKey.currentContext!);
+    expect(state, testKey.currentState);
   });
 
   testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
@@ -1931,7 +1931,61 @@ void main() {
       )
     );
 
-    final NavigatorState state = Navigator.of(sub.currentContext!, rootNavigator: true)!;
+    final NavigatorState state = Navigator.of(sub.currentContext!, rootNavigator: true);
+    expect(state, root.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf throws when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    expect(() async {
+      Navigator.of(testKey.currentContext!);
+    }, throwsFlutterError);
+  });
+
+  testWidgets('Navigator.maybeOf works when there is no navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(SizedBox(key: testKey));
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNull);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> testKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: testKey,
+          home: const Text('home'),
+        )
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(testKey.currentContext!);
+    expect(state, isNotNull);
+    expect(state, testKey.currentState);
+  });
+
+  testWidgets('Navigator.maybeOf able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: root,
+          home: Navigator(
+            key: sub,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => const Text('dummy'),
+              );
+            },
+          ),
+        )
+    );
+
+    final NavigatorState? state = Navigator.maybeOf(sub.currentContext!, rootNavigator: true);
+    expect(state, isNotNull);
     expect(state, root.currentState);
   });
 
@@ -2435,6 +2489,62 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('hero controller throws has correct error message', (WidgetTester tester) async {
+    final HeroControllerSpy spy = HeroControllerSpy();
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Navigator(
+                initialRoute: 'navigator1',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+              Navigator(
+                initialRoute: 'navigator2',
+                onGenerateRoute: (RouteSettings s) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext c) {
+                      return const Placeholder();
+                    },
+                    settings: s,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A HeroController can not be shared by multiple Navigators. The\n'
+        '   Navigators that share the same HeroController are:\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   - NavigatorState#00000(tickers: tracking 1 ticker)\n'
+        '   Please create a HeroControllerScope for each Navigator or use a\n'
+        '   HeroControllerScope.none to prevent subtree from receiving a\n'
+        '   HeroController.\n'
+        ''
+      ),
+    );
+  });
+
   group('Page api', (){
     Widget buildNavigator({
       required List<Page<dynamic>> pages,
@@ -2496,6 +2606,136 @@ void main() {
       expect(find.text('third'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+        const TestPage(key: ValueKey<String>('3'), name:'third'),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate
+            ],
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Navigator(
+                pages: myPages,
+              ),
+            ),
+          ),
+        )
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The Navigator.onPopPage must be provided to use the\n'
+          '   Navigator.pages API\n'
+          ''
+        ),
+      );
+    });
+
+    Widget _buildFrame(String action) {
+      const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/' : (BuildContext context) => OnTapPage(
+          id: action,
+          onTap: (){
+            if (action == 'push') {
+              Navigator.of(context).push(myPage.createRoute(context));
+            } else if (action == 'pushReplacement') {
+              Navigator.of(context).pushReplacement(myPage.createRoute(context));
+            } else if (action == 'pushAndRemoveUntil') {
+              Navigator.of(context).pushAndRemoveUntil(myPage.createRoute(context), (_) => true);
+            }
+          },
+        ),
+      };
+
+      return MaterialApp(routes: routes);
+    }
+
+    void _checkException(WidgetTester tester) {
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A page-based route should not be added using the imperative api.\n'
+          '   Provide a new list with the corresponding Page to Navigator.pages\n'
+          '   instead.\n'
+          ''
+        ),
+      );
+    }
+
+    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('push'));
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushReplacement'));
+      await tester.tap(find.text('pushReplacement'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildFrame('pushAndRemoveUntil'));
+      await tester.tap(find.text('pushAndRemoveUntil'));
+      await tester.pumpAndSettle();
+      _checkException(tester);
+    });
+
+    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+      final List<TestPage> myPages = <TestPage>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterErrorDetails? firstError;
+      FlutterError.onError = (FlutterErrorDetails? detail) {
+        // We only care about the first error;
+        firstError ??= detail;
+      };
+      await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance!.window),
+            child: Localizations(
+              locale: const Locale('en', 'US'),
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate
+              ],
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Navigator(
+                  pages: myPages,
+                ),
+              ),
+            ),
+          )
+      );
+      FlutterError.onError = originalOnError;
+      expect(
+        firstError!.exception.toString(),
+        'The Navigator.pages must not be empty to use the Navigator.pages API',
+      );
     });
 
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {
@@ -3189,6 +3429,43 @@ void main() {
         buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
       );
 
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
+
+    testWidgets('can update pages before a pageless route has finished popping', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/68162.
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
+      // Pushes a pageless route.
+      showDialog<void>(
+        useRootNavigator: false,
+        context: navigator.currentContext!,
+        builder: (BuildContext context) => const Text('dialog')
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('dialog'), findsOneWidget);
+      // Pops the pageless route.
+      navigator.currentState!.pop();
+      // Before the pop finishes, updates the page list.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator)
+      );
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();

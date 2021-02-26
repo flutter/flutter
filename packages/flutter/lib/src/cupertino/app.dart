@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -38,6 +37,11 @@ import 'theme.dart';
 /// This widget also configures the observer of the top-level [Navigator] (if
 /// any) to perform [Hero] animations.
 ///
+/// The [CupertinoApp] widget isn't a required ancestor for other Cupertino
+/// widgets, but many Cupertino widgets could depend on the [CupertinoTheme]
+/// widget, which the [CupertinoApp] composes. If you use Material widgets, a
+/// [MaterialApp] also creates the needed dependencies for Cupertino widgets.
+///
 /// Use this widget with caution on Android since it may produce behaviors
 /// Android users are not expecting such as:
 ///
@@ -45,6 +49,75 @@ import 'theme.dart';
 ///  * Scrolling past extremities will trigger iOS-style spring overscrolls.
 ///  * The San Francisco font family is unavailable on Android and can result
 ///    in undefined font behavior.
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that disables the "debug"
+/// banner with a [home] route that will be displayed when the app is launched.
+///
+/// ![The CupertinoApp displays a CupertinoPageScaffold](https://flutter.github.io/assets-for-api-docs/assets/cupertino/basic_cupertino_app.png)
+///
+/// ```dart
+/// CupertinoApp(
+///   home: CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('Home'),
+///     ),
+///     child: Center(child: Icon(CupertinoIcons.share)),
+///   ),
+///   debugShowCheckedModeBanner: false,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that uses the [routes]
+/// `Map` to define the "home" route and an "about" route.
+///
+/// ```dart
+/// CupertinoApp(
+///   routes: <String, WidgetBuilder>{
+///     '/': (BuildContext context) {
+///       return CupertinoPageScaffold(
+///         navigationBar: CupertinoNavigationBar(
+///           middle: const Text('Home Route'),
+///         ),
+///         child: Center(child: Icon(CupertinoIcons.share)),
+///       );
+///     },
+///     '/about': (BuildContext context) {
+///       return CupertinoPageScaffold(
+///         navigationBar: CupertinoNavigationBar(
+///           middle: const Text('About Route'),
+///         ),
+///         child: Center(child: Icon(CupertinoIcons.share)),
+///       );
+///     }
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to create a [CupertinoApp] that defines a [theme] that
+/// will be used for Cupertino widgets in the app.
+///
+/// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
+///
+/// ```dart
+/// CupertinoApp(
+///   theme: CupertinoThemeData(
+///     brightness: Brightness.dark,
+///     primaryColor: CupertinoColors.systemOrange,
+///   ),
+///   home: CupertinoPageScaffold(
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('CupertinoApp Theme'),
+///     ),
+///     child: Center(child: Icon(CupertinoIcons.share)),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -226,7 +299,7 @@ class CupertinoApp extends StatefulWidget {
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleListResolutionCallback? localeListResolutionCallback;
 
-  /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
   final LocaleResolutionCallback? localeResolutionCallback;
@@ -274,7 +347,7 @@ class CupertinoApp extends StatefulWidget {
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -307,7 +380,7 @@ class CupertinoApp extends StatefulWidget {
   ///       ),
   ///     },
   ///     color: const Color(0xFFFF0000),
-  ///     builder: (BuildContext context, Widget child) {
+  ///     builder: (BuildContext context, Widget? child) {
   ///       return const Placeholder();
   ///     },
   ///   );
@@ -378,7 +451,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context)!;
+    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
     if (_usesRouter) {
       return WidgetsApp.router(
