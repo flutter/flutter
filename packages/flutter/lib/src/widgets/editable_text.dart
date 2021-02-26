@@ -29,6 +29,7 @@ import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'text.dart';
+import 'text_editing_action.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
@@ -1480,7 +1481,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient, TextEditingActionTarget {
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -2461,6 +2462,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
+  @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override

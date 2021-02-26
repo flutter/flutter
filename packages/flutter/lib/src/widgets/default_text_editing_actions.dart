@@ -33,134 +33,134 @@ class DefaultTextEditingActions extends StatelessWidget {
   final Widget child;
 
   static final TextEditingAction<ExpandSelectionLeftByLineTextIntent> _expandSelectionLeftByLineAction = TextEditingAction<ExpandSelectionLeftByLineTextIntent>(
-    onInvoke: (ExpandSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+    onInvoke: (ExpandSelectionLeftByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExpandSelectionRightByLineTextIntent> _expandSelectionRightByLineAction = TextEditingAction<ExpandSelectionRightByLineTextIntent>(
-    onInvoke: (ExpandSelectionRightByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+    onInvoke: (ExpandSelectionRightByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExpandSelectionToEndTextIntent> _expandSelectionToEndAction = TextEditingAction<ExpandSelectionToEndTextIntent>(
-    onInvoke: (ExpandSelectionToEndTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+    onInvoke: (ExpandSelectionToEndTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExpandSelectionToStartTextIntent> _expandSelectionToStartAction = TextEditingAction<ExpandSelectionToStartTextIntent>(
-    onInvoke: (ExpandSelectionToStartTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+    onInvoke: (ExpandSelectionToStartTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionDownTextIntent> _extendSelectionDownAction = TextEditingAction<ExtendSelectionDownTextIntent>(
-    onInvoke: (ExtendSelectionDownTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionDownTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionLeftByLineTextIntent> _extendSelectionLeftByLineAction = TextEditingAction<ExtendSelectionLeftByLineTextIntent>(
-    onInvoke: (ExtendSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionLeftByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionLeftByWordTextIntent> _extendSelectionLeftByWordAction = TextEditingAction<ExtendSelectionLeftByWordTextIntent>(
-    onInvoke: (ExtendSelectionLeftByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+    onInvoke: (ExtendSelectionLeftByWordTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
   static final TextEditingAction<ExtendSelectionLeftTextIntent> _extendSelectionLeftAction = TextEditingAction<ExtendSelectionLeftTextIntent>(
-    onInvoke: (ExtendSelectionLeftTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionLeftTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionRightByLineTextIntent> _extendSelectionRightByLineAction = TextEditingAction<ExtendSelectionRightByLineTextIntent>(
-    onInvoke: (ExtendSelectionRightByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionRightByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionRightByWordTextIntent> _extendSelectionRightByWordAction = TextEditingAction<ExtendSelectionRightByWordTextIntent>(
-    onInvoke: (ExtendSelectionRightByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
+    onInvoke: (ExtendSelectionRightByWordTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
   static final TextEditingAction<ExtendSelectionRightTextIntent> _extendSelectionRightAction = TextEditingAction<ExtendSelectionRightTextIntent>(
-    onInvoke: (ExtendSelectionRightTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionRightTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<ExtendSelectionUpTextIntent> _extendSelectionUpAction = TextEditingAction<ExtendSelectionUpTextIntent>(
-    onInvoke: (ExtendSelectionUpTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
+    onInvoke: (ExtendSelectionUpTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionDownTextIntent> _moveSelectionDown = TextEditingAction<MoveSelectionDownTextIntent>(
-    onInvoke: (MoveSelectionDownTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionDownTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionLeftTextIntent> _moveSelectionLeft = TextEditingAction<MoveSelectionLeftTextIntent>(
-    onInvoke: (MoveSelectionLeftTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionLeftTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionRightTextIntent> _moveSelectionRight = TextEditingAction<MoveSelectionRightTextIntent>(
-    onInvoke: (MoveSelectionRightTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionRightTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionUpTextIntent> _moveSelectionUp = TextEditingAction<MoveSelectionUpTextIntent>(
-    onInvoke: (MoveSelectionUpTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionUpTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionLeftByLineTextIntent> _moveSelectionLeftByLineAction = TextEditingAction<MoveSelectionLeftByLineTextIntent>(
-    onInvoke: (MoveSelectionLeftByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionLeftByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionLeftByWordTextIntent> _moveSelectionLeftByWordAction = TextEditingAction<MoveSelectionLeftByWordTextIntent>(
-    onInvoke: (MoveSelectionLeftByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard, false);
+    onInvoke: (MoveSelectionLeftByWordTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
   static final TextEditingAction<MoveSelectionRightByLineTextIntent> _moveSelectionRightByLineAction = TextEditingAction<MoveSelectionRightByLineTextIntent>(
-    onInvoke: (MoveSelectionRightByLineTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionRightByLineTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionRightByWordTextIntent> _moveSelectionRightByWordAction = TextEditingAction<MoveSelectionRightByWordTextIntent>(
-    onInvoke: (MoveSelectionRightByWordTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard, false);
+    onInvoke: (MoveSelectionRightByWordTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard, false);
     }
   );
 
   static final TextEditingAction<MoveSelectionToEndTextIntent> _moveSelectionToEndAction = TextEditingAction<MoveSelectionToEndTextIntent>(
-    onInvoke: (MoveSelectionToEndTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionToEndTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
     }
   );
 
   static final TextEditingAction<MoveSelectionToStartTextIntent> _moveSelectionToStartAction = TextEditingAction<MoveSelectionToStartTextIntent>(
-    onInvoke: (MoveSelectionToStartTextIntent intent, EditableTextState editableTextState) {
-      editableTextState.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+    onInvoke: (MoveSelectionToStartTextIntent intent, TextEditingActionTarget textEditingActionTarget) {
+      textEditingActionTarget.renderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
     }
   );
 
