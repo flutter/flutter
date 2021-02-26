@@ -161,7 +161,6 @@ Future<void> _runABTest() async {
       silent: silent,
       localEngine: localEngine,
       localEngineSrcPath: localEngineSrcPath,
-      luciBuilder: luciBuilder,
       deviceId: deviceId,
     );
 
