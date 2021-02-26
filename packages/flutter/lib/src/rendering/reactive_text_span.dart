@@ -14,6 +14,66 @@ import 'mouse_tracking.dart';
 /// Aside from what [TextSpan] provides, [ReactiveTextSpan] also accepts a
 /// [recognizer] that recognizes gestures starting on this text span, as well as
 /// allowing customizing the [mouseCursor] when a mouse hovers over it.
+///
+/// {@tool snippet}
+/// This example shows how to use [ReactiveTextSpan] with a gesture recognizer.
+/// It defines a `BuzzingText` widget which uses the [HapticFeedback]
+/// class to vibrate the device when the user long-presses the "find the" span,
+/// which is underlined in wavy green. The hit-testing is handled by the
+/// [RichText] widget.
+///
+/// ```dart
+/// class BuzzingText extends StatefulWidget {
+///   @override
+///   _BuzzingTextState createState() => _BuzzingTextState();
+/// }
+///
+/// class _BuzzingTextState extends State<BuzzingText> {
+///   LongPressGestureRecognizer _longPressRecognizer;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _longPressRecognizer = LongPressGestureRecognizer()
+///       ..onLongPress = _handlePress;
+///   }
+///
+///   @override
+///   void dispose() {
+///     _longPressRecognizer.dispose();
+///     super.dispose();
+///   }
+///
+///   void _handlePress() {
+///     HapticFeedback.vibrate();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Text.rich(
+///       TextSpan(
+///         text: 'Can you ',
+///         style: TextStyle(color: Colors.black),
+///         children: <InlineSpan>[
+///           ReactiveTextSpan(
+///             text: 'find the',
+///             style: TextStyle(
+///               color: Colors.green,
+///               decoration: TextDecoration.underline,
+///               decorationStyle: TextDecorationStyle.wavy,
+///             ),
+///             recognizer: _longPressRecognizer,
+///           ),
+///           TextSpan(
+///             text: ' secret?',
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   /// Creates a [ReactiveTextSpan] with the given values.
   ///
@@ -51,68 +111,7 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   /// [ReactiveTextSpan] also does not manage the lifetime of the gesture
   /// recognizer. The code that owns the [GestureRecognizer] object must call
   /// [GestureRecognizer.dispose] when the [ReactiveTextSpan] object is no longer
-  /// used.
-  ///
-  /// {@tool snippet}
-  ///
-  /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [ReactiveTextSpan] object. It defines a `BuzzingText` widget
-  /// which uses the [HapticFeedback] class to vibrate the device when the user
-  /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
-  ///
-  /// ```dart
-  /// class BuzzingText extends StatefulWidget {
-  ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
-  /// }
-  ///
-  /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _longPressRecognizer = LongPressGestureRecognizer()
-  ///       ..onLongPress = _handlePress;
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _longPressRecognizer.dispose();
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   void _handlePress() {
-  ///     HapticFeedback.vibrate();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return Text.rich(
-  ///       TextSpan(
-  ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
-  ///         children: <InlineSpan>[
-  ///           ReactiveTextSpan(
-  ///             text: 'find the',
-  ///             style: TextStyle(
-  ///               color: Colors.green,
-  ///               decoration: TextDecoration.underline,
-  ///               decorationStyle: TextDecorationStyle.wavy,
-  ///             ),
-  ///             recognizer: _longPressRecognizer,
-  ///           ),
-  ///           TextSpan(
-  ///             text: ' secret?',
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// used. See the sample code in the [ReactiveTextSpan] class for reference.
   @override
   // This field is overridden only to override the documentation.
   GestureRecognizer? get recognizer => super.recognizer;
@@ -142,4 +141,7 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
   @protected
   @override
   MouseCursor get cursor => mouseCursor;
+
+  @override
+  bool get validForMouseTracker => true;
 }

@@ -42,9 +42,6 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// _There is some more detailed sample code in the documentation for the
-/// [recognizer] property._
-///
 /// The [TextSpan.text] will be used as the semantics label unless overridden
 /// by the [TextSpan.semanticsLabel] property. Any [PlaceholderSpan]s in the
 /// [TextSpan.children] list will separate the text before and after it into two
@@ -56,6 +53,8 @@ import 'text_style.dart';
 ///    [InlineSpan] tree. Specify a widget within the [children] list by
 ///    wrapping the widget with a [WidgetSpan]. The widget will be laid out
 ///    inline within the paragraph.
+///  * [ReactiveTextSpan], a text span that react to gestures and mouse movements,
+///    including support for gestures and mouse cursors.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
@@ -170,8 +169,9 @@ class TextSpan extends InlineSpan implements HitTestTarget {
   /// ```
   /// {@end-tool}
   @Deprecated(
-    "TextSpan's support for recognizers will be moved to ReactiveTextSpan. Use ReactiveTextSpan instead. "
-    'This feature was deprecated after v1.24.' // TODO: Finalize version
+    "TextSpan's support for recognizers has been moved to ReactiveTextSpan. "
+    'Use ReactiveTextSpan instead. '
+    'This feature was deprecated after v1.24.'
   )
   @override
   final GestureRecognizer? recognizer;

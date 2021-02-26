@@ -1897,14 +1897,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
       assert(!debugNeedsLayout);
-      // // Checks if there is any gesture recognizer in the text span.
-      // final Offset offset = entry.localPosition;
-      // final TextPosition position = _textPainter.getPositionForOffset(offset);
-      // final InlineSpan? span = _textPainter.text!.getSpanForPosition(position);
-      // if (span != null && span is TextSpan) {
-      //   final TextSpan textSpan = span;
-      //   textSpan.recognizer?.addPointer(event);
-      // }
 
       if (!ignorePointer && onSelectionChanged != null) {
         // Propagates the pointer event to selection handlers.
