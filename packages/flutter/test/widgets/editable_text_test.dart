@@ -1526,16 +1526,16 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(EditableText));
-    
+
     // A normal selection update from the framework has 'keyboard' as the cause
     tester.testTextInput.updateEditingValue(TextEditingValue(
       text: controller.text,
       selection: const TextSelection(baseOffset: 2, extentOffset: 3),
     ));
     await tester.pumpAndSettle();
-    
+
     expect(selectionCause, SelectionChangedCause.keyboard);
-    
+
     // A selection update during a scribble interaction has 'scribble' as the cause
     await tester.testTextInput.startScribbleInteraction();
     tester.testTextInput.updateEditingValue(TextEditingValue(

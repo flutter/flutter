@@ -974,6 +974,10 @@ class TextInputConnection {
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
 
+  /// Whether there is currently a Scribble interaction in progress
+  ///
+  /// This is used to make sure selection handles are shown when UIKit changes
+  /// the selection during a Scribble interaction
   bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
@@ -1075,7 +1079,7 @@ class TextInputConnection {
   }
 
   /// Send selection rects.
-  /// 
+  ///
   /// These are used by the engine during a UIDirectScribbleInteraction.
   void setSelectionRects(List<Rect> textBoxes) {
     if (!listEquals(_cachedTextBoxes, textBoxes)) {
@@ -1362,13 +1366,13 @@ class TextInput {
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       if (_scribbleClients.containsKey(args[0])) {
-        _scribbleClients[args[0]]?.onScribbleFocus(Offset(args[1].toDouble(), args[2].toDouble()));
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset(args[1].toDouble() as double, args[2].toDouble() as double));
       }
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0].toDouble() , args[1].toDouble() , args[2].toDouble() , args[3].toDouble() );
+        final Rect rect = Rect.fromLTWH(args[0].toDouble() as double, args[1].toDouble() as double, args[2].toDouble() as double, args[3].toDouble() as double);
         return _scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false;
       }).map((String elementIdentifier) {
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;

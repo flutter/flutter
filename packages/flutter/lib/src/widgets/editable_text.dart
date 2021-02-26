@@ -2431,7 +2431,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  String _cachedText = "";
+  String _cachedText = '';
   double _cachedScrollOffset = 0.0;
   Rect? _cachedFirstRect;
 
@@ -2441,9 +2441,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSpan textSpan = buildTextSpan();
     final StringBuffer text = StringBuffer();
     textSpan.computeToPlainText(text);
-    final Rect firstRect = renderEditable.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: 1)).first.toRect();
+    final Rect firstRect = renderEditable.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).first.toRect();
     final double scrollOffset = _scrollController?.offset ?? 0.0;
-    final ScrollDirection scrollDirection = _scrollController?.position?.userScrollDirection ?? ScrollDirection.idle;
+    final ScrollDirection scrollDirection = _scrollController?.position.userScrollDirection ?? ScrollDirection.idle;
     if (scrollDirection == ScrollDirection.idle && text.toString() != _cachedText ||
         scrollOffset != _cachedScrollOffset ||
         _cachedFirstRect != firstRect) {

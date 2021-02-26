@@ -404,7 +404,7 @@ void main() {
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
-      
+
       final FakeScribbleElement targetElement = FakeScribbleElement(elementIdentifier: 'target');
       TextInput.registerScribbleElement(targetElement.elementIdentifier, targetElement);
       final FakeScribbleElement otherElement = FakeScribbleElement(elementIdentifier: 'other');
@@ -438,11 +438,11 @@ void main() {
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
-      final List<FakeScribbleElement> targetElements = [
+      final List<FakeScribbleElement> targetElements = <FakeScribbleElement>[
         FakeScribbleElement(elementIdentifier: 'target1', bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)),
         FakeScribbleElement(elementIdentifier: 'target2', bounds: const Rect.fromLTWH(0.0, 100.0, 100.0, 100.0)),
       ];
-      final List<FakeScribbleElement> otherElements = [
+      final List<FakeScribbleElement> otherElements = <FakeScribbleElement>[
         FakeScribbleElement(elementIdentifier: 'other1', bounds: const Rect.fromLTWH(100.0, 0.0, 100.0, 100.0)),
         FakeScribbleElement(elementIdentifier: 'other2', bounds: const Rect.fromLTWH(100.0, 100.0, 100.0, 100.0)),
       ];
@@ -466,7 +466,7 @@ void main() {
           responseBytes = response;
         },
       );
-      
+
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(unregisterElements);
 
       final List<dynamic> responses = const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>;
@@ -641,6 +641,6 @@ class FakeScribbleElement implements ScribbleClient {
 
   @override
   void onScribbleFocus(Offset offset) {
-    latestMethodCall = 'onScribbleFocus'; 
+    latestMethodCall = 'onScribbleFocus';
   }
 }
