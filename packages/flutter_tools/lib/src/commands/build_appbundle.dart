@@ -11,8 +11,6 @@ import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -104,40 +102,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     return usage;
   }
 
-  Environment createEnvironment() {
-    final FlutterProject flutterProject = FlutterProject.current();
-    final Map<String, String> defines = <String, String>{ kDeferredComponents: 'false' };
-    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components') && !boolArg('debug')) {
-      defines[kDeferredComponents] = 'true';
-    }
-    final String output = flutterProject.directory
-        .childDirectory('build')
-        .childDirectory('app')
-        .childDirectory('intermediates')
-        .childDirectory('flutter')
-        .childDirectory('release').path;
-    final Environment result = Environment(
-      outputDir: globals.fs.directory(output),
-      buildDir: flutterProject.directory
-          .childDirectory('.dart_tool')
-          .childDirectory('flutter_build'),
-      projectDir: flutterProject.directory,
-      defines: defines,
-      inputs: <String, String>{},
-      cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      artifacts: globals.artifacts,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      engineVersion: globals.artifacts.isLocalEngine
-        ? null
-        : globals.flutterVersion.engineRevision,
-      generateDartPluginRegistry: true,
-    );
-    return result;
-  }
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
@@ -149,11 +113,10 @@ class BuildAppBundleCommand extends BuildSubCommand {
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
-    final Environment env = createEnvironment();
-    if (env.defines[kDeferredComponents] == 'true' && boolArg('verify-deferred-components') && !boolArg('debug')) {
-
+    if (FlutterProject.current().manifest.deferredComponents != null && boolArg('deferred-components') && boolArg('verify-deferred-components') && !boolArg('debug')) {
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-        env,
+        FlutterProject.current().directory,
+        globals.logger,
         title: 'Deferred components prebuild verification',
         exitOnFail: true,
       );
@@ -166,7 +129,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.
       for (final DeferredComponent component in FlutterProject.current().manifest.deferredComponents) {
-        final Directory deferredLibsIntermediate = env.projectDir
+        final Directory deferredLibsIntermediate = FlutterProject.current().directory
           .childDirectory('build')
           .childDirectory(component.name)
           .childDirectory('intermediates')
