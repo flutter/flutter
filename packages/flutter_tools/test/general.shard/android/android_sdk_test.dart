@@ -83,6 +83,27 @@ void main() {
       Config: () => config,
     });
 
+    testUsingContext('Caches adb location after first access', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      final File adbFile = fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe')
+      )..createSync(recursive: true);
+
+      expect(sdk.adbPath,  fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe'));
+
+      adbFile.deleteSync(recursive: true);
+
+      expect(sdk.adbPath,  fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      Config: () => config,
+    });
+
     testUsingContext('returns sdkmanager.bat path under cmdline tools for windows', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       config.setValue('android-sdk', sdkDir.path);

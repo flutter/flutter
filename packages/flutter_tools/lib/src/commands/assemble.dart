@@ -66,6 +66,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
+  ThinIosApplicationFrameworks(),
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),
@@ -227,7 +228,7 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
+    final Target target = targets.length == 1 ? targets.single : CompositeTarget(targets);
     final BuildResult result = await globals.buildSystem.build(
       target,
       createEnvironment(),
@@ -307,23 +308,4 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
     outFile.parent.createSync(recursive: true);
   }
   outFile.writeAsStringSync(json.encode(jsonData));
-}
-
-class _CompositeTarget extends Target {
-  _CompositeTarget(this.dependencies);
-
-  @override
-  final List<Target> dependencies;
-
-  @override
-  String get name => '_composite';
-
-  @override
-  Future<void> build(Environment environment) async { }
-
-  @override
-  List<Source> get inputs => <Source>[];
-
-  @override
-  List<Source> get outputs => <Source>[];
 }
