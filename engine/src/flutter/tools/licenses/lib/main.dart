@@ -318,9 +318,8 @@ class _RepositoryLibPngLicenseFile extends _RepositorySingleLicenseFile {
 
   static void _verifyLicense(fs.TextFile io) {
     final String contents = io.readString();
-    if (!contents.contains('COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:') ||
-        !contents.contains('png') ||
-        !contents.contains('END OF COPYRIGHT NOTICE, DISCLAIMER, and LICENSE.'))
+    if (!contents.contains(RegExp('COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:?')) ||
+        !contents.contains('png'))
       throw 'unexpected libpng license file contents:\n----8<----\n$contents\n----<8----';
   }
 
@@ -1627,6 +1626,24 @@ class _RepositoryLibPngDirectory extends _RepositoryDirectory {
     if (entry.name == 'LICENSE' || entry.name == 'png.h')
       return _RepositoryLibPngLicenseFile(this, entry);
     return super.createFile(entry);
+  }
+
+  static final RegExp skipFileTypes = RegExp(r'\.(?:jpg|png|dfa|in|3|5)$');
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'contrib' // not linked in
+      && entry.name != 'mips' // not linked in
+      && entry.name != 'powerpc' // not linked in
+      && entry.name != 'projects' // not linked in
+      && entry.name != 'scripts' // not linked in
+      && entry.name != 'tests' // not linked in
+      && entry.name != 'ANNOUNCE'
+      && entry.name != 'CHANGES'
+      && entry.name != 'TODO'
+      && entry.name != 'TRADEMARK'
+      && !entry.name.contains(skipFileTypes)
+      && super.shouldRecurse(entry);
   }
 }
 
