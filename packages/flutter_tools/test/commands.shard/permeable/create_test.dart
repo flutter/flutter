@@ -108,6 +108,50 @@ void main() {
     ),
   });
 
+  testUsingContext('can create a list view/detail view app', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['-t', 'list_detail_app', '-i', 'objc', '-a', 'java'],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'lib/main.dart',
+        'l10n.yaml',
+        'assets/images/2.0x/flutter_logo.png',
+        'assets/images/flutter_logo.png',
+        'assets/images/3.0x/flutter_logo.png',
+        'test/unit_test.dart',
+        'test/widget_test.dart',
+        'lib/src/localization/app_en.arb',
+        'lib/src/app.dart',
+        'lib/src/dummy_feature/dummy_item_details_view.dart',
+        'lib/src/dummy_feature/dummy_item_list_view.dart',
+        'lib/src/dummy_feature/dummy_item.dart',
+        'lib/src/settings/settings_controller.dart',
+        'lib/src/settings/settings_view.dart',
+        'lib/src/settings/settings_service.dart',
+        'lib/main.dart',
+        'pubspec.yaml',
+        'README.md',
+      ],
+      runPubGet: true,
+    );
+    return _runFlutterTest(projectDir);
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
   testUsingContext('can create a default project if empty directory exists', () async {
     await projectDir.create(recursive: true);
     await _createAndAnalyzeProject(
@@ -2441,9 +2485,10 @@ Future<void> _createAndAnalyzeProject(
   List<String> createArgs,
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
+  bool runPubGet = false,
 }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
-  await _analyzeProject(dir.path);
+  await _analyzeProject(dir.path, runPubGet);
 }
 
 Future<void> _ensureFlutterToolsSnapshot() async {
@@ -2501,7 +2546,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
-Future<void> _analyzeProject(String workingDir) async {
+Future<void> _analyzeProject(String workingDir, bool runPubGet) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -2510,21 +2555,34 @@ Future<void> _analyzeProject(String workingDir) async {
     'flutter_tools.snapshot',
   ));
 
-  final List<String> args = <String>[
-    flutterToolsSnapshotPath,
-    'analyze',
-  ];
+  // Some templates use generated localizations. Run pub get to generate them.
+  if (runPubGet) {
+    final ProcessResult pubGetResult = await Process.run(
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      <String>[flutterToolsSnapshotPath, 'pub', 'get'],
+      workingDirectory: workingDir,
+    );
 
-  final ProcessResult exec = await Process.run(
+    if (pubGetResult.exitCode != 0) {
+      print(pubGetResult.stdout);
+      print(pubGetResult.stderr);
+    }
+
+    expect(pubGetResult.exitCode, 0);
+  }
+
+  final ProcessResult analyzeResult = await Process.run(
     globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-    args,
+    <String>[flutterToolsSnapshotPath,'analyze'],
     workingDirectory: workingDir,
   );
-  if (exec.exitCode != 0) {
-    print(exec.stdout);
-    print(exec.stderr);
+
+  if (analyzeResult.exitCode != 0) {
+    print(analyzeResult.stdout);
+    print(analyzeResult.stderr);
   }
-  expect(exec.exitCode, 0);
+
+  expect(analyzeResult.exitCode, 0);
 }
 
 Future<void> _runFlutterTest(Directory workingDir, { String target }) async {

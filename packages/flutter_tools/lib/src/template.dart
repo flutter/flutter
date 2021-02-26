@@ -32,7 +32,23 @@ import 'dart/package_map.dart';
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
+  factory Template(Directory templateSource, Directory imageSourceDir, {
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required TemplateRenderer templateRenderer,
+    @required Set<Uri> templateManifest,
+  }) {
+    return Template._(
+      <Directory>[templateSource],
+      imageSourceDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
+      templateManifest: templateManifest,
+    );
+  }
+
+  Template._(List<Directory> templateSources, this.imageSourceDir, {
     @required FileSystem fileSystem,
     @required Logger logger,
     @required TemplateRenderer templateRenderer,
@@ -43,20 +59,23 @@ class Template {
        _templateManifest = templateManifest {
     _templateFilePaths = <String, String>{};
 
-    if (!templateSource.existsSync()) {
+    if (!templateSources.every((Directory directory) => directory.existsSync())) {
       return;
     }
 
-    final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
-    for (final FileSystemEntity entity in templateFiles.whereType<File>()) {
+    final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
+      for (final Directory sourceDirectory in templateSources)
+        for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
+          entity: sourceDirectory,
+    };
+    for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
       if (_templateManifest != null && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
         _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }
 
-      final String relativePath = fileSystem.path.relative(entity.path,
-          from: baseDir.absolute.path);
+      final String relativePath = fileSystem.path.relative(entity.path, from: templateFiles[entity].absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
@@ -75,9 +94,29 @@ class Template {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
     final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
-    return Template(
-      templateDir,
-      templateDir, imageDir,
+    return Template._(
+      <Directory>[templateDir],
+      imageDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
+      templateManifest: templateManifest,
+    );
+  }
+
+  static Future<Template> merged(List<String> names, String imageDirectoryName, {
+    @required FileSystem fileSystem,
+    @required Set<Uri> templateManifest,
+    @required Logger logger,
+    @required TemplateRenderer templateRenderer,
+  }) async {
+    // All named templates are placed in the 'templates' directory
+    return Template._(
+      <Directory>[
+        for (final String name in names)
+          _templateDirectoryInPackage(name, fileSystem)
+      ],
+      await _templateImageDirectory(imageDirectoryName, fileSystem, logger),
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,

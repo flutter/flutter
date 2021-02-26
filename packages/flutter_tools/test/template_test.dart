@@ -18,7 +18,6 @@ void main() {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
     final Template template = Template(
       fileSystem.directory('examples'),
-      fileSystem.currentDirectory,
       null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -44,7 +43,6 @@ void main() {
     sourceImage.writeAsStringSync('Ceci n\'est pas une pipe');
 
     final Template template = Template(
-      templateDir,
       templateDir,
       imageSourceDir,
       fileSystem: fileSystem,

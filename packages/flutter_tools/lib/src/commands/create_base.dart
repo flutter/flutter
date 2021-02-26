@@ -402,15 +402,37 @@ abstract class CreateBase extends FlutterCommand {
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
+  /// Merges named templates into a single template, output to `directory`.
+  ///
+  /// `names` should match one of directory names under flutter_tools/template/.
+  /// `imageDirectory` should match a directory in the `templates` folder of the
+  /// `flutter_template_images` repository.
+  ///
+  /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
+  @protected
+  Future<int> renderMerged(
+      List<String> names, String imageDirectoryName, Directory directory, Map<String, dynamic> context,
+      {bool overwrite = false}) async {
+    final Template template = await Template.merged(
+      names,
+      imageDirectoryName,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+      templateManifest: _templateManifest,
+    );
+    return template.render(directory, context, overwriteExisting: overwrite);
+  }
+
   /// Generate application project in the `directory` using `templateContext`.
   ///
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-      Directory directory, Map<String, dynamic> templateContext,
+      String templateName, Directory directory, Map<String, dynamic> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderTemplate('app', directory, templateContext,
+    generatedCount += await renderMerged(<String>[templateName, 'app_shared'], 'app', directory, templateContext,
         overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {
