@@ -38,8 +38,6 @@ struct ThreadHost {
   ThreadHost(std::string name_prefix, uint64_t type_mask);
 
   ~ThreadHost();
-
-  void Reset();
 };
 
 }  // namespace flutter
