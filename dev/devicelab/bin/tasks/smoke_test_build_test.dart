@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/build_test_task.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
@@ -16,7 +14,7 @@ Future<void> main(List<String> args) async {
 }
 
 class FakeBuildTestTask extends BuildTestTask {
-  FakeBuildTestTask(List<String> args) : super(args, workingDirectory: Directory.current, runFlutterClean: false) {
+  FakeBuildTestTask(List<String> args) : super(args, runFlutterClean: false) {
     deviceOperatingSystem = DeviceOperatingSystem.fake;
   }
 
