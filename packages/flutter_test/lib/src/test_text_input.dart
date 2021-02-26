@@ -245,7 +245,7 @@ class TestTextInput {
       (ByteData? data) { /* response from framework is discarded */ },
     );
   }
-  
+
   /// Simulates a Scribble focus
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
