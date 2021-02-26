@@ -15,6 +15,10 @@ import 'mouse_tracking.dart';
 /// [recognizer] that recognizes gestures starting on this text span, as well as
 /// allowing customizing the [mouseCursor] for a hovering mouse.
 ///
+/// A [ReactiveTextSpan] is equal to another if all of their properties are
+/// equal (by operator ==), including [onEnter] and [onExit]. It's recommended
+/// to use memoized instances for the callbacks instead of local lambdas.
+///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to use [ReactiveTextSpan] with a gesture recognizer,
 /// and sets the cursor for a hovering mouse to a text I-beam. It defines a
@@ -144,4 +148,21 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
 
   @override
   bool get validForMouseTracker => true;
+
+  @override
+  bool operator ==(Object other) {
+    return super == other
+        && other is ReactiveTextSpan
+        && onEnter == other.onEnter
+        && onExit == other.onExit
+        && mouseCursor == other.mouseCursor;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    super.hashCode,
+    onEnter,
+    onExit,
+    mouseCursor,
+  );
 }

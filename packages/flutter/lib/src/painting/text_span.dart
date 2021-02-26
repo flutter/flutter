@@ -173,7 +173,6 @@ class TextSpan extends InlineSpan implements HitTestTarget {
     'Use ReactiveTextSpan instead. '
     'This feature was deprecated after v1.24.'
   )
-  @override
   final GestureRecognizer? recognizer;
 
   /// An alternative semantics label for this [TextSpan].
