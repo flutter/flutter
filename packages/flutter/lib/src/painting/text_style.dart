@@ -1269,6 +1269,7 @@ class TextStyle with Diagnosticable {
     styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(EnumProperty<ui.TextLeadingDistribution>('${prefix}leadingDistribution', leadingDistribution, defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
