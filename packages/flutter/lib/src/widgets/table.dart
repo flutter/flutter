@@ -339,6 +339,32 @@ class Table extends RenderObjectWidget {
   }
 }
 
+@immutable
+class _TableSlot {
+  const _TableSlot(this.x, this.y);
+
+  // The column that the child was in this table.
+  final int x;
+
+  // The row that the child was in this table.
+  final int y;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _TableSlot
+      && x == other.x
+      && y == other.y;
+  }
+
+  @override
+  int get hashCode => hashValues(x, y);
+
+  @override
+  String toString() => '${super.toString()}; "x" : "$x"; "y" : "$y"; }';
+}
+
 class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
@@ -371,6 +397,8 @@ class _TableElement extends RenderObjectElement {
   @override
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
     renderObject.setupParentData(child);
+    if (slot is _TableSlot)
+      renderObject.setChild(slot.x, slot.y, child as RenderBox);
   }
 
   @override
@@ -425,14 +453,20 @@ class _TableElement extends RenderObjectElement {
 
   void _updateRenderObjectChildren() {
     assert(renderObject != null);
+
+    final List<RenderBox?> cells = <RenderBox?>[];
+    for (int y = 0; y < _children.length; y++) {
+      final _TableElementRow row = _children[y];
+      for (int x = 0; x < row.children.length; x++) {
+        final Element child = row.children[x];
+        updateSlotForChild(child, _TableSlot(x, y));
+        cells.add(child.renderObject! as RenderBox);
+      }
+    }
+
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand<RenderBox>((_TableElementRow row) {
-        return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject! as RenderBox;
-          return box;
-        });
-      }).toList(),
+      cells,
     );
   }
 

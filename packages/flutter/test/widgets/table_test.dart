@@ -964,5 +964,46 @@ void main() {
       }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/69395.
+  testWidgets(
+    'RenderTable should adopt the new RenderObject if a child RenderObject was replaced by another different type',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[
+            TableRow(children: <Widget>[
+              TestChildWidget(),
+              TestChildWidget(),
+              TestChildWidget(),
+            ]),
+            TableRow(children: <Widget>[
+              TestChildWidget(),
+              TestChildWidget(),
+              TestChildWidget(),
+            ]),
+          ]),
+        ),
+      );
+      final RenderTable table = tester.renderObject(find.byType(Table));
+
+      expect(find.text('CRASHHH'), findsNothing);
+      expect(find.byType(SizedBox), findsNWidgets(3 * 2));
+      // The SizeBox should be rendered.
+      expect(table.column(2).last.runtimeType.toString(), 'RenderConstrainedBox');
+
+      final TestChildState state = tester.state(find.byType(TestChildWidget).last);
+      state.toggleMe();
+      // Trigger a RenderObject change.
+      await tester.pump();
+
+      expect(find.byType(SizedBox), findsNWidgets(5));
+      expect(find.text('CRASHHH'), findsOneWidget);
+
+      // The Text should be rendered.
+      expect(table.column(2).last.runtimeType.toString(), 'RenderParagraph');
+    },
+  );
+
   // TODO(ianh): Test handling of TableCell object
 }
