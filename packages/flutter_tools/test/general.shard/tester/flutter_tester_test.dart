@@ -21,6 +21,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   MemoryFileSystem fileSystem;
@@ -80,26 +81,19 @@ void main() {
     String mainPath;
 
     FakeProcessManager fakeProcessManager;
-    MockBuildSystem mockBuildSystem;
+    TestBuildSystem buildSystem;
 
     final Map<Type, Generator> startOverrides = <Type, Generator>{
       Platform: () => FakePlatform(operatingSystem: 'linux'),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
-      BuildSystem: () => mockBuildSystem,
+      BuildSystem: () => buildSystem,
     };
 
     setUp(() {
-      mockBuildSystem = MockBuildSystem();
+      buildSystem = TestBuildSystem.all(BuildResult(success: true));
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-
-      when(mockBuildSystem.build(
-        any,
-        any,
-      )).thenAnswer((_) async {
-        return BuildResult(success: true);
-      });
       device = FlutterTesterDevice('flutter-tester',
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
@@ -194,5 +188,4 @@ FlutterTesterDevices setUpFlutterTesterDevices() {
   );
 }
 
-class MockBuildSystem extends Mock implements BuildSystem {}
 class MockFlutterVersion extends Mock implements FlutterVersion {}

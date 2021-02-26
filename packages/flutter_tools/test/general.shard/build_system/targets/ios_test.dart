@@ -321,14 +321,14 @@ void main() {
         throwsA(isA<Exception>().having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('App.framework/App does not exist, cannot thin'),
+          contains('Flutter.framework/Flutter does not exist, cannot thin'),
         )));
     });
 
     testWithoutContext('fails when requested archs missing from framework', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
-      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -346,14 +346,14 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-info',
-          appBinary.path,
+          binary.path,
         ], stdout: 'Architectures in the fat file:'),
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
-          appBinary.path,
+          binary.path,
           '-verify_arch',
           'arm64',
           'armv7',
@@ -372,7 +372,7 @@ void main() {
     testWithoutContext('fails when lipo extract fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
-      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -390,14 +390,14 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-info',
-          appBinary.path,
+          binary.path,
         ], stdout: 'Architectures in the fat file:'),
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
-          appBinary.path,
+          binary.path,
           '-verify_arch',
           'arm64',
           'armv7',
@@ -408,12 +408,12 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-output',
-          appBinary.path,
+          binary.path,
           '-extract',
           'arm64',
           '-extract',
           'armv7',
-          appBinary.path,
+          binary.path,
         ], exitCode: 1,
         stderr: 'lipo error'),
       );
@@ -423,15 +423,14 @@ void main() {
         throwsA(isA<Exception>().having(
               (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for Runner.app/Frameworks/App.framework/App.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains('Failed to extract arm64 armv7 for Runner.app/Frameworks/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
         )));
     });
 
     testWithoutContext('skips thin frameworks', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
-      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
-      final File flutterBinary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -449,38 +448,20 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-info',
-          appBinary.path,
+          binary.path,
         ], stdout: 'Non-fat file:'),
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
-          appBinary.path,
-          '-verify_arch',
-          'arm64',
-        ]),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          '-info',
-          flutterBinary.path,
-        ], stdout: 'Non-fat file:'),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          flutterBinary.path,
+          binary.path,
           '-verify_arch',
           'arm64',
         ]),
       );
       await const ThinIosApplicationFrameworks().build(environment);
 
-      expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/App.framework/App'));
       expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/Flutter.framework/Flutter'));
 
       expect(processManager.hasRemainingExpectations, isFalse);
@@ -489,8 +470,7 @@ void main() {
     testWithoutContext('thins fat frameworks', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
-      final File appBinary = outputDir.childDirectory('App.framework').childFile('App')..createSync(recursive: true);
-      final File flutterBinary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
 
       final Environment environment = Environment.test(
         fileSystem.currentDirectory,
@@ -508,14 +488,14 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-info',
-          appBinary.path,
+          binary.path,
         ], stdout: 'Architectures in the fat file:'),
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
-          appBinary.path,
+          binary.path,
           '-verify_arch',
           'arm64',
           'armv7',
@@ -526,43 +506,12 @@ void main() {
         FakeCommand(command: <String>[
           'lipo',
           '-output',
-          appBinary.path,
+          binary.path,
           '-extract',
           'arm64',
           '-extract',
           'armv7',
-          appBinary.path,
-        ]),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          '-info',
-          flutterBinary.path,
-        ], stdout: 'Architectures in the fat file:'),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          flutterBinary.path,
-          '-verify_arch',
-          'arm64',
-          'armv7',
-        ]),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          '-output',
-          flutterBinary.path,
-          '-extract',
-          'arm64',
-          '-extract',
-          'armv7',
-          flutterBinary.path,
+          binary.path,
         ]),
       );
 

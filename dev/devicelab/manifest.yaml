@@ -65,20 +65,6 @@ tasks:
 
   # iOS on-device tests
 
-  flutter_gallery_sksl_warmup__transition_perf_e2e_ios32:
-    description: >
-      Measures the runtime performance of Flutter gallery transitions on iPhone4s
-      with SkSL shader warm-up with e2e.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-    flaky: true
-
-  flutter_gallery_ios32__start_up:
-    description: >
-      Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-
   native_ui_tests_ios32:
     description: >
       Run native XCUITests on 32-bit iOS (iPhone 4S).

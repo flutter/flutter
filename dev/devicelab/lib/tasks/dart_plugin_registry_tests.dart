@@ -159,16 +159,14 @@ class PluginPlatformInterfaceMacOS {
         });
 
         section('Wait for registry execution');
-        await registryExecutedCompleter.future
-            .timeout(const Duration(minutes: 1));
+        await registryExecutedCompleter.future;
 
         // Hot restart.
         run.stdin.write('R');
         registryExecutedCompleter = Completer<void>();
 
         section('Wait for registry execution after hot restart');
-        await registryExecutedCompleter.future
-            .timeout(const Duration(minutes: 1));
+        await registryExecutedCompleter.future;
 
         subscription.cancel();
         run.kill();

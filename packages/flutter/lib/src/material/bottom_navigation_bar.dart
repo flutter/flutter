@@ -57,7 +57,9 @@ enum BottomNavigationBarType {
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
 ///    [selectedItemColor] if it's non-null, otherwise the theme's
-///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
+///    [ColorScheme.primary] color is used for [Brightness.light] themes
+///    and [ColorScheme.secondary] for [Brightness.dark] themes.
+///    If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
 ///  * [BottomNavigationBarType.shifting], the default when there are four
@@ -939,10 +941,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final Color themeColor;
     switch (themeData.brightness) {
       case Brightness.light:
-        themeColor = themeData.primaryColor;
+        themeColor = themeData.colorScheme.primary;
         break;
       case Brightness.dark:
-        themeColor = themeData.accentColor;
+        themeColor = themeData.colorScheme.secondary;
         break;
     }
 
