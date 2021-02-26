@@ -375,10 +375,17 @@ class ArchiveCreator {
       '-f',
       // Do not -X as it could lead to entire bin/cache getting cleaned
       '-x',
+      '--',
       '**/.packages',
     ]);
     /// Remove package_config files and any contents in .dart_tool
-    await _runGit(<String>['clean', '-f', '-x', '**/.dart_tool']);
+    await _runGit(<String>[
+      'clean',
+      '-f',
+      '-x',
+      '--',
+      '**/.dart_tool/',
+    ]);
 
     // Ensure the above commands do not clean out the cache
     final Directory flutterCache = Directory(path.join(flutterRoot.absolute.path, 'bin', 'cache'));
