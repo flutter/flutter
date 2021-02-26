@@ -44,11 +44,9 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      dependency: compositeTarget,
-      abis: <String>['arm64-v8a'],
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -78,11 +76,9 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      dependency: compositeTarget,
-      abis: <String>['arm64-v8a'],
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       title: 'test checks',
       exitOnFail: false,
     );
@@ -111,11 +107,9 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
     const AndroidAotBundle androidAotBundle = AndroidAotBundle(androidAot);
-    final CompositeTarget androidDefBundle = CompositeTarget(<Target>[androidAotBundle]);
-    final CompositeTarget compositeTarget = CompositeTarget(<Target>[androidDefBundle]);
+    final AndroidAotDeferredComponentsBundle androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final DeferredComponentsGenSnapshotValidatorTarget validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
-      dependency: compositeTarget,
-      abis: <String>['arm64-v8a'],
+      deferredComponentsDependencies: <AndroidAotDeferredComponentsBundle>[androidDefBundle],
       title: 'test checks',
       exitOnFail: false,
     );

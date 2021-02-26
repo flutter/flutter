@@ -270,20 +270,15 @@ class AssembleCommand extends FlutterCommand {
         && decodedDefines.contains('verify-deferred-components=true')
         && isDeferredComponentsTargets()
         && !isDebug()) {
-      final List<String> abis = <String>[];
-      for (final Target target in targets) {
-        if (deferredComponentsTargets.contains(target.name)) {
-          abis.add(
-            getNameForAndroidArch(getAndroidArchForName(getNameForTargetPlatform((target as AndroidAotDeferredComponentsBundle).dependency.targetPlatform)))
-          );
-        }
-      }
       target = DeferredComponentsGenSnapshotValidatorTarget(
-        dependency: target as CompositeTarget,
-        abis: abis,
+        deferredComponentsDependencies: targets.cast<AndroidAotDeferredComponentsBundle>(),
         title: 'Deferred components gen_snapshot verification',
         name: 'deferred_components_gen_snapshot_validator',
       );
+    } else if (targets.length > 1) {
+      target = CompositeTarget(targets);
+    } else if (targets.isNotEmpty) {
+      target = targets.first;
     }
     final BuildResult result = await globals.buildSystem.build(
       target,

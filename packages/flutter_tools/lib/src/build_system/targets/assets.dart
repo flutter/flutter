@@ -123,7 +123,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true') {
     await Future.wait<void>(
-      assetBundle.splitEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+      assetBundle.deferredComponentsEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =
             environment.projectDir
                 .childDirectory('build')

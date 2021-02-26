@@ -65,7 +65,9 @@ abstract class AssetBundleFactory {
 abstract class AssetBundle {
   Map<String, DevFSContent> get entries;
 
-  Map<String, Map<String, DevFSContent>> get splitEntries;
+  /// The files that were specified under the deferred components assets sections
+  /// in pubspec.
+  Map<String, Map<String, DevFSContent>> get deferredComponentsEntries;
 
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
@@ -129,7 +131,7 @@ class ManifestAssetBundle implements AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   @override
-  final Map<String, Map<String, DevFSContent>> splitEntries = <String, Map<String, DevFSContent>>{};
+  final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
 
   // If an asset corresponds to a wildcard directory, then it may have been
   // updated without changes to the manifest. These are only tracked for
@@ -303,46 +305,15 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     // Parse assets for  deferred components.
-    final List<DeferredComponent> components = flutterManifest.deferredComponents;
-    if (components != null) {
-      final Map<_Asset, List<_Asset>> deferredComponentsAssetVariants = <_Asset, List<_Asset>>{};
-      for (final DeferredComponent component in components) {
-        splitEntries[component.name] = <String, DevFSContent>{};
-        final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
-        for (final Uri assetUri in component.assets) {
-          final String assetGlobalPath = globals.fs.path.absolute(flutterProject.directory.path + globals.platform.pathSeparator + assetUri.path);
-          final File assetFile = globals.fs.file(assetGlobalPath);
-          if (_splitDeferredAssets) {
-            splitEntries[component.name][assetUri.path] = DevFSFileContent(assetFile);
-          } else {
-            entries[assetUri.path] = DevFSFileContent(assetFile);
-          }
-
-          if (assetUri.path.endsWith('/')) {
-            wildcardDirectories.add(assetUri);
-            _parseAssetsFromFolder(
-              packageConfig,
-              flutterManifest,
-              assetBasePath,
-              cache,
-              deferredComponentsAssetVariants,
-              assetUri,
-            );
-          } else {
-            _parseAssetFromFile(
-              packageConfig,
-              flutterManifest,
-              assetBasePath,
-              cache,
-              deferredComponentsAssetVariants,
-              assetUri,
-            );
-          }
-        }
-      }
-      if (!_splitDeferredAssets || !deferredComponentsEnabled) {
-        assetVariants.addAll(deferredComponentsAssetVariants);
-      }
+    final Map<_Asset, List<_Asset>> deferredComponentsAssetVariants = _parseDeferredComponentsAssets(
+      flutterManifest,
+      packageConfig,
+      assetBasePath,
+      wildcardDirectories,
+      flutterProject.directory
+    );
+    if (!_splitDeferredAssets || !deferredComponentsEnabled) {
+      assetVariants.addAll(deferredComponentsAssetVariants);
     }
 
     // Save the contents of each image, image variant, and font
@@ -467,6 +438,54 @@ class ManifestAssetBundle implements AssetBundle {
           packageConfig,
         )) font.descriptor,
     ];
+  }
+
+  Map<_Asset, List<_Asset>> _parseDeferredComponentsAssets(
+    FlutterManifest flutterManifest,
+    PackageConfig packageConfig,
+    String assetBasePath,
+    List<Uri> wildcardDirectories,
+    Directory projectDirectory,
+  ) {
+    final List<DeferredComponent> components = flutterManifest.deferredComponents;
+    final Map<_Asset, List<_Asset>> deferredComponentsAssetVariants = <_Asset, List<_Asset>>{};
+    if (components != null) {
+      for (final DeferredComponent component in components) {
+        deferredComponentsEntries[component.name] = <String, DevFSContent>{};
+        final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
+        for (final Uri assetUri in component.assets) {
+          final String assetGlobalPath = globals.fs.path.absolute(projectDirectory.path + globals.platform.pathSeparator + assetUri.path);
+          final File assetFile = globals.fs.file(assetGlobalPath);
+          if (_splitDeferredAssets) {
+            deferredComponentsEntries[component.name][assetUri.path] = DevFSFileContent(assetFile);
+          } else {
+            entries[assetUri.path] = DevFSFileContent(assetFile);
+          }
+
+          if (assetUri.path.endsWith('/')) {
+            wildcardDirectories.add(assetUri);
+            _parseAssetsFromFolder(
+              packageConfig,
+              flutterManifest,
+              assetBasePath,
+              cache,
+              deferredComponentsAssetVariants,
+              assetUri,
+            );
+          } else {
+            _parseAssetFromFile(
+              packageConfig,
+              flutterManifest,
+              assetBasePath,
+              cache,
+              deferredComponentsAssetVariants,
+              assetUri,
+            );
+          }
+        }
+      }
+    }
+    return deferredComponentsAssetVariants;
   }
 
   DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
