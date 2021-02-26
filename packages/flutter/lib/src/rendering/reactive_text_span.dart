@@ -11,66 +11,66 @@ import 'mouse_tracking.dart';
 
 /// An immutable span of text that can react to gestures and mouse movements.
 ///
-/// Aside from what [TextSpan] provides, [ReactiveTextSpan] also accepts a
+/// Besides what [TextSpan] provides, [ReactiveTextSpan] also accepts a
 /// [recognizer] that recognizes gestures starting on this text span, as well as
-/// allowing customizing the [mouseCursor] when a mouse hovers over it.
+/// allowing customizing the [mouseCursor] for a hovering mouse.
 ///
-/// {@tool snippet}
-/// This example shows how to use [ReactiveTextSpan] with a gesture recognizer.
-/// It defines a `BuzzingText` widget which uses the [HapticFeedback]
-/// class to vibrate the device when the user long-presses the "find the" span,
-/// which is underlined in wavy green. The hit-testing is handled by the
-/// [RichText] widget.
+/// {@tool dartpad --template=stateful_widget_scaffold}
+/// This example shows how to use [ReactiveTextSpan] with a gesture recognizer,
+/// and sets the cursor for a hovering mouse to a text I-beam. It defines a
+/// `BuzzingText` widget which uses the [HapticFeedback] class to vibrate the
+/// device when the user long-presses the "find the" span, which is underlined in
+/// wavy green. The hit-testing is handled by the [RichText] widget.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// import 'package:flutter/services.dart';
+/// import 'package:flutter/rendering.dart';
+/// ```
 ///
 /// ```dart
-/// class BuzzingText extends StatefulWidget {
-///   @override
-///   _BuzzingTextState createState() => _BuzzingTextState();
+/// LongPressGestureRecognizer _longPressRecognizer;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _longPressRecognizer = LongPressGestureRecognizer()
+///     ..onLongPress = _handlePress;
 /// }
 ///
-/// class _BuzzingTextState extends State<BuzzingText> {
-///   LongPressGestureRecognizer _longPressRecognizer;
+/// @override
+/// void dispose() {
+///   _longPressRecognizer.dispose();
+///   super.dispose();
+/// }
 ///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _longPressRecognizer = LongPressGestureRecognizer()
-///       ..onLongPress = _handlePress;
-///   }
+/// void _handlePress() {
+///   HapticFeedback.vibrate();
+/// }
 ///
-///   @override
-///   void dispose() {
-///     _longPressRecognizer.dispose();
-///     super.dispose();
-///   }
-///
-///   void _handlePress() {
-///     HapticFeedback.vibrate();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Text.rich(
-///       TextSpan(
-///         text: 'Can you ',
-///         style: TextStyle(color: Colors.black),
-///         children: <InlineSpan>[
-///           ReactiveTextSpan(
-///             text: 'find the',
-///             style: TextStyle(
-///               color: Colors.green,
-///               decoration: TextDecoration.underline,
-///               decorationStyle: TextDecorationStyle.wavy,
-///             ),
-///             recognizer: _longPressRecognizer,
+/// @override
+/// Widget build(BuildContext context) {
+///   return Text.rich(
+///     TextSpan(
+///       text: 'Can you ',
+///       style: TextStyle(color: Colors.black),
+///       children: <InlineSpan>[
+///         ReactiveTextSpan(
+///           text: 'find the',
+///           mouseCursor: SystemMouseCursors.text,
+///           style: TextStyle(
+///             color: Colors.green,
+///             decoration: TextDecoration.underline,
+///             decorationStyle: TextDecorationStyle.wavy,
 ///           ),
-///           TextSpan(
-///             text: ' secret?',
-///           ),
-///         ],
-///       ),
-///     );
-///   }
+///           recognizer: _longPressRecognizer,
+///         ),
+///         TextSpan(
+///           text: ' secret?',
+///         ),
+///       ],
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
