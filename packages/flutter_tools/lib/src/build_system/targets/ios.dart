@@ -421,7 +421,7 @@ abstract class IosAssetBundle extends Target {
     // TODO(jonahwilliams): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory plistRoot = flutterProject.isModule
-      ? flutterProject.ios.ephemeralDirectory
+      ? flutterProject.ios.ephemeralModuleDirectory
       : environment.projectDir.childDirectory('ios');
     plistRoot
       .childDirectory('Flutter')
