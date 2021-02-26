@@ -383,7 +383,7 @@ class ArchiveCreator {
     // Ensure the above commands do not clean out the cache
     final Directory flutterCache = Directory(path.join(flutterRoot.absolute.path, 'bin', 'cache'));
     if (!flutterCache.existsSync()) {
-      throw Exception('The flutter was not found at ${flutterCache.path}!');
+      throw Exception('The flutter cache was not found at ${flutterCache.path}!');
     }
 
     /// Remove git subfolder from .pub-cache, this contains the flutter goldens
