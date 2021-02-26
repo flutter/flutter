@@ -1742,6 +1742,32 @@ void main() {
     },
   });
 
+  testUsingContext('can list available platforms to stdout', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-platforms',
+    ];
+
+    await runner.run(args);
+    expect(logger.errorText, isEmpty);
+    expect(logger.statusText, isNotEmpty);
+
+    final String output = logger.statusText;
+    final List<String> platforms = jsonDecode(output).cast<String>() as List<String>;
+    expect(platforms, contains('ios'));
+    expect(platforms, contains('android'));
+    expect(platforms, contains('web'));
+    expect(platforms, isNot(contains('windows')));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(
+      isWebEnabled: true,
+      isWindowsEnabled: false,
+    ),
+    Logger: () => logger,
+  });
+
   testUsingContext('plugin does not support any platform by default', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);

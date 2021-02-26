@@ -65,6 +65,11 @@ class CreateCommand extends CreateBase {
         'that can be created with "--sample".',
       valueHelp: 'path',
     );
+    argParser.addFlag(
+      'list-platforms',
+      negatable: false,
+      help: 'List the currently supported platforms in JSON format.',
+    );
   }
 
   @override
@@ -144,6 +149,31 @@ class CreateCommand extends CreateBase {
     }
   }
 
+  /// Writes the list of currently available and enabled platforms to stdout in
+  /// JSON format.
+  ///
+  /// This functionality is typically used by higher-level tools (IDEs, ...) in
+  /// order to know which platforms are currently legal for the SDK version,
+  /// channel, and set of user config options.
+  void _listPlatforms() {
+    final List<String> availablePlatforms = <String>['ios', 'android'];
+
+    if (featureFlags.isWebEnabled) {
+      availablePlatforms.add('web');
+    }
+    if (featureFlags.isLinuxEnabled) {
+      availablePlatforms.add('linux');
+    }
+    if (featureFlags.isMacOSEnabled) {
+      availablePlatforms.add('macos');
+    }
+    if (featureFlags.isWindowsEnabled) {
+      availablePlatforms.add('windows');
+    }
+
+    globals.printStatus(jsonEncode(availablePlatforms));
+  }
+
   FlutterProjectType _getProjectType(Directory projectDir) {
     FlutterProjectType template;
     FlutterProjectType detectedProjectType;
@@ -179,6 +209,11 @@ class CreateCommand extends CreateBase {
     if (argResults['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
       await _writeSamplesJson(stringArg('list-samples'));
+      return FlutterCommandResult.success();
+    }
+
+    if (argResults['list-platforms'] != null) {
+      _listPlatforms();
       return FlutterCommandResult.success();
     }
 
