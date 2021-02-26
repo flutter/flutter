@@ -2952,26 +2952,30 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/76614
   testWidgets('Do not crash if used in very short screen', (WidgetTester tester) async {
+    // The default item height is 48.0 pixels and needs two items padding since
+    // the menu requires empty space surrounding the menu. Finally, the constraint height
+    // is 47.0 pixels for the menu rendering.
+    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
     await tester.pumpWidget(
-      Center(
-        child: SizedBox(
-          height: 48.0 * 3 - 1.0, // The height of menu is 47.0.
-          width: double.infinity,
-          child: MaterialApp(
-            home: Scaffold(
-              body: DropdownButton<String>(
-                value: value,
-                items: <DropdownMenuItem<String>>[
-                  DropdownMenuItem<String>(
-                    key: itemKey,
-                    value: value,
-                    child: const Text(value),
-                  ),
-                ],
-                onChanged: (_) { },
-              ),
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButton<String>(
+              value: value,
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  key: itemKey,
+                  value: value,
+                  child: const Text(value),
+                ),
+              ],
+              onChanged: (_) { },
             ),
           ),
         ),
@@ -2982,11 +2986,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
-    expect(itemBoxes[0].localToGlobal(Offset.zero).dx, 0.0);
-    expect(itemBoxes[0].localToGlobal(Offset.zero).dy, 228.5);
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dx, 364.0);
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dy, 47.5);
 
-    expect(itemBoxes[1].localToGlobal(Offset.zero).dx, 16.0);
-    expect(itemBoxes[1].localToGlobal(Offset.zero).dy, 228.5);
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dx, 364.0);
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dy, 47.5);
 
     expect(
       find.ancestor(
