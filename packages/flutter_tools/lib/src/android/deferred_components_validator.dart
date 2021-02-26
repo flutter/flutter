@@ -9,7 +9,6 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../build_system/build_system.dart';
 import '../globals.dart' as globals;
 
 /// A class to configure and run deferred component setup verification checks

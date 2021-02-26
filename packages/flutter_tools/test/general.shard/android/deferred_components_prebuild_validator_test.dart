@@ -21,36 +21,18 @@ void main() {
   FileSystem fileSystem;
   BufferLogger logger;
   Environment env;
-
-  Environment createEnvironment() {
-    final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
-    final Environment result = Environment(
-      outputDir: fileSystem.directory('/output'),
-      buildDir: fileSystem.directory('/build'),
-      projectDir: fileSystem.directory('/project'),
-      defines: defines,
-      inputs: <String, String>{},
-      cacheDir: fileSystem.directory('/cache'),
-      flutterRootDir: fileSystem.directory('/flutter_root'),
-      artifacts: globals.artifacts,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: globals.processManager,
-      engineVersion: 'invalidEngineVersion',
-      generateDartPluginRegistry: false,
-    );
-    return result;
-  }
+  Directory projectDir;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    env = createEnvironment();
+    projectDir = fileSystem.directory('/project');
   });
 
   testWithoutContext('No checks passes', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
     );
@@ -61,7 +43,8 @@ void main() {
 
   testWithoutContext('clearTempDir passes', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
     );
@@ -84,7 +67,8 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -121,7 +105,8 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -158,7 +143,8 @@ void main() {
     androidManifestTemplate.writeAsStringSync('fake AndroidManigest.xml template {{componentName}}', flush: true, mode: FileMode.append);
 
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
       templatesDir: templatesDir,
@@ -189,7 +175,8 @@ void main() {
 
   testWithoutContext('androidStringMapping creates new file', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
     );
@@ -255,7 +242,8 @@ void main() {
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
     final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-      env,
+      projectDir,
+      logger,
       exitOnFail: false,
       title: 'test check',
     );
