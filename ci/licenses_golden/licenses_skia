@@ -1,4 +1,4 @@
-Signature: 4326050828976164ee30a066c9a4da92
+Signature: 2cb5271a87fdd68fbeb03e7ee5b7f614
 
 UNUSED LICENSES:
 
@@ -5218,6 +5218,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLDefinitionMap.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLOperators.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLForStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
@@ -5967,15 +5968,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Metal.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Pipeline.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2SPIRV.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkDescriptorDeserialize.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDDLThreading.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkParagraph.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2019 Google, LLC
+Copyright 2021 Google, LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6008,11 +6006,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkParagraph.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkParagraph.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Metal.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Pipeline.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2SPIRV.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSkDescriptorDeserialize.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2021 Google, LLC
+Copyright 2019 Google, LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
