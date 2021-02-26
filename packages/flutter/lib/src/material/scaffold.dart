@@ -8,13 +8,11 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'button_bar.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -27,7 +25,6 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'snack_bar_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // late TabController tabController;
@@ -1557,7 +1554,7 @@ class Scaffold extends StatefulWidget {
   /// Typically this is a list of [TextButton] widgets. These buttons are
   /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
-  /// These widgets will be wrapped in a [ButtonBar].
+  /// These widgets will be wrapped in an [OverflowBar].
   ///
   /// The [persistentFooterButtons] are rendered above the
   /// [bottomNavigationBar] but below the [body].
@@ -3116,8 +3113,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           ),
           child: SafeArea(
             top: false,
-            child: ButtonBar(
-              children: widget.persistentFooterButtons!,
+            child: IntrinsicHeight(
+              child: Container(
+                alignment: AlignmentDirectional.centerEnd,
+                padding: const EdgeInsets.all(8),
+                child: OverflowBar(
+                  spacing: 8,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  children: widget.persistentFooterButtons!,
+                ),
+              ),
             ),
           ),
         ),

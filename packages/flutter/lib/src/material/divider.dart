@@ -230,6 +230,48 @@ class Divider extends StatelessWidget {
 /// The box's total width is controlled by [width]. The appropriate
 /// padding is automatically computed from the width.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a [VerticalDivider] between an purple and orange box
+/// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
+/// horizontally centered black line that is 1 logical pixels thick. The grey
+/// line is indented by 20 logical pixels.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     padding: const EdgeInsets.all(10),
+///     child: Row(
+///       children: <Widget>[
+///         Expanded(
+///           child: Container(
+///             decoration: BoxDecoration(
+///               borderRadius: BorderRadius.circular(10),
+///               color: Colors.deepPurpleAccent,
+///             ),
+///           ),
+///         ),
+///         const VerticalDivider(
+///           color: Colors.grey,
+///           thickness: 1,
+///           indent: 20,
+///           endIndent: 0,
+///           width: 20,
+///         ),
+///         Expanded(
+///           child: Container(
+///             decoration: BoxDecoration(
+///               borderRadius: BorderRadius.circular(10),
+///               color: Colors.deepOrangeAccent,
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [ListView.separated], which can be used to generate vertical dividers.

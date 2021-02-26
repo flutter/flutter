@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'colors.dart';
@@ -982,6 +981,9 @@ class ListTile extends StatelessWidget {
   static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) sync* {
     assert(tiles != null);
     assert(color != null || context != null);
+
+    if (tiles.isEmpty)
+      return;
 
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();

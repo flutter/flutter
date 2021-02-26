@@ -35,6 +35,7 @@ import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
+import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
@@ -194,7 +195,7 @@ class FlutterDevice {
 
   DevFSWriter devFSWriter;
   Stream<Uri> observatoryUris;
-  vm_service.VmService vmService;
+  FlutterVmService vmService;
   DevFS devFS;
   ApplicationPackage package;
   List<String> fileSystemRoots;
@@ -236,7 +237,7 @@ class FlutterDevice {
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
       bool existingDds = false;
-      vm_service.VmService service;
+      FlutterVmService service;
       if (!disableDds) {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $e');
@@ -249,9 +250,6 @@ class FlutterDevice {
         // from an old application instance, we shouldn't try and start DDS.
         try {
           service = await connectToVmService(observatoryUri);
-          // TODO(dnfield): Remove ignore once internal repo is up to date
-          // https://github.com/flutter/flutter/issues/74518
-          // ignore: await_only_futures
           await service.dispose();
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
@@ -305,7 +303,7 @@ class FlutterDevice {
             if (!existingDds)
               device.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
           ]
-        ) as vm_service.VmService;
+        ) as FlutterVmService;
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
@@ -364,7 +362,7 @@ class FlutterDevice {
         ));
       }
     }
-    return vmService.onDone
+    return vmService.service.onDone
       .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
           'unhandled error waiting for vm service exit:\n $error',
@@ -399,45 +397,50 @@ class FlutterDevice {
   Future<void> debugDumpApp() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpApp(
+      final String data = await vmService.flutterDebugDumpApp(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpRenderTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpRenderTree(
+      final String data = await vmService.flutterDebugDumpRenderTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpLayerTree() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpLayerTree(
+      final String data = await vmService.flutterDebugDumpLayerTree(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
-      await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
+      final String data = await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
         isolateId: view.uiIsolate.id,
       );
+      globals.printStatus(data);
     }
   }
 
@@ -550,7 +553,7 @@ class FlutterDevice {
   }
 
   Future<void> initLogReader() async {
-    final vm_service.VM vm = await vmService.getVM();
+    final vm_service.VM vm = await vmService.service.getVM();
     final DeviceLogReader logReader = await device.getLogReader(app: package);
     logReader.appPid = vm.pid;
   }
@@ -757,6 +760,7 @@ abstract class ResidentRunner {
     this.hotMode = true,
     String dillOutputPath,
     this.machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.path.absolute(target),
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -774,6 +778,7 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
   @protected
@@ -795,7 +800,8 @@ abstract class ResidentRunner {
   final CommandHelp commandHelp;
   final bool machine;
 
-  DevtoolsLauncher _devToolsLauncher;
+  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
+  ResidentDevtoolsHandler _residentDevtoolsHandler;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -878,6 +884,7 @@ abstract class ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
+    bool enableDevTools = false,
     String route,
   });
 
@@ -885,6 +892,7 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     bool allowExistingDdsInstance = false,
+    bool enableDevTools = false,
   });
 
   bool get supportsRestart => false;
@@ -909,6 +917,7 @@ abstract class ResidentRunner {
       outputDir: globals.fs.directory(getBuildDirectory()),
       processManager: globals.processManager,
       projectDir: globals.fs.currentDirectory,
+      generateDartPluginRegistry: true,
     );
     _lastBuild = await globals.buildSystem.buildIncremental(
       const GenerateLocalizationsTarget(),
@@ -961,15 +970,15 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    await shutdownDevTools();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
-    await exitApp();
+    await exitApp(); // calls appFinished
     await shutdownDartDevelopmentService();
   }
 
   Future<void> detach() async {
-    await shutdownDevTools();
+    await residentDevtoolsHandler.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     await shutdownDartDevelopmentService();
@@ -1263,99 +1272,11 @@ abstract class ResidentRunner {
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
-      unawaited(device.vmService.onDone.then<void>(
+      unawaited(device.vmService.service.onDone.then<void>(
         _serviceProtocolDone,
         onError: _serviceProtocolError,
       ).whenComplete(_serviceDisconnected));
     }
-  }
-
-  DevToolsServerAddress activeDevToolsServer() {
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    return _devToolsLauncher.activeDevToolsServer;
-  }
-
-  Future<void> serveDevToolsGracefully({
-    Uri devToolsServerAddress
-  }) async {
-    if (!supportsServiceProtocol) {
-      return;
-    }
-
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (devToolsServerAddress != null) {
-      _devToolsLauncher.devToolsUri = devToolsServerAddress;
-    } else {
-      await _devToolsLauncher.serve();
-    }
-  }
-
-  Future<void> maybeCallDevToolsUriServiceExtension() async {
-    _devToolsLauncher ??= DevtoolsLauncher.instance;
-    if (_devToolsLauncher?.activeDevToolsServer != null) {
-      await Future.wait(<Future<void>>[
-        for (final FlutterDevice device in flutterDevices)
-          _callDevToolsUriExtension(device),
-      ]);
-    }
-  }
-
-  Future<void> _callDevToolsUriExtension(FlutterDevice device) async {
-    if (_devToolsLauncher == null) {
-      return;
-    }
-    await waitForExtension(device.vmService, 'ext.flutter.activeDevToolsServerAddress');
-    try {
-      if (_devToolsLauncher == null) {
-        return;
-      }
-      unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
-        'ext.flutter.activeDevToolsServerAddress',
-        device: device,
-        params: <String, dynamic>{
-          'value': _devToolsLauncher.activeDevToolsServer.uri.toString(),
-        },
-      ));
-    } on Exception catch (e) {
-      globals.printError(
-        'Failed to set DevTools server address: ${e.toString()}. Deep links to'
-        ' DevTools will not show in Flutter errors.',
-      );
-    }
-  }
-
-  Future<void> callConnectedVmServiceUriExtension() async {
-    await Future.wait(<Future<void>>[
-      for (final FlutterDevice device in flutterDevices)
-        _callConnectedVmServiceExtension(device),
-    ]);
-  }
-
-  Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
-    if (device.vmService.httpAddress != null || device.vmService.wsAddress != null) {
-      final Uri uri = device.vmService.httpAddress ?? device.vmService.wsAddress;
-      await waitForExtension(device.vmService, 'ext.flutter.connectedVmServiceUri');
-      try {
-        unawaited(invokeFlutterExtensionRpcRawOnFirstIsolate(
-          'ext.flutter.connectedVmServiceUri',
-          device: device,
-          params: <String, dynamic>{
-            'value': uri.toString(),
-          },
-        ));
-      } on Exception catch (e) {
-        globals.printError(e.toString());
-        globals.printError(
-          'Failed to set vm service URI: ${e.toString()}. Deep links to DevTools'
-          ' will not show in Flutter errors.',
-        );
-      }
-    }
-  }
-
-  Future<void> shutdownDevTools() async {
-    await _devToolsLauncher?.close();
-    _devToolsLauncher = null;
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
@@ -1417,6 +1338,40 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  bool get reportedDebuggers => _reportedDebuggers;
+  bool _reportedDebuggers = false;
+
+  void printDebuggerList({ bool includeObservatory = true, bool includeDevtools = true }) {
+    final DevToolsServerAddress devToolsServerAddress = residentDevtoolsHandler.activeDevToolsServer;
+    if (devToolsServerAddress == null) {
+      includeDevtools = false;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
+        continue;
+      }
+      if (includeObservatory) {
+        // Caution: This log line is parsed by device lab tests.
+        globals.printStatus(
+          'An Observatory debugger and profiler on ${device.device.name} is available at: '
+          '${device.vmService.httpAddress}',
+        );
+      }
+      if (includeDevtools) {
+        final Uri uri = devToolsServerAddress.uri?.replace(
+          queryParameters: <String, dynamic>{'uri': '${device.vmService.httpAddress}'},
+        );
+        if (uri != null) {
+          globals.printStatus(
+            'The Flutter DevTools debugger and profiler '
+            'on ${device.device.name} is available at: $uri',
+          );
+        }
+      }
+    }
+    _reportedDebuggers = true;
+  }
+
   /// Called to print help to the terminal.
   void printHelp({ @required bool details });
 
@@ -1462,36 +1417,6 @@ abstract class ResidentRunner {
   void clearScreen() => globals.logger.clear();
 }
 
-@visibleForTesting
-Future<void> waitForExtension(vm_service.VmService vmService, String extension) async {
-  final Completer<void> completer = Completer<void>();
-  try {
-    await vmService.streamListen(vm_service.EventStreams.kExtension);
-  } on Exception {
-    // do nothing
-  }
-  StreamSubscription<vm_service.Event> extensionStream;
-  extensionStream = vmService.onExtensionEvent.listen((vm_service.Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      // The 'Flutter.FrameworkInitialization' event is sent on hot restart
-      // as well, so make sure we don't try to complete this twice.
-      if (!completer.isCompleted) {
-        completer.complete();
-        extensionStream.cancel();
-      }
-    }
-  });
-  final vm_service.VM vm = await vmService.getVM();
-  if (vm.isolates.isNotEmpty) {
-    final vm_service.IsolateRef isolateRef = vm.isolates.first;
-    final vm_service.Isolate isolate = await vmService.getIsolate(isolateRef.id);
-    if (isolate.extensionRPCs.contains(extension)) {
-      return;
-    }
-  }
-  await completer.future;
-}
-
 class OperationResult {
   OperationResult(this.code, this.message, { this.fatal = false });
 
@@ -1531,17 +1456,27 @@ class TerminalHandler {
     @required Logger logger,
     @required Terminal terminal,
     @required Signals signals,
+    @required io.ProcessInfo processInfo,
+    @required bool reportReady,
+    String pidFile,
   }) : _logger = logger,
        _terminal = terminal,
-       _signals = signals;
+       _signals = signals,
+       _processInfo = processInfo,
+       _reportReady = reportReady,
+       _pidFile = pidFile;
 
   final Logger _logger;
   final Terminal _terminal;
   final Signals _signals;
+  final io.ProcessInfo _processInfo;
+  final bool _reportReady;
+  final String _pidFile;
 
   final ResidentRunner residentRunner;
   bool _processingUserRequest = false;
   StreamSubscription<void> subscription;
+  File _actualPidFile;
 
   @visibleForTesting
   String lastReceivedCommand;
@@ -1555,7 +1490,6 @@ class TerminalHandler {
     subscription = _terminal.keystrokes.listen(processTerminalInput);
   }
 
-
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
   void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
@@ -1564,19 +1498,30 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-
     _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
     _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
-    if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart) {
-      return;
+    if (residentRunner.supportsServiceProtocol && residentRunner.supportsRestart) {
+      _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
+      _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
+      if (_pidFile != null) {
+        _logger.printTrace('Writing pid to: $_pidFile');
+        _actualPidFile = _processInfo.writePidFile(_pidFile);
+      }
     }
-    _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
-    _addSignalHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
   }
 
   /// Unregisters terminal signal and keystroke handlers.
   void stop() {
     assert(residentRunner.stayResident);
+    if (_actualPidFile != null) {
+      try {
+        _logger.printTrace('Deleting pid file (${_actualPidFile.path}).');
+        _actualPidFile.deleteSync();
+      } on FileSystemException catch (error) {
+        _logger.printError('Failed to delete pid file (${_actualPidFile.path}): ${error.message}');
+      }
+      _actualPidFile = null;
+    }
     for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
       _signals.removeHandler(entry.key, entry.value);
     }
@@ -1702,6 +1647,9 @@ class TerminalHandler {
       rethrow;
     } finally {
       _processingUserRequest = false;
+      if (_reportReady) {
+        _logger.printStatus('ready');
+      }
     }
   }
 
@@ -1731,8 +1679,6 @@ class TerminalHandler {
 class DebugConnectionInfo {
   DebugConnectionInfo({ this.httpUri, this.wsUri, this.baseUri });
 
-  // TODO(danrubel): the httpUri field should be removed as part of
-  // https://github.com/flutter/flutter/issues/7050
   final Uri httpUri;
   final Uri wsUri;
   final String baseUri;
@@ -1763,24 +1709,51 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  Uri devToolsUri;
+  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
+
+  /// Serve Dart DevTools and return the host and port they are available on.
+  ///
+  /// This method must return a future that is guaranteed not to fail, because it
+  /// will be used in unawaited contexts. It may, however, return null.
+  Future<DevToolsServerAddress> serve();
 
   /// Launch a Dart DevTools process, optionally targeting a specific VM Service
   /// URI if [vmServiceUri] is non-null.
+  ///
+  /// This method must return a future that is guaranteed not to fail, because it
+  /// will be used in unawaited contexts.
+  @visibleForTesting
   Future<void> launch(Uri vmServiceUri);
-
-  /// Serve Dart DevTools and return the host and port they are available on.
-  Future<DevToolsServerAddress> serve();
 
   Future<void> close();
 
-  static DevtoolsLauncher get instance => context.get<DevtoolsLauncher>();
+  /// Returns a future that completes when the DevTools server is ready.
+  ///
+  /// Completes when [devToolsUrl] is set. That can be set either directly, or
+  /// by calling [serve].
+  Future<void> get ready => _readyCompleter.future;
+  Completer<void> _readyCompleter = Completer<void>();
 
+  Uri get devToolsUrl => _devToolsUrl;
+  Uri _devToolsUrl;
+  set devToolsUrl(Uri value) {
+    assert((_devToolsUrl == null) != (value == null));
+    _devToolsUrl = value;
+    if (_devToolsUrl != null) {
+      _readyCompleter.complete();
+    } else {
+      _readyCompleter = Completer<void>();
+    }
+  }
+
+  /// The URL of the current DevTools server.
+  ///
+  /// Returns null if [ready] is not complete.
   DevToolsServerAddress get activeDevToolsServer {
-    if (devToolsUri == null) {
+    if (_devToolsUrl == null) {
       return null;
     }
-    return DevToolsServerAddress(devToolsUri.host, devToolsUri.port);
+    return DevToolsServerAddress(devToolsUrl.host, devToolsUrl.port);
   }
 }
 

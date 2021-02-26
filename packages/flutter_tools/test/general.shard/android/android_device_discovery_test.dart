@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
@@ -25,6 +26,7 @@ void main() {
     androidWorkflow = AndroidWorkflow(
       androidSdk: FakeAndroidSdk(),
       featureFlags: TestFeatureFlags(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
   });
 
@@ -35,6 +37,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -47,15 +50,17 @@ void main() {
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics when adb cannot be run', () async {
+    final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeProcessManager.excludedExecutables.add('adb');
     final AndroidDevices androidDevices = AndroidDevices(
-      androidSdk: FakeAndroidSdk(null),
+      androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk('adb'),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
-      // Will throw an exception if anything other than canRun is invoked
-      processManager: FakeProcessManger(),
+      processManager: fakeProcessManager,
       fileSystem: MemoryFileSystem.test(),
       platform: FakePlatform(),
       userMessages: UserMessages(),
@@ -63,6 +68,7 @@ void main() {
 
     expect(await androidDevices.pollingGetDevices(), isEmpty);
     expect(await androidDevices.getDiagnostics(), isEmpty);
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
   testWithoutContext('AndroidDevices returns empty device list and diagnostics on null Android SDK', () async {
@@ -72,6 +78,7 @@ void main() {
       androidWorkflow: AndroidWorkflow(
         androidSdk: FakeAndroidSdk(null),
         featureFlags: TestFeatureFlags(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
       fileSystem: MemoryFileSystem.test(),
@@ -113,6 +120,7 @@ void main() {
         featureFlags: TestFeatureFlags(
           isAndroidEnabled: false,
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       ),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
@@ -238,11 +246,4 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final String adbPath;
-}
-
-class FakeProcessManger extends Fake implements ProcessManager {
-  @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
-    return false;
-  }
 }

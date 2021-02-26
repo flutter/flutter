@@ -14,7 +14,7 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 void main() {

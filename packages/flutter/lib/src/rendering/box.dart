@@ -1832,7 +1832,7 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryLayout = true;
       return true;
     }());
-    final Size result =  computeDryLayout(constraints);
+    final Size result = computeDryLayout(constraints);
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
@@ -2583,8 +2583,8 @@ abstract class RenderBox extends RenderObject {
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.
   /// (This is useful because [PointerEvent.position] is in global coordinates.)
   ///
-  /// If you override this, consider calling [debugHandleEvent] as follows, so
-  /// that you can support [debugPaintPointersEnabled]:
+  /// Implementations of this method should call [debugHandleEvent] as follows,
+  /// so that they support [debugPaintPointersEnabled]:
   ///
   /// ```dart
   /// @override

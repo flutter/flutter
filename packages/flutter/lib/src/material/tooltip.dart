@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'feedback.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip_theme.dart';
 
 /// A material design tooltip.

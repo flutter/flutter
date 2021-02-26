@@ -1248,6 +1248,46 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OutlinedButton, '200xh')).width, 200);
     expect(tester.getSize(find.widgetWithText(OutlinedButton, 'wx200')).height, 200);
   });
+
+  testWidgets('OutlinedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                splashFactory: splashFactory,
+              ),
+              onPressed: () { },
+              child: const Text('test'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // NoSplash.splashFactory, no splash circles drawn
+    await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    // Default splashFactory (from Theme.of().splashFactory), one splash circle drawn.
+    await tester.pumpWidget(buildFrame());
+    {
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
+      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {

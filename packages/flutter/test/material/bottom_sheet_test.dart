@@ -4,8 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -734,6 +732,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showModalBottomSheet<void>(
                   context: context,
@@ -754,7 +753,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -793,6 +791,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 showBottomSheet<void>(
                   context: context,
@@ -817,7 +816,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },

@@ -368,6 +368,7 @@ Future<void> main() async {
           // test_plugin_objc no longer supports iOS, shouldn't be present.
         || podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')) {
+        print(podfileLockOutput);
         return TaskResult.failure('Podfile.lock does not contain expected pods');
       }
 
@@ -415,6 +416,7 @@ void _validateIosPodfile(String appPath) {
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')
     || podfileLockOutput.contains('url_launcher_macos')) {
+    print(podfileLockOutput);
     throw TaskResult.failure('iOS Podfile.lock does not contain expected pods');
   }
 
@@ -472,6 +474,7 @@ void _validateMacOSPodfile(String appPath) {
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
       || podfileLockOutput.contains('url_launcher/')) {
+    print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
 

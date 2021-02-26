@@ -6,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 class MockClipboard {
@@ -199,17 +197,34 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pumpAndSettle();
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 7);
 
     // Paste is showing even though clipboard is empty.
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
+    expect(find.descendant(
+      of: find.byType(Overlay),
+      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+    ), findsNWidgets(2));
 
     // Tap copy to add something to the clipboard and close the menu.
     await tester.tapAt(tester.getCenter(find.text('Copy')));
     await tester.pumpAndSettle();
+
+    // The menu is gone, but the handles are visible on the existing selection.
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(controller.selection.isCollapsed, isFalse);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 7);
+    expect(find.descendant(
+      of: find.byType(Overlay),
+      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+    ), findsNWidgets(2));
 
     // Double tap to show the menu again.
     await tester.tapAt(textOffsetToPosition(tester, index));

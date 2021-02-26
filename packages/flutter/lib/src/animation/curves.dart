@@ -550,7 +550,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
 ///  * [Curve2D.generateSamples], which generates samples of this type.
 ///  * [Curve2D], a parametric curve that maps a double parameter to a 2D location.
 class Curve2DSample {
-  /// A const constructor for the sample so that subclasses can be const.
+  /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
   const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);

@@ -18,14 +18,14 @@ vm.Timeline _kTimelines = vm.Timeline(
 );
 
 Future<void> main() async {
-  Future<Map<String, dynamic>> request;
+  Future<Map<String, dynamic>>? request;
 
   group('Test Integration binding', () {
     final WidgetsBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
     assert(binding is IntegrationTestWidgetsFlutterBinding);
     final IntegrationTestWidgetsFlutterBinding integrationBinding = binding as IntegrationTestWidgetsFlutterBinding;
 
-    FakeVM fakeVM;
+    FakeVM? fakeVM;
 
     setUp(() {
       request = integrationBinding.callback(<String, String>{
@@ -74,9 +74,9 @@ Future<void> main() async {
       await integrationBinding.enableTimeline(vmService: fakeVM);
       await integrationBinding.traceAction(() async {});
       expect(integrationBinding.reportData, isNotNull);
-      expect(integrationBinding.reportData.containsKey('timeline'), true);
+      expect(integrationBinding.reportData!.containsKey('timeline'), true);
       expect(
-        json.encode(integrationBinding.reportData['timeline']),
+        json.encode(integrationBinding.reportData!['timeline']),
         json.encode(_kTimelines),
       );
     });
@@ -107,20 +107,20 @@ Future<void> main() async {
     // part of the `tearDownAll` registerred in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
     final Map<String, dynamic> response =
-        (await request)['response'] as Map<String, dynamic>;
+        (await request)!['response'] as Map<String, dynamic>;
     final String message = response['message'] as String;
     final Response result = Response.fromJson(message);
-    assert(result.data['answer'] == 42);
+    assert(result.data!['answer'] == 42);
   });
 }
 
 class FakeVM extends Fake implements vm.VmService {
-  FakeVM({@required this.timeline});
+  FakeVM({required this.timeline});
 
   vm.Timeline timeline;
 
   @override
-  Future<vm.Timeline> getVMTimeline({int timeOriginMicros, int timeExtentMicros}) async {
+  Future<vm.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
     return timeline;
   }
 

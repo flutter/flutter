@@ -15,9 +15,8 @@ import 'package:mockito/mockito.dart';
 import 'package:fake_async/fake_async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcess,
-                                   MockProcessManager,
-                                   MockStdio,
+import '../../src/fakes.dart';
+import '../../src/mocks.dart' show MockProcessManager,
                                    flakyProcessFactory;
 
 void main() {
@@ -90,7 +89,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: FakeStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
@@ -101,7 +100,7 @@ void main() {
       );
     });
 
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, {
+    FakeProcess Function(List<String>) processMetaFactory(List<String> stdout, {
       List<String> stderr = const <String>[],
     }) {
       final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
@@ -110,7 +109,7 @@ void main() {
       final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(
         stderr.map<List<int>>((String s) => s.codeUnits,
       ));
-      return (List<String> command) => MockProcess(stdout: stdoutStream, stderr: stderrStream);
+      return (List<String> command) => FakeProcess(stdout: stdoutStream, stderr: stderrStream);
     }
 
     testWithoutContext('Command output is not wrapped.', () async {
@@ -280,7 +279,7 @@ void main() {
       fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: FakeStdio(),
           platform: FakePlatform(stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),

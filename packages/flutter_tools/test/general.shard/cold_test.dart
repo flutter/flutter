@@ -18,12 +18,11 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
 void main() {
   testUsingContext('Exits with code 2 when when HttpException is thrown '
     'during VM service connection', () async {
-    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
     final MockDevice mockDevice = MockDevice();
     when(mockDevice.supportsHotReload).thenReturn(true);
     when(mockDevice.supportsHotRestart).thenReturn(false);
@@ -42,7 +41,9 @@ void main() {
     final int exitCode = await ColdRunner(devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
-    ).attach();
+    ).attach(
+      enableDevTools: false,
+    );
     expect(exitCode, 2);
   });
 
@@ -90,7 +91,9 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-      ).run();
+      ).run(
+        enableDevTools: false,
+      );
 
       expect(result, 1);
       verify(mockFlutterDevice.runCold(
@@ -136,3 +139,5 @@ class TestFlutterDevice extends FlutterDevice {
     throw exception;
   }
 }
+
+class FakeResidentCompiler extends Fake implements ResidentCompiler {}

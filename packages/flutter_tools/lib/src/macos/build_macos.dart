@@ -34,7 +34,7 @@ Future<void> buildMacOS({
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
     throwToolExit('No macOS desktop project configured. '
-      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
+      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
   }
 

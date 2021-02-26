@@ -261,8 +261,30 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   String get pathVarSeparator => ':';
 
+  HostPlatform _hostPlatform;
+
   @override
-  HostPlatform hostPlatform = HostPlatform.linux_x64;
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      final RunResult hostPlatformCheck =
+          _processUtils.runSync(<String>['uname', '-m']);
+      // On x64 stdout is "uname -m: x86_64"
+      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
+      if (hostPlatformCheck.exitCode != 0) {
+        _logger.printError(
+          'Error trying to run uname -m'
+          '\nstdout: ${hostPlatformCheck.stdout}'
+          '\nstderr: ${hostPlatformCheck.stderr}',
+        );
+        _hostPlatform = HostPlatform.linux_x64;
+      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
+        _hostPlatform = HostPlatform.linux_x64;
+      } else {
+        _hostPlatform = HostPlatform.linux_arm64;
+      }
+    }
+    return _hostPlatform;
+  }
 }
 
 class _MacOSUtils extends _PosixUtils {
@@ -296,8 +318,6 @@ class _MacOSUtils extends _PosixUtils {
     }
     return _name;
   }
-
-  HostPlatform _hostPlatform;
 
   // On ARM returns arm64, even when this process is running in Rosetta.
   @override

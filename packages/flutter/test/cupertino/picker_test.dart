@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -203,7 +202,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, -100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(
           systemCalls.single,
@@ -213,7 +212,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, 100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, 100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1, 0]);
         expect(systemCalls, hasLength(2));
         expect(
@@ -254,7 +253,7 @@ void main() {
           ),
         );
 
-        await tester.drag(find.text('0'), const Offset(0.0, -100.0));
+        await tester.drag(find.text('0'), const Offset(0.0, -100.0), warnIfMissed: false); // has an IgnorePointer
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
     }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
@@ -285,7 +284,7 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0);
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       // The item that was in the center now moved a bit.
       expect(
@@ -302,7 +301,7 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0);
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       await tester.pumpAndSettle();
 
@@ -344,6 +343,7 @@ void main() {
         find.text('10'),
         const Offset(0.0, 10000.0),
         1000.0,
+        warnIfMissed: false, // has an IgnorePointer
       );
 
       // Should have been flung far enough that even the first item goes off

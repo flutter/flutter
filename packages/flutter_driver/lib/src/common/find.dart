@@ -64,20 +64,6 @@ class WaitFor extends CommandWithTarget {
   String get kind => 'waitFor';
 }
 
-/// The result of a [WaitFor] command.
-class WaitForResult extends Result {
-  /// Creates a [WaitForResult].
-  const WaitForResult();
-
-  /// Deserializes the result from JSON.
-  static WaitForResult fromJson(Map<String, dynamic> json) {
-    return const WaitForResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
-}
-
 /// A Flutter Driver command that waits until [finder] can no longer locate the target.
 class WaitForAbsent extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
@@ -92,20 +78,6 @@ class WaitForAbsent extends CommandWithTarget {
 
   @override
   String get kind => 'waitForAbsent';
-}
-
-/// The result of a [WaitForAbsent] command.
-class WaitForAbsentResult extends Result {
-  /// Creates a [WaitForAbsentResult].
-  const WaitForAbsentResult();
-
-  /// Deserializes the result from JSON.
-  static WaitForAbsentResult fromJson(Map<String, dynamic> json) {
-    return const WaitForAbsentResult();
-  }
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
 }
 
 /// Base class for Flutter Driver finders, objects that describe how the driver

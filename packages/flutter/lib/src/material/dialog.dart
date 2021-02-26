@@ -218,6 +218,39 @@ class Dialog extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
+///
+/// This demo shows a [TextButton] which when pressed, calls [showDialog]. When called, this method
+/// displays a Material dialog above the current contents of the app and returns
+/// a [Future] that completes when the dialog is dismissed.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextButton(
+///     onPressed: () => showDialog<String>(
+///       context: context,
+///       builder: (BuildContext context) => AlertDialog(
+///         title: const Text('AlertDialog Tilte'),
+///         content: const Text('AlertDialog description'),
+///         actions: [
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'Cancel'),
+///             child: const Text('Cancel'),
+///           ),
+///           TextButton(
+///             onPressed: () => Navigator.pop(context, 'OK'),
+///             child: const Text('OK'),
+///           ),
+///         ],
+///       ),
+///     ),
+///     child: Text('Show Dialog'),
+///   );
+/// }
+///
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
@@ -391,13 +424,8 @@ class AlertDialog extends StatelessWidget {
   /// This is different from [actionsPadding], which defines the padding
   /// between the entire button bar and the edges of the dialog.
   ///
-  /// If this property is null, then it will use the surrounding
-  /// [ButtonBarThemeData.buttonPadding]. If that is null, it will default to
+  /// If this property is null, then it will default to
   /// 8.0 logical pixels on the left and right.
-  ///
-  /// See also:
-  ///
-  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry? buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -438,13 +466,6 @@ class AlertDialog extends StatelessWidget {
   /// to overflow. Both [title] and [content] are wrapped in a scroll view,
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
-  @Deprecated(
-    'Set scrollable to `true`. This parameter will be removed and '
-    'was introduced to migrate AlertDialog to be scrollable by '
-    'default. For more information, see '
-    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
-    'This feature was deprecated after v1.13.2.'
-  )
   final bool scrollable;
 
   @override
@@ -512,13 +533,19 @@ class AlertDialog extends StatelessWidget {
 
 
     if (actions != null) {
+      final double spacing = (buttonPadding?.horizontal ?? 16) / 2;
       actionsWidget = Padding(
         padding: actionsPadding,
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
-          overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
-          children: actions!,
+        child: Container(
+          alignment: AlignmentDirectional.centerEnd,
+          padding: EdgeInsets.all(spacing),
+          child: OverflowBar(
+            spacing: spacing,
+            overflowAlignment: OverflowBarAlignment.end,
+            overflowDirection: actionsOverflowDirection ?? VerticalDirection.down,
+            overflowSpacing: actionsOverflowButtonSpacing ?? 0,
+            children: actions!,
+          ),
         ),
       );
     }
