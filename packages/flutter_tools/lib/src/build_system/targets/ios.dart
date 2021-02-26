@@ -535,7 +535,7 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
   }
 }
 
-/// Destructively thins the specified executable file to include only the specified architectures.
+/// Destructively thins the Flutter.framework to include only the specified architectures.
 ///
 /// This target is not fingerprinted and will always run.
 class ThinIosApplicationFrameworks extends Target {
@@ -560,15 +560,9 @@ class ThinIosApplicationFrameworks extends Target {
     }
     final Directory frameworkDirectory = environment.outputDir;
 
-    final File appFramework = frameworkDirectory.childDirectory('App.framework').childFile('App');
     final File flutterFramework = frameworkDirectory.childDirectory('Flutter.framework').childFile('Flutter');
-    await _thinBinary(appFramework, environment);
-    await _thinBinary(flutterFramework, environment);
-  }
-
-  Future<void> _thinBinary(File binary, Environment environment) async {
-    final String binaryPath = binary.path;
-    if (!binary.existsSync()) {
+    final String binaryPath = flutterFramework.path;
+    if (!flutterFramework.existsSync()) {
       throw Exception('Binary $binaryPath does not exist, cannot thin');
     }
     final String archs = environment.defines[kIosArchs];
