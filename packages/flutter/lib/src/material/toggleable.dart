@@ -17,15 +17,19 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
-/// A mixin for [StatefulWidget]s that implement toggleable controls with toggle
-/// animations (e.g. [Switch]es, [Checkbox]es, and [Radio]s).
+/// A mixin for [StatefulWidget]s that implement material-themed toggleable
+/// controls with toggle animations (e.g. [Switch]es, [Checkbox]es, and
+/// [Radio]s).
 ///
-/// This mixin implements the logic for toggeling the control (e.g. when tapped)
+/// The mixin implements the logic for toggling the control (e.g. when tapped)
 /// and provides a series of animation controllers to transition the control
 /// from one state to another. It does not have any opinion about the visual
 /// representation of the toggleable widget. The visuals are defined by a
 /// [CustomPainter] passed to the [buildToggleable]. [State] objects using this
 /// mixin should call that method from their [build] method.
+///
+/// This mixin is used to implement the material components for [Switch],
+/// [Checkbox], and [Radio] controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
   /// Used by subclasses to manipulate the visual value of the control.
@@ -204,10 +208,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     super.dispose();
   }
 
-  /// The [Offset] within the Toggleable at which a pointer touched the
-  /// Toggleable.
+  /// The most recent [Offset] at which a pointer touched the Toggleable.
   ///
-  /// This is null if currently no pointer is touching the Toggleable.
+  /// This is null if currently no pointer is touching the Toggleable or if
+  /// [isInteractive] is false.
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
 
@@ -238,9 +242,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   void _handleTapEnd([TapUpDetails? _]) {
-    setState(() {
-      _downPosition = null;
-    });
+    if (_downPosition != null) {
+      setState(() { _downPosition = null; });
+    }
     _reactionController.reverse();
   }
 
@@ -283,8 +287,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     if (value != false) MaterialState.selected,
   };
 
-  /// Wraps a `painter` that draws the actual visuals of the Toggleable with
-  /// logic to toggle it.
+  /// Typically wraps a `painter` that draws the actual visuals of the
+  /// Toggleable with logic to toggle it.
   ///
   /// Consider providing a subclass of [ToggleablePainter] as a `painter`, which
   /// implements logic to draw a radial ink reaction for this control. The
@@ -292,7 +296,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// [reactionHoverFade], and [reactionFocusFade] animation provided by this
   /// mixin. It is expected to draw the visuals of the Toggleable based on the
   /// current value of these animations. The animations are triggered by
-  /// this mixin to transition the Toggleable from one [state] to another.
+  /// this mixin to transition the Toggleable from one state to another.
   ///
   /// This method must be called from the [build] method of the [State] class
   /// that uses this mixin. The returned [Widget] must be returned from the
