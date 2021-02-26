@@ -449,9 +449,10 @@ void main() {
     });
 
     testUsingContext('test without bot', () async {
+      Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        FakeCommand(command: <String>['${getFlutterRoot()}/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
+        FakeCommand(command: <String>['bin/cache/dart-sdk/bin/pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -473,9 +474,10 @@ void main() {
     });
 
     testUsingContext('test with bot', () async {
+      Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        FakeCommand(command: <String>['${getFlutterRoot()}/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
+        FakeCommand(command: <String>['bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -497,11 +499,12 @@ void main() {
     });
 
     testUsingContext('run pass arguments through to pub', () async {
+      Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
         FakeCommand(command: <String>[
-          '${getFlutterRoot()}/bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
+          'bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
           stdin: stdin,
         ),
       );
