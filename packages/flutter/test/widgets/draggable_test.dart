@@ -196,8 +196,45 @@ void main() {
       ),
     ));
 
-    // Legacy test for clients from before https://github.com/flutter/flutter/issues/76825
-    testWidgets('Drag and drop - onMove callback fires correctly with dynamic parameter', (WidgetTester tester) async {
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(0));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(0));
+
+    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
+    await gesture.moveTo(thirdLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(1));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(targetMoveCount['Target 1'], equals(2));
+    expect(targetMoveCount['Target 2'], equals(1));
+  });
+
+  // Legacy test for clients from before https://github.com/flutter/flutter/issues/76825
+  testWidgets('Drag and drop - onMove callback fires correctly with dynamic parameter', (WidgetTester tester) async {
     final Map<String,int> targetMoveCount = <String,int>{
       'Target 1': 0,
       'Target 2': 0,
@@ -236,43 +273,6 @@ void main() {
         ],
       ),
     ));
-
-    expect(targetMoveCount['Target 1'], equals(0));
-    expect(targetMoveCount['Target 2'], equals(0));
-
-    final Offset firstLocation = tester.getCenter(find.text('Source'));
-    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
-    await tester.pump();
-
-    expect(targetMoveCount['Target 1'], equals(0));
-    expect(targetMoveCount['Target 2'], equals(0));
-
-    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    expect(targetMoveCount['Target 1'], equals(1));
-    expect(targetMoveCount['Target 2'], equals(0));
-
-    final Offset thirdLocation = tester.getCenter(find.text('Target 2'));
-    await gesture.moveTo(thirdLocation);
-    await tester.pump();
-
-    expect(targetMoveCount['Target 1'], equals(1));
-    expect(targetMoveCount['Target 2'], equals(1));
-
-    await gesture.moveTo(secondLocation);
-    await tester.pump();
-
-    expect(targetMoveCount['Target 1'], equals(2));
-    expect(targetMoveCount['Target 2'], equals(1));
-
-    await gesture.up();
-    await tester.pump();
-
-    expect(targetMoveCount['Target 1'], equals(2));
-    expect(targetMoveCount['Target 2'], equals(1));
-  });
 
     expect(targetMoveCount['Target 1'], equals(0));
     expect(targetMoveCount['Target 2'], equals(0));

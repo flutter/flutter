@@ -658,7 +658,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
   /// Note that this includes entering and leaving the target.
-  final DragTargetMove? onMove;
+  final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
   ///
