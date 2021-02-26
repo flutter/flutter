@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -29,12 +30,12 @@ void main() {
           textDirection: TextDirection.ltr,
           text: TextSpan(
             children: <TextSpan>[
-              TextSpan(
+              ReactiveTextSpan(
                 text: 'xxxxxxxx',
                 recognizer: tapLeft,
               ),
               const TextSpan(text: 'yyyyyyyy'),
-              TextSpan(
+              ReactiveTextSpan(
                 text: 'zzzzzzzzz',
                 recognizer: tapRight,
               ),

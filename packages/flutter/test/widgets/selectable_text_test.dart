@@ -4188,7 +4188,7 @@ void main() {
               TextSpan(
                 children: <TextSpan>[
                   const TextSpan(text: 'Atwater '),
-                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  ReactiveTextSpan(text: 'Peel', recognizer: spyRecognizer),
                   const TextSpan(text: ' Sherbrooke Bonaventure'),
                 ],
               ),
@@ -4238,7 +4238,7 @@ void main() {
               TextSpan(
                 children: <TextSpan>[
                   const TextSpan(text: 'Atwater '),
-                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  ReactiveTextSpan(text: 'Peel', recognizer: spyRecognizer),
                   const TextSpan(text: ' Sherbrooke Bonaventure'),
                 ],
               ),

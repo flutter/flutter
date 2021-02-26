@@ -561,9 +561,9 @@ void main() {
   test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
-        TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
+        ReactiveTextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ReactiveTextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+        ReactiveTextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
       ]),
       textDirection: TextDirection.rtl,
     );
@@ -575,7 +575,7 @@ void main() {
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+        ReactiveTextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
       ]),
       textDirection: TextDirection.rtl,
     );
@@ -594,9 +594,9 @@ void main() {
   test('assembleSemanticsNode handles text spans that do not yield selection boxes', () {
     final RenderParagraph paragraph = RenderParagraphWithEmptySelectionBoxList(
       TextSpan(text: '', children: <InlineSpan>[
-        TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
-        TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ReactiveTextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ReactiveTextSpan(text: 'B', recognizer: TapGestureRecognizer()..onTap = () {}),
+        ReactiveTextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
       ]),
       textDirection: TextDirection.rtl,
       emptyListSelection: const TextSelection(baseOffset: 0, extentOffset: 1),
@@ -610,9 +610,9 @@ void main() {
 
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
-      TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
+      ReactiveTextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
       const WidgetSpan(child: SizedBox(width: 0, height: 0)),
-      TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
+      ReactiveTextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),

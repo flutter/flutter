@@ -14,9 +14,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: RichText(
           text: TextSpan(text: 'root', children: <InlineSpan>[
-            TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
-            TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()),
-            TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+            ReactiveTextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+            ReactiveTextSpan(text: 'two', recognizer: LongPressGestureRecognizer()),
+            ReactiveTextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
           ]),
         ),
       ),

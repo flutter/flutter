@@ -316,7 +316,7 @@ void main() {
             text: 'Some Text',
             semanticsLabel: '',
           ),
-          TextSpan(
+          ReactiveTextSpan(
             text: 'Clickable',
             recognizer: TapGestureRecognizer()..onTap = () { },
           ),
@@ -360,7 +360,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'world',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -416,7 +416,7 @@ void main() {
           TextSpan(
             children: <TextSpan>[
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
-              TextSpan(
+              ReactiveTextSpan(
                 text: 'world',
                 recognizer: TapGestureRecognizer()..onTap = () { },
               ),
@@ -465,7 +465,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'world',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -524,12 +524,12 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'BOY',
               recognizer: LongPressGestureRecognizer()..onLongPress = () { },
             ),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'SIR',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -603,7 +603,7 @@ void main() {
       Text.rich(
         TextSpan(
           children: <TextSpan>[
-            TextSpan(
+            ReactiveTextSpan(
               text: 'click me',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -644,7 +644,7 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'pebble',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -718,7 +718,7 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'pebble',
               recognizer: TapGestureRecognizer()..onTap = () { },
             ),
@@ -1003,7 +1003,7 @@ void main() {
         textDirection: TextDirection.ltr,
         text: TextSpan(children: <InlineSpan>[
           const WidgetSpan(child: SizedBox.shrink()),
-          TextSpan(
+          ReactiveTextSpan(
             text: 'HELLO',
             style: const TextStyle(color: Colors.black),
             recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1051,7 +1051,7 @@ void main() {
           text: TextSpan(children: <InlineSpan>[
             const WidgetSpan(child: SizedBox.shrink()),
             const WidgetSpan(child: Text('included')),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'HELLO',
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1110,7 +1110,7 @@ void main() {
                 ],
               ),
             ),
-            TextSpan(
+            ReactiveTextSpan(
               text: 'HELLO',
               style: const TextStyle(color: Colors.black),
               recognizer: TapGestureRecognizer()..onTap = () {},
@@ -1170,7 +1170,7 @@ void main() {
                           semanticLabel: 'not clipped',
                         ),
                       ),
-                      TextSpan(
+                      ReactiveTextSpan(
                         text: 'next WS is clipped',
                         recognizer: TapGestureRecognizer()..onTap = () { },
                       ),

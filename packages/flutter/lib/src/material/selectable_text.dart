@@ -556,8 +556,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(() {
-      return _controller._textSpan.visitChildren((InlineSpan span) => span.runtimeType == TextSpan);
-    }(), 'SelectableText only supports TextSpan; Other type of InlineSpan is not allowed');
+      return _controller._textSpan.visitChildren((InlineSpan span) => span is TextSpan);
+    }(), 'SelectableText only supports TextSpan or its subclasses; Other type of InlineSpan is not allowed');
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     assert(
