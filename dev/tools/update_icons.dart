@@ -38,7 +38,7 @@ const Map<String, List<String>> _platformAdaptiveIdentifiers = <String, List<Str
 const Map<String, String> _identifierRewrites = <String, String>{
   '1x': 'one_x',
   '360': 'threesixty',
-  '2d': 'two_d',
+  '2d': 'twod',
   '3d': 'threed',
   '3p': 'three_p',
   '6_ft': 'six_ft',
