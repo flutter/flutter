@@ -1211,8 +1211,6 @@ class EngineStrutStyle implements ui.StrutStyle {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
-    //TODO(LongCatIsLooong): implement leadingDistribution.
-    ui.TextLeadingDistribution? leadingDistribution,
     double? leading,
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
@@ -1221,7 +1219,6 @@ class EngineStrutStyle implements ui.StrutStyle {
         _fontFamilyFallback = fontFamilyFallback,
         _fontSize = fontSize,
         _height = height,
-        _leadingDistribution = leadingDistribution,
         _leading = leading,
         _fontWeight = fontWeight,
         _fontStyle = fontStyle,
@@ -1235,7 +1232,6 @@ class EngineStrutStyle implements ui.StrutStyle {
   final ui.FontWeight? _fontWeight;
   final ui.FontStyle? _fontStyle;
   final bool? _forceStrutHeight;
-  final ui.TextLeadingDistribution? _leadingDistribution;
 
   @override
   bool operator ==(Object other) {
@@ -1250,7 +1246,6 @@ class EngineStrutStyle implements ui.StrutStyle {
         && other._fontSize == _fontSize
         && other._height == _height
         && other._leading == _leading
-        && other._leadingDistribution == _leadingDistribution
         && other._fontWeight == _fontWeight
         && other._fontStyle == _fontStyle
         && other._forceStrutHeight == _forceStrutHeight
@@ -1264,7 +1259,6 @@ class EngineStrutStyle implements ui.StrutStyle {
         _fontSize,
         _height,
         _leading,
-        _leadingDistribution,
         _fontWeight,
         _fontStyle,
         _forceStrutHeight,

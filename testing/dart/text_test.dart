@@ -42,37 +42,6 @@ void main() {
     });
   });
 
-  group('TextStyle', () {
-    final TextStyle ts0 = TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0);
-    final TextStyle ts1 = TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0);
-    final TextStyle ts2 = TextStyle(fontFamily: 'test');
-    final TextStyle ts3 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
-    final TextStyle ts4 = TextStyle(leadingDistribution: TextLeadingDistribution.even);
-
-    test('toString works', () {
-      expect(
-        ts0.toString(),
-        equals('TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, leadingDistribution: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)'),
-      );
-      expect(
-        ts1.toString(),
-        equals('TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, leadingDistribution: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)'),
-      );
-      expect(
-        ts2.toString(),
-        equals('TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, leadingDistribution: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)'),
-      );
-      expect(
-        ts3.toString(),
-        equals('TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, leadingDistribution: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)'),
-      );
-      expect(
-        ts4.toString(),
-        equals('TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, leadingDistribution: TextLeadingDistribution.even, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)'),
-      );
-    });
-  });
-
   group('TextHeightBehavior', () {
     const TextHeightBehavior behavior0 = TextHeightBehavior();
     const TextHeightBehavior behavior1 = TextHeightBehavior(
@@ -84,10 +53,6 @@ void main() {
     );
     const TextHeightBehavior behavior3 = TextHeightBehavior(
       applyHeightToLastDescent: false
-    );
-    const TextHeightBehavior behavior4 = TextHeightBehavior(
-      applyHeightToLastDescent: false,
-      leadingDistribution: TextLeadingDistribution.even,
     );
 
     test('default constructor works', () {
@@ -102,9 +67,6 @@ void main() {
 
       expect(behavior3.applyHeightToFirstAscent, equals(true));
       expect(behavior3.applyHeightToLastDescent, equals(false));
-
-      expect(behavior4.applyHeightToLastDescent, equals(false));
-      expect(behavior4.leadingDistribution, equals(TextLeadingDistribution.even));
     });
 
     test('encode works', () {
@@ -112,23 +74,20 @@ void main() {
       expect(behavior1.encode(), equals(3));
       expect(behavior2.encode(), equals(1));
       expect(behavior3.encode(), equals(2));
-      expect(behavior4.encode(), equals(6));
     });
 
     test('decode works', () {
-      expect(TextHeightBehavior.fromEncoded(0), equals(behavior0));
-      expect(TextHeightBehavior.fromEncoded(3), equals(behavior1));
-      expect(TextHeightBehavior.fromEncoded(1), equals(behavior2));
-      expect(TextHeightBehavior.fromEncoded(2), equals(behavior3));
-      expect(TextHeightBehavior.fromEncoded(6), equals(behavior4));
+      expect(const TextHeightBehavior.fromEncoded(0), equals(behavior0));
+      expect(const TextHeightBehavior.fromEncoded(3), equals(behavior1));
+      expect(const TextHeightBehavior.fromEncoded(1), equals(behavior2));
+      expect(const TextHeightBehavior.fromEncoded(2), equals(behavior3));
     });
 
     test('toString works', () {
-      expect(behavior0.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: true, applyHeightToLastDescent: true, leadingDistribution: TextLeadingDistribution.proportional)'));
-      expect(behavior1.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false, leadingDistribution: TextLeadingDistribution.proportional)'));
-      expect(behavior2.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: true, leadingDistribution: TextLeadingDistribution.proportional)'));
-      expect(behavior3.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: true, applyHeightToLastDescent: false, leadingDistribution: TextLeadingDistribution.proportional)'));
-      expect(behavior4.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: true, applyHeightToLastDescent: false, leadingDistribution: TextLeadingDistribution.even)'));
+      expect(behavior0.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: true, applyHeightToLastDescent: true)'));
+      expect(behavior1.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false)'));
+      expect(behavior2.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: true)'));
+      expect(behavior3.toString(), equals('TextHeightBehavior(applyHeightToFirstAscent: true, applyHeightToLastDescent: false)'));
     });
   });
 
