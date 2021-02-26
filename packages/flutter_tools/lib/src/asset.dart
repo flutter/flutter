@@ -4,8 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:io' as io;
-
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -57,8 +55,8 @@ abstract class AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-    BuildMode buildMode,
-  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, buildMode: buildMode);
+    bool splitDeferredAssets,
+  }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -91,19 +89,19 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-    BuildMode buildMode,
+    bool splitDeferredAssets,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
-       _buildMode = buildMode;
+       _splitDeferredAssets = splitDeferredAssets;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
-  final BuildMode _buildMode;
+  final bool _splitDeferredAssets;
 
   @override
-  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, buildMode: _buildMode);
+  AssetBundle createBundle() => ManifestAssetBundle(logger: _logger, fileSystem: _fileSystem, platform: _platform, splitDeferredAssets: _splitDeferredAssets);
 }
 
 /// An asset bundle based on a pubspec.yaml file.
@@ -114,18 +112,18 @@ class ManifestAssetBundle implements AssetBundle {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-    BuildMode buildMode,
+    bool splitDeferredAssets,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
-       _buildMode = buildMode,
+       _splitDeferredAssets = splitDeferredAssets,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem);
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final LicenseCollector _licenseCollector;
   final Platform _platform;
-  final BuildMode _buildMode;
+  final bool _splitDeferredAssets;
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -312,12 +310,12 @@ class ManifestAssetBundle implements AssetBundle {
         splitEntries[component.name] = <String, DevFSContent>{};
         final _AssetDirectoryCache cache = _AssetDirectoryCache(<String>[], _fileSystem);
         for (final Uri assetUri in component.assets) {
-          final String assetGlobalPath = globals.fs.path.absolute(flutterProject.directory.path + io.Platform.pathSeparator + assetUri.path);
+          final String assetGlobalPath = globals.fs.path.absolute(flutterProject.directory.path + globals.platform.pathSeparator + assetUri.path);
           final File assetFile = globals.fs.file(assetGlobalPath);
-          if (_buildMode == BuildMode.debug || _buildMode == BuildMode.jitRelease) {
-            entries[assetUri.path] = DevFSFileContent(assetFile);
-          } else {
+          if (_splitDeferredAssets) {
             splitEntries[component.name][assetUri.path] = DevFSFileContent(assetFile);
+          } else {
+            entries[assetUri.path] = DevFSFileContent(assetFile);
           }
 
           if (assetUri.path.endsWith('/')) {
@@ -342,7 +340,7 @@ class ManifestAssetBundle implements AssetBundle {
           }
         }
       }
-      if (_buildMode == BuildMode.debug || !deferredComponentsEnabled) {
+      if (!_splitDeferredAssets || !deferredComponentsEnabled) {
         assetVariants.addAll(deferredComponentsAssetVariants);
       }
     }

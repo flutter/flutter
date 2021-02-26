@@ -52,6 +52,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     platform: globals.platform,
+    splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,

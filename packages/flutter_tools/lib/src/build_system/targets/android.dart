@@ -383,7 +383,6 @@ class AndroidAotDeferredComponentsBundle extends Target {
     // changes to app.so as well. This task does not actually
     // copy app.so.
     Source.pattern('{OUTPUT_DIR}/$_androidAbiName/app.so'),
-    Source.pattern('{OUTPUT_DIR}/$_androidAbiName/manifest.json'),
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
   ];
 
@@ -409,6 +408,11 @@ class AndroidAotDeferredComponentsBundle extends Target {
       component.assignLoadingUnits(generatedLoadingUnits);
     }
     final Depfile libDepfile = copyDeferredComponentSoFiles(environment, _components, generatedLoadingUnits, environment.projectDir.childDirectory('build'), abis, dependency.buildMode);
+
+    final File manifestFile = environment.outputDir.childDirectory(_androidAbiName).childFile('manifest.json');
+    if (manifestFile.existsSync()) {
+      libDepfile.inputs.add(manifestFile);
+    }
 
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
