@@ -452,7 +452,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        FakeCommand(command: <String>['bin/cache/dart-sdk/bin/pub', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -477,7 +477,7 @@ void main() {
       Cache.flutterRoot = '';
       globals.fs.file('pubspec.yaml').createSync();
       processManager.addCommand(
-        FakeCommand(command: <String>['bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
+        const FakeCommand(command: <String>['/bin/cache/dart-sdk/bin/pub', '--trace', 'run', 'test']),
       );
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
@@ -503,8 +503,8 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       final IOSink stdin = IOSink(StreamController<List<int>>().sink);
       processManager.addCommand(
-        FakeCommand(command: <String>[
-          'bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
+        FakeCommand(command: const <String>[
+          '/bin/cache/dart-sdk/bin/pub', 'run', '--foo', 'bar'],
           stdin: stdin,
         ),
       );
