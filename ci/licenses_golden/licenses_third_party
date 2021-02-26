@@ -1,4 +1,4 @@
-Signature: 28f685a04d4d5cff3945a962d6c765a6
+Signature: 641da0f071a75142dd5ca186f7b6b29f
 
 UNUSED LICENSES:
 
@@ -11991,6 +11991,8 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/range.h
+FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.cc
+FILE: ../../../third_party/dart/runtime/vm/virtual_memory_compressed.h
 FILE: ../../../third_party/dart/samples/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/samples_2/ffi/resource_management/utf8_helpers.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart
