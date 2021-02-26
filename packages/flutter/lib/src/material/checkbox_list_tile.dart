@@ -314,7 +314,8 @@ class CheckboxListTile extends StatelessWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// If this property is null, then the checkbox's default is used, which is
+  /// [ThemeData.toggleableActiveColor].
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -430,25 +431,23 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
+
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? _handleValueChange : null,
-          selected: selected,
-          autofocus: autofocus,
-          contentPadding: contentPadding,
-          shape: shape,
-          selectedTileColor: selectedTileColor,
-          tileColor: tileColor,
-        ),
+      child: ListTile(
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        enabled: onChanged != null,
+        onTap: onChanged != null ? _handleValueChange : null,
+        selected: selected,
+        autofocus: autofocus,
+        contentPadding: contentPadding,
+        shape: shape,
+        selectedTileColor: selectedTileColor,
+        tileColor: tileColor,
       ),
     );
   }
