@@ -370,9 +370,9 @@ class ArchiveCreator {
     // Yes, we could just skip all .packages files when constructing
     // the archive, but some are checked in, and we don't want to skip
     // those.
-    await _runGit(<String>['clean', '-f', '-X', '**/.packages']);
+    await _runGit(<String>['clean', '-f', '-x', '**/.packages']);
     /// Remove package_config files and any contents in .dart_tool
-    await _runGit(<String>['clean', '-f', '-X', '**/.dart_tool']);
+    await _runGit(<String>['clean', '-f', '-x', '**/.dart_tool']);
     /// Remove git subfolder from .pub-cache, this contains the flutter goldens
     /// and new flutter_gallery.
     final Directory gitCache = Directory(path.join(flutterRoot.absolute.path, '.pub-cache', 'git'));
