@@ -3613,17 +3613,8 @@ void main() {
 
     // There should be a new platform message updating the selection rects.
     final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setSelectionRects', arguments: <List<double>>[
-          <double>[0.0, 0.0, 14.0, 14.0],
-          <double>[14.0, 0.0, 14.0, 14.0],
-          <double>[28.0, 0.0, 14.0, 14.0],
-          <double>[42.0, 0.0, 14.0, 14.0],
-          <double>[56.0, 0.0, 14.0, 14.0],
-        ],
-      ),
-    );
+    expect(methodCall.method, 'TextInput.setSelectionRects');
+    expect(methodCall.arguments.length, 5);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {

@@ -861,7 +861,6 @@ class TextPainter {
     _previousCaretPrototype = caretPrototype;
   }
 
-  /// {@template flutter.painting.textPainter.getBoxesForSelection}
   /// Returns a list of rects that bound the given selection.
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
@@ -879,7 +878,6 @@ class TextPainter {
   /// The method only returns `TextBox`es of glyphs that are entirely enclosed by
   /// the given `selection`: a multi-code-unit glyph will be excluded if only
   /// part of its code units are in `selection`.
-  /// {@endtemplate}
   List<TextBox> getBoxesForSelection(
     TextSelection selection, {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
