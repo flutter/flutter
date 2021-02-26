@@ -82,7 +82,8 @@ const bool useLegacyNames = true;
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({ bool verboseHelp = false }) {
+  AssembleCommand({ bool verboseHelp = false, @required BuildSystem buildSystem })
+    : _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -123,6 +124,8 @@ class AssembleCommand extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final BuildSystem _buildSystem;
 
   @override
   String get description => 'Assemble and build Flutter resources.';
@@ -229,7 +232,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
     final Target target = targets.length == 1 ? targets.single : CompositeTarget(targets);
-    final BuildResult result = await globals.buildSystem.build(
+    final BuildResult result = await _buildSystem.build(
       target,
       createEnvironment(),
       buildSystemConfig: BuildSystemConfig(
