@@ -459,7 +459,9 @@ class _TableElement extends RenderObjectElement {
       final _TableElementRow row = _children[y];
       for (int x = 0; x < row.children.length; x++) {
         final Element child = row.children[x];
-        updateSlotForChild(child, _TableSlot(x, y));
+        final slot = _TableSlot(x, y);
+        if (child.slot != slot)
+          updateSlotForChild(child, slot);
         cells.add(child.renderObject! as RenderBox);
       }
     }
