@@ -1350,6 +1350,10 @@ class TextInput {
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
 
+  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list
+  @visibleForTesting
+  static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
+
   /// true if a scribble interaction is currently happening
   bool get scribbleInProgress => _scribbleInProgress;
 

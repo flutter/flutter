@@ -2987,12 +2987,14 @@ class _ScribbleElementState extends State<_ScribbleElement> implements ScribbleC
   @override
   bool isInScribbleRect(Rect rect) {
     final Rect _bounds = bounds;
+    if (renderEditable?.readOnly ?? false)
+      return false;
     if (_bounds == Rect.zero)
       return false;
     if (!_bounds.overlaps(rect))
       return false;
-    Rect intersection = _bounds.intersect(rect);
-    return [
+    final Rect intersection = _bounds.intersect(rect);
+    return <Offset>[
       intersection.topLeft,
       intersection.topCenter,
       intersection.topRight,

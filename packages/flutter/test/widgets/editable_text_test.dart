@@ -1547,6 +1547,107 @@ void main() {
     expect(selectionCause, SelectionChangedCause.scribble);
   });
 
+  testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+    late SelectionChangedCause selectionCause;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            if (cause != null)
+              selectionCause = cause;
+          },
+        ),
+      ),
+    );
+
+    await tester.testTextInput.scribbleFocusElement(TextInput.scribbleClients.keys.first, Offset.zero);
+
+    expect(focusNode.hasFocus, true);
+    expect(selectionCause, SelectionChangedCause.keyboard);
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
+  testWidgets('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
+    final TextEditingController controller =
+        TextEditingController(text: 'Lorem ipsum dolor sit amet');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final List<dynamic> elementEntry = <dynamic>[TextInput.scribbleClients.keys.first, 0.0, 0.0, 800.0, 600.0];
+
+    List<List<dynamic>> elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
+    expect(elements.first, containsAll(elementEntry));
+
+    // Touch is outside the bounds of the widget
+    elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(-1, -1, 1, 1));
+    expect(elements.length, 0);
+
+    // Widget is read only
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          readOnly: true,
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
+    expect(elements.length, 0);
+
+    // Widget is not touchable
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Stack(children: <Widget>[
+            EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: materialTextSelectionControls,
+            ),
+            Positioned(
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(color: Colors.black),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    elements = await tester.testTextInput.scribbleRequestElementsInRect(const Rect.fromLTWH(0, 0, 1, 1));
+    expect(elements.length, 0);
+
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
