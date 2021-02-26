@@ -1080,9 +1080,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
             }
-            if (verifyDeferredComponents != null && !verifyDeferredComponents) {
-                args "--no-verify-deferred-components"
-            }
             args ruleNames
         }
     }

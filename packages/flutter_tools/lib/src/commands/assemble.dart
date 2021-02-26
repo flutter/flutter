@@ -126,22 +126,9 @@ class AssembleCommand extends FlutterCommand {
     );
     usesExtraDartFlagOptions(verboseHelp: verboseHelp, useLegacyNames: useLegacyNames);
     usesDartDefineOption(useLegacyNames: useLegacyNames);
-    argParser.addOption(kDeferredComponents);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
-    );
-    argParser.addFlag('verify-deferred-components',
-      negatable: true,
-      defaultsTo: true,
-      help: 'When enabled, deferred component apps will fail to build if setup problems are '
-            'detected that would prevent deferred components from functioning properly. The '
-            'tooling also provides guidance on how to set up the project files to pass this '
-            'verification. Disabling setup verification will always attempt to fully build '
-            'the app regardless of any problems detected. Builds that are part of CI testing '
-            'and advanced users with custom deferred components implementations should disable'
-            'setup verification. This flag has no effect on non-deferred components apps. '
-            'Defaults to true.',
     );
   }
 
@@ -264,9 +251,6 @@ class AssembleCommand extends FlutterCommand {
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
-    if (argResults.wasParsed(kDartDefines)) {
-      results[kDartDefines] = argResults[kDartDefines] as String;
-    }
     if (argResults.wasParsed(useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions)) {
       results[kExtraFrontEndOptions] = (argResults[useLegacyNames ? kExtraFrontEndOptions : FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
     }
@@ -281,8 +265,9 @@ class AssembleCommand extends FlutterCommand {
     // Do the remaining setup verification not handled in build_appbundle as
     // now the compilation has completed and the generated loading units are
     // available. Checks performed here all require loading units.
+    final List<String> decodedDefines = decodeDartDefines(env.defines, kDartDefines);
     if (FlutterProject.current().manifest.deferredComponents != null
-        && boolArg('verify-deferred-components')
+        && decodedDefines.contains('verify-deferred-components=true')
         && isDeferredComponentsTargets()
         && !isDebug()) {
       final List<String> abis = <String>[];

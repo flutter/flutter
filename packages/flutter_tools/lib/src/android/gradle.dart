@@ -362,11 +362,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (target != null) {
       command.add('-Ptarget=$target');
     }
-    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (project.manifest.deferredComponents != null) {
       if (deferredComponentsEnabled) {
         command.add('-Pdeferred-components=true');
-        command.add('-Pverify-deferred-components=$verifyDeferredComponents');
+        androidBuildInfo.buildInfo.dartDefines.add('verify-deferred-components=$verifyDeferredComponents');
       }
       // Pass in deferred components regardless of building split aot to satisfy
       // android dynamic features registry in build.gradle.
@@ -376,8 +375,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       }
       if (componentNames.isNotEmpty) {
         command.add('-Pdeferred-component-names=${componentNames.join(',')}');
-      }
-      if (componentNames.isNotEmpty) {
         // Multi-apk applications cannot use shrinking. This is only relevant when using
         // android dynamic feature modules.
         _logger.printStatus(
@@ -387,6 +384,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command.add('-Pshrink=false');
       }
     }
+    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
     if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
       command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     }

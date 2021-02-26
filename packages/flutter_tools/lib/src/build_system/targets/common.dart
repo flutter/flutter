@@ -45,7 +45,7 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
-/// Whether the app should run gen_snapshot as a split aot build for deferred
+/// Whether the build should run gen_snapshot as a split aot build for deferred
 /// components.
 const String kDeferredComponents = 'DeferredComponents';
 
