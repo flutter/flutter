@@ -50,7 +50,7 @@ class FuchsiaShellTest : public ShellTest {
   // Gets the international settings from this Fuchsia realm.
   IntlSettings GetSettings() {
     IntlSettings settings;
-    zx_status_t status = intl_->Watch2(&settings);
+    zx_status_t status = intl_->Watch(&settings);
     EXPECT_EQ(status, ZX_OK);
     return settings;
   }
