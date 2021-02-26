@@ -274,7 +274,8 @@ void main() {
       'TRACK_WIDGET_CREATION=true',
       'TREE_SHAKE_ICONS=true',
       'BUNDLE_SKSL_PATH=foo/bar.sksl.json',
-      'PACKAGE_CONFIG=/.dart_tool/package_config.json'
+      'PACKAGE_CONFIG=/.dart_tool/package_config.json',
+      'COCOAPODS_PARALLEL_CODE_SIGN=true',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
