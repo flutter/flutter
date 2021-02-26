@@ -31,6 +31,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
