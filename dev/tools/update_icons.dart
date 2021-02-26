@@ -362,13 +362,13 @@ class _Icon {
 
     if (id.endsWith('_outlined') && id!='insert_chart_outlined') {
       style = IconStyle.outlined;
-      shortId = id.replaceFirst('_outlined', '');
+      shortId = _replaceLast(id, '_outlined');
     } else if (id.endsWith('_rounded')) {
       style = IconStyle.rounded;
-      shortId = id.replaceFirst('_rounded', '');
+      shortId = _replaceLast(id, '_rounded');
     } else if (id.endsWith('_sharp')) {
       style = IconStyle.sharp;
-      shortId = id.replaceFirst('_sharp', '');
+      shortId = _replaceLast(id, '_sharp');
     } else {
       style = IconStyle.regular;
       shortId = id;
@@ -383,6 +383,10 @@ class _Icon {
 
     fullFlutterId = flutterId + style.idSuffix();
     name = id.replaceAll('_', ' ');
+  }
+
+  String _replaceLast(String string, String toReplace) {
+    return string.replaceAll(RegExp('$toReplace\$'), '');
   }
 
   String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
