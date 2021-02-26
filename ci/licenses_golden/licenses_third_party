@@ -1,4 +1,4 @@
-Signature: 54de652d00d625718e51e472314c598d
+Signature: 1d37f1b1764e5561a17007b9cd135f4c
 
 UNUSED LICENSES:
 
@@ -22056,7 +22056,6 @@ POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: libpng
 ORIGIN: ../../../third_party/libpng/LICENSE
 TYPE: LicenseType.libpng
-FILE: ../../../third_party/libpng/contrib/intel/intel_sse.patch
 FILE: ../../../third_party/libpng/pngprefix.h
 ----------------------------------------------------------------------------------------------------
 <THIS BLOCK INTENTIONALLY LEFT BLANK>
@@ -22069,9 +22068,9 @@ TYPE: LicenseType.libpng
 FILE: ../../../third_party/libpng/arm/arm_init.c
 FILE: ../../../third_party/libpng/arm/filter_neon.S
 FILE: ../../../third_party/libpng/arm/filter_neon_intrinsics.c
-FILE: ../../../third_party/libpng/contrib/intel/filter_sse2_intrinsics.c
-FILE: ../../../third_party/libpng/contrib/intel/intel_init.c
-FILE: ../../../third_party/libpng/contrib/intel/intel_sse.patch
+FILE: ../../../third_party/libpng/arm/palette_neon_intrinsics.c
+FILE: ../../../third_party/libpng/intel/filter_sse2_intrinsics.c
+FILE: ../../../third_party/libpng/intel/intel_init.c
 FILE: ../../../third_party/libpng/png.c
 FILE: ../../../third_party/libpng/pngconf.h
 FILE: ../../../third_party/libpng/pngdebug.h
