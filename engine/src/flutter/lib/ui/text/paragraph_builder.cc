@@ -39,18 +39,17 @@ const int tsTextDecorationStyleIndex = 4;
 const int tsFontWeightIndex = 5;
 const int tsFontStyleIndex = 6;
 const int tsTextBaselineIndex = 7;
-const int tsLeadingDistributionIndex = 8;
-const int tsTextDecorationThicknessIndex = 9;
-const int tsFontFamilyIndex = 10;
-const int tsFontSizeIndex = 11;
-const int tsLetterSpacingIndex = 12;
-const int tsWordSpacingIndex = 13;
-const int tsHeightIndex = 14;
-const int tsLocaleIndex = 15;
-const int tsBackgroundIndex = 16;
-const int tsForegroundIndex = 17;
-const int tsTextShadowsIndex = 18;
-const int tsFontFeaturesIndex = 19;
+const int tsTextDecorationThicknessIndex = 8;
+const int tsFontFamilyIndex = 9;
+const int tsFontSizeIndex = 10;
+const int tsLetterSpacingIndex = 11;
+const int tsWordSpacingIndex = 12;
+const int tsHeightIndex = 13;
+const int tsLocaleIndex = 14;
+const int tsBackgroundIndex = 15;
+const int tsForegroundIndex = 16;
+const int tsTextShadowsIndex = 17;
+const int tsFontFeaturesIndex = 18;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -60,7 +59,6 @@ const int tsTextDecorationThicknessMask = 1 << tsTextDecorationThicknessIndex;
 const int tsFontWeightMask = 1 << tsFontWeightIndex;
 const int tsFontStyleMask = 1 << tsFontStyleIndex;
 const int tsTextBaselineMask = 1 << tsTextBaselineIndex;
-const int tsLeadingDistributionMask = 1 << tsLeadingDistributionIndex;
 const int tsFontFamilyMask = 1 << tsFontFamilyIndex;
 const int tsFontSizeMask = 1 << tsFontSizeIndex;
 const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
@@ -120,16 +118,14 @@ const int sFontStyleIndex = 1;
 const int sFontFamilyIndex = 2;
 const int sFontSizeIndex = 3;
 const int sHeightIndex = 4;
-const int sLeadingDistributionIndex = 5;
-const int sLeadingIndex = 6;
-const int sForceStrutHeightIndex = 7;
+const int sLeadingIndex = 5;
+const int sForceStrutHeightIndex = 6;
 
 const int sFontWeightMask = 1 << sFontWeightIndex;
 const int sFontStyleMask = 1 << sFontStyleIndex;
 const int sFontFamilyMask = 1 << sFontFamilyIndex;
 const int sFontSizeMask = 1 << sFontSizeIndex;
 const int sHeightMask = 1 << sHeightIndex;
-const int sLeadingDistributionMask = 1 << sLeadingDistributionIndex;
 const int sLeadingMask = 1 << sLeadingIndex;
 const int sForceStrutHeightMask = 1 << sForceStrutHeightIndex;
 
@@ -214,12 +210,6 @@ void decodeStrut(Dart_Handle strut_data,
   if (mask & sHeightMask) {
     paragraph_style.strut_height = float_data[float_count++];
     paragraph_style.strut_has_height_override = true;
-
-    // LeadingDistribution does not affect layout if height is not set.
-    if (mask & sLeadingDistributionMask) {
-      paragraph_style.strut_half_leading = uint8_data[byte_count];
-      paragraph_style.strut_has_leading_distribution_override = true;
-    }
   }
   if (mask & sLeadingMask) {
     paragraph_style.strut_leading = float_data[float_count++];
@@ -383,7 +373,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  Dart_Handle foreground_data,
                                  Dart_Handle shadows_data,
                                  Dart_Handle font_features_data) {
-  FML_DCHECK(encoded.num_elements() == 9);
+  FML_DCHECK(encoded.num_elements() == 8);
 
   int32_t mask = encoded[0];
 
@@ -418,11 +408,6 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
   if (mask & tsTextBaselineMask) {
     // TODO(abarth): Implement TextBaseline. The CSS version of this
     // property wasn't wired up either.
-  }
-
-  style.has_leading_distribution_override = mask & tsLeadingDistributionMask;
-  if (mask & tsLeadingDistributionMask) {
-    style.half_leading = encoded[tsLeadingDistributionIndex];
   }
 
   if (mask & (tsFontWeightMask | tsFontStyleMask | tsFontSizeMask |
