@@ -59,7 +59,7 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object? data);
+typedef DragTargetLeave<T> = void Function(T? data);
 
 /// Signature for when a [Draggable] moves within a [DragTarget].
 ///
@@ -653,7 +653,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave? onLeave;
+  final DragTargetLeave<T>? onLeave;
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
@@ -712,7 +712,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave!(avatar.data);
+      widget.onLeave!(avatar.data as T);
   }
 
   void didDrop(_DragAvatar<Object> avatar) {
