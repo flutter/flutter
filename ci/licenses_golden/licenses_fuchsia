@@ -1,4 +1,4 @@
-Signature: d9d5d8d6096f0fe22103fc2ba340054f
+Signature: 3bf07d060b9e110abc56624ee46acc90
 
 UNUSED LICENSES:
 
@@ -3201,6 +3201,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/url_request_rewrite_rules.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/access_point_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/client_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/rights.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/irq.h
