@@ -26,10 +26,10 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property, but the color used is that described by [activeColor], if any,
-/// defaulting to the accent color of the current [Theme]. No effort is made to
-/// coordinate the [selected] state and the [value] state; to have the list tile
-/// appear selected when the checkbox is checked, pass the same value to both.
+/// property, but the color used is [activeColor], if it's non-null.
+/// No effort is made to coordinate the [selected] state and the
+/// [value] state; to have the list tile appear selected when the
+/// checkbox is checked, pass the same value to both.
 ///
 /// The checkbox is shown on the right by default in left-to-right languages
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. The
@@ -432,7 +432,7 @@ class CheckboxListTile extends StatelessWidget {
     }
     return MergeSemantics(
       child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        selectedColor: activeColor,
         child: ListTile(
           leading: leading,
           title: title,
