@@ -27,34 +27,34 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
-const List<Target> _kDefaultTargets = <Target>[
+List<Target> _kDefaultTargets = <Target>[
   // Shared targets
-  CopyAssets(),
-  KernelSnapshot(),
-  AotElfProfile(TargetPlatform.android_arm),
-  AotElfRelease(TargetPlatform.android_arm),
-  AotAssemblyProfile(),
-  AotAssemblyRelease(),
+  const CopyAssets(),
+  const KernelSnapshot(),
+  const AotElfProfile(TargetPlatform.android_arm),
+  const AotElfRelease(TargetPlatform.android_arm),
+  const AotAssemblyProfile(),
+  const AotAssemblyRelease(),
   // macOS targets
-  DebugMacOSFramework(),
-  DebugMacOSBundleFlutterAssets(),
-  ProfileMacOSBundleFlutterAssets(),
-  ReleaseMacOSBundleFlutterAssets(),
+  const DebugMacOSFramework(),
+  const DebugMacOSBundleFlutterAssets(),
+  const ProfileMacOSBundleFlutterAssets(),
+  const ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
-  DebugBundleLinuxAssets(TargetPlatform.linux_x64),
-  DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
-  ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
-  ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
-  ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
-  ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
   // Web targets
-  WebServiceWorker(),
-  ReleaseAndroidApplication(),
+  const WebServiceWorker(),
+  const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
-  CopyFlutterBundle(),
+  const CopyFlutterBundle(),
   // Android targets,
-  DebugAndroidApplication(),
-  ProfileAndroidApplication(),
+  const DebugAndroidApplication(),
+  const ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
   androidArm64ProfileBundle,
@@ -63,15 +63,15 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
   // iOS targets
-  DebugIosApplicationBundle(),
-  ProfileIosApplicationBundle(),
-  ReleaseIosApplicationBundle(),
+  const DebugIosApplicationBundle(),
+  const ProfileIosApplicationBundle(),
+  const ReleaseIosApplicationBundle(),
   ThinIosApplicationFrameworks(),
   // Windows targets
-  UnpackWindows(),
-  DebugBundleWindowsAssets(),
-  ProfileBundleWindowsAssets(),
-  ReleaseBundleWindowsAssets(),
+  const UnpackWindows(),
+  const DebugBundleWindowsAssets(),
+  const ProfileBundleWindowsAssets(),
+  const ReleaseBundleWindowsAssets(),
 ];
 
 // TODO(ianh): https://github.com/dart-lang/args/issues/181 will allow us to remove useLegacyNames

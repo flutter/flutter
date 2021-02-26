@@ -539,7 +539,7 @@ Future<RunResult> createStubAppFramework(File outputFile, String sdkRoot,
 ///
 /// This target is not fingerprinted and will always run.
 class ThinIosApplicationFrameworks extends Target {
-  const ThinIosApplicationFrameworks();
+  ThinIosApplicationFrameworks();
 
   @override
   String get name => 'thin_ios_application_frameworks';
@@ -554,6 +554,50 @@ class ThinIosApplicationFrameworks extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
+  bool canSkip(Environment environment) {
+    final String requestedArchs = environment.defines[kIosArchs];
+    if (requestedArchs == null) {
+      return false;
+    }
+    final Set<String> requestedArchList = requestedArchs.split(' ').toSet();
+    return _setEquals(_existingArchs(environment), requestedArchList);
+  }
+
+  /// Architectures in the original Flutter.framework.
+  Set<String> _existingArchs(Environment environment) {
+    if (_existingArchsByEnvironment[environment] == null) {
+      // Example outputs ("Architectures in the fat file" output has a trailing space):
+      // Architectures in the fat file: /project/build/ios/Debug-iphoneos/Flutter.framework/Flutter are: armv7 arm64
+      // Non-fat file: /project/build/ios/Debug-iphoneos/Flutter.framework/Flutter is architecture: arm64
+      final String lipoOutput = _lipoOutput(environment);
+      final List<String> parts = lipoOutput?.split(': ')?.toList();
+      if (parts == null || parts.length < 2) {
+        return null;
+      }
+      _existingArchsByEnvironment[environment] = parts.last.trim().split(' ').toSet();
+    }
+    return _existingArchsByEnvironment[environment];
+  }
+  final Map<Environment, Set<String>> _existingArchsByEnvironment = <Environment, Set<String>>{};
+
+  String _lipoOutput(Environment environment) {
+    if (_lipoOutputByEnvironment[environment] == null) {
+      final File flutterFramework = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+      final ProcessResult infoResult = environment.processManager.runSync(<String>[
+        'lipo',
+        '-info',
+        flutterFramework.path,
+      ]);
+      if (infoResult.exitCode != 0) {
+        return null;
+      }
+      _lipoOutputByEnvironment[environment] = infoResult.stdout as String;
+    }
+    return _lipoOutputByEnvironment[environment];
+  }
+  final Map<Environment, String> _lipoOutputByEnvironment = <Environment, String>{};
+
+  @override
   Future<void> build(Environment environment) async {
     if (environment.defines[kIosArchs] == null) {
       throw MissingDefineException(kIosArchs, 'thin_ios_application_frameworks');
@@ -565,24 +609,13 @@ class ThinIosApplicationFrameworks extends Target {
     if (!flutterFramework.existsSync()) {
       throw Exception('Binary $binaryPath does not exist, cannot thin');
     }
-    final String archs = environment.defines[kIosArchs];
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-info',
-      binaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
+    final String requestedArchs = environment.defines[kIosArchs];
+    final Set<String> requestedArchList = requestedArchs.split(' ').toSet();
+    final String lipoInfo = _lipoOutput(environment);
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
-      'lipo',
-      binaryPath,
-      '-verify_arch',
-      ...archList
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $binaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+    final Set<String> archs = _existingArchs(environment);
+    if (archs == null || !archs.containsAll(requestedArchList)) {
+      throw Exception('Binary $binaryPath does not contain $requestedArchs. Running lipo -info:\n$lipoInfo');
     }
 
     // Skip this step for non-fat executables.
@@ -596,7 +629,7 @@ class ThinIosApplicationFrameworks extends Target {
       'lipo',
       '-output',
       binaryPath,
-      for (final String arch in archList)
+      for (final String arch in requestedArchList)
         ...<String>[
           '-extract',
           arch,
@@ -605,7 +638,28 @@ class ThinIosApplicationFrameworks extends Target {
     ]);
 
     if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+      throw Exception('Failed to extract $requestedArchs for $binaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
     }
   }
+}
+
+/// Compares two sets for deep equality.
+///
+/// Copied from flutter/lib/src/foundation/collections.dart
+bool _setEquals<T>(Set<T> a, Set<T> b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (final T value in a) {
+    if (!b.contains(value)) {
+      return false;
+    }
+  }
+  return true;
 }

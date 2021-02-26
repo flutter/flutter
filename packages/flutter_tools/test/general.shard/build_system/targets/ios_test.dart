@@ -302,6 +302,203 @@ void main() {
   });
 
   group('thin frameworks', () {
+    testWithoutContext('do not skip when archs not requested', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{},
+      );
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isFalse);
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext('do not skip when requested archs missing from framework', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Non-fat file: Flutter.framework/Flutter is architecture: arm64'),
+      );
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isFalse);
+    });
+
+    testWithoutContext('do not skip when lipo -info fails', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], exitCode: 1),
+      );
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isFalse);
+    });
+
+    testWithoutContext('do not skip when cannot parse lipo', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Bogus output'),
+      );
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isFalse);
+    });
+
+    testWithoutContext('do not skip when thinning is required', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Architectures in the fat file: Flutter.framework/Flutter are: armv7 arm64 '),
+      );
+
+      final ThinIosApplicationFrameworks thinIosApplicationFrameworks = ThinIosApplicationFrameworks();
+      expect(thinIosApplicationFrameworks.canSkip(environment), isFalse);
+      expect(processManager.hasRemainingExpectations, isFalse);
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-output',
+          binary.path,
+          '-extract',
+          'arm64',
+          binary.path,
+        ]),
+      );
+
+      await thinIosApplicationFrameworks.build(environment);
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext('skip when thinning is not required for fat', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'armv7 arm64',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Architectures in the fat file: Flutter.framework/Flutter are: arm64 armv7 '), // arch order doesn't matter
+      );
+
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isTrue);
+    });
+
+    testWithoutContext('skip when thinning is not required for non-fat', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'x86_64',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(command: <String>[
+          'lipo',
+          '-info',
+          binary.path,
+        ], stdout: 'Non-fat file: Flutter.framework/Flutter is architecture: x86_64'),
+      );
+      expect(ThinIosApplicationFrameworks().canSkip(environment), isTrue);
+    });
+
     testWithoutContext('fails when frameworks missing', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks');
@@ -316,8 +513,8 @@ void main() {
           kIosArchs: 'arm64',
         },
       );
-      expect(
-        const ThinIosApplicationFrameworks().build(environment),
+      await expectLater(
+        ThinIosApplicationFrameworks().build(environment),
         throwsA(isA<Exception>().having(
           (Exception exception) => exception.toString(),
           'description',
@@ -347,25 +544,50 @@ void main() {
           'lipo',
           '-info',
           binary.path,
-        ], stdout: 'Architectures in the fat file:'),
+        ], stdout: 'Non-fat file: Flutter.framework/Flutter is architecture: arm64'),
+      );
+
+      await expectLater(
+          ThinIosApplicationFrameworks().build(environment),
+          throwsA(isA<Exception>().having(
+                (Exception exception) => exception.toString(),
+            'description',
+            contains('does not contain arm64 armv7. Running lipo -info:\nNon-fat file:'),
+          )));
+    });
+
+
+    testWithoutContext('fails when cannot parse lipo', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory outputDir = fileSystem.directory('Runner.app').childDirectory('Frameworks')..createSync(recursive: true);
+      final File binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter')..createSync(recursive: true);
+
+      final Environment environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64 armv7',
+        },
       );
 
       processManager.addCommand(
         FakeCommand(command: <String>[
           'lipo',
+          '-info',
           binary.path,
-          '-verify_arch',
-          'arm64',
-          'armv7',
-        ], exitCode: 1),
+        ], stdout: 'Bogus output'),
       );
 
-      expect(
-          const ThinIosApplicationFrameworks().build(environment),
+      await expectLater(
+          ThinIosApplicationFrameworks().build(environment),
           throwsA(isA<Exception>().having(
                 (Exception exception) => exception.toString(),
             'description',
-            contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+            contains('does not contain arm64 armv7. Running lipo -info:\nBogus output'),
           )));
     });
 
@@ -391,17 +613,7 @@ void main() {
           'lipo',
           '-info',
           binary.path,
-        ], stdout: 'Architectures in the fat file:'),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          binary.path,
-          '-verify_arch',
-          'arm64',
-          'armv7',
-        ]),
+        ], stdout: 'Architectures in the fat file: Flutter.framework/Flutter are: armv7 arm64 '),
       );
 
       processManager.addCommand(
@@ -418,8 +630,8 @@ void main() {
         stderr: 'lipo error'),
       );
 
-      expect(
-        const ThinIosApplicationFrameworks().build(environment),
+      await expectLater(
+        ThinIosApplicationFrameworks().build(environment),
         throwsA(isA<Exception>().having(
               (Exception exception) => exception.toString(),
           'description',
@@ -449,18 +661,9 @@ void main() {
           'lipo',
           '-info',
           binary.path,
-        ], stdout: 'Non-fat file:'),
+        ], stdout: 'Non-fat file: Flutter.framework/Flutter is architecture: arm64'),
       );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          binary.path,
-          '-verify_arch',
-          'arm64',
-        ]),
-      );
-      await const ThinIosApplicationFrameworks().build(environment);
+      await ThinIosApplicationFrameworks().build(environment);
 
       expect(logger.traceText, contains('Skipping lipo for non-fat file Runner.app/Frameworks/Flutter.framework/Flutter'));
 
@@ -489,17 +692,7 @@ void main() {
           'lipo',
           '-info',
           binary.path,
-        ], stdout: 'Architectures in the fat file:'),
-      );
-
-      processManager.addCommand(
-        FakeCommand(command: <String>[
-          'lipo',
-          binary.path,
-          '-verify_arch',
-          'arm64',
-          'armv7',
-        ]),
+        ], stdout: 'Architectures in the fat file: Flutter.framework/Flutter are: armv7 arm64 '),
       );
 
       processManager.addCommand(
@@ -515,7 +708,7 @@ void main() {
         ]),
       );
 
-      await const ThinIosApplicationFrameworks().build(environment);
+      await ThinIosApplicationFrameworks().build(environment);
       expect(processManager.hasRemainingExpectations, isFalse);
     });
   });
