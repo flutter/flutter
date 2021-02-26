@@ -2439,7 +2439,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (defaultTargetPlatform != TargetPlatform.iOS)
       return;
     final TextSpan textSpan = buildTextSpan();
-    final text = StringBuffer();
+    final StringBuffer text = StringBuffer();
     textSpan.computeToPlainText(text);
     final Rect firstRect = renderEditable.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: 1)).first.toRect();
     final double scrollOffset = _scrollController?.offset ?? 0.0;

@@ -3475,6 +3475,56 @@ void main() {
     );
   });
 
+  testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    final TextEditingController controller = TextEditingController();
+    controller.text = 'Text1';
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+            devicePixelRatio: 1.0
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:  <Widget>[
+              EditableText(
+                key: ValueKey<String>(controller.text),
+                controller: controller,
+                focusNode: FocusNode(),
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byKey(ValueKey<String>(controller.text)));
+
+    // There should be a new platform message updating the selection rects.
+    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setSelectionRects');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setSelectionRects', arguments: <List<double>>[
+          <double>[0.0, 0.0, 14.0, 14.0],
+          <double>[14.0, 0.0, 14.0, 14.0],
+          <double>[28.0, 0.0, 14.0, 14.0],
+          <double>[42.0, 0.0, 14.0, 14.0],
+          <double>[56.0, 0.0, 14.0, 14.0],
+        ],
+      ),
+    );
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
