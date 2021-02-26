@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -81,6 +80,27 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Platform: () => FakePlatform(operatingSystem: 'linux'),
+      Config: () => config,
+    });
+
+    testUsingContext('Caches adb location after first access', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      final File adbFile = fileSystem.file(
+        fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe')
+      )..createSync(recursive: true);
+
+      expect(sdk.adbPath,  fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe'));
+
+      adbFile.deleteSync(recursive: true);
+
+      expect(sdk.adbPath,  fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
     });
 

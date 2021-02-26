@@ -12,7 +12,6 @@ import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -144,7 +143,7 @@ void main() {
       return UpdateFSReport(success: true,  syncedBytes: 0);
     });
     when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
-      return fakeVmServiceHost.vmService;
+      return fakeVmServiceHost.vmService.service;
     });
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;

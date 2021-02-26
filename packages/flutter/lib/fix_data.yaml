@@ -11,6 +11,29 @@
 version: 1
 transforms:
 
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      field: 'title'
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'rename'
+        newName: 'label'
+
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'material.dart', 'widgets.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'title'
+        newName: 'label'
+
   # Changes made in https://github.com/flutter/flutter/pull/66043
   - title: "Use withKind"
     date: 2020-09-17
