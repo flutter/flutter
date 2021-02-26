@@ -44,7 +44,7 @@ abstract class BuildTestTask {
   final bool runFlutterClean;
 
   /// Path to a built application to use in [test].
-  /// 
+  ///
   /// If not given, will default to child's expected location.
   String applicationBinaryPath;
 
@@ -94,7 +94,7 @@ abstract class BuildTestTask {
   String getApplicationBinaryPath() => applicationBinaryPath;
 
   /// Run this task.
-  /// 
+  ///
   /// Throws [Exception] when unnecessary arguments are passed.
   Future<TaskResult> call() async {
     if (buildOnly && testOnly) {

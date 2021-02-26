@@ -147,7 +147,7 @@ class GalleryTransitionTest extends BuildTestTask {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return 'build/app/outputs/flutter-apk/app-profile.apk';
-      default: 
+      default:
         throw UnimplementedError('getApplicationBinaryPath does not support $deviceOperatingSystem');
     }
   }

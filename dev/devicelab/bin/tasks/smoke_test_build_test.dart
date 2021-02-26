@@ -22,7 +22,7 @@ class FakeBuildTestTask extends BuildTestTask {
 
   @override
   Future<void> build() async {}
-  
+
   @override
   Future<TaskResult> test() async => TaskResult.success(<String, String>{'benchmark': 'data'});
 }
