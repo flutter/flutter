@@ -12,7 +12,6 @@ import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -144,7 +143,7 @@ void main() {
       return UpdateFSReport(success: true,  syncedBytes: 0);
     });
     when(mockDebugConnection.vmService).thenAnswer((Invocation invocation) {
-      return fakeVmServiceHost.vmService;
+      return fakeVmServiceHost.vmService.service;
     });
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;
@@ -172,7 +171,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -203,7 +202,7 @@ void main() {
     ));
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
@@ -224,7 +223,7 @@ void main() {
       ..writeAsStringSync('\n');
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -234,7 +233,7 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
@@ -341,7 +340,7 @@ void main() {
       .deleteSync();
     final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
@@ -363,7 +362,7 @@ void main() {
     _setupMocks();
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
@@ -487,7 +486,7 @@ void main() {
   testUsingContext('Does not run main with --start-paused', () async {
     final ResidentRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
@@ -1459,7 +1458,7 @@ void main() {
     fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -1506,7 +1505,7 @@ void main() {
     fakeStatusLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
@@ -1635,7 +1634,7 @@ void main() {
 ResidentRunner setUpResidentRunner(FlutterDevice flutterDevice) {
   return DwdsWebRunnerFactory().createWebRunner(
     flutterDevice,
-    flutterProject: FlutterProject.current(),
+    flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     stayResident: true,

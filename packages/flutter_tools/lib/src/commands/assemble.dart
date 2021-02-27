@@ -66,6 +66,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
+  ThinIosApplicationFrameworks(),
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),
@@ -81,7 +82,8 @@ const bool useLegacyNames = true;
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({ bool verboseHelp = false }) {
+  AssembleCommand({ bool verboseHelp = false, @required BuildSystem buildSystem })
+    : _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -122,6 +124,8 @@ class AssembleCommand extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final BuildSystem _buildSystem;
 
   @override
   String get description => 'Assemble and build Flutter resources.';
@@ -195,7 +199,8 @@ class AssembleCommand extends FlutterCommand {
       processManager: globals.processManager,
       engineVersion: globals.artifacts.isLocalEngine
         ? null
-        : globals.flutterVersion.engineRevision
+        : globals.flutterVersion.engineRevision,
+      generateDartPluginRegistry: true,
     );
     return result;
   }
@@ -226,8 +231,8 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await globals.buildSystem.build(
+    final Target target = targets.length == 1 ? targets.single : CompositeTarget(targets);
+    final BuildResult result = await _buildSystem.build(
       target,
       createEnvironment(),
       buildSystemConfig: BuildSystemConfig(
@@ -306,23 +311,4 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
     outFile.parent.createSync(recursive: true);
   }
   outFile.writeAsStringSync(json.encode(jsonData));
-}
-
-class _CompositeTarget extends Target {
-  _CompositeTarget(this.dependencies);
-
-  @override
-  final List<Target> dependencies;
-
-  @override
-  String get name => '_composite';
-
-  @override
-  Future<void> build(Environment environment) async { }
-
-  @override
-  List<Source> get inputs => <Source>[];
-
-  @override
-  List<Source> get outputs => <Source>[];
 }

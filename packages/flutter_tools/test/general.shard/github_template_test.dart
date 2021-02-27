@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_http_client.dart';
-import '../src/testbed.dart';
 
 const String _kShortURL = 'https://www.example.com/short';
 

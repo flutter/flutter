@@ -208,11 +208,10 @@ void main() {
           'value': 'http://localhost:1234',
         },
       ),
-    ]);
+    ], httpAddress: Uri.parse('http://localhost:1234'));
 
     final FakeFlutterDevice device = FakeFlutterDevice()
       ..vmService = fakeVmServiceHost.vmService;
-    setHttpAddress(Uri.parse('http://localhost:1234'), fakeVmServiceHost.vmService);
 
     await handler.serveAndAnnounceDevTools(
       flutterDevices: <FlutterDevice>[device],
@@ -236,7 +235,7 @@ void main() {
         },
       ),
     ]);
-    waitForExtension(fakeVmServiceHost.vmService, 'foo');
+    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
   });
 
   testWithoutContext('wait for extension handles no isolates', () {
@@ -270,7 +269,7 @@ void main() {
         ),
       ),
     ]);
-    waitForExtension(fakeVmServiceHost.vmService, 'foo');
+    waitForExtension(fakeVmServiceHost.vmService.service, 'foo');
   });
 }
 
@@ -298,5 +297,5 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
-  vm_service.VmService vmService;
+  FlutterVmService vmService;
 }
