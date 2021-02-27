@@ -153,7 +153,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
             command: <String>[
-            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager.bat',
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
             '--version',
           ],
           stdout: '26.1.1\n',
@@ -166,6 +166,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     });
 
     testUsingContext('returns validate sdk is well formed', () {
@@ -173,7 +174,7 @@ void main() {
         fileSystem: fileSystem,
       );
       processManager.addCommand(const FakeCommand(command: <String>[
-        '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager.bat',
+        '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
         '--version',
       ]));
       config.setValue('android-sdk', sdkDir.path);
@@ -197,7 +198,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
           command: <String>[
-            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager.bat',
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
             '--version',
           ],
           stdout: '\n',
@@ -213,12 +214,13 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     });
 
     testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
       sdkDir = MockAndroidSdk.createSdkDirectory(withSdkManager: false);
       config.setValue('android-sdk', sdkDir.path);
-      processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager.bat');
+      processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager');
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
       expect(() => sdk.sdkManagerVersion, throwsToolExit());
@@ -226,6 +228,7 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }
