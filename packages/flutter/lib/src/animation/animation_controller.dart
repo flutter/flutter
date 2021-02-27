@@ -195,82 +195,6 @@ enum AnimationBehavior {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
-///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart
-/// void main() {
-///   runApp(AnimationControllerDemo());
-/// }
-///
-/// class AnimationControllerDemo extends StatefulWidget {
-///   @override
-///   _AnimationControllerDemoState createState() =>
-///       _AnimationControllerDemoState();
-/// }
-///
-/// class _AnimationControllerDemoState extends State<AnimationControllerDemo>
-///     with SingleTickerProviderStateMixin {
-///   static const Duration _duration = Duration(seconds: 1);
-///   dynamic controller;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     controller = AnimationController(vsync: this, duration: _duration)
-///       ..addListener(() {
-///         setState(() {});
-///       });
-///   }
-///
-///   @override
-///   void dispose() {
-///     controller.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: Text('Animation Controller'),
-///         ),
-///         body: Center(
-///           child: Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: [
-///               ConstrainedBox(
-///                 constraints: BoxConstraints(maxWidth: 200),
-///                 child: Text(
-///                   '${controller.value.toStringAsFixed(2)}',
-///                   style: Theme.of(context).textTheme.headline3,
-///                   textScaleFactor: 1.0 + controller.value,
-///                 ),
-///               ),
-///               ElevatedButton(
-///                 child: Text('animate'),
-///                 onPressed: () {
-///                   if (controller.status == AnimationStatus.completed) {
-///                     controller.reverse();
-///                   } else {
-///                     controller.forward();
-///                   }
-///                 },
-///               )
-///             ],
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-/// ```
-/// {@end-tool}
-///
 /// The assumption in the code above is that the animation controllers are being
 /// disposed in the [State] subclass' override of the [State.dispose] method.
 /// Since disposing the controller cancels the animation (raising a
@@ -278,6 +202,65 @@ enum AnimationBehavior {
 /// [State.mounted] is still true at each step. (Again, this assumes that the
 /// controllers are created in [State.initState] and disposed in
 /// [State.dispose], as described in the previous section.)
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// This example shows a [ElevatedButton] which ontap calls [AnimationController] to play 
+/// [forward] and [reverse] animation.
+///
+/// ```dart
+/// static const Duration _duration = Duration(seconds: 1);
+/// dynamic controller = "";
+/// 
+/// @override
+/// void initState() {
+///   super.initState();
+///   controller = AnimationController(vsync: this, duration: _duration);
+/// }
+/// 
+/// @override
+/// void dispose() {
+///   controller.dispose();
+///   super.dispose();
+/// }
+/// 
+/// @override
+/// Widget build(BuildContext context) {
+///   return MaterialApp(
+///     home: Scaffold(
+///       appBar: AppBar(
+///         title: const Text('Animation Controller'),
+///       ),
+///       body: Center(
+///         child: Column(
+///           mainAxisSize: MainAxisSize.min,
+///           children: [
+///             ConstrainedBox(
+///               constraints: BoxConstraints(maxWidth: 200),
+///               child: Text(
+///                 '${controller.value.toStringAsFixed(2)}',
+///                 style: Theme.of(context).textTheme.headline3,
+///                 textScaleFactor: 1.0 + controller.value,
+///               ),
+///             ),
+///             ElevatedButton(
+///               child: const Text('animate'),
+///               onPressed: () {
+///                 if (controller.status == AnimationStatus.completed) {
+///                   controller.reverse();
+///                 } else {
+///                   controller.forward();
+///                 }
+///               },
+///             )
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
