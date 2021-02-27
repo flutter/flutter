@@ -56,9 +56,7 @@ constexpr SHORT kStateMaskPressed = 0x80;
 }  // namespace
 
 KeyboardKeyEmbedderHandler::KeyboardKeyEmbedderHandler(
-    std::function<void(const FlutterKeyEvent&,
-                       FlutterKeyEventCallback,
-                       void* user_data)> send_event,
+    SendEvent send_event,
     GetKeyStateHandler get_key_state)
     : sendEvent_(send_event), get_key_state_(get_key_state), response_id_(1) {
   InitCriticalKeys();
@@ -264,6 +262,11 @@ void KeyboardKeyEmbedderHandler::UpdateLastSeenCritialKey(
 
 void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
     int toggle_virtual_key) {
+  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
+  // https://github.com/flutter/flutter/issues/70202
+#ifdef WINUWP
+  return;
+#else
   for (auto& kv : critical_keys_) {
     UINT virtual_key = kv.first;
     CriticalKey& key_info = kv.second;
@@ -301,9 +304,15 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
       key_info.toggled_on = should_toggled;
     }
   }
+#endif
 }
 
 void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates() {
+  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
+  // https://github.com/flutter/flutter/issues/70202
+#ifdef WINUWP
+  return;
+#else
   for (auto& kv : critical_keys_) {
     UINT virtual_key = kv.first;
     CriticalKey& key_info = kv.second;
@@ -333,6 +342,7 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates() {
       }
     }
   }
+#endif
 }
 
 void KeyboardKeyEmbedderHandler::HandleResponse(bool handled, void* user_data) {
@@ -342,6 +352,11 @@ void KeyboardKeyEmbedderHandler::HandleResponse(bool handled, void* user_data) {
 }
 
 void KeyboardKeyEmbedderHandler::InitCriticalKeys() {
+  // TODO(dkwingsmt) consider adding support for synchronizing key state for UWP
+  // https://github.com/flutter/flutter/issues/70202
+#ifdef WINUWP
+  return;
+#else
   auto createCheckedKey = [this](UINT virtual_key, bool extended,
                                  bool check_pressed,
                                  bool check_toggled) -> CriticalKey {
@@ -374,6 +389,7 @@ void KeyboardKeyEmbedderHandler::InitCriticalKeys() {
                          createCheckedKey(VK_SCROLL, false, true, true));
   critical_keys_.emplace(VK_NUMLOCK,
                          createCheckedKey(VK_NUMLOCK, true, true, true));
+#endif
 }
 
 void KeyboardKeyEmbedderHandler::ConvertUtf32ToUtf8_(char* out, char32_t ch) {

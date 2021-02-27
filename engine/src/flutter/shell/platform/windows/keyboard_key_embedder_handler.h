@@ -37,7 +37,8 @@ class KeyboardKeyEmbedderHandler
   // of the SendEvent call might be nullptr.
   //
   // Use `get_key_state` to define how the class should get a reliable result of
-  // the state for a virtual key. It's typically Win32's GetKeyState.
+  // the state for a virtual key. It's typically Win32's GetKeyState, but can
+  // also be nullptr (for UWP).
   explicit KeyboardKeyEmbedderHandler(SendEvent send_event,
                                       GetKeyStateHandler get_key_state);
 

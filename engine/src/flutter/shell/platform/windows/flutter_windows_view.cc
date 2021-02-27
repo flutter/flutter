@@ -78,7 +78,17 @@ void FlutterWindowsView::RegisterKeyboardHandlers(
   // of the event. In order to allow the same real event in the future, the
   // handler is "toggled" when events pass through, therefore the redispatching
   // algorithm does not allow more than 1 handler that takes |SendInput|.
-  auto key_handler = std::make_unique<flutter::KeyboardKeyHandler>(SendInput);
+#ifdef WINUWP
+  flutter::KeyboardKeyHandler::EventRedispatcher redispatch_event = nullptr;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      nullptr;
+#else
+  flutter::KeyboardKeyHandler::EventRedispatcher redispatch_event = SendInput;
+  flutter::KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state =
+      GetKeyState;
+#endif
+  auto key_handler =
+      std::make_unique<flutter::KeyboardKeyHandler>(redispatch_event);
   key_handler->AddDelegate(
       std::make_unique<KeyboardKeyChannelHandler>(messenger));
   key_handler->AddDelegate(std::make_unique<KeyboardKeyEmbedderHandler>(
@@ -86,7 +96,7 @@ void FlutterWindowsView::RegisterKeyboardHandlers(
              void* user_data) {
         return engine_->SendKeyEvent(event, callback, user_data);
       },
-      GetKeyState));
+      get_key_state));
   AddKeyboardHandler(std::move(key_handler));
   AddKeyboardHandler(
       std::make_unique<flutter::TextInputPlugin>(messenger, this));

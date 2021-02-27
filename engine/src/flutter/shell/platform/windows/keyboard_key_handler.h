@@ -58,7 +58,8 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
   // Create a KeyboardKeyHandler and specify where to redispatch events.
   //
-  // The |redispatch_event| is typically |SendInput|.
+  // The |redispatch_event| is typically |SendInput|, but can also be nullptr
+  // (for UWP).
   explicit KeyboardKeyHandler(EventRedispatcher redispatch_event);
 
   ~KeyboardKeyHandler();
