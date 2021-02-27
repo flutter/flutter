@@ -8,25 +8,22 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
   MemoryFileSystem fileSystem;
-  MockProcessManager processManager;
+  FakeProcessManager processManager;
   Config config;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    processManager = MockProcessManager();
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
     config = Config.test();
   });
 
@@ -153,33 +150,35 @@ void main() {
     testUsingContext('returns sdkmanager version', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       config.setValue('android-sdk', sdkDir.path);
-
+      processManager.addCommand(
+        const FakeCommand(
+            command: <String>[
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
+            '--version',
+          ],
+          stdout: '26.1.1\n',
+        ),
+      );
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: argThat(isNotNull,  named: 'environment')))
-          .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
-      when(processManager.runSync(
-        <String>['/usr/libexec/java_home', '-v', '1.8'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 0, '', ''));
 
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     });
 
     testUsingContext('returns validate sdk is well formed', () {
-      sdkDir = MockBrokenAndroidSdk.createSdkDirectory(
+      sdkDir = createSdkDirectory(
         fileSystem: fileSystem,
       );
+      processManager.addCommand(const FakeCommand(command: <String>[
+        '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
+        '--version',
+      ]));
       config.setValue('android-sdk', sdkDir.path);
-
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.adbPath)).thenReturn(true);
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
       expect(validationIssues.first, 'No valid Android SDK platforms found in'
@@ -196,66 +195,68 @@ void main() {
     testUsingContext('does not throw on sdkmanager version check failure', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       config.setValue('android-sdk', sdkDir.path);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager',
+            '--version',
+          ],
+          stdout: '\n',
+          stderr: 'Mystery error',
+          exitCode: 1,
+        ),
+      );
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: argThat(isNotNull,  named: 'environment')))
-          .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
-      when(processManager.runSync(
-        <String>['/usr/libexec/java_home', '-v', '1.8'],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(0, 0, '', ''));
 
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux', environment: <String, String>{}),
     });
 
     testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
       sdkDir = MockAndroidSdk.createSdkDirectory(withSdkManager: false);
       config.setValue('android-sdk', sdkDir.path);
-
+      processManager.excludedExecutables.add('/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/sdkmanager');
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(false);
+
       expect(() => sdk.sdkManagerVersion, throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Config: () => config,
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }
 
 /// A broken SDK installation.
-class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
-  static Directory createSdkDirectory({
-    bool withAndroidN = false,
-    bool withSdkManager = true,
-    @required FileSystem fileSystem,
-  }) {
-    final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    _createSdkFile(dir, 'licenses/dummy');
-    _createSdkFile(dir, 'platform-tools/adb');
+Directory createSdkDirectory({
+  bool withAndroidN = false,
+  bool withSdkManager = true,
+  @required FileSystem fileSystem,
+}) {
+  final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+  _createSdkFile(dir, 'licenses/dummy');
+  _createSdkFile(dir, 'platform-tools/adb');
 
-    _createSdkFile(dir, 'build-tools/sda/aapt');
-    _createSdkFile(dir, 'build-tools/af/aapt');
-    _createSdkFile(dir, 'build-tools/ljkasd/aapt');
+  _createSdkFile(dir, 'build-tools/sda/aapt');
+  _createSdkFile(dir, 'build-tools/af/aapt');
+  _createSdkFile(dir, 'build-tools/ljkasd/aapt');
 
-    _createSdkFile(dir, 'platforms/android-22/android.jar');
-    _createSdkFile(dir, 'platforms/android-23/android.jar');
+  _createSdkFile(dir, 'platforms/android-22/android.jar');
+  _createSdkFile(dir, 'platforms/android-23/android.jar');
 
-    return dir;
-  }
+  return dir;
+}
 
-  static void _createSdkFile(Directory dir, String filePath, { String contents }) {
-    final File file = dir.childFile(filePath);
-    file.createSync(recursive: true);
-    if (contents != null) {
-      file.writeAsStringSync(contents, flush: true);
-    }
+void _createSdkFile(Directory dir, String filePath, { String contents }) {
+  final File file = dir.childFile(filePath);
+  file.createSync(recursive: true);
+  if (contents != null) {
+    file.writeAsStringSync(contents, flush: true);
   }
 }
