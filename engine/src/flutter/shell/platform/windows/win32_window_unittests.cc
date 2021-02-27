@@ -13,15 +13,15 @@ namespace {
 
 // Creates a valid Windows LPARAM for WM_KEYDOWN and WM_KEYUP from parameters
 // given.
-static LPARAM CreateKeyEventLparam(USHORT ScanCode,
+static LPARAM CreateKeyEventLparam(USHORT scancode,
                                    bool extended = false,
-                                   USHORT RepeatCount = 1,
-                                   bool ContextCode = 0,
-                                   bool PreviousKeyState = 1,
-                                   bool TransitionState = 1) {
-  return ((LPARAM(TransitionState) << 31) | (LPARAM(PreviousKeyState) << 30) |
-          (LPARAM(ContextCode) << 29) | (LPARAM(extended ? 0x1 : 0x0) << 24) |
-          (LPARAM(ScanCode) << 16) | LPARAM(RepeatCount));
+                                   bool was_down = 1,
+                                   USHORT repeat_count = 1,
+                                   bool context_code = 0,
+                                   bool transition_state = 1) {
+  return ((LPARAM(transition_state) << 31) | (LPARAM(was_down) << 30) |
+          (LPARAM(context_code) << 29) | (LPARAM(extended ? 0x1 : 0x0) << 24) |
+          (LPARAM(scancode) << 16) | LPARAM(repeat_count));
 }
 
 }  // namespace
@@ -57,7 +57,7 @@ TEST(MockWin32Window, HorizontalScroll) {
 
 TEST(MockWin32Window, KeyDown) {
   MockWin32Window window;
-  EXPECT_CALL(window, OnKey(_, _, _, _, _)).Times(1);
+  EXPECT_CALL(window, OnKey(_, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42);
   // send a "Shift" key down event.
   window.InjectWindowMessage(WM_KEYDOWN, 16, lparam);
@@ -65,7 +65,7 @@ TEST(MockWin32Window, KeyDown) {
 
 TEST(MockWin32Window, KeyUp) {
   MockWin32Window window;
-  EXPECT_CALL(window, OnKey(_, _, _, _, _)).Times(1);
+  EXPECT_CALL(window, OnKey(_, _, _, _, _, _)).Times(1);
   LPARAM lparam = CreateKeyEventLparam(42);
   // send a "Shift" key up event.
   window.InjectWindowMessage(WM_KEYUP, 16, lparam);
@@ -75,11 +75,11 @@ TEST(MockWin32Window, KeyDownPrintable) {
   MockWin32Window window;
   LPARAM lparam = CreateKeyEventLparam(30);
   // OnKey shouldn't be called until the WM_CHAR message.
-  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false)).Times(0);
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false, true)).Times(0);
   // send a "A" key down event.
   window.InjectWindowMessage(WM_KEYDOWN, 65, lparam);
 
-  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false)).Times(1);
+  EXPECT_CALL(window, OnKey(65, 30, WM_KEYDOWN, 65, false, true)).Times(1);
   EXPECT_CALL(window, OnText(_)).Times(1);
   window.InjectWindowMessage(WM_CHAR, 65, lparam);
 }

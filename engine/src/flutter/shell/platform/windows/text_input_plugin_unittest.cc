@@ -49,7 +49,7 @@ TEST(TextInputPluginTest, TextMethodsWorksWithEmptyModel) {
   int redispatch_scancode = 0;
   TextInputPlugin handler(&messenger, &delegate);
 
-  handler.KeyboardHook(nullptr, VK_RETURN, 100, WM_KEYDOWN, '\n', false);
+  handler.KeyboardHook(nullptr, VK_RETURN, 100, WM_KEYDOWN, '\n', false, false);
   handler.ComposeBeginHook();
   std::u16string text;
   text.push_back('\n');

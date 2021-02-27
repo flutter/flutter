@@ -97,6 +97,11 @@ class FlutterWindowsEngine {
   // Informs the engine of an incoming pointer event.
   void SendPointerEvent(const FlutterPointerEvent& event);
 
+  // Informs the engine of an incoming key event.
+  void SendKeyEvent(const FlutterKeyEvent& event,
+                    FlutterKeyEventCallback callback,
+                    void* user_data);
+
   // Sends the given message to the engine, calling |reply| with |user_data|
   // when a reponse is received from the engine if they are non-null.
   bool SendPlatformMessage(const char* channel,
