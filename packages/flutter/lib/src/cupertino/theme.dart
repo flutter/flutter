@@ -249,7 +249,6 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
   @override
   Color get scaffoldBackgroundColor => super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
-  
   @override
   bool get autoScrollbars => super.autoScrollbars ?? _defaults.autoScrollbars;
 
@@ -408,9 +407,8 @@ class NoDefaultCupertinoThemeData {
   ///
   /// Defaults to [CupertinoColors.systemBackground].
   final Color? scaffoldBackgroundColor;
-  
   /// Whether [CupertinoScrollbar]s on desktop and Web should automatically be applied.
-  /// 
+  ///
   /// Defaults to true.
   final bool? autoScrollbars;
 
