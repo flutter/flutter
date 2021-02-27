@@ -270,7 +270,8 @@ void FlutterWindowWinUWP::OnKeyUp(
   int key = static_cast<int>(args.VirtualKey());
   char32_t chararacter = static_cast<char32_t>(key | 32);
   int action = 0x0101;
-  binding_handler_delegate_->OnKey(key, scancode, action, chararacter, false);
+  binding_handler_delegate_->OnKey(key, scancode, action, chararacter,
+                                   false /* extended */, true /* was_down */);
 }
 
 void FlutterWindowWinUWP::OnKeyDown(
@@ -285,7 +286,8 @@ void FlutterWindowWinUWP::OnKeyDown(
   int key = static_cast<int>(args.VirtualKey());
   char32_t chararacter = static_cast<char32_t>(key | 32);
   int action = 0x0100;
-  binding_handler_delegate_->OnKey(key, scancode, action, chararacter, false);
+  binding_handler_delegate_->OnKey(key, scancode, action, chararacter,
+                                   false /* extended */, false /* was_down */);
 }
 
 void FlutterWindowWinUWP::OnCharacterReceived(

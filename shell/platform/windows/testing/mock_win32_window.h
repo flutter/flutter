@@ -39,11 +39,12 @@ class MockWin32Window : public Win32Window {
   MOCK_METHOD0(OnPointerLeave, void());
   MOCK_METHOD0(OnSetCursor, void());
   MOCK_METHOD1(OnText, void(const std::u16string&));
-  MOCK_METHOD5(OnKey, bool(int, int, int, char32_t, bool));
+  MOCK_METHOD6(OnKey, bool(int, int, int, char32_t, bool, bool));
   MOCK_METHOD2(OnScroll, void(double, double));
   MOCK_METHOD0(OnComposeBegin, void());
   MOCK_METHOD0(OnComposeEnd, void());
   MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
+  MOCK_METHOD4(DefaultWindowProc, LRESULT(HWND, UINT, WPARAM, LPARAM));
 };
 
 }  // namespace testing
