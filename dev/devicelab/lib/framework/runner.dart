@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -77,6 +78,7 @@ Future<TaskResult> runTask(
   String localEngineSrcPath,
   String deviceId,
   List<String> taskArgs,
+  @visibleForTesting bool skipProcessCleanup = false,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
@@ -131,7 +133,10 @@ Future<TaskResult> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final Map<String, String> isolateParams = <String, String>{
+      'skipProcessCleanup': '$skipProcessCleanup',
+    };
+    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask', isolateParams) as Map<String, dynamic>;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;

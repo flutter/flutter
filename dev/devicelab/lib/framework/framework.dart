@@ -64,7 +64,10 @@ class _TaskRunner {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
         ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
         : null;
-      final TaskResult result = await run(taskTimeout);
+      // This is only expected to be passed in unit test runs so they do not
+      // kill the Dart process that is running them.
+      final bool skipProcessCleanup = parameters['skipProcessCleanup'] == 'true';
+      final TaskResult result = await run(taskTimeout, skipProcessCleanup: skipProcessCleanup);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -87,7 +90,7 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration taskTimeout) async {
+  Future<TaskResult> run(Duration taskTimeout, {bool skipProcessCleanup = false}) async {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
@@ -123,21 +126,25 @@ class _TaskRunner {
 
       TaskResult result = await futureResult;
 
-      section('Checking running Dart$exe processes after task...');
-      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toList();
-      for (final RunningProcessInfo info in afterRunningDartInstances) {
-        if (!beforeRunningDartInstances.contains(info)) {
-          print('$info was leaked by this test.');
-          if (result is TaskResultCheckProcesses) {
-            result = TaskResult.failure('This test leaked dart processes');
-          }
-          final bool killed = await killProcess(info.pid);
-          if (!killed) {
-            print('Failed to kill process ${info.pid}.');
-          } else {
-            print('Killed process id ${info.pid}.');
+      if (skipProcessCleanup) {
+        section('Skipping Dart process cleanup. You should only see this in devicelab unit tests');
+      } else {
+        section('Checking running Dart$exe processes after task...');
+        final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+          processName: 'dart$exe',
+        ).toList();
+        for (final RunningProcessInfo info in afterRunningDartInstances) {
+          if (!beforeRunningDartInstances.contains(info)) {
+            print('$info was leaked by this test.');
+            if (result is TaskResultCheckProcesses) {
+              result = TaskResult.failure('This test leaked dart processes');
+            }
+            final bool killed = await killProcess(info.pid);
+            if (!killed) {
+              print('Failed to kill process ${info.pid}.');
+            } else {
+              print('Killed process id ${info.pid}.');
+            }
           }
         }
       }
