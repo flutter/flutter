@@ -63,8 +63,8 @@ class WindowBindingHandler {
   // content. See mouse_cursor.dart for the values and meanings of cursor_name.
   virtual void UpdateFlutterCursor(const std::string& cursor_name) = 0;
 
-  // Sets the cursor rect in root view coordinates.
-  virtual void UpdateCursorRect(const Rect& rect) = 0;
+  // Invoked when the cursor/composing rect has been updated in the framework.
+  virtual void OnCursorRectUpdated(const Rect& rect) = 0;
 };
 
 }  // namespace flutter
