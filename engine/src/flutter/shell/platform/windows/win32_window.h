@@ -101,7 +101,8 @@ class Win32Window {
                      int scancode,
                      int action,
                      char32_t character,
-                     bool extended) = 0;
+                     bool extended,
+                     bool was_down) = 0;
 
   // Called when IME composing begins.
   virtual void OnComposeBegin() = 0;
@@ -148,6 +149,9 @@ class Win32Window {
   UINT GetCurrentWidth();
 
   UINT GetCurrentHeight();
+
+ protected:
+  LRESULT DefaultWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
  private:
   // Release OS resources asociated with window.

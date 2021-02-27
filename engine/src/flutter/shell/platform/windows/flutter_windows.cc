@@ -148,7 +148,7 @@ void FlutterDesktopResyncOutputStreams() {
   std::ios::sync_with_stdio();
 }
 
-// Implementations of common/cpp/ API methods.
+// Implementations of common/ API methods.
 
 FlutterDesktopMessengerRef FlutterDesktopPluginRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {

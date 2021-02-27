@@ -10,11 +10,6 @@
 
 #include "win32_dpi_utils.h"
 
-// KeyCode used to indicate key events to be handled by the IME. These include
-// the kana key, fullwidth/halfwidth (zenkaku/hankaku) key, and keypresses when
-// the IME is in composing mode.
-static constexpr int kImeComposingKeyCode = 229;
-
 namespace flutter {
 
 namespace {
@@ -341,9 +336,9 @@ Win32Window::HandleMessage(UINT const message,
       if (keycode_for_char_message_ != 0) {
         const unsigned int scancode = (lparam >> 16) & 0xff;
         const bool extended = ((lparam >> 24) & 0x01) == 0x01;
-
+        const bool was_down = lparam & 0x40000000;
         bool handled = OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN,
-                             code_point, extended);
+                             code_point, extended, was_down);
         keycode_for_char_message_ = 0;
         if (handled) {
           // If the OnKey handler handles the message, then return so we don't
@@ -383,12 +378,6 @@ Win32Window::HandleMessage(UINT const message,
         break;
       }
       unsigned int keyCode(wparam);
-      if (keyCode == kImeComposingKeyCode) {
-        // This is an IME composing mode keypress that will be handled via
-        // WM_IME_* messages, which update the framework via updates to the text
-        // and composing range in text editing update messages.
-        break;
-      }
       const unsigned int scancode = (lparam >> 16) & 0xff;
       const bool extended = ((lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.
@@ -396,7 +385,8 @@ Win32Window::HandleMessage(UINT const message,
         keyCode = MapVirtualKey(scancode, MAPVK_VSC_TO_VK_EX);
       }
       const int action = is_keydown_message ? WM_KEYDOWN : WM_KEYUP;
-      if (OnKey(keyCode, scancode, action, 0, extended)) {
+      const bool was_down = lparam & 0x40000000;
+      if (OnKey(keyCode, scancode, action, 0, extended, was_down)) {
         return 0;
       }
       break;
@@ -439,6 +429,13 @@ void Win32Window::HandleResize(UINT width, UINT height) {
 Win32Window* Win32Window::GetThisFromHandle(HWND const window) noexcept {
   return reinterpret_cast<Win32Window*>(
       GetWindowLongPtr(window, GWLP_USERDATA));
+}
+
+LRESULT Win32Window::DefaultWindowProc(HWND hWnd,
+                                       UINT Msg,
+                                       WPARAM wParam,
+                                       LPARAM lParam) {
+  return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
 }  // namespace flutter

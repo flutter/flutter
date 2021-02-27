@@ -66,7 +66,8 @@ bool TextInputPlugin::KeyboardHook(FlutterWindowsView* view,
                                    int scancode,
                                    int action,
                                    char32_t character,
-                                   bool extended) {
+                                   bool extended,
+                                   bool was_down) {
   if (active_model_ == nullptr) {
     return false;
   }

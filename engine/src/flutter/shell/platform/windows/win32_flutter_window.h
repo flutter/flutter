@@ -59,7 +59,8 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
              int scancode,
              int action,
              char32_t character,
-             bool extended) override;
+             bool extended,
+             bool was_down) override;
 
   // |Win32Window|
   void OnComposeBegin() override;
