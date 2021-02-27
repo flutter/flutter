@@ -708,4 +708,40 @@ void main() {
     final ColoredBox coloredBox = tester.firstWidget(find.byType(ColoredBox));
     expect(coloredBox.color, equals(selectedTileColor));
   });
+
+  testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
+    // Regression test for
+
+    const Color activeColor = Color(0xff00ff00);
+
+    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          toggleableActiveColor: toggleableActiveColor,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: RadioListTile<bool>(
+              activeColor: activeColor,
+              selected: true,
+              title: const Text('title'),
+              value: false,
+              groupValue: true,
+              onChanged: (bool? newValue) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color? textColor(String text) {
+      return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
+    }
+
+    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    expect(textColor('title'), activeColor);
+
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
+    expect(textColor('title'), activeColor);
+  });
 }
