@@ -302,7 +302,7 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection, { ScrollController? controller }) {
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return child;
   }
 

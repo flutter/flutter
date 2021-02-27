@@ -535,7 +535,7 @@ void main() {
 
 class TestScrollBehavior1 extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection, { ScrollController? controller }) {
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return GlowingOverscrollIndicator(
       child: child,
       axisDirection: axisDirection,
@@ -546,7 +546,7 @@ class TestScrollBehavior1 extends ScrollBehavior {
 
 class TestScrollBehavior2 extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection, { ScrollController? controller }) {
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return GlowingOverscrollIndicator(
       child: child,
       axisDirection: axisDirection,
