@@ -173,6 +173,10 @@ void Win32Window::OnImeRequest(UINT const message,
   // https://github.com/flutter/flutter/issues/74547
 }
 
+void Win32Window::UpdateCursorRect(const Rect& rect) {
+  text_input_manager_.UpdateCaretRect(rect);
+}
+
 LRESULT
 Win32Window::HandleMessage(UINT const message,
                            WPARAM const wparam,

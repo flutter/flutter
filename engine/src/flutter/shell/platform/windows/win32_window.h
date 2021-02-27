@@ -141,6 +141,11 @@ class Win32Window {
                     WPARAM const wparam,
                     LPARAM const lparam);
 
+  // Called when the cursor rect has been updated.
+  //
+  // |rect| is in Win32 window coordinates.
+  virtual void UpdateCursorRect(const Rect& rect);
+
   // Called when mouse scrollwheel input occurs.
   virtual void OnScroll(double delta_x, double delta_y) = 0;
 
@@ -186,7 +191,7 @@ class Win32Window {
   // message.
   int keycode_for_char_message_ = 0;
 
- protected:
+  // Manages IME state.
   TextInputManagerWin32 text_input_manager_;
 };
 

@@ -21,6 +21,7 @@
 
 using testing::_;
 using testing::Invoke;
+using testing::Return;
 
 namespace flutter {
 namespace testing {
@@ -123,7 +124,10 @@ class SpyTextInputPlugin : public KeyboardHandlerBase,
 
 class MockWin32FlutterWindow : public Win32FlutterWindow {
  public:
-  MockWin32FlutterWindow() : Win32FlutterWindow(800, 600) {}
+  MockWin32FlutterWindow() : Win32FlutterWindow(800, 600) {
+    ON_CALL(*this, GetDpiScale())
+        .WillByDefault(Return(this->Win32FlutterWindow::GetDpiScale()));
+  }
   virtual ~MockWin32FlutterWindow() {}
 
   // Prevent copying.
@@ -149,6 +153,8 @@ class MockWin32FlutterWindow : public Win32FlutterWindow {
   MOCK_METHOD0(OnSetCursor, void());
   MOCK_METHOD2(OnScroll, void(double, double));
   MOCK_METHOD4(DefaultWindowProc, LRESULT(HWND, UINT, WPARAM, LPARAM));
+  MOCK_METHOD0(GetDpiScale, float());
+  MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
 };
 
 // A FlutterWindowsView that overrides the RegisterKeyboardHandlers function
@@ -470,6 +476,35 @@ TEST(Win32FlutterWindowTest, ModifierKeyDownPropagation) {
               0);
     flutter_windows_view.InjectPendingEvents(&win32window);
   }
+}
+
+// Tests that composing rect updates are transformed from Flutter logical
+// coordinates to device coordinates and passed to the text input manager
+// when the DPI scale is 100% (96 DPI).
+TEST(Win32FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
+  MockWin32FlutterWindow win32window;
+  ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.0));
+  EXPECT_CALL(win32window, GetDpiScale()).Times(1);
+
+  Rect cursor_rect(Point(10, 20), Size(30, 40));
+  EXPECT_CALL(win32window, UpdateCursorRect(cursor_rect)).Times(1);
+
+  win32window.OnCursorRectUpdated(cursor_rect);
+}
+
+// Tests that composing rect updates are transformed from Flutter logical
+// coordinates to device coordinates and passed to the text input manager
+// when the DPI scale is 150% (144 DPI).
+TEST(Win32FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
+  MockWin32FlutterWindow win32window;
+  ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.5));
+  EXPECT_CALL(win32window, GetDpiScale()).Times(1);
+
+  Rect expected_cursor_rect(Point(15, 30), Size(45, 60));
+  EXPECT_CALL(win32window, UpdateCursorRect(expected_cursor_rect)).Times(1);
+
+  Rect cursor_rect(Point(10, 20), Size(30, 40));
+  win32window.OnCursorRectUpdated(cursor_rect);
 }
 
 }  // namespace testing

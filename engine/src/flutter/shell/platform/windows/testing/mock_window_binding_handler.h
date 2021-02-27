@@ -29,7 +29,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD0(OnWindowResized, void());
   MOCK_METHOD0(GetPhysicalWindowBounds, PhysicalWindowBounds());
   MOCK_METHOD1(UpdateFlutterCursor, void(const std::string& cursor_name));
-  MOCK_METHOD1(UpdateCursorRect, void(const Rect& rect));
+  MOCK_METHOD1(OnCursorRectUpdated, void(const Rect& rect));
 };
 
 }  // namespace testing
