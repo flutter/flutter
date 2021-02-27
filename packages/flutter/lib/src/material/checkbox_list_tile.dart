@@ -26,7 +26,7 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property. This tile's [activeColor] is used for the selected item color, or
+/// property. This tile's [activeColor] is used for the selected item's text color, or
 /// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the [value] state; to have the list tile
