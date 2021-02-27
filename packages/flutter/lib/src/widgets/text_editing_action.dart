@@ -10,12 +10,6 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
-/// Similar to [CallbackAction]'s [OnInvokeCallback], but includes a
-/// [TextEditingActionTarget] as a parameter.
-///
-/// Used by [TextEditingAction.onInvoke].
-typedef OnInvokeTextEditingCallback<T extends Intent> = Object? Function(T intent, TextEditingActionTarget textEditingActionTarget);
-
 /// An implementor of this must be focused for a [TextEditingAction] to be
 /// enabled.
 ///
@@ -42,13 +36,10 @@ abstract class TextEditingActionTarget {
 ///
 ///  * [CallbackAction], which is a similar Action type but unrelated to text
 ///    editing.
-class TextEditingAction<T extends Intent> extends ContextAction<T> {
-  /// A constructor for a [TextEditingAction].
-  ///
-  /// The [onInvoke] parameter must not be null.
-  TextEditingAction({ required this.onInvoke }) : assert(onInvoke != null);
-
-  TextEditingActionTarget? get _textEditingActionTarget {
+abstract class TextEditingAction<T extends Intent> extends ContextAction<T> {
+  /// Returns the currently focused [TextEditingAction], if any.
+  @protected
+  TextEditingActionTarget? get textEditingActionTarget {
     // If an EditableText is not focused, then ignore this action.
     if (primaryFocus?.context?.widget is! EditableText) {
       return null;
@@ -56,28 +47,10 @@ class TextEditingAction<T extends Intent> extends ContextAction<T> {
     return (primaryFocus!.context! as StatefulElement).state as TextEditingActionTarget;
   }
 
-  /// The callback to be called when invoked.
-  ///
-  /// If an EditableText is not focused and available at
-  /// `primaryFocus.context.widget`, then [isEnabled] will be false, and this
-  /// will not be invoked.
-  ///
-  /// Must not be null.
-  @protected
-  final OnInvokeTextEditingCallback<T> onInvoke;
-
-  @override
-  Object? invoke(covariant T intent, [BuildContext? context]) {
-    // _textEditingActionTarget shouldn't be null because isEnabled will return
-    // false and invoke shouldn't be called if so.
-    assert(_textEditingActionTarget != null);
-    return onInvoke(intent, _textEditingActionTarget!);
-  }
-
   @override
   bool isEnabled(Intent intent) {
     // The Action is disabled if there is no focused EditableText, or if the
     // platform is web, because web lets the browser handle text editing.
-    return !kIsWeb && _textEditingActionTarget != null;
+    return !kIsWeb && textEditingActionTarget != null;
   }
 }
