@@ -26,10 +26,10 @@ import 'theme_data.dart';
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property, but the color used is [activeColor], if it's non-null.
-/// No effort is made to coordinate the [selected] state and the
-/// [value] state; to have the list tile appear selected when the
-/// checkbox is checked, pass the same value to both.
+/// property, but the color used is that described by [activeColor], if any,
+/// defaulting to the accent color of the current [Theme]. No effort is made to
+/// coordinate the [selected] state and the [value] state; to have the list tile
+/// appear selected when the checkbox is checked, pass the same value to both.
 ///
 /// The checkbox is shown on the right by default in left-to-right languages
 /// (i.e. the trailing edge). This can be changed using [controlAffinity]. The
@@ -314,8 +314,7 @@ class CheckboxListTile extends StatelessWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// If this property is null, then the checkbox's default is used, which is
-  /// [ThemeData.toggleableActiveColor].
+  /// Defaults to accent color of the current [Theme].
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.
@@ -431,23 +430,25 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
-
     return MergeSemantics(
-      child: ListTile(
-        leading: leading,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
-        isThreeLine: isThreeLine,
-        dense: dense,
-        enabled: onChanged != null,
-        onTap: onChanged != null ? _handleValueChange : null,
-        selected: selected,
-        autofocus: autofocus,
-        contentPadding: contentPadding,
-        shape: shape,
-        selectedTileColor: selectedTileColor,
-        tileColor: tileColor,
+      child: ListTileTheme.merge(
+        selectedColor: activeColor ?? Theme.of(context).accentColor,
+        child: ListTile(
+          leading: leading,
+          title: title,
+          subtitle: subtitle,
+          trailing: trailing,
+          isThreeLine: isThreeLine,
+          dense: dense,
+          enabled: onChanged != null,
+          onTap: onChanged != null ? _handleValueChange : null,
+          selected: selected,
+          autofocus: autofocus,
+          contentPadding: contentPadding,
+          shape: shape,
+          selectedTileColor: selectedTileColor,
+          tileColor: tileColor,
+        ),
       ),
     );
   }
