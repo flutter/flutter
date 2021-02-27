@@ -55,6 +55,11 @@ static constexpr int kScrollLock = 1 << 13;
 /// with the re-defined values declared above for compatibility with the Flutter
 /// framework.
 int GetModsForKeyState() {
+  // TODO(clarkezone) need to add support for get modifier state for UWP
+  // https://github.com/flutter/flutter/issues/70202
+#ifdef WINUWP
+  return 0;
+#else
   int mods = 0;
 
   if (GetKeyState(VK_SHIFT) < 0)
@@ -86,6 +91,7 @@ int GetModsForKeyState() {
   if (GetKeyState(VK_SCROLL) < 0)
     mods |= kScrollLock;
   return mods;
+#endif
 }
 
 }  // namespace
