@@ -120,6 +120,7 @@ const int sFontSizeIndex = 3;
 const int sHeightIndex = 4;
 const int sLeadingIndex = 5;
 const int sForceStrutHeightIndex = 6;
+const int sForceStrutHeightValueIndex = 7;
 
 const int sFontWeightMask = 1 << sFontWeightIndex;
 const int sFontStyleMask = 1 << sFontStyleIndex;
@@ -128,6 +129,7 @@ const int sFontSizeMask = 1 << sFontSizeIndex;
 const int sHeightMask = 1 << sHeightIndex;
 const int sLeadingMask = 1 << sLeadingIndex;
 const int sForceStrutHeightMask = 1 << sForceStrutHeightIndex;
+const int sForceStrutHeightValueMask = 1 << sForceStrutHeightValueIndex;
 
 }  // namespace
 
@@ -215,8 +217,8 @@ void decodeStrut(Dart_Handle strut_data,
     paragraph_style.strut_leading = float_data[float_count++];
   }
   if (mask & sForceStrutHeightMask) {
-    // The boolean is stored as the last bit in the bitmask.
-    paragraph_style.force_strut_height = (mask & 1 << 7) != 0;
+    paragraph_style.force_strut_height =
+        (mask & sForceStrutHeightValueMask) != 0;
   }
 
   if (mask & sFontFamilyMask) {
