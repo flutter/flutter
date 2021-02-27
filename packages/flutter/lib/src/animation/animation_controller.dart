@@ -206,7 +206,7 @@ enum AnimationBehavior {
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This example shows a [ElevatedButton] which ontap calls [AnimationController] to play 
-/// [forward] and [reverse] animation.
+/// [forward] and [reverse] animation on [Text] widget inside an [AnimatedBuilder].
 ///
 /// ```dart
 /// static const Duration _duration = Duration(seconds: 1);
@@ -235,14 +235,19 @@ enum AnimationBehavior {
 ///         child: Column(
 ///           mainAxisSize: MainAxisSize.min,
 ///           children: [
-///             ConstrainedBox(
-///               constraints: BoxConstraints(maxWidth: 200),
-///               child: Text(
-///                 '${controller.value.toStringAsFixed(2)}',
-///                 style: Theme.of(context).textTheme.headline3,
-///                 textScaleFactor: 1.0 + controller.value,
+///              AnimatedBuilder(
+///                 animation: controller,
+///                 builder: (BuildContext context, Widget child) {
+///                   return ConstrainedBox(
+///                     constraints: BoxConstraints(maxWidth: 200),
+///                     child: Text(
+///                       '${controller.value.toStringAsFixed(2)}',
+///                       style: Theme.of(context).textTheme.headline3,
+///                       textScaleFactor: 1 + controller.value,
+///                     ),
+///                   );
+///                 },
 ///               ),
-///             ),
 ///             ElevatedButton(
 ///               child: const Text('animate'),
 ///               onPressed: () {
