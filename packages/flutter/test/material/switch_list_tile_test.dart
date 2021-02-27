@@ -401,7 +401,7 @@ void main() {
   });
 
   testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
-    // Regression test for
+    // Regression test for https://github.com/flutter/flutter/pull/76909
 
     const Color activeColor = Color(0xff00ff00);
 
