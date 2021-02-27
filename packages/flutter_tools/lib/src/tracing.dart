@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -32,7 +34,7 @@ class Tracing {
   final Logger _logger;
 
   Future<void> startTracing() async {
-    await vmService.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService.setTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
     await vmService.clearVMTimeline();
   }
 
@@ -78,8 +80,13 @@ class Tracing {
       }
       status.stop();
     }
-    final vm_service.Timeline timeline = await vmService.getVMTimeline();
-    await vmService.setVMTimelineFlags(<String>[]);
+    final vm_service.Response timeline = await vmService.getTimeline();
+    await vmService.setTimelineFlags(<String>[]);
+    if (timeline == null) {
+      throwToolExit(
+        'The device disconnected before the timeline could be retrieved.',
+      );
+    }
     return timeline.json;
   }
 }

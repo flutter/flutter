@@ -33,8 +33,6 @@
         "templates/app/android.tmpl/gradle/wrapper/gradle-wrapper.properties",
         "templates/app/android.tmpl/gradle.properties.tmpl",
         "templates/app/android.tmpl/settings.gradle",
-        "templates/app/integration_test/app_test.dart.tmpl",
-        "templates/app/integration_test/driver.dart.tmpl",
         "templates/app/ios-objc.tmpl/Runner/AppDelegate.h",
         "templates/app/ios-objc.tmpl/Runner/AppDelegate.m",
         "templates/app/ios-objc.tmpl/Runner/main.m",

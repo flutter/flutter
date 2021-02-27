@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'colors.dart';
@@ -983,6 +982,9 @@ class ListTile extends StatelessWidget {
     assert(tiles != null);
     assert(color != null || context != null);
 
+    if (tiles.isEmpty)
+      return;
+
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
 
@@ -1076,6 +1078,12 @@ class ListTile extends StatelessWidget {
       : style.copyWith(color: color);
   }
 
+  TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileTheme? tileTheme) {
+    final TextStyle style = theme.textTheme.bodyText2!;
+    final Color? color = _textColor(theme, tileTheme, style.color);
+    return style.copyWith(color: color);
+  }
+
   Color _tileBackgroundColor(ListTileTheme? tileTheme) {
     if (!selected) {
       if (tileColor != null)
@@ -1101,14 +1109,21 @@ class ListTile extends StatelessWidget {
     final ListTileTheme tileTheme = ListTileTheme.of(context);
 
     IconThemeData? iconThemeData;
-    if (leading != null || trailing != null)
+    TextStyle? leadingAndTrailingTextStyle;
+    if (leading != null || trailing != null) {
       iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
+      leadingAndTrailingTextStyle = _trailingAndLeadingTextStyle(theme, tileTheme);
+    }
 
     Widget? leadingIcon;
     if (leading != null) {
-      leadingIcon = IconTheme.merge(
-        data: iconThemeData!,
-        child: leading!,
+      leadingIcon = AnimatedDefaultTextStyle(
+        style: leadingAndTrailingTextStyle!,
+        duration: kThemeChangeDuration,
+        child: IconTheme.merge(
+          data: iconThemeData!,
+          child: leading!,
+        ),
       );
     }
 
@@ -1132,9 +1147,13 @@ class ListTile extends StatelessWidget {
 
     Widget? trailingIcon;
     if (trailing != null) {
-      trailingIcon = IconTheme.merge(
-        data: iconThemeData!,
-        child: trailing!,
+      trailingIcon = AnimatedDefaultTextStyle(
+        style: leadingAndTrailingTextStyle!,
+        duration: kThemeChangeDuration,
+        child: IconTheme.merge(
+          data: iconThemeData!,
+          child: trailing!,
+        ),
       );
     }
 
@@ -1674,7 +1693,7 @@ class _RenderListTile extends RenderBox {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.'
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   // All of the dimensions below were taken from the Material Design spec:

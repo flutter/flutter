@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
@@ -84,9 +86,25 @@ class FlutterProject {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static FlutterProject current() => globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
 
-  /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
-  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => globals.projectFactory.fromDirectory(globals.fs.directory(path));
+  /// Create a [FlutterProject] and bypass the project caching.
+  @visibleForTesting
+  static FlutterProject fromDirectoryTest(Directory directory, [Logger logger]) {
+    final FileSystem fileSystem = directory.fileSystem;
+    logger ??= BufferLogger.test();
+    final FlutterManifest manifest = FlutterProject._readManifest(
+      directory.childFile(bundle.defaultManifestPath).path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    final FlutterManifest exampleManifest = FlutterProject._readManifest(
+      FlutterProject._exampleDirectory(directory)
+        .childFile(bundle.defaultManifestPath)
+        .path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    return FlutterProject(directory, manifest, exampleManifest);
+  }
 
   /// The location of this project.
   final Directory directory;
@@ -162,6 +180,12 @@ class FlutterProject {
   /// The `.packages` file of this project.
   File get packagesFile => directory.childFile('.packages');
 
+  /// The `package_config.json` file of the project.
+  ///
+  /// This is the replacement for .packages which contains language
+  /// version information.
+  File get packageConfigFile => directory.childDirectory('.dart_tool').childFile('package_config.json');
+
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
@@ -220,6 +244,12 @@ class FlutterProject {
       );
     } on YamlException catch (e) {
       logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
+    } on FormatException catch (e) {
+      logger.printError('Error detected while parsing pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
+    } on FileSystemException catch (e) {
+      logger.printError('Error detected while reading pubspec.yaml:', emphasis: true);
       logger.printError('$e');
     }
     if (manifest == null) {
@@ -446,6 +476,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
+  File get xcodeProjectWorkspaceData =>
+    xcodeProject
+    .childDirectory('project.xcworkspace')
+    .childFile('contents.xcworkspacedata');
+
   @override
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
 
@@ -651,11 +686,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           ephemeralDirectory,
         );
       }
-      copyEngineArtifactToProject(BuildMode.debug, EnvironmentType.physical);
+      // Use release mode so host project can link on bitcode variant.
+      _copyEngineArtifactToProject(BuildMode.release, EnvironmentType.physical);
     }
   }
 
-  void copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
+  void _copyEngineArtifactToProject(BuildMode mode, EnvironmentType environmentType) {
     // Copy framework from engine cache. The actual build mode
     // doesn't actually matter as it will be overwritten by xcode_backend.sh.
     // However, cocoapods will run before that script and requires something
@@ -669,7 +705,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       )
     );
     if (framework.existsSync()) {
-      globals.fsUtils.copyDirectorySync(
+      copyDirectory(
         framework,
         engineCopyDirectory.childDirectory('Flutter.xcframework'),
       );
@@ -880,7 +916,7 @@ to migrate your project.
       'library_new_embedding',
     ), ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    globals.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   Future<void> _overwriteFromTemplate(String path, Directory target) async {

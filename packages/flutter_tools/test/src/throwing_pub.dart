@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
@@ -36,7 +38,13 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> interactively(List<String> arguments, {String directory, @required Stdio stdio,}) {
+  Future<void> interactively(
+    List<String> arguments, {
+    String directory,
+    @required Stdio stdio,
+    bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
+  }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 }

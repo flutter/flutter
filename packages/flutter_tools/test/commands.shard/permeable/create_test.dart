@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -29,12 +30,14 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_http_client.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
 const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
+const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 // TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -183,6 +186,31 @@ void main() {
     ...noColorTerminalOverride,
   });
 
+  testUsingContext('cannot create a project in flutter root', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
+    final ProcessResult exec = await Process.run(
+      flutterBin,
+      <String>[
+        'create',
+        'flutter_project',
+      ],
+      workingDirectory: Cache.flutterRoot,
+    );
+    expect(exec.exitCode, 2);
+    expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+    ...noColorTerminalOverride,
+  });
+
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childDirectory('.idea').create(recursive: true);
@@ -299,8 +327,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
   }, overrides: <Type, Generator>{
@@ -366,8 +392,6 @@ void main() {
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
-        'integration_test/app_test.dart',
-        'integration_test/driver.dart',
       ],
     );
     return _runFlutterTest(projectDir);
@@ -1603,7 +1627,39 @@ void main() {
     expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
       contains('void main() {}'));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() {}')),
+          )
+        ]);
+      };
+    },
+  });
+
+  testUsingContext('null-safe sample-based project have no analyzer errors', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--no-pub', '--sample=foo.bar.Baz'],
+      <String>['lib/main.dart'],
+    );
+    expect(
+      projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
+      contains('String?'), // uses null-safe syntax
+    );
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); }')),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('can write samples index to disk', () async {
@@ -1621,8 +1677,16 @@ void main() {
     expect(expectedFile, exists);
     expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: samplesIndexJson),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: FakeResponse(body: utf8.encode(samplesIndexJson)),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('Throws tool exit on empty samples index', () async {
@@ -1642,8 +1706,15 @@ void main() {
         message: 'Unable to download samples',
     ));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: ''),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('provides an error to the user if samples json download fails', () async {
@@ -1659,8 +1730,16 @@ void main() {
     await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
     expect(globals.fs.file(outputFile), isNot(exists));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(404, result: 'not found'),
+    HttpClientFactory: () {
+      return () {
+        return FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            response: const FakeResponse(statusCode: HttpStatus.notFound),
+          )
+        ]);
+      };
+    },
   });
 
   testUsingContext('plugin does not support any platform by default', () async {
@@ -2339,6 +2418,93 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
     Logger: () => logger,
   });
+
+  testUsingContext('should show warning when disabled platforms are selected while creating a plugin', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a plugin", () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android,ios,windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning when disabled platforms are selected while creating a app', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android,ios,web,windows,macos,linux', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(logger.statusText, contains(_kDisabledPlatformRequestedMessage));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext("shouldn't show warning when only enabled platforms are selected while creating a app", () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.statusText, isNot(contains(_kDisabledPlatformRequestedMessage)));
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true, isAndroidEnabled: false, isIOSEnabled: false),
+    Logger: () => logger,
+  });
+
+  testUsingContext('flutter create prints note about null safety', () async {
+    await _createProject(
+      projectDir,
+      <String>[],
+      <String>[],
+    );
+    expect(logger.statusText, contains('dart migrate --apply-changes'));
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+    Logger: () => logger,
+  });
 }
 
 Future<void> _createProject(
@@ -2512,14 +2678,14 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<String> command, {
+    List<Object> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    commands.add(command);
+    commands.add(command.map((Object arg) => arg.toString()).toList());
     return super.start(
       command,
       workingDirectory: workingDirectory,
@@ -2528,78 +2694,5 @@ class LoggingProcessManager extends LocalProcessManager {
       runInShell: runInShell,
       mode: mode,
     );
-  }
-}
-
-class MockHttpClient implements HttpClient {
-  MockHttpClient(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
-    return MockHttpClientRequest(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClient - $invocation';
-  }
-}
-
-class MockHttpClientRequest implements HttpClientRequest {
-  MockHttpClientRequest(this.statusCode, {this.result});
-
-  final int statusCode;
-  final String result;
-
-  @override
-  Future<HttpClientResponse> close() async {
-    return MockHttpClientResponse(statusCode, result: result);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientRequest - $invocation';
-  }
-}
-
-class MockHttpClientResponse implements HttpClientResponse {
-  MockHttpClientResponse(this.statusCode, {this.result});
-
-  @override
-  final int statusCode;
-
-  final String result;
-
-  @override
-  String get reasonPhrase => '<reason phrase>';
-
-  @override
-  HttpClientResponseCompressionState get compressionState {
-    return HttpClientResponseCompressionState.decompressed;
-  }
-
-  @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
-    Function onError,
-    void onDone(),
-    bool cancelOnError,
-  }) {
-    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-
-  @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) {
-    action(Uint8List.fromList(result.codeUnits));
-    return Future<void>.value();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw 'io.HttpClientResponse - $invocation';
   }
 }

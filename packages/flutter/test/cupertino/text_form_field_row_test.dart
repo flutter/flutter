@@ -252,10 +252,11 @@ void main() {
     await tester.pump();
     expect(tester.testTextInput.hasAnyClients, false);
 
-    await tester.longPress(find.byType(CupertinoTextFormFieldRow));
+    await tester.longPress(find.text('readonly'));
     await tester.pump();
 
     // Context menu should not have paste.
+    expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
 
     final EditableTextState editableTextState =

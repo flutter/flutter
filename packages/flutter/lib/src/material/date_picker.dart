@@ -1053,9 +1053,9 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         size = mediaQuery.size;
-        insetPadding = const EdgeInsets.all(0.0);
+        insetPadding = EdgeInsets.zero;
         shape = const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.zero)
+            borderRadius: BorderRadius.zero
         );
         elevation = 0;
         break;

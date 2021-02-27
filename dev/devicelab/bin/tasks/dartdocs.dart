@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   final String dot = Platform.isWindows ? '-' : '•';
+  await flutter('update-packages');
   await task(() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(

@@ -88,7 +88,6 @@ void main() {
     Router<dynamic>? router = Router.maybeOf(textContext);
     expect(router, isNull);
 
-    // Test when the nullOk is not specified.
     bool hasFlutterError = false;
     try {
       router = Router.of(textContext);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -33,7 +35,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   if (!windowsProject.cmakeFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
-      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-app '
+      'https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding Windows support to a project.');
   }
 

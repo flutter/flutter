@@ -18,6 +18,37 @@ import 'theme.dart';
 /// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
 /// a [ScrollView] to the enclosing [PrimaryScrollController].
 ///
+/// {@tool dartpad --template=stateful_widget_cupertino}
+/// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
+/// The [CupertinoButton] is connected to a callback that increments a counter.
+/// The [backgroundColor] can be changed.
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return CupertinoPageScaffold(
+///     // Uncomment to change the background color
+///     // backgroundColor: CupertinoColors.systemPink,
+///     navigationBar: CupertinoNavigationBar(
+///       middle: const Text('Sample Code'),
+///     ),
+///     child: ListView(
+///       children: [
+///         CupertinoButton(
+///           onPressed: () => setState(() => _count++),
+///           child: const Icon(CupertinoIcons.add),
+///         ),
+///         Center(
+///           child: Text('You have pressed the button $_count times.'),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.

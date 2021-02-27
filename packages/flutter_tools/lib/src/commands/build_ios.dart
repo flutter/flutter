@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -110,6 +112,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
     final BuildInfo buildInfo = await getBuildInfo();
+    displayNullSafetyMode(buildInfo);
 
     if (exportOptionsPlist == null) {
       return xcarchiveResult;
@@ -170,7 +173,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(defaultToRelease: true);
+    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -178,7 +181,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     usesBuildNameOption();
     addDartObfuscationOption();
     usesDartDefineOption();
-    usesExtraDartFlagOptions();
+    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);

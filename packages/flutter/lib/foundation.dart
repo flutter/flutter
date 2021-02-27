@@ -19,21 +19,6 @@ export 'package:meta/meta.dart' show
   required,
   visibleForTesting;
 
-// Examples can assume:
-// // @dart = 2.9
-// String _name;
-// bool _first;
-// bool _lights;
-// bool _visible;
-// bool inherit;
-// int columns;
-// int rows;
-// class Cat { }
-// double _volume;
-// dynamic _calculation;
-// dynamic _last;
-// dynamic _selection;
-
 export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
@@ -33,7 +35,7 @@ void main() {
     });
     await buildWithAssemble(
       buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       outputDir: 'example',
       targetPlatform: TargetPlatform.ios,
@@ -55,7 +57,7 @@ void main() {
 
     expect(() => buildWithAssemble(
       buildMode: BuildMode.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
       mainPath: 'lib/main.dart',
       outputDir: 'example',
       targetPlatform: TargetPlatform.linux_x64,
