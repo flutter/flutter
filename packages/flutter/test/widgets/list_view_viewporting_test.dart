@@ -501,8 +501,7 @@ void main() {
           child: Container(
             height: 200.0,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 0.0, vertical: 0.0),
+              padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
               itemExtent: 200.0,
               itemCount: 10,

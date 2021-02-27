@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 part of reporting;
 
 /// Tells crash backend that the error is from the Flutter CLI.
@@ -95,12 +97,12 @@ class CrashReporter {
 /// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
-    @required http.Client client,
+    http.Client client,
     @required Usage usage,
     @required Platform platform,
     @required Logger logger,
     @required OperatingSystemUtils operatingSystemUtils,
-  }) : _client = client,
+  }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
       _logger = logger,
@@ -175,19 +177,17 @@ class CrashReportSender {
         filename: _kStackTraceFilename,
       ));
 
-      // package:http may throw unhandled async exceptions into the Zone.
-      await asyncGuard(() async {
-        final http.StreamedResponse resp = await _client.send(req);
+      final http.StreamedResponse resp = await _client.send(req);
 
-        if (resp.statusCode == HttpStatus.ok) {
-          final String reportId = await http.ByteStream(resp.stream)
-            .bytesToString();
-          _logger.printTrace('Crash report sent (report ID: $reportId)');
-          _crashReportSent = true;
-        } else {
-          _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
-        }
-      });
+      if (resp.statusCode == HttpStatus.ok) {
+        final String reportId = await http.ByteStream(resp.stream)
+          .bytesToString();
+        _logger.printTrace('Crash report sent (report ID: $reportId)');
+        _crashReportSent = true;
+      } else {
+        _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+      }
+
     // Catch all exceptions to print the message that makes clear that the
     // crash logger crashed.
     } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses

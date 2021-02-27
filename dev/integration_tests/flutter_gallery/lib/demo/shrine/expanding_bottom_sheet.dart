@@ -328,7 +328,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
         width: _widthAnimation.value,
         height: _heightAnimation.value,
         child: Material(
-          animationDuration: const Duration(milliseconds: 0),
+          animationDuration: Duration.zero,
           shape: BeveledRectangleBorder(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(_shapeAnimation.value),
@@ -349,7 +349,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     _slideAnimation = _getEmphasizedEasingAnimation(
       begin: const Offset(1.0, 0.0),
       peak: const Offset(_kPeakVelocityProgress, 0.0),
-      end: const Offset(0.0, 0.0),
+      end: Offset.zero,
       isForward: widget.hideController.status == AnimationStatus.forward,
       parent: widget.hideController,
     );

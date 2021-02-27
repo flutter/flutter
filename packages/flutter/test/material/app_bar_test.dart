@@ -553,7 +553,7 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(hamburger), Offset.zero);
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
@@ -1122,6 +1122,97 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+      key: const ValueKey<String>('1'),
+      child: Scaffold(
+        key: const ValueKey<String>('1'),
+        appBar: AppBar(),
+      )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+    // Update pages
+    pages = <Page<void>>[ page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
+    final Page<void> page1 = MaterialPage<void>(
+        key: const ValueKey<String>('1'),
+        child: Scaffold(
+          key: const ValueKey<String>('1'),
+          appBar: AppBar(),
+        )
+    );
+    final Page<void> page2 = MaterialPage<void>(
+        key: const ValueKey<String>('2'),
+        child: Scaffold(
+          key: const ValueKey<String>('2'),
+          appBar: AppBar(),
+        )
+    );
+    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    // The page2 should have a back button
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+    // Update pages
+    pages = <Page<void>>[ page1 ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) => false,
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+    // The back button should persist during the pop animation.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('2')),
+        matching: find.byType(BackButton),
+      ),
+      findsOneWidget
+    );
+  });
+
   testWidgets('AppBar ink splash draw on the correct canvas', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665
     final Key key = UniqueKey();
@@ -1142,7 +1233,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1183,7 +1274,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1204,7 +1295,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1214,7 +1305,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1235,7 +1326,7 @@ void main() {
             flexibleSpace: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: const Alignment(0.0, -1.0),
+                  begin: Alignment.topCenter,
                   end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
@@ -1256,7 +1347,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1289,7 +1380,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), Offset.zero);
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 
@@ -1323,7 +1414,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0, 0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
@@ -1369,7 +1460,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byType(AppBar)), Offset.zero);
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));

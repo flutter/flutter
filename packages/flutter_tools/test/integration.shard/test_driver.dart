@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io; // ignore: dart_io_import
@@ -53,6 +55,7 @@ abstract class FlutterTestDriver {
   final StringBuffer _errorBuffer = StringBuffer();
   String _lastResponse;
   Uri _vmServiceWsUri;
+  int _attachPort;
   bool _hasExited = false;
 
   VmService _vmService;
@@ -83,7 +86,6 @@ abstract class FlutterTestDriver {
     List<String> arguments, {
     String script,
     bool withDebugger = false,
-    File pidFile,
     bool singleWidgetReloads = false,
   }) async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -92,9 +94,6 @@ abstract class FlutterTestDriver {
     }
     if (_printDebugOutputToStdOut) {
       arguments.add('--verbose');
-    }
-    if (pidFile != null) {
-      arguments.addAll(<String>['--pid-file', pidFile.path]);
     }
     if (script != null) {
       arguments.add(script);
@@ -167,6 +166,20 @@ abstract class FlutterTestDriver {
         ExceptionPauseMode.kUnhandled,
       );
     }
+  }
+
+  Future<Response> callServiceExtension(
+    String extension, {
+    Map<String, dynamic> args = const <String, dynamic>{},
+  }) async {
+    final int port = _vmServiceWsUri != null ? vmServicePort : _attachPort;
+    final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
+    final Isolate isolate = await waitForExtension(vmService, extension);
+    return await vmService.callServiceExtension(
+      extension,
+      isolateId: isolate.id,
+      args: args,
+    );
   }
 
   Future<int> quit() => _killGracefully();
@@ -450,9 +463,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool chrome = false,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
-    bool machine = true,
     bool singleWidgetReloads = false,
-    File pidFile,
     String script,
     List<String> additionalCommandArgs,
   }) async {
@@ -461,7 +472,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'run',
         if (!chrome)
           '--disable-service-auth-codes',
-        if (machine) '--machine',
+        '--machine',
         if (!spawnDdsInstance) '--disable-dds',
         ...getLocalEngineArguments(),
         '-d',
@@ -480,7 +491,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
-      pidFile: pidFile,
       script: script,
       singleWidgetReloads: singleWidgetReloads,
     );
@@ -491,9 +501,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    File pidFile,
     bool singleWidgetReloads = false,
+    List<String> additionalCommandArgs,
   }) async {
+    _attachPort = port;
     await _setupProcess(
       <String>[
         'attach',
@@ -505,12 +516,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'flutter-tester',
         '--debug-port',
         '$port',
+        ...?additionalCommandArgs,
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
-      pidFile: pidFile,
       singleWidgetReloads: singleWidgetReloads,
+      attachPort: port,
     );
   }
 
@@ -522,14 +534,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
-    File pidFile,
+    int attachPort,
   }) async {
     assert(!startPaused || withDebugger);
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
-      pidFile: pidFile,
       singleWidgetReloads: singleWidgetReloads,
     );
 
@@ -565,6 +576,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           if (!startPaused) {
             await resume(waitForNextPause: false);
           }
+        }
+
+        // In order to call service extensions from test runners started with
+        // attach, we need to store the port that the test runner was attached
+        // to.
+        if (_vmServiceWsUri == null && attachPort != null) {
+          _attachPort = attachPort;
         }
 
         // Now await the started event; if it had already happened the future will
@@ -616,7 +634,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      _vmService.dispose();
+      // TODO(dnfield): Remove ignore once internal repo is up to date
+      // https://github.com/flutter/flutter/issues/74518
+      // ignore: await_only_futures
+      await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Detaching from app...');
@@ -639,7 +660,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<int> stop() async {
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
-      _vmService.dispose();
+      await _vmService.dispose();
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping application...');
@@ -706,7 +727,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     bool coverage = false,
-    File pidFile,
     Future<void> Function() beforeStart,
   }) async {
     await _setupProcess(<String>[
@@ -716,7 +736,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       '--machine',
       if (coverage)
         '--coverage',
-    ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
+    ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, beforeStart: beforeStart);
   }
 
   @override
@@ -725,7 +745,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     String script,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
-    File pidFile,
     Future<void> Function() beforeStart,
     bool singleWidgetReloads = false,
   }) async {
@@ -733,7 +752,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       args,
       script: script,
       withDebugger: withDebugger,
-      pidFile: pidFile,
       singleWidgetReloads: singleWidgetReloads,
     );
 
@@ -825,7 +843,7 @@ class SourcePosition {
   final int column;
 }
 
-Future<Isolate> waitForExtension(VmService vmService) async {
+Future<Isolate> waitForExtension(VmService vmService, String extension) async {
   final Completer<void> completer = Completer<void>();
   await vmService.streamListen(EventStreams.kExtension);
   vmService.onExtensionEvent.listen((Event event) {
@@ -835,7 +853,7 @@ Future<Isolate> waitForExtension(VmService vmService) async {
   });
   final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
   final Isolate isolate = await vmService.getIsolate(isolateRef.id);
-  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
+  if (isolate.extensionRPCs.contains(extension)) {
     return isolate;
   }
   await completer.future;

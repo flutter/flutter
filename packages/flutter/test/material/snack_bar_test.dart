@@ -16,6 +16,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
@@ -26,7 +27,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -61,6 +61,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
@@ -71,7 +72,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -106,6 +106,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
@@ -117,7 +118,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -181,6 +181,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -192,7 +193,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -258,6 +258,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(SnackBar(
@@ -269,7 +270,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -344,6 +344,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 lastController = ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -355,7 +356,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -428,6 +428,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
@@ -439,7 +440,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -473,6 +473,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 snackBarCount += 1;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -484,7 +485,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           }
@@ -691,7 +691,7 @@ void main() {
     );
 
     final ThemeData theme = ThemeData.raw(
-      visualDensity: const VisualDensity(),
+      visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -741,7 +741,8 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       applyElevationOverlayColor: false,
       pageTransitionsTheme: pageTransitionTheme,
-      appBarTheme: const AppBarTheme(color: Colors.black),
+      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
@@ -1591,25 +1592,25 @@ void main() {
     const String helloSnackBar = 'Hello SnackBar';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-            body: Builder(
-                builder: (BuildContext context) {
-                  return GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar),
-                        ));
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          key: tapTarget,
-                      ),
-                  );
-                }
-            ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(helloSnackBar),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          }
         ),
+      ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -1739,6 +1740,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('hello'),
@@ -1752,7 +1754,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -1776,6 +1777,7 @@ void main() {
         body: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
+              key: tapTarget,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: const Text('hello'),
@@ -1796,7 +1798,6 @@ void main() {
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget,
               ),
             );
           },
@@ -2264,5 +2265,62 @@ void main() {
     expect(exceptions.length, 1);
     final AssertionError error = exceptions.first as AssertionError;
     expect(error.message, contains('Only one API should be used to manage SnackBars.'));
+  });
+
+  testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        bottomSheet: SizedBox(
+          width: 200,
+          height: 50,
+          child: ColoredBox(
+            color: Colors.pink,
+          ),
+        ),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      content: const Text('I love Flutter!'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('snack_bar.goldenTest.workWithBottomSheet.png'));
+  });
+
+  testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: const Scaffold(),
+        floatingActionButton: FloatingActionButton(onPressed: () {}),
+      ),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    scaffoldMessengerState.showSnackBar(SnackBar(
+      content: const Text('ScaffoldMessenger'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+      behavior: SnackBarBehavior.floating,
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    // The FloatingActionButton helps us identify which Scaffold has the
+    // SnackBar here. Since the outer Scaffold contains a FAB, the SnackBar
+    // should be above it. If the inner Scaffold had the SnackBar, it would be
+    // overlapping the FAB.
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('snack_bar.scaffold.nested.png'),
+    );
+    final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+    expect(snackBarTopRight.dy, 465.0);
   });
 }

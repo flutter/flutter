@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -44,6 +46,7 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
+    deleteFile(flutterProject.packagesFile);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 

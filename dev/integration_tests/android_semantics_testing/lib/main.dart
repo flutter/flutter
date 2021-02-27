@@ -12,7 +12,6 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
 import 'src/tests/headings_page.dart';
-import 'src/tests/popup_constants.dart';
 import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 

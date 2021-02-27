@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -25,6 +27,7 @@ import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'devices.dart';
 import 'migrations/project_base_configuration_migration.dart';
+import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
@@ -106,6 +109,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
+    ProjectBuildLocationMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -221,7 +225,8 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands.addAll(<String>[
         '-workspace', globals.fs.path.basename(entity.path),
         '-scheme', scheme,
-        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
       ]);
       break;
     }
@@ -430,7 +435,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           // (for example, kernel binary files produced from previous run).
           globals.fs.directory(outputDir).deleteSync(recursive: true);
         }
-        globals.fsUtils.copyDirectorySync(
+        copyDirectory(
           globals.fs.directory(expectedOutputDirectory),
           globals.fs.directory(outputDir),
         );
@@ -634,7 +639,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.$kXcodeRequiredVersionPatch or greater is required to develop for iOS.';
+final String _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {
@@ -644,7 +649,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!globals.xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isRequiredVersionSatisfactory) {
     globals.printError('Found "${globals.xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

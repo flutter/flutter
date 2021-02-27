@@ -30,12 +30,16 @@ Future<void> main() async {
         projectDir,
       );
 
+      // For some reason devicelab machines have really old spec snapshots.
+      // TODO(jmagman): Remove this if this test is moved to a machine that installs CocoaPods on every run.
+      await eval('pod', <String>['repo', 'update', '--verbose']);
+
       section('Create release build');
 
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--no-codesign', '--release'],
+          options: <String>['ios', '--no-codesign', '--release', '--verbose'],
         );
       });
 
@@ -89,7 +93,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios', '--debug', '--no-codesign'],
+          options: <String>['ios', '--debug', '--no-codesign', '--verbose'],
         );
       });
 

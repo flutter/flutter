@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
@@ -113,7 +115,7 @@ void main() {
   });
 
   testUsingContext('VmService registers flutterMemoryInfo service', () async {
-    final MockDevice mockDevice = MockDevice();
+    final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
     setUpVmService(
@@ -181,7 +183,7 @@ void main() {
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => MockFlutterVersion(),
+    FlutterVersion: () => FakeFlutterVersion(),
   });
 
   testUsingContext('VMService prints messages for connection failures', () {
@@ -312,6 +314,82 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('Framework service extension invocations return null if service disappears ', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kGetSkSLsMethod,
+          args: <String, Object>{
+            'viewId': '1234',
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: kScreenshotMethod,
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: kScreenshotSkpMethod,
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: 'setVMTimelineFlags',
+          args: <String, dynamic>{
+            'recordedStreams': <String>['test'],
+          },
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+        const FakeVmServiceRequest(
+          method: 'getVMTimeline',
+          errorCode: RPCErrorCodes.kServiceDisappeared,
+        ),
+      ]
+    );
+
+    final Map<String, Object> skSLs = await fakeVmServiceHost.vmService.getSkSLs(
+      viewId: '1234',
+    );
+    expect(skSLs, isNull);
+
+    final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
+    expect(views, isEmpty);
+
+    final vm_service.Response screenshot = await fakeVmServiceHost.vmService.screenshot();
+    expect(screenshot, isNull);
+
+    final vm_service.Response screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
+    expect(screenshotSkp, isNull);
+
+    // Checking that this doesn't throw.
+    await fakeVmServiceHost.vmService.setTimelineFlags(<String>['test']);
+
+    final vm_service.Response timeline = await fakeVmServiceHost.vmService.getTimeline();
+    expect(timeline, isNull);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getIsolateOrNull returns null if service disappears ', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'getIsolate', args: <String, Object>{
+          'isolateId': 'isolate/123',
+        }, errorCode: RPCErrorCodes.kServiceDisappeared),
+      ]
+    );
+
+    final vm_service.Isolate isolate = await fakeVmServiceHost.vmService.getIsolateOrNull(
+      'isolate/123',
+    );
+    expect(isolate, null);
+
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('getFlutterViews polls until a view is returned', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -389,11 +467,11 @@ void main() {
   });
 }
 
-class MockDevice extends Mock implements Device {}
 class MockVMService extends Mock implements vm_service.VmService {}
-class MockFlutterVersion extends Mock implements FlutterVersion {
+class FakeDevice extends Fake implements Device {}
+class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
+  Map<String, Object> toJson() => const <String, Object>{'Fake': 'Version'};
 }
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].

@@ -109,3 +109,10 @@ String debugFormatDouble(double? value) {
 ///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
 ///    to construct a [MediaQueryData].
 ui.Brightness? debugBrightnessOverride;
+
+/// The address for the active DevTools server used for debugging this
+/// application.
+String? activeDevToolsServerAddress;
+
+/// The uri for the connected vm service protocol.
+String? connectedVmServiceUri;

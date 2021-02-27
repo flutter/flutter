@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -63,7 +65,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (_androidSdk?.licensesAvailable == true && _androidSdk?.latestVersion == null) {
-          await checkGradleDependencies();
+          await checkGradleDependencies(_logger, _processUtils);
         }
         if (applicationBinary == null) {
           return await AndroidApk.fromAndroidProject(
@@ -99,6 +101,7 @@ class ApplicationPackageFactory {
         }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
@@ -218,7 +221,7 @@ class AndroidApk extends ApplicationPackage {
     File apkFile;
 
     if (androidProject.isUsingGradle) {
-      apkFile = await getGradleAppOut(androidProject);
+      apkFile = await getGradleAppOut(androidProject, globals.flutterUsage);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.

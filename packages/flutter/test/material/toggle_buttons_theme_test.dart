@@ -427,7 +427,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -476,13 +476,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: borderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -516,13 +509,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: selectedBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -555,13 +541,6 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
-          // trailing side
-          ..path(
-            style: PaintingStyle.stroke,
-            color: disabledBorderColor,
-            strokeWidth: customWidth,
-          )
-          // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,

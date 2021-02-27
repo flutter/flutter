@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_utils.dart';
 
-final String rootDirectoryPath = Directory.current.parent.path;
+final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
@@ -31,6 +31,8 @@ void main() {
       expect(localizations.previousMonthTooltip, isNotNull);
       expect(localizations.nextPageTooltip, isNotNull);
       expect(localizations.previousPageTooltip, isNotNull);
+      expect(localizations.firstPageTooltip, isNotNull);
+      expect(localizations.lastPageTooltip, isNotNull);
       expect(localizations.showMenuTooltip, isNotNull);
       expect(localizations.licensesPageTitle, isNotNull);
       expect(localizations.rowsPerPageTitle, isNotNull);

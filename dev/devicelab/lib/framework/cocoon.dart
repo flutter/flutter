@@ -170,7 +170,7 @@ class Cocoon {
 
   /// Make an API request to Cocoon.
   Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath, [dynamic jsonData]) async {
-    final String url = '$baseCocoonApiUrl/$apiPath';
+    final Uri url = Uri.parse('$baseCocoonApiUrl/$apiPath');
 
     /// Retry requests to Cocoon as sometimes there are issues with the servers, such
     /// as version changes to the backend, datastore issues, or latency issues.

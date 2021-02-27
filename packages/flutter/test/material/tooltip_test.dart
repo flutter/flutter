@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -231,7 +230,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 100.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
                         child: const SizedBox(
@@ -287,7 +286,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 190.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
                         child: const SizedBox(
@@ -354,7 +353,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 190.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -409,7 +408,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 10.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -466,7 +465,7 @@ void main() {
                         key: key,
                         message: tooltipText,
                         height: 10.0,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
                         child: const SizedBox(
@@ -518,7 +517,7 @@ void main() {
                 return Tooltip(
                   key: key,
                   message: tooltipText,
-                  padding: const EdgeInsets.all(0.0),
+                  padding: EdgeInsets.zero,
                   margin: const EdgeInsets.all(_customMarginValue),
                   child: const SizedBox(
                     width: 0.0,
@@ -862,7 +861,7 @@ void main() {
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
-    const Duration waitDuration = Duration(milliseconds: 0);
+    const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null)
