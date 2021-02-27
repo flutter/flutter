@@ -1214,11 +1214,7 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.windows,
-    TargetPlatform.fuchsia,
-  }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();

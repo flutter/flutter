@@ -249,12 +249,7 @@ void main() {
         color: _kDefaultIdleThumbColor,
       ),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.macOS,
-    TargetPlatform.windows,
-    TargetPlatform.fuchsia,
-  }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -302,12 +297,7 @@ void main() {
         color: _kDefaultIdleThumbColor,
       ),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{
-    TargetPlatform.linux,
-    TargetPlatform.macOS,
-    TargetPlatform.windows,
-    TargetPlatform.fuchsia,
-  }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
     const double thickness = 4.0;
