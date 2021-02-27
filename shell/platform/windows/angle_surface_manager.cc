@@ -228,6 +228,8 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
     LogEglError("Surface creation failed.");
   }
 
+  surface_width_ = width;
+  surface_height_ = height;
   render_surface_ = surface;
   return true;
 }
@@ -240,19 +242,24 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
   if (width != existing_width || height != existing_height) {
     // Resize render_surface_.  Internaly this calls mSwapChain->ResizeBuffers
     // avoiding the need to destory and recreate the underlying SwapChain.
+    surface_width_ = width;
+    surface_height_ = height;
     eglPostSubBufferNV(egl_display_, render_surface_, 1, 1, width, height);
   }
 }
 
 void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
   if (render_surface_ == EGL_NO_SURFACE || !initialize_succeeded_) {
-    width = 0;
-    height = 0;
+    *width = 0;
+    *height = 0;
     return;
   }
 
-  eglQuerySurface(egl_display_, render_surface_, EGL_WIDTH, width);
-  eglQuerySurface(egl_display_, render_surface_, EGL_HEIGHT, height);
+  // Can't use eglQuerySurface here; Because we're not using
+  // EGL_FIXED_SIZE_ANGLE flag anymore, Angle may resize the surface before
+  // Flutter asks it to, which breaks resize redraw synchronization
+  *width = surface_width_;
+  *height = surface_height_;
 }
 
 void AngleSurfaceManager::DestroySurface() {
