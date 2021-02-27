@@ -228,7 +228,7 @@ void FlutterWindowsView::OnScroll(double x,
 }
 
 void FlutterWindowsView::OnCursorRectUpdated(const Rect& rect) {
-  binding_handler_->UpdateCursorRect(rect);
+  binding_handler_->OnCursorRectUpdated(rect);
 }
 
 // Sends new size  information to FlutterEngine.
