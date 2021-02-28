@@ -7,14 +7,14 @@
 
 #include <windowsx.h>
 
-#include "flutter/shell/platform/windows/win32_window.h"
+#include "flutter/shell/platform/windows/window_win32.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
 namespace testing {
 
-/// Mock for the Win32Window base class.
-class MockWin32Window : public Win32Window {
+/// Mock for the |WindowWin32| base class.
+class MockWin32Window : public WindowWin32 {
  public:
   MockWin32Window();
   virtual ~MockWin32Window();

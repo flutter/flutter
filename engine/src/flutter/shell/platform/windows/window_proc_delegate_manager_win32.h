@@ -16,16 +16,16 @@ namespace flutter {
 
 // Handles registration, unregistration, and dispatching for WindowProc
 // delegation.
-class Win32WindowProcDelegateManager {
+class WindowProcDelegateManagerWin32 {
  public:
-  explicit Win32WindowProcDelegateManager();
-  ~Win32WindowProcDelegateManager();
+  explicit WindowProcDelegateManagerWin32();
+  ~WindowProcDelegateManagerWin32();
 
   // Prevent copying.
-  Win32WindowProcDelegateManager(Win32WindowProcDelegateManager const&) =
+  WindowProcDelegateManagerWin32(WindowProcDelegateManagerWin32 const&) =
       delete;
-  Win32WindowProcDelegateManager& operator=(
-      Win32WindowProcDelegateManager const&) = delete;
+  WindowProcDelegateManagerWin32& operator=(
+      WindowProcDelegateManagerWin32 const&) = delete;
 
   // Adds |delegate| as a delegate to be called for |OnTopLevelWindowProc|.
   //

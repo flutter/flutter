@@ -4,7 +4,7 @@
 
 #include <windows.h>
 
-#include "flutter/shell/platform/windows/win32_dpi_utils.h"
+#include "flutter/shell/platform/windows/dpi_utils_win32.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

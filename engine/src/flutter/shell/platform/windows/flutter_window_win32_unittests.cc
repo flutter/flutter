@@ -9,8 +9,8 @@
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
 #include "flutter/shell/platform/windows/testing/engine_embedder_api_modifier.h"
+#include "flutter/shell/platform/windows/testing/flutter_window_win32_test.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
-#include "flutter/shell/platform/windows/testing/win32_flutter_window_test.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 
@@ -122,17 +122,17 @@ class SpyTextInputPlugin : public KeyboardHandlerBase,
   std::unique_ptr<TextInputPlugin> real_implementation_;
 };
 
-class MockWin32FlutterWindow : public Win32FlutterWindow {
+class MockFlutterWindowWin32 : public FlutterWindowWin32 {
  public:
-  MockWin32FlutterWindow() : Win32FlutterWindow(800, 600) {
+  MockFlutterWindowWin32() : FlutterWindowWin32(800, 600) {
     ON_CALL(*this, GetDpiScale())
-        .WillByDefault(Return(this->Win32FlutterWindow::GetDpiScale()));
+        .WillByDefault(Return(this->FlutterWindowWin32::GetDpiScale()));
   }
-  virtual ~MockWin32FlutterWindow() {}
+  virtual ~MockFlutterWindowWin32() {}
 
   // Prevent copying.
-  MockWin32FlutterWindow(MockWin32FlutterWindow const&) = delete;
-  MockWin32FlutterWindow& operator=(MockWin32FlutterWindow const&) = delete;
+  MockFlutterWindowWin32(MockFlutterWindowWin32 const&) = delete;
+  MockFlutterWindowWin32& operator=(MockFlutterWindowWin32 const&) = delete;
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
@@ -171,7 +171,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
   SpyKeyboardKeyHandler* key_event_handler;
   SpyTextInputPlugin* text_input_plugin;
 
-  void InjectPendingEvents(MockWin32FlutterWindow* win32window) {
+  void InjectPendingEvents(MockFlutterWindowWin32* win32window) {
     while (pending_responds_.size() > 0) {
       SimulatedEvent event = pending_responds_.front();
       win32window->InjectWindowMessage(event.message, event.wparam,
@@ -292,19 +292,19 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
 
 }  // namespace
 
-TEST(Win32FlutterWindowTest, CreateDestroy) {
-  Win32FlutterWindowTest window(800, 600);
+TEST(FlutterWindowWin32Test, CreateDestroy) {
+  FlutterWindowWin32Test window(800, 600);
   ASSERT_TRUE(TRUE);
 }
 
 // Tests key event propagation of non-printable, non-modifier key down events.
-TEST(Win32FlutterWindowTest, NonPrintableKeyDownPropagation) {
+TEST(FlutterWindowWin32Test, NonPrintableKeyDownPropagation) {
   ::testing::InSequence in_sequence;
 
   constexpr WPARAM virtual_key = VK_LEFT;
   constexpr WPARAM scan_code = 10;
   constexpr char32_t character = 0;
-  MockWin32FlutterWindow win32window;
+  MockFlutterWindowWin32 win32window;
   std::deque<SimulatedEvent> pending_events;
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
@@ -359,14 +359,14 @@ TEST(Win32FlutterWindowTest, NonPrintableKeyDownPropagation) {
 // Tests key event propagation of printable character key down events. These
 // differ from non-printable characters in that they follow a different code
 // path in the WndProc (HandleMessage), producing a follow-on WM_CHAR event.
-TEST(Win32FlutterWindowTest, CharKeyDownPropagation) {
+TEST(FlutterWindowWin32Test, CharKeyDownPropagation) {
   // ::testing::InSequence in_sequence;
 
   constexpr WPARAM virtual_key = 65;  // The "A" key, which produces a character
   constexpr WPARAM scan_code = 30;
   constexpr char32_t character = 65;
 
-  MockWin32FlutterWindow win32window;
+  MockFlutterWindowWin32 win32window;
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   TestFlutterWindowsView flutter_windows_view(
@@ -426,11 +426,11 @@ TEST(Win32FlutterWindowTest, CharKeyDownPropagation) {
 // Tests key event propagation of modifier key down events. This are different
 // from non-printable events in that they call MapVirtualKey, resulting in a
 // slightly different code path.
-TEST(Win32FlutterWindowTest, ModifierKeyDownPropagation) {
+TEST(FlutterWindowWin32Test, ModifierKeyDownPropagation) {
   constexpr WPARAM virtual_key = VK_LSHIFT;
   constexpr WPARAM scan_code = 20;
   constexpr char32_t character = 0;
-  MockWin32FlutterWindow win32window;
+  MockFlutterWindowWin32 win32window;
   std::deque<SimulatedEvent> pending_events;
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
@@ -481,8 +481,8 @@ TEST(Win32FlutterWindowTest, ModifierKeyDownPropagation) {
 // Tests that composing rect updates are transformed from Flutter logical
 // coordinates to device coordinates and passed to the text input manager
 // when the DPI scale is 100% (96 DPI).
-TEST(Win32FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
-  MockWin32FlutterWindow win32window;
+TEST(FlutterWindowWin32Test, OnCursorRectUpdatedRegularDPI) {
+  MockFlutterWindowWin32 win32window;
   ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.0));
   EXPECT_CALL(win32window, GetDpiScale()).Times(1);
 
@@ -495,8 +495,8 @@ TEST(Win32FlutterWindowTest, OnCursorRectUpdatedRegularDPI) {
 // Tests that composing rect updates are transformed from Flutter logical
 // coordinates to device coordinates and passed to the text input manager
 // when the DPI scale is 150% (144 DPI).
-TEST(Win32FlutterWindowTest, OnCursorRectUpdatedHighDPI) {
-  MockWin32FlutterWindow win32window;
+TEST(FlutterWindowWin32Test, OnCursorRectUpdatedHighDPI) {
+  MockFlutterWindowWin32 win32window;
   ON_CALL(win32window, GetDpiScale()).WillByDefault(Return(1.5));
   EXPECT_CALL(win32window, GetDpiScale()).Times(1);
 
