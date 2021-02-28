@@ -207,6 +207,10 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
+    @Deprecated(
+      'Use dragAnchorStrategy instead. '
+      'This feature was deprecated after v1.XX.X'
+    )
     this.dragAnchor = DragAnchor.child,
     this.dragAnchorStrategy,
     this.affinity,
@@ -283,7 +287,10 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// providing a strategy following the [DragAnchoStrategy] interface like the
   /// built-in [childDragAnchorStrategy] and [pointerDragAnchorStrategy] or a
   /// custom implementation.
-  @Deprecated('Use dragAnchorStrategy instead')
+  @Deprecated(
+    'Use dragAnchorStrategy instead. '
+    'This feature was deprecated after v1.XX.X'
+  )
   final DragAnchor dragAnchor;
 
   /// A strategy that is used by this draggable to get the the anchor offset when it is dragged.
