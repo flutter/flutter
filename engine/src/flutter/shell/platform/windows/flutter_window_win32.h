@@ -14,8 +14,8 @@
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
-#include "flutter/shell/platform/windows/win32_window.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
+#include "flutter/shell/platform/windows/window_win32.h"
 
 namespace flutter {
 
@@ -23,38 +23,38 @@ namespace flutter {
 // future, there will likely be a CoreWindow-based FlutterWindow as well.  At
 // the point may make sense to dependency inject the native window rather than
 // inherit.
-class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
+class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
  public:
   // Create flutter Window for use as child window
-  Win32FlutterWindow(int width, int height);
+  FlutterWindowWin32(int width, int height);
 
-  virtual ~Win32FlutterWindow();
+  virtual ~FlutterWindowWin32();
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnDpiScale(unsigned int dpi) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnResize(unsigned int width, unsigned int height) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnPointerMove(double x, double y) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnPointerDown(double x, double y, UINT button) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnPointerUp(double x, double y, UINT button) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnPointerLeave() override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnSetCursor() override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnText(const std::u16string& text) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   bool OnKey(int key,
              int scancode,
              int action,
@@ -62,19 +62,19 @@ class Win32FlutterWindow : public Win32Window, public WindowBindingHandler {
              bool extended,
              bool was_down) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnComposeBegin() override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnComposeEnd() override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnComposeChange(const std::u16string& text, int cursor_pos) override;
 
   // |FlutterWindowBindingHandler|
   void OnCursorRectUpdated(const Rect& rect) override;
 
-  // |Win32Window|
+  // |WindowWin32|
   void OnScroll(double delta_x, double delta_y) override;
 
   // |FlutterWindowBindingHandler|

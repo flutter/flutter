@@ -145,7 +145,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   texture_registrar_ = std::make_unique<FlutterWindowsTextureRegistrar>(this);
 #ifndef WINUWP
   window_proc_delegate_manager_ =
-      std::make_unique<Win32WindowProcDelegateManager>();
+      std::make_unique<WindowProcDelegateManagerWin32>();
 #endif
 
   // Set up internal channels.

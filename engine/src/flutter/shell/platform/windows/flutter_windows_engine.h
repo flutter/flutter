@@ -22,7 +22,7 @@
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
 #ifndef WINUWP
-#include "flutter/shell/platform/windows/win32_window_proc_delegate_manager.h"  // nogncheck
+#include "flutter/shell/platform/windows/window_proc_delegate_manager_win32.h"  // nogncheck
 #endif
 
 namespace flutter {
@@ -86,7 +86,7 @@ class FlutterWindowsEngine {
   }
 
 #ifndef WINUWP
-  Win32WindowProcDelegateManager* window_proc_delegate_manager() {
+  WindowProcDelegateManagerWin32* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
   }
 #endif
@@ -184,7 +184,7 @@ class FlutterWindowsEngine {
 
 #ifndef WINUWP
   // The manager for WindowProc delegate registration and callbacks.
-  std::unique_ptr<Win32WindowProcDelegateManager> window_proc_delegate_manager_;
+  std::unique_ptr<WindowProcDelegateManagerWin32> window_proc_delegate_manager_;
 #endif
 };
 

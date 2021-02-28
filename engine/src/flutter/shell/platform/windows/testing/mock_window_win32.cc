@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/testing/mock_win32_window.h"
+#include "flutter/shell/platform/windows/testing/mock_window_win32.h"
 
 namespace flutter {
 namespace testing {
 
-MockWin32Window::MockWin32Window() : Win32Window(){};
+MockWin32Window::MockWin32Window() : WindowWin32(){};
 
 MockWin32Window::~MockWin32Window() = default;
 

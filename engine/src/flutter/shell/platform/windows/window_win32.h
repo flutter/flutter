@@ -18,10 +18,10 @@ namespace flutter {
 // A class abstraction for a high DPI aware Win32 Window.  Intended to be
 // inherited from by classes that wish to specialize with custom
 // rendering and input handling.
-class Win32Window {
+class WindowWin32 {
  public:
-  Win32Window();
-  virtual ~Win32Window();
+  WindowWin32();
+  virtual ~WindowWin32();
 
   // Initializes as a child window with size using |width| and |height| and
   // |title| to identify the windowclass.  Does not show window, window must be
@@ -169,7 +169,7 @@ class Win32Window {
   void HandleResize(UINT width, UINT height);
 
   // Retrieves a class instance pointer for |window|
-  static Win32Window* GetThisFromHandle(HWND const window) noexcept;
+  static WindowWin32* GetThisFromHandle(HWND const window) noexcept;
   int current_dpi_ = 0;
   int current_width_ = 0;
   int current_height_ = 0;
