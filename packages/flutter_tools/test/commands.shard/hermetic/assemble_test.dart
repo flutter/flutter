@@ -33,7 +33,7 @@ void main() {
 
     expect(testLogger.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -48,7 +48,7 @@ void main() {
 
     expect(testLogger.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -63,7 +63,7 @@ void main() {
 
     expect(testLogger.traceText, contains('build succeeded.'));
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -75,7 +75,7 @@ void main() {
 
     expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsToolExit());
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -88,7 +88,7 @@ void main() {
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']),
       throwsToolExit());
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -105,7 +105,7 @@ void main() {
     expect(testLogger.errorText, isNot(contains('bar')));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -140,7 +140,7 @@ void main() {
       )),
     );
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -154,7 +154,7 @@ void main() {
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -217,7 +217,7 @@ void main() {
     expect(inputs.readAsStringSync(), contains('fizz'));
     expect(inputs.lastModifiedSync(), isNot(theDistantPast));
   }, overrides: <Type, Generator>{
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
