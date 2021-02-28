@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/windows/win32_flutter_window.h"
+#include "flutter/shell/platform/windows/flutter_window_win32.h"
 
 #include <dwmapi.h>
 #include <chrono>
@@ -65,35 +65,35 @@ static HCURSOR GetCursorByName(const std::string& cursor_name) {
 
 }  // namespace
 
-Win32FlutterWindow::Win32FlutterWindow(int width, int height)
+FlutterWindowWin32::FlutterWindowWin32(int width, int height)
     : binding_handler_delegate_(nullptr) {
-  Win32Window::InitializeChild("FLUTTERVIEW", width, height);
+  WindowWin32::InitializeChild("FLUTTERVIEW", width, height);
   current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
-Win32FlutterWindow::~Win32FlutterWindow() {}
+FlutterWindowWin32::~FlutterWindowWin32() {}
 
-void Win32FlutterWindow::SetView(WindowBindingHandlerDelegate* window) {
+void FlutterWindowWin32::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
 }
 
-WindowsRenderTarget Win32FlutterWindow::GetRenderTarget() {
+WindowsRenderTarget FlutterWindowWin32::GetRenderTarget() {
   return WindowsRenderTarget(GetWindowHandle());
 }
 
-float Win32FlutterWindow::GetDpiScale() {
+float FlutterWindowWin32::GetDpiScale() {
   return static_cast<float>(GetCurrentDPI()) / static_cast<float>(base_dpi);
 }
 
-PhysicalWindowBounds Win32FlutterWindow::GetPhysicalWindowBounds() {
+PhysicalWindowBounds FlutterWindowWin32::GetPhysicalWindowBounds() {
   return {GetCurrentWidth(), GetCurrentHeight()};
 }
 
-void Win32FlutterWindow::UpdateFlutterCursor(const std::string& cursor_name) {
+void FlutterWindowWin32::UpdateFlutterCursor(const std::string& cursor_name) {
   current_cursor_ = GetCursorByName(cursor_name);
 }
 
-void Win32FlutterWindow::OnWindowResized() {
+void FlutterWindowWin32::OnWindowResized() {
   // Blocking the raster thread until DWM flushes alleviates glitches where
   // previous size surface is stretched over current size view.
   DwmFlush();
@@ -120,21 +120,21 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
   return 0;
 }
 
-void Win32FlutterWindow::OnDpiScale(unsigned int dpi){};
+void FlutterWindowWin32::OnDpiScale(unsigned int dpi){};
 
 // When DesktopWindow notifies that a WM_Size message has come in
 // lets FlutterEngine know about the new size.
-void Win32FlutterWindow::OnResize(unsigned int width, unsigned int height) {
+void FlutterWindowWin32::OnResize(unsigned int width, unsigned int height) {
   if (binding_handler_delegate_ != nullptr) {
     binding_handler_delegate_->OnWindowSizeChanged(width, height);
   }
 }
 
-void Win32FlutterWindow::OnPointerMove(double x, double y) {
+void FlutterWindowWin32::OnPointerMove(double x, double y) {
   binding_handler_delegate_->OnPointerMove(x, y);
 }
 
-void Win32FlutterWindow::OnPointerDown(double x, double y, UINT button) {
+void FlutterWindowWin32::OnPointerDown(double x, double y, UINT button) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerDown(
@@ -142,7 +142,7 @@ void Win32FlutterWindow::OnPointerDown(double x, double y, UINT button) {
   }
 }
 
-void Win32FlutterWindow::OnPointerUp(double x, double y, UINT button) {
+void FlutterWindowWin32::OnPointerUp(double x, double y, UINT button) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerUp(
@@ -150,19 +150,19 @@ void Win32FlutterWindow::OnPointerUp(double x, double y, UINT button) {
   }
 }
 
-void Win32FlutterWindow::OnPointerLeave() {
+void FlutterWindowWin32::OnPointerLeave() {
   binding_handler_delegate_->OnPointerLeave();
 }
 
-void Win32FlutterWindow::OnSetCursor() {
+void FlutterWindowWin32::OnSetCursor() {
   ::SetCursor(current_cursor_);
 }
 
-void Win32FlutterWindow::OnText(const std::u16string& text) {
+void FlutterWindowWin32::OnText(const std::u16string& text) {
   binding_handler_delegate_->OnText(text);
 }
 
-bool Win32FlutterWindow::OnKey(int key,
+bool FlutterWindowWin32::OnKey(int key,
                                int scancode,
                                int action,
                                char32_t character,
@@ -172,20 +172,20 @@ bool Win32FlutterWindow::OnKey(int key,
                                           extended, was_down);
 }
 
-void Win32FlutterWindow::OnComposeBegin() {
+void FlutterWindowWin32::OnComposeBegin() {
   binding_handler_delegate_->OnComposeBegin();
 }
 
-void Win32FlutterWindow::OnComposeEnd() {
+void FlutterWindowWin32::OnComposeEnd() {
   binding_handler_delegate_->OnComposeEnd();
 }
 
-void Win32FlutterWindow::OnComposeChange(const std::u16string& text,
+void FlutterWindowWin32::OnComposeChange(const std::u16string& text,
                                          int cursor_pos) {
   binding_handler_delegate_->OnComposeChange(text, cursor_pos);
 }
 
-void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
+void FlutterWindowWin32::OnScroll(double delta_x, double delta_y) {
   POINT point;
   GetCursorPos(&point);
 
@@ -194,7 +194,7 @@ void Win32FlutterWindow::OnScroll(double delta_x, double delta_y) {
                                       kScrollOffsetMultiplier);
 }
 
-void Win32FlutterWindow::OnCursorRectUpdated(const Rect& rect) {
+void FlutterWindowWin32::OnCursorRectUpdated(const Rect& rect) {
   // Convert the rect from Flutter logical coordinates to device coordinates.
   auto scale = GetDpiScale();
   Point origin(rect.left() * scale, rect.top() * scale);
