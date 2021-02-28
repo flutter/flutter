@@ -49,7 +49,7 @@ class ExpansionTile extends StatefulWidget {
     this.allowOnTap = True,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
-       assert(allowOnTap != null)
+       assert(allowOnTap != null),
        assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
