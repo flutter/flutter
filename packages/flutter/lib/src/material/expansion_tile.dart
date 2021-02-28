@@ -46,8 +46,10 @@ class ExpansionTile extends StatefulWidget {
     this.expandedAlignment,
     this.childrenPadding,
     this.collapsedBackgroundColor,
+    this.allowOnTap = True,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
+       assert(allowOnTap != null)
        assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -146,6 +148,9 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
   final EdgeInsetsGeometry? childrenPadding;
+  
+  ///Specifies whether the expension tile can collapse/expand
+  final bool allowOnTap;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -194,23 +199,25 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   void _handleTap() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _controller.forward();
-      } else {
-        _controller.reverse().then<void>((void value) {
-          if (!mounted)
-            return;
-          setState(() {
-            // Rebuild without widget.children.
+    if (allowOnTap) {
+      setState(() {
+        _isExpanded = !_isExpanded;
+        if (_isExpanded) {
+          _controller.forward();
+        } else {
+          _controller.reverse().then<void>((void value) {
+            if (!mounted)
+              return;
+            setState(() {
+              // Rebuild without widget.children.
+            });
           });
-        });
-      }
-      PageStorage.of(context)?.writeState(context, _isExpanded);
-    });
-    if (widget.onExpansionChanged != null)
-      widget.onExpansionChanged!(_isExpanded);
+        }
+        PageStorage.of(context)?.writeState(context, _isExpanded);
+      });
+      if (widget.onExpansionChanged != null)
+        widget.onExpansionChanged!(_isExpanded);
+    }
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
