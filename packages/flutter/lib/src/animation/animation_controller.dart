@@ -205,7 +205,7 @@ enum AnimationBehavior {
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
-/// This example shows a [ElevatedButton] which ontap calls [AnimationController] to play
+/// This example shows an [ElevatedButton] which ontap calls [AnimationController] to play
 /// [forward] and [reverse] animation on [Text] widget inside an [AnimatedBuilder].
 ///
 /// ```dart
