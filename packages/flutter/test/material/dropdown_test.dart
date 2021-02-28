@@ -456,7 +456,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains("There should be exactly one item with [DropdownButton]'s value"),
+        contains("There should be exactly one enabled item with [DropdownButton]'s value"),
       );
     }
   });
@@ -487,7 +487,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains("There should be exactly one item with [DropdownButton]'s value"),
+        contains("There should be exactly one enabled item with [DropdownButton]'s value"),
       );
     }
   });
@@ -3007,5 +3007,169 @@ void main() {
     // The scrollbar is shown when the list is longer than the height of the screen.
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());
+  });
+
+
+  testWidgets('tapping a disabled item should not close DropdownButton', (WidgetTester tester) async {
+    final List<String> options = <String>['first', 'second', 'disabled'];
+    String? value = options.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              value: value,
+              items: options.map((String s) => DropdownMenuItem<String>(
+                value: s,
+                disabled: s == 'disabled',
+                child: Text(s),
+              )).toList(),
+              onChanged: (String? v) => setState(() => value = v),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on a disabled item.
+    await tester.tap(find.text('disabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('disabled item should not be focusable when tapped', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    final List<String> options = <String>['first', 'disabled'];
+    String? value = options.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              autofocus: true,
+              value: value,
+              items: options.map((String s) => DropdownMenuItem<String>(
+                value: s,
+                disabled: s == 'disabled',
+                child: Text(s),
+              )).toList(),
+              onChanged: (String? v) => setState(() => value = v),
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Pump a frame for autofocus to take effect.
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // The first element should have the focus
+    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
+
+    // Tap on a disabled item.
+    await tester.tap(find.text('disabled').hitTestable());
+    await tester.pump();
+
+    // The first element of the dropdown list should retain the focus
+    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('disabled item should not be focusable when navigated using arrow keys', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    final List<String> options = <String>['first', 'disabled', 'second'];
+    String? value = options.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              autofocus: true,
+              value: value,
+              items: options.map((String s) => DropdownMenuItem<String>(
+                value: s,
+                disabled: s == 'disabled',
+                child: Text(s),
+              )).toList(),
+              onChanged: (String? v) => setState(() => value = v),
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Pump a frame for autofocus to take effect.
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Moving focus one down.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    // second should have the focus.
+    expect(Focus.of(tester.element(find.text('second').hitTestable())).hasPrimaryFocus, isTrue);
+
+    // Moving focus one up.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    // now first should have the focus.
+    expect(Focus.of(tester.element(find.text('first').hitTestable())).hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('an enabled and a disabled item can have the same value', (WidgetTester tester) async {
+    String? value = 'common value';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => DropdownButton<String>(
+              value: value,
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(
+                  value: 'common value',
+                  disabled: true,
+                  child: Text('disabled'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'common value',
+                  child: Text('enabled'),
+                )
+              ],
+              onChanged: (String? v) => setState(() => value = v),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // rending of DropdownButton proves that there are no errors (like AssertionError) thrown
+    expect(find.byType(dropdownButtonType), findsOneWidget);
+
+    // opening and closing the dropdown widget
+    await tester.tap(find.text('enabled').hitTestable());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('enabled').hitTestable());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(dropdownButtonType), findsOneWidget);
   });
 }

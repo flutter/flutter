@@ -169,6 +169,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   Widget build(BuildContext context) {
+    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
     final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
@@ -178,18 +179,20 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
     }
-    Widget child = FadeTransition(
-      opacity: opacity,
-      child: InkWell(
+    Widget child = Container(
+      padding: widget.padding,
+      child: widget.route.items[widget.itemIndex],
+    );
+    // An [InkWell] is added to the item only if it is not disabled
+    if (!dropdownMenuItem.disabled) {
+      child = InkWell(
         autofocus: widget.itemIndex == widget.route.selectedIndex,
-        child: Container(
-          padding: widget.padding,
-          child: widget.route.items[widget.itemIndex],
-        ),
+        child: child,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-      ),
-    );
+      );
+    }
+    child = FadeTransition(opacity: opacity, child: child);
     if (kIsWeb) {
       child = Shortcuts(
         shortcuts: _webShortcuts,
@@ -686,17 +689,26 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     Key? key,
     this.onTap,
     this.value,
+    this.disabled = false,
     required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+  })   : assert(child != null),
+        super(key: key, child: child);
 
-  /// Called when the dropdown menu item is tapped.
+  /// Called when the dropdown menu item is tapped, provided [disabled] is false.
   final VoidCallback? onTap;
 
-  /// The value to return if the user selects this menu item.
+  /// The value to return if the user selects this menu item, provided [disabled] is false.
   ///
   /// Eventually returned in a call to [DropdownButton.onChanged].
   final T? value;
+
+  /// If `true`:
+  /// * [value] and [onTap] won't be used.
+  /// * the item will not be clickable / focusable.
+  /// * tapping won't close drop down list.
+  ///
+  /// defaults to `false`
+  final bool disabled;
 }
 
 /// An inherited widget that causes any descendant [DropdownButton]
@@ -849,10 +861,11 @@ class DropdownButton<T> extends StatefulWidget {
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
-                return item.value == value;
+                // a disabled item's value should not be taken into account
+                return !item.disabled && item.value == value;
               }).length == 1,
-                "There should be exactly one item with [DropdownButton]'s value: "
-                '$value. \n'
+                'There should be exactly one enabled '
+                "item with [DropdownButton]'s value: $value. \n "
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
               ),
@@ -1187,9 +1200,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return;
     }
 
-    assert(widget.items!.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
+    assert(widget.items!.where((DropdownMenuItem<T> item) => !item.disabled && item.value == widget.value).length == 1);
     for (int itemIndex = 0; itemIndex < widget.items!.length; itemIndex++) {
-      if (widget.items![itemIndex].value == widget.value) {
+      if (!widget.items![itemIndex].disabled && widget.items![itemIndex].value == widget.value) {
         _selectedIndex = itemIndex;
         return;
       }
