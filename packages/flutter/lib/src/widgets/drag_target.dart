@@ -485,19 +485,6 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   void initState() {
     super.initState();
     _recognizer = widget.createRecognizer(_startDrag);
-
-    if (widget.dragAnchorStrategy == null) {
-      switch (widget.dragAnchor) {
-        case DragAnchor.child:
-          _dragAnchorStrategy = childDragAnchorStrategy;
-          break;
-        case DragAnchor.pointer:
-          _dragAnchorStrategy = pointerDragAnchorStrategy;
-          break;
-      }
-    } else {
-      _dragAnchorStrategy = widget.dragAnchorStrategy!;
-    }
   }
 
   @override
@@ -518,8 +505,6 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   GestureRecognizer? _recognizer;
   int _activeCount = 0;
 
-  late DragAnchorStrategy _dragAnchorStrategy;
-
   void _disposeRecognizerIfInactive() {
     if (_activeCount > 0)
       return;
@@ -534,9 +519,21 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   }
 
   _DragAvatar<T>? _startDrag(Offset position) {
+    final Offset dragStartPoint;
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags!)
       return null;
-    final Offset dragStartPoint = _dragAnchorStrategy(widget, context, position);
+    if (widget.dragAnchorStrategy == null) {
+      switch (widget.dragAnchor) {
+        case DragAnchor.child:
+          dragStartPoint = childDragAnchorStrategy(widget, context, position);
+          break;
+        case DragAnchor.pointer:
+          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
+          break;
+      }
+    } else {
+      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
+    }
     setState(() {
       _activeCount += 1;
     });
