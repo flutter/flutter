@@ -4,42 +4,11 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
-
 import 'common.dart';
+import 'src/utils.dart';
 
 void main() {
-  const ProcessManager processManager = LocalProcessManager();
-
   group('run.dart script', () {
-    Future<ProcessResult> runScript(List<String> testNames,
-        [List<String> otherArgs = const <String>[]]) async {
-      final String dart = path.absolute(
-          path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
-      final ProcessResult scriptProcess = processManager.runSync(<String>[
-        dart,
-        'bin/run.dart',
-        ...otherArgs,
-        for (final String testName in testNames) ...<String>['-t', testName],
-      ]);
-      return scriptProcess;
-    }
-
-    Future<void> expectScriptResult(
-        List<String> testNames,
-        int expectedExitCode,
-        {String deviceId}
-      ) async {
-      final ProcessResult result = await runScript(testNames, <String>[
-        if (deviceId != null) ...<String>['-d', deviceId],
-      ]);
-      expect(result.exitCode, expectedExitCode,
-          reason:
-              '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
-              '\n\n[ stdout from test process ]\n\n${result.stdout}\n\n[ end of stdout ]');
-    }
-
     test('exits with code 0 when succeeds', () async {
       await expectScriptResult(<String>['smoke_test_success'], 0);
     });

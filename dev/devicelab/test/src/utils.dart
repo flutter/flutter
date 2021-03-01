@@ -2,8 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
+
+import '../common.dart';
+
+const ProcessManager processManager = LocalProcessManager();
+
+Future<ProcessResult> runScript(List<String> testNames,
+    [List<String> otherArgs = const <String>[]]) async {
+  final String dart = path.absolute(
+      path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
+  final ProcessResult scriptProcess = processManager.runSync(<String>[
+    dart,
+    'bin/run.dart',
+    ...otherArgs,
+    for (final String testName in testNames) ...<String>['-t', testName],
+  ]);
+  return scriptProcess;
+}
+
+Future<void> expectScriptResult(List<String> testNames, int expectedExitCode, {
+  String deviceId,
+  List<String> taskArgs,
+}) async {
+  final List<String> args = <String>[
+    if (deviceId != null)
+      '-d', deviceId,
+    ...?taskArgs
+  ];
+  final ProcessResult result = await runScript(testNames, args);
+  expect(result.exitCode, expectedExitCode,
+      reason:
+          '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
+          '\n\n[ stdout from test process ]\n\n${result.stdout}\n\n[ end of stdout ]');
+}
+
 
 CommandArgs cmd({
   String command,

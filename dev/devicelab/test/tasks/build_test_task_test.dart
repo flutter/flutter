@@ -6,21 +6,16 @@ import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 
 import '../common.dart';
+import '../src/utils.dart';
 
 void main() {
   test('runs build and test when no args are passed', () async {
-    final TaskResult result = await runTask('smoke_test_build_test', deviceId: 'FAKE_SUCCESS', skipProcessCleanup: true,);
-    expect(result.data['benchmark'], 'data');
+    expectScriptResult(<String>['smoke_test_build_test'], 0, deviceId: 'FAKE_SUCCESS');
   });
 
   test('runs build only when build arg is given', () async {
     final TaskResult result = await runTask('smoke_test_build_test', taskArgs: <String>['--build'], deviceId: 'FAKE_SUCCESS', skipProcessCleanup: true,);
     expect(result.message, 'No tests run');
-  });
-
-  test('runs test only when test arg is given', () async {
-    final TaskResult result = await runTask('smoke_test_build_test', taskArgs: <String>['--test'], deviceId: 'FAKE_SUCCESS', skipProcessCleanup: true,);
-    expect(result.data['benchmark'], 'data');
   });
 
   test('throws exception when build and test arg are given', () async {
