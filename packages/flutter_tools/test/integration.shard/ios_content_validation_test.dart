@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -193,6 +195,8 @@ void main() {
             'VERBOSE_SCRIPT_LOGGING': '1',
             'FLUTTER_BUILD_MODE': 'release',
             'ACTION': 'install',
+            'ARCHS': 'arm64 armv7',
+            'FLUTTER_ROOT': flutterRoot,
             // Skip bitcode stripping since we just checked that above.
           },
         );

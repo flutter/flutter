@@ -16,6 +16,7 @@ import 'overlay.dart';
 /// entered so far.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
 typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(TextEditingValue textEditingValue);
 
@@ -23,6 +24,7 @@ typedef AutocompleteOptionsBuilder<T extends Object> = Iterable<T> Function(Text
 /// that the user has selected an option.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.onSelected], which is of this type.
 typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 
@@ -31,6 +33,7 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 /// selects an option.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
 typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
@@ -42,6 +45,7 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 /// contains the input [TextField] or [TextFormField].
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
@@ -54,19 +58,21 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 /// a string which can be displayed in the widget's options menu.
 ///
 /// See also:
+///
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
-// TODO(justinmc): Mention Autocomplete and AutocompleteCupertino when they are
-// implemented.
+// TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
+/// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
 /// choosing from among a list of options.
-///
-/// This is a core framework widget with very basic UI.
 ///
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
+/// {@endtemplate}
+///
+/// This is a core framework widget with very basic UI.
 ///
 /// {@tool dartpad --template=freeform}
 /// This example shows how to create a very basic autocomplete widget using the
@@ -419,6 +425,11 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [Autocomplete], which is a Material-styled implementation that is based
+/// on RawAutocomplete.
 class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
@@ -428,7 +439,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     Key? key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
-    this.displayStringForOption = _defaultStringForOption,
+    this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
     this.onSelected,
@@ -444,10 +455,12 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert((focusNode == null) == (textEditingController == null)),
        super(key: key);
 
+  /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
+  /// {@endtemplate}
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.
@@ -552,30 +565,38 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// not null.
   final FocusNode? focusNode;
 
+  /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
   /// Builds the selectable options widgets from a list of options objects.
   ///
   /// The options are displayed floating below the field using a
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as RawAutocomplete.
+  /// place in the widget tree as [RawAutocomplete].
+  /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
+  /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
   /// Returns the string to display in the field when the option is selected.
   ///
   /// This is useful when using a custom T type and the string to display is
   /// different than the string to search by.
   ///
   /// If not provided, will use `option.toString()`.
+  /// {@endtemplate}
   final AutocompleteOptionToString<T> displayStringForOption;
 
+  /// {@template flutter.widgets.RawAutocomplete.onSelected}
   /// Called when an option is selected by the user.
   ///
   /// Any [TextEditingController] listeners will not be called when the user
   /// selects an option, even though the field will update with the selected
   /// value, so use this to be informed of selection.
+  /// {@endtemplate}
   final AutocompleteOnSelected<T>? onSelected;
 
+  /// {@template flutter.widgets.RawAutocomplete.optionsBuilder}
   /// A function that returns the current selectable options objects given the
   /// current TextEditingValue.
+  /// {@endtemplate}
   final AutocompleteOptionsBuilder<T> optionsBuilder;
 
   /// The [TextEditingController] that is used for the text field.
@@ -603,8 +624,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     rawAutocomplete._onFieldSubmitted();
   }
 
-  // The default way to convert an option to a string.
-  static String _defaultStringForOption(dynamic option) {
+  /// The default way to convert an option to a string in
+  /// [displayStringForOption].
+  ///
+  /// Simply uses the `toString` method on the option.
+  static String defaultStringForOption(dynamic option) {
     return option.toString();
   }
 

@@ -276,6 +276,7 @@ class AnimatedList extends StatefulWidget {
     this.physics,
     this.shrinkWrap = false,
     this.padding,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(itemBuilder != null),
        assert(initialItemCount != null && initialItemCount >= 0),
        super(key: key);
@@ -372,6 +373,11 @@ class AnimatedList extends StatefulWidget {
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -493,9 +499,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       primary: widget.primary,
       physics: widget.physics,
       shrinkWrap: widget.shrinkWrap,
+      clipBehavior: widget.clipBehavior,
       slivers: <Widget>[
         SliverPadding(
-          padding: widget.padding ?? const EdgeInsets.all(0),
+          padding: widget.padding ?? EdgeInsets.zero,
           sliver: SliverAnimatedList(
             key: _sliverAnimatedListKey,
             itemBuilder: widget.itemBuilder,

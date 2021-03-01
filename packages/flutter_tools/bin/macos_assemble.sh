@@ -83,6 +83,7 @@ BuildApp() {
       ${flutter_engine_flag}                                                  \
       ${local_engine_flag}                                                    \
       assemble                                                                \
+      --no-version-check                                                      \
       ${performance_measurement_option}                                       \
       -dTargetPlatform=darwin-x64                                             \
       -dTargetFile="${target_path}"                                           \

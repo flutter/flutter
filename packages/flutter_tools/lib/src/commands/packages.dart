@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -76,6 +78,8 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner.executableName} pub $name [<target directory>]';
   }
 
+  /// The pub packages usage values are incorrect since these are calculated/sent
+  /// before pub get completes. This needs to be performed after dependency resolution.
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
@@ -84,10 +88,15 @@ class PackagesGetCommand extends FlutterCommand {
     if (target == null) {
       return usageValues;
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
-    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync();
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+    // Do not send plugin analytics if pub has not run before.
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packagesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
     if (hasPlugins) {
-      final List<Plugin> plugins = await findPlugins(rootProject);
+      // Do not fail pub get if package config files are invalid before pub has
+      // had a chance to run.
+      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = plugins.length.toString();
     } else {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
@@ -110,6 +119,7 @@ class PackagesGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(
@@ -151,13 +161,13 @@ class PackagesGetCommand extends FlutterCommand {
        '${ workingDirectory ?? "current working directory" }.'
       );
     }
-    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     await _runPubGet(target, rootProject);
     await rootProject.regeneratePlatformSpecificTooling();
 
     // Get/upgrade packages in example app as well
-    if (rootProject.hasExampleApp) {
+    if (rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path, exampleProject);
       await exampleProject.regeneratePlatformSpecificTooling();
@@ -302,7 +312,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
       throwToolExit('Expected to find project root in '
           'current working directory.');
     }
-    final FlutterProject flutterProject = FlutterProject.fromPath(target);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
     if (flutterProject.manifest.generateSyntheticPackage) {
       final Environment environment = Environment(
@@ -315,6 +325,7 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         projectDir: flutterProject.directory,
+        generateDartPluginRegistry: true,
       );
 
       await generateLocalizationsSyntheticPackage(

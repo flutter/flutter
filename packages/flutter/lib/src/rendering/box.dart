@@ -1832,7 +1832,7 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryLayout = true;
       return true;
     }());
-    final Size result =  computeDryLayout(constraints);
+    final Size result = computeDryLayout(constraints);
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
@@ -1884,7 +1884,7 @@ abstract class RenderBox extends RenderObject {
         ),
       ]),
     ));
-    return const Size(0, 0);
+    return Size.zero;
   }
 
   static bool _dryLayoutCalculationValid = true;
@@ -1942,7 +1942,8 @@ abstract class RenderBox extends RenderObject {
       final Size? _size = this._size;
       if (_size is _DebugSize) {
         assert(_size._owner == this);
-        if (RenderObject.debugActiveLayout != null) {
+        if (RenderObject.debugActiveLayout != null &&
+            !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
           assert(
             debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
               (RenderObject.debugActiveLayout == parent && _size._canBeUsedByParent),
@@ -2582,8 +2583,8 @@ abstract class RenderBox extends RenderObject {
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.
   /// (This is useful because [PointerEvent.position] is in global coordinates.)
   ///
-  /// If you override this, consider calling [debugHandleEvent] as follows, so
-  /// that you can support [debugPaintPointersEnabled]:
+  /// Implementations of this method should call [debugHandleEvent] as follows,
+  /// so that they support [debugPaintPointersEnabled]:
   ///
   /// ```dart
   /// @override

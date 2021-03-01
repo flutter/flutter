@@ -565,6 +565,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// visible without the fade animation. This requires that a [ScrollController]
 /// is provided to [controller], or that the [PrimaryScrollController] is available.
 ///
+/// If the scrollbar is wrapped around multiple [ScrollView]s, it only responds to
+/// the nearest scrollView and shows the corresponding scrollbar thumb by default.
+/// Set [notificationPredicate] to something else for more complicated behaviors.
+///
 /// Scrollbars are interactive and will also use the [PrimaryScrollController] if
 /// a [controller] is not set. Scrollbar thumbs can be dragged along the main axis
 /// of the [ScrollView] to change the [ScrollPosition]. Tapping along the track
@@ -607,6 +611,8 @@ class RawScrollbar extends StatefulWidget {
     this.fadeDuration = _kScrollbarFadeDuration,
     this.timeToFade = _kScrollbarTimeToFade,
     this.pressDuration = Duration.zero,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.interactive,
   }) : assert(child != null),
        assert(fadeDuration != null),
        assert(timeToFade != null),
@@ -732,6 +738,11 @@ class RawScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
+  ///     this value to override the default behavior.
   /// {@endtemplate}
   final bool? isAlwaysShown;
 
@@ -767,6 +778,36 @@ class RawScrollbar extends StatefulWidget {
   /// Cannot be null, defaults to [Duration.zero].
   final Duration pressDuration;
 
+  /// {@template flutter.widgets.Scrollbar.notificationPredicate}
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. That means if the
+  /// scrollbar is wrapped around multiple [ScrollView]s, it only responds to the
+  /// nearest scrollView and shows the corresponding scrollbar thumb.
+  /// {@endtemplate}
+  final ScrollNotificationPredicate notificationPredicate;
+
+  /// {@template flutter.widgets.Scrollbar.interactive}
+  /// Whether the Scrollbar should be interactive and respond to dragging on the
+  /// thumb, or tapping in the track area.
+  ///
+  /// Does not apply to the [CupertinoScrollbar], which is always interactive to
+  /// match native behavior. On Android, the scrollbar is not interactive by
+  /// default.
+  ///
+  /// When false, the scrollbar will not respond to gesture or hover events.
+  ///
+  /// Defaults to true when null, unless on Android, which will default to false
+  /// when null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbarState.enableGestures], an overridable getter which uses
+  ///     this value to override the default behavior.
+  /// {@endtemplate}
+  final bool? interactive;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -800,8 +841,28 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
+  ///
+  /// Defaults to false when [RawScrollbar.isAlwaysShown] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
   @protected
   bool get showScrollbar => widget.isAlwaysShown ?? false;
+
+  /// Overridable getter to indicate is gestures should be enabled on the
+  /// scrollbar.
+  ///
+  /// Subclasses can override this getter to make its value depend on an inherited
+  /// theme.
+  ///
+  /// Defaults to true when [RawScrollbar.interactive] is null.
+  ///
+  /// See also:
+  ///
+  ///   * [RawScrollbar.interactive], which overrides the default behavior.
+  @protected
+  bool get enableGestures => widget.interactive ?? true;
 
   @override
   void initState() {
@@ -1031,6 +1092,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    if (!widget.notificationPredicate(notification))
+      return false;
 
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent)
@@ -1054,7 +1117,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     final ScrollController? controller = widget.controller ?? PrimaryScrollController.of(context);
-    if (controller == null)
+    if (controller == null || !enableGestures)
       return gestures;
 
     gestures[_ThumbPressGestureRecognizer] =
@@ -1173,7 +1236,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onExit: (PointerExitEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHoverExit(event);
+                  if (enableGestures)
+                    handleHoverExit(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:
@@ -1185,7 +1249,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             onHover: (PointerHoverEvent event) {
               switch(event.kind) {
                 case PointerDeviceKind.mouse:
-                  handleHover(event);
+                  if (enableGestures)
+                    handleHover(event);
                   break;
                 case PointerDeviceKind.stylus:
                 case PointerDeviceKind.invertedStylus:

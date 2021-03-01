@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -167,7 +166,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 29 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 31 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -227,22 +226,19 @@ void main() {
   });
 
   test('Service extensions - debugDumpApp', () async {
-    Map<String, dynamic> result;
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpApp', <String, String>{});
 
-    result = await binding.testExtension('debugDumpApp', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['TestServiceExtensionsBinding - CHECKED MODE', '<no tree currently mounted>']);
-    console.clear();
+    expect(result, <String, dynamic>{
+      'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
+    });
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
@@ -251,18 +247,15 @@ void main() {
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <Matcher>[
-      matches(
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
         r'^'
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
@@ -276,28 +269,25 @@ void main() {
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
         r'$'
       ),
-    ]);
-    console.clear();
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    Map<String, dynamic> result;
-
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
-    expect(result, <String, String>{});
-    expect(console, <String>['Semantics not collected.']);
-    console.clear();
+    final Map<String, dynamic> result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
+
+    expect(result, <String, String>{
+      'data': 'Semantics not collected.'
+    });
   });
 
   test('Service extensions - debugPaint', () async {
@@ -757,5 +747,31 @@ void main() {
     final String brightnessValue = result['value'] as String;
 
     expect(brightnessValue, 'Brightness.light');
+  });
+
+  test('Service extensions - activeDevToolsServerAddress', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9101'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9101');
+    result = await binding.testExtension('activeDevToolsServerAddress', <String, String>{'value': 'http://127.0.0.1:9102'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:9102');
+  });
+
+  test('Service extensions - connectedVmServiceUri', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{});
+    String serverAddress = result['value'] as String;
+    expect(serverAddress, '');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54669/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54669/kMUMseKAnog=/');
+    result = await binding.testExtension('connectedVmServiceUri', <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
+    serverAddress = result['value'] as String;
+    expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
   });
 }

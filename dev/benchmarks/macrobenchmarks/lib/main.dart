@@ -21,6 +21,7 @@ import 'src/picture_cache.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
+import 'src/stack_size.dart';
 import 'src/text.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -54,6 +55,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
         kSimpleScrollRouteName: (BuildContext context) => SimpleScroll(),
+        kStackSizeRouteName: (BuildContext context) => StackSizePage(),
       },
     );
   }
@@ -179,6 +181,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Image Changer'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImageChangerRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kStackSizeRouteName),
+            child: const Text('Stack Size'),
+            onPressed: () {
+              Navigator.pushNamed(context, kStackSizeRouteName);
             },
           ),
         ],
