@@ -1016,7 +1016,7 @@ class ListTile extends StatelessWidget {
       case Brightness.light:
         // For the sake of backwards compatibility, the default for unselected
         // tiles - with the default light theme - is the same as Colors.black45.
-        return selected ? theme.colorScheme.primary : theme.colorScheme.onPrimary.withAlpha(0x73);
+        return selected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withAlpha(0x73);
       case Brightness.dark:
         return selected ? theme.colorScheme.secondary : null; // null - use current icon theme color
     }

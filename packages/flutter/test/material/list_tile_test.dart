@@ -2319,8 +2319,8 @@ void main() {
     expect(iconColor(trailingKey), lightColorScheme.primary);
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
-    expect(iconColor(leadingKey), lightColorScheme.onPrimary.withAlpha(0x73));
-    expect(iconColor(trailingKey), lightColorScheme.onPrimary.withAlpha(0x73));
+    expect(iconColor(leadingKey), lightColorScheme.onSurface.withAlpha(0x73));
+    expect(iconColor(trailingKey), lightColorScheme.onSurface.withAlpha(0x73));
 
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
     await tester.pumpAndSettle(); // Animated theme change
