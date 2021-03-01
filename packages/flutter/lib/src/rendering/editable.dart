@@ -908,6 +908,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Extend the current selection to the end of the field.
   //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the end.
+  //
   // {@template flutter.rendering.RenderEditable.cause}
   // The given [SelectionChangedCause] indicates the cause of this change and
   // will be passed to [onSelectionChanged].
@@ -931,6 +934,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Extend the current selection to the start of the field.
+  //
+  // If selectionEnabled is false, keeps the selection collapsed and moves it to
+  // the start.
   //
   // {@macro flutter.rendering.RenderEditable.cause}
   //
@@ -984,8 +990,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] down by one line.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and just
+  /// moves it down.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1026,11 +1035,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Expand the current selection to the end of the field.
+  /// Expand the current [selection] to the end of the field.
   ///
   /// The selection will never shrink. The [TextSelection.extentOffset] will
   // always be at the end of the field, regardless of the original order of
   /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// to the end.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1058,8 +1070,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] left.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1085,12 +1100,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the start of
+  /// Extend the current [selection] to the start of
   /// [TextSelection.extentOffset]'s line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
   /// If [TextSelection.extentOffset] is right of [TextSelection.baseOffset],
   /// then collapses the selection.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left by line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1124,8 +1142,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] right.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1151,12 +1172,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the end of [TextSelection.extentOffset]'s
+  /// Extend the current [selection] to the end of [TextSelection.extentOffset]'s
   /// line.
   ///
   /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
   /// [TextSelection.extentOffset] is left of [TextSelection.baseOffset], then
   /// collapses the selection.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right by line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1190,9 +1214,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// Keeping [selection]'s [TextSelection.baseOffset] fixed, move the
   /// [TextSelection.extentOffset] up by one
   /// line.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// up.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1236,11 +1263,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Expand the current selection to the start of the field.
+  /// Expand the current [selection] to the start of the field.
   ///
   /// The selection will never shrink. The [TextSelection.extentOffset] will
   /// always be at the start of the field, regardless of the original order of
   /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// to the start.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1269,11 +1299,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Expand the current selection to the start of the line.
+  /// Expand the current [selection] to the start of the line.
   ///
   /// The selection will never shrink. The upper offset will be expanded to the
   /// beginning of its line, and the original order of baseOffset and
   /// [TextSelection.extentOffset] will be preserved.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// left by line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1306,7 +1339,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the previous start of a word.
+  /// Extend the current [selection] to the previous start of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1336,7 +1369,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the next end of a word.
+  /// Extend the current [selection] to the next end of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1366,11 +1399,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Expand the current selection to the end of the line.
+  /// Expand the current [selection] to the end of the line.
   ///
   /// The selection will never shrink. The lower offset will be expanded to the
   /// end of its line and the original order of [TextSelection.baseOffset] and
   /// [TextSelection.extentOffset] will be preserved.
+  ///
+  /// If [selectionEnabled] is false, keeps the selection collapsed and moves it
+  /// right by line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1403,7 +1439,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the next line.
+  /// Move the current [selection] to the next line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1436,7 +1472,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection left by one character.
+  /// Move the current [selection] left by one character.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1457,7 +1493,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the leftmost of the current line.
+  /// Move the current [selection] to the leftmost of the current line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1488,7 +1524,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the previous start of a word.
+  /// Move the current [selection] to the previous start of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1518,7 +1554,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the right by one character.
+  /// Move the current [selection] to the right by one character.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1538,7 +1574,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the rightmost point of the current line.
+  /// Move the current [selection] to the rightmost point of the current line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1570,7 +1606,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the next end of a word.
+  /// Move the current [selection] to the next end of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1600,7 +1636,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the end of the field.
+  /// Move the current [selection] to the end of the field.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1620,7 +1656,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection to the start of the field.
+  /// Move the current [selection] to the start of the field.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
@@ -1637,7 +1673,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Move the current selection up by one line.
+  /// Move the current [selection] up by one line.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
