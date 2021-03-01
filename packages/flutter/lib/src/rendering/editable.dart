@@ -738,6 +738,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return 0;
   }
 
+  // Return a new selection that has been moved left once.
+  //
+  // If it can't be moved left, the original TextSelection is returned.
   static TextSelection _moveGivenSelectionLeft(TextSelection selection, String text) {
     // If the selection is already all the way left, there is nothing to do.
     if (selection.isCollapsed && selection.extentOffset <= 0) {
@@ -972,8 +975,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return _getTextPositionVertical(offset, verticalOffset);
   }
 
-  /// Keeping the current baseOffset fixed, move the extentOffset down by one
-  /// line.
+  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] down by one line.
   ///
   /// See also:
   ///
@@ -1014,9 +1017,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Expand the current selection to the end of the field.
   ///
-  /// The selection will never shrink. The extentOffset will always be at the
-  /// end of the field, regardless of the original order of baseOffset and
-  /// extentOffset.
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  // always be at the end of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
   ///
   /// See also:
   ///
@@ -1042,7 +1045,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current baseOffset fixed, move the extentOffset left.
+  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] left.
   ///
   /// See also:
   ///
@@ -1066,10 +1070,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the start of extentOffset's line.
+  /// Extend the current selection to the start of
+  /// [TextSelection.extentOffset]'s line.
   ///
-  /// Uses baseOffset as a pivot point and doesn't change it. If extentOffset is
-  /// right of baseOffset, then collapses the selection.
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it.
+  /// If [TextSelection.extentOffset] is right of [TextSelection.baseOffset],
+  /// then collapses the selection.
   ///
   /// See also:
   ///
@@ -1099,7 +1105,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current baseOffset fixed, move the extentOffset left.
+  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] left.
   ///
   /// See also:
   ///
@@ -1123,10 +1130,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Extend the current selection to the end of extentOffset's line.
+  /// Extend the current selection to the end of [TextSelection.extentOffset]'s
+  /// line.
   ///
-  /// Uses baseOffset as a pivot point and doesn't change it. If extentOffset is
-  /// left of baseOffset, then collapses the selection.
+  /// Uses [TextSelection.baseOffset] as a pivot point and doesn't change it. If
+  /// [TextSelection.extentOffset] is left of [TextSelection.baseOffset], then
+  /// collapses the selection.
   ///
   /// See also:
   ///
@@ -1156,7 +1165,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateSelection(nextSelection, cause);
   }
 
-  /// Keeping the current baseOffset fixed, move the extentOffset up by one
+  /// Keeping the current [TextSelection.baseOffset] fixed, move the
+  /// [TextSelection.extentOffset] up by one
   /// line.
   ///
   /// See also:
@@ -1200,9 +1210,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   /// Expand the current selection to the start of the field.
   ///
-  /// The selection will never shrink. The extentOffset will always be at the
-  /// start of the field, regardless of the original order of baseOffset and
-  /// extentOffset.
+  /// The selection will never shrink. The [TextSelection.extentOffset] will
+  /// always be at the start of the field, regardless of the original order of
+  /// [TextSelection.baseOffset] and [TextSelection.extentOffset].
   ///
   /// See also:
   ///
@@ -1232,7 +1242,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// The selection will never shrink. The upper offset will be expanded to the
   /// beginning of its line, and the original order of baseOffset and
-  /// extentOffset will be preserved.
+  /// [TextSelection.extentOffset] will be preserved.
   ///
   /// See also:
   ///
@@ -1319,8 +1329,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Expand the current selection to the end of the line.
   ///
   /// The selection will never shrink. The lower offset will be expanded to the
-  /// end of its line and the original order of baseOffset and extentOffset will
-  /// be preserved.
+  /// end of its line and the original order of [TextSelection.baseOffset] and
+  /// [TextSelection.extentOffset] will be preserved.
   ///
   /// See also:
   ///
