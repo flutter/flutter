@@ -1126,7 +1126,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
     if (selection!.extentOffset > selection!.baseOffset) {
@@ -1198,7 +1198,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
     if (selection!.extentOffset < selection!.baseOffset) {
@@ -1323,7 +1323,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
     if (selection!.extentOffset <= selection!.baseOffset) {
@@ -1431,7 +1431,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
     final int startPoint = nextCharacter(lastOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
     if (selection!.extentOffset >= selection!.baseOffset) {
@@ -1514,17 +1514,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // If the previous character is the edge of a line, don't do anything.
     final int previousPoint = previousCharacter(selection!.extentOffset, _plainText, true);
-    final TextSelection line = _selectLineAtOffset(TextPosition(offset: previousPoint));
+    final TextSelection line = _getLineAtOffset(TextPosition(offset: previousPoint));
     if (line.extentOffset == previousPoint) {
       return;
     }
 
     // When going left, we want to skip over any whitespace before the line,
     // so we go back to the first non-whitespace before asking for the line
-    // bounds, since _selectLineAtOffset finds the line boundaries without
+    // bounds, since _getLineAtOffset finds the line boundaries without
     // including whitespace (like the newline).
     final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.baseOffset,
     );
@@ -1598,7 +1598,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(selection != null);
 
     // If already at the right edge of the line, do nothing.
-    final TextSelection currentLine = _selectLineAtOffset(TextPosition(
+    final TextSelection currentLine = _getLineAtOffset(TextPosition(
       offset: selection!.extentOffset,
     ));
     if (currentLine.extentOffset == selection!.extentOffset) {
@@ -1607,10 +1607,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // When going right, we want to skip over any whitespace after the line,
     // so we go forward to the first non-whitespace character before asking
-    // for the line bounds, since _selectLineAtOffset finds the line
+    // for the line bounds, since _getLineAtOffset finds the line
     // boundaries without including whitespace (like the newline).
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
-    final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
+    final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
     final TextSelection nextSelection = TextSelection.collapsed(
       offset: selectedLine.extentOffset,
     );
@@ -2849,9 +2849,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     final TextPosition firstPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection firstWord = _selectWordAtOffset(firstPosition);
+    final TextSelection firstWord = _getWordAtOffset(firstPosition);
     final TextSelection lastWord = to == null ?
-      firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
+      firstWord : _getWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
 
     _handleSelectionChange(
       TextSelection(
@@ -2888,7 +2888,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  TextSelection _selectWordAtOffset(TextPosition position) {
+  TextSelection _getWordAtOffset(TextPosition position) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
@@ -2931,7 +2931,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
-  TextSelection _selectLineAtOffset(TextPosition position) {
+  TextSelection _getLineAtOffset(TextPosition position) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
         _textLayoutLastMinWidth == constraints.minWidth,
     'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
