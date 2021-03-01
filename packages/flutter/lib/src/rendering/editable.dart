@@ -1014,7 +1014,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (positionBelow.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: _plainText.length,
@@ -1125,10 +1125,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionLeftByLine(cause);
     }
 
+    // When going left, we want to skip over any whitespace before the line,
+    // so we go back to the first non-whitespace before asking for the line
+    // bounds, since _getLineAtOffset finds the line boundaries without
+    // including whitespace (like the newline).
     final int startPoint = previousCharacter(selection!.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (selection!.extentOffset > selection!.baseOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selection!.baseOffset,
@@ -1200,7 +1204,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int startPoint = nextCharacter(selection!.extentOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (selection!.extentOffset < selection!.baseOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selection!.baseOffset,
@@ -1240,7 +1244,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (positionAbove.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: 0,
@@ -1325,7 +1329,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (selection!.extentOffset <= selection!.baseOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selectedLine.baseOffset,
@@ -1433,7 +1437,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final int startPoint = nextCharacter(lastOffset, _plainText, false);
     final TextSelection selectedLine = _getLineAtOffset(TextPosition(offset: startPoint));
 
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (selection!.extentOffset >= selection!.baseOffset) {
       nextSelection = selection!.copyWith(
         extentOffset: selectedLine.extentOffset,
@@ -1465,7 +1469,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final TextPosition positionBelow = _getTextPositionBelow(selection!.extentOffset);
 
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (positionBelow.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(
         baseOffset: _plainText.length,
@@ -1706,7 +1710,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     final TextPosition positionAbove = _getTextPositionAbove(selection!.extentOffset);
-    late TextSelection nextSelection;
+    late final TextSelection nextSelection;
     if (positionAbove.offset == selection!.extentOffset) {
       nextSelection = selection!.copyWith(baseOffset: 0, extentOffset: 0);
       _wasSelectingVerticallyWithKeyboard = false;
