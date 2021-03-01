@@ -4,6 +4,8 @@
 
 #include "resource.h"
 
+#define WM_SIZE_CHILD WM_USER + 1
+
 namespace {
 
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
@@ -174,15 +176,19 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
     }
     case WM_SIZE: {
-      RECT rect = GetClientArea();
-      if (child_content_ != nullptr) {
-        // Size and position the child window.
-        MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
-                   rect.bottom - rect.top, TRUE);
-      }
+		PostMessage(hwnd, WM_SIZE_CHILD, 0, 0);
       return 0;
     }
-
+	case WM_SIZE_CHILD:
+	{
+		if (child_content_ != nullptr) {
+			// Size and position the child window.
+			RECT rect = GetClientArea();
+			MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
+				rect.bottom - rect.top, TRUE);
+		}
+	}
+	break;
     case WM_ACTIVATE:
       if (child_content_ != nullptr) {
         SetFocus(child_content_);
