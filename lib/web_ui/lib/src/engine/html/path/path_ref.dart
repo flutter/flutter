@@ -61,9 +61,9 @@ class PathRef {
     fBoundsIsDirty = true; // this also invalidates fIsFinite
     fSegmentMask = 0;
     fIsOval = false;
-    rrectRepresentation = null;
+    fIsRRect = false;
     fIsRect = false;
-    // The next two values don't matter unless fIsOval is true or rrectRepresentation is not null.
+    // The next two values don't matter unless fIsOval or fIsRRect are true.
     fRRectOrOvalIsCCW = false;
     fRRectOrOvalStartIdx = 0xAC;
     assert(() {
@@ -104,7 +104,7 @@ class PathRef {
     }
     fSegmentMask = ref.fSegmentMask;
     fIsOval = ref.fIsOval;
-    rrectRepresentation = ref.rrectRepresentation;
+    fIsRRect = ref.fIsRRect;
     fIsRect = ref.fIsRect;
     fRRectOrOvalIsCCW = ref.fRRectOrOvalIsCCW;
     fRRectOrOvalStartIdx = ref.fRRectOrOvalStartIdx;
@@ -153,9 +153,9 @@ class PathRef {
   int get isOval => fIsOval ? fRRectOrOvalStartIdx : -1;
   bool get isOvalCCW => fRRectOrOvalIsCCW;
 
-  int get isRRect => rrectRepresentation != null ? fRRectOrOvalStartIdx : -1;
+  int get isRRect => fIsRRect ? fRRectOrOvalStartIdx : -1;
   int get isRect => fIsRect ? fRRectOrOvalStartIdx : -1;
-  ui.RRect? getRRect() => rrectRepresentation;
+  ui.RRect? getRRect() => fIsRRect ? _getRRect() : null;
   ui.Rect? getRect() {
     /// Use _detectRect() for detection if explicity addRect was used (fIsRect) or
     /// it is a potential due to moveTo + 3 lineTo verbs.
@@ -225,6 +225,70 @@ class PathRef {
       return ui.Rect.fromLTRB(x0, y0, x1, y1);
     }
     return null;
+  }
+
+  /// Reconstructs RRect from path commands.
+  ///
+  /// Expect 4 Conics and lines between.
+  /// Use conic points to calculate corner radius.
+  ui.RRect _getRRect() {
+    ui.Rect bounds = getBounds();
+    // Radii x,y of 4 corners
+    final List<ui.Radius> radii = <ui.Radius>[];
+    final PathRefIterator iter = PathRefIterator(this);
+    final Float32List pts = Float32List(PathRefIterator.kMaxBufferSize);
+    int verb = iter.next(pts);
+    assert(SPath.kMoveVerb == verb);
+    int cornerIndex = 0;
+    while ((verb = iter.next(pts)) != SPath.kDoneVerb) {
+      if (SPath.kConicVerb == verb) {
+        final double controlPx = pts[2];
+        final double controlPy = pts[3];
+        double vector1_0x = controlPx - pts[0];
+        double vector1_0y = controlPy - pts[1];
+        double vector2_1x = pts[4] - pts[2];
+        double vector2_1y = pts[5] - pts[3];
+        double dx, dy;
+        // Depending on the corner we have control point at same
+        // horizontal position as startpoint or same vertical position.
+        // The location delta of control point specifies corner radius.
+        if (vector1_0x != 0.0) {
+          // For CW : Top right or bottom left corners.
+          assert(vector2_1x == 0.0 && vector1_0y == 0.0);
+          dx = vector1_0x.abs();
+          dy = vector2_1y.abs();
+        } else if (vector1_0y != 0.0) {
+          assert(vector2_1x == 0.0 || vector2_1y == 0.0);
+          dx = vector2_1x.abs();
+          dy = vector1_0y.abs();
+        } else {
+          assert(vector2_1y == 0.0);
+          dx = vector1_0x.abs();
+          dy = vector1_0y.abs();
+        }
+        if (assertionsEnabled) {
+          final int checkCornerIndex = _nearlyEqual(controlPx, bounds.left)
+              ? (_nearlyEqual(controlPy, bounds.top)
+                  ? _Corner.kUpperLeft
+                  : _Corner.kLowerLeft)
+              : (_nearlyEqual(controlPy, bounds.top)
+                  ? _Corner.kUpperRight
+                  : _Corner.kLowerRight);
+          assert(checkCornerIndex == cornerIndex);
+        }
+        radii.add(ui.Radius.elliptical(dx, dy));
+        ++cornerIndex;
+      } else {
+        assert((verb == SPath.kLineVerb &&
+                ((pts[2] - pts[0]) == 0 || (pts[3] - pts[1]) == 0)) ||
+            verb == SPath.kCloseVerb);
+      }
+    }
+    return ui.RRect.fromRectAndCorners(bounds,
+        topLeft: radii[_Corner.kUpperLeft],
+        topRight: radii[_Corner.kUpperRight],
+        bottomRight: radii[_Corner.kLowerRight],
+        bottomLeft: radii[_Corner.kLowerLeft]);
   }
 
   bool operator ==(Object other) {
@@ -330,7 +394,7 @@ class PathRef {
     }
     fSegmentMask = source.fSegmentMask;
     fIsOval = source.fIsOval;
-    rrectRepresentation = source.rrectRepresentation;
+    fIsRRect = source.fIsRRect;
     fIsRect = source.fIsRect;
     fRRectOrOvalIsCCW = source.fRRectOrOvalIsCCW;
     fRRectOrOvalStartIdx = source.fRRectOrOvalStartIdx;
@@ -363,7 +427,7 @@ class PathRef {
     }
     fSegmentMask = ref.fSegmentMask;
     fIsOval = ref.fIsOval;
-    rrectRepresentation = ref.rrectRepresentation;
+    fIsRRect = ref.fIsRRect;
     fIsRect = ref.fIsRect;
     fRRectOrOvalIsCCW = ref.fRRectOrOvalIsCCW;
     fRRectOrOvalStartIdx = ref.fRRectOrOvalStartIdx;
@@ -714,7 +778,7 @@ class PathRef {
   /// points are added.
   void startEdit() {
     fIsOval = false;
-    rrectRepresentation = null;
+    fIsRRect = false;
     fIsRect = false;
     cachedBounds = null;
     fBoundsIsDirty = true;
@@ -727,11 +791,7 @@ class PathRef {
   }
 
   void setIsRRect(bool isRRect, bool isCCW, int start, ui.RRect rrect) {
-    if (isRRect) {
-      rrectRepresentation = rrect;
-    } else {
-      rrectRepresentation = null;
-    }
+    fIsRRect = isRRect;
     fRRectOrOvalIsCCW = isCCW;
     fRRectOrOvalStartIdx = start;
   }
@@ -753,11 +813,7 @@ class PathRef {
   bool fIsFinite = true; // only meaningful if bounds are valid
 
   bool fIsOval = false;
-
-  /// If the path is made of a single `RRect`, this field contains the original
-  /// `RRect` that was added to the path.
-  ui.RRect? rrectRepresentation;
-
+  bool fIsRRect = false;
   bool fIsRect = false;
   // Both the circle and rrect special cases have a notion of direction and starting point
   // The next two variables store that information for either.
@@ -766,9 +822,9 @@ class PathRef {
   int fSegmentMask = 0;
 
   bool get isValid {
-    if (fIsOval || rrectRepresentation != null) {
+    if (fIsOval || fIsRRect) {
       // Currently we don't allow both of these to be set.
-      if (fIsOval == (rrectRepresentation != null)) {
+      if (fIsOval == fIsRRect) {
         return false;
       }
       if (fIsOval) {
@@ -782,7 +838,7 @@ class PathRef {
       }
     }
     if (fIsRect) {
-      if (fIsOval || (rrectRepresentation != null)) {
+      if (fIsOval || fIsRRect) {
         return false;
       }
       if (fRRectOrOvalStartIdx >= 4) {
@@ -1007,4 +1063,11 @@ class PathRefIterator {
   int peek() => _verbIndex < pathRef.countVerbs()
       ? pathRef._fVerbs[_verbIndex]
       : SPath.kDoneVerb;
+}
+
+class _Corner {
+  static const int kUpperLeft = 0;
+  static const int kUpperRight = 1;
+  static const int kLowerRight = 2;
+  static const int kLowerLeft = 3;
 }
