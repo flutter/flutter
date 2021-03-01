@@ -23,6 +23,7 @@ void main() {
 
       Directory buildPath;
       Directory outputApp;
+      Directory frameworkDirectory;
       Directory outputFlutterFramework;
       File outputFlutterFrameworkBinary;
       Directory outputAppFramework;
@@ -70,22 +71,11 @@ void main() {
 
         outputApp = buildPath.childDirectory('Runner.app');
 
-        outputFlutterFramework = fileSystem.directory(
-          fileSystem.path.join(
-            outputApp.path,
-            'Frameworks',
-            'Flutter.framework',
-          ),
-        );
-
+        frameworkDirectory = outputApp.childDirectory('Frameworks');
+        outputFlutterFramework = frameworkDirectory.childDirectory('Flutter.framework');
         outputFlutterFrameworkBinary = outputFlutterFramework.childFile('Flutter');
 
-        outputAppFramework = fileSystem.directory(fileSystem.path.join(
-          outputApp.path,
-          'Frameworks',
-          'App.framework',
-        ));
-
+        outputAppFramework = frameworkDirectory.childDirectory('App.framework');
         outputAppFrameworkBinary = outputAppFramework.childFile('App');
       });
 
@@ -94,6 +84,8 @@ void main() {
       });
 
       testWithoutContext('flutter build ios builds a valid app', () {
+        // Should only contain Flutter.framework and App.framework.
+        expect(frameworkDirectory.listSync().length, 2);
         expect(outputAppFramework.childFile('App'), exists);
 
         final File vmSnapshot = fileSystem.file(fileSystem.path.join(
@@ -195,8 +187,6 @@ void main() {
             'VERBOSE_SCRIPT_LOGGING': '1',
             'FLUTTER_BUILD_MODE': 'release',
             'ACTION': 'install',
-            'ARCHS': 'arm64 armv7',
-            'FLUTTER_ROOT': flutterRoot,
             // Skip bitcode stripping since we just checked that above.
           },
         );
