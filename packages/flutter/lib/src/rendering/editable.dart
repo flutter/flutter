@@ -1059,12 +1059,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionToEnd(cause);
     }
 
-    final int upperOffset = math.max(0, math.min(
+    final int firstOffset = math.max(0, math.min(
       selection!.baseOffset,
       selection!.extentOffset,
     ));
     final TextSelection nextSelection = TextSelection(
-      baseOffset: upperOffset,
+      baseOffset: firstOffset,
       extentOffset: _plainText.length,
     );
     _updateSelection(nextSelection, cause);
@@ -1288,12 +1288,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionToStart(cause);
     }
 
-    final int lowerOffset = math.max(0, math.max(
+    final int lastOffset = math.max(0, math.max(
       selection!.baseOffset,
       selection!.extentOffset,
     ));
     final TextSelection nextSelection = TextSelection(
-      baseOffset: lowerOffset,
+      baseOffset: lastOffset,
       extentOffset: 0,
     );
     _updateSelection(nextSelection, cause);
@@ -1321,8 +1321,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionLeftByLine(cause);
     }
 
-    final int upperOffset = math.min(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = previousCharacter(upperOffset, _plainText, false);
+    final int firstOffset = math.min(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = previousCharacter(firstOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
@@ -1342,6 +1342,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Extend the current [selection] to the previous start of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
   ///
   /// See also:
   ///
@@ -1372,6 +1376,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Extend the current [selection] to the next end of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// extended past any whitespace and the first word following the whitespace.
   ///
   /// See also:
   ///
@@ -1421,8 +1429,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return moveSelectionRightByLine(cause);
     }
 
-    final int lowerOffset = math.max(selection!.baseOffset, selection!.extentOffset);
-    final int startPoint = nextCharacter(lowerOffset, _plainText, false);
+    final int lastOffset = math.max(selection!.baseOffset, selection!.extentOffset);
+    final int startPoint = nextCharacter(lastOffset, _plainText, false);
     final TextSelection selectedLine = _selectLineAtOffset(TextPosition(offset: startPoint));
 
     late TextSelection nextSelection;
@@ -1528,6 +1536,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
   ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// moved past any whitespace and the first word following the whitespace.
+  ///
   /// See also:
   ///
   ///   * [moveSelectionRightByWord], which is the same but in the opposite
@@ -1609,6 +1621,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Move the current [selection] to the next end of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.cause}
+  ///
+  /// By default, includeWhitespace is set to true, meaning that whitespace can
+  /// be considered a word in itself.  If set to false, the selection will be
+  /// moved past any whitespace and the first word following the whitespace.
   ///
   /// See also:
   ///
