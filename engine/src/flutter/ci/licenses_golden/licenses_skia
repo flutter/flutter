@@ -1,4 +1,4 @@
-Signature: 3ebc2279c91e522a6edac841c56e9bbf
+Signature: 24455f0a33cdb78223c551672c22cc5d
 
 UNUSED LICENSES:
 
@@ -5223,6 +5223,7 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
