@@ -1565,14 +1565,46 @@ enum TextDecorationStyle {
   wavy
 }
 
+/// {@macro dart.ui.textLeadingDistribution}
+enum TextLeadingDistribution {
+  /// Distributes the [leading](https://en.wikipedia.org/wiki/Leading)
+  /// of the text proportionally above and below the text, to the font's
+  /// ascent/discent ratio.
+  ///
+  /// {@template dart.ui.leading}
+  /// The leading of a text run is defined as
+  /// `TextStyle.height * TextStyle.fontSize - TextStyle.fontSize`. When
+  /// [TextStyle.height] is not set, the text run uses the leading specified by
+  /// the font instead.
+  /// {@endtemplate}
+  proportional,
+
+  /// Distributes the ["leading"](https://en.wikipedia.org/wiki/Leading)
+  /// of the text evenly above and below the text (i.e. evenly above the
+  /// font's ascender and below the descender).
+  ///
+  /// {@macro dart.ui.leading}
+  ///
+  /// The leading can become negative when [TextStyle.height] is smaller than
+  /// 1.0.
+  ///
+  /// This is the default strategy used by CSS, known as
+  /// ["half-leading"](https://www.w3.org/TR/css-inline-3/#half-leading).
+  even,
+}
+
 /// {@template dart.ui.textHeightBehavior}
-/// Defines how the paragraph will apply [TextStyle.height] to the ascent of the
-/// first line and descent of the last line.
+/// Defines how to apply [TextStyle.height] over and under text.
 ///
-/// Each boolean value represents whether the [TextStyle.height] modifier will
-/// be applied to the corresponding metric. By default, all properties are true,
-/// and [TextStyle.height] is applied as normal. When set to false, the font's
-/// default ascent will be used.
+/// [applyHeightToFirstAscent] and [applyHeightToLastDescent] represent whether
+/// the [TextStyle.height] modifier will be applied to the corresponding metric.
+/// By default both properties are true, and [TextStyle.height] is applied as
+/// normal. When set to false, the font's default ascent will be used.
+///
+/// [leadingDistribution] determines how the [leading] is distributed over and
+/// under text. This property applies before [applyHeightToFirstAscent] and
+/// [applyHeightToLastDescent].
+///
 /// {@endtemplate}
 class TextHeightBehavior {
 
@@ -1584,20 +1616,23 @@ class TextHeightBehavior {
   ///  * applyHeightToLastDescent: When true, the [TextStyle.height] modifier
   ///    will be applied to the descent of the last line. When false, the font's
   ///    default descent will be used.
+  ///  * leadingDistribution: How the [leading] is distributed over and under
+  ///    text.
   ///
   /// All properties default to true (height modifications applied as normal).
   const TextHeightBehavior({
     this.applyHeightToFirstAscent = true,
     this.applyHeightToLastDescent = true,
+    this.leadingDistribution = TextLeadingDistribution.proportional,
   });
 
   /// Creates a new TextHeightBehavior object from an encoded form.
   ///
   /// See [encode] for the creation of the encoded form.
-  const TextHeightBehavior.fromEncoded(int encoded)
+  TextHeightBehavior.fromEncoded(int encoded)
     : applyHeightToFirstAscent = (encoded & 0x1) == 0,
-      applyHeightToLastDescent = (encoded & 0x2) == 0;
-
+      applyHeightToLastDescent = (encoded & 0x2) == 0,
+      leadingDistribution = TextLeadingDistribution.values[encoded >> 2];
 
   /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
   /// line in the paragraph.
@@ -1623,9 +1658,23 @@ class TextHeightBehavior {
   /// Defaults to true (height modifications applied as normal).
   final bool applyHeightToLastDescent;
 
+  /// {@template dart.ui.textLeadingDistribution}
+  /// How the ["leading"](https://en.wikipedia.org/wiki/Leading) is distributed
+  /// over and under the text.
+  ///
+  /// Does not affect layout when [TextStyle.height] is not specified. The
+  /// leading can become negative, for example, when [TextLeadingDistribution.even]
+  /// is used with a [TextStyle.height] much smaller than 1.0.
+  /// {@endtemplate}
+  ///
+  /// Defaults to [TextLeadingDistribution.proportional],
+  final TextLeadingDistribution leadingDistribution;
+
   /// Returns an encoded int representation of this object.
   int encode() {
-    return (applyHeightToFirstAscent ? 0 : 1 << 0) | (applyHeightToLastDescent ? 0 : 1 << 1);
+    return (applyHeightToFirstAscent ? 0 : 1 << 0)
+         | (applyHeightToLastDescent ? 0 : 1 << 1)
+         | (leadingDistribution.index << 2);
   }
 
   @override
@@ -1634,7 +1683,8 @@ class TextHeightBehavior {
       return false;
     return other is TextHeightBehavior
         && other.applyHeightToFirstAscent == applyHeightToFirstAscent
-        && other.applyHeightToLastDescent == applyHeightToLastDescent;
+        && other.applyHeightToLastDescent == applyHeightToLastDescent
+        && other.leadingDistribution == leadingDistribution;
   }
 
   @override
@@ -1642,6 +1692,7 @@ class TextHeightBehavior {
     return hashValues(
       applyHeightToFirstAscent,
       applyHeightToLastDescent,
+      leadingDistribution.index,
     );
   }
 
@@ -1649,7 +1700,8 @@ class TextHeightBehavior {
   String toString() {
     return 'TextHeightBehavior('
              'applyHeightToFirstAscent: $applyHeightToFirstAscent, '
-             'applyHeightToLastDescent: $applyHeightToLastDescent'
+             'applyHeightToLastDescent: $applyHeightToLastDescent, '
+             'leadingDistribution: $leadingDistribution'
            ')';
   }
 }
@@ -1696,6 +1748,8 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
 //
 //  - Element 7: The enum index of the |textBaseline|.
 //
+//  - Element 8: The encoded value of the |leadingDistribution|.
+//
 Int32List _encodeTextStyle(
   Color? color,
   TextDecoration? decoration,
@@ -1711,13 +1765,14 @@ Int32List _encodeTextStyle(
   double? letterSpacing,
   double? wordSpacing,
   double? height,
+  TextLeadingDistribution? leadingDistribution,
   Locale? locale,
   Paint? background,
   Paint? foreground,
   List<Shadow>? shadows,
   List<FontFeature>? fontFeatures,
 ) {
-  final Int32List result = Int32List(8);
+  final Int32List result = Int32List(9);
   if (color != null) {
     result[0] |= 1 << 1;
     result[1] = color.value;
@@ -1746,49 +1801,54 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 7;
     result[7] = textBaseline.index;
   }
-  if (decorationThickness != null) {
+  if (leadingDistribution != null) {
     result[0] |= 1 << 8;
+    result[8] = leadingDistribution.index;
+  }
+  if (decorationThickness != null) {
+    result[0] |= 1 << 9;
   }
   if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
-    result[0] |= 1 << 9;
-    // Passed separately to native.
-  }
-  if (fontSize != null) {
     result[0] |= 1 << 10;
     // Passed separately to native.
   }
-  if (letterSpacing != null) {
+  if (fontSize != null) {
     result[0] |= 1 << 11;
     // Passed separately to native.
   }
-  if (wordSpacing != null) {
+  if (letterSpacing != null) {
     result[0] |= 1 << 12;
     // Passed separately to native.
   }
-  if (height != null) {
+  if (wordSpacing != null) {
     result[0] |= 1 << 13;
     // Passed separately to native.
   }
-  if (locale != null) {
+  if (height != null) {
     result[0] |= 1 << 14;
     // Passed separately to native.
   }
-  if (background != null) {
+  if (locale != null) {
     result[0] |= 1 << 15;
     // Passed separately to native.
   }
-  if (foreground != null) {
+  if (background != null) {
     result[0] |= 1 << 16;
     // Passed separately to native.
   }
-  if (shadows != null) {
+  if (foreground != null) {
     result[0] |= 1 << 17;
     // Passed separately to native.
   }
-  if (fontFeatures != null) {
+  if (shadows != null) {
     result[0] |= 1 << 18;
     // Passed separately to native.
   }
+  if (fontFeatures != null) {
+    result[0] |= 1 << 19;
+    // Passed separately to native.
+  }
+
   return result;
 }
 
@@ -1823,6 +1883,7 @@ class TextStyle {
   /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
   /// * `height`: The height of this text span, as a multiplier of the font size. Omitting `height` will allow the line height
   ///   to take the height as defined by the font, which may not be exactly the height of the fontSize.
+  /// * `leadingDistribution`: When `height` is specified, how the extra vertical space should be distributed over and under the text.
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
@@ -1842,6 +1903,7 @@ class TextStyle {
     double? letterSpacing,
     double? wordSpacing,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     Locale? locale,
     Paint? background,
     Paint? foreground,
@@ -1866,6 +1928,7 @@ class TextStyle {
          letterSpacing,
          wordSpacing,
          height,
+         leadingDistribution,
          locale,
          background,
          foreground,
@@ -1925,29 +1988,30 @@ class TextStyle {
   @override
   String toString() {
     return 'TextStyle('
-             'color: ${              _encoded[0] & 0x00002 == 0x00002  ? Color(_encoded[1])                  : "unspecified"}, '
-             'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? TextDecoration._(_encoded[2])       : "unspecified"}, '
-             'decorationColor: ${    _encoded[0] & 0x00008 == 0x00008  ? Color(_encoded[3])                  : "unspecified"}, '
-             'decorationStyle: ${    _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
+             'color: ${              _encoded[0] & 0x00002 == 0x00002  ? Color(_encoded[1])                           : "unspecified"}, '
+             'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? TextDecoration._(_encoded[2])                : "unspecified"}, '
+             'decorationColor: ${    _encoded[0] & 0x00008 == 0x00008  ? Color(_encoded[3])                           : "unspecified"}, '
+             'decorationStyle: ${    _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]]      : "unspecified"}, '
              // The decorationThickness is not in encoded order in order to keep it near the other decoration properties.
-             'decorationThickness: ${_encoded[0] & 0x00100 == 0x00100  ? _decorationThickness                    : "unspecified"}, '
-             'fontWeight: ${         _encoded[0] & 0x00020 == 0x00020  ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${          _encoded[0] & 0x00040 == 0x00040  ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'textBaseline: ${       _encoded[0] & 0x00080 == 0x00080  ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
-             'fontFamily: ${         _encoded[0] & 0x00200 == 0x00200
-                                     && _fontFamily != ''              ? _fontFamily                             : "unspecified"}, '
-             'fontFamilyFallback: ${ _encoded[0] & 0x00200 == 0x00200
+             'decorationThickness: ${_encoded[0] & 0x00200 == 0x00200  ? _decorationThickness                         : "unspecified"}, '
+             'fontWeight: ${         _encoded[0] & 0x00020 == 0x00020  ? FontWeight.values[_encoded[5]]               : "unspecified"}, '
+             'fontStyle: ${          _encoded[0] & 0x00040 == 0x00040  ? FontStyle.values[_encoded[6]]                : "unspecified"}, '
+             'textBaseline: ${       _encoded[0] & 0x00080 == 0x00080  ? TextBaseline.values[_encoded[7]]             : "unspecified"}, '
+             'fontFamily: ${         _encoded[0] & 0x00400 == 0x00400
+                                     && _fontFamily != ''              ? _fontFamily                                  : "unspecified"}, '
+             'fontFamilyFallback: ${ _encoded[0] & 0x00400 == 0x00400
                                      && _fontFamilyFallback != null
-                                     && _fontFamilyFallback!.isNotEmpty ? _fontFamilyFallback                     : "unspecified"}, '
-             'fontSize: ${           _encoded[0] & 0x00400 == 0x00400  ? _fontSize                               : "unspecified"}, '
-             'letterSpacing: ${      _encoded[0] & 0x00800 == 0x00800  ? "${_letterSpacing}x"                    : "unspecified"}, '
-             'wordSpacing: ${        _encoded[0] & 0x01000 == 0x01000  ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'height: ${             _encoded[0] & 0x02000 == 0x02000  ? "${_height}x"                           : "unspecified"}, '
-             'locale: ${             _encoded[0] & 0x04000 == 0x04000  ? _locale                                 : "unspecified"}, '
-             'background: ${         _encoded[0] & 0x08000 == 0x08000  ? _background                             : "unspecified"}, '
-             'foreground: ${         _encoded[0] & 0x10000 == 0x10000  ? _foreground                             : "unspecified"}, '
-             'shadows: ${            _encoded[0] & 0x20000 == 0x20000  ? _shadows                                : "unspecified"}, '
-             'fontFeatures: ${       _encoded[0] & 0x40000 == 0x40000  ? _fontFeatures                           : "unspecified"}'
+                                     && _fontFamilyFallback!.isNotEmpty ? _fontFamilyFallback                         : "unspecified"}, '
+             'fontSize: ${           _encoded[0] & 0x00800 == 0x00800  ? _fontSize                                    : "unspecified"}, '
+             'letterSpacing: ${      _encoded[0] & 0x01000 == 0x01000  ? "${_letterSpacing}x"                         : "unspecified"}, '
+             'wordSpacing: ${        _encoded[0] & 0x02000 == 0x02000  ? "${_wordSpacing}x"                           : "unspecified"}, '
+             'height: ${             _encoded[0] & 0x04000 == 0x04000  ? "${_height}x"                                : "unspecified"}, '
+             'leadingDistribution: ${_encoded[0] & 0x0100 == 0x0100    ? "${TextLeadingDistribution.values[_encoded[8]]}" : "unspecified"}, '
+             'locale: ${             _encoded[0] & 0x08000 == 0x08000  ? _locale                                      : "unspecified"}, '
+             'background: ${         _encoded[0] & 0x10000 == 0x10000  ? _background                                  : "unspecified"}, '
+             'foreground: ${         _encoded[0] & 0x20000 == 0x20000  ? _foreground                                  : "unspecified"}, '
+             'shadows: ${            _encoded[0] & 0x40000 == 0x40000  ? _shadows                                     : "unspecified"}, '
+             'fontFeatures: ${       _encoded[0] & 0x80000 == 0x80000  ? _fontFeatures                                : "unspecified"}'
            ')';
   }
 }
@@ -2077,6 +2141,9 @@ class ParagraphStyle {
   /// * `textHeightBehavior`: Specifies how the `height` multiplier is
   ///   applied to ascent of the first line and the descent of the last line.
   ///
+  /// * `leadingDistribution`: Specifies how the extra vertical space added by
+  ///   the `height` multiplier should be distributed over and under the text.
+  ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
   ///
@@ -2182,7 +2249,8 @@ class ParagraphStyle {
 // compactness. The first 8 bits is a bitmask that records which properties
 // are null. The rest of the values are encoded in the same order encountered
 // in the bitmask. The final returned value truncates any unused bytes
-// at the end.
+// at the end. For ease of decoding, all 8 bit ints are stored before any 32 bit
+// ints.
 //
 // We serialize this more thoroughly than ParagraphStyle because it is
 // much more likely that the strut is empty/null and we wish to add
@@ -2192,6 +2260,7 @@ ByteData _encodeStrut(
   List<String>? fontFamilyFallback,
   double? fontSize,
   double? height,
+  TextLeadingDistribution? leadingDistribution,
   double? leading,
   FontWeight? fontWeight,
   FontStyle? fontStyle,
@@ -2199,13 +2268,14 @@ ByteData _encodeStrut(
   if (fontFamily == null &&
     fontSize == null &&
     height == null &&
+    leadingDistribution == null &&
     leading == null &&
     fontWeight == null &&
     fontStyle == null &&
     forceStrutHeight == null)
     return ByteData(0);
 
-  final ByteData data = ByteData(15); // Max size is 15 bytes
+  final ByteData data = ByteData(16); // Max size is 16 bytes
   int bitmask = 0; // 8 bit mask
   int byteCount = 1;
   if (fontWeight != null) {
@@ -2222,30 +2292,35 @@ ByteData _encodeStrut(
     bitmask |= 1 << 2;
     // passed separately to native
   }
-  if (fontSize != null) {
+  if (leadingDistribution != null) {
     bitmask |= 1 << 3;
+    data.setInt8(byteCount, leadingDistribution.index);
+    byteCount += 1;
+  }
+  if (fontSize != null) {
+    bitmask |= 1 << 4;
     data.setFloat32(byteCount, fontSize, _kFakeHostEndian);
     byteCount += 4;
   }
   if (height != null) {
-    bitmask |= 1 << 4;
+    bitmask |= 1 << 5;
     data.setFloat32(byteCount, height, _kFakeHostEndian);
     byteCount += 4;
+
   }
   if (leading != null) {
-    bitmask |= 1 << 5;
+    bitmask |= 1 << 6;
     data.setFloat32(byteCount, leading, _kFakeHostEndian);
     byteCount += 4;
   }
-  if (forceStrutHeight != null) {
-    bitmask |= 1 << 6;
-    // We store this boolean directly in the bitmask since there is
-    // extra space in the 16 bit int.
-    bitmask |= (forceStrutHeight ? 1 : 0) << 7;
+  if (forceStrutHeight ?? false) {
+    bitmask |= 1 << 7;
   }
 
   data.setInt8(0, bitmask);
 
+  assert(byteCount <= 16);
+  assert(bitmask >> 8 == 0, 'strut bitmask overflow: $bitmask');
   return ByteData.view(data.buffer, 0,  byteCount);
 }
 
@@ -2276,7 +2351,14 @@ class StrutStyle {
   ///   be provided for this property to take effect.
   ///
   /// * `leading`: The minimum amount of leading between lines as a multiple of
-  ///   the font size. `fontSize` must be provided for this property to take effect.
+  ///   the font size. `fontSize` must be provided for this property to take
+  ///   effect. The leading added by this property is distributed evenly over
+  ///   and under the text, regardless of `leadingDistribution`.
+  ///
+  /// * `leadingDistribution`: how the extra vertical space added by the
+  ///   `height` multiplier should be distributed over and under the text,
+  ///   independent of `leading` (which is always distributed evenly over and
+  ///   under text).
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -2296,6 +2378,7 @@ class StrutStyle {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     double? leading,
     FontWeight? fontWeight,
     FontStyle? fontStyle,
@@ -2305,6 +2388,7 @@ class StrutStyle {
          fontFamilyFallback,
          fontSize,
          height,
+         leadingDistribution,
          leading,
          fontWeight,
          fontStyle,
