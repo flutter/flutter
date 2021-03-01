@@ -460,7 +460,7 @@ class StrutStyle with Diagnosticable {
   /// evenly over and under the strut, regardless of [leadingDistribution].
   ///
   /// Defaults to null, which defers to the paragraph's
-  /// [ParagraphStyle.textHeightBehavior].
+  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
   final TextLeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
