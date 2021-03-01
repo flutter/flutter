@@ -48,6 +48,11 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (has_height_override != other.has_height_override)
     return false;
+  if (has_leading_distribution_override !=
+      other.has_leading_distribution_override)
+    return false;
+  if (half_leading != other.half_leading)
+    return false;
   if (locale != other.locale)
     return false;
   if (foreground != other.foreground)
