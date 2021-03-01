@@ -1007,80 +1007,42 @@ class SurfacePath implements ui.Path {
       _addOval(bounds, direction, startIndex ~/ 2);
     } else {
       final double weight = SPath.scalarRoot2Over2;
-      final double left = bounds.left;
-      final double right = bounds.right;
-      final double top = bounds.top;
-      final double bottom = bounds.bottom;
+      double left = bounds.left;
+      double right = bounds.right;
+      double top = bounds.top;
+      double bottom = bounds.bottom;
       final double width = right - left;
       final double height = bottom - top;
       // Proportionally scale down all radii to fit. Find the minimum ratio
       // of a side and the radii on that side (for all four sides) and use
       // that to scale down _all_ the radii. This algorithm is from the
       // W3 spec (http://www.w3.org/TR/css3-background/) section 5.5
-      double tlRadiusX = math.max(0, rrect.tlRadiusX);
-      double trRadiusX = math.max(0, rrect.trRadiusX);
-      double blRadiusX = math.max(0, rrect.blRadiusX);
-      double brRadiusX = math.max(0, rrect.brRadiusX);
-      double tlRadiusY = math.max(0, rrect.tlRadiusY);
-      double trRadiusY = math.max(0, rrect.trRadiusY);
-      double blRadiusY = math.max(0, rrect.blRadiusY);
-      double brRadiusY = math.max(0, rrect.brRadiusY);
+      final double tlRadiusX = math.max(0, rrect.tlRadiusX);
+      final double trRadiusX = math.max(0, rrect.trRadiusX);
+      final double blRadiusX = math.max(0, rrect.blRadiusX);
+      final double brRadiusX = math.max(0, rrect.brRadiusX);
+      final double tlRadiusY = math.max(0, rrect.tlRadiusY);
+      final double trRadiusY = math.max(0, rrect.trRadiusY);
+      final double blRadiusY = math.max(0, rrect.blRadiusY);
+      final double brRadiusY = math.max(0, rrect.brRadiusY);
       double scale = _computeMinScale(tlRadiusX, trRadiusX, width, 1.0);
       scale = _computeMinScale(blRadiusX, brRadiusX, width, scale);
       scale = _computeMinScale(tlRadiusY, trRadiusY, height, scale);
       scale = _computeMinScale(blRadiusY, brRadiusY, height, scale);
 
-      if (scale != 1.0) {
-        tlRadiusX = scale * tlRadiusX;
-        trRadiusX = scale * trRadiusX;
-        blRadiusX = scale * blRadiusX;
-        brRadiusX = scale * brRadiusX;
-        tlRadiusY = scale * tlRadiusY;
-        trRadiusY = scale * trRadiusY;
-        blRadiusY = scale * blRadiusY;
-        brRadiusY = scale * brRadiusY;
-      }
-
-      // Whether we had to alter the rrect parameters for correctness.
-      final bool isRRectCorrected =
-          tlRadiusX != rrect.tlRadiusX ||
-          trRadiusX != rrect.trRadiusX ||
-          blRadiusX != rrect.blRadiusX ||
-          brRadiusX != rrect.brRadiusX ||
-          tlRadiusY != rrect.tlRadiusY ||
-          trRadiusY != rrect.trRadiusY ||
-          blRadiusY != rrect.blRadiusY ||
-          brRadiusY != rrect.brRadiusY;
-
-      // Expand the rrect into a series of path ops.
-      moveTo(left, bottom - blRadiusY);
-      lineTo(left, top + tlRadiusY);
-      conicTo(left, top, left + tlRadiusX, top, weight);
-      lineTo(right - trRadiusX, top);
-      conicTo(right, top, right, top + trRadiusY, weight);
-      lineTo(right, bottom - brRadiusY);
-      conicTo(right, bottom, right - brRadiusX, bottom, weight);
-      lineTo(left + blRadiusX, bottom);
-      conicTo(left, bottom, left, bottom - blRadiusY, weight);
+      // Inlined version of:
+      moveTo(left, bottom - scale * blRadiusY);
+      lineTo(left, top + scale * tlRadiusY);
+      conicTo(left, top, left + scale * tlRadiusX, top, weight);
+      lineTo(right - scale * trRadiusX, top);
+      conicTo(right, top, right, top + scale * trRadiusY, weight);
+      lineTo(right, bottom - scale * brRadiusY);
+      conicTo(right, bottom, right - scale * brRadiusX, bottom, weight);
+      lineTo(left + scale * blRadiusX, bottom);
+      conicTo(left, bottom, left, bottom - scale * blRadiusY, weight);
       close();
       // SkAutoDisableDirectionCheck.
       _firstDirection = isRRect ? direction : SPathDirection.kUnknown;
-
-      // No need to duplicate the rrect if we know the path is not made of a
-      // single rrect, or if the original rrect was consistent and didn't have
-      // to be corrected.
-      if (isRRect && isRRectCorrected) {
-        rrect = ui.RRect.fromLTRBAndCorners(
-          left,
-          top,
-          right,
-          bottom,
-          topLeft: ui.Radius.elliptical(tlRadiusX, tlRadiusY),
-          topRight: ui.Radius.elliptical(trRadiusX, trRadiusY),
-          bottomLeft: ui.Radius.elliptical(blRadiusX, blRadiusY),
-          bottomRight: ui.Radius.elliptical(brRadiusX, brRadiusY),
-        );
-      }
       pathRef.setIsRRect(
           isRRect, direction == SPathDirection.kCCW, startIndex % 8, rrect);
     }
