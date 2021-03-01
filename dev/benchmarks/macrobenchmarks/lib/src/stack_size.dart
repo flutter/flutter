@@ -45,12 +45,12 @@ const int kExitCodeSuccess = 0;
 final GetStackPointerCallback getStackPointer = () {
   // Makes sure we are running on an Android arm64 device.
   if (!io.Platform.isAndroid)
-    throw 'This benchmark test can only be run on Android arm64 devices.';
+    throw 'This benchmark test can only be run on Android arm devices.';
   final io.ProcessResult result = io.Process.runSync('getprop', <String>['ro.product.cpu.abi']);
   if (result.exitCode != 0)
     throw 'Failed to retrieve CPU information.';
-  if (!result.stdout.toString().contains('arm64'))
-    throw 'This benchmark test can only be run on Android arm64 devices.';
+  if (!result.stdout.toString().contains('armeabi'))
+    throw 'This benchmark test can only be run on Android arm devices.';
 
   // Creates a block of memory to store the assembly code.
   final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, kMemorySize, kProtRead | kProtWrite,
@@ -64,10 +64,10 @@ final GetStackPointerCallback getStackPointer = () {
   region.cast<ffi.Uint8>().asTypedList(kMemorySize).setAll(
     kMemoryStartingIndex,
     <int>[
-      // "mov x0, sp"  in machine code: E0030091.
-      0xe0, 0x03, 0x00, 0x91,
-      // "ret"         in machine code: C0035FD6.
-      0xc0, 0x03, 0x5f, 0xd6
+      // "mov r0, sp"  in machine code: 0D00A0E1.
+      0x0d, 0x00, 0xa0, 0xe1,
+      // "bx lr"       in machine code: 1EFF2FE1.
+      0x1e, 0xff, 0x2f, 0xe1
     ]
   );
 

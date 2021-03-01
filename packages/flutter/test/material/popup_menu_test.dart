@@ -453,7 +453,6 @@ void main() {
 
   testWidgets('PopupMenu positioning', (WidgetTester tester) async {
     final Widget testButton = PopupMenuButton<int>(
-      placement: PopupMenuPlacement.belowButton,
       itemBuilder: (BuildContext context) {
         return <PopupMenuItem<int>>[
           const PopupMenuItem<int>(value: 1, child: Text('AAA')),
@@ -619,24 +618,24 @@ void main() {
       });
     }
 
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 100.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 350.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 350.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 350.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 350.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, const Rect.fromLTWH(350.0, 350.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, const Rect.fromLTWH(450.0, 350.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 592.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 592.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 592.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 592.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 592.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 592.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, const Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, const Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
   testWidgets('PopupMenu positioning inside nested Overlay', (WidgetTester tester) async {
@@ -654,7 +653,6 @@ void main() {
                   builder: (_) => Center(
                     child: PopupMenuButton<int>(
                       key: buttonKey,
-                      placement: PopupMenuPlacement.belowButton,
                       itemBuilder: (_) => <PopupMenuItem<int>>[
                         const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
                         const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
@@ -675,8 +673,8 @@ void main() {
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
 
-    final Offset buttonBottomLeft = tester.getBottomLeft(buttonFinder);
-    expect(tester.getTopLeft(popupFinder), buttonBottomLeft);
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
   testWidgets('PopupMenu positioning inside nested Navigator', (WidgetTester tester) async {
@@ -697,7 +695,6 @@ void main() {
                       child: Center(
                         child: PopupMenuButton<int>(
                           key: buttonKey,
-                          placement: PopupMenuPlacement.belowButton,
                           itemBuilder: (_) => <PopupMenuItem<int>>[
                             const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
                             const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
@@ -720,8 +717,8 @@ void main() {
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
 
-    final Offset buttonBottomLeft = tester.getBottomLeft(buttonFinder);
-    expect(tester.getTopLeft(popupFinder), buttonBottomLeft);
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
@@ -734,7 +731,6 @@ void main() {
         ),
         child: Material(
           child: PopupMenuButton<int>(
-            placement: PopupMenuPlacement.belowButton,
             itemBuilder: (BuildContext context) {
               popupContext = context;
               return <PopupMenuItem<int>>[
@@ -769,7 +765,6 @@ void main() {
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
     PopupMenuButton<int> buildMenuButton({Offset offset = Offset.zero}) {
       return PopupMenuButton<int>(
-        placement: PopupMenuPlacement.belowButton,
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
@@ -801,10 +796,8 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    final Size iconSize = tester.getSize(find.byType(IconButton));
-
-    // Initial state, the menu start at bottomLeft of the icon, the 8 pixels is edge padding when offset.dx < 8.0.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), Offset(8.0, iconSize.height));
+    // Initial state, the menu start at Offset(8.0, 8.0), the 8 pixels is edge padding when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
 
     // Collapse the menu.
     await tester.tap(find.byType(IconButton), warnIfMissed: false);
@@ -824,8 +817,8 @@ void main() {
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
-    // This time the menu should start at Offset(50.0, 50.0 + iconSize.height), the padding only added when offset.dx < 8.0.
-    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), Offset(50.0, 50.0 + iconSize.height));
+    // This time the menu should start at Offset(50.0, 50.0), the padding only added when offset.dx < 8.0.
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
   testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
@@ -1811,124 +1804,6 @@ void main() {
     );
   });
 
-  testWidgets('PopupMenu button can render at its "natural" size in AppBar', (WidgetTester tester) async {
-    final GlobalKey buttonKey = GlobalKey();
-
-    Widget buildFrame(double width, double height) {
-      return MaterialApp(
-        builder: (BuildContext context, Widget? child) {
-          return MediaQuery(
-            data: const MediaQueryData(
-              padding: EdgeInsets.only(
-                top: 32.0,
-                bottom: 32.0,
-              ),
-            ),
-            child: child!,
-          );
-        },
-        home: Scaffold(
-          appBar: AppBar(
-            toolbarHeight: 100.0,
-            title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
-                ),
-              ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(child: Text('-1-'), value: 1),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2),
-                const PopupMenuItem<int>(child: Text('-3-'), value: 3),
-                const PopupMenuItem<int>(child: Text('-4-'), value: 4),
-                const PopupMenuItem<int>(child: Text('-5-'), value: 5),
-              ],
-            )],
-          ),
-          body: Container(),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(10.0, 10.0));
-    Size buttonSize = tester.getSize(find.byKey(buttonKey));
-    expect(buttonSize, const Size(10.0, 10.0));
-
-    await tester.pumpWidget(buildFrame(20.5, 30.5));
-    buttonSize = tester.getSize(find.byKey(buttonKey));
-    expect(buttonSize, const Size(20.5, 30.5));
-
-    await tester.pumpWidget(buildFrame(20.0, 100.0));
-    buttonSize = tester.getSize(find.byKey(buttonKey));
-    expect(buttonSize, const Size(20.0, 100.0));
-
-    await tester.pumpWidget(buildFrame(20.0, 100.1));
-    buttonSize = tester.getSize(find.byKey(buttonKey));
-    expect(buttonSize, const Size(20.0, 100.0)); // Do not overflow the AppBar.
-  });
-
-  testWidgets('PopupMenu position test when have unsafe area', (WidgetTester tester) async {
-    final GlobalKey buttonKey = GlobalKey();
-    final GlobalKey firstItemKey = GlobalKey();
-
-    Widget buildFrame(double width, double height) {
-      return MaterialApp(
-        builder: (BuildContext context, Widget? child) {
-          return MediaQuery(
-            data: const MediaQueryData(
-              padding: EdgeInsets.only(
-                top: 32.0,
-                bottom: 32.0,
-              ),
-            ),
-            child: child!,
-          );
-        },
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              placement: PopupMenuPlacement.belowButton,
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
-                ),
-              ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                PopupMenuItem<int>(
-                  key: firstItemKey,
-                  child: const Text('-1-'),
-                  value: 1,
-                ),
-                const PopupMenuItem<int>(child: Text('-2-'), value: 2,),
-              ],
-            )],
-          ),
-          body: Container(),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(20.0, 20.0));
-
-    await tester.tap(find.byKey(buttonKey));
-    await tester.pumpAndSettle();
-
-    final Offset button = tester.getBottomRight(find.byKey(buttonKey));
-    final Offset popupMenu = tester.getTopRight(find.byKey(firstItemKey));
-
-    // The menu should popup below the button.
-    // The 8.0 pixels are [_kMenuScreenPadding] and [_kMenuVerticalPadding].
-    expect(popupMenu, Offset(button.dx - 8.0, button.dy + 8.0));
-  });
-
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -2039,6 +1914,46 @@ void main() {
 
     await buildFrame(iconSize: 50);
     expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+  });
+
+  testWidgets('does not crash in small overlay', (WidgetTester tester) async {
+    final GlobalKey navigator = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              OutlinedButton(
+                onPressed: () {
+                  showMenu<void>(
+                    context: navigator.currentContext!,
+                    position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+                    items: const <PopupMenuItem<void>>[
+                      PopupMenuItem<void>(child: Text('foo')),
+                    ],
+                  );
+                },
+                child: const Text('press'),
+              ),
+              SizedBox(
+                height: 10,
+                width: 10,
+                child: Navigator(
+                  key: navigator,
+                  onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
+                    builder: (BuildContext context) => Container(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('press'));
+    await tester.pumpAndSettle();
+    expect(find.text('foo'), findsOneWidget);
   });
 }
 

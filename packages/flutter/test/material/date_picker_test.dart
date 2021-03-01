@@ -132,7 +132,7 @@ void main() {
       });
     });
 
-    testWidgets('Can toggle to input entry mode', (WidgetTester tester) async {
+    testWidgets('Can switch from calendar to input entry mode', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         expect(find.byType(TextField), findsNothing);
         await tester.tap(find.byIcon(Icons.edit));
@@ -141,7 +141,33 @@ void main() {
       });
     });
 
-    testWidgets('Toggle to input mode keeps selected date', (WidgetTester tester) async {
+    testWidgets('Can switch from input to calendar entry mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.input;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsNothing);
+      });
+    });
+
+    testWidgets('Can not switch out of calendarOnly mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.calendarOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsNothing);
+        expect(find.byIcon(Icons.edit), findsNothing);
+      });
+    });
+
+    testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+      initialEntryMode = DatePickerEntryMode.inputOnly;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byIcon(Icons.calendar_today), findsNothing);
+      });
+    });
+
+    testWidgets('Switching to input mode keeps selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('12'));
         await tester.tap(find.byIcon(Icons.edit));

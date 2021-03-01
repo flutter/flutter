@@ -6,6 +6,7 @@
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
+import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals hide fs, artifacts, logger, processManager;
@@ -311,3 +312,79 @@ const Target androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
 const Target androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
 const Target androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
 const Target androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
+
+/// Utility method to copy and rename the required .so shared libs from the build output
+/// to the correct component intermediate directory.
+///
+/// The [DeferredComponent]s passed to this method must have had loading units assigned.
+/// Assigned components are components that have determined which loading units contains
+/// the dart libraries it has via the DeferredComponent.assignLoadingUnits method.
+Depfile copyDeferredComponentSoFiles(
+    Environment env,
+    List<DeferredComponent> components,
+    List<LoadingUnit> loadingUnits,
+    Directory buildDir, // generally `<projectDir>/build`
+    List<String> abis,
+    BuildMode buildMode,) {
+  final List<File> inputs = <File>[];
+  final List<File> outputs = <File>[];
+  final Set<int> usedLoadingUnits = <int>{};
+  // Copy all .so files for loading units that are paired with a deferred component.
+  for (final String abi in abis) {
+    for (final DeferredComponent component in components) {
+      if (!component.assigned) {
+        globals.printError('Deferred component require loading units to be assigned.');
+        return Depfile(inputs, outputs);
+      }
+      for (final LoadingUnit unit in component.loadingUnits) {
+        // ensure the abi for the unit is one of the abis we build for.
+        final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
+        if (splitPath[splitPath.length - 2] != abi) {
+          continue;
+        }
+        usedLoadingUnits.add(unit.id);
+        // the deferred_libs directory is added as a source set for the component.
+        final File destination = buildDir
+            .childDirectory(component.name)
+            .childDirectory('intermediates')
+            .childDirectory('flutter')
+            .childDirectory(buildMode.name)
+            .childDirectory('deferred_libs')
+            .childDirectory(abi)
+            .childFile('libapp.so-${unit.id}.part.so');
+        if (!destination.existsSync()) {
+          destination.createSync(recursive: true);
+        }
+        final File source = env.fileSystem.file(unit.path);
+        source.copySync(destination.path);
+        inputs.add(source);
+        outputs.add(destination);
+      }
+    }
+  }
+  // Copy unused loading units, which are included in the base module.
+  for (final String abi in abis) {
+    for (final LoadingUnit unit in loadingUnits) {
+      if (usedLoadingUnits.contains(unit.id)) {
+        continue;
+      }
+        // ensure the abi for the unit is one of the abis we build for.
+      final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
+      if (splitPath[splitPath.length - 2] != abi) {
+        continue;
+      }
+      final File destination = env.outputDir
+          .childDirectory(abi)
+          // Omit 'lib' prefix here as it is added by the gradle task that adds 'lib' to 'app.so'.
+          .childFile('app.so-${unit.id}.part.so');
+      if (!destination.existsSync()) {
+          destination.createSync(recursive: true);
+        }
+      final File source = env.fileSystem.file(unit.path);
+      source.copySync(destination.path);
+      inputs.add(source);
+      outputs.add(destination);
+    }
+  }
+  return Depfile(inputs, outputs);
+}

@@ -97,12 +97,12 @@ class CrashReporter {
 /// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
-    @required http.Client client,
+    http.Client client,
     @required Usage usage,
     @required Platform platform,
     @required Logger logger,
     @required OperatingSystemUtils operatingSystemUtils,
-  }) : _client = client,
+  }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
       _logger = logger,

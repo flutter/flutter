@@ -49,7 +49,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: ^0.17.0-nullsafety.2
+///   intl: any # Use the pinned version from flutter_localizations
 ///
 ///   # rest of dependencies
 /// ```

@@ -87,6 +87,32 @@ void main() {
     ), isA<AppRunLogger>());
   });
 
+  testWithoutContext('WindowsStdoutLogger rewrites emojis when terminal does not support emoji', () {
+    final FakeStdio stdio = FakeStdio();
+    final WindowsStdoutLogger logger = WindowsStdoutLogger(
+      outputPreferences: OutputPreferences.test(),
+      stdio: stdio,
+      terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+    );
+
+    logger.printStatus('🔥🖼️✗✓🔨💪✏️');
+
+    expect(stdio.writtenToStdout, <String>['X√\n']);
+  });
+
+  testWithoutContext('WindowsStdoutLogger does not rewrite emojis when terminal does support emoji', () {
+    final FakeStdio stdio = FakeStdio();
+    final WindowsStdoutLogger logger = WindowsStdoutLogger(
+      outputPreferences: OutputPreferences.test(),
+      stdio: stdio,
+      terminal: Terminal.test(supportsColor: true, supportsEmoji: true),
+    );
+
+    logger.printStatus('🔥🖼️✗✓🔨💪✏️');
+
+    expect(stdio.writtenToStdout, <String>['🔥🖼️✗✓🔨💪✏️\n']);
+  });
+
   testWithoutContext('DelegatingLogger delegates', () {
     final FakeLogger fakeLogger = FakeLogger();
     final DelegatingLogger delegatingLogger = DelegatingLogger(fakeLogger);

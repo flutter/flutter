@@ -13,10 +13,10 @@ import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/mocks.dart';
 import '../src/testbed.dart';
 
@@ -79,6 +79,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -101,6 +102,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: null,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -135,6 +137,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -176,6 +179,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -212,6 +216,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -250,6 +255,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
@@ -291,6 +297,7 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: mockSdk,
           featureFlags: TestFeatureFlags(),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();

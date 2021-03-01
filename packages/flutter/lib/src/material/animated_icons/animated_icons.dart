@@ -30,7 +30,6 @@ part of material_animated_icons;
 /// {@end-tool}
 ///
 class AnimatedIcon extends StatelessWidget {
-
   /// Creates an AnimatedIcon.
   ///
   /// The [progress] and [icon] arguments must not be null.

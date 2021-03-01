@@ -33,7 +33,6 @@ class Rectangle extends StatelessWidget {
 
 double? value;
 RenderObjectToWidgetElement<RenderBox>? element;
-BuildOwner owner = BuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
@@ -74,7 +73,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         ),
       ),
     ),
-  ).attachToRenderTree(owner, element);
+  ).attachToRenderTree(WidgetsBinding.instance!.buildOwner!, element);
 }
 
 Duration? timeBase;
@@ -87,7 +86,7 @@ void rotate(Duration timeStamp) {
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
 
-  owner.buildScope(element!);
+  WidgetsBinding.instance!.buildOwner!.buildScope(element!);
 }
 
 void main() {
