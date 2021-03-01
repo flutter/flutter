@@ -246,7 +246,8 @@ class CreateCommand extends CreateBase {
       windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
       windowsUwp: featureFlags.isWindowsUwpEnabled && platforms.contains('winuwp'),
       // Enable null safety everywhere.
-      dartSdkVersionBounds: '">=2.12.0 <3.0.0"'
+      dartSdkVersionBounds: '">=2.12.0 <3.0.0"',
+      implementationTests: boolArg('implementation-tests'),
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);

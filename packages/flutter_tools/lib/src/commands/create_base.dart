@@ -123,6 +123,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      'implementation-tests',
+      help:
+          'Include implementation tests that verify the template functions correctly'
+          'This is normally enabled to test the tool itself.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -328,6 +335,7 @@ abstract class CreateBase extends FlutterCommand {
     bool macos = false,
     bool windows = false,
     bool windowsUwp = false,
+    bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -379,6 +387,7 @@ abstract class CreateBase extends FlutterCommand {
       'winuwp': windowsUwp,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
+      'implementationTests': implementationTests,
     };
   }
 
