@@ -911,10 +911,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // If selectionEnabled is false, keeps the selection collapsed and moves it to
   // the end.
   //
-  // {@template flutter.rendering.RenderEditable.cause}
   // The given [SelectionChangedCause] indicates the cause of this change and
   // will be passed to [onSelectionChanged].
-  // {@endtemplate}
   //
   // See also:
   //
@@ -938,7 +936,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // If selectionEnabled is false, keeps the selection collapsed and moves it to
   // the start.
   //
-  // {@macro flutter.rendering.RenderEditable.cause}
+  // The given [SelectionChangedCause] indicates the cause of this change and
+  // will be passed to [onSelectionChanged].
   //
   // See also:
   //
@@ -996,7 +995,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// If [selectionEnabled] is false, keeps the selection collapsed and just
   /// moves it down.
   ///
-  /// {@macro flutter.rendering.RenderEditable.cause}
+  /// {@template flutter.rendering.RenderEditable.cause}
+  /// The given [SelectionChangedCause] indicates the cause of this change and
+  /// will be passed to [onSelectionChanged].
+  /// {@endtemplate}
   ///
   /// See also:
   ///
