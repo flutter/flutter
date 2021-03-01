@@ -1,4 +1,4 @@
-Signature: 5ac14b84a9302fa6d58b55b3e4c05f2d
+Signature: 17195ccccce9e5f592da1b1fa1472154
 
 UNUSED LICENSES:
 
@@ -5745,6 +5745,7 @@ FILE: ../../../third_party/skia/fuzz/FuzzDDLThreading.cpp
 FILE: ../../../third_party/skia/gm/aarecteffect.cpp
 FILE: ../../../third_party/skia/gm/colorspace.cpp
 FILE: ../../../third_party/skia/gm/largeclippedpath.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/FractalNoiseEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/SphereEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ThresholdEffect.cpp
 FILE: ../../../third_party/skia/modules/svg/include/SkSVGFeLightSource.h
