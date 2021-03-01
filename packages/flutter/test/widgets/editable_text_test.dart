@@ -7141,10 +7141,9 @@ void main() {
           width: 400,
           child: Actions(
             actions: <Type, Action<Intent>>{
-              MoveSelectionLeftTextIntent: TextEditingAction<MoveSelectionLeftTextIntent>(
-                onInvoke: (MoveSelectionLeftTextIntent intent, EditableTextState editableTextState) {
+              MoveSelectionLeftTextIntent: _MyMoveSelectionRightTextAction(
+                onInvoke: () {
                   myIntentWasCalled = true;
-                  editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
                 },
               ),
             },
@@ -7201,10 +7200,9 @@ void main() {
           width: 400,
           child: Actions(
             actions: <Type, Action<Intent>>{
-              MoveSelectionRightTextIntent: TextEditingAction<MoveSelectionRightTextIntent>(
-                onInvoke: (MoveSelectionRightTextIntent intent, EditableTextState editableTextState) {
+              MoveSelectionRightTextIntent: _MyMoveSelectionRightTextAction(
+                onInvoke: () {
                   myIntentWasCalled = true;
-                  editableTextState.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
                 },
               ),
             },
@@ -7468,5 +7466,19 @@ class _AccentColorTextEditingController extends TextEditingController {
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     final Color color = Theme.of(context).accentColor;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
+  }
+}
+
+class _MyMoveSelectionRightTextAction extends TextEditingAction<Intent> {
+  _MyMoveSelectionRightTextAction({
+    required this.onInvoke,
+  }) : super();
+
+  final VoidCallback onInvoke;
+
+  @override
+  Object? invoke(Intent intent, [BuildContext? context]) {
+    textEditingActionTarget!.renderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+    onInvoke();
   }
 }
