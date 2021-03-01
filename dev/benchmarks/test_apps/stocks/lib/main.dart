@@ -60,6 +60,11 @@ class StocksAppState extends State<StocksApp> {
         return ThemeData(
           brightness: Brightness.light,
           primarySwatch: Colors.purple,
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(
+            // Override for backwards compatibility. The correct onPrimary color
+            // is actually white, but for the sake of test/icon_color_test...
+            onPrimary: Colors.black,
+          ),
         );
       case StockMode.pessimistic:
         return ThemeData(

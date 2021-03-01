@@ -790,8 +790,8 @@ class ListTile extends StatelessWidget {
   ///
   /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
   /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
-  /// is set to [ThemeData.ColorScheme.primary] when [ThemeData.brightness] is
-  /// [Brightness.light] and to [ThemeData.ColorScheme.secondary] when it is [Brightness.dark].
+  /// is set to [ThemeData.colorScheme.primary] when [ThemeData.brightness] is
+  /// [Brightness.light] and to [ThemeData.colorScheme.secondary] when it is [Brightness.dark].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
   /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]

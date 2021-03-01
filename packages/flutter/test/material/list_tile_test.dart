@@ -2286,6 +2286,8 @@ void main() {
   });
 
   testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/77004
+
     const ColorScheme lightColorScheme = ColorScheme.light();
     const ColorScheme darkColorScheme = ColorScheme.dark();
     final Key leadingKey = UniqueKey();
@@ -2326,7 +2328,7 @@ void main() {
     expect(iconColor(trailingKey), darkColorScheme.secondary);
 
     // For this configuration, ListTile defers to the default IconTheme.
-    // Default dark theme IconTheme has color:white
+    // The default dark theme's IconTheme has color:white
     await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
     expect(iconColor(leadingKey),  Colors.white);
     expect(iconColor(trailingKey), Colors.white);
