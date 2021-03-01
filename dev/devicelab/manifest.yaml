@@ -63,28 +63,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # iOS on-device tests
-
-  native_ui_tests_ios32:
-    description: >
-      Run native XCUITests on 32-bit iOS (iPhone 4S).
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-    flaky: true
-
-  flutter_gallery_ios__start_up:
-    description: >
-      Measures the startup time of the Flutter Gallery app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  flutter_gallery_ios__transition_perf:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   # Tests running on Windows host
 
   flavors_test_win:
@@ -104,26 +82,3 @@ tasks:
       Measures the performance of Dart VM hot patching feature on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-
-  # Tests running on Linux hosts
-
-  flutter_gallery__transition_perf_e2e_ios32:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      Android with e2e.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-    flaky: true
-
-  flutter_gallery__transition_perf_e2e_ios:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      Android with e2e.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  new_gallery_ios__transition_perf:
-    description: >
-      Measures the performance of screen transitions in the new Flutter Gallery on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
