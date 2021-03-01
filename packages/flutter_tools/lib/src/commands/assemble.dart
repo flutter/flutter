@@ -278,9 +278,9 @@ class AssembleCommand extends FlutterCommand {
     } else if (targets.length > 1) {
       target = CompositeTarget(targets);
     } else if (targets.isNotEmpty) {
-      target = targets.first;
+      target = targets.single;
     }
-    final BuildResult result = await globals.buildSystem.build(
+    final BuildResult result = await _buildSystem.build(
       target,
       env,
       buildSystemConfig: BuildSystemConfig(

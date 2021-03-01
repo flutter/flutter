@@ -594,7 +594,7 @@ class NoGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
 }
 
 /// Missing golden
-class NoMismatchedGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
+class MismatchedGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get deferredComponentsGolden => r'''
   loading-units:

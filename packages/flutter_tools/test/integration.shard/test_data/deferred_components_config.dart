@@ -29,7 +29,7 @@ abstract class DeferredComponentsConfig {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
     }
     if (deferredComponentsGolden != null) {
-      writeFile(fileSystem.path.join(dir.path, 'deferred_components_golden.yaml'), deferredComponentsGolden);
+      writeFile(fileSystem.path.join(dir.path, 'deferred_components_loading_units.yaml'), deferredComponentsGolden);
     }
     if (androidSettings != null) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);

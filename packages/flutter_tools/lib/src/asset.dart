@@ -55,7 +55,7 @@ abstract class AssetBundleFactory {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Platform platform,
-    bool splitDeferredAssets,
+    bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
   /// Creates a new [AssetBundle].

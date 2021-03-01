@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -40,18 +41,25 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString(), contains('app-release.aab'));
-    expect(result.stdout.toString(), contains('Deferred components setup verification part 1 of 2 passed.'));
-    expect(result.stdout.toString(), contains('Deferred components setup verification part 2 of 2 passed.'));
+    expect(result.stdout.toString(), contains('Deferred components prebuild verification passed.'));
+    expect(result.stdout.toString(), contains('Deferred components gen_snapshot verification passed.'));
 
     final String line = result.stdout.toString()
       .split('\n')
       .firstWhere((String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
-    expect(fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath)), exists);
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
+
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
 
     expect(result.exitCode, 0);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   testWithoutContext('simple build appbundle all targets succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
@@ -65,18 +73,33 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString(), contains('app-release.aab'));
-    expect(result.stdout.toString(), contains('Deferred components setup verification part 1 of 2 passed.'));
-    expect(result.stdout.toString(), contains('Deferred components setup verification part 2 of 2 passed.'));
+    expect(result.stdout.toString(), contains('Deferred components prebuild verification passed.'));
+    expect(result.stdout.toString(), contains('Deferred components gen_snapshot verification passed.'));
 
     final String line = result.stdout.toString()
       .split('\n')
       .firstWhere((String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
-    expect(fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath)), exists);
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
+
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
+
+    expect(archive.findFile('base/lib/armeabi-v7a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/armeabi-v7a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/armeabi-v7a/libapp.so-2.part.so') != null, true);
+
+    expect(archive.findFile('base/lib/x86_64/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/x86_64/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/x86_64/libapp.so-2.part.so') != null, true);
 
     expect(result.exitCode, 0);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   testWithoutContext('simple build appbundle no-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
@@ -90,22 +113,29 @@ void main() {
       '--no-deferred-components'
     ], workingDirectory: tempDir.path);
 
-    expect(result.stdout.toString(), contains('app-release.aab'));
-    expect(result.stdout.toString().contains('Deferred components setup verification part 1 of 2 passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 2 of 2 passed.'), false);
+    expect(result.stdout.toString().contains('app-release.aab'), true);
+    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
 
     final String line = result.stdout.toString()
       .split('\n')
       .firstWhere((String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
-    expect(fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath)), exists);
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
+
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') == null, true);
 
     expect(result.exitCode, 0);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   testWithoutContext('simple build appbundle mismatched golden no-verify-deferred-components succeeds', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(NoMismatchedGoldenDeferredComponentsConfig());
+    final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
@@ -117,8 +147,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), true);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 1 of 2 passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 2 of 2 passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
 
     expect(result.stdout.toString().contains('New loading units were found:'), false);
     expect(result.stdout.toString().contains('Previously existing loading units no longer exist:'), false);
@@ -128,10 +158,17 @@ void main() {
       .firstWhere((String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
-    expect(fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath)), exists);
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
+
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
+    expect(archive.findFile('base/lib/arm64-v8a/libflutter.so') != null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
 
     expect(result.exitCode, 0);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   testWithoutContext('simple build appbundle missing android dynamic feature module fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(NoAndroidDynamicFeatureModuleDeferredComponentsConfig());
@@ -145,8 +182,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 1 of 2 passed.'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 2 of 2 passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
 
     expect(result.stdout.toString(), contains('Newly generated android files:'));
     expect(result.stdout.toString(), contains('build/android_deferred_components_setup_files/component1/build.gradle'));
@@ -167,8 +204,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 1 of 2 passed.'), true);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 2 of 2 passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), true);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
 
     expect(result.stdout.toString(), contains('New loading units were found:'));
     expect(result.stdout.toString(), contains('- package:test/deferred_library.dart'));
@@ -179,7 +216,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle mismatched golden fails', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(NoMismatchedGoldenDeferredComponentsConfig());
+    final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
@@ -190,8 +227,8 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     expect(result.stdout.toString().contains('app-release.aab'), false);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 1 of 2 passed.'), true);
-    expect(result.stdout.toString().contains('Deferred components setup verification part 2 of 2 passed.'), false);
+    expect(result.stdout.toString().contains('Deferred components prebuild verification passed.'), true);
+    expect(result.stdout.toString().contains('Deferred components gen_snapshot verification passed.'), false);
 
     expect(result.stdout.toString(), contains('New loading units were found:'));
     expect(result.stdout.toString(), contains('- package:test/deferred_library.dart'));
