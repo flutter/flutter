@@ -2284,4 +2284,51 @@ void main() {
     expect(textColor(leadingKey), theme.disabledColor);
     expect(textColor(trailingKey), theme.disabledColor);
   });
+
+  testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
+    const ColorScheme lightColorScheme = ColorScheme.light();
+    const ColorScheme darkColorScheme = ColorScheme.dark();
+    final Key leadingKey = UniqueKey();
+    final Key trailingKey = UniqueKey();
+
+    Widget buildFrame({ required Brightness brightness, required bool selected }) {
+      final ThemeData theme = brightness == Brightness.light
+        ? ThemeData.from(colorScheme: const ColorScheme.light())
+        : ThemeData.from(colorScheme: const ColorScheme.dark());
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: ListTile(
+              enabled: true,
+              selected: selected,
+              leading: TestIcon(key: leadingKey),
+              trailing: TestIcon(key: trailingKey),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
+    expect(iconColor(leadingKey), lightColorScheme.primary);
+    expect(iconColor(trailingKey), lightColorScheme.primary);
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
+    expect(iconColor(leadingKey), lightColorScheme.onPrimary.withAlpha(0x73));
+    expect(iconColor(trailingKey), lightColorScheme.onPrimary.withAlpha(0x73));
+
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
+    await tester.pumpAndSettle(); // Animated theme change
+    expect(iconColor(leadingKey), darkColorScheme.secondary);
+    expect(iconColor(trailingKey), darkColorScheme.secondary);
+
+    // For this configuration, ListTile defers to the default IconTheme.
+    // Default dark theme IconTheme has color:white
+    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
+    expect(iconColor(leadingKey),  Colors.white);
+    expect(iconColor(trailingKey), Colors.white);
+  });
 }

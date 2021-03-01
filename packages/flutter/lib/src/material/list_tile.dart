@@ -790,8 +790,8 @@ class ListTile extends StatelessWidget {
   ///
   /// When [selected] is true, the text color is set to [ListTileTheme.selectedColor]
   /// if it's not null. If [ListTileTheme.selectedColor] is null, the text color
-  /// is set to [ThemeData.primaryColor] when [ThemeData.brightness] is
-  /// [Brightness.light] and to [ThemeData.accentColor] when it is [Brightness.dark].
+  /// is set to [ThemeData.ColorScheme.primary] when [ThemeData.brightness] is
+  /// [Brightness.light] and to [ThemeData.ColorScheme.secondary] when it is [Brightness.dark].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
   /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
@@ -1019,9 +1019,11 @@ class ListTile extends StatelessWidget {
 
     switch (theme.brightness) {
       case Brightness.light:
-        return selected ? theme.primaryColor : Colors.black45;
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles - with the default light theme - is the same as Colors.black45.
+        return selected ? theme.colorScheme.primary : theme.colorScheme.onPrimary.withAlpha(0x73);
       case Brightness.dark:
-        return selected ? theme.accentColor : null; // null - use current icon theme color
+        return selected ? theme.colorScheme.secondary : null; // null - use current icon theme color
     }
   }
 
@@ -1038,9 +1040,9 @@ class ListTile extends StatelessWidget {
     if (selected) {
       switch (theme.brightness) {
         case Brightness.light:
-          return theme.primaryColor;
+          return theme.colorScheme.primary;
         case Brightness.dark:
-          return theme.accentColor;
+          return theme.colorScheme.secondary;
       }
     }
     return defaultColor;
