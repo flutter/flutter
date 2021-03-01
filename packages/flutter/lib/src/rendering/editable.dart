@@ -909,7 +909,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Extend the current selection to the end of the field.
   //
   // See also:
-  //   * [_extendSelectionToStart]
+  //
+  //   * _extendSelectionToStart
   void _extendSelectionToEnd(SelectionChangedCause cause) {
     if (selection!.extentOffset == _plainText.length) {
       return;
@@ -927,7 +928,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Extend the current selection to the start of the field.
   //
   // See also:
-  //   * [_expandSelectionToEnd]
+  //
+  //   * _expandSelectionToEnd
   void _extendSelectionToStart(SelectionChangedCause cause) {
     if (selection!.extentOffset == 0) {
       return;
@@ -980,7 +982,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionUp]
+  ///   * [extendSelectionUp], which is same but in the opposite direction.
   void extendSelectionDown(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1023,7 +1025,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [expandSelectionToStart]
+  ///   * [expandSelectionToStart], which is same but in the opposite direction.
   void expandSelectionToEnd(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1050,7 +1052,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionRight]
+  ///   * [extendSelectionRight], which is same but in the opposite direction.
   void extendSelectionLeft(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1079,8 +1081,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionRightByLine]
-  ///   * [expandSelectionRightByLine]
+  ///   * [extendSelectionRightByLine], which is same but in the opposite
+  ///     direction.
+  ///   * [expandSelectionRightByLine], which strictly grows the selection
+  ///     regardless of the order.
   void extendSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1110,7 +1114,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionLeft]
+  ///   * [extendSelectionLeft], which is same but in the opposite direction.
   void extendSelectionRight(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1139,8 +1143,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionLeftByLine]
-  ///   * [expandSelectionRightByLine]
+  ///   * [extendSelectionLeftByLine], which is same but in the opposite
+  ///     direction.
+  ///   * [expandSelectionRightByLine], which strictly grows the selection
+  ///     regardless of the order.
   void extendSelectionRightByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1171,7 +1177,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionDown]
+  ///   * [extendSelectionDown], which is the same but in the opposite
+  ///     direction.
   void extendSelectionUp(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1216,7 +1223,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [expandSelectionToEnd]
+  ///   * [expandSelectionToEnd], which is the same but in the opposite
+  ///     direction.
   void expandSelectionToStart(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1246,7 +1254,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [expandSelectionRightByLine]
+  ///   * [expandSelectionRightByLine], which is the same but in the opposite
+  ///     direction.
   void expandSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1276,7 +1285,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionRightByWord]
+  ///   * [extendSelectionRightByWord], which is the same but in the opposite
+  ///     direction.
   void extendSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(selection != null);
 
@@ -1303,7 +1313,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [extendSelectionLeftByWord]
+  ///   * [extendSelectionLeftByWord], which is the same but in the opposite
+  ///     direction.
   void extendSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(selection != null);
 
@@ -1334,7 +1345,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [expandSelectionLeftByLine]
+  ///   * [expandSelectionLeftByLine], which is the same but in the opposite
+  ///     direction.
   void expandSelectionRightByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1364,7 +1376,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionUp]
+  ///   * [moveSelectionUp], which is the same but in the opposite direction.
   void moveSelectionDown(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1395,7 +1407,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionRight]
+  ///   * [moveSelectionRight], which is the same but in the opposite direction.
   void moveSelectionLeft(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1414,7 +1426,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionRightByLine]
+  ///   * [moveSelectionRightByLine], which is the same but in the opposite
+  ///     direction.
   void moveSelectionLeftByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1442,7 +1455,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionRightByWord]
+  ///   * [moveSelectionRightByWord], which is the same but in the opposite
+  ///     direction.
   void moveSelectionLeftByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(selection != null);
 
@@ -1469,7 +1483,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionLeft]
+  ///   * [moveSelectionLeft], which is the same but in the opposite direction.
   void moveSelectionRight(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1487,7 +1501,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionLeftByLine]
+  ///   * [moveSelectionLeftByLine], which is the same but in the opposite
+  ///     direction.
   void moveSelectionRightByLine(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1516,7 +1531,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionLeftByWord]
+  ///   * [moveSelectionLeftByWord], which is the same but in the opposite
+  ///     direction.
   void moveSelectionRightByWord(SelectionChangedCause cause, [bool includeWhitespace = true]) {
     assert(selection != null);
 
@@ -1543,7 +1559,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionToStart]
+  ///   * [moveSelectionToStart], which is the same but in the opposite
+  ///     direction.
   void moveSelectionToEnd(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1560,7 +1577,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionToEnd]
+  ///   * [moveSelectionToEnd], which is the same but in the opposite direction.
   void moveSelectionToStart(SelectionChangedCause cause) {
     assert(selection != null);
 
@@ -1575,7 +1592,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// See also:
   ///
-  ///   * [moveSelectionDown]
+  ///   * [moveSelectionDown], which is the same but in the opposite direction.
   void moveSelectionUp(SelectionChangedCause cause) {
     assert(selection != null);
 
