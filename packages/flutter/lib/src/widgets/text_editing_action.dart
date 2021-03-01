@@ -22,15 +22,22 @@ abstract class TextEditingActionTarget {
   ///
   /// See also:
   ///
-  /// * [EditableText.renderEditable], which overrides this.
+  /// * [EditableTextState.renderEditable], which overrides this.
   RenderEditable get renderEditable;
 }
 
 /// An [Action] related to editing text.
 ///
-/// If an [EditableText] is currently focused, then it will be passed to the
-/// given [onInvoke] callback. If not, then [isEnabled] will be false and
-/// [onInvoke] will not be called.
+/// Enables itself only when a [TextEditingActionTarget], e.g. [EditableText],
+/// is currently focused. The result of this is that when a
+/// TextEditingActionTarget is not focused, it will fall through to any
+/// non-TextEditingAction that handles the same shortcut. For example,
+/// overriding the tab key in [Shortcuts] with a TextEditingAction will only
+/// invoke your TextEditingAction when a TextEditingActionTarget is focused,
+/// otherwise the default tab behavior will apply.
+///
+/// The currently focused TextEditingActionTarget is available in the [invoke]
+/// method via [textEditingActionTarget].
 ///
 /// See also:
 ///
