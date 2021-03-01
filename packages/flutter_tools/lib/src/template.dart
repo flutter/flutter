@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
@@ -26,6 +27,11 @@ import 'dart/package_map.dart';
 /// but without template expansion (data files, etc.), the '.copy.tmpl'
 /// extension may be used.
 ///
+/// Furthermore, templates may contain test files and golden images that are only
+/// included when the --include-tests flag is enabled. Test files must end in
+/// `.test.tmpl`. Golden images must end in '.golden.tmpl'. Golden images are
+/// copied from the flutter_template_images repository.
+///
 /// Folders with platform/language-specific content must be named
 /// '<platform>-<language>.tmpl'.
 ///
@@ -40,7 +46,7 @@ class Template {
   }) {
     return Template._(
       <Directory>[templateSource],
-      imageSourceDir,
+      <Directory>[imageSourceDir],
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,
@@ -48,7 +54,8 @@ class Template {
     );
   }
 
-  Template._(List<Directory> templateSources, this.imageSourceDir, {
+  Template._(
+    List<Directory> templateSources, this.imageSourceDirectories, {
     @required FileSystem fileSystem,
     @required Logger logger,
     @required TemplateRenderer templateRenderer,
@@ -96,7 +103,7 @@ class Template {
     final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
     return Template._(
       <Directory>[templateDir],
-      imageDir,
+      <Directory>[imageDir],
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,
@@ -104,7 +111,7 @@ class Template {
     );
   }
 
-  static Future<Template> merged(List<String> names, String imageDirectoryName, {
+  static Future<Template> merged(List<String> names, {
     @required FileSystem fileSystem,
     @required Set<Uri> templateManifest,
     @required Logger logger,
@@ -112,11 +119,12 @@ class Template {
   }) async {
     // All named templates are placed in the 'templates' directory
     return Template._(
+      <Directory>[for (final String name in names) _templateDirectoryInPackage(name, fileSystem)],
       <Directory>[
         for (final String name in names)
-          _templateDirectoryInPackage(name, fileSystem)
+          if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
+            await _templateImageDirectory(name, fileSystem, logger)
       ],
-      await _templateImageDirectory(imageDirectoryName, fileSystem, logger),
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,
@@ -132,8 +140,10 @@ class Template {
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
   static const String imageTemplateExtension = '.img.tmpl';
+  static const String testTemplateExtension = '.test.tmpl';
+  static const String goldenTemplateExtension = '.golden.tmpl';
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
-  final Directory imageSourceDir;
+  final List<Directory> imageSourceDirectories;
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
@@ -154,6 +164,7 @@ class Template {
       return 0;
     }
     int fileCount = 0;
+    final bool implementationTests = context['implementationTests'] as bool ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
     /// raw destination path, after performing language filtering and template
@@ -212,6 +223,8 @@ class Template {
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(copyTemplateExtension, '')
         .replaceAll(imageTemplateExtension, '')
+        .replaceAll(goldenTemplateExtension, '')
+        .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
       if (android != null && android && androidIdentifier != null) {
@@ -231,9 +244,29 @@ class Template {
       return finalDestinationPath;
     }
 
+    void copyImage(String extension, String relativeDestinationPath, File finalDestinationFile) {
+      final List<File> potentials = <File>[
+        for (final Directory imageSourceDir in imageSourceDirectories)
+          _fileSystem.file(_fileSystem.path
+              .join(imageSourceDir.path, relativeDestinationPath.replaceAll(extension, '')))
+      ];
+
+      if (potentials.any((File file) => file.existsSync())) {
+        final File imageSourceFile = potentials.firstWhere((File file) => file.existsSync());
+
+        imageSourceFile.copySync(finalDestinationFile.path);
+      } else {
+        throwToolExit('Image File not found ${finalDestinationFile.path}');
+      }
+    }
+
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] as bool ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
+        return;
+      }
+
+      if (!implementationTests && (absoluteSourcePath.contains(testTemplateExtension) || absoluteSourcePath.contains(goldenTemplateExtension))) {
         return;
       }
 
@@ -283,14 +316,22 @@ class Template {
       //         to be copied from the template image package.
 
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
-        final File imageSourceFile = _fileSystem.file(_fileSystem.path.join(
-            imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')));
-        imageSourceFile.copySync(finalDestinationFile.path);
+        copyImage(imageTemplateExtension, relativeDestinationPath, finalDestinationFile);
 
         return;
       }
 
-      // Step 4: If the absolute path ends with a '.tmpl', this file needs
+      // Step 4: If testing is enabled and the absolute path ends with a
+      //         '.golden.tmpl', this file needs to be copied from the template
+      //         image package.
+
+      if (sourceFile.path.endsWith(goldenTemplateExtension)) {
+        copyImage(goldenTemplateExtension, relativeDestinationPath, finalDestinationFile);
+
+        return;
+      }
+
+      // Step 5: If the absolute path ends with a '.tmpl', this file needs
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(templateExtension)) {
@@ -302,7 +343,7 @@ class Template {
         return;
       }
 
-      // Step 5: This file does not end in .tmpl but is in a directory that
+      // Step 6: This file does not end in .tmpl but is in a directory that
       //         does. Directly copy the file to the destination.
       sourceFile.copySync(finalDestinationFile.path);
     });

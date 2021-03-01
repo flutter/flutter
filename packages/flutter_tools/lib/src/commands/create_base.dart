@@ -110,6 +110,13 @@ abstract class CreateBase extends FlutterCommand {
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
+    argParser.addFlag(
+      'implementation-tests',
+      help:
+          'Include implementation tests that verify the template functions correctly'
+          'This is normally enabled to test the tool itself.',
+      hide: !verboseHelp,
+    );
   }
 
   /// The output directory of the command.
@@ -332,6 +339,7 @@ abstract class CreateBase extends FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
+    bool implementationTests = false,
   }) {
     flutterRoot = globals.fs.path.normalize(flutterRoot);
 
@@ -381,6 +389,7 @@ abstract class CreateBase extends FlutterCommand {
       'windows': windows,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
+      'implementationTests': implementationTests,
     };
   }
 
@@ -411,11 +420,10 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderMerged(
-      List<String> names, String imageDirectoryName, Directory directory, Map<String, dynamic> context,
+      List<String> names, Directory directory, Map<String, dynamic> context,
       {bool overwrite = false}) async {
     final Template template = await Template.merged(
       names,
-      imageDirectoryName,
       fileSystem: globals.fs,
       logger: globals.logger,
       templateRenderer: globals.templateRenderer,
@@ -432,7 +440,7 @@ abstract class CreateBase extends FlutterCommand {
       String templateName, Directory directory, Map<String, dynamic> templateContext,
       {bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
-    generatedCount += await renderMerged(<String>[templateName, 'app_shared'], 'app', directory, templateContext,
+    generatedCount += await renderMerged(<String>[templateName, 'app_shared'], directory, templateContext,
         overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     if (templateContext['android'] == true) {

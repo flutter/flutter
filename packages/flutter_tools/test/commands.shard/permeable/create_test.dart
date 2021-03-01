@@ -111,7 +111,7 @@ void main() {
   testUsingContext('can create a list view/detail view app', () async {
     await _createAndAnalyzeProject(
       projectDir,
-      <String>['-t', 'list_detail_app', '-i', 'objc', '-a', 'java'],
+      <String>['-t', 'list_detail_app', '-i', 'objc', '-a', 'java', '--implementation-tests'],
       <String>[
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -126,6 +126,12 @@ void main() {
         'assets/images/3.0x/flutter_logo.png',
         'test/unit_test.dart',
         'test/widget_test.dart',
+        'test/implementation_test.dart',
+        'test/dark.png',
+        'test/details.png',
+        'test/light.png',
+        'test/list.png',
+        'test/system.png',
         'lib/src/localization/app_en.arb',
         'lib/src/app.dart',
         'lib/src/dummy_feature/dummy_item_details_view.dart',

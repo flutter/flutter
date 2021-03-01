@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           // depending on the user's locale.
           localizationsDelegates: [AppLocalizations.delegate],
 
-          // Use AppLocalizations to configure a the correct application title
+          // Use AppLocalizations to configure the correct application title
           // depending on the user's locale.
           //
           // The appTitle is defined in .arb files found in the localization
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
 
           // Define a light and dark color theme. Then, read the user's
-          // preferred ThemeMode (light, dark or system default) from the
+          // preferred ThemeMode (light, dark, or system default) from the
           // SettingsController to display the correct theme.
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
