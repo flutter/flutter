@@ -117,9 +117,9 @@ void main() {
     );
 
     final TextStyle s2 = s1.copyWith(
-        color: const Color(0xFF00FF00),
-        height: 100.0,
-        leadingDistribution: TextLeadingDistribution.even,
+      color: const Color(0xFF00FF00),
+      height: 100.0,
+      leadingDistribution: TextLeadingDistribution.even,
     );
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
@@ -168,6 +168,7 @@ void main() {
     expect(s2.fontWeight, FontWeight.w800);
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
+    expect(s2.leadingDistribution, TextLeadingDistribution.even);
     expect(s2, isNot(equals(s1)));
     expect(s2, isNot(equals(s4)));
     expect(s4.fontFamily, isNull);
@@ -175,6 +176,7 @@ void main() {
     expect(s4.fontWeight, FontWeight.w800);
     expect(s4.height, 123.0);
     expect(s4.color, const Color(0xFF00FF00));
+    expect(s4.leadingDistribution, TextLeadingDistribution.even);
 
     final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25)!;
     expect(s1.fontFamily, isNull);
@@ -258,8 +260,8 @@ void main() {
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(
-        ps2,
-        equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, textHeightBehavior: const TextHeightBehavior(leadingDistribution: TextLeadingDistribution.even))),
+      ps2,
+      equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0, textHeightBehavior: const TextHeightBehavior(leadingDistribution: TextLeadingDistribution.even))),
     );
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(
@@ -267,7 +269,6 @@ void main() {
       equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0, textHeightBehavior: const TextHeightBehavior())),
     );
   });
-
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
@@ -354,6 +355,11 @@ void main() {
     const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
+
+    const TextStyle c = TextStyle(leadingDistribution: TextLeadingDistribution.even);
+    const TextStyle d = TextStyle(leadingDistribution: TextLeadingDistribution.proportional);
+    expect(c.hashCode, c.hashCode);
+    expect(c.hashCode, isNot(d.hashCode));
   });
 
   test('TextStyle foreground and color combos', () {

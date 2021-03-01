@@ -566,9 +566,8 @@ class TextStyle with Diagnosticable {
   /// distributed over and under the text.
   ///
   /// When a non-null [height] is specified, after accommodating the glyphs of
-  /// the text (whose height is determined by the font metrics and does not
-  /// scale with [height]), the remaining vertical space from the allotted line
-  /// height will be distributed over and under the text, according to the
+  /// the text, the remaining vertical space from the allotted line height will
+  /// be distributed over and under the text, according to the
   /// [leadingDistribution] property.
   ///
   /// When [height] is null, [leadingDistribution] does not affect the text
@@ -928,7 +927,6 @@ class TextStyle with Diagnosticable {
       wordSpacing: other.wordSpacing,
       textBaseline: other.textBaseline,
       height: other.height,
-      // ??????
       leadingDistribution: other.leadingDistribution,
       locale: other.locale,
       foreground: other.foreground,

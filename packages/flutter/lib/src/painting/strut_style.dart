@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' show TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 
@@ -427,9 +427,9 @@ class StrutStyle with Diagnosticable {
   /// The minimum height of the strut, as a multiple of [fontSize].
   ///
   /// When [height] is omitted or null, then the strut's height will be the sum
-  /// of font defined ascent, font defined descent, and the strut's [leading].
-  /// The font's combined ascent and descent may be taller or shorter than the
-  /// [fontSize].
+  /// of the strut's font-defined ascent, its font-defined descent, and its
+  /// [leading]. The font's combined ascent and descent may be taller or shorter
+  /// than the [fontSize].
   ///
   /// When [height] is provided, the line's EM-square ascent and descent (which
   /// sums to [fontSize]) will be scaled by [height] to achieve a final strut
@@ -438,10 +438,6 @@ class StrutStyle with Diagnosticable {
   /// defined height and the EM-square height:
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
-  ///
-  /// !!!
-  /// See [leadingDistribution] for how the baseline of the strut is determined
-  /// given the height of the strut.
   ///
   /// The ratio of ascent:descent with [height] specified is the same as the
   /// font metrics defined ascent:descent ratio when [height] is null or omitted.
