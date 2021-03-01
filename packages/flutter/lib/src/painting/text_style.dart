@@ -1112,6 +1112,9 @@ class TextStyle with Diagnosticable {
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
+    final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
+    final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
+      ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1122,7 +1125,7 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
-      textHeightBehavior: textHeightBehavior ?? ui.TextHeightBehavior(leadingDistribution: leadingDistribution ?? ui.TextLeadingDistribution.proportional),
+      textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
