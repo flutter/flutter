@@ -8,54 +8,45 @@ import 'package:flutter_devicelab/framework/runner.dart';
 
 class TestCommand extends Command<void> {
   TestCommand() {
-    argParser.addOption(
-      'task',
-      abbr: 't',
-      help: 'The name of a task listed under bin/tasks.\n'
-          '   Example: complex_layout__start_up.\n'
-    );
-    argParser.addMultiOption(
-      'task-args',
-      help: 'The name of a task listed under bin/tasks.\n'
-            'For example, "--task-args build" is passed as "bin/task/task.dart --build"'
-    );
+    argParser.addOption('task',
+        abbr: 't',
+        help: 'The name of a task listed under bin/tasks.\n'
+            '   Example: complex_layout__start_up.\n');
+    argParser.addMultiOption('task-args',
+        help: 'The name of a task listed under bin/tasks.\n'
+            'For example, "--task-args build" is passed as "bin/task/task.dart --build"');
     argParser.addOption(
       'device-id',
       abbr: 'd',
       help: 'Target device id (prefixes are allowed, names are not supported).\n'
-            'The option will be ignored if the test target does not run on a\n'
-            'mobile device. This still respects the device operating system\n'
-            'settings in the test case, and will results in error if no device\n'
-            'with given ID/ID prefix is found.',
+          'The option will be ignored if the test target does not run on a\n'
+          'mobile device. This still respects the device operating system\n'
+          'settings in the test case, and will results in error if no device\n'
+          'with given ID/ID prefix is found.',
     );
     argParser.addOption(
       'git-branch',
       help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
-            'checkouts run in detached HEAD state, so the branch must be passed.',
+          'checkouts run in detached HEAD state, so the branch must be passed.',
     );
     argParser.addOption(
       'local-engine',
       help: 'Name of a build output within the engine out directory, if you\n'
-            'are building Flutter locally. Use this to select a specific\n'
-            'version of the engine if you have built multiple engine targets.\n'
-            'This path is relative to --local-engine-src-path/out. This option\n'
-            'is required when running an A/B test (see the --ab option).',
+          'are building Flutter locally. Use this to select a specific\n'
+          'version of the engine if you have built multiple engine targets.\n'
+          'This path is relative to --local-engine-src-path/out. This option\n'
+          'is required when running an A/B test (see the --ab option).',
     );
     argParser.addOption(
       'local-engine-src-path',
       help: 'Path to your engine src directory, if you are building Flutter\n'
-            'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
-            'the location based on the value of the --flutter-root option.',
+          'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
+          'the location based on the value of the --flutter-root option.',
     );
-    argParser.addOption(
-      'luci-builder',
-      help: '[Flutter infrastructure] Name of the LUCI builder being run on.'
-    );
-    argParser.addOption(
-      'results-file',
-      help: '[Flutter infrastructure] File path for test results. If passed with\n'
-            'task, will write test results to the file.'
-    );
+    argParser.addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.');
+    argParser.addOption('results-file',
+        help: '[Flutter infrastructure] File path for test results. If passed with\n'
+            'task, will write test results to the file.');
     argParser.addFlag(
       'silent',
       negatable: true,
@@ -75,7 +66,8 @@ class TestCommand extends Command<void> {
     // Prepend '--' to convert args to options when passed to task
     final List<String> taskArgs = taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
     print(taskArgs);
-    await runTasks(<String>[argResults['task'] as String],
+    await runTasks(
+      <String>[argResults['task'] as String],
       deviceId: argResults['device-id'] as String,
       gitBranch: argResults['git-branch'] as String,
       localEngine: argResults['local-engine'] as String,

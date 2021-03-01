@@ -19,7 +19,9 @@ class FakeBuildTestTask extends BuildTestTask {
   }
 
   @override
-  Future<void> build() async {}
+  // In prod, tasks always run some unit of work and the test framework assumes
+  // there will be some work done when managing the isolate. To fake this, add a delay.
+  Future<void> build() => Future<void>.delayed(const Duration(milliseconds: 500));
 
   @override
   Future<TaskResult> test() async => TaskResult.success(<String, String>{'benchmark': 'data'});

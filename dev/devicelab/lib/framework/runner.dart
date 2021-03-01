@@ -15,8 +15,8 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'cocoon.dart';
 import 'task_result.dart';
 
-
-Future<void> runTasks(List<String> taskNames, {
+Future<void> runTasks(
+  List<String> taskNames, {
   bool exitOnFirstTestFailure = false,
   bool silent = false,
   String deviceId,
@@ -78,12 +78,11 @@ Future<TaskResult> runTask(
   String localEngineSrcPath,
   String deviceId,
   List<String> taskArgs,
-  @visibleForTesting bool skipProcessCleanup = false,
+  @visibleForTesting Map<String, String> isolateParams = const <String, String>{},
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
-  if (!file(taskExecutable).existsSync())
-    throw 'Executable Dart file not found: $taskExecutable';
+  if (!file(taskExecutable).existsSync()) throw 'Executable Dart file not found: $taskExecutable';
 
   final Process runner = await startProcess(
     dartBin,
@@ -97,8 +96,7 @@ Future<TaskResult> runTask(
       ...?taskArgs,
     ],
     environment: <String, String>{
-      if (deviceId != null)
-        DeviceIdEnvName: deviceId,
+      if (deviceId != null) DeviceIdEnvName: deviceId,
     },
   );
 
@@ -116,8 +114,7 @@ Future<TaskResult> runTask(
       .listen((String line) {
     if (!uri.isCompleted) {
       final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
-      if (serviceUri != null)
-        uri.complete(serviceUri);
+      if (serviceUri != null) uri.complete(serviceUri);
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -133,16 +130,13 @@ Future<TaskResult> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, String> isolateParams = <String, String>{
-      'skipProcessCleanup': '$skipProcessCleanup',
-    };
-    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask', isolateParams) as Map<String, dynamic>;
+    final Map<String, dynamic> taskResultJson =
+        await isolate.invokeExtension('ext.cocoonRunTask', isolateParams) as Map<String, dynamic>;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;
   } finally {
-    if (!runnerFinished)
-      runner.kill(ProcessSignal.sigkill);
+    if (!runnerFinished) runner.kill(ProcessSignal.sigkill);
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -154,8 +148,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
     'ws',
   ];
-  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
-      pathSegments).toString();
+  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments: pathSegments).toString();
   final Stopwatch stopwatch = Stopwatch()..start();
 
   while (true) {
@@ -168,8 +161,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
-      if (response != 'ready')
-        throw 'not ready yet';
+      if (response != 'ready') throw 'not ready yet';
       return isolate;
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10))
