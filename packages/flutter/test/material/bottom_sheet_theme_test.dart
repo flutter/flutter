@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,6 +60,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: BottomSheet(
+          animationController: AnimationController(vsync: TestTickerProvider()),
           onClosing: () {},
           builder: (BuildContext context) {
             return Container();
@@ -86,6 +88,7 @@ void main() {
       theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
       home: Scaffold(
         body: BottomSheet(
+          animationController: AnimationController(vsync: TestTickerProvider()),
           onClosing: () {},
           builder: (BuildContext context) {
             return Container();
@@ -118,6 +121,7 @@ void main() {
       theme: ThemeData(bottomSheetTheme: _bottomSheetTheme()),
       home: Scaffold(
         body: BottomSheet(
+          animationController: AnimationController(vsync: TestTickerProvider()),
           backgroundColor: backgroundColor,
           elevation: elevation,
           shape: shape,
@@ -339,4 +343,11 @@ BottomSheetThemeData _bottomSheetTheme() {
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
     clipBehavior: Clip.antiAlias,
   );
+}
+
+class TestTickerProvider extends TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    return Ticker(onTick);
+  }
 }

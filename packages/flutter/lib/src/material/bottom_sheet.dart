@@ -39,7 +39,7 @@ typedef BottomSheetDragEndHandler = void Function(
 /// A material design bottom sheet.
 ///
 /// There are two kinds of bottom sheets in material design:
-///
+///class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStateMixin {
 ///  * _Persistent_. A persistent bottom sheet shows information that
 ///    supplements the primary content of the app. A persistent bottom sheet
 ///    remains visible even when the user interacts with other parts of the app.
@@ -71,7 +71,7 @@ class BottomSheet extends StatefulWidget {
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
     Key? key,
-    this.animationController,
+    required this.animationController,
     this.enableDrag = true,
     this.onDragStart,
     this.onDragEnd,
@@ -92,7 +92,7 @@ class BottomSheet extends StatefulWidget {
   ///
   /// The BottomSheet widget will manipulate the position of this animation, it
   /// is not just a passive observer.
-  final AnimationController? animationController;
+  final AnimationController animationController;
 
   /// Called when the bottom sheet begins to close.
   ///
@@ -191,10 +191,7 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
     return renderBox.size.height;
   }
 
-  late AnimationController _effectiveAnimationController =
-      widget.animationController ?? BottomSheet.createAnimationController(this);
-
-  bool get _dismissUnderway => _effectiveAnimationController.status == AnimationStatus.reverse;
+  bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragStart(DragStartDetails details) {
     if (widget.onDragStart != null) {
@@ -206,7 +203,7 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
     assert(widget.enableDrag);
     if (_dismissUnderway)
       return;
-    _effectiveAnimationController.value -= details.primaryDelta! / _childHeight;
+    widget.animationController.value -= details.primaryDelta! / _childHeight;
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -216,18 +213,18 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
     bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
-      if (_effectiveAnimationController.value > 0.0) {
-        _effectiveAnimationController.fling(velocity: flingVelocity);
+      if (widget.animationController.value > 0.0) {
+        widget.animationController.fling(velocity: flingVelocity);
       }
       if (flingVelocity < 0.0) {
         isClosing = true;
       }
-    } else if (_effectiveAnimationController.value < _closeProgressThreshold) {
-      if (_effectiveAnimationController.value > 0.0)
-        _effectiveAnimationController.fling(velocity: -1.0);
+    } else if (widget.animationController.value < _closeProgressThreshold) {
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: -1.0);
       isClosing = true;
     } else {
-      _effectiveAnimationController.forward();
+      widget.animationController.forward();
     }
 
     if (widget.onDragEnd != null) {
@@ -247,23 +244,6 @@ class _BottomSheetState extends State<BottomSheet> with SingleTickerProviderStat
       widget.onClosing();
     }
     return false;
-  }
-
-  @override
-  void dispose() {
-    _effectiveAnimationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant BottomSheet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animationController != null) {
-      _effectiveAnimationController.dispose();
-      _effectiveAnimationController = widget.animationController!;
-    } else {
-      _effectiveAnimationController = BottomSheet.createAnimationController(this);
-    }
   }
 
   @override
@@ -396,7 +376,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return AnimatedBuilder(
       animation: widget.route!.animation!,
       child: BottomSheet(
-        animationController: widget.route!._animationController,
+        animationController: widget.route!._animationController!,
         onClosing: () {
           if (widget.route!.isCurrent) {
             Navigator.pop(context);
