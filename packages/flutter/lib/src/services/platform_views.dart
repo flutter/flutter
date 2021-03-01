@@ -347,6 +347,14 @@ class AndroidPointerCoords {
 }
 
 /// A Dart version of Android's [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent).
+///
+/// This is used by [AndroidViewController] to describe pointer events that are forwarded to a platform view
+/// when Flutter receives an event that it determines is to be handled by that platform view rather than by
+/// another Flutter widget.
+///
+/// See also:
+///
+///  * [AndroidViewController.sendMotionEvent], which can be used to send an [AndroidMotionEvent] explicitly.
 class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
   ///
