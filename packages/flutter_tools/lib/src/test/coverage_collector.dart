@@ -202,7 +202,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> handleTestTimedOut(TestDevice testDevice) async { }
 }
 
-Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+Future<FlutterVmService> _defaultConnect(Uri serviceUri) {
   return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
@@ -210,14 +210,10 @@ Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
+  Future<FlutterVmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final vm_service.VmService vmService = await connector(serviceUri);
-  final Map<String, dynamic> result = await _getAllCoverage(
-      vmService, libraryPredicate);
-  // TODO(dnfield): Remove ignore once internal repo is up to date
-  // https://github.com/flutter/flutter/issues/74518
-  // ignore: await_only_futures
+  final FlutterVmService vmService = await connector(serviceUri);
+  final Map<String, dynamic> result = await _getAllCoverage(vmService.service, libraryPredicate);
   await vmService.dispose();
   return result;
 }

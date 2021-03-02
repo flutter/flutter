@@ -767,6 +767,7 @@ void main() {
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     Cache cache;
+    FakeAndroidSdk fakeAndroidSdk;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -774,6 +775,7 @@ void main() {
         fileSystem: memoryFileSystem,
         processManager: FakeProcessManager.any(),
       );
+      fakeAndroidSdk = FakeAndroidSdk();
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
@@ -793,6 +795,7 @@ void main() {
       await mavenArtifacts.update(MockArtifactUpdater(), BufferLogger.test(), memoryFileSystem, MockOperatingSystemUtils());
 
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem), isFalse);
+      expect(fakeAndroidSdk.reinitialized, true);
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FileSystem: () => memoryFileSystem,
@@ -806,7 +809,7 @@ void main() {
           'resolveDependencies',
         ])
       ]),
-      AndroidSdk: () => FakeAndroidSdk()
+      AndroidSdk: () => fakeAndroidSdk
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
@@ -903,4 +906,11 @@ class FakeCache extends Cache {
     return stampFile;
   }
 }
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  bool reinitialized = false;
+
+  @override
+  void reinitialize() {
+    reinitialized = true;
+  }
+}

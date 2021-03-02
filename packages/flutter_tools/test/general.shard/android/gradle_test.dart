@@ -646,6 +646,8 @@ flutter:
         fileSystem: fs,
         artifacts: Artifacts.test(),
         usage: TestUsage(),
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
       );
     });
 

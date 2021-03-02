@@ -185,6 +185,13 @@ void main() {
         await project.regeneratePlatformSpecificTooling();
         expect(testLogger.statusText, contains('https://flutter.dev/go/android-project-migration'));
       });
+      _testInMemory('Android plugin without example app does not show a warning', () async {
+        final FlutterProject project = await aPluginProject();
+        project.example.directory.deleteSync();
+
+        await project.regeneratePlatformSpecificTooling();
+        expect(testLogger.statusText, isNot(contains('https://flutter.dev/go/android-project-migration')));
+      });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
         await project.regeneratePlatformSpecificTooling();
@@ -306,6 +313,7 @@ void main() {
     group('example', () {
       _testInMemory('exists for plugin in legacy format', () async {
         final FlutterProject project = await aPluginProject();
+        expect(project.isPlugin, isTrue);
         expect(project.hasExampleApp, isTrue);
       });
       _testInMemory('exists for plugin in multi-platform format', () async {
@@ -314,6 +322,7 @@ void main() {
       });
       _testInMemory('does not exist for non-plugin', () async {
         final FlutterProject project = await someProject();
+        expect(project.isPlugin, isFalse);
         expect(project.hasExampleApp, isFalse);
       });
     });

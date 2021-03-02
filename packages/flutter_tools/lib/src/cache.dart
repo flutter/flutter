@@ -1201,6 +1201,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     } finally {
       status.stop();
       tempDir.deleteSync(recursive: true);
+      globals.androidSdk?.reinitialize();
     }
   }
 

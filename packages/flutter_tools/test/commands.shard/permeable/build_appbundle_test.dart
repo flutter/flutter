@@ -162,27 +162,6 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=app']);
-
-        await expectLater(
-          runBuildAppBundleCommand(
-            projectPath,
-            arguments: <String>['--no-pub'],
-          ),
-          throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'),
-        );
-
-        verifyNever(mockAndroidSdk.validateSdkWellFormed());
-        verify(mockAndroidSdk.reinitialize()).called(1);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => mockProcessManager,
-      });
-
       testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
         final String projectPath = await createProject(tempDir,
             arguments: <String>['--no-pub', '--template=app']);
