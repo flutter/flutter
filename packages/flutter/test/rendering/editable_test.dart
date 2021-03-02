@@ -714,6 +714,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -742,7 +743,6 @@ void main() {
     expect(currentSelection.baseOffset, 13);
     // RenderEditable relies on its parent that passes onSelectionChanged to set
     // the selection.
-    editable.selection = currentSelection;
 
     // Try moveSelectionRightByLine again and nothing happens because we're
     // already at the end of a line.
@@ -754,7 +754,6 @@ void main() {
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
-    editable.selection = currentSelection;
 
     // Trying moveSelectionLeftByLine does nothing at the leftmost of the field.
     editable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
@@ -765,11 +764,9 @@ void main() {
     editable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 13);
-    editable.selection = currentSelection;
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 14);
-    editable.selection = currentSelection;
 
     // Neither moveSelectionLeftByLine nor moveSelectionRightByLine do anything
     // here, because we're at both the beginning and end of the line.
@@ -798,6 +795,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -823,14 +821,10 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 1);
-    // RenderEditable relies on its parent that passes onSelectionChanged to set
-    // the selection.
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
-    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -853,6 +847,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -877,12 +872,10 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -905,6 +898,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -929,12 +923,10 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 12);
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -953,6 +945,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -978,12 +971,10 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
-    editable.selection = currentSelection;
 
     await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
@@ -1058,6 +1049,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -1080,7 +1072,6 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
@@ -1088,7 +1079,6 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 4);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
@@ -1096,7 +1086,6 @@ void main() {
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
@@ -1104,7 +1093,6 @@ void main() {
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
-    editable.selection = currentSelection;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('arrow keys with selection text and shift', () async {
@@ -1119,6 +1107,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -1142,7 +1131,6 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 5);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
@@ -1151,7 +1139,6 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 3);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 2, extentOffset: 4);
     pumpFrame();
@@ -1160,7 +1147,6 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 2);
     expect(currentSelection.extentOffset, 3);
-    editable.selection = currentSelection;
 
     editable.selection = const TextSelection(baseOffset: 4, extentOffset: 2);
     pumpFrame();
@@ -1169,7 +1155,6 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 4);
     expect(currentSelection.extentOffset, 1);
-    editable.selection = currentSelection;
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/58068
 
   test('respects enableInteractiveSelection', () async {
@@ -1184,6 +1169,7 @@ void main() {
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        renderObject.selection = selection;
         currentSelection = selection;
       },
       startHandleLayerLink: LayerLink(),
@@ -1209,12 +1195,10 @@ void main() {
     editable.moveSelectionRight(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 3);
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeft(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 2);
-    editable.selection = currentSelection;
 
     final LogicalKeyboardKey wordModifier =
         Platform.isMacOS ? LogicalKeyboardKey.alt : LogicalKeyboardKey.control;
@@ -1224,12 +1208,10 @@ void main() {
     editable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 6);
-    editable.selection = currentSelection;
 
     editable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
     expect(currentSelection.isCollapsed, true);
     expect(currentSelection.baseOffset, 0);
-    editable.selection = currentSelection;
 
     await simulateKeyUpEvent(wordModifier);
     await simulateKeyUpEvent(LogicalKeyboardKey.shift);
