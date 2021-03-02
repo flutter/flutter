@@ -960,7 +960,7 @@ Widget buildNavigator({
 }
 
 class KeepsStateTestWidget extends StatefulWidget {
-  const KeepsStateTestWidget({this.navigatorKey});
+  const KeepsStateTestWidget({Key? key, this.navigatorKey}) : super(key: key);
 
   final Key? navigatorKey;
 

@@ -6,12 +6,60 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 
+import 'cocoon.dart';
 import 'task_result.dart';
+
+Future<void> runTasks(
+  List<String> taskNames, {
+  bool exitOnFirstTestFailure = false,
+  bool silent = false,
+  String deviceId,
+  String gitBranch,
+  String localEngine,
+  String localEngineSrcPath,
+  String luciBuilder,
+  String resultsPath,
+  List<String> taskArgs,
+}) async {
+  for (final String taskName in taskNames) {
+    section('Running task "$taskName"');
+    final TaskResult result = await runTask(
+      taskName,
+      deviceId: deviceId,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
+      silent: silent,
+      taskArgs: taskArgs,
+    );
+
+    print('Task result:');
+    print(const JsonEncoder.withIndent('  ').convert(result));
+    section('Finished task "$taskName"');
+
+    if (resultsPath != null) {
+      final Cocoon cocoon = Cocoon();
+      await cocoon.writeTaskResultToFile(
+        builderName: luciBuilder,
+        gitBranch: gitBranch,
+        result: result,
+        resultsPath: resultsPath,
+      );
+    }
+
+    if (!result.succeeded) {
+      exitCode = 1;
+      if (exitOnFirstTestFailure) {
+        return;
+      }
+    }
+  }
+}
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -21,17 +69,22 @@ import 'task_result.dart';
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
+///
+/// [taskArgs] are passed to the task executable for additional configuration.
 Future<TaskResult> runTask(
   String taskName, {
   bool silent = false,
   String localEngine,
   String localEngineSrcPath,
   String deviceId,
+  List<String> taskArgs,
+  @visibleForTesting Map<String, String> isolateParams = const <String, String>{},
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
-  if (!file(taskExecutable).existsSync())
+  if (!file(taskExecutable).existsSync()) {
     throw 'Executable Dart file not found: $taskExecutable';
+  }
 
   final Process runner = await startProcess(
     dartBin,
@@ -42,10 +95,10 @@ Future<TaskResult> runTask(
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
+      ...?taskArgs,
     ],
     environment: <String, String>{
-      if (deviceId != null)
-        DeviceIdEnvName: deviceId,
+      if (deviceId != null) DeviceIdEnvName: deviceId,
     },
   );
 
@@ -63,8 +116,9 @@ Future<TaskResult> runTask(
       .listen((String line) {
     if (!uri.isCompleted) {
       final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
-      if (serviceUri != null)
+      if (serviceUri != null) {
         uri.complete(serviceUri);
+      }
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -80,13 +134,15 @@ Future<TaskResult> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResultJson = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
+    final Map<String, dynamic> taskResultJson =
+        await isolate.invokeExtension('ext.cocoonRunTask', isolateParams) as Map<String, dynamic>;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     await runner.exitCode;
     return taskResult;
   } finally {
-    if (!runnerFinished)
+    if (!runnerFinished) {
       runner.kill(ProcessSignal.sigkill);
+    }
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -98,8 +154,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
     'ws',
   ];
-  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
-      pathSegments).toString();
+  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments: pathSegments).toString();
   final Stopwatch stopwatch = Stopwatch()..start();
 
   while (true) {
@@ -112,8 +167,9 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
-      if (response != 'ready')
+      if (response != 'ready') {
         throw 'not ready yet';
+      }
       return isolate;
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10))

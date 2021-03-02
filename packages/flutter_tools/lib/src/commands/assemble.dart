@@ -66,7 +66,6 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
-  ThinIosApplicationFrameworks(),
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),

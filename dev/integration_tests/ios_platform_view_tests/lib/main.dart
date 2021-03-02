@@ -7,11 +7,13 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 /// The main app entrance of the test
 class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -50,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<PlatformViewPage>(
-                  builder: (BuildContext context) => PlatformViewPage()),
+                  builder: (BuildContext context) => const PlatformViewPage()),
             );
           },
         ),
@@ -67,7 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 /// A page contains the platform view to be tested.
 class PlatformViewPage extends StatelessWidget {
-  final Key button = const ValueKey<String>('plus_button');
+  const PlatformViewPage({Key key}) : super(key: key);
+
+  static Key button = const ValueKey<String>('plus_button');
 
   @override
   Widget build(BuildContext context) {

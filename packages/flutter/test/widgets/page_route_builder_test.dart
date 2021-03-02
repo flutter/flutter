@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestPage extends StatelessWidget {
+  const TestPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,12 +15,14 @@ class TestPage extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
@@ -30,7 +34,7 @@ class _HomePageState extends State<HomePage> {
       barrierColor: Colors.black54,
       opaque: false,
       pageBuilder: (BuildContext context, _, __) {
-        return ModalPage();
+        return const ModalPage();
       },
     ));
   }
@@ -50,6 +54,8 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ModalPage extends StatelessWidget {
+  const ModalPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -81,7 +87,7 @@ class ModalPage extends StatelessWidget {
 
 void main() {
   testWidgets('Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(TestPage());
+    await tester.pumpWidget(const TestPage());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await expectLater(

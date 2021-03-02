@@ -29,7 +29,7 @@ const String kMacrobenchmarks = 'Macrobenchmarks';
 void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
-  const MacrobenchmarksApp({this.initialRoute = '/'});
+  const MacrobenchmarksApp({Key key, this.initialRoute = '/'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,25 +37,25 @@ class MacrobenchmarksApp extends StatelessWidget {
       title: kMacrobenchmarks,
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => HomePage(),
-        kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
-        kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
-        kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
-        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
-        kSimpleAnimationRouteName: (BuildContext context) => SimpleAnimationPage(),
-        kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
-        kLargeImageChangerRouteName: (BuildContext context) => LargeImageChangerPage(),
-        kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
-        kTextRouteName: (BuildContext context) => TextPage(),
-        kFullscreenTextRouteName: (BuildContext context) => TextFieldPage(),
-        kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
-        kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
+        '/': (BuildContext context) => const HomePage(),
+        kCullOpacityRouteName: (BuildContext context) => const CullOpacityPage(),
+        kCubicBezierRouteName: (BuildContext context) => const CubicBezierPage(),
+        kBackdropFilterRouteName: (BuildContext context) => const BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
+        kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
+        kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
+        kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => const TextPage(),
+        kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
+        kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
+        kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
         kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
         kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
-        kHeavyGridViewRouteName: (BuildContext context) => HeavyGridViewPage(),
-        kSimpleScrollRouteName: (BuildContext context) => SimpleScroll(),
-        kStackSizeRouteName: (BuildContext context) => StackSizePage(),
+        kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
+        kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
+        kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
       },
     );
   }
@@ -64,6 +64,8 @@ class MacrobenchmarksApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
