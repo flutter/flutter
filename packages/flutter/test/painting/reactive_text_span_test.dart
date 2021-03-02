@@ -9,67 +9,43 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ReactiveTextSpan equals', () {
-    const TextSpan a1 = TextSpan(text: 'a');
-    const TextSpan a2 = TextSpan(text: 'a');
-    const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
-    const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    const TextSpan c1 = TextSpan(text: null);
-    const TextSpan c2 = TextSpan(text: null);
+    final ValueSetter<PointerEnterEvent> callback1 = (_) {};
+    final ValueSetter<PointerEnterEvent> callback2 = (_) {};
+    const ReactiveTextSpan a1 = ReactiveTextSpan(text: 'a');
+    final ReactiveTextSpan a2 = ReactiveTextSpan(text: 'a', onEnter: callback1);
+    final ReactiveTextSpan a3 = ReactiveTextSpan(text: 'a', onEnter: callback1);
+    final ReactiveTextSpan a4 = ReactiveTextSpan(text: 'a', onEnter: callback2);
+    final ReactiveTextSpan a5 = ReactiveTextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final ReactiveTextSpan a6 = ReactiveTextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
 
-    expect(a1 == a2, isTrue);
-    expect(b1 == b2, isTrue);
-    expect(c1 == c2, isTrue);
-
-    expect(a1 == b2, isFalse);
-    expect(b1 == c2, isFalse);
-    expect(c1 == a2, isFalse);
-
-    expect(a1 == c2, isFalse);
-    expect(b1 == a2, isFalse);
-    expect(c1 == b2, isFalse);
+    expect(a1 == a2, isFalse);
+    expect(a2 == a3, isTrue);
+    expect(a3 == a4, isFalse);
+    expect(a4 == a5, isFalse);
+    expect(a5 == a6, isTrue);
   });
 
   test('ReactiveTextSpan toStringDeep', () {
-    const TextSpan test = TextSpan(
+    const ReactiveTextSpan test1 = ReactiveTextSpan(
       text: 'a',
-      style: TextStyle(
-        fontSize: 10.0,
-      ),
-      children: <TextSpan>[
-        TextSpan(
-          text: 'b',
-          children: <TextSpan>[
-            TextSpan(),
-          ],
-        ),
-        TextSpan(
-          text: 'c',
-        ),
-      ],
     );
-    expect(test.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  inherit: true\n'
-      '  size: 10.0\n'
+    expect(test1.toStringDeep(), equals(
+      'ReactiveTextSpan:\n'
       '  "a"\n'
-      '  TextSpan:\n'
-      '    "b"\n'
-      '    TextSpan:\n'
-      '      (empty)\n'
-      '  TextSpan:\n'
-      '    "c"\n'
     ));
-  });
 
-  test('ReactiveTextSpan toPlainText', () {
-    const TextSpan textSpan = TextSpan(
+    final ReactiveTextSpan test2 = ReactiveTextSpan(
       text: 'a',
-      children: <TextSpan>[
-        TextSpan(text: 'b'),
-        TextSpan(text: 'c'),
-      ],
+      onEnter: (_) {},
+      onExit: (_) {},
+      mouseCursor: SystemMouseCursors.forbidden,
     );
-    expect(textSpan.toPlainText(), 'abc');
+    expect(test2.toStringDeep(), equals(
+      'ReactiveTextSpan:\n'
+      '  "a"\n'
+      '  callbacks: enter, exit\n'
+      '  mouseCursor: SystemMouseCursor(forbidden)\n'
+    ));
   });
 
   testWidgets('handles mouse cursor', (WidgetTester tester) async {
@@ -106,5 +82,49 @@ void main() {
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
     expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
+    final List<PointerEvent> logEvents = <PointerEvent>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            text: 'xxxxx',
+            children: <InlineSpan>[
+              ReactiveTextSpan(
+                text: 'yyyyy',
+                onEnter: (PointerEnterEvent event) {
+                  logEvents.add(event);
+                },
+                onExit: (PointerExitEvent event) {
+                  logEvents.add(event);
+                }
+              ),
+              const TextSpan(
+                text: 'xxxxx',
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
+    expect(logEvents, isEmpty);
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)));
+    expect(logEvents.length, 1);
+    expect(logEvents[0], isA<PointerEnterEvent>());
+
+    await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
+    expect(logEvents.length, 2);
+    expect(logEvents[1], isA<PointerExitEvent>());
   });
 }

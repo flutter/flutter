@@ -165,4 +165,18 @@ class ReactiveTextSpan extends TextSpan implements MouseTrackerAnnotation {
     onExit,
     mouseCursor,
   );
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+
+    properties.add(FlagsSummary<Function?>(
+      'callbacks',
+      <String, Function?> {
+        'enter': onEnter,
+        'exit': onExit,
+      },
+    ));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor, defaultValue: MouseCursor.defer));
+  }
 }
