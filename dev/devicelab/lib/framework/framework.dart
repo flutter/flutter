@@ -67,7 +67,8 @@ class _TaskRunner {
       // This is only expected to be passed in unit test runs so they do not
       // kill the Dart process that is running them.
       final bool runProcessCleanup = parameters['runProcessCleanup'] != 'false';
-      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup);
+      final bool enableConfig = parameters['enableConfig'] != 'false';
+      final TaskResult result = await run(taskTimeout, runProcessCleanup: runProcessCleanup, enableConfig: enableConfig);
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady', (String method, Map<String, String> parameters) async {
@@ -89,37 +90,47 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration taskTimeout, {bool runProcessCleanup = false}) async {
+  Future<TaskResult> run(Duration taskTimeout, {
+    bool runProcessCleanup = true,
+    bool enableConfig = true,
+  }) async {
     try {
       _taskStarted = true;
       print('Running task with a timeout of $taskTimeout.');
       final String exe = Platform.isWindows ? '.exe' : '';
-      section('Checking running Dart$exe processes');
-      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
-        processName: 'dart$exe',
-      ).toSet();
-      final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
-      beforeRunningDartInstances.forEach(print);
-      for (final RunningProcessInfo info in allProcesses) {
-        if (info.commandLine.contains('iproxy')) {
-          print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+      Set<RunningProcessInfo> beforeRunningDartInstances;
+      if (runProcessCleanup) {
+        section('Checking running Dart$exe processes');
+        beforeRunningDartInstances = await getRunningProcesses(
+          processName: 'dart$exe',
+        ).toSet();
+        final Set<RunningProcessInfo> allProcesses = await getRunningProcesses().toSet();
+        beforeRunningDartInstances.forEach(print);
+        for (final RunningProcessInfo info in allProcesses) {
+          if (info.commandLine.contains('iproxy')) {
+            print('[LEAK]: ${info.commandLine} ${info.creationDate} ${info.pid} ');
+          }
         }
       }
-      print('enabling configs for macOS, Linux, Windows, and Web...');
-      final int configResult = await exec(
-          path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>[
-            'config',
-            '-v',
-            '--enable-macos-desktop',
-            '--enable-windows-desktop',
-            '--enable-linux-desktop',
-            '--enable-web',
-            if (localEngine != null) ...<String>['--local-engine', localEngine],
-          ],
-          canFail: true);
-      if (configResult != 0) {
-        print('Failed to enable configuration, tasks may not run.');
+      if (enableConfig) {
+        print('enabling configs for macOS, Linux, Windows, and Web...');
+        final int configResult = await exec(
+            path.join(flutterDirectory.path, 'bin', 'flutter'),
+            <String>[
+              'config',
+              '-v',
+              '--enable-macos-desktop',
+              '--enable-windows-desktop',
+              '--enable-linux-desktop',
+              '--enable-web',
+              if (localEngine != null) ...<String>['--local-engine', localEngine],
+            ],
+            canFail: true);
+        if (configResult != 0) {
+          print('Failed to enable configuration, tasks may not run.');
+        }
+      } else {
+        section('Skipping flutter config. You should only see this in devicelab unit tests');
       }
 
       Future<TaskResult> futureResult = _performTask();

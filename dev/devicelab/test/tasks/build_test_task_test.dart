@@ -9,6 +9,7 @@ import '../common.dart';
 
 void main() {
   final Map<String, String> isolateParams = <String, String>{
+    'enableConfig': 'false',
     'runProcessCleanup': 'false',
     'timeoutInMinutes': '1',
   };
