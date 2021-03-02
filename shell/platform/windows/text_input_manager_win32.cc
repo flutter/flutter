@@ -10,9 +10,43 @@
 
 #include <imm.h>
 
+#include <cassert>
 #include <memory>
 
 namespace flutter {
+
+// RAII wrapper for the Win32 Input Method Manager context.
+class ImmContext {
+ public:
+  ImmContext(HWND window_handle)
+      : context_(::ImmGetContext(window_handle)),
+        window_handle_(window_handle) {
+    assert(window_handle);
+  }
+
+  ~ImmContext() {
+    if (context_ != nullptr) {
+      ::ImmReleaseContext(window_handle_, context_);
+    }
+  }
+
+  // Prevent copying.
+  ImmContext(const ImmContext& other) = delete;
+  ImmContext& operator=(const ImmContext& other) = delete;
+
+  // Returns true if a valid IMM context has been obtained.
+  bool IsValid() const { return context_ != nullptr; }
+
+  // Returns the IMM context.
+  HIMC get() {
+    assert(context_);
+    return context_;
+  }
+
+ private:
+  HWND window_handle_;
+  HIMC context_;
+};
 
 void TextInputManagerWin32::SetWindowHandle(HWND window_handle) {
   window_handle_ = window_handle;
@@ -52,10 +86,9 @@ void TextInputManagerWin32::UpdateImeWindow() {
     return;
   }
 
-  HIMC imm_context = ::ImmGetContext(window_handle_);
-  if (imm_context) {
-    MoveImeWindow(imm_context);
-    ::ImmReleaseContext(window_handle_, imm_context);
+  ImmContext imm_context(window_handle_);
+  if (imm_context.IsValid()) {
+    MoveImeWindow(imm_context.get());
   }
 }
 
@@ -66,11 +99,9 @@ void TextInputManagerWin32::UpdateCaretRect(const Rect& rect) {
     return;
   }
 
-  // TODO(cbracken): wrap these in an RAII container.
-  HIMC imm_context = ::ImmGetContext(window_handle_);
-  if (imm_context) {
-    MoveImeWindow(imm_context);
-    ::ImmReleaseContext(window_handle_, imm_context);
+  ImmContext imm_context(window_handle_);
+  if (imm_context.IsValid()) {
+    MoveImeWindow(imm_context.get());
   }
 }
 
@@ -79,13 +110,11 @@ long TextInputManagerWin32::GetComposingCursorPosition() const {
     return false;
   }
 
-  HIMC imm_context = ::ImmGetContext(window_handle_);
-  if (imm_context) {
+  ImmContext imm_context(window_handle_);
+  if (imm_context.IsValid()) {
     // Read the cursor position within the composing string.
-    const int pos =
-        ImmGetCompositionStringW(imm_context, GCS_CURSORPOS, nullptr, 0);
-    ::ImmReleaseContext(window_handle_, imm_context);
-    return pos;
+    return ImmGetCompositionString(imm_context.get(), GCS_CURSORPOS, nullptr,
+                                   0);
   }
   return -1;
 }
@@ -103,20 +132,18 @@ std::optional<std::u16string> TextInputManagerWin32::GetString(int type) const {
   if (window_handle_ == nullptr || !ime_active_) {
     return std::nullopt;
   }
-  HIMC imm_context = ::ImmGetContext(window_handle_);
-  if (imm_context) {
+  ImmContext imm_context(window_handle_);
+  if (imm_context.IsValid()) {
     // Read the composing string length.
     const long compose_bytes =
-        ::ImmGetCompositionString(imm_context, type, nullptr, 0);
+        ::ImmGetCompositionString(imm_context.get(), type, nullptr, 0);
     const long compose_length = compose_bytes / sizeof(wchar_t);
     if (compose_length <= 0) {
-      ::ImmReleaseContext(window_handle_, imm_context);
       return std::nullopt;
     }
 
     std::u16string text(compose_length, '\0');
-    ::ImmGetCompositionString(imm_context, type, &text[0], compose_bytes);
-    ::ImmReleaseContext(window_handle_, imm_context);
+    ::ImmGetCompositionString(imm_context.get(), type, &text[0], compose_bytes);
     return text;
   }
   return std::nullopt;
