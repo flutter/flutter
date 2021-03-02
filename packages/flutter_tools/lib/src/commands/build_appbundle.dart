@@ -51,7 +51,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       help: 'Setting to false disables building with deferred components. All deferred code '
             'will be compiled into the base app, and assets act as if they were defined under'
             ' the regular assets section in pubspec.yaml. This flag has no effect on '
-            'non-deferred components apps. Defaults to true.',
+            'non-deferred components apps.',
     );
     argParser.addFlag('verify-deferred-components',
       negatable: true,
@@ -62,8 +62,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
             'verification. Disabling setup verification will always attempt to fully build '
             'the app regardless of any problems detected. Builds that are part of CI testing '
             'and advanced users with custom deferred components implementations should disable'
-            'setup verification. This flag has no effect on non-deferred components apps. '
-            'Defaults to true.',
+            'setup verification. This flag has no effect on non-deferred components apps.',
     );
   }
 
