@@ -234,7 +234,7 @@ abstract class RawKeyEventData {
   /// according to Flutter's event model. For example, on macOS, Fn keys are
   /// skipped to be consistant with other platform. On Win32, events dispatched
   /// for IME (`VK_PROCESSKEY`) are also skipped.
-  ///https://github.com/flutter/engine/pull/2346i
+  ///
   /// This method will be called upon every down events. By default, this method
   /// always return true. Subclasses should override this method to define the
   /// filtering rule for the platform. If this method returns false for an event
