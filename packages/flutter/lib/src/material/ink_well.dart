@@ -779,20 +779,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final List<InkFeature?> inkFeatures = <InkFeature?>[...?_splashes, ..._highlights.values];
-    assert(() {
-      MaterialInkController? lastController;
-      for (final InkFeature? inkFeature in inkFeatures) {
-        if (inkFeature == null)
-          continue;
-        final MaterialInkController controller = inkFeature.controller;
-        if (lastController != null && !identical(controller, lastController))
-          return false;
-        lastController = controller;
-      }
-      return true;
-    }());
-    final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
+    final InkFeature? validInkFeature = _getSingleInkFeature();
     if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context)!)) {
       _removeAllFeatures();
       if (_hovering && enabled)
@@ -809,6 +796,24 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       _updateFocusHighlights();
     }
+  }
+
+  InkFeature? _getSingleInkFeature() {
+    final List<InkFeature?> inkFeatures = <InkFeature?>[...?_splashes, ..._highlights.values];
+    assert(() {
+      MaterialInkController? lastController;
+      for (final InkFeature? inkFeature in inkFeatures) {
+        if (inkFeature == null)
+          continue;
+        final MaterialInkController controller = inkFeature.controller;
+        if (lastController != null && !identical(controller, lastController))
+          return false;
+        lastController = controller;
+      }
+      return true;
+    }());
+    final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
+    return validInkFeature;
   }
 
   @override
