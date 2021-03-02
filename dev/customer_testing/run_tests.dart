@@ -9,7 +9,7 @@ import 'package:file/local.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
 
-import 'runner.dart';
+import 'lib/runner.dart';
 
 Future<void> main(List<String> arguments) async {
   exit(await run(arguments) ? 0 : 1);
