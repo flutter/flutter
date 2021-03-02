@@ -45,10 +45,17 @@ class KeyboardHandlerBase {
   // input method such as in CJK text input.
   virtual void ComposeBeginHook() = 0;
 
+  // Handler for IME compose commit events.
+  //
+  // Triggered when the user commits the current composing text while using a
+  // multi-step input method such as in CJK text input. Composing continues with
+  // the next keypress.
+  virtual void ComposeCommitHook() = 0;
+
   // Handler for IME compose end events.
   //
-  // Triggered when the user commits the composing text while using a multi-step
-  // input method such as in CJK text input.
+  // Triggered when the user ends editing composing text while using a
+  // multi-step input method such as in CJK text input.
   virtual void ComposeEndHook() = 0;
 
   // Handler for IME compose change events.

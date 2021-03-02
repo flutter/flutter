@@ -112,6 +112,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   void OnComposeBegin() override;
 
   // |WindowBindingHandlerDelegate|
+  void OnComposeCommit() override;
+
+  // |WindowBindingHandlerDelegate|
   void OnComposeEnd() override;
 
   // |WindowBindingHandlerDelegate|
@@ -201,6 +204,13 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // Triggered when the user begins editing composing text using a multi-step
   // input method such as in CJK text input.
   void SendComposeBegin();
+
+  // Reports an IME compose commit event.
+  //
+  // Triggered when the user commits the current composing text while using a
+  // multi-step input method such as in CJK text input. Composing continues with
+  // the next keypress.
+  void SendComposeCommit();
 
   // Reports an IME compose end event.
   //

@@ -142,18 +142,13 @@ void WindowWin32::OnImeComposition(UINT const message,
       OnComposeChange(text.value(), pos);
     }
   } else if (lparam & GCS_RESULTSTR) {
+    // Commit but don't end composing.
     // Read the committed composing string.
     long pos = text_input_manager_.GetComposingCursorPosition();
     std::optional<std::u16string> text = text_input_manager_.GetResultString();
     if (text) {
       OnComposeChange(text.value(), pos);
-    }
-    // Next, try reading the composing string. Some Japanese IMEs send a message
-    // containing both a GCS_RESULTSTR and a GCS_COMPSTR when one composition is
-    // committed and another immediately started.
-    text = text_input_manager_.GetResultString();
-    if (text) {
-      OnComposeChange(text.value(), pos);
+      OnComposeCommit();
     }
   }
 }

@@ -108,6 +108,9 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   void ComposeBeginHook() override;
 
   // |KeyboardHandlerBase|
+  void ComposeCommitHook() override;
+
+  // |KeyboardHandlerBase|
   void ComposeEndHook() override;
 
   // |KeyboardHandlerBase|
