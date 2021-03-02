@@ -227,13 +227,14 @@ abstract class RawKeyEventData {
   /// {@endtemplate}
   String get keyLabel;
 
-  /// Whether a down event should be disapatched.
+  /// Whether a key down event, and likewise its accompanying key up event,
+  /// should be disapatched.
   ///
   /// Certain events on some platforms should not be dispatched to listeners
   /// according to Flutter's event model. For example, on macOS, Fn keys are
   /// skipped to be consistant with other platform. On Win32, events dispatched
   /// for IME (`VK_PROCESSKEY`) are also skipped.
-  ///
+  ///https://github.com/flutter/engine/pull/2346i
   /// This method will be called upon every down events. By default, this method
   /// always return true. Subclasses should override this method to define the
   /// filtering rule for the platform. If this method returns false for an event
@@ -630,7 +631,6 @@ class RawKeyboard {
   RawKeyEventHandler? keyEventHandler;
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    print('message $message');
     final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
     bool shouldDispatch = true;
     if (event is RawKeyDownEvent) {
