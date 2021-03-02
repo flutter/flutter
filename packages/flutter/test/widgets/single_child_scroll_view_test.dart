@@ -4,10 +4,9 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-
 import '../rendering/rendering_tester.dart';
 import 'semantics_tester.dart';
 
@@ -921,5 +920,54 @@ void main() {
       expect(outer.offset, 200.0);
       expect(inner.offset, 0.0);
     });
+  });
+
+  testWidgets('keyboardDismissBehavior tests', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    Future<void> boilerplate(ScrollViewKeyboardDismissBehavior behavior) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              keyboardDismissBehavior: behavior,
+              child: Column(
+                children: focusNodes.map((FocusNode focusNode) {
+                  return Container(
+                    height: 50,
+                    child: TextField(focusNode: focusNode),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ScrollViewKeyboardDismissBehavior.onDrag dismiss keyboard on drag
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
+
+    Finder finder = find.byType(TextField).first;
+    TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isFalse);
+
+    // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
+    await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
+
+    finder = find.byType(TextField).first;
+    textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
   });
 }
