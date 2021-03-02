@@ -201,7 +201,7 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -216,7 +216,7 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('deferred assets are bot parsed when splitDeferredAssetsDisabled', () async {
+    testUsingContext('deferred assets are parsed regularly when splitDeferredAssets Disabled', () async {
       globals.fs.file('.packages').createSync();
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
@@ -235,13 +235,13 @@ flutter:
         - assets/wild/
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: false);
       // Expected assets:
       //  - asset manifest
       //  - font manifest
       //  - license file
       //  - assets/foo/bar.txt
-      expect(bundle.entries.length, 4);
+      expect(bundle.entries.length, 6);
       expect(bundle.deferredComponentsEntries.isEmpty, true);
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
     }, overrides: <Type, Generator>{
@@ -273,7 +273,7 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
       // Expected assets:
       //  - asset manifest
       //  - font manifest
@@ -290,7 +290,7 @@ flutter:
         ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
-      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages');
+      await bundle.build(manifestPath: 'pubspec.yaml', packagesPath: '.packages', deferredComponentsEnabled: true);
 
       expect(bundle.entries.length, 4);
       expect(bundle.deferredComponentsEntries.length, 1);
