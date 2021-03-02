@@ -7,10 +7,10 @@ import 'dart:io';
 import 'common.dart';
 
 void main() {
-  test('analyze-sample-code', () {
+  test('analyze_sample_code', () {
     final ProcessResult process = Process.runSync(
       '../../bin/cache/dart-sdk/bin/dart',
-      <String>['analyze-sample-code.dart', 'test/analyze-sample-code-test-input'],
+      <String>['analyze_sample_code.dart', 'test/analyze-sample-code-test-input'],
     );
     final List<String> stdoutLines = process.stdout.toString().split('\n');
     final List<String> stderrLines = process.stderr.toString().split('\n')

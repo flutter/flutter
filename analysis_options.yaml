@@ -113,7 +113,7 @@ linter:
     - empty_constructor_bodies
     - empty_statements
     - exhaustive_cases
-    # - file_names # not yet tested
+    - file_names
     - flutter_style_todos
     - hash_and_equals
     - implementation_imports
@@ -140,7 +140,7 @@ linter:
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
     - overridden_fields
     - package_api_docs
-    # - package_names # non conforming packages in sdk
+    - package_names
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
