@@ -791,7 +791,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }());
     final InkFeature? validInkFeature = inkFeatures.firstWhere((InkFeature? inkFeature) => inkFeature != null, orElse: () => null);
     if (validInkFeature != null && !identical(validInkFeature.controller, Material.of(context)!)) {
-      _dispose();
+      _removeAllFeatures();
       if (_hovering && enabled)
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       _updateFocusHighlights();
@@ -810,12 +810,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void dispose() {
-    _dispose();
+    _removeAllFeatures();
     FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
     super.dispose();
   }
 
-  void _dispose() {
+  void _removeAllFeatures() {
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
@@ -1058,20 +1058,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void _setInkFeature(bool visible) {
+  void _setAllFeaturesVisible(bool visible) {
     for (final InkFeature? splash in <InkFeature?>[...?_splashes, ..._highlights.values])
       splash?.visible = visible;
   }
 
   @override
   void deactivate() {
-    _setInkFeature(false);
+    _setAllFeaturesVisible(false);
     super.deactivate();
   }
 
   @override
   void reactivate() {
-    _setInkFeature(true);
+    _setAllFeaturesVisible(true);
     updateKeepAlive();
     super.reactivate();
   }
@@ -1246,8 +1246,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 /// that are changing size.
 ///
 /// Animations triggered by an [InkWell] will survive their widget moving due
-/// to [GlobalKey] reparenting, assuming that the nearest [Material] ancestor
-/// is the same before and after the move.
+/// to [GlobalKey] reparenting, as long as the nearest [Material] ancestor is
+/// the same before and after the move.
 ///
 /// See also:
 ///
