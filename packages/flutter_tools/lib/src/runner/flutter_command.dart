@@ -448,8 +448,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('publish-port',
         negatable: true,
         hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the'
-            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
+        help: 'Publish the VM service port over mDNS. Disable to prevent the '
+              'local network permission app dialog in debug and profile build modes (iOS devices only.)',
         defaultsTo: enabledByDefault);
   }
 
@@ -670,7 +670,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addMultiOption(useLegacyNames ? kExtraGenSnapshotOptions : FlutterOptions.kExtraGenSnapshotOptions,
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
-            '(Only used in "--profile" or "--release" builds.)'
+            '(Only used in "--profile" or "--release" builds.) '
             'For example, "--${FlutterOptions.kExtraGenSnapshotOptions}=--no-strip".',
       valueHelp: '--foo,--bar',
       splitCommas: true,

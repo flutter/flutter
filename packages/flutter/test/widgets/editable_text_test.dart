@@ -1806,8 +1806,7 @@ void main() {
   });
 
   testWidgets(
-    'iOS autocorrection rectangle should appear on demand'
-    'and dismiss when the text changes or when focus is lost',
+    'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
 

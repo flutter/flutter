@@ -1039,7 +1039,7 @@ void main() {
       for (final TextDirection textDirection in textDirectionOptions) {
         for (final Widget? icon in iconOptions) {
           final String testName = 'OutlinedButton'
-            ', text scale $textScaleFactor'
+            ', text scale $textScaleFactor' // ignore: missing_whitespace_between_adjacent_strings, https://github.com/dart-lang/linter/issues/2489
             '${icon != null ? ", with icon" : ""}'
             '${textDirection == TextDirection.rtl ? ", RTL" : ""}';
 
