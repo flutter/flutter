@@ -54,9 +54,7 @@ Widget buildDropdown({
     Color? focusColor,
     Color? dropdownColor,
   }) {
-  final List<DropdownMenuItem<String>>? listItems = items == null
-      ? null
-      : items.map<DropdownMenuItem<String>>((String item) {
+  final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
       key: ValueKey<String>(item),
       value: item,
