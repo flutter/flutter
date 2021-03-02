@@ -1471,6 +1471,37 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isEmpty);
     });
+    testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
+      const  String platform = 'windows';
+      bool lastHandled = true;
+      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
+      Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
+        return ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(<String, dynamic>{
+            'type': type,
+            'keymap': platform,
+            'keyCode': keyCode,
+            'scanCode': scanCode,
+            'modifiers': 0,
+          }),
+          (ByteData? data) {
+            final Map<String, dynamic> decoded = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+            lastHandled = decoded['handled'] as bool;
+          }
+        );
+      }
+      RawKeyboard.instance.addListener(events.add);
+      await simulateKeyEventMessage('keydown', 229, 30);
+      expect(events, isEmpty);
+      expect(lastHandled, true);
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      await simulateKeyEventMessage('keyup', 65, 30);
+      expect(events, isEmpty);
+      expect(lastHandled, true);
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    });
   }, skip: isBrowser); // This is a Windows-specific group.
 
   group('RawKeyEventDataLinux-GFLW', () {
