@@ -375,14 +375,13 @@ class _Icon {
       shortId = id;
     }
 
-    flutterId = shortId;
+    flutterId = id;
     for (final MapEntry<String, String> rewritePair in _identifierRewrites.entries) {
-      if (shortId.startsWith(rewritePair.key)) {
-        flutterId = shortId.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
+      if (id.startsWith(rewritePair.key)) {
+        flutterId = id.replaceFirst(rewritePair.key, _identifierRewrites[rewritePair.key]);
       }
     }
 
-    fullFlutterId = flutterId + style.idSuffix();
     name = id.replaceAll('_', ' ');
   }
 
@@ -392,8 +391,7 @@ class _Icon {
 
   String id;            // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   String shortId;       // e.g. 5g
-  String flutterId;     // e.g. five_g
-  String fullFlutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
+  String flutterId;     // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
   String name;          // e.g. five g, five g outlined, five g rounded, five g sharp
   IconStyle style;      // e.g. IconStyle.outlined
   String hexCodepoint;  // e.g. e547
@@ -404,7 +402,7 @@ class _Icon {
       '<i class="material-icons${style.htmlSuffix()} md-36">$shortId</i> &#x2014; material icon named "$name"';
 
   String get declaration =>
-      "static const IconData $fullFlutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
+      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: 'MaterialIcons'$mirroredInRTL);";
 
   String get fullDeclaration => '''
 
@@ -415,7 +413,7 @@ class _Icon {
   static String platformAdaptiveDeclaration(String fullFlutterId, _Icon agnosticIcon, _Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
-  IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.fullFlutterId} : Icons.${iOSIcon.fullFlutterId};
+  IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
 ''';
 
   @override
