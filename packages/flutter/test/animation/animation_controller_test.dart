@@ -258,8 +258,7 @@ void main() {
     );
     final AnimationController customSpringController = AnimationController(
       vsync: const TestVSync(),
-      springDescription: _customSpringDescription,
-    );
+    )..springDescription = _customSpringDescription;
 
     controller.fling();
     customSpringController.fling();
