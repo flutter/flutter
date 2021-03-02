@@ -171,7 +171,7 @@ class LocalComparisonOutput {
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
   if (identical(test, master))
     return ComparisonResult(
-      passed: true
+      passed: true,
       diffPercent: 0.0,
     );
 
