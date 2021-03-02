@@ -771,7 +771,7 @@ void main() {
           home: Scaffold(
             body: Column(
               children: <Widget>[
-                Container(height: 200, child: ListView.builder(
+                SizedBox(height: 200, child: ListView.builder(
                   key: const Key('listView-a'),
                   itemCount: 50,
                   shrinkWrap: true,

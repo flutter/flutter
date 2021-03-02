@@ -45,7 +45,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -53,7 +53,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: true,
@@ -87,7 +87,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -95,7 +95,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: false,
@@ -141,7 +141,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -149,7 +149,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: true,
@@ -183,7 +183,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -191,7 +191,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: false,

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
-    return Container(height: 100.0, child: Text('$i'));
+    return SizedBox(height: 100.0, child: Text('$i'));
   });
 }
 

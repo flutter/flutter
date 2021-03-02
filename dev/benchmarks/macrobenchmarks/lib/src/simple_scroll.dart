@@ -12,7 +12,7 @@ class SimpleScroll extends StatelessWidget {
     return ListView(
       children: <Widget>[
         for (int n = 0; n < 200; n += 1)
-          Container(height: 40.0, child: Text('$n')),
+          SizedBox(height: 40.0, child: Text('$n')),
       ],
     );
   }

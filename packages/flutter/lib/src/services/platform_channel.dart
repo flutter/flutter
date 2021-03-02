@@ -292,7 +292,7 @@ class MethodChannel {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
   ///     for (final BWPlayItem* item in items) {
-  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
+  ///       [json addObject:@{ @"id":item.itemId, @"title":item.name, @"artist":item.artist }];
   ///     }
   ///     result(json);
   ///   } else if ([@"play" isEqualToString:call.method]) {

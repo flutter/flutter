@@ -136,10 +136,10 @@ Press play to produce texture frames.''';
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
+              const SizedBox(
                 width: 300.0,
                 height: 200.0,
-                child: const Texture(textureId: 0),
+                child: Texture(textureId: 0),
               ),
               Container(
                 width: 300.0,

@@ -575,10 +575,10 @@ void main() {
   });
 
   testWidgets('applies mouse cursor', (WidgetTester tester) async {
-    await tester.pumpWidget(_Scaffold(
+    await tester.pumpWidget(const _Scaffold(
       topLeft: MouseRegion(
         cursor: SystemMouseCursors.text,
-        child: Container(width: 10, height: 10),
+        child: SizedBox(width: 10, height: 10),
       ),
     ));
 
@@ -1085,7 +1085,7 @@ void main() {
               height: 100,
               width: 10,
               alignment: moved ? Alignment.topLeft : Alignment.bottomLeft,
-              child: Container(
+              child: SizedBox(
                 height: 10,
                 width: 10,
                 child: HoverClient(
@@ -1363,7 +1363,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1384,7 +1384,7 @@ void main() {
     logs.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1405,7 +1405,7 @@ void main() {
 
     // Compare: It repaints if the MouseRegion is deactivated.
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1430,7 +1430,7 @@ void main() {
     final VoidCallback onPaintChild = () { logs.add('paint'); };
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1450,7 +1450,7 @@ void main() {
     logs.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1476,7 +1476,7 @@ void main() {
     final VoidCallback onPaintChild = () { logPaints.add('paint'); };
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1496,7 +1496,7 @@ void main() {
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1526,7 +1526,7 @@ void main() {
     final VoidCallback onPaintChild = () { logPaints.add('paint'); };
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1548,7 +1548,7 @@ void main() {
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1569,7 +1569,7 @@ void main() {
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(

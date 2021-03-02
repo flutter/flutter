@@ -402,7 +402,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
@@ -431,12 +431,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -456,19 +456,19 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                 ),
-                Container(
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -486,13 +486,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
               cacheExtent: 500.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -511,13 +511,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
               itemExtent: 100.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 100.0,
                 ),
               ],
@@ -547,15 +547,15 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             width: 100.0,
             child: ListView(
               controller: controller,
               scrollDirection: scrollDirection,
               itemExtent: 50.0,
-              children: <Widget>[
-                Container(
+              children: const <Widget>[
+                SizedBox(
                   height: 50.0,
                   width: 50.0,
                 ),
