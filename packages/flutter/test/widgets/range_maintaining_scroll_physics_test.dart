@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({ required this.collapsedSize, required this.expandedSize });
+  const ExpandingBox({ Key? key, required this.collapsedSize, required this.expandedSize }) : super(key: key);
 
   final double collapsedSize;
   final double expandedSize;
@@ -220,12 +220,12 @@ void main() {
   });
 
   testWidgets('expanding page views', (WidgetTester tester) async {
-    await tester.pumpWidget(Padding(padding: const EdgeInsets.only(right: 200.0), child: TabBarDemo()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.text('bike'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     final Rect bike1 = tester.getRect(find.byIcon(Icons.directions_bike));
-    await tester.pumpWidget(Padding(padding: EdgeInsets.zero, child: TabBarDemo()));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.zero, child: TabBarDemo()));
     final Rect bike2 = tester.getRect(find.byIcon(Icons.directions_bike));
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
@@ -266,6 +266,8 @@ void main() {
 }
 
 class TabBarDemo extends StatelessWidget {
+  const TabBarDemo({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -1667,7 +1667,7 @@ class DependentState extends State<DependentStatefulWidget> {
 }
 
 class SwapKeyWidget extends StatefulWidget {
-  const SwapKeyWidget({this.childKey}): super();
+  const SwapKeyWidget({Key? key, this.childKey}): super(key: key);
 
   final Key? childKey;
   @override
