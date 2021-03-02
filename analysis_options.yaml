@@ -57,12 +57,12 @@ linter:
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
-    # - avoid_as # required for implicit-casts: true
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
     # - avoid_double_and_int_checks # only useful when targeting JS runtime
+    # - avoid_dynamic_calls # not yet tested
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
     # - avoid_escaping_inner_quotes # not yet tested
@@ -101,10 +101,11 @@ linter:
     # - cascade_invocations # not yet tested
     - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
-    # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
+    # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     # - curly_braces_in_flow_control_structures # not required by flutter style
+    # - deprecated_consistency # not yet tested
     # - diagnostic_describe_all_properties # not yet tested
     - directives_ordering
     # - do_not_use_environment # we do this commonly
@@ -217,9 +218,11 @@ linter:
     # - unsafe_html # not yet tested
     - use_full_hex_values_for_flutter_colors
     # - use_function_type_syntax_for_parameters # not yet tested
+    # - use_if_null_to_convert_nulls_to_bools # not yet tested
     - use_is_even_rather_than_modulo
     # - use_key_in_widget_constructors # not yet tested
     - use_late_for_private_fields_and_variables
+    # - use_named_constants # not yet yested
     - use_raw_strings
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
