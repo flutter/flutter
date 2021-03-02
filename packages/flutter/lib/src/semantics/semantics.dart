@@ -36,6 +36,10 @@ typedef MoveCursorHandler = void Function(bool extendSelection);
 /// text selection (or re-position the cursor) to `selection`.
 typedef SetSelectionHandler = void Function(TextSelection selection);
 
+/// Signature for the [SemanticsAction.setText] handlers to change the
+/// text selection (or re-position the cursor) to `selection`.
+typedef SetTextHandler = void Function(String text);
+
 typedef _SemanticsActionHandler = void Function(dynamic args);
 
 /// A tag for a [SemanticsNode].
@@ -3171,6 +3175,25 @@ class SemanticsConfiguration {
       ));
     });
     _onSetSelection = value;
+  }
+
+  /// The handler for [SemanticsAction.setText].
+  ///
+  /// This handler is invoked when the user either wants to replace the current
+  /// text in the text field with a new text.
+  ///
+  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// their Android devices.
+  SetTextHandler? get onSetText => _onSetText;
+  SetTextHandler? _onSetText;
+  set onSetText(SetTextHandler? value) {
+    assert(value != null);
+    _addAction(SemanticsAction.setText, (dynamic args) {
+      assert(args != null && args is String);
+      final String text = args as String;
+      value!(text);
+    });
+    _onSetText = value;
   }
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].

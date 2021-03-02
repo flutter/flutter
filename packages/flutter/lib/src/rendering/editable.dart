@@ -1492,6 +1492,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (hasFocus && selectionEnabled)
       config.onSetSelection = _handleSetSelection;
 
+    if (hasFocus && !readOnly)
+      config.onSetText = _handleSetText;
+
     if (selectionEnabled && selection?.isValid == true) {
       config.textSelection = selection;
       if (_textPainter.getOffsetBefore(selection!.extentOffset) != null) {
@@ -1505,6 +1508,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           ..onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
       }
     }
+  }
+
+  void _handleSetText(String text) {
+    textSelectionDelegate.textEditingValue = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
   }
 
   // TODO(ianh): in theory, [selection] could become null between when
