@@ -111,6 +111,14 @@ void TextInputPlugin::ComposeBeginHook() {
   SendStateUpdate(*active_model_);
 }
 
+void TextInputPlugin::ComposeCommitHook() {
+  if (active_model_ == nullptr) {
+    return;
+  }
+  active_model_->CommitComposing();
+  SendStateUpdate(*active_model_);
+}
+
 void TextInputPlugin::ComposeEndHook() {
   if (active_model_ == nullptr) {
     return;

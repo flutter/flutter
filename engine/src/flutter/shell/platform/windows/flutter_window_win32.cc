@@ -176,6 +176,10 @@ void FlutterWindowWin32::OnComposeBegin() {
   binding_handler_delegate_->OnComposeBegin();
 }
 
+void FlutterWindowWin32::OnComposeCommit() {
+  binding_handler_delegate_->OnComposeCommit();
+}
+
 void FlutterWindowWin32::OnComposeEnd() {
   binding_handler_delegate_->OnComposeEnd();
 }

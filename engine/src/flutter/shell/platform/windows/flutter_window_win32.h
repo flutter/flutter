@@ -66,6 +66,9 @@ class FlutterWindowWin32 : public WindowWin32, public WindowBindingHandler {
   void OnComposeBegin() override;
 
   // |WindowWin32|
+  void OnComposeCommit() override;
+
+  // |WindowWin32|
   void OnComposeEnd() override;
 
   // |WindowWin32|

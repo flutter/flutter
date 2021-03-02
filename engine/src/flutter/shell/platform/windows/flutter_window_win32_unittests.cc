@@ -78,6 +78,7 @@ class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
   MOCK_METHOD2(TextHook,
                void(FlutterWindowsView* window, const std::u16string& text));
   MOCK_METHOD0(ComposeBeginHook, void());
+  MOCK_METHOD0(ComposeCommitHook, void());
   MOCK_METHOD0(ComposeEndHook, void());
   MOCK_METHOD2(ComposeChangeHook,
                void(const std::u16string& text, int cursor_pos));
@@ -112,6 +113,7 @@ class SpyTextInputPlugin : public KeyboardHandlerBase,
   MOCK_METHOD2(TextHook,
                void(FlutterWindowsView* window, const std::u16string& text));
   MOCK_METHOD0(ComposeBeginHook, void());
+  MOCK_METHOD0(ComposeCommitHook, void());
   MOCK_METHOD0(ComposeEndHook, void());
   MOCK_METHOD2(ComposeChangeHook,
                void(const std::u16string& text, int cursor_pos));
